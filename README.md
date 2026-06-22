@@ -3,6 +3,8 @@
 **An interactive control-systems course for FRC** — from the one idea behind all
 control, to real WPILib code, to tuning a Kraken with CTRE Phoenix 6, and beyond.
 
+### 🌐 Live: https://jerredcook.github.io/FRC-Control-Systems/
+
 It's built for students who start at zero. Every lesson is hands-on: you feel the
 control problem first (live physics simulations you can drive), then name it, then
 see the code. No prior controls background required.
@@ -50,10 +52,10 @@ Your progress (which lessons you've completed) is saved in your browser.
 
 ## Publishing (GitHub Pages)
 
-This repo is ready to serve as a static site. With GitHub Pages enabled on the default
-branch (root folder), the live course is at:
+This repo serves as a static site via GitHub Pages (main branch, root folder). The
+live course is at:
 
-> `https://<your-username>.github.io/<repo-name>/`
+> **https://jerredcook.github.io/FRC-Control-Systems/**
 
 `index.html` at the repo root is the landing page.
 
