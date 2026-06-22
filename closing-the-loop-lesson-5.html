@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Closing the Loop · Lesson 5 — Tuning PID</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020;   /* setpoint / target / brand */
+    --teal:#34D7C5;    /* measured position */
+    --indigo:#8E8CF8;  /* voltage / velocity */
+    --red:#FF6B6B;     /* error / overshoot */
+    --green:#43D67E;   /* correct */
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+    --maxw:1160px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ink); color:var(--text);
+    font-family:var(--sans); font-size:17px; line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(900px 500px at 80% -10%, rgba(255,176,32,.06), transparent 60%),
+      radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--teal);box-shadow:0 0 12px var(--teal)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--teal),var(--indigo));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:44ch;margin-top:6px}
+
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--teal);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  p .sub,.sub{color:var(--muted)}
+  .lead{font-size:19px}
+  em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .formula{font-family:var(--mono);background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:18px 20px;margin:20px 0;font-size:18px;overflow-x:auto;color:#cfe;text-align:center}
+  .formula .small{display:block;font-size:13px;color:var(--muted);margin-top:8px}
+  .formula b{color:var(--amber)} .formula .t{color:var(--teal)}
+
+  /* term chips */
+  .terms{display:grid;gap:12px;margin:22px 0 6px}
+  @media(min-width:560px){.terms{grid-template-columns:repeat(3,1fr)}}
+  .term{border:1px solid var(--line);border-radius:10px;padding:14px 15px;background:var(--panel);border-top:2px solid var(--accent,var(--teal))}
+  .term h4{margin:0 0 4px;font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent,var(--teal))}
+  .term p{margin:0;font-size:14.5px;color:var(--muted);line-height:1.45}
+
+  /* interactive panels */
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;gap:6px;align-items:center}
+  .demo-tag .live{width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 8px var(--red)}
+  .demo-tag .live.on{background:var(--green);box-shadow:0 0 8px var(--green)}
+  .demo-stage{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line)}
+  @media(min-width:600px){.demo-stage{grid-template-columns:minmax(150px,0.78fr) 1.5fr}}
+  .stage-cell{background:#0B1322;position:relative}
+  .stage-cell .cell-label{position:absolute;top:8px;left:10px;z-index:2;font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);pointer-events:none}
+  canvas.world{display:block;width:100%;height:320px}
+  canvas.scope{display:block;width:100%;height:320px}
+
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--teal);color:var(--text)}
+  .btn.active{background:var(--teal);border-color:var(--teal);color:#06121f;font-weight:700}
+  .btn.primary{background:linear-gradient(180deg,#6FF0DD,var(--teal));color:#06121f;font-weight:700;border:none}
+  .slider-group{flex:1 1 200px;display:flex;flex-direction:column;gap:6px;min-width:170px}
+  .slider-group label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+  .slider-group label .val{color:var(--amber)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:var(--line-2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--amber);cursor:pointer;box-shadow:0 0 10px -1px var(--amber)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--amber);cursor:pointer}
+
+  .readouts{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  @media(min-width:560px){.readouts{grid-template-columns:repeat(4,1fr)}}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:20px;font-weight:600;margin-top:3px}
+  .ro .v.amber{color:var(--amber)} .ro .v.teal{color:var(--teal)} .ro .v.indigo{color:var(--indigo)} .ro .v.red{color:var(--red)} .ro .v.ink{color:var(--text)}
+
+  .legend{display:flex;flex-wrap:wrap;gap:16px;padding:11px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .legend i{width:16px;height:2px;border-radius:2px;display:inline-block}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  /* shared callout pattern */
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.teal{border-color:var(--teal);background:rgba(52,215,197,.06)} .note.teal .nh{color:var(--teal)}
+
+  /* code */
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--teal);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:13.5px;line-height:1.85;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic}
+  .code .kw{color:#ff9bbf}
+  .code .ty{color:var(--teal)}
+  .code .fn{color:var(--indigo)}
+  .code .num{color:var(--amber)}
+
+  /* code exercise */
+  .code-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .code-ex .chead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .code-ex .chead .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,176,32,.14);display:grid;place-items:center;color:var(--amber);font-size:13px}
+  .code-ex .ctask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .code-ex pre.code{margin:0 0 14px}
+  .blank{font-family:var(--mono);font-size:13px;width:13ch;text-align:center;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:2px 4px;outline:none}
+  .blank:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
+  .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+
+  /* quiz */
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)}
+  .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7}
+  .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--teal);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  /* recap */
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px}
+  @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px}
+  .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--teal);min-width:130px;text-transform:uppercase}
+  .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(142,140,248,0.1),transparent 70%)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--indigo)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)}
+  .next code{font-family:var(--mono);background:var(--panel-2);border:1px solid var(--line-2);padding:2px 8px;border-radius:5px;color:var(--teal);font-size:14px}
+
+  footer{padding:40px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+
+  .steps{counter-reset:s;list-style:none;padding:0;margin:18px 0}
+  .steps li{position:relative;padding:12px 16px 12px 52px;margin-bottom:10px;border:1px solid var(--line);border-radius:10px;background:var(--panel);font-size:15.5px;color:var(--muted)}
+  .steps li b{color:var(--text);font-weight:650}
+  .steps li::before{counter-increment:s;content:counter(s,decimal-leading-zero);position:absolute;left:14px;top:12px;font-family:var(--mono);font-size:12px;color:var(--amber);font-weight:700;letter-spacing:.05em}
+  .presets{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:11px 16px;border-bottom:1px solid var(--line);background:rgba(27,37,64,.25)}
+  .presets-label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-right:4px}
+  .dhead{display:grid;grid-template-columns:1.3fr 1.2fr 1.3fr;gap:12px;padding:0 14px 4px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  @media(max-width:560px){.dhead{display:none}}
+  .diag{display:grid;gap:10px;margin:8px 0}
+  .dcard{display:grid;grid-template-columns:1.3fr 1.2fr 1.3fr;gap:12px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--panel)}
+  @media(max-width:560px){.dcard{grid-template-columns:1fr;gap:5px}}
+  .dcard .sym{color:var(--text);font-weight:600;font-size:14.5px}
+  .dcard .cau{font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+  .dcard .fix{font-size:13.5px;color:var(--teal);font-weight:600}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand"><span class="dot"></span><span class="name">Closing the Loop</span></div>
+    <div class="top-meta">Lesson 05 / 08 · Foundations</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Lesson 05</b> Foundations</div>
+    <div class="eyebrow">Tuning PID</div>
+    <h1>Turning the<br><span class="accent">right</span> knob.</h1>
+    <p class="dek">Three gains, a handful of symptoms, one reliable method. Read the response and know exactly what to adjust.</p>
+  </div>
+
+  <section>
+    <p class="lead">Knowing what each gain does is only half the battle.</p>
+    <p>You've met <span class="k">kP</span>, <span class="k">kI</span>, and <span class="k">kD</span> and seen each one's effect on its own. On a real mechanism they interact, and you're handed three blank dials and a carriage misbehaving in some specific way. Tuning is the skill of reading <em>how</em> it misbehaves and knowing which dial fixes it — instead of flailing.</p>
+    <p>There's no magic recipe, but there is a dependable order and a short diagnostic table. Together they'll get almost any mechanism dialed in within a few minutes.</p>
+  </section>
+
+  <section>
+    <div class="kicker">The method</div>
+    <h2>Tune in this order</h2>
+    <p>Always start from zero and add one term at a time. Adding gains in this sequence keeps each one's effect readable:</p>
+    <ol class="steps">
+      <li><b>Zero everything.</b> kP, kI, kD all at 0 (plus feedforward, if you have it — next lesson).</li>
+      <li><b>Raise kP</b> until the response is snappy and <em>just</em> begins to overshoot. Too low and it's sluggish; too high and it oscillates.</li>
+      <li><b>Add kD</b> to damp that overshoot into a clean settle. Back off the moment it starts to buzz.</li>
+      <li><b>Add kI last,</b> and only if a steady-state error remains. Keep it small, and pair it with an iZone to avoid windup.</li>
+      <li><b>Test the whole range</b> — short moves, long moves, with a game piece loaded, on a low battery. A tune that only works in one spot isn't tuned.</li>
+    </ol>
+  </section>
+
+  <section>
+    <div class="kicker">Try it</div>
+    <h2>The tuning clinic</h2>
+    <p>Load a misbehaving tune, read what the scope is telling you, then fix it with the sliders. The diagnostic table below is your cheat sheet — match the symptom to the cause to the cure.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head">
+        <span class="demo-title">Elevator · Tuning clinic</span>
+        <span class="demo-tag"><span class="live" id="live"></span> <span id="status">Paused</span></span>
+      </div>
+      <div class="presets">
+        <span class="presets-label">Load a symptom</span>
+        <button class="btn" data-preset="sluggish">Sluggish</button>
+        <button class="btn" data-preset="oscillating">Oscillating</button>
+        <button class="btn" data-preset="drooping">Drooping</button>
+        <button class="btn" data-preset="jittery">Jittery</button>
+        <button class="btn" data-preset="good">Good tune</button>
+      </div>
+      <div class="demo-stage">
+        <div class="stage-cell"><span class="cell-label">Height</span><canvas class="world" id="world"></canvas></div>
+        <div class="stage-cell"><span class="cell-label">Scope · signal vs time</span><canvas class="scope" id="scope"></canvas></div>
+      </div>
+      <div class="legend">
+        <span><i style="background:var(--amber)"></i> Setpoint</span>
+        <span><i style="background:var(--teal)"></i> Position</span>
+        <span><i style="background:var(--indigo)"></i> Motor voltage</span>
+      </div>
+      <div class="controls">
+        <button class="btn primary" id="step">Step ▸</button>
+        <button class="btn" id="run">Pause</button>
+        <button class="btn" id="noise">Noise: off</button>
+        <div class="slider-group">
+          <label>kP — gain <span class="val" id="kpVal">4.0</span></label>
+          <input type="range" id="kp" min="0.5" max="20" step="0.5" value="4" />
+        </div>
+        <div class="slider-group">
+          <label>kI — integral <span class="val" id="kiVal">1.0</span></label>
+          <input type="range" id="ki" min="0" max="3" step="0.1" value="1" />
+        </div>
+        <div class="slider-group">
+          <label>kD — derivative <span class="val" id="kdVal">2.0</span></label>
+          <input type="range" id="kd" min="0" max="6" step="0.5" value="2" />
+        </div>
+        <div class="slider-group">
+          <label>Setpoint <span class="val" id="spVal">0.70</span></label>
+          <input type="range" id="sp" min="0.15" max="0.9" step="0.01" value="0.7" />
+        </div>
+      </div>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Position</div><div class="v teal" id="roPos">0.00</div></div>
+        <div class="ro"><div class="k2">Error</div><div class="v red" id="roErr">0.00</div></div>
+        <div class="ro"><div class="k2">D-term (V)</div><div class="v indigo" id="roDterm">0.00</div></div>
+        <div class="ro"><div class="k2">Voltage (V)</div><div class="v ink" id="roVolt">0.00</div></div>
+      </div>
+    </div>
+    <p class="caption">Every symptom here is curable with the three gains you already know. The trick is reading which one to reach for.</p>
+  </section>
+
+  <section>
+    <div class="kicker">The cheat sheet</div>
+    <h2>Diagnose from the scope</h2>
+    <p>Five symptoms cover almost everything you'll meet on a real mechanism:</p>
+    <div class="dhead"><div>Symptom</div><div>Likely cause</div><div>Fix</div></div>
+    <div class="diag">
+      <div class="dcard"><div class="sym">Sluggish, slow to arrive</div><div class="cau">kP too low</div><div class="fix">Raise kP</div></div>
+      <div class="dcard"><div class="sym">Overshoots &amp; oscillates</div><div class="cau">kP too high, or kD too low</div><div class="fix">Lower kP or raise kD</div></div>
+      <div class="dcard"><div class="sym">Parks below the target</div><div class="cau">No / too little integral</div><div class="fix">Add a little kI, with iZone</div></div>
+      <div class="dcard"><div class="sym">Slow to settle after a long move</div><div class="cau">Integral windup</div><div class="fix">Clamp the integral / set iZone</div></div>
+      <div class="dcard"><div class="sym">Motor buzzes / jitters</div><div class="cau">kD too high, or noisy sensor</div><div class="fix">Lower kD, filter the measurement</div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">In Java</div>
+    <h2>Tune live, on the robot</h2>
+    <p>Re-deploying code for every gain tweak is painfully slow. Instead, push the gains to <strong>Shuffleboard</strong> (or SmartDashboard) and read them back each loop, so you can turn the knobs while the robot runs:</p>
+    <div class="codewrap">
+      <div class="clabel">Live-tunable gains <span class="badge">Java</span></div>
+<pre class="code"><span class="cm">// once, in robotInit — seed the dashboard with starting values</span>
+<span class="ty">SmartDashboard</span>.<span class="fn">putNumber</span>(<span class="num">"kP"</span>, <span class="num">4.0</span>);
+<span class="ty">SmartDashboard</span>.<span class="fn">putNumber</span>(<span class="num">"kD"</span>, <span class="num">2.0</span>);
+
+<span class="cm">// each loop — read whatever you've dialed in and apply it</span>
+<span class="ty">double</span> kP = <span class="ty">SmartDashboard</span>.<span class="fn">getNumber</span>(<span class="num">"kP"</span>, <span class="num">4.0</span>);
+<span class="ty">double</span> kD = <span class="ty">SmartDashboard</span>.<span class="fn">getNumber</span>(<span class="num">"kD"</span>, <span class="num">2.0</span>);
+controller.<span class="fn">setPID</span>(kP, <span class="num">0.0</span>, kD);</pre>
+    </div>
+    <div class="note">
+      <div class="nh">Tune against the plot, not your gut</div>
+      <p>Eyeballing the mechanism only gets you so far. Log the setpoint and measurement and watch them on a real scope — <span class="k">AdvantageScope</span>, or Shuffleboard's graph — exactly like the trace in the clinic above. Overshoot, droop, and ringing are obvious on a plot and easy to miss by eye.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="code-ex">
+      <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
+      <div class="ctask">Read both gains off the dashboard, then apply them to the controller. Fill the blanks, then Check.</div>
+<pre class="code"><span class="ty">double</span> kP = <span class="ty">SmartDashboard</span>.<span class="fn">getNumber</span>(<span class="num">"kP"</span>, <span class="num">4.0</span>);
+<span class="ty">double</span> kD = <span class="ty">SmartDashboard</span>.<span class="fn">getNumber</span>(<span class="num">"kD"</span>, <span class="num">2.0</span>);
+controller.<span class="fn">setPID</span>(<input class="blank" data-ans="kp" aria-label="blank 1" autocomplete="off" spellcheck="false">, <span class="num">0.0</span>, <input class="blank" data-ans="kd" aria-label="blank 2" autocomplete="off" spellcheck="false">);</pre>
+      <div class="code-actions">
+        <button class="btn" id="check">Check</button>
+        <button class="btn" id="reveal">Reveal</button>
+        <span class="code-result" id="cres"></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">What's the recommended order for adding PID gains?</div>
+        <div class="opts">
+          <button class="opt">kI first, then kP, then kD</button>
+          <button class="opt">kP first, then kD, then kI</button>
+          <button class="opt">All three at once, then adjust</button>
+        </div>
+        <div class="explain">Get a responsive kP, damp it with kD, then add kI only if a steady-state error remains. This order keeps each effect readable instead of three gains fighting at once.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 2</div>
+        <div class="qt">The carriage reaches the target fast but overshoots and rings. Best first move?</div>
+        <div class="opts">
+          <button class="opt">Add more kI</button>
+          <button class="opt">Raise kD (or lower kP)</button>
+          <button class="opt">Increase the setpoint</button>
+        </div>
+        <div class="explain">Overshoot and ringing are a damping problem — raise kD to brake the approach, or back off kP if it's too aggressive. Adding kI here would only make the overshoot worse.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 3</div>
+        <div class="qt">After a long move the carriage overshoots hard and takes forever to settle, but short moves are fine. The cause?</div>
+        <div class="opts">
+          <button class="opt">kP is too low</button>
+          <button class="opt">The encoder is broken</button>
+          <button class="opt">Integral windup on the long approach</button>
+        </div>
+        <div class="explain">Long moves give the integral time to pile up a backlog it can't act on, so it overshoots and unwinds slowly. Short moves never accumulate enough to matter. Clamp the integral or use an iZone.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Lesson 05 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Tuning order</b><span>kP for response, kD to damp, kI for residual error.</span></div>
+        <div class="gl"><b>Sluggish</b><span>Raise kP.</span></div>
+        <div class="gl"><b>Overshoot / ring</b><span>Raise kD or lower kP.</span></div>
+        <div class="gl"><b>Parks low</b><span>Add a little kI.</span></div>
+        <div class="gl"><b>Buzzing</b><span>Lower kD, filter the sensor.</span></div>
+        <div class="gl"><b>Live tuning</b><span>Push gains to Shuffleboard; tune against the plot.</span></div>
+      </div>
+      <div class="next">
+        <div class="n-eyebrow">Up next · Lesson 06</div>
+        <h3>Feedforward</h3>
+        <p style="margin-bottom:0">PID corrects errors <em>after</em> they happen. Feedforward predicts the voltage a move needs <em>in advance</em> — for gravity, friction, and speed — so PID barely has to lift a finger. Meet <code>kS</code>, <code>kG</code>, <code>kV</code>, and <code>kA</code>.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>Closing the Loop · A control systems course for FRC</footer>
+
+<script>
+(function(){
+  "use strict";
+  var clamp=function(x,a,b){return x<a?a:(x>b?b:x);};
+
+  function makeCanvas(cv){
+    var ctx=cv.getContext('2d'); var o={cv:cv,ctx:ctx,w:0,h:0};
+    function fit(){
+      var r=cv.getBoundingClientRect(); if(!r.width)return;
+      var dpr=window.devicePixelRatio||1;
+      cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr);
+      ctx.setTransform(dpr,0,0,dpr,0,0); o.w=r.width; o.h=r.height;
+    }
+    o.fit=fit; fit(); return o;
+  }
+  function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+
+  function drawElevator(o,y,sp,volt){
+    var ctx=o.ctx,W=o.w,H=o.h;
+    ctx.clearRect(0,0,W,H);
+    var pad=24,top=pad,bot=H-pad,span=bot-top,cx=W*0.5;
+    function py(v){return bot-clamp(v,0,1)*span;}
+    // rails
+    ctx.strokeStyle='#2B3A57';ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(cx-26,top-6);ctx.lineTo(cx-26,bot);ctx.moveTo(cx+26,top-6);ctx.lineTo(cx+26,bot);ctx.stroke();
+    // motor head
+    ctx.fillStyle='#1B2540';ctx.strokeStyle='#33415e';ctx.lineWidth=1.5;
+    roundRect(ctx,cx-30,top-16,60,12,3);ctx.fill();ctx.stroke();
+    // ticks
+    ctx.strokeStyle='rgba(120,140,180,0.16)';ctx.lineWidth=1;
+    for(var i=0;i<=10;i++){var ty=top+span*(i/10);ctx.beginPath();ctx.moveTo(cx-34,ty);ctx.lineTo(cx-30,ty);ctx.stroke();}
+    // setpoint line
+    ctx.strokeStyle='#FFB020';ctx.lineWidth=1.5;ctx.setLineDash([6,5]);
+    ctx.beginPath();ctx.moveTo(cx-42,py(sp));ctx.lineTo(cx+42,py(sp));ctx.stroke();ctx.setLineDash([]);
+    // cable
+    var my=py(y);
+    ctx.strokeStyle='#475679';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(cx,top-4);ctx.lineTo(cx,my-10);ctx.stroke();
+    // force arrow (voltage)
+    var fmag=clamp(Math.abs(volt)*16,0,30);
+    if(fmag>1.5){
+      var up=volt>=0, ay=up?my+12:my-12, dir=up?1:-1, col=up?'#34D7C5':'#FF6B6B';
+      ctx.strokeStyle=col;ctx.globalAlpha=0.7;ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(cx,ay);ctx.lineTo(cx,ay+dir*fmag);
+      ctx.moveTo(cx-4,ay+dir*(fmag-5));ctx.lineTo(cx,ay+dir*fmag);ctx.lineTo(cx+4,ay+dir*(fmag-5));
+      ctx.stroke();ctx.globalAlpha=1;
+    }
+    // carriage
+    ctx.shadowColor='#34D7C5';ctx.shadowBlur=16;
+    ctx.fillStyle='#0e2b2a';ctx.strokeStyle='#34D7C5';ctx.lineWidth=2;
+    roundRect(ctx,cx-22,my-11,44,22,5);ctx.fill();ctx.stroke();
+    ctx.shadowBlur=0;
+    ctx.fillStyle='#34D7C5';ctx.fillRect(cx-12,my-3,24,2);
+    ctx.beginPath();ctx.arc(cx,my+3,3,0,7);ctx.fill();
+  }
+
+  function Scope(o,signals,len){this.o=o;this.signals=signals;this.len=len||260;this.buf=[];}
+  Scope.prototype.push=function(s){this.buf.push(s);if(this.buf.length>this.len)this.buf.shift();};
+  Scope.prototype.clear=function(){this.buf=[];};
+  Scope.prototype.draw=function(){
+    var o=this.o,ctx=o.ctx,W=o.w,H=o.h;ctx.clearRect(0,0,W,H);
+    var pad=14,top=pad,bot=H-pad,left=8,right=W-8,span=bot-top,wspan=right-left;
+    ctx.strokeStyle='rgba(120,140,180,0.07)';ctx.lineWidth=1;
+    for(var gy=0;gy<=4;gy++){var yy=top+span*(gy/4);ctx.beginPath();ctx.moveTo(left,yy);ctx.lineTo(right,yy);ctx.stroke();}
+    for(var gx=0;gx<=8;gx++){var xx=left+wspan*(gx/8);ctx.beginPath();ctx.moveTo(xx,top);ctx.lineTo(xx,bot);ctx.stroke();}
+    var n=this.buf.length;if(n<2)return;var self=this;
+    function pyv(v){return bot-clamp(v,0,1)*span;}
+    for(var s=0;s<this.signals.length;s++){
+      var sig=this.signals[s];
+      ctx.strokeStyle=sig.color;ctx.lineWidth=sig.w||2;
+      ctx.setLineDash(sig.dash||[]);
+      ctx.shadowColor=sig.color;ctx.shadowBlur=sig.glow?7:0;
+      ctx.beginPath();
+      for(var i=0;i<n;i++){
+        var v=self.buf[i][sig.key];
+        var X=left+wspan*((i+(self.len-n))/(self.len-1));
+        var Y=pyv(v);
+        if(i===0)ctx.moveTo(X,Y);else ctx.lineTo(X,Y);
+      }
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);ctx.shadowBlur=0;
+  };
+
+  // ---- state ----
+  var S={y:0,v:0,I:0,sp:0.7,kP:4,kI:1,kD:2,g:0.45,drag:1.8,running:false,u:0,prevM:0,deriv:0,dterm:0,noise:false};
+  var world=makeCanvas(document.getElementById('world'));
+  var scope=makeCanvas(document.getElementById('scope'));
+  var scopeObj=new Scope(scope,[
+    {key:'volt',color:'#8E8CF8',w:1.5},
+    {key:'sp',color:'#FFB020',w:1.5,dash:[5,4]},
+    {key:'pos',color:'#34D7C5',w:2,glow:true}
+  ]);
+  var el={
+    live:document.getElementById('live'),status:document.getElementById('status'),
+    kp:document.getElementById('kp'),kpVal:document.getElementById('kpVal'),
+    ki:document.getElementById('ki'),kiVal:document.getElementById('kiVal'),
+    kd:document.getElementById('kd'),kdVal:document.getElementById('kdVal'),
+    sp:document.getElementById('sp'),spVal:document.getElementById('spVal'),
+    step:document.getElementById('step'),run:document.getElementById('run'),
+    noiseBtn:document.getElementById('noise'),
+    roPos:document.getElementById('roPos'),roErr:document.getElementById('roErr'),
+    roDterm:document.getElementById('roDterm'),roVolt:document.getElementById('roVolt')
+  };
+  function setRun(on){S.running=on;el.run.textContent=on?'Pause':'Run';el.run.classList.toggle('active',on);el.live.classList.toggle('on',on);el.status.textContent=on?'Live':'Paused';}
+  el.kp.addEventListener('input',function(){S.kP=parseFloat(el.kp.value);el.kpVal.textContent=S.kP.toFixed(1);});
+  el.ki.addEventListener('input',function(){S.kI=parseFloat(el.ki.value);el.kiVal.textContent=S.kI.toFixed(1);});
+  el.kd.addEventListener('input',function(){S.kD=parseFloat(el.kd.value);el.kdVal.textContent=S.kD.toFixed(1);});
+  el.sp.addEventListener('input',function(){S.sp=parseFloat(el.sp.value);el.spVal.textContent=S.sp.toFixed(2);});
+  el.step.addEventListener('click',function(){S.y=0;S.v=0;S.I=0;S.prevM=0;scopeObj.clear();setRun(true);});
+  el.run.addEventListener('click',function(){setRun(!S.running);});
+  el.noiseBtn.addEventListener('click',function(){S.noise=!S.noise;el.noiseBtn.textContent='Noise: '+(S.noise?'on':'off');el.noiseBtn.classList.toggle('active',S.noise);});
+
+  function step(dt){
+    if(S.running){
+      var meas=S.y+(S.noise?(Math.random()*2-1)*0.004:0);
+      var e=S.sp-meas;
+      S.I+=e*dt;
+      S.deriv=-(meas-S.prevM)/dt;          // derivative of measurement (no setpoint kick)
+      S.prevM=meas;
+      S.dterm=S.kD*S.deriv;
+      S.u=S.kP*e+S.kI*S.I+S.dterm;
+      var a=S.u-S.g-S.drag*S.v;
+      S.v+=a*dt;S.y+=S.v*dt;
+      if(S.y<0){S.y=0;if(S.v<0)S.v=0;}if(S.y>1){S.y=1;if(S.v>0)S.v=0;}
+      scopeObj.push({sp:S.sp,pos:S.y,volt:clamp(0.12+S.u*0.20,0,1)});
+    }
+    drawElevator(world,S.y,S.sp,S.u);
+    scopeObj.draw();
+    el.roPos.textContent=S.y.toFixed(2);
+    el.roErr.textContent=(S.sp-S.y).toFixed(2);
+    el.roDterm.textContent=S.dterm.toFixed(2);
+    el.roVolt.textContent=S.u.toFixed(2);
+  }
+
+  var last=0;
+  function frame(ts){var t=ts/1000;var dt=last?Math.min(0.033,t-last):0.016;last=t;step(dt);requestAnimationFrame(frame);}
+  requestAnimationFrame(frame);
+
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){world.fit();scope.fit();},120);});
+
+  // ---- tuning presets ----
+  var presets={
+    sluggish:{kP:1,kI:0,kD:0,noise:false},
+    oscillating:{kP:4,kI:3,kD:0,noise:false},
+    drooping:{kP:6,kI:0,kD:2,noise:false},
+    jittery:{kP:4,kI:1,kD:6,noise:true},
+    good:{kP:4,kI:1,kD:2,noise:false}
+  };
+  function applyPreset(name){
+    var p=presets[name]; if(!p)return;
+    S.kP=p.kP;S.kI=p.kI;S.kD=p.kD;S.noise=p.noise;
+    el.kp.value=p.kP;el.kpVal.textContent=p.kP.toFixed(1);
+    el.ki.value=p.kI;el.kiVal.textContent=p.kI.toFixed(1);
+    el.kd.value=p.kD;el.kdVal.textContent=p.kD.toFixed(1);
+    el.noiseBtn.textContent='Noise: '+(p.noise?'on':'off');el.noiseBtn.classList.toggle('active',p.noise);
+    S.y=0;S.v=0;S.I=0;S.prevM=0;scopeObj.clear();setRun(true);
+  }
+  Array.prototype.slice.call(document.querySelectorAll('[data-preset]')).forEach(function(b){
+    b.addEventListener('click',function(){applyPreset(b.getAttribute('data-preset'));});
+  });
+
+  // ---- code exercise ----
+  var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
+  function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'');}
+  document.getElementById('check').addEventListener('click',function(){
+    var all=true;
+    blanks.forEach(function(b){
+      var ans=(b.getAttribute('data-ans')||'').split('|');
+      var ok=ans.indexOf(norm(b.value))!==-1;
+      b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad');
+      if(!ok)all=false;
+    });
+    var res=document.getElementById('cres');
+    res.textContent=all?'All correct ✓':'Not quite — keep at it';
+    res.className='code-result '+(all?'ok':'no');
+  });
+  document.getElementById('reveal').addEventListener('click',function(){
+    blanks.forEach(function(b){b.value=(b.getAttribute('data-ans')||'').split('|')[0];b.classList.remove('bad');b.classList.add('ok');});
+    var res=document.getElementById('cres');res.textContent='Revealed';res.className='code-result ok';
+  });
+
+  // ---- quiz ----
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){
+      opt.addEventListener('click',function(){
+        if(done)return;done=true;
+        opts.forEach(function(o){o.classList.add('locked');});
+        if(idx===correct){opt.classList.add('correct');}
+        else{opt.classList.add('wrong');opts[correct].classList.add('correct');}
+        explain.classList.add('show');
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>

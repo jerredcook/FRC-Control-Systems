@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Closing the Loop · Lesson 6 — Feedforward</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020;   /* setpoint / target / brand */
+    --teal:#34D7C5;    /* measured position */
+    --indigo:#8E8CF8;  /* voltage / velocity */
+    --red:#FF6B6B;     /* error / overshoot */
+    --green:#43D67E;   /* correct */
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+    --maxw:1160px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ink); color:var(--text);
+    font-family:var(--sans); font-size:17px; line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(900px 500px at 80% -10%, rgba(255,176,32,.06), transparent 60%),
+      radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--teal);box-shadow:0 0 12px var(--teal)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--teal),var(--indigo));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:44ch;margin-top:6px}
+
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--teal);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  p .sub,.sub{color:var(--muted)}
+  .lead{font-size:19px}
+  em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .formula{font-family:var(--mono);background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:18px 20px;margin:20px 0;font-size:18px;overflow-x:auto;color:#cfe;text-align:center}
+  .formula .small{display:block;font-size:13px;color:var(--muted);margin-top:8px}
+  .formula b{color:var(--amber)} .formula .t{color:var(--teal)}
+
+  /* term chips */
+  .terms{display:grid;gap:12px;margin:22px 0 6px}
+  @media(min-width:560px){.terms{grid-template-columns:repeat(3,1fr)}}
+  .term{border:1px solid var(--line);border-radius:10px;padding:14px 15px;background:var(--panel);border-top:2px solid var(--accent,var(--teal))}
+  .term h4{margin:0 0 4px;font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent,var(--teal))}
+  .term p{margin:0;font-size:14.5px;color:var(--muted);line-height:1.45}
+
+  /* interactive panels */
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;gap:6px;align-items:center}
+  .demo-tag .live{width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 8px var(--red)}
+  .demo-tag .live.on{background:var(--green);box-shadow:0 0 8px var(--green)}
+  .demo-stage{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line)}
+  @media(min-width:600px){.demo-stage{grid-template-columns:minmax(150px,0.78fr) 1.5fr}}
+  .stage-cell{background:#0B1322;position:relative}
+  .stage-cell .cell-label{position:absolute;top:8px;left:10px;z-index:2;font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);pointer-events:none}
+  canvas.world{display:block;width:100%;height:320px}
+  canvas.scope{display:block;width:100%;height:320px}
+
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--teal);color:var(--text)}
+  .btn.active{background:var(--teal);border-color:var(--teal);color:#06121f;font-weight:700}
+  .btn.primary{background:linear-gradient(180deg,#6FF0DD,var(--teal));color:#06121f;font-weight:700;border:none}
+  .slider-group{flex:1 1 200px;display:flex;flex-direction:column;gap:6px;min-width:170px}
+  .slider-group label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+  .slider-group label .val{color:var(--amber)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:var(--line-2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--amber);cursor:pointer;box-shadow:0 0 10px -1px var(--amber)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--amber);cursor:pointer}
+
+  .readouts{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  @media(min-width:560px){.readouts{grid-template-columns:repeat(4,1fr)}}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:20px;font-weight:600;margin-top:3px}
+  .ro .v.amber{color:var(--amber)} .ro .v.teal{color:var(--teal)} .ro .v.indigo{color:var(--indigo)} .ro .v.red{color:var(--red)} .ro .v.ink{color:var(--text)}
+
+  .legend{display:flex;flex-wrap:wrap;gap:16px;padding:11px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .legend i{width:16px;height:2px;border-radius:2px;display:inline-block}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  /* shared callout pattern */
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.teal{border-color:var(--teal);background:rgba(52,215,197,.06)} .note.teal .nh{color:var(--teal)}
+
+  /* code */
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--teal);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:13.5px;line-height:1.85;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic}
+  .code .kw{color:#ff9bbf}
+  .code .ty{color:var(--teal)}
+  .code .fn{color:var(--indigo)}
+  .code .num{color:var(--amber)}
+
+  /* code exercise */
+  .code-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .code-ex .chead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .code-ex .chead .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,176,32,.14);display:grid;place-items:center;color:var(--amber);font-size:13px}
+  .code-ex .ctask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .code-ex pre.code{margin:0 0 14px}
+  .blank{font-family:var(--mono);font-size:13px;width:13ch;text-align:center;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:2px 4px;outline:none}
+  .blank:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
+  .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+
+  /* quiz */
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)}
+  .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7}
+  .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--teal);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  /* recap */
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px}
+  @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px}
+  .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--teal);min-width:130px;text-transform:uppercase}
+  .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(142,140,248,0.1),transparent 70%)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--indigo)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)}
+  .next code{font-family:var(--mono);background:var(--panel-2);border:1px solid var(--line-2);padding:2px 8px;border-radius:5px;color:var(--teal);font-size:14px}
+
+  footer{padding:40px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand"><span class="dot"></span><span class="name">Closing the Loop</span></div>
+    <div class="top-meta">Lesson 06 / 08 · Modeling</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Lesson 06</b> Modeling</div>
+    <div class="eyebrow">Feedforward</div>
+    <h1>Knowing the<br><span class="accent">answer</span> in advance.</h1>
+    <p class="dek">PID reacts to error. Feedforward predicts the voltage a move needs before any error even appears.</p>
+  </div>
+
+  <section>
+    <p class="lead">Every controller so far has been reactive.</p>
+    <p>PID waits for an error, then responds. That's powerful, but it's always a step behind — it can only correct a mistake after the mistake happens. <strong>Feedforward</strong> flips it around: if you know the physics of your mechanism, you can compute most of the voltage a move needs <em>in advance</em>, before any error shows up.</p>
+    <p>Take gravity. Your elevator needs the same voltage just to hang in place, every time. Why make the controller rediscover that through accumulated error on every move, when you can simply <em>tell</em> it?</p>
+    <div class="formula">
+      voltage = kS·sign(v) + <b>kG</b> + kV·v + kA·a
+      <span class="small">a model of exactly what voltage each part of a move requires</span>
+    </div>
+    <p>Four terms, each a piece of physics: <span class="k">kS</span> the static friction to break free and start moving, <span class="k">kG</span> the constant pull of gravity, <span class="k">kV</span> the voltage to sustain a given speed, and <span class="k">kA</span> the extra to accelerate the mass. Feedforward computes this predicted voltage from where you <em>want</em> to go, and leaves PID to mop up only the small leftover — disturbances, a sagging battery, a game piece you didn't model.</p>
+  </section>
+
+  <section>
+    <div class="kicker">Try it</div>
+    <h2>Predict the load</h2>
+    <p>Here's the elevator with feedforward. Notice the integral is <strong>off</strong> (kI = 0) — yet with <span class="k">kG</span> set right, the carriage holds dead on the line. That's feedforward supplying gravity directly. Switch <strong>Feedforward off</strong> and Lesson 2's droop snaps back. Then mis-set kG and watch it park high or low.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head">
+        <span class="demo-title">Elevator · Feedforward + PID</span>
+        <span class="demo-tag"><span class="live" id="live"></span> <span id="status">Paused</span></span>
+      </div>
+      <div class="demo-stage">
+        <div class="stage-cell"><span class="cell-label">Height</span><canvas class="world" id="world"></canvas></div>
+        <div class="stage-cell"><span class="cell-label">Scope · signal vs time</span><canvas class="scope" id="scope"></canvas></div>
+      </div>
+      <div class="legend">
+        <span><i style="background:var(--amber)"></i> Setpoint</span>
+        <span><i style="background:var(--teal)"></i> Position</span>
+        <span><i style="background:var(--indigo)"></i> Motor voltage</span>
+      </div>
+      <div class="controls">
+        <button class="btn primary" id="step">Step ▸</button>
+        <button class="btn" id="run">Pause</button>
+        <button class="btn active" id="ff">Feedforward: on</button>
+        <div class="slider-group">
+          <label>kG — gravity FF <span class="val" id="kgVal">0.45</span></label>
+          <input type="range" id="kg" min="0" max="0.9" step="0.01" value="0.45" />
+        </div>
+        <div class="slider-group">
+          <label>kP — gain <span class="val" id="kpVal">4.0</span></label>
+          <input type="range" id="kp" min="0.5" max="20" step="0.5" value="4" />
+        </div>
+        <div class="slider-group">
+          <label>kI — integral <span class="val" id="kiVal">0.0</span></label>
+          <input type="range" id="ki" min="0" max="3" step="0.1" value="0" />
+        </div>
+        <div class="slider-group">
+          <label>kD — derivative <span class="val" id="kdVal">2.0</span></label>
+          <input type="range" id="kd" min="0" max="6" step="0.5" value="2" />
+        </div>
+        <div class="slider-group">
+          <label>Setpoint <span class="val" id="spVal">0.70</span></label>
+          <input type="range" id="sp" min="0.15" max="0.9" step="0.01" value="0.7" />
+        </div>
+      </div>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Position</div><div class="v teal" id="roPos">0.00</div></div>
+        <div class="ro"><div class="k2">Error</div><div class="v red" id="roErr">0.00</div></div>
+        <div class="ro"><div class="k2">Feedforward (V)</div><div class="v indigo" id="roFf">0.00</div></div>
+        <div class="ro"><div class="k2">Voltage (V)</div><div class="v ink" id="roVolt">0.00</div></div>
+      </div>
+    </div>
+    <p class="caption">With kG matched to the load and feedforward on, the error sits at zero from the first instant — no droop, no integral, no waiting.</p>
+  </section>
+
+  <section>
+    <div class="kicker">Why it works</div>
+    <h2>Feedforward does the heavy lifting</h2>
+    <p>Remember the droop from Lesson 2 — the gap pure P couldn't close because it needed leftover error to fight gravity? And how Lesson 3's integral erased it, slowly, by accumulating that error over time? Feedforward erases it a third way: <strong>instantly, and in advance.</strong> <span class="k">kG</span> hands the motor exactly the gravity-holding voltage from the first instant, so there's nothing for the error to compensate for. No droop, no waiting, no windup to manage.</p>
+    <p>Watch the <span style="color:var(--indigo)">feedforward readout</span>: with feedforward on it sits at the gravity-holding voltage the entire time, doing the steady work — while PID's contribution stays near zero unless something disturbs the carriage.</p>
+    <div class="note teal">
+      <div class="nh">Feedforward + feedback, together</div>
+      <p>Feedforward isn't a replacement for PID — it's a head start. The predicted voltage gets the mechanism most of the way; PID cleans up the rest: friction you under-modeled, a battery sagging, an unexpected load. A strong feedforward with a light PID on top is the gold standard for nearly every FRC mechanism — and exactly the recipe your final lessons build toward.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">In Java</div>
+    <h2>Predict, then correct</h2>
+    <p>By hand, feedforward is one term added before the feedback. For a simple hold, that term is just <span class="k">kG</span>:</p>
+    <div class="codewrap">
+      <div class="clabel">Feedforward + feedback, by hand <span class="badge">Java</span></div>
+<pre class="code"><span class="ty">double</span> kG = <span class="num">0.45</span>;   <span class="cm">// volts needed just to hold against gravity</span>
+
+<span class="kw">public</span> <span class="kw">void</span> <span class="fn">periodic</span>() {
+  <span class="ty">double</span> error = setpoint - encoder.<span class="fn">getPosition</span>();
+  <span class="ty">double</span> feedforward = kG;             <span class="cm">// predict the constant gravity load</span>
+  <span class="ty">double</span> feedback    = kP * error;     <span class="cm">// PID corrects only the leftover</span>
+  motor.<span class="fn">setVoltage</span>(feedforward + feedback);
+}</pre>
+    </div>
+    <p>WPILib's <span class="k">ElevatorFeedforward</span> packages all four physics terms. You pair it with a plain PID and add their outputs:</p>
+    <div class="codewrap">
+      <div class="clabel">Feedforward + PID, with WPILib <span class="badge">Java</span></div>
+<pre class="code"><span class="kw">private final</span> <span class="ty">ElevatorFeedforward</span> ff = <span class="kw">new</span> <span class="ty">ElevatorFeedforward</span>(kS, kG, kV, kA);
+<span class="kw">private final</span> <span class="ty">PIDController</span> pid = <span class="kw">new</span> <span class="ty">PIDController</span>(kP, <span class="num">0.0</span>, kD);
+
+<span class="kw">public</span> <span class="kw">void</span> <span class="fn">periodic</span>() {
+  <span class="ty">double</span> ffVolts  = ff.<span class="fn">calculate</span>(velocity, nextVelocity);   <span class="cm">// discrete (2026) form</span>
+  <span class="ty">double</span> pidVolts = pid.<span class="fn">calculate</span>(encoder.<span class="fn">getPosition</span>(), setpoint);
+  motor.<span class="fn">setVoltage</span>(ffVolts + pidVolts);
+}</pre>
+    </div>
+    <div class="note">
+      <div class="nh">Under the hood — where kV and kA come alive</div>
+      <p>For a static hold, feed velocity 0 and feedforward returns just <span class="k">kG</span>. The velocity and acceleration terms only earn their keep when the setpoint is actually <em>moving</em> — fed a planned trajectory. As of WPILib 2026 the single-argument <span class="k">calculate(velocity)</span> is deprecated in favor of the discrete <span class="k">calculate(currentVelocity, nextVelocity)</span>. Generating that smooth moving trajectory is <strong>motion profiling</strong>, which we reach at the end of the course — where kV and kA finally shine.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="code-ex">
+      <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
+      <div class="ctask">Complete the hold loop: supply gravity with feedforward, then add the PID correction. Fill the blanks, then Check.</div>
+<pre class="code"><span class="ty">double</span> feedforward = <input class="blank" data-ans="kg" aria-label="blank 1" autocomplete="off" spellcheck="false">;                  <span class="cm">// hold against gravity</span>
+<span class="ty">double</span> feedback    = kP * (setpoint - measurement);
+motor.<span class="fn">setVoltage</span>(feedforward + <input class="blank" data-ans="feedback" aria-label="blank 2" autocomplete="off" spellcheck="false">);</pre>
+      <div class="code-actions">
+        <button class="btn" id="check">Check</button>
+        <button class="btn" id="reveal">Reveal</button>
+        <span class="code-result" id="cres"></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">What does feedforward do that feedback can't?</div>
+        <div class="opts">
+          <button class="opt">It measures the error more accurately</button>
+          <button class="opt">It predicts the needed voltage in advance from the mechanism's physics</button>
+          <button class="opt">It replaces the encoder</button>
+        </div>
+        <div class="explain">Feedback only reacts to error after it appears. Feedforward uses a model of the mechanism to supply most of the voltage up front, so the error never grows large in the first place.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 2</div>
+        <div class="qt">With correct kG and no integral at all, why does the elevator hold with zero steady-state error?</div>
+        <div class="opts">
+          <button class="opt">kG supplies the gravity-holding voltage directly, so no leftover error is needed</button>
+          <button class="opt">The integral is secretly still running</button>
+          <button class="opt">Gravity stops acting once it reaches the target</button>
+        </div>
+        <div class="explain">In Lesson 2 the droop existed because P needed error to generate the holding voltage. Feedforward provides that voltage outright, so the error can sit at zero — no integral required.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 3</div>
+        <div class="qt">Which feedforward terms only matter when the setpoint is moving?</div>
+        <div class="opts">
+          <button class="opt">kS and kG</button>
+          <button class="opt">kG alone</button>
+          <button class="opt">kV and kA — velocity and acceleration</button>
+        </div>
+        <div class="explain">kG (gravity) and kS (static friction at the start) apply even for a hold. kV and kA respond to commanded speed and acceleration, so they need a moving trajectory to act on — which is what motion profiling provides.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Lesson 06 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Feedforward</b><span>Predicting the needed voltage from physics, before any error.</span></div>
+        <div class="gl"><b>kS</b><span>Static friction — voltage to break free and start moving.</span></div>
+        <div class="gl"><b>kG</b><span>Gravity — the constant voltage to hold position.</span></div>
+        <div class="gl"><b>kV, kA</b><span>Voltage for a target speed and acceleration (moving only).</span></div>
+        <div class="gl"><b>Predictive vs reactive</b><span>Feedforward acts in advance; PID corrects the rest.</span></div>
+        <div class="gl"><b>The combination</b><span>Strong feedforward + light PID = the FRC gold standard.</span></div>
+      </div>
+      <div class="next">
+        <div class="n-eyebrow">Up next · Lesson 07</div>
+        <h3>System identification</h3>
+        <p style="margin-bottom:0">You've been typing in <code>kG</code>, <code>kV</code>, and <code>kP</code> like they fell from the sky. Lesson 7 is how you actually <em>measure</em> them — the characterization tests that turn a few runs of your real mechanism into trustworthy numbers.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>Closing the Loop · A control systems course for FRC</footer>
+
+<script>
+(function(){
+  "use strict";
+  var clamp=function(x,a,b){return x<a?a:(x>b?b:x);};
+
+  function makeCanvas(cv){
+    var ctx=cv.getContext('2d'); var o={cv:cv,ctx:ctx,w:0,h:0};
+    function fit(){
+      var r=cv.getBoundingClientRect(); if(!r.width)return;
+      var dpr=window.devicePixelRatio||1;
+      cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr);
+      ctx.setTransform(dpr,0,0,dpr,0,0); o.w=r.width; o.h=r.height;
+    }
+    o.fit=fit; fit(); return o;
+  }
+  function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+
+  function drawElevator(o,y,sp,volt){
+    var ctx=o.ctx,W=o.w,H=o.h;
+    ctx.clearRect(0,0,W,H);
+    var pad=24,top=pad,bot=H-pad,span=bot-top,cx=W*0.5;
+    function py(v){return bot-clamp(v,0,1)*span;}
+    // rails
+    ctx.strokeStyle='#2B3A57';ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(cx-26,top-6);ctx.lineTo(cx-26,bot);ctx.moveTo(cx+26,top-6);ctx.lineTo(cx+26,bot);ctx.stroke();
+    // motor head
+    ctx.fillStyle='#1B2540';ctx.strokeStyle='#33415e';ctx.lineWidth=1.5;
+    roundRect(ctx,cx-30,top-16,60,12,3);ctx.fill();ctx.stroke();
+    // ticks
+    ctx.strokeStyle='rgba(120,140,180,0.16)';ctx.lineWidth=1;
+    for(var i=0;i<=10;i++){var ty=top+span*(i/10);ctx.beginPath();ctx.moveTo(cx-34,ty);ctx.lineTo(cx-30,ty);ctx.stroke();}
+    // setpoint line
+    ctx.strokeStyle='#FFB020';ctx.lineWidth=1.5;ctx.setLineDash([6,5]);
+    ctx.beginPath();ctx.moveTo(cx-42,py(sp));ctx.lineTo(cx+42,py(sp));ctx.stroke();ctx.setLineDash([]);
+    // cable
+    var my=py(y);
+    ctx.strokeStyle='#475679';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(cx,top-4);ctx.lineTo(cx,my-10);ctx.stroke();
+    // force arrow (voltage)
+    var fmag=clamp(Math.abs(volt)*16,0,30);
+    if(fmag>1.5){
+      var up=volt>=0, ay=up?my+12:my-12, dir=up?1:-1, col=up?'#34D7C5':'#FF6B6B';
+      ctx.strokeStyle=col;ctx.globalAlpha=0.7;ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(cx,ay);ctx.lineTo(cx,ay+dir*fmag);
+      ctx.moveTo(cx-4,ay+dir*(fmag-5));ctx.lineTo(cx,ay+dir*fmag);ctx.lineTo(cx+4,ay+dir*(fmag-5));
+      ctx.stroke();ctx.globalAlpha=1;
+    }
+    // carriage
+    ctx.shadowColor='#34D7C5';ctx.shadowBlur=16;
+    ctx.fillStyle='#0e2b2a';ctx.strokeStyle='#34D7C5';ctx.lineWidth=2;
+    roundRect(ctx,cx-22,my-11,44,22,5);ctx.fill();ctx.stroke();
+    ctx.shadowBlur=0;
+    ctx.fillStyle='#34D7C5';ctx.fillRect(cx-12,my-3,24,2);
+    ctx.beginPath();ctx.arc(cx,my+3,3,0,7);ctx.fill();
+  }
+
+  function Scope(o,signals,len){this.o=o;this.signals=signals;this.len=len||260;this.buf=[];}
+  Scope.prototype.push=function(s){this.buf.push(s);if(this.buf.length>this.len)this.buf.shift();};
+  Scope.prototype.clear=function(){this.buf=[];};
+  Scope.prototype.draw=function(){
+    var o=this.o,ctx=o.ctx,W=o.w,H=o.h;ctx.clearRect(0,0,W,H);
+    var pad=14,top=pad,bot=H-pad,left=8,right=W-8,span=bot-top,wspan=right-left;
+    ctx.strokeStyle='rgba(120,140,180,0.07)';ctx.lineWidth=1;
+    for(var gy=0;gy<=4;gy++){var yy=top+span*(gy/4);ctx.beginPath();ctx.moveTo(left,yy);ctx.lineTo(right,yy);ctx.stroke();}
+    for(var gx=0;gx<=8;gx++){var xx=left+wspan*(gx/8);ctx.beginPath();ctx.moveTo(xx,top);ctx.lineTo(xx,bot);ctx.stroke();}
+    var n=this.buf.length;if(n<2)return;var self=this;
+    function pyv(v){return bot-clamp(v,0,1)*span;}
+    for(var s=0;s<this.signals.length;s++){
+      var sig=this.signals[s];
+      ctx.strokeStyle=sig.color;ctx.lineWidth=sig.w||2;
+      ctx.setLineDash(sig.dash||[]);
+      ctx.shadowColor=sig.color;ctx.shadowBlur=sig.glow?7:0;
+      ctx.beginPath();
+      for(var i=0;i<n;i++){
+        var v=self.buf[i][sig.key];
+        var X=left+wspan*((i+(self.len-n))/(self.len-1));
+        var Y=pyv(v);
+        if(i===0)ctx.moveTo(X,Y);else ctx.lineTo(X,Y);
+      }
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);ctx.shadowBlur=0;
+  };
+
+  // ---- state ----
+  var S={y:0,v:0,I:0,sp:0.7,kP:4,kI:0,kD:2,kG:0.45,g:0.45,drag:1.8,running:false,u:0,prevM:0,deriv:0,dterm:0,ff:true,ffv:0};
+  var world=makeCanvas(document.getElementById('world'));
+  var scope=makeCanvas(document.getElementById('scope'));
+  var scopeObj=new Scope(scope,[
+    {key:'volt',color:'#8E8CF8',w:1.5},
+    {key:'sp',color:'#FFB020',w:1.5,dash:[5,4]},
+    {key:'pos',color:'#34D7C5',w:2,glow:true}
+  ]);
+  var el={
+    live:document.getElementById('live'),status:document.getElementById('status'),
+    kp:document.getElementById('kp'),kpVal:document.getElementById('kpVal'),
+    ki:document.getElementById('ki'),kiVal:document.getElementById('kiVal'),
+    kd:document.getElementById('kd'),kdVal:document.getElementById('kdVal'),
+    kg:document.getElementById('kg'),kgVal:document.getElementById('kgVal'),
+    sp:document.getElementById('sp'),spVal:document.getElementById('spVal'),
+    step:document.getElementById('step'),run:document.getElementById('run'),
+    ffBtn:document.getElementById('ff'),
+    roPos:document.getElementById('roPos'),roErr:document.getElementById('roErr'),
+    roFf:document.getElementById('roFf'),roVolt:document.getElementById('roVolt')
+  };
+  function setRun(on){S.running=on;el.run.textContent=on?'Pause':'Run';el.run.classList.toggle('active',on);el.live.classList.toggle('on',on);el.status.textContent=on?'Live':'Paused';}
+  el.kp.addEventListener('input',function(){S.kP=parseFloat(el.kp.value);el.kpVal.textContent=S.kP.toFixed(1);});
+  el.ki.addEventListener('input',function(){S.kI=parseFloat(el.ki.value);el.kiVal.textContent=S.kI.toFixed(1);});
+  el.kd.addEventListener('input',function(){S.kD=parseFloat(el.kd.value);el.kdVal.textContent=S.kD.toFixed(1);});
+  el.kg.addEventListener('input',function(){S.kG=parseFloat(el.kg.value);el.kgVal.textContent=S.kG.toFixed(2);});
+  el.sp.addEventListener('input',function(){S.sp=parseFloat(el.sp.value);el.spVal.textContent=S.sp.toFixed(2);});
+  el.step.addEventListener('click',function(){S.y=0;S.v=0;S.I=0;S.prevM=0;scopeObj.clear();setRun(true);});
+  el.run.addEventListener('click',function(){setRun(!S.running);});
+  el.ffBtn.addEventListener('click',function(){S.ff=!S.ff;el.ffBtn.textContent='Feedforward: '+(S.ff?'on':'off');el.ffBtn.classList.toggle('active',S.ff);});
+
+  function step(dt){
+    if(S.running){
+      var meas=S.y;
+      var e=S.sp-meas;
+      S.I+=e*dt;
+      S.deriv=-(meas-S.prevM)/dt; S.prevM=meas;
+      S.dterm=S.kD*S.deriv;
+      S.ffv=S.ff?S.kG:0;                    // feedforward: hold against gravity
+      S.u=S.ffv+S.kP*e+S.kI*S.I+S.dterm;
+      var a=S.u-S.g-S.drag*S.v;
+      S.v+=a*dt;S.y+=S.v*dt;
+      if(S.y<0){S.y=0;if(S.v<0)S.v=0;}if(S.y>1){S.y=1;if(S.v>0)S.v=0;}
+      scopeObj.push({sp:S.sp,pos:S.y,volt:clamp(0.12+S.u*0.20,0,1)});
+    }
+    drawElevator(world,S.y,S.sp,S.u);
+    scopeObj.draw();
+    el.roPos.textContent=S.y.toFixed(2);
+    el.roErr.textContent=(S.sp-S.y).toFixed(2);
+    el.roFf.textContent=S.ffv.toFixed(2);
+    el.roVolt.textContent=S.u.toFixed(2);
+  }
+
+  var last=0;
+  function frame(ts){var t=ts/1000;var dt=last?Math.min(0.033,t-last):0.016;last=t;step(dt);requestAnimationFrame(frame);}
+  requestAnimationFrame(frame);
+
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){world.fit();scope.fit();},120);});
+
+  // ---- code exercise ----
+  var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
+  function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'');}
+  document.getElementById('check').addEventListener('click',function(){
+    var all=true;
+    blanks.forEach(function(b){
+      var ans=(b.getAttribute('data-ans')||'').split('|');
+      var ok=ans.indexOf(norm(b.value))!==-1;
+      b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad');
+      if(!ok)all=false;
+    });
+    var res=document.getElementById('cres');
+    res.textContent=all?'All correct ✓':'Not quite — keep at it';
+    res.className='code-result '+(all?'ok':'no');
+  });
+  document.getElementById('reveal').addEventListener('click',function(){
+    blanks.forEach(function(b){b.value=(b.getAttribute('data-ans')||'').split('|')[0];b.classList.remove('bad');b.classList.add('ok');});
+    var res=document.getElementById('cres');res.textContent='Revealed';res.className='code-result ok';
+  });
+
+  // ---- quiz ----
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){
+      opt.addEventListener('click',function(){
+        if(done)return;done=true;
+        opts.forEach(function(o){o.classList.add('locked');});
+        if(idx===correct){opt.classList.add('correct');}
+        else{opt.classList.add('wrong');opts[correct].classList.add('correct');}
+        explain.classList.add('show');
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>
