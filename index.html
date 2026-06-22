@@ -233,11 +233,11 @@
       code:"III", title:"CTRE Phoenix 6", sub:"Kraken / TalonFX",
       blurb:"Move the control loop onto the motor controller itself, the way competitive teams do. Configure devices, run closed loops at 1 kHz on a Kraken, and find your gains with built-in tools.",
       lessons:[
-        {n:1, title:"Meet Phoenix 6 & the Kraken", desc:"TalonFX, the CAN bus, and Tuner X.",                                        file:null},
-        {n:2, title:"Configuring a TalonFX",       desc:"TalonFXConfiguration, current limits, sensors & FusedCANcoder.",            file:null},
-        {n:3, title:"On-Motor Closed Loop",        desc:"Slot gains (kS/kV/kA/kG/kP/kI/kD) and control requests, run on the motor.", file:null},
-        {n:4, title:"Motion Magic",                desc:"Motion Magic & Motion Magic Expo: profiled moves from one request.",        file:null},
-        {n:5, title:"SysId on Phoenix 6",          desc:"Run the SysId routines to find your gains empirically.",                    file:null}
+        {n:1, title:"Meet Phoenix 6 & the Kraken", desc:"TalonFX, the CAN bus, and Tuner X.",                                        file:"closing-the-loop-lesson-14.html"},
+        {n:2, title:"Configuring a TalonFX",       desc:"TalonFXConfiguration, current limits, sensors & FusedCANcoder.",            file:"closing-the-loop-lesson-15.html"},
+        {n:3, title:"On-Motor Closed Loop",        desc:"Slot gains (kS/kV/kA/kG/kP/kI/kD) and control requests, run on the motor.", file:"closing-the-loop-lesson-16.html"},
+        {n:4, title:"Motion Magic",                desc:"Motion Magic & Motion Magic Expo: profiled moves from one request.",        file:"closing-the-loop-lesson-17.html"},
+        {n:5, title:"SysId on Phoenix 6",          desc:"Run the SysId routines to find your gains empirically.",                    file:"closing-the-loop-lesson-18.html"}
       ]
     },
     {
@@ -261,7 +261,7 @@
   ];
 
   // first not-yet-built lesson = "next to build / coming up next"
-  var NEXT_ID = "III-1";
+  var NEXT_ID = "IV-1";
 
   var STORE_KEY = "closing-the-loop:done";
   function loadDone(){

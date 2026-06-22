@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Closing the Loop · Part III.4 — Motion Magic</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ink); color:var(--text);
+    font-family:var(--sans); font-size:17px; line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(900px 500px at 80% -10%, rgba(255,176,32,.06), transparent 60%),
+      radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--teal);box-shadow:0 0 12px var(--teal)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--teal),var(--indigo));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:50ch;margin-top:6px}
+
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--teal);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  p .sub,.sub{color:var(--muted)}
+  .lead{font-size:19px}
+  em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;gap:6px;align-items:center}
+  .demo-tag .live{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+  .demo-stage{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line)}
+  @media(min-width:600px){.demo-stage{grid-template-columns:minmax(150px,0.78fr) 1.5fr}}
+  .stage-cell{background:#0B1322;position:relative}
+  .stage-cell .cell-label{position:absolute;top:8px;left:10px;z-index:2;font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);pointer-events:none}
+  canvas.world{display:block;width:100%;height:330px}
+  canvas.scope{display:block;width:100%;height:330px}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--teal);color:var(--text)}
+  .btn.active{background:var(--teal);border-color:var(--teal);color:#06121f;font-weight:700}
+  .btn.primary{background:linear-gradient(180deg,#6FF0DD,var(--teal));color:#06121f;font-weight:700;border:none}
+  .slider-group{flex:1 1 200px;display:flex;flex-direction:column;gap:6px;min-width:170px}
+  .slider-group label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+  .slider-group label .val{color:var(--amber)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:var(--line-2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--amber);cursor:pointer;box-shadow:0 0 10px -1px var(--amber)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--amber);cursor:pointer}
+  .readouts{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  @media(min-width:560px){.readouts{grid-template-columns:repeat(4,1fr)}}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:20px;font-weight:600;margin-top:3px}
+  .ro .v.amber{color:var(--amber)} .ro .v.teal{color:var(--teal)} .ro .v.indigo{color:var(--indigo)} .ro .v.red{color:var(--red)} .ro .v.ink{color:var(--text)}
+  .legend{display:flex;flex-wrap:wrap;gap:16px;padding:11px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .legend i{width:16px;height:2px;border-radius:2px;display:inline-block}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.teal{border-color:var(--teal);background:rgba(52,215,197,.06)} .note.teal .nh{color:var(--teal)}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--teal);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:13.5px;line-height:1.85;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic}
+  .code .kw{color:#ff9bbf}
+  .code .ty{color:var(--teal)}
+  .code .fn{color:var(--indigo)}
+  .code .num{color:var(--amber)}
+
+  .code-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .code-ex .chead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .code-ex .chead .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,176,32,.14);display:grid;place-items:center;color:var(--amber);font-size:13px}
+  .code-ex .ctask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .code-ex pre.code{margin:0 0 14px}
+  .blank{font-family:var(--mono);font-size:13px;width:20ch;text-align:center;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:2px 4px;outline:none}
+  .blank:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
+  .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)}
+  .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7}
+  .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--teal);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px}
+  @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px}
+  .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--teal);min-width:155px;text-transform:uppercase}
+  .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(142,140,248,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--indigo);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--indigo)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)}
+  .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--teal);color:var(--text)}
+  .coursenav a.map{border-color:transparent;color:var(--indigo)}
+
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><span class="name">Closing the Loop</span></a>
+    <div class="top-meta">Part III · 04 / 05 · CTRE Phoenix 6</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part III · 04</b> CTRE Phoenix 6</div>
+    <div class="eyebrow">Motion Magic</div>
+    <h1>A smooth move,<br>from <span class="accent">one</span> request.</h1>
+    <p class="dek">Part II's motion profile — now built into the motor. Set a cruise speed and acceleration, send a target, and the Kraken plans and tracks the whole trajectory itself.</p>
+  </div>
+
+  <section>
+    <p class="lead">Last lesson's move was a lunge.</p>
+    <p>A plain <span class="k">PositionVoltage</span> request snaps the target, so the motor slams toward it and overshoots — just like the unprofiled move back in Lesson II.5. <strong>Motion Magic</strong> is the onboard version of the trapezoid profile you built there: you give the device a cruise velocity and an acceleration, and it generates a smooth ramp-cruise-slow plan and tracks it with your Slot0 gains — all on the motor, from a single request.</p>
+    <p>Toggle Motion Magic below and feel the difference. Same target, same gains — but one lunges and one glides.</p>
+  </section>
+
+  <section>
+    <div class="kicker">Feel it</div>
+    <h2>Lunge vs. Motion Magic</h2>
+    <p>Press <strong>Move</strong> with Motion Magic <strong>off</strong> (a raw PositionVoltage): the target jumps and the carriage overshoots. Turn it <strong>on</strong> and the move becomes a smooth profile. Shape it with <span class="k">cruise velocity</span> and <span class="k">acceleration</span>.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head">
+        <span class="demo-title">TalonFX · MotionMagicVoltage</span>
+        <span class="demo-tag"><span class="live"></span> profiled onboard @ 1 kHz</span>
+      </div>
+      <div class="demo-stage">
+        <div class="stage-cell"><span class="cell-label">Height</span><canvas class="world" id="world"></canvas></div>
+        <div class="stage-cell"><span class="cell-label">Scope · signal vs time</span><canvas class="scope" id="scope"></canvas></div>
+      </div>
+      <div class="legend">
+        <span><i style="background:var(--amber)"></i> Motion Magic target</span>
+        <span><i style="background:var(--teal)"></i> Position</span>
+        <span><i style="background:var(--indigo)"></i> Applied voltage</span>
+      </div>
+      <div class="controls">
+        <button class="btn primary" id="move">Move ▸</button>
+        <button class="btn active" id="mm">Motion Magic: on</button>
+        <div class="slider-group">
+          <label>Cruise velocity <span class="val" id="vmaxVal">0.62</span></label>
+          <input type="range" id="vmax" min="0.2" max="1.2" step="0.02" value="0.62" />
+        </div>
+        <div class="slider-group">
+          <label>Acceleration <span class="val" id="amaxVal">1.5</span></label>
+          <input type="range" id="amax" min="0.3" max="3.5" step="0.1" value="1.5" />
+        </div>
+      </div>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Position</div><div class="v teal" id="roPos">0.10</div></div>
+        <div class="ro"><div class="k2">Error</div><div class="v red" id="roErr">0.00</div></div>
+        <div class="ro"><div class="k2">Profile vel</div><div class="v amber" id="roPv">0.00</div></div>
+        <div class="ro"><div class="k2">Applied (V)</div><div class="v ink" id="roVolt">0.00</div></div>
+      </div>
+    </div>
+    <p class="caption">Motion Magic uses your Slot0 gains to track its own plan — so the carriage rides the amber profile, and the error stays small the whole way.</p>
+  </section>
+
+  <section>
+    <div class="kicker">The code</div>
+    <h2>Three numbers and a request</h2>
+    <p>Motion Magic settings live in the config alongside Slot0. Set the cruise velocity, acceleration, and (optionally) jerk to round the corners, then send a <span class="k">MotionMagicVoltage</span> request just like a position request:</p>
+    <div class="codewrap">
+      <div class="clabel">Constructor — Motion Magic limits <span class="badge">Java · Phoenix 6</span></div>
+<pre class="code">cfg.MotionMagic.MotionMagicCruiseVelocity = <span class="num">80</span>;    <span class="cm">// rotations / sec (top speed)</span>
+cfg.MotionMagic.MotionMagicAcceleration   = <span class="num">160</span>;   <span class="cm">// rotations / sec² (ramp rate)</span>
+cfg.MotionMagic.MotionMagicJerk           = <span class="num">1600</span>;  <span class="cm">// rotations / sec³ (smooths corners)</span>
+motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(cfg);</pre>
+    </div>
+    <div class="codewrap">
+      <div class="clabel">Commanding a profiled move <span class="badge">Java · Phoenix 6</span></div>
+<pre class="code"><span class="kw">private final</span> <span class="ty">MotionMagicVoltage</span> request = <span class="kw">new</span> <span class="ty">MotionMagicVoltage</span>(<span class="num">0</span>).<span class="fn">withSlot</span>(<span class="num">0</span>);
+
+<span class="kw">public</span> <span class="kw">void</span> <span class="fn">setGoal</span>(<span class="ty">double</span> rotations) {
+  motor.<span class="fn">setControl</span>(request.<span class="fn">withPosition</span>(rotations));   <span class="cm">// device builds + tracks the profile</span>
+}</pre>
+    </div>
+    <div class="note teal">
+      <div class="nh">Motion Magic Expo — even smarter</div>
+      <p>Regular Motion Magic uses a fixed cruise velocity. <strong>Motion Magic Expo</strong> instead uses your mechanism's <span class="k">kV</span> and <span class="k">kA</span> to shape an <em>exponential</em> profile that matches what the motor can actually achieve — accelerating hard, then easing as it nears its real top speed. Set <span class="k">MotionMagicExpo_kV</span> and <span class="k">MotionMagicExpo_kA</span> and send a <span class="k">MotionMagicExpoVoltage</span>. No guessing a cruise velocity — the physics picks it.</p>
+    </div>
+
+    <div class="code-ex">
+      <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
+      <div class="ctask">Pick the control request that runs a profiled move on board, then send the target. Fill the blank with the request type, then Check.</div>
+<pre class="code"><span class="kw">private final</span> <input class="blank" data-ans="motionmagicvoltage" aria-label="blank" autocomplete="off" spellcheck="false"> request =
+    <span class="kw">new</span> <span class="ty">MotionMagicVoltage</span>(<span class="num">0</span>).<span class="fn">withSlot</span>(<span class="num">0</span>);
+
+motor.<span class="fn">setControl</span>(request.<span class="fn">withPosition</span>(targetRotations));</pre>
+      <div class="code-actions">
+        <button class="btn" id="check">Check</button>
+        <button class="btn" id="reveal">Reveal</button>
+        <span class="code-result" id="cres"></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="2">
+        <div class="qn">Question 1</div>
+        <div class="qt">What does Motion Magic add compared to a plain PositionVoltage request?</div>
+        <div class="opts">
+          <button class="opt">A higher current limit</button>
+          <button class="opt">A second motor</button>
+          <button class="opt">A smooth onboard motion profile, so the move ramps up and slows down instead of lunging</button>
+        </div>
+        <div class="explain">It's the Part II trapezoid profile, generated and tracked on the device. Instead of snapping to the target, the motor follows a planned ramp-cruise-slow trajectory — gentler and more accurate.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 2</div>
+        <div class="qt">What do MotionMagicCruiseVelocity and MotionMagicAcceleration control?</div>
+        <div class="opts">
+          <button class="opt">The top speed of the move and how quickly it ramps to that speed — the profile's shape</button>
+          <button class="opt">The PID gains</button>
+          <button class="opt">The motor's CAN id</button>
+        </div>
+        <div class="explain">They define the trapezoid: cruise velocity is the fastest the move will go, acceleration is how hard it ramps up and down. Jerk optionally rounds the corners for an even smoother feel.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 3</div>
+        <div class="qt">How is Motion Magic <em>Expo</em> different from regular Motion Magic?</div>
+        <div class="opts">
+          <button class="opt">It's slower</button>
+          <button class="opt">It uses the mechanism's kV and kA to shape an exponential profile matched to what the motor can really do</button>
+          <button class="opt">It only works on drivetrains</button>
+        </div>
+        <div class="explain">Instead of a fixed cruise velocity you guess, Expo uses kV/kA so the profile naturally respects the motor's real top speed — accelerating hard, then easing in as it approaches it.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part III · 04 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Motion Magic</b><span>Onboard motion profile from one request.</span></div>
+        <div class="gl"><b>CruiseVelocity</b><span>The move's top speed (rot/sec).</span></div>
+        <div class="gl"><b>Acceleration</b><span>How fast it ramps to cruise (rot/sec²).</span></div>
+        <div class="gl"><b>Jerk</b><span>Smooths the corners (rot/sec³).</span></div>
+        <div class="gl"><b>MotionMagicVoltage</b><span>The control request for a profiled move.</span></div>
+        <div class="gl"><b>Motion Magic Expo</b><span>kV/kA-shaped profile; no cruise guess.</span></div>
+      </div>
+      <a class="next" href="closing-the-loop-lesson-18.html">
+        <div class="n-eyebrow">Up next · Part III · 05</div>
+        <h3>SysId on Phoenix 6</h3>
+        <p>Every gain you've typed — kS, kV, kA, kG — comes from one place: measuring your real mechanism. The finale runs SysId through Phoenix and drops the numbers straight into Slot0.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="closing-the-loop-lesson-16.html">← Part III · 03 · On-Motor Closed Loop</a>
+    <a class="map" href="index.html">Course map</a>
+    <a href="closing-the-loop-lesson-18.html">Part III · 05 · SysId on Phoenix 6 →</a>
+  </nav>
+
+</div>
+
+<footer>Closing the Loop · A control systems course for FRC</footer>
+
+<script>
+(function(){
+  "use strict";
+  var clamp=function(x,a,b){return x<a?a:(x>b?b:x);};
+  var sgn=function(x){return x>1e-4?1:(x<-1e-4?-1:0);};
+
+  function makeCanvas(cv){
+    var ctx=cv.getContext('2d'); var o={cv:cv,ctx:ctx,w:0,h:0};
+    function fit(){
+      var r=cv.getBoundingClientRect(); if(!r.width)return;
+      var dpr=window.devicePixelRatio||1;
+      cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr);
+      ctx.setTransform(dpr,0,0,dpr,0,0); o.w=r.width; o.h=r.height;
+    }
+    o.fit=fit; fit(); return o;
+  }
+  function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+
+  function drawElevator(o,y,sp,volt){
+    var ctx=o.ctx,W=o.w,H=o.h; ctx.clearRect(0,0,W,H);
+    var pad=24,top=pad,bot=H-pad,span=bot-top,cx=W*0.5;
+    function py(v){return bot-clamp(v,0,1)*span;}
+    ctx.strokeStyle='#2B3A57';ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(cx-26,top-6);ctx.lineTo(cx-26,bot);ctx.moveTo(cx+26,top-6);ctx.lineTo(cx+26,bot);ctx.stroke();
+    ctx.fillStyle='#1B2540';ctx.strokeStyle='#33415e';ctx.lineWidth=1.5;
+    roundRect(ctx,cx-30,top-16,60,12,3);ctx.fill();ctx.stroke();
+    ctx.strokeStyle='rgba(120,140,180,0.16)';ctx.lineWidth=1;
+    for(var i=0;i<=10;i++){var ty=top+span*(i/10);ctx.beginPath();ctx.moveTo(cx-34,ty);ctx.lineTo(cx-30,ty);ctx.stroke();}
+    ctx.strokeStyle='#FFB020';ctx.lineWidth=1.5;ctx.setLineDash([6,5]);
+    ctx.beginPath();ctx.moveTo(cx-42,py(sp));ctx.lineTo(cx+42,py(sp));ctx.stroke();ctx.setLineDash([]);
+    var my=py(y);
+    ctx.strokeStyle='#475679';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(cx,top-4);ctx.lineTo(cx,my-10);ctx.stroke();
+    var fmag=clamp(Math.abs(volt)*15,0,30);
+    if(fmag>1.5){
+      var up=volt>=0, ay=up?my+12:my-12, dir=up?1:-1, col=up?'#34D7C5':'#FF6B6B';
+      ctx.strokeStyle=col;ctx.globalAlpha=0.7;ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(cx,ay);ctx.lineTo(cx,ay+dir*fmag);
+      ctx.moveTo(cx-4,ay+dir*(fmag-5));ctx.lineTo(cx,ay+dir*fmag);ctx.lineTo(cx+4,ay+dir*(fmag-5));
+      ctx.stroke();ctx.globalAlpha=1;
+    }
+    ctx.shadowColor='#34D7C5';ctx.shadowBlur=16;
+    ctx.fillStyle='#0e2b2a';ctx.strokeStyle='#34D7C5';ctx.lineWidth=2;
+    roundRect(ctx,cx-22,my-11,44,22,5);ctx.fill();ctx.stroke();
+    ctx.shadowBlur=0;
+    ctx.fillStyle='#34D7C5';ctx.fillRect(cx-12,my-3,24,2);
+    ctx.beginPath();ctx.arc(cx,my+3,3,0,7);ctx.fill();
+  }
+
+  function Scope(o,signals,len){this.o=o;this.signals=signals;this.len=len||300;this.buf=[];}
+  Scope.prototype.push=function(s){this.buf.push(s);if(this.buf.length>this.len)this.buf.shift();};
+  Scope.prototype.clear=function(){this.buf=[];};
+  Scope.prototype.draw=function(){
+    var o=this.o,ctx=o.ctx,W=o.w,H=o.h;ctx.clearRect(0,0,W,H);
+    var pad=14,top=pad,bot=H-pad,left=8,right=W-8,span=bot-top,wspan=right-left;
+    ctx.strokeStyle='rgba(120,140,180,0.07)';ctx.lineWidth=1;
+    for(var gy=0;gy<=4;gy++){var yy=top+span*(gy/4);ctx.beginPath();ctx.moveTo(left,yy);ctx.lineTo(right,yy);ctx.stroke();}
+    for(var gx=0;gx<=8;gx++){var xx=left+wspan*(gx/8);ctx.beginPath();ctx.moveTo(xx,top);ctx.lineTo(xx,bot);ctx.stroke();}
+    var n=this.buf.length;if(n<2)return;var self=this;
+    function pyv(v){return bot-clamp(v,0,1)*span;}
+    for(var s=0;s<this.signals.length;s++){
+      var sig=this.signals[s];
+      ctx.strokeStyle=sig.color;ctx.lineWidth=sig.w||2;
+      ctx.setLineDash(sig.dash||[]);
+      ctx.shadowColor=sig.color;ctx.shadowBlur=sig.glow?7:0;
+      ctx.beginPath();
+      for(var i=0;i<n;i++){
+        var v=self.buf[i][sig.key];
+        var X=left+wspan*((i+(self.len-n))/(self.len-1));
+        var Y=pyv(v);
+        if(i===0)ctx.moveTo(X,Y);else ctx.lineTo(X,Y);
+      }
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);ctx.shadowBlur=0;
+  };
+
+  var S={
+    y:0.10,v:0,prevM:0.10,tgt:0.85,
+    pPos:0.10,pVel:0,pAcc:0,vmax:0.62,amax:1.5,
+    kG:0.45,kS:0.06,kV:1.8,kA:1.0,kP:6,kD:2.5,
+    g:0.45,drag:1.8,fricK:0.06,mm:true,u:0
+  };
+  var world=makeCanvas(document.getElementById('world'));
+  var scope=makeCanvas(document.getElementById('scope'));
+  var scopeObj=new Scope(scope,[
+    {key:'volt',color:'#8E8CF8',w:1.5},
+    {key:'sp',color:'#FFB020',w:1.5,dash:[5,4]},
+    {key:'pos',color:'#34D7C5',w:2,glow:true}
+  ]);
+  var el={
+    move:document.getElementById('move'),mmBtn:document.getElementById('mm'),
+    vmax:document.getElementById('vmax'),vmaxVal:document.getElementById('vmaxVal'),
+    amax:document.getElementById('amax'),amaxVal:document.getElementById('amaxVal'),
+    roPos:document.getElementById('roPos'),roErr:document.getElementById('roErr'),
+    roPv:document.getElementById('roPv'),roVolt:document.getElementById('roVolt')
+  };
+  el.vmax.addEventListener('input',function(){S.vmax=parseFloat(el.vmax.value);el.vmaxVal.textContent=S.vmax.toFixed(2);});
+  el.amax.addEventListener('input',function(){S.amax=parseFloat(el.amax.value);el.amaxVal.textContent=S.amax.toFixed(1);});
+  el.move.addEventListener('click',function(){S.tgt=(S.tgt>0.5)?0.18:0.85;});
+  el.mmBtn.addEventListener('click',function(){S.mm=!S.mm;el.mmBtn.textContent='Motion Magic: '+(S.mm?'on':'off');el.mmBtn.classList.toggle('active',S.mm);});
+
+  function updateProfile(dt){
+    if(!S.mm){ S.pPos=S.tgt; S.pVel=0; S.pAcc=0; return; }
+    var dist=S.tgt-S.pPos, dir=dist>=0?1:-1;
+    var vStop=Math.sqrt(2*S.amax*Math.abs(dist));
+    var targetV=dir*Math.min(S.vmax,vStop);
+    var dv=targetV-S.pVel, maxDv=S.amax*dt;
+    if(dv>maxDv)dv=maxDv; else if(dv<-maxDv)dv=-maxDv;
+    var prevV=S.pVel; S.pVel+=dv; S.pPos+=S.pVel*dt;
+    if(Math.abs(S.tgt-S.pPos)<0.004 && Math.abs(S.pVel)<0.02){S.pPos=S.tgt;S.pVel=0;}
+    S.pAcc=dt>0?(S.pVel-prevV)/dt:0;
+  }
+
+  function step(dt){
+    updateProfile(dt);
+    var meas=S.y;
+    var err=S.pPos-meas;
+    var deriv=-(meas-S.prevM)/dt; S.prevM=meas;
+    var ff=S.kG+S.kS*sgn(S.pVel)+S.kV*S.pVel+S.kA*S.pAcc;
+    var fb=S.kP*err+S.kD*deriv;
+    S.u=ff+fb;
+    var s=sgn(S.v);
+    var a=S.u-S.g-S.drag*S.v-(s!==0?s*S.fricK:0);
+    S.v+=a*dt; S.y+=S.v*dt;
+    if(S.y<0){S.y=0;if(S.v<0)S.v=0;} if(S.y>1){S.y=1;if(S.v>0)S.v=0;}
+    scopeObj.push({sp:S.pPos,pos:S.y,volt:clamp(0.12+S.u*0.20,0,1)});
+    drawElevator(world,S.y,S.tgt,S.u);
+    scopeObj.draw();
+    el.roPos.textContent=S.y.toFixed(2);
+    el.roErr.textContent=(S.tgt-S.y).toFixed(2);
+    el.roPv.textContent=S.pVel.toFixed(2);
+    el.roVolt.textContent=S.u.toFixed(2);
+  }
+  var last=0;
+  function frame(ts){var t=ts/1000;var dt=last?Math.min(0.033,t-last):0.016;last=t;step(dt);requestAnimationFrame(frame);}
+  requestAnimationFrame(frame);
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){world.fit();scope.fit();},120);});
+
+  // code exercise
+  var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
+  function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'');}
+  document.getElementById('check').addEventListener('click',function(){
+    var all=true;
+    blanks.forEach(function(b){
+      var ans=(b.getAttribute('data-ans')||'').split('|');
+      var ok=ans.indexOf(norm(b.value))!==-1;
+      b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad');
+      if(!ok)all=false;
+    });
+    var res=document.getElementById('cres');
+    res.textContent=all?'All correct ✓':'Not quite — it’s MotionMagicVoltage';
+    res.className='code-result '+(all?'ok':'no');
+  });
+  document.getElementById('reveal').addEventListener('click',function(){
+    blanks.forEach(function(b){b.value='MotionMagicVoltage';b.classList.remove('bad');b.classList.add('ok');});
+    var res=document.getElementById('cres');res.textContent='Revealed';res.className='code-result ok';
+  });
+
+  // quiz
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){
+      opt.addEventListener('click',function(){
+        if(done)return;done=true;
+        opts.forEach(function(o){o.classList.add('locked');});
+        if(idx===correct){opt.classList.add('correct');}
+        else{opt.classList.add('wrong');opts[correct].classList.add('correct');}
+        explain.classList.add('show');
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>

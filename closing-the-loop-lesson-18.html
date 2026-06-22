@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Closing the Loop · Part III.5 — SysId on Phoenix 6</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ink); color:var(--text);
+    font-family:var(--sans); font-size:17px; line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(900px 500px at 80% -10%, rgba(255,176,32,.06), transparent 60%),
+      radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--teal);box-shadow:0 0 12px var(--teal)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--teal),var(--indigo));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:50ch;margin-top:6px}
+
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--teal);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  p .sub,.sub{color:var(--muted)}
+  .lead{font-size:19px}
+  em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .formula{font-family:var(--mono);background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:18px 20px;margin:20px 0;font-size:17px;overflow-x:auto;color:#cfe;text-align:center}
+  .formula .small{display:block;font-size:13px;color:var(--muted);margin-top:8px}
+  .formula b{color:var(--amber)} .formula .t{color:var(--teal)} .formula .i{color:var(--indigo)}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;gap:6px;align-items:center}
+  .demo-tag .live{width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 8px var(--red)}
+  .demo-tag .live.on{background:var(--green);box-shadow:0 0 8px var(--green)}
+  .demo-stage{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line)}
+  @media(min-width:600px){.demo-stage{grid-template-columns:minmax(150px,0.7fr) 1.6fr}}
+  .stage-cell{background:#0B1322;position:relative}
+  .stage-cell .cell-label{position:absolute;top:8px;left:10px;z-index:2;font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);pointer-events:none}
+  canvas.world{display:block;width:100%;height:330px}
+  canvas.plot{display:block;width:100%;height:330px}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--teal);color:var(--text)}
+  .btn.primary{background:linear-gradient(180deg,#6FF0DD,var(--teal));color:#06121f;font-weight:700;border:none}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .slider-group{flex:1 1 200px;display:flex;flex-direction:column;gap:6px;min-width:180px}
+  .slider-group label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+  .slider-group label .val{color:var(--indigo)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:var(--line-2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--indigo);cursor:pointer;box-shadow:0 0 10px -1px var(--indigo)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
+  .readouts{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  @media(min-width:560px){.readouts{grid-template-columns:repeat(4,1fr)}}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:20px;font-weight:600;margin-top:3px}
+  .ro .v.amber{color:var(--amber)} .ro .v.teal{color:var(--teal)} .ro .v.indigo{color:var(--indigo)} .ro .v.green{color:var(--green)} .ro .v.ink{color:var(--text)}
+  .legend{display:flex;flex-wrap:wrap;gap:16px;padding:11px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .legend i{width:16px;height:2px;border-radius:2px;display:inline-block}
+  .legend i.dot{width:9px;height:9px;border-radius:50%}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.teal{border-color:var(--teal);background:rgba(52,215,197,.06)} .note.teal .nh{color:var(--teal)}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--teal);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:13.5px;line-height:1.85;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic}
+  .code .kw{color:#ff9bbf}
+  .code .ty{color:var(--teal)}
+  .code .fn{color:var(--indigo)}
+  .code .num{color:var(--amber)}
+
+  .code-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .code-ex .chead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .code-ex .chead .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,176,32,.14);display:grid;place-items:center;color:var(--amber);font-size:13px}
+  .code-ex .ctask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .code-ex pre.code{margin:0 0 14px}
+  .blank{font-family:var(--mono);font-size:13px;width:12ch;text-align:center;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:2px 4px;outline:none}
+  .blank:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
+  .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)}
+  .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7}
+  .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--teal);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .roadmap{display:grid;gap:12px;margin:20px 0}
+  @media(min-width:620px){.roadmap{grid-template-columns:repeat(2,1fr)}}
+  .rm{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:16px 17px;border-left:3px solid var(--accent,var(--teal))}
+  .rm .pt{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent,var(--teal));margin-bottom:5px}
+  .rm h4{margin:0 0 5px;font-size:16px;color:var(--text)}
+  .rm p{margin:0;font-size:14px;color:var(--muted)}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px}
+  @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px}
+  .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--teal);min-width:140px;text-transform:uppercase}
+  .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(142,140,248,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--indigo);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--indigo)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)}
+  .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--teal);color:var(--text)}
+  .coursenav a.map{border-color:transparent;color:var(--indigo)}
+  .coursenav a.next-link{color:var(--teal);border-color:rgba(52,215,197,.4)}
+
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><span class="name">Closing the Loop</span></a>
+    <div class="top-meta">Part III · 05 / 05 · CTRE Phoenix 6</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part III · 05</b> CTRE Phoenix 6</div>
+    <div class="eyebrow">SysId on Phoenix 6</div>
+    <h1>Where the<br><span class="accent">gains</span> come from.</h1>
+    <p class="dek">Every kS, kV, kA, kG you've typed traces back to one thing: measuring your real mechanism. SysId runs the tests, Tuner X fits the line, and the numbers drop into Slot0.</p>
+  </div>
+
+  <section>
+    <p class="lead">You've been borrowing numbers. Time to earn them.</p>
+    <p>Back in Part I, Lesson 7, you learned the idea: run a slow voltage ramp, plot voltage against velocity, and the line's slope is <span class="k">kV</span> while its intercept is <span class="k">kS + kG</span>. Phoenix 6 automates the whole thing. A <span class="k">SysIdRoutine</span> drives the ramp and a step, <span class="k">SignalLogger</span> records every sample to a <span class="k">.hoot</span> file, and <span class="k">Tuner X</span> fits the line across hundreds of points — then you paste the gains into Slot0.</p>
+    <p>Here's that quasistatic ramp again, the test Phoenix runs for you. Collect the data, then fit the line to read the gains.</p>
+  </section>
+
+  <section>
+    <div class="kicker">Run it</div>
+    <h2>The characterization, by hand</h2>
+    <p>Press <strong>Run ramp test</strong> — voltage climbs slowly while the mechanism cruises, and each instant drops a dot (<span style="color:var(--indigo)">velocity</span> across, <span class="sub">voltage</span> up). Then fit the line: its <strong>slope is kV</strong>, its <strong>intercept is kS + kG</strong>.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head">
+        <span class="demo-title">SysId quasistatic ramp · what Tuner X automates</span>
+        <span class="demo-tag"><span class="live" id="live"></span> <span id="status">Idle</span></span>
+      </div>
+      <div class="demo-stage">
+        <div class="stage-cell"><span class="cell-label">Mechanism</span><canvas class="world" id="world"></canvas></div>
+        <div class="stage-cell"><span class="cell-label">Data · voltage vs velocity</span><canvas class="plot" id="plot"></canvas></div>
+      </div>
+      <div class="legend">
+        <span><i class="dot" style="background:var(--teal)"></i> Logged data</span>
+        <span><i style="background:var(--indigo)"></i> Your fit line</span>
+        <span><i style="background:var(--amber)"></i> True line (on reveal)</span>
+      </div>
+      <div class="controls">
+        <button class="btn primary" id="runBtn">Run ramp test ▸</button>
+        <button class="btn" id="autofit" disabled>Auto-fit ✓</button>
+        <button class="btn" id="reset">Reset</button>
+        <div class="slider-group">
+          <label>Fit intercept → kS + kG <span class="val" id="bVal">0.30</span></label>
+          <input type="range" id="bSlide" min="0" max="1" step="0.01" value="0.30" />
+        </div>
+        <div class="slider-group">
+          <label>Fit slope → kV <span class="val" id="mVal">1.00</span></label>
+          <input type="range" id="mSlide" min="0" max="3" step="0.02" value="1.00" />
+        </div>
+      </div>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Voltage</div><div class="v ink" id="roU">0.00</div></div>
+        <div class="ro"><div class="k2">Velocity</div><div class="v indigo" id="roV">0.00</div></div>
+        <div class="ro"><div class="k2">Samples</div><div class="v teal" id="roN">0</div></div>
+        <div class="ro"><div class="k2">Fit error (RMS)</div><div class="v amber" id="roErr">—</div></div>
+      </div>
+    </div>
+    <p class="caption">Tuner X does exactly this fit, automatically, across hundreds of logged samples — and adds a step test for kA. You just read off the answers.</p>
+  </section>
+
+  <section>
+    <div class="kicker">The code</div>
+    <h2>A SysId routine in Phoenix 6</h2>
+    <p>The routine drives the motor with a plain <span class="k">VoltageOut</span> request while <span class="k">SignalLogger</span> captures position, velocity, and voltage in the background. You bind four commands — quasistatic and dynamic, each direction — and run them on the real robot:</p>
+    <div class="codewrap">
+      <div class="clabel">A Phoenix 6 SysId routine <span class="badge">Java</span></div>
+<pre class="code"><span class="kw">private final</span> <span class="ty">VoltageOut</span> sysIdReq = <span class="kw">new</span> <span class="ty">VoltageOut</span>(<span class="num">0</span>);
+
+<span class="kw">private final</span> <span class="ty">SysIdRoutine</span> routine = <span class="kw">new</span> <span class="ty">SysIdRoutine</span>(
+    <span class="kw">new</span> <span class="ty">SysIdRoutine</span>.<span class="ty">Config</span>(
+        <span class="kw">null</span>,                 <span class="cm">// default ramp rate (1 V/s)</span>
+        <span class="ty">Volts</span>.<span class="fn">of</span>(<span class="num">4</span>),          <span class="cm">// step voltage for the dynamic test</span>
+        <span class="kw">null</span>,
+        state -&gt; <span class="ty">SignalLogger</span>.<span class="fn">writeString</span>(<span class="str">"sysid-state"</span>, state.<span class="fn">toString</span>())),
+    <span class="kw">new</span> <span class="ty">SysIdRoutine</span>.<span class="ty">Mechanism</span>(
+        volts -&gt; motor.<span class="fn">setControl</span>(sysIdReq.<span class="fn">withOutput</span>(volts)),  <span class="cm">// drive the motor</span>
+        <span class="kw">null</span>,                 <span class="cm">// SignalLogger already records the signals</span>
+        <span class="kw">this</span>));
+
+<span class="kw">public</span> <span class="ty">Command</span> <span class="fn">quasistatic</span>(<span class="ty">Direction</span> d){ <span class="kw">return</span> routine.<span class="fn">quasistatic</span>(d); }
+<span class="kw">public</span> <span class="ty">Command</span> <span class="fn">dynamic</span>(<span class="ty">Direction</span> d){ <span class="kw">return</span> routine.<span class="fn">dynamic</span>(d); }</pre>
+    </div>
+    <p>Call <span class="k">SignalLogger.start()</span>, run the four commands, then open the <span class="k">.hoot</span> log in Tuner X and let its SysId tool fit the gains. The output drops straight into the Slot0 you built two lessons ago:</p>
+    <div class="codewrap">
+      <div class="clabel">The measured gains → Slot0 <span class="badge">Java · Phoenix 6</span></div>
+<pre class="code">cfg.Slot0.kS = <span class="num">0.14</span>;   <span class="cm">// ← from SysId</span>
+cfg.Slot0.kV = <span class="num">0.115</span>;  <span class="cm">// ← slope of the line</span>
+cfg.Slot0.kA = <span class="num">0.004</span>;  <span class="cm">// ← from the step test</span>
+cfg.Slot0.kG = <span class="num">0.31</span>;   <span class="cm">// ← gravity hold</span>
+cfg.Slot0.kP = <span class="num">12</span>;     <span class="cm">// then tune kP for crisp tracking</span></pre>
+    </div>
+
+    <div class="code-ex">
+      <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
+      <div class="ctask">In the SysId mechanism, the routine hands you a voltage to apply. Drive the motor with it. Fill the blank, then Check.</div>
+<pre class="code">volts -&gt; motor.<span class="fn">setControl</span>(sysIdReq.<span class="fn">withOutput</span>(<input class="blank" data-ans="volts" aria-label="blank" autocomplete="off" spellcheck="false">))</pre>
+      <div class="code-actions">
+        <button class="btn" id="check">Check</button>
+        <button class="btn" id="reveal">Reveal</button>
+        <span class="code-result" id="cres"></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">What is SysId actually measuring?</div>
+        <div class="opts">
+          <button class="opt">The robot's battery voltage</button>
+          <button class="opt">The feedforward gains kS, kV, kA (and kG) of your real mechanism</button>
+          <button class="opt">The CAN bus speed</button>
+        </div>
+        <div class="explain">SysId runs a ramp and a step, then fits the voltage/velocity/acceleration data to recover kS, kV, kA, and (for gravity-loaded mechanisms) kG — the model of how your hardware turns voltage into motion.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 2</div>
+        <div class="qt">How is the test data captured on Phoenix 6?</div>
+        <div class="opts">
+          <button class="opt">SignalLogger records it to a .hoot file, which you analyze in Tuner X</button>
+          <button class="opt">You write the numbers down off the dashboard</button>
+          <button class="opt">It isn't recorded — you estimate</button>
+        </div>
+        <div class="explain">SignalLogger streams every device signal to a .hoot log. Tuner X opens that log, runs the line-fit you just did by hand, and reports the gains — no manual graphing.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 3</div>
+        <div class="qt">Once SysId gives you kS, kV, kA, kG, where do they go?</div>
+        <div class="opts">
+          <button class="opt">Into a spreadsheet, forever</button>
+          <button class="opt">Into the roboRIO's PIDController</button>
+          <button class="opt">Into the device's Slot0 — then you tune kP for tracking</button>
+        </div>
+        <div class="explain">The feedforward gains go straight into Slot0. With them in place, the onboard loop already does most of the work, so you only need a modest kP (and maybe kD) to clean up tracking.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">You finished Part III</div>
+    <h2>The loop now lives on the motor</h2>
+    <p>You can configure a Kraken, store gains in Slot0, command it with position, velocity, or Motion Magic, and measure those gains with SysId — the full competitive workflow, running at 1 kHz on the device. From here it's about doing it for real, on whole mechanisms:</p>
+    <div class="roadmap">
+      <div class="rm" style="--accent:var(--amber)"><div class="pt">Part IV · Coming up</div><h4>Tune a Real Mechanism</h4><p>An elevator, an arm, and a flywheel — each taken start-to-finish: SysId → Slot0 → Motion Magic → validated.</p></div>
+      <div class="rm" style="--accent:var(--teal)"><div class="pt">Part V</div><h4>Beyond</h4><p>Swerve drive control, vision-assisted aiming, and a first real look at state-space.</p></div>
+      <div class="rm" style="--accent:var(--indigo)"><div class="pt">Anytime</div><h4>Parts I &amp; II</h4><p>The intuition and the WPILib code behind every Phoenix feature, one click away on the map.</p></div>
+      <div class="rm" style="--accent:var(--green)"><div class="pt">Reference</div><h4>CTRE docs &amp; Tuner X</h4><p>You now have the vocabulary to read the official Phoenix 6 docs fluently. Go deep whenever you need to.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part III · 05 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>SysIdRoutine</b><span>Drives the ramp + step tests for you.</span></div>
+        <div class="gl"><b>VoltageOut</b><span>The plain request SysId uses to drive the motor.</span></div>
+        <div class="gl"><b>SignalLogger</b><span>Records every signal to a .hoot file.</span></div>
+        <div class="gl"><b>Tuner X SysId</b><span>Fits the gains from the log automatically.</span></div>
+        <div class="gl"><b>Slope = kV</b><span>Intercept = kS + kG, just like Lesson 7.</span></div>
+        <div class="gl"><b>Gains → Slot0</b><span>Paste in kS/kV/kA/kG, then tune kP.</span></div>
+      </div>
+      <a class="next" href="index.html">
+        <div class="n-eyebrow">Part III complete · CTRE Phoenix 6</div>
+        <h3>On to Part IV — Tune a Real Mechanism →</h3>
+        <p>Back to the course map to keep going, where you take an elevator, an arm, and a flywheel from bare hardware to dialed-in.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="closing-the-loop-lesson-17.html">← Part III · 04 · Motion Magic</a>
+    <a class="map" href="index.html">Course map</a>
+    <a class="next-link" href="index.html">Part IV · Tune a Real Mechanism →</a>
+  </nav>
+
+</div>
+
+<footer>Closing the Loop · A control systems course for FRC</footer>
+
+<script>
+(function(){
+  "use strict";
+  var clamp=function(x,a,b){return x<a?a:(x>b?b:x);};
+  var sgn=function(x){return x>1e-4?1:(x<-1e-4?-1:0);};
+
+  function makeCanvas(cv){
+    var ctx=cv.getContext('2d'); var o={cv:cv,ctx:ctx,w:0,h:0};
+    function fit(){
+      var r=cv.getBoundingClientRect(); if(!r.width)return;
+      var dpr=window.devicePixelRatio||1;
+      cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr);
+      ctx.setTransform(dpr,0,0,dpr,0,0); o.w=r.width; o.h=r.height;
+    }
+    o.fit=fit; fit(); return o;
+  }
+  function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+
+  function drawRig(o,y,volt){
+    var ctx=o.ctx,W=o.w,H=o.h; ctx.clearRect(0,0,W,H);
+    var pad=24,top=pad,bot=H-pad,span=bot-top,cx=W*0.5;
+    function py(v){return bot-clamp(v,0,1)*span;}
+    ctx.strokeStyle='#2B3A57';ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(cx-26,top-6);ctx.lineTo(cx-26,bot);ctx.moveTo(cx+26,top-6);ctx.lineTo(cx+26,bot);ctx.stroke();
+    ctx.fillStyle='#1B2540';ctx.strokeStyle='#33415e';ctx.lineWidth=1.5;
+    roundRect(ctx,cx-30,top-16,60,12,3);ctx.fill();ctx.stroke();
+    ctx.strokeStyle='rgba(120,140,180,0.16)';ctx.lineWidth=1;
+    for(var i=0;i<=10;i++){var ty=top+span*(i/10);ctx.beginPath();ctx.moveTo(cx-34,ty);ctx.lineTo(cx-30,ty);ctx.stroke();}
+    var my=py(y);
+    ctx.strokeStyle='#475679';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(cx,top-4);ctx.lineTo(cx,my-10);ctx.stroke();
+    var fmag=clamp(Math.abs(volt)*16,0,30);
+    if(fmag>1.5){
+      var up=volt>=0, ay=up?my+12:my-12, dir=up?1:-1, col=up?'#34D7C5':'#FF6B6B';
+      ctx.strokeStyle=col;ctx.globalAlpha=0.7;ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(cx,ay);ctx.lineTo(cx,ay+dir*fmag);
+      ctx.moveTo(cx-4,ay+dir*(fmag-5));ctx.lineTo(cx,ay+dir*fmag);ctx.lineTo(cx+4,ay+dir*(fmag-5));
+      ctx.stroke();ctx.globalAlpha=1;
+    }
+    ctx.shadowColor='#34D7C5';ctx.shadowBlur=16;
+    ctx.fillStyle='#0e2b2a';ctx.strokeStyle='#34D7C5';ctx.lineWidth=2;
+    roundRect(ctx,cx-22,my-11,44,22,5);ctx.fill();ctx.stroke();
+    ctx.shadowBlur=0;
+    ctx.fillStyle='#34D7C5';ctx.fillRect(cx-12,my-3,24,2);
+    ctx.beginPath();ctx.arc(cx,my+3,3,0,7);ctx.fill();
+  }
+
+  var VMAX=0.5, UMAX=1.45;
+  function drawPlot(o, pts, fitB, fitM, showTrue, trueB, trueM){
+    var ctx=o.ctx,W=o.w,H=o.h; ctx.clearRect(0,0,W,H);
+    var left=42, right=W-14, top=16, bot=H-26;
+    var wspan=right-left, span=bot-top;
+    function X(v){return left+clamp(v/VMAX,0,1)*wspan;}
+    function Y(u){return bot-clamp(u/UMAX,0,1)*span;}
+    ctx.strokeStyle='rgba(120,140,180,0.08)';ctx.lineWidth=1;
+    for(var gy=0;gy<=4;gy++){var yy=top+span*(gy/4);ctx.beginPath();ctx.moveTo(left,yy);ctx.lineTo(right,yy);ctx.stroke();}
+    for(var gx=0;gx<=5;gx++){var xx=left+wspan*(gx/5);ctx.beginPath();ctx.moveTo(xx,top);ctx.lineTo(xx,bot);ctx.stroke();}
+    ctx.fillStyle='#5E6F8E';ctx.font='9px ui-monospace,Menlo,monospace';
+    ctx.textAlign='center';ctx.fillText('velocity →',(left+right)/2,H-8);
+    ctx.save();ctx.translate(12,(top+bot)/2);ctx.rotate(-Math.PI/2);ctx.fillText('voltage →',0,0);ctx.restore();
+    if(showTrue){
+      ctx.strokeStyle='rgba(255,176,32,0.6)';ctx.lineWidth=1.5;ctx.setLineDash([5,4]);
+      ctx.beginPath();ctx.moveTo(X(0),Y(trueB));ctx.lineTo(X(VMAX),Y(trueB+trueM*VMAX));ctx.stroke();ctx.setLineDash([]);
+    }
+    ctx.fillStyle='#34D7C5';ctx.globalAlpha=0.85;
+    for(var i=0;i<pts.length;i++){ctx.beginPath();ctx.arc(X(pts[i].v),Y(pts[i].u),2.6,0,7);ctx.fill();}
+    ctx.globalAlpha=1;
+    ctx.strokeStyle='#8E8CF8';ctx.lineWidth=2;ctx.shadowColor='#8E8CF8';ctx.shadowBlur=6;
+    ctx.beginPath();ctx.moveTo(X(0),Y(fitB));ctx.lineTo(X(VMAX),Y(fitB+fitM*VMAX));ctx.stroke();ctx.shadowBlur=0;
+    ctx.fillStyle='#8E8CF8';ctx.beginPath();ctx.arc(X(0),Y(fitB),3.5,0,7);ctx.fill();
+  }
+
+  var TRUE_G=0.45, TRUE_KS=0.06, TRUE_DRAG=1.8;
+  var TRUE_B=TRUE_G+TRUE_KS, TRUE_M=TRUE_DRAG;
+
+  var S={
+    y:0.05, v:0, u:0, phase:'idle',
+    rampT:0, rampDur:7.5, uStart:0.40, uEnd:1.32,
+    pts:[], sampleAcc:0,
+    fitB:0.30, fitM:1.00, showTrue:false
+  };
+  var world=makeCanvas(document.getElementById('world'));
+  var plot=makeCanvas(document.getElementById('plot'));
+  var el={
+    live:document.getElementById('live'), status:document.getElementById('status'),
+    runBtn:document.getElementById('runBtn'), autofit:document.getElementById('autofit'), reset:document.getElementById('reset'),
+    bSlide:document.getElementById('bSlide'), bVal:document.getElementById('bVal'),
+    mSlide:document.getElementById('mSlide'), mVal:document.getElementById('mVal'),
+    roU:document.getElementById('roU'), roV:document.getElementById('roV'),
+    roN:document.getElementById('roN'), roErr:document.getElementById('roErr')
+  };
+  function setStatus(t,on){el.status.textContent=t;el.live.classList.toggle('on',!!on);}
+  function rmsError(){
+    if(!S.pts.length)return null;
+    var s=0;for(var i=0;i<S.pts.length;i++){var d=S.pts[i].u-(S.fitB+S.fitM*S.pts[i].v);s+=d*d;}
+    return Math.sqrt(s/S.pts.length);
+  }
+  function syncFitUI(){el.bSlide.value=S.fitB;el.bVal.textContent=S.fitB.toFixed(2);el.mSlide.value=S.fitM;el.mVal.textContent=S.fitM.toFixed(2);}
+  el.bSlide.addEventListener('input',function(){S.fitB=parseFloat(el.bSlide.value);el.bVal.textContent=S.fitB.toFixed(2);});
+  el.mSlide.addEventListener('input',function(){S.fitM=parseFloat(el.mSlide.value);el.mVal.textContent=S.fitM.toFixed(2);});
+  el.runBtn.addEventListener('click',function(){
+    if(S.phase==='ramping')return;
+    S.phase='ramping'; S.rampT=0; S.u=S.uStart; S.y=0.05; S.v=0; S.pts=[]; S.sampleAcc=0; S.showTrue=false;
+    el.runBtn.disabled=true; el.autofit.disabled=true; setStatus('Logging…',true);
+  });
+  el.autofit.addEventListener('click',function(){
+    var n=S.pts.length; if(n<2)return;
+    var sv=0,su=0,i;
+    for(i=0;i<n;i++){sv+=S.pts[i].v;su+=S.pts[i].u;}
+    var mv=sv/n, mu=su/n, num=0, den=0;
+    for(i=0;i<n;i++){var dv=S.pts[i].v-mv;num+=dv*(S.pts[i].u-mu);den+=dv*dv;}
+    S.fitM=clamp(den?num/den:0,0,3); S.fitB=clamp(mu-S.fitM*mv,0,1);
+    S.showTrue=true; syncFitUI();
+  });
+  el.reset.addEventListener('click',function(){
+    S.phase='idle'; S.pts=[]; S.y=0.05; S.v=0; S.u=0; S.showTrue=false;
+    S.fitB=0.30; S.fitM=1.00; syncFitUI();
+    el.runBtn.disabled=false; el.autofit.disabled=true; setStatus('Idle',false);
+  });
+  function noise(){return (Math.random()-0.5)*0.04;}
+
+  function step(dt){
+    if(S.phase==='ramping'){
+      S.rampT+=dt;
+      var frac=clamp(S.rampT/S.rampDur,0,1);
+      S.u=S.uStart+(S.uEnd-S.uStart)*frac;
+      var s=sgn(S.v), a;
+      if(s===0){var net=S.u-TRUE_G; a=(Math.abs(net)<=TRUE_KS)?0:(net-(net>0?1:-1)*TRUE_KS);}
+      else { a=S.u-TRUE_G-TRUE_DRAG*S.v-s*TRUE_KS; }
+      S.v+=a*dt; S.y+=S.v*dt;
+      if(S.y>1){S.y=0.02;} if(S.y<0){S.y=0; if(S.v<0)S.v=0;}
+      S.sampleAcc+=dt;
+      if(S.rampT>0.8 && S.v>0.012 && S.sampleAcc>0.11){ S.pts.push({v:S.v, u:S.u+noise()}); S.sampleAcc=0; }
+      if(frac>=1){ S.phase='done'; el.runBtn.disabled=false; el.autofit.disabled=false; setStatus('Log complete · fit the line',false); }
+    }
+    drawRig(world, S.y, S.phase==='ramping'?S.u:0);
+    drawPlot(plot, S.pts, S.fitB, S.fitM, S.showTrue, TRUE_B, TRUE_M);
+    el.roU.textContent=S.u.toFixed(2);
+    el.roV.textContent=Math.max(0,S.v).toFixed(3);
+    el.roN.textContent=String(S.pts.length);
+    var e=rmsError();
+    el.roErr.textContent=(e==null)?'—':e.toFixed(3);
+    el.roErr.className='v '+((e!=null&&e<0.03)?'green':'amber');
+  }
+  var last=0;
+  function frame(ts){var t=ts/1000;var dt=last?Math.min(0.033,t-last):0.016;last=t;step(dt);requestAnimationFrame(frame);}
+  requestAnimationFrame(frame);
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){world.fit();plot.fit();},120);});
+
+  // code exercise
+  var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
+  function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'');}
+  document.getElementById('check').addEventListener('click',function(){
+    var all=true;
+    blanks.forEach(function(b){
+      var ans=(b.getAttribute('data-ans')||'').split('|');
+      var ok=ans.indexOf(norm(b.value))!==-1;
+      b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad');
+      if(!ok)all=false;
+    });
+    var res=document.getElementById('cres');
+    res.textContent=all?'All correct ✓':'Not quite — apply the voltage SysId gave you';
+    res.className='code-result '+(all?'ok':'no');
+  });
+  document.getElementById('reveal').addEventListener('click',function(){
+    blanks.forEach(function(b){b.value=(b.getAttribute('data-ans')||'').split('|')[0];b.classList.remove('bad');b.classList.add('ok');});
+    var res=document.getElementById('cres');res.textContent='Revealed';res.className='code-result ok';
+  });
+
+  // quiz
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){
+      opt.addEventListener('click',function(){
+        if(done)return;done=true;
+        opts.forEach(function(o){o.classList.add('locked');});
+        if(idx===correct){opt.classList.add('correct');}
+        else{opt.classList.add('wrong');opts[correct].classList.add('correct');}
+        explain.classList.add('show');
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>
