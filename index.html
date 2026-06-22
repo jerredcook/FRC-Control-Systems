@@ -253,15 +253,15 @@
       code:"V", title:"Beyond", sub:"Where it gets fun",
       blurb:"The frontier. Multi-actuator control, closing the loop on a camera, and a first real look at the state-space math the course kept hinting at.",
       lessons:[
-        {n:1, title:"Swerve Drive Control",     desc:"Per-module steer & drive loops, and odometry.",            file:null},
-        {n:2, title:"Vision-Assisted Control",  desc:"Close the loop on a camera: pose, aiming, alignment.",      file:null},
-        {n:3, title:"State-Space & LQR",        desc:"The math the course kept hinting at — made approachable.", file:null}
+        {n:1, title:"Swerve Drive Control",     desc:"Per-module steer & drive loops, and odometry.",            file:"closing-the-loop-lesson-22.html"},
+        {n:2, title:"Vision-Assisted Control",  desc:"Close the loop on a camera: pose, aiming, alignment.",      file:"closing-the-loop-lesson-23.html"},
+        {n:3, title:"State-Space & LQR",        desc:"The math the course kept hinting at — made approachable.", file:"closing-the-loop-lesson-24.html"}
       ]
     }
   ];
 
-  // first not-yet-built lesson = "next to build / coming up next"
-  var NEXT_ID = "V-1";
+  // course complete — every lesson is built, so nothing is flagged "up next"
+  var NEXT_ID = "";
 
   var STORE_KEY = "closing-the-loop:done";
   function loadDone(){

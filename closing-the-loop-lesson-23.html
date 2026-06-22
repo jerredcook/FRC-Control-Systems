@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Closing the Loop · Part V.2 — Vision-Assisted Control</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ink); color:var(--text);
+    font-family:var(--sans); font-size:17px; line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(900px 500px at 80% -10%, rgba(255,176,32,.06), transparent 60%),
+      radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--teal);box-shadow:0 0 12px var(--teal)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--teal),var(--indigo));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:50ch;margin-top:6px}
+
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--teal);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  p .sub,.sub{color:var(--muted)}
+  .lead{font-size:19px}
+  em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .formula{font-family:var(--mono);background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:18px 20px;margin:20px 0;font-size:17px;overflow-x:auto;color:#cfe;text-align:center}
+  .formula .small{display:block;font-size:13px;color:var(--muted);margin-top:8px}
+  .formula b{color:var(--amber)} .formula .t{color:var(--teal)}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;gap:6px;align-items:center}
+  .demo-tag .live{width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 8px var(--red)}
+  .demo-tag .live.on{background:var(--green);box-shadow:0 0 8px var(--green)}
+  canvas.field{display:block;width:100%;height:360px}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--teal);color:var(--text)}
+  .btn.active{background:var(--teal);border-color:var(--teal);color:#06121f;font-weight:700}
+  .slider-group{flex:1 1 200px;display:flex;flex-direction:column;gap:6px;min-width:170px}
+  .slider-group label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+  .slider-group label .val{color:var(--amber)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:var(--line-2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--amber);cursor:pointer;box-shadow:0 0 10px -1px var(--amber)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--amber);cursor:pointer}
+  .readouts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:20px;font-weight:600;margin-top:3px}
+  .ro .v.amber{color:var(--amber)} .ro .v.teal{color:var(--teal)} .ro .v.indigo{color:var(--indigo)} .ro .v.green{color:var(--green)} .ro .v.red{color:var(--red)} .ro .v.ink{color:var(--text)}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.teal{border-color:var(--teal);background:rgba(52,215,197,.06)} .note.teal .nh{color:var(--teal)}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--teal);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:13.5px;line-height:1.85;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic}
+  .code .kw{color:#ff9bbf}
+  .code .ty{color:var(--teal)}
+  .code .fn{color:var(--indigo)}
+  .code .num{color:var(--amber)}
+
+  .code-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .code-ex .chead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .code-ex .chead .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,176,32,.14);display:grid;place-items:center;color:var(--amber);font-size:13px}
+  .code-ex .ctask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .code-ex pre.code{margin:0 0 14px}
+  .blank{font-family:var(--mono);font-size:13px;width:10ch;text-align:center;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:2px 4px;outline:none}
+  .blank:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
+  .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)}
+  .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7}
+  .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--teal);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px}
+  @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px}
+  .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--teal);min-width:130px;text-transform:uppercase}
+  .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(142,140,248,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--indigo);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--indigo)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)}
+  .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--teal);color:var(--text)}
+  .coursenav a.map{border-color:transparent;color:var(--indigo)}
+
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><span class="name">Closing the Loop</span></a>
+    <div class="top-meta">Part V · 02 / 03 · Beyond</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part V · 02</b> Beyond</div>
+    <div class="eyebrow">Vision-Assisted Control</div>
+    <h1>Close the loop<br>on what it <span class="accent">sees</span>.</h1>
+    <p class="dek">A camera hands you one number — how far off-target you are. Drive that number to zero and you've got auto-aim. It's the very first controller you ever built, fed by a new sensor.</p>
+  </div>
+
+  <section>
+    <p class="lead">Vision isn't a new kind of control. It's a new kind of sensor.</p>
+    <p>A camera — a Limelight or PhotonVision running on a coprocessor — spots an AprilTag or target and reports <span class="k">tx</span>: the horizontal angle, in degrees, between where the robot is pointed and the target. That's an <strong>error</strong>. And you know exactly what to do with an error:</p>
+    <div class="formula">
+      turn rate = −<b>kP</b> · tx
+      <span class="small">setpoint = 0 (centered) · measurement = tx from the camera · it's a P controller</span>
+    </div>
+    <p>Drive tx to zero and the robot is aimed dead at the target. Lesson 2's proportional control, three years of build season later, pointed at a camera instead of an encoder.</p>
+  </section>
+
+  <section>
+    <div class="kicker">Aim it</div>
+    <h2>Auto-aim, live</h2>
+    <p>The camera sees a target up the field. Move the <strong>target</strong> and watch <span class="k">tx</span> — the offset — change. Flip <strong>auto-aim on</strong> and the robot rotates to drive tx to zero and lock on. Crank <span class="k">kP</span> too high and the aim overshoots and hunts, exactly like an over-tuned PID.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head">
+        <span class="demo-title">Auto-aim · P control on camera tx</span>
+        <span class="demo-tag"><span class="live" id="live"></span> <span id="status">searching</span></span>
+      </div>
+      <canvas class="field" id="field"></canvas>
+      <div class="controls">
+        <button class="btn active" id="aim">Auto-aim: on</button>
+        <div class="slider-group">
+          <label>Target bearing <span class="val" id="tgtVal">25°</span></label>
+          <input type="range" id="tgt" min="-42" max="42" step="1" value="25" />
+        </div>
+        <div class="slider-group">
+          <label>kP — aim gain <span class="val" id="kpVal">4.0</span></label>
+          <input type="range" id="kp" min="0.5" max="14" step="0.5" value="4" />
+        </div>
+      </div>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Camera tx (offset)</div><div class="v amber" id="roTx">0°</div></div>
+        <div class="ro"><div class="k2">Turn rate</div><div class="v indigo" id="roW">0.0</div></div>
+        <div class="ro"><div class="k2">Locked on?</div><div class="v ink" id="roLock">no</div></div>
+      </div>
+    </div>
+    <p class="caption">The amber wedge is the camera's view of the offset; the teal line is where the robot points. Auto-aim closes the gap — pure proportional control.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In code</div>
+    <h2>Read the offset, turn toward it</h2>
+    <p>The aim loop is a few lines. Ask the camera for the target's yaw, multiply by a gain, and command a turn. When the target's centered, tx is ~0 and the turn stops:</p>
+    <div class="codewrap">
+      <div class="clabel">Auto-aim <span class="badge">Java · PhotonVision</span></div>
+<pre class="code"><span class="ty">var</span> result = camera.<span class="fn">getLatestResult</span>();
+<span class="kw">if</span> (result.<span class="fn">hasTargets</span>()) {
+  <span class="ty">double</span> tx = result.<span class="fn">getBestTarget</span>().<span class="fn">getYaw</span>();   <span class="cm">// degrees off bore-sight</span>
+  <span class="ty">double</span> omega = -kP * tx;                          <span class="cm">// turn to drive tx → 0</span>
+  drive.<span class="fn">drive</span>(<span class="num">0</span>, <span class="num">0</span>, omega);                       <span class="cm">// rotate in place (swerve!)</span>
+}</pre>
+    </div>
+    <p>And vision does something odometry can't: it gives an <strong>absolute</strong> fix. Odometry drifts as wheels slip; a known AprilTag tells the robot exactly where it is on the field. You fold that into the same pose estimator from the swerve lesson:</p>
+    <div class="codewrap">
+      <div class="clabel">Vision corrects odometry drift <span class="badge">Java · WPILib</span></div>
+<pre class="code"><span class="cm">// every loop, blend the camera's field-position estimate into odometry:</span>
+poseEstimator.<span class="fn">addVisionMeasurement</span>(estimatedPose, timestampSeconds);</pre>
+    </div>
+    <div class="note teal">
+      <div class="nh">Two cautions the camera adds</div>
+      <p><strong>Latency:</strong> a camera frame is tens of milliseconds old, so you time-stamp measurements and let the estimator account for the delay. <strong>Trust:</strong> a single noisy frame shouldn't yank the robot — you reject wild jumps and weight vision against odometry. The control idea stays simple; the plumbing is where the care goes.</p>
+    </div>
+
+    <div class="code-ex">
+      <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
+      <div class="ctask">Turn the camera offset into a rotation command that drives it to zero. Fill the blank, then Check.</div>
+<pre class="code"><span class="ty">double</span> tx = result.<span class="fn">getBestTarget</span>().<span class="fn">getYaw</span>();
+<span class="ty">double</span> omega = -kP * <input class="blank" data-ans="tx" aria-label="blank" autocomplete="off" spellcheck="false">;
+drive.<span class="fn">drive</span>(<span class="num">0</span>, <span class="num">0</span>, omega);</pre>
+      <div class="code-actions">
+        <button class="btn" id="check">Check</button>
+        <button class="btn" id="reveal">Reveal</button>
+        <span class="code-result" id="cres"></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="2">
+        <div class="qn">Question 1</div>
+        <div class="qt">What does the camera's <code style="font-family:var(--mono);color:var(--teal)">tx</code> represent in control terms?</div>
+        <div class="opts">
+          <button class="opt">The setpoint</button>
+          <button class="opt">The output voltage</button>
+          <button class="opt">The error — how far off-target the robot is pointed</button>
+        </div>
+        <div class="explain">tx is the angle between bore-sight and the target. The setpoint is 0 (centered), so tx is the error. Multiply it by kP and you have a turn command — proportional control with a camera for a sensor.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 2</div>
+        <div class="qt">Crank the aim kP way up. What happens, and why?</div>
+        <div class="opts">
+          <button class="opt">The aim overshoots and hunts — same instability as an over-tuned PID</button>
+          <button class="opt">The camera sees farther</button>
+          <button class="opt">Nothing changes</button>
+        </div>
+        <div class="explain">It's the exact same proportional loop from Lesson 2. Too much gain overreacts to the error, swings past center, and oscillates. Vision doesn't change the control rules one bit.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 3</div>
+        <div class="qt">Besides aiming, what can vision do that wheel odometry can't?</div>
+        <div class="opts">
+          <button class="opt">Spin the motors faster</button>
+          <button class="opt">Give an absolute field position from a known tag, correcting odometry drift</button>
+          <button class="opt">Replace the gyro entirely</button>
+        </div>
+        <div class="explain">Odometry accumulates error as wheels slip. A recognized AprilTag has a known field location, so it pins down where the robot truly is — you blend it in with addVisionMeasurement to keep the pose honest.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part V · 02 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>tx</b><span>Camera's horizontal offset to the target = error.</span></div>
+        <div class="gl"><b>Auto-aim</b><span>omega = −kP · tx — proportional control.</span></div>
+        <div class="gl"><b>Setpoint 0</b><span>Centered on target means tx = 0.</span></div>
+        <div class="gl"><b>AprilTag</b><span>Known field location → absolute position.</span></div>
+        <div class="gl"><b>addVisionMeasurement</b><span>Blend vision into odometry, fix drift.</span></div>
+        <div class="gl"><b>Latency &amp; trust</b><span>Time-stamp frames; reject wild jumps.</span></div>
+      </div>
+      <a class="next" href="closing-the-loop-lesson-24.html">
+        <div class="n-eyebrow">Up next · Part V · 03 · Finale</div>
+        <h3>State-Space &amp; LQR</h3>
+        <p>One last idea — the math the whole course kept hinting at. It turns out PID has a bigger, smarter sibling, and it's more approachable than it sounds.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="closing-the-loop-lesson-22.html">← Part V · 01 · Swerve Drive</a>
+    <a class="map" href="index.html">Course map</a>
+    <a href="closing-the-loop-lesson-24.html">Part V · 03 · State-Space &amp; LQR →</a>
+  </nav>
+
+</div>
+
+<footer>Closing the Loop · A control systems course for FRC</footer>
+
+<script>
+(function(){
+  "use strict";
+  var clamp=function(x,a,b){return x<a?a:(x>b?b:x);};
+  var TAU=Math.PI*2, DEG=180/Math.PI, RAD=Math.PI/180;
+
+  function makeCanvas(cv){
+    var ctx=cv.getContext('2d'); var o={cv:cv,ctx:ctx,w:0,h:0};
+    function fit(){
+      var r=cv.getBoundingClientRect(); if(!r.width)return;
+      var dpr=window.devicePixelRatio||1;
+      cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr);
+      ctx.setTransform(dpr,0,0,dpr,0,0); o.w=r.width; o.h=r.height;
+    }
+    o.fit=fit; fit(); return o;
+  }
+
+  var F=makeCanvas(document.getElementById('field'));
+  // heading: 0 = pointing straight up the field; positive = turned left (CCW). target bearing same convention.
+  var S={heading:0, targetBearing:25*RAD, kP:4, aim:true, omega:0};
+  var el={
+    live:document.getElementById('live'),status:document.getElementById('status'),
+    aim:document.getElementById('aim'),
+    tgt:document.getElementById('tgt'),tgtVal:document.getElementById('tgtVal'),
+    kp:document.getElementById('kp'),kpVal:document.getElementById('kpVal'),
+    roTx:document.getElementById('roTx'),roW:document.getElementById('roW'),roLock:document.getElementById('roLock')
+  };
+  el.tgt.addEventListener('input',function(){S.targetBearing=parseFloat(el.tgt.value)*RAD;el.tgtVal.textContent=el.tgt.value+'°';});
+  el.kp.addEventListener('input',function(){S.kP=parseFloat(el.kp.value);el.kpVal.textContent=S.kP.toFixed(1);});
+  el.aim.addEventListener('click',function(){S.aim=!S.aim;el.aim.textContent='Auto-aim: '+(S.aim?'on':'off');el.aim.classList.toggle('active',S.aim);});
+
+  function draw(){
+    var ctx=F.ctx,W=F.w,H=F.h; ctx.clearRect(0,0,W,H);
+    var pad=18, fw=W-2*pad, fh=H-2*pad;
+    ctx.fillStyle='#0A1120'; ctx.fillRect(pad,pad,fw,fh);
+    ctx.strokeStyle='rgba(120,140,180,0.10)';ctx.lineWidth=1;
+    for(var gx=0;gx<=8;gx++){var x=pad+fw*(gx/8);ctx.beginPath();ctx.moveTo(x,pad);ctx.lineTo(x,pad+fh);ctx.stroke();}
+    for(var gy=0;gy<=5;gy++){var y=pad+fh*(gy/5);ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(pad+fw,y);ctx.stroke();}
+    ctx.strokeStyle='#26324A';ctx.lineWidth=1.5;ctx.strokeRect(pad,pad,fw,fh);
+
+    var rx=pad+fw*0.5, ry=pad+fh*0.84;       // robot near bottom center
+    var reach=fh*0.72;
+    // up = -y on canvas. heading 0 -> straight up. positive heading -> CCW (to the left).
+    function dir(angle){ return {x:Math.sin(-angle), y:-Math.cos(angle)}; }
+
+    // target
+    var td=dir(S.targetBearing);
+    var tx2=rx+td.x*reach, ty2=ry+td.y*reach;
+    // camera FOV wedge toward target offset (amber) from robot heading to target
+    var hd=dir(S.heading);
+    // tx (error)
+    var txErr=S.targetBearing - S.heading;
+    // wedge between heading and target
+    ctx.fillStyle='rgba(255,176,32,0.10)';
+    ctx.beginPath(); ctx.moveTo(rx,ry);
+    var steps=12;
+    for(var i=0;i<=steps;i++){ var a=S.heading + (txErr)*(i/steps); var d=dir(a); ctx.lineTo(rx+d.x*reach*0.9, ry+d.y*reach*0.9); }
+    ctx.closePath(); ctx.fill();
+
+    // bore-sight (teal) where robot points
+    ctx.strokeStyle='#34D7C5';ctx.lineWidth=2.5;ctx.setLineDash([2,5]);
+    ctx.beginPath(); ctx.moveTo(rx,ry); ctx.lineTo(rx+hd.x*reach, ry+hd.y*reach); ctx.stroke(); ctx.setLineDash([]);
+
+    // target marker (AprilTag)
+    var locked=Math.abs(txErr*DEG)<1.5;
+    ctx.save(); ctx.translate(tx2,ty2);
+    ctx.fillStyle=locked?'rgba(67,214,126,0.18)':'rgba(255,176,32,0.14)';
+    ctx.strokeStyle=locked?'#43D67E':'#FFB020'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.rect(-13,-13,26,26); ctx.fill(); ctx.stroke();
+    ctx.fillStyle=locked?'#43D67E':'#FFB020'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='center';
+    ctx.fillText('TAG',0,3);
+    ctx.restore();
+
+    // robot
+    ctx.save(); ctx.translate(rx,ry); ctx.rotate(-S.heading);
+    ctx.fillStyle='rgba(52,215,197,0.08)'; ctx.strokeStyle='#34D7C5'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(0,-20); ctx.lineTo(15,16); ctx.lineTo(-15,16); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.restore();
+
+    // readouts
+    var txd=txErr*DEG;
+    el.roTx.textContent=Math.round(txd)+'°';
+    el.roW.textContent=S.omega.toFixed(1);
+    el.roLock.textContent=locked?'yes':'no'; el.roLock.className='v '+(locked?'green':'ink');
+    el.live.classList.toggle('on',locked);
+    el.status.textContent=locked?'locked on':(S.aim?'aiming':'searching');
+  }
+
+  var last=0;
+  function frame(ts){
+    var t=ts/1000, dt=last?Math.min(0.05,t-last):0.016; last=t;
+    var txErr=S.targetBearing - S.heading;       // radians
+    if(S.aim){
+      S.omega = S.kP * (txErr*DEG) * 0.02;        // proportional turn (scaled)
+      S.heading += S.omega*dt*3;
+    } else {
+      S.omega = 0;
+    }
+    draw();
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){F.fit();},120);});
+
+  // code exercise
+  var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
+  function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'');}
+  document.getElementById('check').addEventListener('click',function(){
+    var all=true;
+    blanks.forEach(function(b){
+      var ans=(b.getAttribute('data-ans')||'').split('|');
+      var ok=ans.indexOf(norm(b.value))!==-1;
+      b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad');
+      if(!ok)all=false;
+    });
+    var res=document.getElementById('cres');
+    res.textContent=all?'All correct ✓':'Not quite — drive the offset tx to zero';
+    res.className='code-result '+(all?'ok':'no');
+  });
+  document.getElementById('reveal').addEventListener('click',function(){
+    blanks.forEach(function(b){b.value=(b.getAttribute('data-ans')||'').split('|')[0];b.classList.remove('bad');b.classList.add('ok');});
+    var res=document.getElementById('cres');res.textContent='Revealed';res.className='code-result ok';
+  });
+
+  // quiz
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){
+      opt.addEventListener('click',function(){
+        if(done)return;done=true;
+        opts.forEach(function(o){o.classList.add('locked');});
+        if(idx===correct){opt.classList.add('correct');}
+        else{opt.classList.add('wrong');opts[correct].classList.add('correct');}
+        explain.classList.add('show');
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>

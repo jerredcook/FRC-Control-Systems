@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Closing the Loop · Part V.1 — Swerve Drive Control</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ink); color:var(--text);
+    font-family:var(--sans); font-size:17px; line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(900px 500px at 80% -10%, rgba(255,176,32,.06), transparent 60%),
+      radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--teal);box-shadow:0 0 12px var(--teal)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--teal),var(--indigo));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:50ch;margin-top:6px}
+
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--teal);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  p .sub,.sub{color:var(--muted)}
+  .lead{font-size:19px}
+  em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .terms{display:grid;gap:12px;margin:22px 0 6px}
+  @media(min-width:560px){.terms{grid-template-columns:repeat(2,1fr)}}
+  .term{border:1px solid var(--line);border-radius:10px;padding:14px 15px;background:var(--panel);border-top:2px solid var(--accent,var(--teal))}
+  .term h4{margin:0 0 4px;font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent,var(--teal))}
+  .term p{margin:0;font-size:14.5px;color:var(--muted);line-height:1.45}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  canvas.field{display:block;width:100%;height:360px}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--teal);color:var(--text)}
+  .btn.active{background:var(--teal);border-color:var(--teal);color:#06121f;font-weight:700}
+  .slider-group{flex:1 1 180px;display:flex;flex-direction:column;gap:6px;min-width:150px}
+  .slider-group label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+  .slider-group label .val{color:var(--amber)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:var(--line-2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--amber);cursor:pointer;box-shadow:0 0 10px -1px var(--amber)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--amber);cursor:pointer}
+  .readouts{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  @media(min-width:560px){.readouts{grid-template-columns:repeat(4,1fr)}}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:19px;font-weight:600;margin-top:3px}
+  .ro .v.amber{color:var(--amber)} .ro .v.teal{color:var(--teal)} .ro .v.indigo{color:var(--indigo)} .ro .v.ink{color:var(--text)}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.teal{border-color:var(--teal);background:rgba(52,215,197,.06)} .note.teal .nh{color:var(--teal)}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--teal);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:13px;line-height:1.8;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic}
+  .code .kw{color:#ff9bbf}
+  .code .ty{color:var(--teal)}
+  .code .fn{color:var(--indigo)}
+  .code .num{color:var(--amber)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)}
+  .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7}
+  .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--teal);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px}
+  @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px}
+  .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--teal);min-width:135px;text-transform:uppercase}
+  .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(142,140,248,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--indigo);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--indigo)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)}
+  .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--teal);color:var(--text)}
+  .coursenav a.map{border-color:transparent;color:var(--indigo)}
+
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><span class="name">Closing the Loop</span></a>
+    <div class="top-meta">Part V · 01 / 03 · Beyond</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part V · 01</b> Beyond</div>
+    <div class="eyebrow">Swerve Drive Control</div>
+    <h1>Eight motors,<br>one <span class="accent">intention</span>.</h1>
+    <p class="dek">Four wheels that each steer and drive independently. The magic is turning one simple wish — go this way, spin this fast — into eight perfectly coordinated loops.</p>
+  </div>
+
+  <section>
+    <p class="lead">A swerve drive is just the mechanisms you already know, times four.</p>
+    <p>Each corner of the robot is a <strong>module</strong>: a <span class="k">steer</span> motor that points the wheel (position control — like the arm) and a <span class="k">drive</span> motor that spins it (velocity control — like the flywheel). Four modules, eight motors. Nothing new at the motor level — you tuned both kinds in Part IV.</p>
+    <p>What's new is the layer above: taking what the <em>driver</em> wants — a forward speed, a sideways speed, and a rotation — and computing, for each module, which way to point and how fast to spin. That conversion is called <strong>kinematics</strong>.</p>
+  </section>
+
+  <section>
+    <div class="kicker">Drive it</div>
+    <h2>One command, four modules</h2>
+    <p>Move the three sliders — <strong>forward</strong>, <strong>strafe</strong>, and <strong>rotate</strong>. Watch each module instantly point where it needs to and spin the right amount. The robot obeys, gliding and turning at once. This is field-oriented control: "forward" means forward on the field, no matter which way the robot faces.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head">
+        <span class="demo-title">Swerve · field-oriented · 4 modules</span>
+        <span class="demo-tag">top-down view</span>
+      </div>
+      <canvas class="field" id="field"></canvas>
+      <div class="controls">
+        <button class="btn" id="reset">Reset pose</button>
+        <div class="slider-group">
+          <label>Forward <span class="val" id="fwdVal">0.00</span></label>
+          <input type="range" id="fwd" min="-0.6" max="0.6" step="0.02" value="0" />
+        </div>
+        <div class="slider-group">
+          <label>Strafe <span class="val" id="strVal">0.00</span></label>
+          <input type="range" id="str" min="-0.6" max="0.6" step="0.02" value="0" />
+        </div>
+        <div class="slider-group">
+          <label>Rotate <span class="val" id="rotVal">0.00</span></label>
+          <input type="range" id="rot" min="-1.4" max="1.4" step="0.05" value="0" />
+        </div>
+      </div>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Pose X</div><div class="v teal" id="roX">0.50</div></div>
+        <div class="ro"><div class="k2">Pose Y</div><div class="v teal" id="roY">0.50</div></div>
+        <div class="ro"><div class="k2">Heading</div><div class="v amber" id="roH">0°</div></div>
+        <div class="ro"><div class="k2">Front-left module</div><div class="v indigo" id="roM">0° · 0.0</div></div>
+      </div>
+    </div>
+    <p class="caption">Rotate alone and the wheels form a circle — each points tangent to its corner. Add forward and they all lean the same way. Kinematics figures out the blend.</p>
+  </section>
+
+  <section>
+    <div class="kicker">How it works</div>
+    <h2>Three numbers in, eight out</h2>
+    <p>The whole pipeline is three steps, and you've built two of them already:</p>
+    <div class="terms">
+      <div class="term" style="--accent:var(--amber)"><h4>1 · Chassis speeds</h4><p>The driver's wish becomes <span class="k">ChassisSpeeds</span>: vx, vy, and omega. Field-oriented control rotates the stick direction by the gyro angle so "forward" stays forward.</p></div>
+      <div class="term" style="--accent:var(--teal)"><h4>2 · Kinematics</h4><p><span class="k">SwerveDriveKinematics</span> turns those three numbers into four <span class="k">SwerveModuleState</span>s — an angle and a speed for each corner.</p></div>
+      <div class="term" style="--accent:var(--indigo)"><h4>3 · Two loops per module</h4><p>Each module runs a steer loop (position, like the arm) and a drive loop (velocity, like the flywheel) — the Part IV mechanisms, on the motors.</p></div>
+      <div class="term" style="--accent:var(--green)"><h4>+ · Odometry</h4><p>Reading the modules <em>backwards</em>, the robot integrates how far each wheel went to track its <span class="k">pose</span> on the field — where it is and which way it faces.</p></div>
+    </div>
+    <div class="codewrap">
+      <div class="clabel">The control pipeline <span class="badge">Java · WPILib + Phoenix 6</span></div>
+<pre class="code"><span class="cm">// 1. driver wish → field-oriented chassis speeds</span>
+<span class="ty">ChassisSpeeds</span> speeds = <span class="ty">ChassisSpeeds</span>.<span class="fn">fromFieldRelativeSpeeds</span>(vx, vy, omega, gyro.<span class="fn">getRotation2d</span>());
+
+<span class="cm">// 2. kinematics → four module states (angle + speed)</span>
+<span class="ty">SwerveModuleState</span>[] states = kinematics.<span class="fn">toSwerveModuleStates</span>(speeds);
+
+<span class="cm">// 3. each module runs its two loops</span>
+<span class="kw">for</span> (<span class="ty">int</span> i = <span class="num">0</span>; i &lt; <span class="num">4</span>; i++) modules[i].<span class="fn">setDesiredState</span>(states[i]);
+
+<span class="cm">// inside a module:</span>
+<span class="kw">void</span> <span class="fn">setDesiredState</span>(<span class="ty">SwerveModuleState</span> s) {
+  s.<span class="fn">optimize</span>(currentAngle);                       <span class="cm">// never turn 270° when 90° does it</span>
+  steer.<span class="fn">setControl</span>(steerReq.<span class="fn">withPosition</span>(s.angle.<span class="fn">getRotations</span>()));   <span class="cm">// position</span>
+  drive.<span class="fn">setControl</span>(driveReq.<span class="fn">withVelocity</span>(<span class="fn">toRPS</span>(s.speedMetersPerSecond))); <span class="cm">// velocity</span>
+}</pre>
+    </div>
+    <div class="note teal">
+      <div class="nh">Two tricks that matter</div>
+      <p><strong>Optimize:</strong> if a module is at 0° and asked for 179°, it's faster to flip to −1° and drive the wheel backward. <span class="k">optimize()</span> does that automatically. <strong>Absolute angle:</strong> steering needs a <span class="k">FusedCANcoder</span> (Lesson III.2) so each module knows its angle the instant the robot boots — otherwise the wheels start crooked.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">What two control loops does a single swerve module run?</div>
+        <div class="opts">
+          <button class="opt">Two velocity loops</button>
+          <button class="opt">A steer loop (position, like the arm) and a drive loop (velocity, like the flywheel)</button>
+          <button class="opt">A single PID for everything</button>
+        </div>
+        <div class="explain">Each module points its wheel with position control and spins it with velocity control — exactly the two Part IV mechanisms, one per motor. Four modules means eight motors and eight loops.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 2</div>
+        <div class="qt">What does kinematics do?</div>
+        <div class="opts">
+          <button class="opt">Converts the driver's vx, vy, and rotation into an angle + speed for each module</button>
+          <button class="opt">Charges the battery</button>
+          <button class="opt">Tunes the PID gains</button>
+        </div>
+        <div class="explain">SwerveDriveKinematics turns the three chassis numbers (forward, strafe, rotate) into four SwerveModuleStates. Run it backward — from how far the wheels actually moved — and you get odometry.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 3</div>
+        <div class="qt">Why does a swerve module's steering need a FusedCANcoder?</div>
+        <div class="opts">
+          <button class="opt">To spin faster</button>
+          <button class="opt">It doesn't — any sensor works</button>
+          <button class="opt">So the wheel knows its absolute angle at power-on and doesn't start crooked</button>
+        </div>
+        <div class="explain">Steering is position control, and the rotor alone forgets its zero at power-off. An absolute CANcoder, fused with the fast rotor, gives the true wheel angle immediately — just like the arm.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part V · 01 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Module</b><span>A steer motor + a drive motor at one corner.</span></div>
+        <div class="gl"><b>Steer = position</b><span>Points the wheel — like the arm.</span></div>
+        <div class="gl"><b>Drive = velocity</b><span>Spins the wheel — like the flywheel.</span></div>
+        <div class="gl"><b>Kinematics</b><span>ChassisSpeeds → four module states.</span></div>
+        <div class="gl"><b>Optimize</b><span>Take the shorter path; drive backward if closer.</span></div>
+        <div class="gl"><b>Odometry</b><span>Integrate module motion → field pose.</span></div>
+      </div>
+      <a class="next" href="closing-the-loop-lesson-23.html">
+        <div class="n-eyebrow">Up next · Part V · 02</div>
+        <h3>Vision-Assisted Control</h3>
+        <p>Odometry drifts. A camera doesn't. Next, you close the loop on what the robot can see — aiming at a target and snapping to a tag.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="closing-the-loop-lesson-21.html">← Part IV · 03 · The Flywheel</a>
+    <a class="map" href="index.html">Course map</a>
+    <a href="closing-the-loop-lesson-23.html">Part V · 02 · Vision-Assisted Control →</a>
+  </nav>
+
+</div>
+
+<footer>Closing the Loop · A control systems course for FRC</footer>
+
+<script>
+(function(){
+  "use strict";
+  var clamp=function(x,a,b){return x<a?a:(x>b?b:x);};
+  var TAU=Math.PI*2, DEG=180/Math.PI;
+
+  function makeCanvas(cv){
+    var ctx=cv.getContext('2d'); var o={cv:cv,ctx:ctx,w:0,h:0};
+    function fit(){
+      var r=cv.getBoundingClientRect(); if(!r.width)return;
+      var dpr=window.devicePixelRatio||1;
+      cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr);
+      ctx.setTransform(dpr,0,0,dpr,0,0); o.w=r.width; o.h=r.height;
+    }
+    o.fit=fit; fit(); return o;
+  }
+  function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+
+  var F=makeCanvas(document.getElementById('field'));
+  var S={x:0.5,y:0.5,h:0, fwd:0,str:0,rot:0, scale:0.28};
+  var corners=[{lx: 1,ly: 1,name:'FL'},{lx: 1,ly:-1,name:'FR'},{lx:-1,ly:-1,name:'BR'},{lx:-1,ly: 1,name:'BL'}];
+
+  var el={
+    fwd:document.getElementById('fwd'),fwdVal:document.getElementById('fwdVal'),
+    str:document.getElementById('str'),strVal:document.getElementById('strVal'),
+    rot:document.getElementById('rot'),rotVal:document.getElementById('rotVal'),
+    reset:document.getElementById('reset'),
+    roX:document.getElementById('roX'),roY:document.getElementById('roY'),roH:document.getElementById('roH'),roM:document.getElementById('roM')
+  };
+  el.fwd.addEventListener('input',function(){S.fwd=parseFloat(el.fwd.value);el.fwdVal.textContent=S.fwd.toFixed(2);});
+  el.str.addEventListener('input',function(){S.str=parseFloat(el.str.value);el.strVal.textContent=S.str.toFixed(2);});
+  el.rot.addEventListener('input',function(){S.rot=parseFloat(el.rot.value);el.rotVal.textContent=S.rot.toFixed(2);});
+  el.reset.addEventListener('click',function(){
+    S.x=0.5;S.y=0.5;S.h=0;S.fwd=0;S.str=0;S.rot=0;
+    el.fwd.value=0;el.str.value=0;el.rot.value=0;
+    el.fwdVal.textContent='0.00';el.strVal.textContent='0.00';el.rotVal.textContent='0.00';
+  });
+
+  function draw(){
+    var ctx=F.ctx,W=F.w,H=F.h; ctx.clearRect(0,0,W,H);
+    var pad=18, fw=W-2*pad, fh=H-2*pad;
+    // field
+    ctx.fillStyle='#0A1120'; ctx.fillRect(pad,pad,fw,fh);
+    ctx.strokeStyle='rgba(120,140,180,0.10)';ctx.lineWidth=1;
+    for(var gx=0;gx<=8;gx++){var x=pad+fw*(gx/8);ctx.beginPath();ctx.moveTo(x,pad);ctx.lineTo(x,pad+fh);ctx.stroke();}
+    for(var gy=0;gy<=5;gy++){var y=pad+fh*(gy/5);ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(pad+fw,y);ctx.stroke();}
+    ctx.strokeStyle='#26324A';ctx.lineWidth=1.5;ctx.strokeRect(pad,pad,fw,fh);
+
+    function FX(fx){return pad+fx*fw;}
+    function FY(fy){return pad+(1-fy)*fh;}      // field y up = canvas up
+    var cx=FX(S.x), cy=FY(S.y);
+    var rpx=Math.min(fw,fh)*0.13;               // robot half-size in pixels
+    var cosH=Math.cos(S.h), sinH=Math.sin(S.h);
+
+    // robot body
+    ctx.save(); ctx.translate(cx,cy); ctx.rotate(-S.h);
+    ctx.fillStyle='rgba(52,215,197,0.06)'; ctx.strokeStyle='#34D7C5'; ctx.lineWidth=2;
+    roundRect(ctx,-rpx,-rpx,2*rpx,2*rpx,8); ctx.fill(); ctx.stroke();
+    // heading arrow (robot forward = +x robot frame)
+    ctx.strokeStyle='#FFB020'; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(rpx*0.9,0); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(rpx*0.9,0); ctx.lineTo(rpx*0.66,-5); ctx.lineTo(rpx*0.66,5); ctx.closePath(); ctx.fillStyle='#FFB020'; ctx.fill();
+    ctx.restore();
+
+    // modules
+    var flAngle=0, flSpeed=0;
+    for(var i=0;i<corners.length;i++){
+      var c=corners[i];
+      // field-frame corner offset (robot +x is forward)
+      var Rx=(c.lx*cosH - c.ly*sinH), Ry=(c.lx*sinH + c.ly*cosH);
+      var px=cx + Rx*rpx, py=cy - Ry*rpx;
+      // field-frame module velocity = translation + rotation
+      var mvx=S.str + (-S.rot)*( -Ry );   // = str + rot*Ry... see below
+      // proper: module vel = (vx - omega*Ry_world, vy + omega*Rx_world)
+      var vx=S.str, vy=S.fwd, omega=S.rot;
+      var mvX=vx - omega*Ry;
+      var mvY=vy + omega*Rx;
+      var spd=Math.hypot(mvX,mvY);
+      var ang=Math.atan2(mvY,mvX);
+      if(c.name==='FL'){ flSpeed=spd; // module angle relative to robot heading
+        flAngle=((ang - S.h)*DEG); }
+      // draw wheel
+      var len=8+clamp(spd,0,1)*22;
+      var on=spd>0.005;
+      ctx.strokeStyle=on?'#8E8CF8':'#33415e'; ctx.lineWidth=4; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(px-Math.cos(ang)*len*0.5, py+Math.sin(ang)*len*0.5);
+      ctx.lineTo(px+Math.cos(ang)*len*0.5, py-Math.sin(ang)*len*0.5); ctx.stroke();
+      ctx.lineCap='butt';
+      // direction tip
+      if(on){
+        var tx=px+Math.cos(ang)*len*0.5, ty=py-Math.sin(ang)*len*0.5;
+        ctx.fillStyle='#8E8CF8'; ctx.beginPath(); ctx.arc(tx,ty,3,0,TAU); ctx.fill();
+      }
+      // hub
+      ctx.fillStyle='#11192B'; ctx.strokeStyle='#34D7C5'; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.arc(px,py,4,0,TAU); ctx.fill(); ctx.stroke();
+    }
+
+    // integrate pose (field oriented)
+    el.roX.textContent=S.x.toFixed(2);
+    el.roY.textContent=S.y.toFixed(2);
+    var hd=((S.h*DEG)%360); if(hd>180)hd-=360; if(hd<-180)hd+=360;
+    el.roH.textContent=Math.round(hd)+'°';
+    var fa=flAngle%360; if(fa>180)fa-=360; if(fa<-180)fa+=360;
+    el.roM.textContent=Math.round(fa)+'° · '+flSpeed.toFixed(1);
+  }
+
+  var last=0;
+  function frame(ts){
+    var t=ts/1000, dt=last?Math.min(0.05,t-last):0.016; last=t;
+    S.x=clamp(S.x + S.str*dt*S.scale, 0.06, 0.94);
+    S.y=clamp(S.y + S.fwd*dt*S.scale, 0.06, 0.94);
+    S.h += S.rot*dt;
+    draw();
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){F.fit();},120);});
+
+  // quiz
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){
+      opt.addEventListener('click',function(){
+        if(done)return;done=true;
+        opts.forEach(function(o){o.classList.add('locked');});
+        if(idx===correct){opt.classList.add('correct');}
+        else{opt.classList.add('wrong');opts[correct].classList.add('correct');}
+        explain.classList.add('show');
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>
