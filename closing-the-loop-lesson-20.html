@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Closing the Loop · Part IV.2 — The Arm</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ink); color:var(--text);
+    font-family:var(--sans); font-size:17px; line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(900px 500px at 80% -10%, rgba(255,176,32,.06), transparent 60%),
+      radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--teal);box-shadow:0 0 12px var(--teal)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--teal),var(--indigo));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:50ch;margin-top:6px}
+
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--teal);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  p .sub,.sub{color:var(--muted)}
+  .lead{font-size:19px}
+  em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .formula{font-family:var(--mono);background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:18px 20px;margin:20px 0;font-size:18px;overflow-x:auto;color:#cfe;text-align:center}
+  .formula .small{display:block;font-size:13px;color:var(--muted);margin-top:8px}
+  .formula b{color:var(--amber)} .formula .t{color:var(--teal)}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;gap:6px;align-items:center}
+  .demo-tag .live{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+  .demo-stage{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line)}
+  @media(min-width:600px){.demo-stage{grid-template-columns:1.05fr 1.25fr}}
+  .stage-cell{background:#0B1322;position:relative}
+  .stage-cell .cell-label{position:absolute;top:8px;left:10px;z-index:2;font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);pointer-events:none}
+  canvas.world{display:block;width:100%;height:340px}
+  canvas.scope{display:block;width:100%;height:340px}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--teal);color:var(--text)}
+  .btn.active{background:var(--teal);border-color:var(--teal);color:#06121f;font-weight:700}
+  .slider-group{flex:1 1 200px;display:flex;flex-direction:column;gap:6px;min-width:170px}
+  .slider-group label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+  .slider-group label .val{color:var(--amber)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:var(--line-2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--amber);cursor:pointer;box-shadow:0 0 10px -1px var(--amber)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--amber);cursor:pointer}
+  .readouts{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  @media(min-width:560px){.readouts{grid-template-columns:repeat(4,1fr)}}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:20px;font-weight:600;margin-top:3px}
+  .ro .v.amber{color:var(--amber)} .ro .v.teal{color:var(--teal)} .ro .v.indigo{color:var(--indigo)} .ro .v.red{color:var(--red)} .ro .v.ink{color:var(--text)}
+  .legend{display:flex;flex-wrap:wrap;gap:16px;padding:11px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .legend i{width:16px;height:2px;border-radius:2px;display:inline-block}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.teal{border-color:var(--teal);background:rgba(52,215,197,.06)} .note.teal .nh{color:var(--teal)}
+  .note.red{border-color:var(--red);background:rgba(255,107,107,.07)} .note.red .nh{color:var(--red)}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--teal);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:13.5px;line-height:1.85;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic}
+  .code .kw{color:#ff9bbf}
+  .code .ty{color:var(--teal)}
+  .code .fn{color:var(--indigo)}
+  .code .num{color:var(--amber)}
+
+  .code-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .code-ex .chead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .code-ex .chead .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,176,32,.14);display:grid;place-items:center;color:var(--amber);font-size:13px}
+  .code-ex .ctask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .code-ex pre.code{margin:0 0 14px}
+  .blank{font-family:var(--mono);font-size:13px;width:14ch;text-align:center;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:2px 4px;outline:none}
+  .blank:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
+  .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)}
+  .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7}
+  .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--teal);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px}
+  @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px}
+  .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--teal);min-width:135px;text-transform:uppercase}
+  .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(142,140,248,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--indigo);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--indigo)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)}
+  .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--teal);color:var(--text)}
+  .coursenav a.map{border-color:transparent;color:var(--indigo)}
+
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><span class="name">Closing the Loop</span></a>
+    <div class="top-meta">Part IV · 02 / 03 · Tune a Real Mechanism</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part IV · 02</b> Tune a Real Mechanism</div>
+    <div class="eyebrow">The Arm</div>
+    <h1>Gravity that<br><span class="accent">moves</span>.</h1>
+    <p class="dek">An elevator fights the same gravity everywhere. An arm's load changes with its angle — full at horizontal, zero straight up. One cosine fixes it.</p>
+  </div>
+
+  <section>
+    <p class="lead">The elevator had it easy.</p>
+    <p>Straight up and down, gravity is constant, so a single <span class="k">kG</span> holds it anywhere. An arm is different: held out horizontal it strains against its full weight, but pointed straight up it barely needs anything. The gravity load follows the <strong>cosine</strong> of the angle:</p>
+    <div class="formula">
+      hold voltage = <b>kG</b> · cos(angle)
+      <span class="small">angle measured from horizontal · cos(0°) = 1 (full) · cos(90°) = 0 (none)</span>
+    </div>
+    <p>So feedforward for an arm needs to know the <em>angle</em>, and scale kG by its cosine. Get that right and the arm holds rock-steady at any position; get it wrong and it sags or drifts. Let's see both.</p>
+  </section>
+
+  <section>
+    <div class="kicker">Try it</div>
+    <h2>Cosine on, cosine off</h2>
+    <p>Drag the <strong>target angle</strong> around. With <strong>cosine compensation on</strong>, the arm holds wherever you point it. Switch it <strong>off</strong> — now feedforward applies a flat kG that's only right at horizontal, and the arm drifts high as you raise the target.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head">
+        <span class="demo-title">Arm · ArmFeedforward · Arm_Cosine</span>
+        <span class="demo-tag"><span class="live"></span> position control</span>
+      </div>
+      <div class="demo-stage">
+        <div class="stage-cell"><span class="cell-label">Arm</span><canvas class="world" id="world"></canvas></div>
+        <div class="stage-cell"><span class="cell-label">Scope · angle vs target</span><canvas class="scope" id="scope"></canvas></div>
+      </div>
+      <div class="legend">
+        <span><i style="background:var(--amber)"></i> Target angle</span>
+        <span><i style="background:var(--teal)"></i> Arm angle</span>
+        <span><i style="background:var(--indigo)"></i> Voltage</span>
+      </div>
+      <div class="controls">
+        <button class="btn active" id="cos">Cosine comp: on</button>
+        <div class="slider-group">
+          <label>Target angle <span class="val" id="tgtVal">45°</span></label>
+          <input type="range" id="tgt" min="-25" max="105" step="1" value="45" />
+        </div>
+        <div class="slider-group">
+          <label>kG — gravity @ horizontal <span class="val" id="kgVal">0.50</span></label>
+          <input type="range" id="kg" min="0" max="0.9" step="0.01" value="0.5" />
+        </div>
+      </div>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Arm angle</div><div class="v teal" id="roAng">45°</div></div>
+        <div class="ro"><div class="k2">Error</div><div class="v red" id="roErr">0°</div></div>
+        <div class="ro"><div class="k2">Gravity factor cos θ</div><div class="v amber" id="roCos">0.71</div></div>
+        <div class="ro"><div class="k2">Feedforward (V)</div><div class="v indigo" id="roFf">0.35</div></div>
+      </div>
+    </div>
+    <p class="caption">Watch the gravity factor: near horizontal it's ~1 (needs the most hold), near vertical it falls toward 0. Cosine comp tracks that; a flat kG can't.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In code</div>
+    <h2>One line tells the motor about gravity</h2>
+    <p>On Phoenix 6, you don't compute the cosine yourself — you set the gravity <em>type</em>, and the device scales kG by <span class="k">cos(position)</span> on every loop. The one rule: the arm's <strong>zero must be horizontal</strong>, so cos(0) = 1 lines up with full gravity.</p>
+    <div class="codewrap">
+      <div class="clabel">Arm gains — the key difference <span class="badge">Java · Phoenix 6</span></div>
+<pre class="code">cfg.Slot0.kG = <span class="num">0.40</span>;                                  <span class="cm">// volts to hold the arm HORIZONTAL</span>
+cfg.Slot0.kS = <span class="num">0.10</span>;  cfg.Slot0.kV = <span class="num">0.9</span>;  cfg.Slot0.kA = <span class="num">0.02</span>;
+cfg.Slot0.kP = <span class="num">60</span>;    cfg.Slot0.kD = <span class="num">0.5</span>;
+cfg.Slot0.GravityType = <span class="ty">GravityTypeValue</span>.Arm_Cosine;     <span class="cm">// ← scales kG by cos(angle)</span>
+
+<span class="cm">// position 0 = horizontal. Use a FusedCANcoder so the arm knows</span>
+<span class="cm">// its true angle the instant the robot powers on (Lesson III.2).</span></pre>
+    </div>
+    <p>That's the whole change from the elevator: <span class="k">Arm_Cosine</span> instead of <span class="k">Elevator_Static</span>, and a horizontal zero. Everything else — Motion Magic, the control request, the workflow — is identical. On the WPILib side it's <span class="k">ArmFeedforward</span>, which takes the angle directly:</p>
+    <div class="codewrap">
+      <div class="clabel">If you compute feedforward yourself <span class="badge">Java · WPILib</span></div>
+<pre class="code"><span class="ty">ArmFeedforward</span> ff = <span class="kw">new</span> <span class="ty">ArmFeedforward</span>(kS, kG, kV, kA);
+<span class="ty">double</span> volts = ff.<span class="fn">calculate</span>(angleRadians, velocityRps);  <span class="cm">// kG·cos(angle), for you</span></pre>
+    </div>
+
+    <div class="code-ex">
+      <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
+      <div class="ctask">Tell the device this mechanism is an arm, so it scales kG by the cosine of the angle. Fill the blank, then Check.</div>
+<pre class="code">cfg.Slot0.kG = <span class="num">0.40</span>;
+cfg.Slot0.GravityType = <span class="ty">GravityTypeValue</span>.<input class="blank" data-ans="arm_cosine|armcosine" aria-label="blank" autocomplete="off" spellcheck="false">;</pre>
+      <div class="code-actions">
+        <button class="btn" id="check">Check</button>
+        <button class="btn" id="reveal">Reveal</button>
+        <span class="code-result" id="cres"></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="2">
+        <div class="qn">Question 1</div>
+        <div class="qt">Why does an arm's gravity feedforward depend on its angle?</div>
+        <div class="opts">
+          <button class="opt">Because the motor weakens at angles</button>
+          <button class="opt">It doesn't — gravity is always the same</button>
+          <button class="opt">The gravity torque scales with cos(angle): full at horizontal, zero straight up</button>
+        </div>
+        <div class="explain">Horizontal, the arm's whole weight pulls down on the pivot (cos 0° = 1). Straight up, the weight pulls along the arm, creating no turning torque (cos 90° = 0). So the hold voltage is kG·cos(angle).</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 2</div>
+        <div class="qt">On Phoenix 6, how do you get the cosine scaling?</div>
+        <div class="opts">
+          <button class="opt">Set GravityType = Arm_Cosine, with the arm's zero at horizontal</button>
+          <button class="opt">Multiply kP by cosine yourself every loop</button>
+          <button class="opt">Use a bigger current limit</button>
+        </div>
+        <div class="explain">GravityType.Arm_Cosine tells the onboard loop to scale kG by cos(position). Because it uses the measured position, zero must be horizontal so cos(0)=1 corresponds to full gravity.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 3</div>
+        <div class="qt">Which sensor setup helps an arm know its true angle the moment the robot turns on?</div>
+        <div class="opts">
+          <button class="opt">The internal rotor alone</button>
+          <button class="opt">A FusedCANcoder (absolute angle + fast rotor)</button>
+          <button class="opt">A current sensor</button>
+        </div>
+        <div class="explain">The rotor only counts from boot, so it can't know an absolute angle. A FusedCANcoder gives the true angle immediately — essential for an arm, where cosine feedforward needs a correct angle from the first instant.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part IV · 02 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>kG · cos(angle)</b><span>An arm's gravity load changes with angle.</span></div>
+        <div class="gl"><b>kG @ horizontal</b><span>Set kG as the hold voltage at horizontal.</span></div>
+        <div class="gl"><b>Arm_Cosine</b><span>GravityType that scales kG by cos(position).</span></div>
+        <div class="gl"><b>Zero at horizontal</b><span>So cos(0)=1 lines up with full gravity.</span></div>
+        <div class="gl"><b>ArmFeedforward</b><span>WPILib version; takes the angle directly.</span></div>
+        <div class="gl"><b>FusedCANcoder</b><span>Absolute angle from power-on.</span></div>
+      </div>
+      <a class="next" href="closing-the-loop-lesson-21.html">
+        <div class="n-eyebrow">Up next · Part IV · 03</div>
+        <h3>The Flywheel</h3>
+        <p>Position is one game. A shooter plays another: it doesn't go to a place, it holds a speed. Meet velocity control, where kV runs the show and kP barely whispers.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="closing-the-loop-lesson-19.html">← Part IV · 01 · The Elevator</a>
+    <a class="map" href="index.html">Course map</a>
+    <a href="closing-the-loop-lesson-21.html">Part IV · 03 · The Flywheel →</a>
+  </nav>
+
+</div>
+
+<footer>Closing the Loop · A control systems course for FRC</footer>
+
+<script>
+(function(){
+  "use strict";
+  var clamp=function(x,a,b){return x<a?a:(x>b?b:x);};
+  var DEG=Math.PI/180;
+
+  function makeCanvas(cv){
+    var ctx=cv.getContext('2d'); var o={cv:cv,ctx:ctx,w:0,h:0};
+    function fit(){
+      var r=cv.getBoundingClientRect(); if(!r.width)return;
+      var dpr=window.devicePixelRatio||1;
+      cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr);
+      ctx.setTransform(dpr,0,0,dpr,0,0); o.w=r.width; o.h=r.height;
+    }
+    o.fit=fit; fit(); return o;
+  }
+
+  function drawArm(o,theta,target,volt,cosFactor){
+    var ctx=o.ctx,W=o.w,H=o.h; ctx.clearRect(0,0,W,H);
+    var cx=W*0.30, cy=H*0.62, L=Math.min(W*0.5,H*0.42);
+    // base
+    ctx.fillStyle='#1B2540';ctx.strokeStyle='#33415e';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(cx-26,cy+20);ctx.lineTo(cx+26,cy+20);ctx.lineTo(cx+16,cy);ctx.lineTo(cx-16,cy);ctx.closePath();ctx.fill();ctx.stroke();
+    // horizontal reference (0 degrees)
+    ctx.strokeStyle='rgba(120,140,180,0.25)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+L+18,cy);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#5E6F8E';ctx.font='9px ui-monospace,Menlo,monospace';ctx.textAlign='left';
+    ctx.fillText('0° (horizontal)',cx+L-44,cy+14);
+    // target ghost arm
+    var tx=cx+L*Math.cos(target), ty=cy-L*Math.sin(target);
+    ctx.strokeStyle='rgba(255,176,32,0.55)';ctx.lineWidth=3;ctx.setLineDash([6,5]);
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(tx,ty);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='rgba(255,176,32,0.7)';ctx.beginPath();ctx.arc(tx,ty,5,0,7);ctx.fill();
+    // actual arm
+    var ex=cx+L*Math.cos(theta), ey=cy-L*Math.sin(theta);
+    ctx.strokeStyle='#34D7C5';ctx.lineWidth=7;ctx.lineCap='round';
+    ctx.shadowColor='#34D7C5';ctx.shadowBlur=12;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(ex,ey);ctx.stroke();
+    ctx.shadowBlur=0;ctx.lineCap='butt';
+    // end effector
+    ctx.fillStyle='#0e2b2a';ctx.strokeStyle='#34D7C5';ctx.lineWidth=2;
+    ctx.beginPath();ctx.arc(ex,ey,9,0,7);ctx.fill();ctx.stroke();
+    // gravity arrow from end
+    var gl=10+cosFactor*26;
+    ctx.strokeStyle='#FF6B6B';ctx.globalAlpha=0.6;ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(ex,ey+11);ctx.lineTo(ex,ey+11+gl);
+    ctx.moveTo(ex-4,ey+11+gl-5);ctx.lineTo(ex,ey+11+gl);ctx.lineTo(ex+4,ey+11+gl-5);
+    ctx.stroke();ctx.globalAlpha=1;
+    // hub
+    ctx.fillStyle='#11192B';ctx.strokeStyle='#34D7C5';ctx.lineWidth=2;
+    ctx.beginPath();ctx.arc(cx,cy,8,0,7);ctx.fill();ctx.stroke();
+  }
+
+  function Scope(o,signals,len){this.o=o;this.signals=signals;this.len=len||300;this.buf=[];}
+  Scope.prototype.push=function(s){this.buf.push(s);if(this.buf.length>this.len)this.buf.shift();};
+  Scope.prototype.draw=function(){
+    var o=this.o,ctx=o.ctx,W=o.w,H=o.h;ctx.clearRect(0,0,W,H);
+    var pad=14,top=pad,bot=H-pad,left=8,right=W-8,span=bot-top,wspan=right-left;
+    ctx.strokeStyle='rgba(120,140,180,0.07)';ctx.lineWidth=1;
+    for(var gy=0;gy<=4;gy++){var yy=top+span*(gy/4);ctx.beginPath();ctx.moveTo(left,yy);ctx.lineTo(right,yy);ctx.stroke();}
+    for(var gx=0;gx<=8;gx++){var xx=left+wspan*(gx/8);ctx.beginPath();ctx.moveTo(xx,top);ctx.lineTo(xx,bot);ctx.stroke();}
+    var n=this.buf.length;if(n<2)return;var self=this;
+    function pyv(v){return bot-clamp(v,0,1)*span;}
+    for(var s=0;s<this.signals.length;s++){
+      var sig=this.signals[s];
+      ctx.strokeStyle=sig.color;ctx.lineWidth=sig.w||2;
+      ctx.setLineDash(sig.dash||[]);
+      ctx.shadowColor=sig.color;ctx.shadowBlur=sig.glow?7:0;
+      ctx.beginPath();
+      for(var i=0;i<n;i++){
+        var v=self.buf[i][sig.key];
+        var X=left+wspan*((i+(self.len-n))/(self.len-1));
+        var Y=pyv(v);
+        if(i===0)ctx.moveTo(X,Y);else ctx.lineTo(X,Y);
+      }
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);ctx.shadowBlur=0;
+  };
+
+  // angle range for scope normalization
+  var AMIN=-30*DEG, AMAX=110*DEG;
+  function norm(a){return clamp((a-AMIN)/(AMAX-AMIN),0,1);}
+
+  var S={theta:45*DEG, omega:0, prevT:45*DEG, target:45*DEG, kG:0.5, gMax:0.5, drag:1.8, kP:3.4, kD:1.4, cos:true, u:0, ffv:0};
+  var world=makeCanvas(document.getElementById('world'));
+  var scope=makeCanvas(document.getElementById('scope'));
+  var scopeObj=new Scope(scope,[
+    {key:'volt',color:'#8E8CF8',w:1.5},
+    {key:'tgt',color:'#FFB020',w:1.5,dash:[5,4]},
+    {key:'ang',color:'#34D7C5',w:2,glow:true}
+  ]);
+  var el={
+    cos:document.getElementById('cos'),
+    tgt:document.getElementById('tgt'),tgtVal:document.getElementById('tgtVal'),
+    kg:document.getElementById('kg'),kgVal:document.getElementById('kgVal'),
+    roAng:document.getElementById('roAng'),roErr:document.getElementById('roErr'),
+    roCos:document.getElementById('roCos'),roFf:document.getElementById('roFf')
+  };
+  el.tgt.addEventListener('input',function(){S.target=parseFloat(el.tgt.value)*DEG;el.tgtVal.textContent=el.tgt.value+'°';});
+  el.kg.addEventListener('input',function(){S.kG=parseFloat(el.kg.value);el.kgVal.textContent=S.kG.toFixed(2);});
+  el.cos.addEventListener('click',function(){S.cos=!S.cos;el.cos.textContent='Cosine comp: '+(S.cos?'on':'off');el.cos.classList.toggle('active',S.cos);});
+
+  function step(dt){
+    var meas=S.theta;
+    var err=S.target-meas;
+    var deriv=-(meas-S.prevT)/dt; S.prevT=meas;
+    S.ffv=S.cos ? S.kG*Math.cos(meas) : S.kG;          // cosine comp vs flat
+    S.u=S.ffv+S.kP*err+S.kD*deriv;
+    var alpha=S.u - S.gMax*Math.cos(meas) - S.drag*S.omega;
+    S.omega+=alpha*dt; S.theta+=S.omega*dt;
+    if(S.theta<AMIN){S.theta=AMIN;if(S.omega<0)S.omega=0;}
+    if(S.theta>AMAX){S.theta=AMAX;if(S.omega>0)S.omega=0;}
+    var cosF=Math.cos(meas);
+    scopeObj.push({tgt:norm(S.target),ang:norm(S.theta),volt:clamp(0.12+S.u*0.32,0,1)});
+    drawArm(world,S.theta,S.target,S.u,Math.max(0,cosF));
+    scopeObj.draw();
+    el.roAng.textContent=Math.round(S.theta/DEG)+'°';
+    el.roErr.textContent=Math.round((S.target-S.theta)/DEG)+'°';
+    el.roCos.textContent=cosF.toFixed(2);
+    el.roFf.textContent=S.ffv.toFixed(2);
+  }
+  var last=0;
+  function frame(ts){var t=ts/1000;var dt=last?Math.min(0.033,t-last):0.016;last=t;step(dt);requestAnimationFrame(frame);}
+  requestAnimationFrame(frame);
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){world.fit();scope.fit();},120);});
+
+  // code exercise
+  var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
+  function normStr(s){return s.trim().toLowerCase().replace(/\s+/g,'');}
+  document.getElementById('check').addEventListener('click',function(){
+    var all=true;
+    blanks.forEach(function(b){
+      var ans=(b.getAttribute('data-ans')||'').split('|');
+      var ok=ans.indexOf(normStr(b.value))!==-1;
+      b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad');
+      if(!ok)all=false;
+    });
+    var res=document.getElementById('cres');
+    res.textContent=all?'All correct ✓':'Not quite — it’s Arm_Cosine';
+    res.className='code-result '+(all?'ok':'no');
+  });
+  document.getElementById('reveal').addEventListener('click',function(){
+    blanks.forEach(function(b){b.value='Arm_Cosine';b.classList.remove('bad');b.classList.add('ok');});
+    var res=document.getElementById('cres');res.textContent='Revealed';res.className='code-result ok';
+  });
+
+  // quiz
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){
+      opt.addEventListener('click',function(){
+        if(done)return;done=true;
+        opts.forEach(function(o){o.classList.add('locked');});
+        if(idx===correct){opt.classList.add('correct');}
+        else{opt.classList.add('wrong');opts[correct].classList.add('correct');}
+        explain.classList.add('show');
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>
