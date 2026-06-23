@@ -7,53 +7,59 @@ control, to real WPILib code, to tuning a Kraken with CTRE Phoenix 6, and beyond
 
 It's built for students who start at zero. Every lesson is hands-on: you feel the
 control problem first (live physics simulations you can drive), then name it, then
-see the code. No prior controls background required.
+see the code. No prior controls background required. **24 lessons, all complete.**
 
 ## ▶ Start here
 
-Open **`index.html`** in any browser — that's the course map. Or, once published,
-visit the live site (see *Publishing* below). No install, no build step, no internet
-required: every lesson is a single self-contained HTML file.
+Open **`index.html`** in any browser — that's the course map. Or visit the live
+site above. No install, no build step, no internet required: every lesson is a
+single self-contained HTML file. Your progress is saved in your browser.
 
-Your progress (which lessons you've completed) is saved in your browser.
+## Course outline — all 24 lessons
 
-## Course outline
+**Part I — The Idea** · *concepts, no code*
+1. Feedback & Control · 2. Proportional · 3. Integral · 4. Derivative ·
+5. Tuning PID · 6. Feedforward · 7. System Identification · 8. The Complete Controller
 
-**Part I — The Idea** · *concepts, no code* — **available now**
+**Part II — From Math to Code** · *WPILib, Java*
+1. Robot Code Anatomy · 2. Units, Gears & Conversions · 3. Your First Closed Loop in Code ·
+4. Feedforward in Code · 5. Motion Profiles
 
-| # | Lesson | What it covers |
-|---|--------|----------------|
-| 1 | Feedback & Control | The loop behind everything: measure → compare → correct |
-| 2 | Proportional Control | `output = kP × error` |
-| 3 | Integral Control | A memory that erases steady-state error |
-| 4 | Derivative Control | Brakes that read your speed and kill overshoot |
-| 5 | Tuning PID | A repeatable order for dialing in kP, kI, kD |
-| 6 | Feedforward | Predicting the voltage a move needs (kS, kG, kV, kA) |
-| 7 | System Identification | *Measuring* those gains from your real mechanism |
-| 8 | The Complete Controller | Feedforward + feedback + motion profile, together |
+**Part III — CTRE Phoenix 6**
+1. Meet Phoenix 6 & the Kraken · 2. Configuring a TalonFX · 3. On-Motor Closed Loop ·
+4. Motion Magic · 5. SysId on Phoenix 6
 
-**Coming next**
+**Part IV — Tune a Real Mechanism**
+1. The Elevator, End to End · 2. The Arm · 3. The Flywheel
 
-- **Part II — From Math to Code** (WPILib, Java): robot project anatomy, units & gear
-  ratios, your first closed loop in code, feedforward in code, motion profiles
-- **Part III — CTRE Phoenix 6**: the Kraken/TalonFX, configuration, on-motor closed
-  loop, Motion Magic, SysId
-- **Part IV — Tune a Real Mechanism**: an elevator, an arm, and a flywheel, each
-  taken start-to-finish
-- **Part V — Beyond**: swerve drive control, vision-assisted control, state-space & LQR
+**Part V — Beyond**
+1. Swerve Drive Control · 2. Vision-Assisted Control · 3. State-Space & LQR
+
+## For your robot
+
+Two companions turn the lessons into real, running code:
+
+- **[Tuning worksheet](worksheet.html)** — enter your mechanism's CAN id, gear
+  ratio, and SysId gains; it generates paste-ready Phoenix 6 Java plus a
+  printable tuning record. Saved in your browser.
+- **[Java templates](templates/)** — complete `Elevator`, `Arm`, and `Flywheel`
+  command-based subsystems (plus a `Constants`), straight from Part IV, with
+  `// TODO` markers for your team's own numbers.
 
 ## How it's built
 
 - Plain HTML/CSS/JavaScript — **no dependencies, no build tools, no framework**.
-- Each lesson is one file; simulations are hand-written `<canvas>` physics.
-- The course hub (`index.html`) is data-driven: the `COURSE` array near the top of its
-  `<script>` defines every part and lesson, so adding a lesson is one entry plus the file.
-- Code examples target **WPILib (Java)** and **CTRE Phoenix 6**.
+- Each lesson is one file; simulations are hand-written `<canvas>` physics
+  (elevator, arm, flywheel, swerve, vision, and more).
+- The course hub (`index.html`) is data-driven: the `COURSE` array near the top
+  of its `<script>` defines every part and lesson, so adding or reordering a
+  lesson is one entry plus the file.
+- Code examples target **WPILib (Java)** and **CTRE Phoenix 6**, current season.
 
 ## Publishing (GitHub Pages)
 
-This repo serves as a static site via GitHub Pages (main branch, root folder). The
-live course is at:
+This repo serves as a static site via GitHub Pages (main branch, root folder).
+The live course is at:
 
 > **https://jerredcook.github.io/FRC-Control-Systems/**
 

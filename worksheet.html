@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Closing the Loop · Robot Tuning Worksheet</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ink); color:var(--text);
+    font-family:var(--sans); font-size:17px; line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(900px 500px at 80% -10%, rgba(255,176,32,.06), transparent 60%),
+      radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:0 22px}
+
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:980px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--teal);box-shadow:0 0 12px var(--teal)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:48px 0 18px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  h1{font-size:clamp(2.1rem,5vw,3.4rem);line-height:1.04;margin:.1em 0 .3em;letter-spacing:-.03em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--teal),var(--indigo));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(16px,2.2vw,19px);color:var(--text);max-width:60ch;margin-top:6px}
+  .dek b{color:var(--text)}
+
+  .seg{display:inline-flex;gap:0;border:1px solid var(--line-2);border-radius:10px;overflow:hidden;margin:20px 0 4px}
+  .seg button{border:none;background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;padding:11px 18px;cursor:pointer;transition:.12s;border-right:1px solid var(--line-2)}
+  .seg button:last-child{border-right:none}
+  .seg button:hover{color:var(--text)}
+  .seg button.active{background:var(--teal);color:#06121f;font-weight:700}
+
+  .builder{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8);margin-top:14px}
+  .builder-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .builder-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .builder-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .bgrid{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line)}
+  @media(min-width:760px){.bgrid{grid-template-columns:0.85fr 1.15fr}}
+  .bctl{background:#0B1322;padding:16px}
+  .fgroup-title{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--teal);margin:14px 0 8px;border-bottom:1px solid var(--line);padding-bottom:6px}
+  .fgroup-title:first-child{margin-top:0}
+  .fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .field{display:flex;flex-direction:column;gap:5px}
+  .field.wide{grid-column:1 / -1}
+  .field label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+  .field input{font-family:var(--mono);font-size:13px;background:var(--panel-2);border:1px solid var(--line-2);color:var(--text);border-radius:7px;padding:8px 10px;outline:none;width:100%}
+  .field input:focus{border-color:var(--amber);box-shadow:0 0 0 3px rgba(255,176,32,.18)}
+  .field .hint{font-size:10px;color:var(--faint)}
+
+  .bcode{background:var(--ink);padding:0;overflow:hidden;display:flex;flex-direction:column}
+  .bcode .ch{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:12px 16px 0}
+  .bcode pre{font-family:var(--mono);font-size:12px;line-height:1.75;margin:0;white-space:pre;color:#cdd9ec;tab-size:2;padding:10px 16px 16px;overflow-x:auto}
+  .bcode .cm{color:var(--faint);font-style:italic}
+  .bcode .kw{color:#ff9bbf}
+  .bcode .ty{color:var(--teal)}
+  .bcode .fn{color:var(--indigo)}
+  .bcode .num{color:var(--amber)}
+
+  .actions{display:flex;flex-wrap:wrap;gap:10px;padding:14px 16px;border-top:1px solid var(--line);align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--teal);color:var(--text)}
+  .btn.primary{background:linear-gradient(180deg,#6FF0DD,var(--teal));color:#06121f;font-weight:700;border:none}
+  .savemsg{font-family:var(--mono);font-size:11px;color:var(--green);margin-left:auto}
+
+  .record{margin:26px 0;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:18px 20px}
+  .record h3{margin:0 0 12px;font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+  .rgrid{display:grid;grid-template-columns:1fr;gap:6px}
+  @media(min-width:560px){.rgrid{grid-template-columns:1fr 1fr}}
+  .rrow{display:flex;justify-content:space-between;gap:12px;font-size:14px;border-bottom:1px dotted var(--line-2);padding:5px 0}
+  .rrow .rk{color:var(--muted)} .rrow .rv{font-family:var(--mono);color:var(--text)}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:15.5px}
+
+  .backlink{display:inline-block;margin:8px 0 0;font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--indigo);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px}
+  .backlink:hover{border-color:var(--teal);color:var(--text)}
+
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+
+  .print-only{display:none}
+
+  @media print{
+    body{background:#fff;color:#111;background-image:none}
+    header.top,.seg,.actions,.builder-head,.backlink,footer,.note,.no-print{display:none !important}
+    .print-only{display:block}
+    .wrap{max-width:100%}
+    .builder,.record{border:1px solid #ccc;box-shadow:none;background:#fff}
+    .bgrid{grid-template-columns:1fr;background:#fff}
+    .bctl,.bcode{background:#fff}
+    .bcode pre{color:#111}
+    .bcode .cm{color:#777} .bcode .kw{color:#a00} .bcode .ty{color:#067} .bcode .fn{color:#46a} .bcode .num{color:#a60}
+    .field input{border:1px solid #bbb;color:#111;background:#fff}
+    .field label,.fgroup-title,.bcode .ch{color:#444}
+    h1,.hero{color:#111} h1 .accent{-webkit-text-fill-color:#067;color:#067}
+    .record .rrow .rk{color:#444} .record .rrow .rv{color:#111}
+    a{color:#111}
+  }
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><span class="name">Closing the Loop</span></a>
+    <div class="top-meta">Tuning Worksheet</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">For your robot</div>
+    <h1>Tuning <span class="accent">worksheet</span></h1>
+    <p class="dek">Enter <b>your</b> mechanism's numbers and get paste-ready Phoenix&nbsp;6 Java, plus a printable record of the gains you measured. Everything saves in this browser. Pair it with the <a href="https://github.com/jerredcook/FRC-Control-Systems/tree/main/templates" style="color:var(--teal)">Java templates</a> and the course lessons.</p>
+    <div class="print-only" style="margin-top:8px;font-family:var(--mono);font-size:12px">Closing the Loop · Robot Tuning Record</div>
+  </div>
+
+  <div class="seg" id="typeSeg">
+    <button data-type="elevator" class="active">Elevator</button>
+    <button data-type="arm">Arm</button>
+    <button data-type="flywheel">Flywheel</button>
+  </div>
+
+  <div class="builder">
+    <div class="builder-head">
+      <span class="builder-title" id="bTitle">Elevator</span>
+      <span class="builder-tag">your values → Java</span>
+    </div>
+    <div class="bgrid">
+      <div class="bctl" id="form"></div>
+      <div class="bcode"><div class="ch" id="codeLabel">Subsystem config · Java · Phoenix 6</div><pre id="code"></pre></div>
+    </div>
+    <div class="actions no-print">
+      <button class="btn primary" id="print">⎙ Print / Save PDF</button>
+      <button class="btn" id="save">Save</button>
+      <button class="btn" id="reset">Reset this mechanism</button>
+      <span class="savemsg" id="savemsg"></span>
+    </div>
+  </div>
+
+  <div class="record">
+    <h3 id="recordTitle">Tuning record · Elevator</h3>
+    <div class="rgrid" id="record"></div>
+  </div>
+
+  <div class="note no-print">
+    <div class="nh">Get the gains from SysId — don't guess</div>
+    <p>kS, kG, kV, kA come from running the characterization (Lessons I.7 + III.5), not from a slider. Measure them, paste them here, then trim kP. Tuning order: configure → characterize → kP → Motion Magic → validate.</p>
+  </div>
+
+  <a class="backlink no-print" href="index.html">← Back to the course map</a>
+
+</div>
+
+<footer>Closing the Loop · A control systems course for FRC</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---- field definitions per mechanism ----
+  var SPEC = {
+    elevator: {
+      label:"Elevator", gravity:"Elevator_Static", motionMagic:true, control:"MotionMagicVoltage", target:"withPosition",
+      groups:[
+        {t:"Device", f:[
+          {k:"name", l:"Subsystem name", v:"Elevator", text:true, wide:true},
+          {k:"canId", l:"Motor CAN id", v:"10"},
+          {k:"gear", l:"Gear ratio (motor:out)", v:"12.0"},
+          {k:"stator", l:"Stator current limit (A)", v:"60"}
+        ]},
+        {t:"Slot0 gains — from SysId", f:[
+          {k:"kS", l:"kS (static, V)", v:"0.14"},
+          {k:"kG", l:"kG (gravity, V)", v:"0.31"},
+          {k:"kV", l:"kV (V per rot/s)", v:"0.115"},
+          {k:"kA", l:"kA (V per rot/s²)", v:"0.004"},
+          {k:"kP", l:"kP (V per rot err)", v:"12"},
+          {k:"kD", l:"kD", v:"0.2"}
+        ]},
+        {t:"Motion Magic", f:[
+          {k:"mmV", l:"Cruise velocity (rot/s)", v:"80"},
+          {k:"mmA", l:"Acceleration (rot/s²)", v:"200"}
+        ]}
+      ]
+    },
+    arm: {
+      label:"Arm", gravity:"Arm_Cosine", motionMagic:true, control:"MotionMagicVoltage", target:"withPosition", arm:true,
+      groups:[
+        {t:"Device", f:[
+          {k:"name", l:"Subsystem name", v:"Arm", text:true, wide:true},
+          {k:"canId", l:"Motor CAN id", v:"11"},
+          {k:"ccId", l:"CANcoder CAN id", v:"21"},
+          {k:"gear", l:"Rotor:sensor ratio", v:"50.0"},
+          {k:"stator", l:"Stator current limit (A)", v:"40"}
+        ]},
+        {t:"Slot0 gains — from SysId  ·  0 = horizontal!", f:[
+          {k:"kS", l:"kS (static, V)", v:"0.10"},
+          {k:"kG", l:"kG @ horizontal (V)", v:"0.40"},
+          {k:"kV", l:"kV (V per rot/s)", v:"0.9"},
+          {k:"kA", l:"kA (V per rot/s²)", v:"0.02"},
+          {k:"kP", l:"kP (V per rot err)", v:"60"},
+          {k:"kD", l:"kD", v:"0.5"}
+        ]},
+        {t:"Motion Magic", f:[
+          {k:"mmV", l:"Cruise velocity (rot/s)", v:"2.0"},
+          {k:"mmA", l:"Acceleration (rot/s²)", v:"4.0"}
+        ]}
+      ]
+    },
+    flywheel: {
+      label:"Flywheel", gravity:null, motionMagic:false, control:"VelocityVoltage", target:"withVelocity",
+      groups:[
+        {t:"Device", f:[
+          {k:"name", l:"Subsystem name", v:"Flywheel", text:true, wide:true},
+          {k:"canId", l:"Motor CAN id", v:"12"},
+          {k:"stator", l:"Stator current limit (A)", v:"60"}
+        ]},
+        {t:"Slot0 gains — from SysId  ·  no kG, small kP", f:[
+          {k:"kS", l:"kS (static, V)", v:"0.10"},
+          {k:"kV", l:"kV — dominant (V per rot/s)", v:"0.12"},
+          {k:"kP", l:"kP — keep small", v:"0.18"},
+          {k:"target", l:"Target speed (rot/s)", v:"60"}
+        ]}
+      ]
+    }
+  };
+
+  var STORE="closing-the-loop:worksheet";
+  function loadAll(){ try{ return JSON.parse(localStorage.getItem(STORE))||{}; }catch(e){ return {}; } }
+  function saveAll(d){ try{ localStorage.setItem(STORE, JSON.stringify(d)); }catch(e){} }
+
+  var saved = loadAll();
+  var type = "elevator";
+  var state = {};   // current mechanism field values
+
+  function defaults(t){
+    var o={}; SPEC[t].groups.forEach(function(g){ g.f.forEach(function(f){ o[f.k]=f.v; }); }); return o;
+  }
+  function loadType(t){
+    type=t;
+    state = Object.assign(defaults(t), saved[t]||{});
+    renderForm(); renderAll();
+    document.querySelectorAll("#typeSeg button").forEach(function(b){ b.classList.toggle("active", b.getAttribute("data-type")===t); });
+    document.getElementById("bTitle").textContent=SPEC[t].label;
+    document.getElementById("recordTitle").textContent="Tuning record · "+SPEC[t].label;
+  }
+
+  function renderForm(){
+    var sp=SPEC[type], html="";
+    sp.groups.forEach(function(g){
+      html+='<div class="fgroup-title">'+g.t+'</div><div class="fields">';
+      g.f.forEach(function(f){
+        html+='<div class="field'+(f.wide?' wide':'')+'">'+
+          '<label>'+f.l+'</label>'+
+          '<input data-k="'+f.k+'" type="'+(f.text?'text':'text')+'" value="'+(state[f.k]||'')+'" autocomplete="off" spellcheck="false" inputmode="'+(f.text?'text':'decimal')+'">'+
+        '</div>';
+      });
+      html+='</div>';
+    });
+    var form=document.getElementById("form");
+    form.innerHTML=html;
+    form.querySelectorAll("input").forEach(function(inp){
+      inp.addEventListener("input",function(){ state[inp.getAttribute("data-k")]=inp.value; renderAll(); });
+    });
+  }
+
+  function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+  function num(v){ return '<span class="num">'+esc(v)+'</span>'; }
+  function ty(v){ return '<span class="ty">'+v+'</span>'; }
+  function kw(v){ return '<span class="kw">'+v+'</span>'; }
+  function fn(v){ return '<span class="fn">'+v+'</span>'; }
+  function cm(v){ return '<span class="cm">'+v+'</span>'; }
+  function g(k){ return state[k]!==undefined && state[k]!=="" ? state[k] : "0"; }
+
+  function genCode(){
+    var sp=SPEC[type], cls=(state.name||sp.label).replace(/[^A-Za-z0-9_]/g,"")||sp.label;
+    var L=[];
+    L.push(kw("public class")+" "+ty(cls)+" "+kw("extends")+" "+ty("SubsystemBase")+" {");
+    L.push("  "+kw("private final")+" "+ty("TalonFX")+" motor = "+kw("new")+" "+ty("TalonFX")+"("+num(g("canId"))+");");
+    if(sp.arm) L.push("  "+kw("private final")+" "+ty("CANcoder")+" cancoder = "+kw("new")+" "+ty("CANcoder")+"("+num(g("ccId"))+");");
+    L.push("  "+kw("private final")+" "+ty(sp.control)+" request = "+kw("new")+" "+ty(sp.control)+"("+num("0")+")."+fn("withSlot")+"("+num("0")+");");
+    L.push("");
+    L.push("  "+kw("public")+" "+ty(cls)+"() {");
+    L.push("    "+ty("var")+" cfg = "+kw("new")+" "+ty("TalonFXConfiguration")+"();");
+    L.push("    cfg.MotorOutput.NeutralMode = "+ty("NeutralModeValue")+"."+(type==="flywheel"?"Coast":"Brake")+";");
+    L.push("    cfg.CurrentLimits.StatorCurrentLimit = "+num(g("stator"))+";");
+    L.push("    cfg.CurrentLimits.StatorCurrentLimitEnable = "+kw("true")+";");
+    if(sp.arm){
+      L.push("    cfg.Feedback.FeedbackSensorSource = "+ty("FeedbackSensorSourceValue")+".FusedCANcoder;");
+      L.push("    cfg.Feedback.FeedbackRemoteSensorID = cancoder."+fn("getDeviceID")+"();");
+      L.push("    cfg.Feedback.RotorToSensorRatio = "+num(g("gear"))+";");
+    } else if(type==="elevator"){
+      L.push("    cfg.Feedback.SensorToMechanismRatio = "+num(g("gear"))+";");
+    }
+    L.push("    cfg.Slot0.kS = "+num(g("kS"))+";");
+    if(sp.gravity) L.push("    cfg.Slot0.kG = "+num(g("kG"))+";");
+    L.push("    cfg.Slot0.kV = "+num(g("kV"))+";");
+    if(type!=="flywheel") L.push("    cfg.Slot0.kA = "+num(g("kA"))+";");
+    L.push("    cfg.Slot0.kP = "+num(g("kP"))+";");
+    if(type!=="flywheel") L.push("    cfg.Slot0.kD = "+num(g("kD"))+";");
+    if(sp.gravity) L.push("    cfg.Slot0.GravityType = "+ty("GravityTypeValue")+"."+sp.gravity+";");
+    if(sp.motionMagic){
+      L.push("    cfg.MotionMagic.MotionMagicCruiseVelocity = "+num(g("mmV"))+";");
+      L.push("    cfg.MotionMagic.MotionMagicAcceleration   = "+num(g("mmA"))+";");
+    }
+    L.push("    motor."+fn("getConfigurator")+"()."+fn("apply")+"(cfg);");
+    L.push("  }");
+    L.push("");
+    if(type==="flywheel"){
+      L.push("  "+kw("public")+" "+kw("void")+" "+fn("setSpeed")+"("+ty("double")+" rps) {");
+      L.push("    motor."+fn("setControl")+"(request."+fn("withVelocity")+"(rps));");
+      L.push("  }");
+      L.push("  "+cm("// spin up to "+g("target")+" rot/s, wait for atSpeed(), then shoot"));
+    } else {
+      L.push("  "+kw("public")+" "+kw("void")+" "+fn("setGoal")+"("+ty("double")+" rotations) {");
+      L.push("    motor."+fn("setControl")+"(request."+fn("withPosition")+"(rotations));");
+      L.push("  }");
+    }
+    L.push("}");
+    return L.join("\n");
+  }
+
+  function renderRecord(){
+    var sp=SPEC[type], html="";
+    sp.groups.forEach(function(grp){
+      grp.f.forEach(function(f){
+        html+='<div class="rrow"><span class="rk">'+esc(f.l)+'</span><span class="rv">'+esc(state[f.k]||"—")+'</span></div>';
+      });
+    });
+    document.getElementById("record").innerHTML=html;
+  }
+
+  function renderAll(){
+    document.getElementById("code").innerHTML=genCode();
+    renderRecord();
+  }
+
+  // ---- actions ----
+  document.querySelectorAll("#typeSeg button").forEach(function(b){
+    b.addEventListener("click",function(){ loadType(b.getAttribute("data-type")); });
+  });
+  document.getElementById("save").addEventListener("click",function(){
+    saved[type]=state; saveAll(saved);
+    var m=document.getElementById("savemsg"); m.textContent="saved ✓"; setTimeout(function(){m.textContent="";},1600);
+  });
+  document.getElementById("reset").addEventListener("click",function(){
+    if(confirm("Reset "+SPEC[type].label+" to default values?")){ state=defaults(type); delete saved[type]; saveAll(saved); renderForm(); renderAll(); }
+  });
+  document.getElementById("print").addEventListener("click",function(){ window.print(); });
+
+  loadType("elevator");
+})();
+</script>
+</body>
+</html>

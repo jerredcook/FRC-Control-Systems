@@ -153,6 +153,16 @@
     *{transition:none!important}
     html{scroll-behavior:auto}
   }
+
+  /* resources */
+  .resources{margin:40px 0 8px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#0c1320);padding:22px}
+  .resources h3{margin:0 0 6px;font-size:20px}
+  .resources .rp{margin:0 0 16px;color:var(--ink-dim);font-size:15.5px}
+  .res-links{display:flex;flex-wrap:wrap;gap:12px}
+  .res-links a{flex:1 1 240px;border:1px solid var(--line-bright);border-radius:11px;padding:14px 16px;text-decoration:none;background:var(--panel-2);transition:.14s}
+  .res-links a:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .res-links .rt{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin-bottom:5px}
+  .res-links .rd{color:var(--ink-dim);font-size:14px;line-height:1.45}
 </style>
 </head>
 <body>
@@ -190,6 +200,15 @@
 
   <!-- COURSE renders here -->
   <main id="course"></main>
+
+  <section class="resources">
+    <h3>Take it to your robot</h3>
+    <p class="rp">When you're ready to tune your own mechanism, these turn the lessons into real code.</p>
+    <div class="res-links">
+      <a href="worksheet.html"><div class="rt">⎙ Tuning Worksheet</div><div class="rd">Enter your robot's numbers → paste-ready Phoenix 6 Java and a printable gains record.</div></a>
+      <a href="https://github.com/jerredcook/FRC-Control-Systems/tree/main/templates"><div class="rt">&lt; &gt; Java Templates</div><div class="rd">Complete Elevator, Arm &amp; Flywheel subsystems to drop into your robot project.</div></a>
+    </div>
+  </section>
 
 </div>
 
