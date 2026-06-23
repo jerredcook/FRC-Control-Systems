@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deploy · Programming an FRC robot</title>
+<style>
+  :root{
+    --bg:#090d15; --bg-grad:#0b1019;
+    --panel:#0f1626; --panel-2:#131c30;
+    --line:#1e2840; --line-bright:#2c3c5e;
+    --ink:#e8edf7; --ink-dim:#aeb9d1; --muted:#75829e;
+    --amber:#ffb454; --teal:#34d6c0; --indigo:#8a93ff;
+    --good:#46d6a0; --bad:#ff6f6f;
+    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono","Cascadia Code",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 70% -10%, #161433 0%, transparent 60%),
+      linear-gradient(180deg,var(--bg-grad),var(--bg));
+    color:var(--ink);font-family:var(--sans);line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;
+  }
+  .wrap{max-width:940px;margin:0 auto;padding:0 22px}
+
+  header.top{border-bottom:1px solid var(--line);background:rgba(9,13,21,0.6);backdrop-filter:blur(6px);position:sticky;top:0;z-index:20}
+  .top-inner{max-width:940px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--ink-dim)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;text-decoration:none}
+  a.top-meta:hover{color:var(--ink)}
+
+  .hero{padding:64px 0 18px}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.32em;text-transform:uppercase;color:var(--amber)}
+  h1{font-size:clamp(40px,7vw,66px);line-height:1.0;margin:12px 0 12px;letter-spacing:-0.025em;font-weight:800}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,21px);color:var(--ink-dim);max-width:56ch;margin-top:6px}
+  .dek b{color:var(--ink);font-weight:650}
+
+  .progress-card{margin:26px 0 8px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#0c1320);padding:18px 20px;display:flex;flex-wrap:wrap;gap:18px;align-items:center;justify-content:space-between}
+  .pc-stats{display:flex;gap:26px;flex-wrap:wrap}
+  .pc-stat .k{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+  .pc-stat .v{font-family:var(--mono);font-size:26px;font-weight:700;margin-top:2px}
+  .pc-stat .v small{font-size:14px;color:var(--muted);font-weight:500}
+  .pc-stat .v.teal{color:var(--teal)} .pc-stat .v.amber{color:var(--amber)} .pc-stat .v.indigo{color:var(--indigo)}
+  .pc-bar-wrap{flex:1 1 220px;min-width:200px}
+  .pc-bar-label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+  .pc-bar{height:8px;border-radius:6px;background:var(--line-bright);overflow:hidden}
+  .pc-bar i{display:block;height:100%;width:0;border-radius:6px;background:linear-gradient(90deg,var(--indigo),var(--teal));transition:width .5s ease}
+  .reset-btn{border:1px solid var(--line-bright);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;padding:8px 12px;border-radius:8px;cursor:pointer;transition:.12s}
+  .reset-btn:hover{border-color:var(--bad);color:var(--bad)}
+  .howto{font-size:14.5px;color:var(--muted);margin:14px 0 0;font-style:italic}
+
+  .part{padding:34px 0 6px}
+  .part-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+  .part-tag{font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);border:1px solid var(--line-bright);border-radius:6px;padding:4px 9px}
+  .part h2{font-size:clamp(23px,3.4vw,30px);line-height:1.15;letter-spacing:-0.01em;margin:0;font-weight:750}
+  .part-sub{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .part-blurb{color:var(--ink-dim);font-size:16px;margin:8px 0 18px;max-width:64ch}
+
+  .lessons{display:grid;gap:12px}
+  @media(min-width:640px){.lessons{grid-template-columns:1fr 1fr}}
+  .card{position:relative;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:16px 16px 14px;display:flex;gap:14px;transition:.14s;overflow:hidden;border-left:3px solid var(--line-bright)}
+  .card.available{cursor:pointer;border-left-color:var(--indigo)}
+  .card.available:hover{border-color:var(--line-bright);transform:translateY(-2px);box-shadow:0 18px 40px -26px rgba(0,0,0,0.9)}
+  .card.planned{opacity:.62}
+  .card.next{border-left-color:var(--amber)}
+  .card.done{border-left-color:var(--good)}
+  .card.control{border-left-color:var(--teal);grid-column:1 / -1;background:linear-gradient(180deg,var(--panel),#0b1622)}
+  .card-num{flex:0 0 auto;width:38px;height:38px;border-radius:9px;background:var(--panel-2);border:1px solid var(--line-bright);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:700;color:var(--ink-dim)}
+  .card.done .card-num{background:rgba(70,214,160,0.14);border-color:var(--good);color:var(--good)}
+  .card.control .card-num{background:rgba(52,214,192,0.14);border-color:var(--teal);color:var(--teal)}
+  .card-body{flex:1 1 auto;min-width:0}
+  .card-title{font-size:16.5px;font-weight:650;color:var(--ink);margin:1px 0 4px}
+  .card-desc{font-size:13.5px;color:var(--ink-dim);line-height:1.45;margin:0}
+  .card-foot{display:flex;align-items:center;justify-content:space-between;margin-top:11px;gap:10px}
+  .pill{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;padding:3px 8px;border-radius:20px;border:1px solid var(--line-bright);color:var(--muted)}
+  .pill.open{color:var(--indigo);border-color:rgba(138,147,255,0.4);background:rgba(138,147,255,0.08)}
+  .pill.next{color:var(--amber);border-color:rgba(255,180,84,0.4);background:rgba(255,180,84,0.08)}
+  .pill.course{color:var(--teal);border-color:rgba(52,214,192,0.4);background:rgba(52,214,192,0.08)}
+  .open-link{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--indigo);display:inline-flex;gap:5px;align-items:center}
+  .card.planned .open-link{color:var(--muted)}
+  .card.control .open-link{color:var(--teal)}
+  .done-toggle{position:absolute;top:12px;right:12px;width:24px;height:24px;border-radius:50%;border:1px solid var(--line-bright);background:var(--panel-2);cursor:pointer;display:flex;align-items:center;justify-content:center;color:transparent;font-size:13px;transition:.12s;z-index:3}
+  .done-toggle:hover{border-color:var(--good)}
+  .card.done .done-toggle{background:var(--good);border-color:var(--good);color:#06121f}
+  .card.planned .done-toggle,.card.control .done-toggle{display:none}
+  .card.available{padding-right:44px}
+
+  footer{padding:48px 0 64px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  footer .small{display:block;margin-top:8px;letter-spacing:.06em;text-transform:none;font-size:11px}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand"><span class="dot"></span><span class="name">Deploy</span></div>
+    <a class="top-meta" href="index.html">← FRC Academy</a>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Code · the robot</div>
+    <h1>Program an<br>FRC <span class="accent">robot</span>.</h1>
+    <p class="dek">From your first line of Java to a full command-based robot you can drive: the <b>toolchain</b>, the <b>hardware</b>, <b>autonomous</b>, <b>vision</b>, and the pro practices that hold up under competition. A little coding helps; we build up the rest.</p>
+
+    <div class="progress-card">
+      <div class="pc-stats">
+        <div class="pc-stat"><div class="k">Completed</div><div class="v indigo" id="statDone">0 <small>/ 0</small></div></div>
+        <div class="pc-stat"><div class="k">Available now</div><div class="v amber" id="statOpen">0</div></div>
+        <div class="pc-stat"><div class="k">On the map</div><div class="v teal" id="statTotal">0</div></div>
+      </div>
+      <div class="pc-bar-wrap">
+        <div class="pc-bar-label"><span>Your progress</span><span id="pcPct">0%</span></div>
+        <div class="pc-bar"><i id="pcBar"></i></div>
+      </div>
+      <button class="reset-btn" id="resetBtn" title="Clear saved progress on this device">Reset</button>
+    </div>
+    <p class="howto">Lessons are meant in order. Finish a lesson's quiz and it marks itself done — progress is saved in this browser.</p>
+  </div>
+
+  <main id="course"></main>
+
+</div>
+
+<footer>
+  Deploy · Programming an FRC robot · part of <a href="index.html" style="color:var(--muted)">FRC Academy</a>
+  <span class="small">From your first line of code to a competition robot.</span>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  var COURSE=[
+    {code:"1", title:"The Toolchain", sub:"The dev environment",
+     blurb:"Before any robot code, you need the setup: the software, the roboRIO, and the loop of writing → deploying → running. Get comfortable here and everything after is just typing.",
+     lessons:[
+       {n:1, title:"What a Robot Program Is", desc:"The roboRIO, your laptop, and the deploy loop that ties them together.", file:null},
+       {n:2, title:"Setting Up WPILib", desc:"Install the WPILib VS Code, create your first project, tour the files.", file:null},
+       {n:3, title:"Build, Deploy, Run", desc:"Push code to the robot and drive it from the Driver Station.", file:null},
+       {n:4, title:"Git & GitHub for Teams", desc:"Version control, branches, and the workflow that keeps a team sane.", file:null},
+       {n:5, title:"Docs & Vendordeps", desc:"Install CTRE/REV libraries; read the official docs fluently.", file:null}
+     ]},
+    {code:"2", title:"Just-Enough Java", sub:"Programming basics, for robots",
+     blurb:"You don't need a CS degree — just the handful of Java ideas robot code leans on, taught with motors and sensors instead of toy examples.",
+     lessons:[
+       {n:1, title:"Variables, Types & Math", desc:"The building blocks: numbers, booleans, and doing arithmetic.", file:null},
+       {n:2, title:"Methods & Logic", desc:"Functions, if/else, and loops — making decisions in code.", file:null},
+       {n:3, title:"Classes & Objects", desc:"The heart of Java: objects that model real hardware.", file:null},
+       {n:4, title:"Inheritance & Interfaces", desc:"extends, @Override, and why WPILib is built on them.", file:null},
+       {n:5, title:"Collections & Enums", desc:"Lists, maps, and enums for clean robot states.", file:null}
+     ]},
+    {code:"3", title:"Command-Based Robots", sub:"How robot code is organized",
+     blurb:"The framework nearly every team uses. Once you see how subsystems and commands fit together, the rest of robot programming clicks into place.",
+     lessons:[
+       {n:1, title:"The Big Picture", desc:"Robot, RobotContainer, the scheduler, and the 20 ms loop.", file:null},
+       {n:2, title:"Subsystems", desc:"Modeling one mechanism — its hardware, state, and loop.", file:null},
+       {n:3, title:"Commands", desc:"Actions over time: the command lifecycle, start to finish.", file:null},
+       {n:4, title:"Command Compositions", desc:"Sequence, parallel, deadline, race — building behaviors.", file:null},
+       {n:5, title:"Triggers & Button Bindings", desc:"Wire the controller to your commands.", file:null},
+       {n:6, title:"Default Commands & Requirements", desc:"Who controls a subsystem, and how conflicts resolve.", file:null}
+     ]},
+    {code:"4", title:"Talking to Hardware", sub:"Motors, sensors, the gamepad",
+     blurb:"A robot is only as good as what it can sense and move. Here's how your code reads every sensor and commands every motor.",
+     lessons:[
+       {n:1, title:"Motors & Controllers", desc:"TalonFX and SparkMax: set, setVoltage, and configuration.", file:null},
+       {n:2, title:"Encoders & Position", desc:"Measuring rotation and converting to real-world units.", file:null},
+       {n:3, title:"Gyros & the IMU", desc:"Heading and rotation with a Pigeon or navX.", file:null},
+       {n:4, title:"Switches & Digital Sensors", desc:"Limit switches, beam breaks, and homing.", file:null},
+       {n:5, title:"The Gamepad", desc:"Joysticks, deadbands, and the operator interface.", file:null},
+       {n:6, title:"NetworkTables & Dashboards", desc:"Send data out to Elastic, Shuffleboard, AdvantageScope.", file:null}
+     ]},
+    {code:"5", title:"Make It Move", sub:"Control systems", control:true,
+     blurb:"Once your code can read sensors and drive motors, the question becomes how to make a mechanism go exactly where you tell it. That's an entire course of its own — and it's already built.",
+     lessons:[
+       {n:1, title:"Closing the Loop — the Control course", desc:"24 interactive lessons: feedback, PID, feedforward, CTRE Phoenix 6, tuned mechanisms, swerve, vision, and state-space.", link:"closing-the-loop.html"}
+     ]},
+    {code:"6", title:"Driving & Autonomous", sub:"Drivetrains, odometry, paths",
+     blurb:"Make the whole robot move — first by joystick, then on its own. Drivetrains, knowing where you are on the field, and following a planned path.",
+     lessons:[
+       {n:1, title:"The Drivetrain", desc:"Tank and arcade drive from controller input.", file:null},
+       {n:2, title:"Swerve Drive in Code", desc:"Modules and kinematics; the modern FRC drivetrain.", file:null},
+       {n:3, title:"Odometry", desc:"Tracking the robot's pose on the field.", file:null},
+       {n:4, title:"Trajectories & PathPlanner", desc:"Follow a smooth, planned path with PathPlanner/Choreo.", file:null},
+       {n:5, title:"Building an Autonomous", desc:"Command groups that score on their own.", file:null}
+     ]},
+    {code:"7", title:"Seeing & Thinking", sub:"Vision, pose, state machines",
+     blurb:"Give the robot eyes and a brain: read a camera, know exactly where it is, and coordinate a whole superstructure of mechanisms.",
+     lessons:[
+       {n:1, title:"Vision & AprilTags", desc:"What PhotonVision / Limelight hand your code.", file:null},
+       {n:2, title:"Closing the Loop on Vision", desc:"Aim and align using the camera's measurement.", file:null},
+       {n:3, title:"Pose Estimation", desc:"Fuse vision with odometry for an accurate pose.", file:null},
+       {n:4, title:"State Machines", desc:"Coordinate intake → index → shoot cleanly.", file:null}
+     ]},
+    {code:"8", title:"Pro Practices", sub:"Dashboards, sim, testing, comp",
+     blurb:"The difference between code that works on the bench and code that wins on Saturday: telemetry, simulation, tests, and competition-day discipline.",
+     lessons:[
+       {n:1, title:"Dashboards & Telemetry", desc:"Elastic and AdvantageScope; log everything that matters.", file:null},
+       {n:2, title:"Simulation", desc:"Test your robot code without a robot.", file:null},
+       {n:3, title:"Unit Testing", desc:"JUnit for robot code — catch bugs before the field does.", file:null},
+       {n:4, title:"Debugging & Robust Code", desc:"Defensive coding, brownouts, and fail-safes.", file:null},
+       {n:5, title:"Competition-Ready", desc:"Deploy hygiene and the build-season workflow.", file:null}
+     ]}
+  ];
+
+  var NEXT_ID="1-1";
+  var STORE_KEY="deploy:done";
+  function loadDone(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY))||{}; }catch(e){ return {}; } }
+  function saveDone(d){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(d)); }catch(e){} }
+  var done=loadDone();
+  function lid(c,n){ return c+"-"+n; }
+
+  var courseEl=document.getElementById("course");
+
+  function render(){
+    courseEl.innerHTML="";
+    COURSE.forEach(function(part){
+      var sec=document.createElement("section"); sec.className="part";
+      var head=document.createElement("div"); head.className="part-head";
+      head.innerHTML='<span class="part-tag">Part '+part.code+'</span><h2>'+part.title+'</h2><span class="part-sub">'+part.sub+'</span>';
+      sec.appendChild(head);
+      var blurb=document.createElement("p"); blurb.className="part-blurb"; blurb.textContent=part.blurb; sec.appendChild(blurb);
+      var grid=document.createElement("div"); grid.className="lessons";
+
+      part.lessons.forEach(function(L){
+        var id=lid(part.code,L.n);
+        var isControl=!!L.link, available=!!L.file, isDone=!!done[L.file], isNext=(id===NEXT_ID);
+        var card=document.createElement("div");
+        card.className="card "+(isControl?"control":(available?"available":"planned"))+(isDone?" done":"")+(isNext?" next":"");
+        card.setAttribute("data-id",id);
+        if(available) card.setAttribute("data-file",L.file);
+        if(isControl) card.setAttribute("data-link",L.link);
+
+        var pill, link, toggle="";
+        if(isControl){ pill='<span class="pill course">Course</span>'; link='<span class="open-link">Open course →</span>'; }
+        else if(available){ pill='<span class="pill open">Open</span>'; link='<span class="open-link">Start →</span>'; toggle='<button class="done-toggle" title="Mark complete">✓</button>'; }
+        else { pill=isNext?'<span class="pill next">Up next</span>':'<span class="pill">Planned</span>'; link='<span class="open-link">'+(isNext?"Building soon":"Planned")+'</span>'; }
+
+        card.innerHTML=toggle+
+          '<div class="card-num">'+(isControl?'★':(part.code+'.'+L.n))+'</div>'+
+          '<div class="card-body"><div class="card-title">'+L.title+'</div><p class="card-desc">'+L.desc+'</p>'+
+          '<div class="card-foot">'+pill+link+'</div></div>';
+        grid.appendChild(card);
+      });
+      sec.appendChild(grid);
+      courseEl.appendChild(sec);
+    });
+    updateStats();
+  }
+
+  function updateStats(){
+    var total=0, open=0, doneCount=0;
+    COURSE.forEach(function(part){ part.lessons.forEach(function(L){
+      if(L.link) return;              // the control-course card isn't counted here
+      total++; if(L.file){ open++; } if(done[L.file]){ doneCount++; }
+    });});
+    document.getElementById("statDone").innerHTML=doneCount+' <small>/ '+total+'</small>';
+    document.getElementById("statOpen").textContent=open;
+    document.getElementById("statTotal").textContent=total;
+    var pct=total?Math.round(doneCount/total*100):0;
+    document.getElementById("pcPct").textContent=pct+"%";
+    document.getElementById("pcBar").style.width=pct+"%";
+  }
+
+  courseEl.addEventListener("click",function(e){
+    var toggle=e.target.closest(".done-toggle");
+    var card=e.target.closest(".card"); if(!card) return;
+    var file=card.getAttribute("data-file"), linkc=card.getAttribute("data-link");
+    if(toggle){
+      e.stopPropagation();
+      if(!file) return;
+      if(done[file]){ delete done[file]; } else { done[file]=true; }
+      saveDone(done); card.classList.toggle("done", !!done[file]); updateStats(); return;
+    }
+    if(linkc){ window.location.href=linkc; return; }
+    if(file){ window.location.href=file; }
+  });
+
+  document.getElementById("resetBtn").addEventListener("click",function(){
+    if(confirm("Clear your saved progress for this course?")){ done={}; saveDone(done); render(); }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

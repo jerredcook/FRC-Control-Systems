@@ -51,4 +51,4 @@ kP only trims a small leftover error — so it's easy to tune and stays stable.
 - They're intentionally minimal — no logging, simulation, or limit-switch
   handling. Add those for competition; this is the control core.
 
-*Part of [Closing the Loop](../index.html) — a control systems course for FRC.*
+*Part of [Closing the Loop](../closing-the-loop.html) — the control course of the FRC Academy.*
