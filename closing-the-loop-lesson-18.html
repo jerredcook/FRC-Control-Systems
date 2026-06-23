@@ -243,7 +243,7 @@
         <span class="kw">null</span>,
         state -&gt; <span class="ty">SignalLogger</span>.<span class="fn">writeString</span>(<span class="str">"sysid-state"</span>, state.<span class="fn">toString</span>())),
     <span class="kw">new</span> <span class="ty">SysIdRoutine</span>.<span class="ty">Mechanism</span>(
-        volts -&gt; motor.<span class="fn">setControl</span>(sysIdReq.<span class="fn">withOutput</span>(volts)),  <span class="cm">// drive the motor</span>
+        volts -&gt; motor.<span class="fn">setControl</span>(sysIdReq.<span class="fn">withOutput</span>(volts.<span class="fn">in</span>(Volts))),  <span class="cm">// drive the motor</span>
         <span class="kw">null</span>,                 <span class="cm">// SignalLogger already records the signals</span>
         <span class="kw">this</span>));
 
@@ -263,7 +263,7 @@ cfg.Slot0.kP = <span class="num">12</span>;     <span class="cm">// then tune kP
     <div class="code-ex">
       <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
       <div class="ctask">In the SysId mechanism, the routine hands you a voltage to apply. Drive the motor with it. Fill the blank, then Check.</div>
-<pre class="code">volts -&gt; motor.<span class="fn">setControl</span>(sysIdReq.<span class="fn">withOutput</span>(<input class="blank" data-ans="volts" aria-label="blank" autocomplete="off" spellcheck="false">))</pre>
+<pre class="code">volts -&gt; motor.<span class="fn">setControl</span>(sysIdReq.<span class="fn">withOutput</span>(<input class="blank" data-ans="volts" aria-label="blank" autocomplete="off" spellcheck="false">.<span class="fn">in</span>(Volts)))</pre>
       <div class="code-actions">
         <button class="btn" id="check">Check</button>
         <button class="btn" id="reveal">Reveal</button>

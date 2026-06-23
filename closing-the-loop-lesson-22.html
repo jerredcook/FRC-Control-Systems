@@ -363,9 +363,7 @@
       // field-frame corner offset (robot +x is forward)
       var Rx=(c.lx*cosH - c.ly*sinH), Ry=(c.lx*sinH + c.ly*cosH);
       var px=cx + Rx*rpx, py=cy - Ry*rpx;
-      // field-frame module velocity = translation + rotation
-      var mvx=S.str + (-S.rot)*( -Ry );   // = str + rot*Ry... see below
-      // proper: module vel = (vx - omega*Ry_world, vy + omega*Rx_world)
+      // field-frame module velocity = chassis translation + rotation (omega x r)
       var vx=S.str, vy=S.fwd, omega=S.rot;
       var mvX=vx - omega*Ry;
       var mvY=vy + omega*Rx;
