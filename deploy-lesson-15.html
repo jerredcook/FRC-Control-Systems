@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deploy · Part 3.5 — Triggers &amp; Button Bindings</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(138,140,248,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .padwrap{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line)}
+  @media(min-width:640px){.padwrap{grid-template-columns:1.1fr 1fr}}
+  .pad{background:#0B1322;padding:18px 16px}
+  .btnrow{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+  .gbtn{display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;user-select:none}
+  .gbtn .circ{width:50px;height:50px;border-radius:50%;border:2px solid var(--c);background:#0E1525;color:var(--c);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:700;font-size:16px;transition:.1s}
+  .gbtn.held .circ{background:var(--c);color:#0a0f24;box-shadow:0 0 18px -3px var(--c);transform:translateY(2px)}
+  .gbtn .bind{font-family:var(--mono);font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--faint);text-align:center;line-height:1.3}
+  .gbtn .bind b{color:var(--muted)}
+  .side{background:#080d16;padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+  .active{}
+  .active .h{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:6px}
+  .active .ac{font-family:var(--mono);font-size:12.5px;color:var(--green);padding:2px 0}
+  .active .none{font-family:var(--mono);font-size:12px;color:var(--faint)}
+  .log{flex:1;min-height:110px;max-height:150px;overflow-y:auto;font-family:var(--mono);font-size:12px;line-height:1.6}
+  .log .h{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:6px}
+  .log .l{color:var(--muted)} .log .l .on{color:var(--amber)} .log .l .wt{color:var(--teal)} .log .l .off{color:var(--faint)}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--indigo);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:13px;line-height:1.85;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic} .code .kw{color:#ff9bbf} .code .ty{color:var(--teal)} .code .fn{color:var(--indigo)} .code .num{color:var(--amber)}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(138,140,248,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .code-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .code-ex .chead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .code-ex .chead .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,176,32,.14);display:grid;place-items:center;color:var(--amber);font-size:13px}
+  .code-ex .ctask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .code-ex pre.code{margin:0 0 14px}
+  .blank{font-family:var(--mono);font-size:13px;width:11ch;text-align:center;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:2px 4px;outline:none}
+  .blank:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
+  .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:110px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="code.html"><span class="dot"></span><span class="name">Deploy</span></a>
+    <div class="top-meta">Part 3 · 05 / 06 · Command-Based</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 3 · 05</b> Command-Based Robots</div>
+    <div class="eyebrow">Triggers &amp; Button Bindings</div>
+    <h1>Press a button,<br><span class="accent">fire</span> a command.</h1>
+    <p class="dek">Bindings connect the controller to your commands. A button press starts an action — once, or for as long as you hold it. Try the gamepad.</p>
+  </div>
+
+  <section>
+    <p class="lead">A binding wires a condition to a command.</p>
+    <p>In <span class="k">RobotContainer</span> you say "when this happens, run that." The most common condition is a button. <span class="k">onTrue</span> fires once when it's pressed; <span class="k">whileTrue</span> runs only while it's held and ends on release. Press the buttons below — watch what fires, and what keeps running.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">CommandXboxController</span><span class="demo-tag">press a button</span></div>
+      <div class="padwrap">
+        <div class="pad"><div class="btnrow" id="btnrow"></div></div>
+        <div class="side">
+          <div class="active"><div class="h">Running now (whileTrue)</div><div id="activeList"><div class="none">— nothing held —</div></div></div>
+          <div class="log"><div class="h">Event log</div><div id="log"></div></div>
+        </div>
+      </div>
+      <div class="caption" style="padding:0 16px 14px;margin:0">Tap a button to press &amp; release it; the colored ones with "hold" stay active while pressed. (On a real robot you'd hold the actual button.)</div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">In code</div>
+    <h2>Bindings live in RobotContainer</h2>
+    <p>You grab the controller, then chain a condition to a command. <span class="k">onTrue</span>, <span class="k">whileTrue</span>, <span class="k">onFalse</span>, and <span class="k">toggleOnTrue</span> cover almost everything:</p>
+    <div class="codewrap">
+      <div class="clabel">configureBindings() <span class="badge">Java · WPILib</span></div>
+<pre class="code"><span class="kw">private final</span> <span class="ty">CommandXboxController</span> driver = <span class="kw">new</span> <span class="ty">CommandXboxController</span>(<span class="num">0</span>);
+
+driver.<span class="fn">a</span>().<span class="fn">onTrue</span>(intake.<span class="fn">intakeCommand</span>());      <span class="cm">// press → run once</span>
+driver.<span class="fn">x</span>().<span class="fn">whileTrue</span>(shooter.<span class="fn">aim</span>());          <span class="cm">// held → runs; release → ends</span>
+driver.<span class="fn">rightBumper</span>().<span class="fn">whileTrue</span>(drive.<span class="fn">slowMode</span>());</pre>
+    </div>
+    <div class="note indigo">
+      <div class="nh">A Trigger doesn't have to be a button</div>
+      <p>Under the hood, <span class="k">driver.a()</span> is just a <span class="k">Trigger</span> — a boolean condition. <em>Any</em> boolean can be one. Want the controller to rumble when the intake loads a game piece? <span class="k">new Trigger(intake::hasGamePiece).onTrue(rumble())</span>. That's how robots react to sensors, not just buttons.</p>
+    </div>
+
+    <div class="code-ex">
+      <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
+      <div class="ctask">Aim should run <em>only while X is held</em> and stop the instant it's released. Fill in the binding.</div>
+<pre class="code">driver.<span class="fn">x</span>().<input class="blank" data-ans="whiletrue" aria-label="blank" autocomplete="off" spellcheck="false">(shooter.<span class="fn">aim</span>());</pre>
+      <div class="code-actions">
+        <button class="btn" id="check">Check</button>
+        <button class="btn" id="reveal">Reveal</button>
+        <span class="code-result" id="cres"></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">What's the difference between onTrue and whileTrue?</div>
+        <div class="opts">
+          <button class="opt">They're the same</button>
+          <button class="opt">onTrue fires once on press; whileTrue runs only while held and ends on release</button>
+          <button class="opt">whileTrue only works on bumpers</button>
+        </div>
+        <div class="explain">onTrue schedules the command once when the condition becomes true. whileTrue runs the command for as long as the condition stays true, interrupting it the moment you let go.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">Besides buttons, what can a Trigger react to?</div>
+        <div class="opts">
+          <button class="opt">Only the A button</button>
+          <button class="opt">Nothing else</button>
+          <button class="opt">Any boolean — like a sensor reading "game piece detected"</button>
+        </div>
+        <div class="explain">A Trigger wraps any boolean condition. new Trigger(intake::hasGamePiece) lets the robot react to a sensor automatically — the same binding machinery, no button required.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">Where do you set up button bindings?</div>
+        <div class="opts">
+          <button class="opt">In RobotContainer, once at startup</button>
+          <button class="opt">In each subsystem's periodic()</button>
+          <button class="opt">In Main.java</button>
+        </div>
+        <div class="explain">Bindings are wiring, so they live in RobotContainer's configureBindings(), called once when the robot starts. After that the scheduler watches the triggers for you.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 3 · 05 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Binding</b><span>Connects a condition to a command.</span></div>
+        <div class="gl"><b>onTrue</b><span>Fires once when it becomes true.</span></div>
+        <div class="gl"><b>whileTrue</b><span>Runs while held; ends on release.</span></div>
+        <div class="gl"><b>Trigger</b><span>Any boolean condition.</span></div>
+        <div class="gl"><b>From a sensor</b><span>new Trigger(intake::hasGamePiece).</span></div>
+        <div class="gl"><b>Where</b><span>RobotContainer.configureBindings().</span></div>
+      </div>
+      <a class="next" href="deploy-lesson-16.html">
+        <div class="n-eyebrow">Up next · Part 3 · 06 · Finale</div>
+        <h3>Default Commands &amp; Requirements</h3>
+        <p>Last piece: what runs when nothing else is, and how the scheduler stops two commands from fighting over one mechanism.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="deploy-lesson-14.html">← Part 3 · 04 · Command Compositions</a>
+    <a class="map" href="code.html">Course map</a>
+    <a href="deploy-lesson-16.html">Part 3 · 06 · Default Commands →</a>
+  </nav>
+
+</div>
+
+<footer>Deploy · Programming an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var BTNS=[
+    {id:'a', label:'A', col:'#43D67E', type:'onTrue',    cmd:'Intake a note'},
+    {id:'x', label:'X', col:'#34D7C5', type:'whileTrue', cmd:'Aim at target'},
+    {id:'b', label:'B', col:'#FF6B6B', type:'onTrue',    cmd:'Stop everything'},
+    {id:'y', label:'Y', col:'#FFB020', type:'onTrue',    cmd:'Score high'},
+    {id:'lb',label:'LB',col:'#8E8CF8', type:'whileTrue', cmd:'Slow mode'}
+  ];
+  var rowEl=document.getElementById('btnrow'), logEl=document.getElementById('log'), activeEl=document.getElementById('activeList');
+  var active={};
+  BTNS.forEach(function(b){
+    var d=document.createElement('div'); d.className='gbtn'; d.style.setProperty('--c',b.col); d.setAttribute('data-id',b.id);
+    d.innerHTML='<div class="circ">'+b.label+'</div><div class="bind">'+(b.type==='whileTrue'?'<b>hold</b><br>'+b.cmd:'<b>press</b><br>'+b.cmd)+'</div>';
+    d.addEventListener('click',function(){ press(b, d); });
+    rowEl.appendChild(d);
+  });
+  function logLine(html){ var l=document.createElement('div'); l.className='l'; l.innerHTML=html; logEl.insertBefore(l, logEl.firstChild); while(logEl.children.length>8) logEl.removeChild(logEl.lastChild); }
+  function renderActive(){
+    var keys=Object.keys(active);
+    activeEl.innerHTML = keys.length ? keys.map(function(k){return '<div class="ac">▶ '+active[k]+'</div>';}).join('') : '<div class="none">— nothing held —</div>';
+  }
+  function press(b, el){
+    if(b.type==='onTrue'){
+      logLine('<span class="on">'+b.label+' pressed</span> → onTrue → <b>'+b.cmd+'</b> scheduled');
+      el.classList.add('held'); setTimeout(function(){ el.classList.remove('held'); }, 220);
+    } else {
+      var held=el.classList.toggle('held');
+      if(held){ active[b.id]=b.cmd; logLine('<span class="wt">'+b.label+' held</span> → whileTrue → <b>'+b.cmd+'</b> running'); }
+      else { delete active[b.id]; logLine('<span class="off">'+b.label+' released</span> → <b>'+b.cmd+'</b> ended'); }
+      renderActive();
+    }
+  }
+  logLine('<span style="color:var(--faint)">— press a button to bind it —</span>'); renderActive();
+
+  var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
+  function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'').replace(/\(\)$/,'');}
+  document.getElementById('check').addEventListener('click',function(){
+    var all=true;
+    blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite — "only while held" is whileTrue'; res.className='code-result '+(all?'ok':'no');
+  });
+  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='whileTrue';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(idx===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="deploy:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

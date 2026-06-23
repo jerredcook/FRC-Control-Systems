@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deploy · Part 3.2 — Subsystems</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(138,140,248,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .anat{font-family:var(--mono);font-size:13px;line-height:1.95;margin:0;padding:14px 16px;white-space:pre;overflow-x:auto;color:#cdd9ec;background:#080d16}
+  .anat .ln{display:inline;border-radius:4px;padding:1px 0}
+  .anat .ln.click{cursor:pointer}
+  .anat .ln.click:hover{background:rgba(138,140,248,.10)}
+  .anat .ln.active{background:rgba(138,140,248,.18);box-shadow:-4px 0 0 rgba(138,140,248,.6)}
+  .cm{color:var(--faint);font-style:italic} .kw{color:#ff9bbf} .ty{color:var(--teal)} .fn{color:var(--indigo)} .num{color:var(--amber)} .an{color:var(--amber)}
+  .detail{padding:14px 16px;border-top:1px solid var(--line);background:#0B1322;font-size:14.5px;color:var(--muted);min-height:56px}
+  .detail b{color:var(--text)} .detail .tg{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--indigo);border:1px solid var(--line-2);border-radius:6px;padding:2px 7px;margin-right:8px}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--indigo);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:13.5px;line-height:1.85;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  pre.code .cm{color:var(--faint);font-style:italic} pre.code .kw{color:#ff9bbf} pre.code .ty{color:var(--teal)} pre.code .fn{color:var(--indigo)} pre.code .num{color:var(--amber)} pre.code .an{color:var(--amber)}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(138,140,248,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .code-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .code-ex .chead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .code-ex .chead .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,176,32,.14);display:grid;place-items:center;color:var(--amber);font-size:13px}
+  .code-ex .ctask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .code-ex pre.code{margin:0 0 14px}
+  .blank{font-family:var(--mono);font-size:13px;width:11ch;text-align:center;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:2px 4px;outline:none}
+  .blank:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
+  .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:110px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="code.html"><span class="dot"></span><span class="name">Deploy</span></a>
+    <div class="top-meta">Part 3 · 02 / 06 · Command-Based</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 3 · 02</b> Command-Based Robots</div>
+    <div class="eyebrow">Subsystems</div>
+    <h1>A home for<br>one <span class="accent">mechanism</span>.</h1>
+    <p class="dek">A subsystem wraps one piece of hardware — its motor, its sensor, its state — behind a clean set of methods. It's the noun the rest of your robot talks to.</p>
+  </div>
+
+  <section>
+    <p class="lead">One subsystem, one mechanism.</p>
+    <p>An <span class="k">Elevator</span> subsystem owns the elevator's motor, remembers what it's trying to do, and updates itself every loop. Nothing else in your code touches that motor directly — they ask the subsystem. Click each part of a real subsystem to see its job.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Elevator.java</span><span class="demo-tag">click a part</span></div>
+<pre class="anat" id="anat"><span class="ln click" data-k="ext"><span class="kw">public class</span> <span class="ty">Elevator</span> <span class="kw">extends</span> <span class="ty">SubsystemBase</span> {</span>
+  <span class="ln click" data-k="hw"><span class="kw">private final</span> <span class="ty">TalonFX</span> motor = <span class="kw">new</span> <span class="ty">TalonFX</span>(<span class="num">10</span>);</span>
+  <span class="ln click" data-k="state"><span class="kw">private</span> <span class="ty">double</span> goalMeters = <span class="num">0</span>;</span>
+
+  <span class="ln click" data-k="api"><span class="kw">public</span> <span class="kw">void</span> <span class="fn">setGoal</span>(<span class="ty">double</span> meters) { goalMeters = meters; }</span>
+
+  <span class="an">@Override</span>
+  <span class="ln click" data-k="per"><span class="kw">public</span> <span class="kw">void</span> <span class="fn">periodic</span>() {                <span class="cm">// runs every 20 ms</span></span>
+    <span class="cm">  // read the sensor, drive the motor toward goalMeters</span>
+  }
+}</pre>
+      <div class="detail" id="detail">Click a highlighted line to learn what it does.</div>
+    </div>
+    <p class="caption">Everything the elevator needs is in one file. Commands and the rest of the robot only ever call its public methods — they never reach in and grab the motor.</p>
+  </section>
+
+  <section>
+    <div class="kicker">The big rule</div>
+    <h2>The subsystem owns its hardware</h2>
+    <p>This is the discipline that keeps a robot sane: <strong>only the subsystem touches its own motors and sensors.</strong> Commands and other code ask through public methods like <span class="k">setGoal()</span>. That way there's exactly one place that controls the elevator, and the scheduler can guarantee two things never fight over it (more in Lesson 3.6).</p>
+    <div class="note indigo">
+      <div class="nh">periodic() is the subsystem's heartbeat</div>
+      <p>The scheduler calls every subsystem's <span class="k">periodic()</span> once per loop, no matter what command is running. It's the natural home for the control loop — reading the sensor and driving the motor toward the goal. (Exactly the loops from the Control course live here.)</p>
+    </div>
+
+    <div class="code-ex">
+      <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
+      <div class="ctask">Name the method the scheduler calls on a subsystem every 20 ms. Fill the blank.</div>
+<pre class="code"><span class="an">@Override</span>
+<span class="kw">public</span> <span class="kw">void</span> <input class="blank" data-ans="periodic" aria-label="blank" autocomplete="off" spellcheck="false">() {
+  <span class="cm">// runs once per loop, always</span>
+}</pre>
+      <div class="code-actions">
+        <button class="btn" id="check">Check</button>
+        <button class="btn" id="reveal">Reveal</button>
+        <span class="code-result" id="cres"></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">What does a subsystem contain?</div>
+        <div class="opts">
+          <button class="opt">The whole robot's code in one place</button>
+          <button class="opt">One mechanism — its hardware, its state, and its periodic loop</button>
+          <button class="opt">Only the controller bindings</button>
+        </div>
+        <div class="explain">A subsystem models one mechanism: it owns that mechanism's motor and sensor, holds its state (like a goal), and updates itself in periodic(). The Elevator subsystem is everything-elevator.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 2</div>
+        <div class="qt">Who is allowed to command the elevator's motor directly?</div>
+        <div class="opts">
+          <button class="opt">Only the Elevator subsystem — others call its public methods</button>
+          <button class="opt">Any command, any time</button>
+          <button class="opt">The Driver Station</button>
+        </div>
+        <div class="explain">Encapsulation: the subsystem owns its hardware. Commands ask via methods like setGoal(). One owner means no two pieces of code can secretly fight over the same motor.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 3</div>
+        <div class="qt">When does a subsystem's <code style="font-family:var(--mono);color:var(--teal)">periodic()</code> run?</div>
+        <div class="opts">
+          <button class="opt">Only when a command uses it</button>
+          <button class="opt">Once at startup</button>
+          <button class="opt">Every loop, always — the scheduler calls it for every subsystem</button>
+        </div>
+        <div class="explain">periodic() runs every 20 ms regardless of what commands are active, so it's the reliable home for a subsystem's continuous control loop.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 3 · 02 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Subsystem</b><span>One mechanism, wrapped up.</span></div>
+        <div class="gl"><b>Owns hardware</b><span>Only it touches its motor/sensor.</span></div>
+        <div class="gl"><b>State</b><span>What it remembers (a goal).</span></div>
+        <div class="gl"><b>Public methods</b><span>How others ask it to act.</span></div>
+        <div class="gl"><b>periodic()</b><span>Its per-loop heartbeat.</span></div>
+        <div class="gl"><b>Encapsulation</b><span>One owner = no fights over a motor.</span></div>
+      </div>
+      <a class="next" href="deploy-lesson-13.html">
+        <div class="n-eyebrow">Up next · Part 3 · 03</div>
+        <h3>Commands</h3>
+        <p>Subsystems are the nouns. Now the verbs: a Command is an action that plays out over time. Meet its four-method lifecycle.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="deploy-lesson-11.html">← Part 3 · 01 · The Big Picture</a>
+    <a class="map" href="code.html">Course map</a>
+    <a href="deploy-lesson-13.html">Part 3 · 03 · Commands →</a>
+  </nav>
+
+</div>
+
+<footer>Deploy · Programming an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var DETAIL={
+    ext:'<span class="tg">extends SubsystemBase</span><b>It\'s a subsystem.</b> Extending SubsystemBase auto-registers it with the scheduler, so its periodic() gets called every loop (Lesson 2.4).',
+    hw:'<span class="tg">hardware</span><b>The motor it owns.</b> A TalonFX field — the physical device on CAN id 10. This subsystem, and only this subsystem, controls it.',
+    state:'<span class="tg">state</span><b>What it remembers.</b> goalMeters holds where the elevator is trying to go. Commands change it; periodic() works toward it.',
+    api:'<span class="tg">public API</span><b>How others ask it to act.</b> setGoal() is the door in — commands call it to set a target, without ever touching the motor directly.',
+    per:'<span class="tg">periodic()</span><b>The per-loop loop.</b> Called every 20 ms by the scheduler. Here you read the sensor and drive the motor toward goalMeters — the control loop\'s home.'
+  };
+  var detail=document.getElementById('detail');
+  document.querySelectorAll('#anat .ln.click').forEach(function(l){
+    l.addEventListener('click',function(){
+      document.querySelectorAll('#anat .ln').forEach(function(x){x.classList.remove('active');});
+      l.classList.add('active'); detail.innerHTML=DETAIL[l.getAttribute('data-k')]||'';
+    });
+  });
+
+  var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
+  function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'').replace(/\(\)$/,'');}
+  document.getElementById('check').addEventListener('click',function(){
+    var all=true;
+    blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite — it\'s periodic'; res.className='code-result '+(all?'ok':'no');
+  });
+  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='periodic';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(idx===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="deploy:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

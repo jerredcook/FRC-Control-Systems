@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deploy · Part 3.4 — Command Compositions</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(138,140,248,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  canvas.gantt{display:block;width:100%;height:220px}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .seg{display:flex;gap:0;border:1px solid var(--line-2);border-radius:9px;overflow:hidden}
+  .seg button{border:none;background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:9px 11px;cursor:pointer;transition:.12s;border-right:1px solid var(--line-2)}
+  .seg button:last-child{border-right:none}
+  .seg button:hover{color:var(--text)} .seg button.active{background:var(--indigo);color:#0a0f24;font-weight:700}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .btn.primary{background:linear-gradient(180deg,#a7adff,var(--indigo));color:#0a0f24;font-weight:700;border:none}
+  .ruleline{padding:12px 16px;border-top:1px solid var(--line);background:#080d16;font-size:14.5px;color:var(--muted)}
+  .ruleline b{color:var(--text)}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--indigo);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:13px;line-height:1.85;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic} .code .kw{color:#ff9bbf} .code .ty{color:var(--teal)} .code .fn{color:var(--indigo)} .code .num{color:var(--amber)}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(138,140,248,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .code-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .code-ex .chead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .code-ex .chead .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,176,32,.14);display:grid;place-items:center;color:var(--amber);font-size:13px}
+  .code-ex .ctask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .code-ex pre.code{margin:0 0 14px}
+  .blank{font-family:var(--mono);font-size:13px;width:12ch;text-align:center;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:2px 4px;outline:none}
+  .blank:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
+  .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:90px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="code.html"><span class="dot"></span><span class="name">Deploy</span></a>
+    <div class="top-meta">Part 3 · 04 / 06 · Command-Based</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 3 · 04</b> Command-Based Robots</div>
+    <div class="eyebrow">Command Compositions</div>
+    <h1>Glue verbs into<br><span class="accent">sentences</span>.</h1>
+    <p class="dek">One command is an action. Combine them — in order, all at once, or racing to the finish — and you describe a whole routine. Watch each rule on a timeline.</p>
+  </div>
+
+  <section>
+    <p class="lead">Real behaviors are several commands woven together.</p>
+    <p>"Drive to the goal, <em>then</em> shoot." "Aim <em>while</em> spinning up." WPILib gives you composition operators to express exactly that. Pick one below and play it — three commands (<b>A</b>=2 s, <b>B</b>=3 s, <b>C</b>=1 s) run, and the whole group ends by that rule.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Composition timeline</span><span class="demo-tag" id="typeTag">sequence</span></div>
+      <canvas class="gantt" id="gantt"></canvas>
+      <div class="ruleline" id="rule"></div>
+      <div class="controls">
+        <div class="seg" id="seg">
+          <button data-t="sequence" class="active">Sequence</button>
+          <button data-t="parallel">Parallel</button>
+          <button data-t="deadline">Deadline (A)</button>
+          <button data-t="race">Race</button>
+        </div>
+        <button class="btn primary" id="playBtn">Play ▸</button>
+      </div>
+    </div>
+    <p class="caption">Green caps = the command finished on its own. Amber caps = it was cut short because the group's rule ended first.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In code</div>
+    <h2>The four operators</h2>
+    <p>Each composition has a factory (and a fluent method). They take any commands and return a new command you can schedule like any other:</p>
+    <div class="codewrap">
+      <div class="clabel">Composing commands <span class="badge">Java · WPILib</span></div>
+<pre class="code"><span class="ty">Commands</span>.<span class="fn">sequence</span>(a, b, c);    <span class="cm">// one after another; ends when the last finishes</span>
+<span class="ty">Commands</span>.<span class="fn">parallel</span>(a, b, c);    <span class="cm">// all at once; ends when ALL finish</span>
+<span class="ty">Commands</span>.<span class="fn">deadline</span>(a, b, c);    <span class="cm">// all at once; ends when A (the deadline) finishes</span>
+<span class="ty">Commands</span>.<span class="fn">race</span>(a, b, c);        <span class="cm">// all at once; ends when ANY finishes</span>
+
+a.<span class="fn">andThen</span>(b);          <span class="cm">// fluent sequence: a, then b</span>
+aim.<span class="fn">alongWith</span>(spinUp);   <span class="cm">// fluent parallel</span>
+drive.<span class="fn">withTimeout</span>(<span class="num">3</span>);   <span class="cm">// race against a 3-second timer</span></pre>
+    </div>
+    <div class="note indigo">
+      <div class="nh">withTimeout is just a race</div>
+      <p><span class="k">command.withTimeout(3)</span> races your command against a 3-second timer — whichever finishes first ends the group. It's the everyday way to say "do this, but give up after 3 seconds," and it keeps an autonomous routine from hanging forever.</p>
+    </div>
+
+    <div class="code-ex">
+      <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
+      <div class="ctask">Run "drive to the goal" and then "score" — one after the other. Fill in the composition.</div>
+<pre class="code"><span class="ty">Commands</span>.<input class="blank" data-ans="sequence" aria-label="blank" autocomplete="off" spellcheck="false">(driveToGoal, score);</pre>
+      <div class="code-actions">
+        <button class="btn" id="check">Check</button>
+        <button class="btn" id="reveal">Reveal</button>
+        <span class="code-result" id="cres"></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="0">
+        <div class="qn">Question 1</div>
+        <div class="qt">A parallel composition of A, B, C ends when…</div>
+        <div class="opts">
+          <button class="opt">ALL of them finish</button>
+          <button class="opt">the first one finishes</button>
+          <button class="opt">exactly 3 seconds pass</button>
+        </div>
+        <div class="explain">Parallel runs them together and waits for every one to complete. (Race ends when the first finishes; deadline ends when the chosen deadline command finishes.)</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">You want "aim, but give up after 2 seconds." Which fits?</div>
+        <div class="opts">
+          <button class="opt">aim.andThen(wait)</button>
+          <button class="opt">Commands.sequence(aim)</button>
+          <button class="opt">aim.withTimeout(2)</button>
+        </div>
+        <div class="explain">withTimeout(2) races aim against a 2-second timer — whichever ends first stops the group. It's the standard "do it, but don't hang" pattern.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 3</div>
+        <div class="qt">In a race(A, B, C), when does the whole group end?</div>
+        <div class="opts">
+          <button class="opt">When all three finish</button>
+          <button class="opt">The instant the first one finishes — the rest are interrupted</button>
+          <button class="opt">Never</button>
+        </div>
+        <div class="explain">A race ends the moment any member finishes; the others are interrupted (and their end(true) runs). Useful for "shoot OR time out," for example.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 3 · 04 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>sequence</b><span>One after another.</span></div>
+        <div class="gl"><b>parallel</b><span>Together; ends when ALL finish.</span></div>
+        <div class="gl"><b>deadline</b><span>Together; ends with the deadline command.</span></div>
+        <div class="gl"><b>race</b><span>Together; ends when ANY finishes.</span></div>
+        <div class="gl"><b>andThen / alongWith</b><span>Fluent sequence / parallel.</span></div>
+        <div class="gl"><b>withTimeout</b><span>Race against a timer.</span></div>
+      </div>
+      <a class="next" href="deploy-lesson-15.html">
+        <div class="n-eyebrow">Up next · Part 3 · 05</div>
+        <h3>Triggers &amp; Button Bindings</h3>
+        <p>Commands are built. Now make them happen: bind them to the controller, so a button press fires a command. Press buttons and watch them go.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="deploy-lesson-13.html">← Part 3 · 03 · Commands</a>
+    <a class="map" href="code.html">Course map</a>
+    <a href="deploy-lesson-15.html">Part 3 · 05 · Triggers &amp; Bindings →</a>
+  </nav>
+
+</div>
+
+<footer>Deploy · Programming an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  function makeCanvas(cv){
+    var ctx=cv.getContext('2d'); var o={cv:cv,ctx:ctx,w:0,h:0};
+    function fit(){ var r=cv.getBoundingClientRect(); if(!r.width)return; var dpr=window.devicePixelRatio||1;
+      cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr); ctx.setTransform(dpr,0,0,dpr,0,0); o.w=r.width; o.h=r.height; }
+    o.fit=fit; fit(); return o;
+  }
+  var CMDS=[{n:'A',dur:2,col:'#34D7C5'},{n:'B',dur:3,col:'#8E8CF8'},{n:'C',dur:1,col:'#FFB020'}];
+  var TMAX=6.5;
+  // returns [{start, end, cut(bool)}], groupEnd, ruleHtml
+  function schedule(type){
+    var s=[], g=0, rule='';
+    if(type==='sequence'){
+      var t=0; CMDS.forEach(function(c){ s.push({start:t,end:t+c.dur,cut:false}); t+=c.dur; }); g=t;
+      rule='<b>Sequence</b> — A, then B, then C. Ends when the last finishes: <b>'+g+' s</b>.';
+    } else if(type==='parallel'){
+      CMDS.forEach(function(c){ s.push({start:0,end:c.dur,cut:false}); }); g=Math.max(2,3,1);
+      rule='<b>Parallel</b> — all together. Ends when <b>ALL</b> finish: at the slowest, <b>'+g+' s</b>.';
+    } else if(type==='deadline'){
+      g=CMDS[0].dur; // A is the deadline
+      CMDS.forEach(function(c,i){ var e=Math.min(c.dur,g); s.push({start:0,end:e,cut:c.dur>g}); });
+      rule='<b>Deadline (A)</b> — all together, ends when <b>A</b> finishes (<b>'+g+' s</b>). B is cut short.';
+    } else { // race
+      g=Math.min(2,3,1); CMDS.forEach(function(c){ var e=Math.min(c.dur,g); s.push({start:0,end:e,cut:c.dur>g}); });
+      rule='<b>Race</b> — all together, ends when the <b>first</b> finishes (C at <b>'+g+' s</b>). A and B are cut.';
+    }
+    return {s:s, g:g, rule:rule};
+  }
+
+  var G=makeCanvas(document.getElementById('gantt'));
+  var type='sequence', cursor=0, playing=false, plan=schedule('sequence');
+  var ruleEl=document.getElementById('rule'), typeTag=document.getElementById('typeTag');
+
+  function draw(){
+    var ctx=G.ctx,W=G.w,H=G.h; ctx.clearRect(0,0,W,H);
+    var left=46, right=W-18, top=18, rowH=44, gap=10;
+    var wspan=right-left;
+    function X(t){ return left + (t/TMAX)*wspan; }
+    // grid seconds
+    ctx.strokeStyle='rgba(120,140,180,0.10)'; ctx.fillStyle='#5E6F8E'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.lineWidth=1;
+    for(var t=0;t<=6;t++){ var x=X(t); ctx.beginPath(); ctx.moveTo(x,top-4); ctx.lineTo(x,top+3*(rowH+gap)); ctx.stroke(); ctx.fillText(t+'s',x,H-6); }
+    // rows
+    CMDS.forEach(function(c,i){
+      var y=top+i*(rowH+gap), seg=plan.s[i];
+      ctx.fillStyle='#92A2BE'; ctx.font='700 12px ui-monospace,Menlo,monospace'; ctx.textAlign='left'; ctx.fillText(c.n, 14, y+rowH/2+4);
+      // ghost full natural duration
+      ctx.fillStyle='rgba(120,140,180,0.10)';
+      ctx.fillRect(X(seg.start), y+8, X(c.dur)-X(0), rowH-16);
+      // filled up to min(end, cursor)
+      var fillEnd=Math.min(seg.end, cursor);
+      if(fillEnd>seg.start){
+        ctx.fillStyle=c.col; ctx.globalAlpha=0.85;
+        ctx.fillRect(X(seg.start), y+8, X(fillEnd)-X(seg.start), rowH-16);
+        ctx.globalAlpha=1;
+      }
+      // end cap once reached
+      if(cursor>=seg.end){
+        ctx.fillStyle=seg.cut?'#FFB020':'#43D67E';
+        ctx.fillRect(X(seg.end)-3, y+6, 4, rowH-12);
+      }
+    });
+    // group end line
+    ctx.strokeStyle='rgba(255,107,107,0.55)'; ctx.lineWidth=1.5; ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(X(plan.g),top-6); ctx.lineTo(X(plan.g),top+3*(rowH+gap)); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle='#FF6B6B'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='left'; ctx.fillText('group ends', X(plan.g)+4, top-8);
+    // cursor
+    if(playing||cursor>0){
+      ctx.strokeStyle='#a7adff'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(X(cursor),top-6); ctx.lineTo(X(cursor),top+3*(rowH+gap)); ctx.stroke();
+    }
+  }
+  function setType(t){ type=t; plan=schedule(t); cursor=0; playing=false; typeTag.textContent=t; ruleEl.innerHTML=plan.rule;
+    document.querySelectorAll('#seg button').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-t')===t);}); draw(); }
+  document.querySelectorAll('#seg button').forEach(function(b){ b.addEventListener('click',function(){ setType(b.getAttribute('data-t')); }); });
+  document.getElementById('playBtn').addEventListener('click',function(){ cursor=0; playing=true; });
+
+  var last=0;
+  function frame(ts){ var t=ts/1000, dt=last?Math.min(0.05,t-last):0.016; last=t;
+    if(playing){ cursor+=dt*1.1; if(cursor>=plan.g){ cursor=plan.g; playing=false; } }
+    draw(); requestAnimationFrame(frame);
+  }
+  setType('sequence'); requestAnimationFrame(frame);
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){G.fit();draw();},120);});
+
+  var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
+  function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'');}
+  document.getElementById('check').addEventListener('click',function(){
+    var all=true;
+    blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite — one after another is sequence'; res.className='code-result '+(all?'ok':'no');
+  });
+  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='sequence';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(idx===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="deploy:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

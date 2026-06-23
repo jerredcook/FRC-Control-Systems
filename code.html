@@ -162,12 +162,12 @@
     {code:"3", title:"Command-Based Robots", sub:"How robot code is organized",
      blurb:"The framework nearly every team uses. Once you see how subsystems and commands fit together, the rest of robot programming clicks into place.",
      lessons:[
-       {n:1, title:"The Big Picture", desc:"Robot, RobotContainer, the scheduler, and the 20 ms loop.", file:null},
-       {n:2, title:"Subsystems", desc:"Modeling one mechanism — its hardware, state, and loop.", file:null},
-       {n:3, title:"Commands", desc:"Actions over time: the command lifecycle, start to finish.", file:null},
-       {n:4, title:"Command Compositions", desc:"Sequence, parallel, deadline, race — building behaviors.", file:null},
-       {n:5, title:"Triggers & Button Bindings", desc:"Wire the controller to your commands.", file:null},
-       {n:6, title:"Default Commands & Requirements", desc:"Who controls a subsystem, and how conflicts resolve.", file:null}
+       {n:1, title:"The Big Picture", desc:"Robot, RobotContainer, the scheduler, and the 20 ms loop.", file:"deploy-lesson-11.html"},
+       {n:2, title:"Subsystems", desc:"Modeling one mechanism — its hardware, state, and loop.", file:"deploy-lesson-12.html"},
+       {n:3, title:"Commands", desc:"Actions over time: the command lifecycle, start to finish.", file:"deploy-lesson-13.html"},
+       {n:4, title:"Command Compositions", desc:"Sequence, parallel, deadline, race — building behaviors.", file:"deploy-lesson-14.html"},
+       {n:5, title:"Triggers & Button Bindings", desc:"Wire the controller to your commands.", file:"deploy-lesson-15.html"},
+       {n:6, title:"Default Commands & Requirements", desc:"Who controls a subsystem, and how conflicts resolve.", file:"deploy-lesson-16.html"}
      ]},
     {code:"4", title:"Talking to Hardware", sub:"Motors, sensors, the gamepad",
      blurb:"A robot is only as good as what it can sense and move. Here's how your code reads every sensor and commands every motor.",
@@ -212,7 +212,7 @@
      ]}
   ];
 
-  var NEXT_ID="3-1";
+  var NEXT_ID="4-1";
   var STORE_KEY="deploy:done";
   function loadDone(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY))||{}; }catch(e){ return {}; } }
   function saveDone(d){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(d)); }catch(e){} }
