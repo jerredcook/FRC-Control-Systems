@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Closing the Loop · Glossary &amp; Reference</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ink); color:var(--text);
+    font-family:var(--sans); font-size:17px; line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(900px 500px at 80% -10%, rgba(255,176,32,.06), transparent 60%),
+      radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:0 22px}
+
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px);position:sticky;top:0;z-index:20}
+  .top-inner{max-width:920px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--teal);box-shadow:0 0 12px var(--teal)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:44px 0 8px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  h1{font-size:clamp(2.1rem,5vw,3.4rem);line-height:1.04;margin:.1em 0 .3em;letter-spacing:-.03em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--teal),var(--indigo));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(16px,2.2vw,19px);color:var(--muted);max-width:58ch}
+
+  .tools{position:sticky;top:54px;z-index:10;background:rgba(14,21,37,0.85);backdrop-filter:blur(6px);padding:14px 0 12px;margin-top:14px;border-bottom:1px solid var(--line)}
+  .search{width:100%;font-family:var(--sans);font-size:16px;background:var(--panel-2);border:1px solid var(--line-2);color:var(--text);border-radius:10px;padding:12px 14px;outline:none}
+  .search:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(52,215,197,.16)}
+  .search::placeholder{color:var(--faint)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .chip{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:var(--panel-2);border:1px solid var(--line-2);border-radius:20px;padding:6px 12px;cursor:pointer;transition:.12s}
+  .chip:hover{color:var(--text)}
+  .chip.active{background:var(--teal);border-color:var(--teal);color:#06121f;font-weight:700}
+  .count{font-family:var(--mono);font-size:11px;color:var(--faint);margin-top:10px}
+
+  .cat{padding:24px 0 4px}
+  .cat h2{font-family:var(--mono);font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--teal);margin:0 0 12px;display:flex;align-items:center;gap:12px}
+  .cat h2::before{content:"";width:24px;height:1px;background:var(--line-2)}
+  .terms{display:grid;gap:10px}
+  @media(min-width:620px){.terms{grid-template-columns:1fr 1fr}}
+  .term{border:1px solid var(--line);border-radius:11px;background:var(--panel);padding:13px 15px;border-left:3px solid var(--accent,var(--teal))}
+  .term .t{font-family:var(--mono);font-size:14px;color:var(--text);font-weight:650}
+  .term .d{font-size:14px;color:var(--muted);margin-top:4px;line-height:1.45}
+  .term .ref{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-top:6px}
+  .empty{color:var(--faint);font-style:italic;padding:30px 0;text-align:center}
+
+  .backlink{display:inline-block;margin:18px 0 0;font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--indigo);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px}
+  .backlink:hover{border-color:var(--teal);color:var(--text)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><span class="name">Closing the Loop</span></a>
+    <div class="top-meta">Glossary</div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="hero">
+    <div class="eyebrow">Reference</div>
+    <h1>Every term, <span class="accent">one page</span></h1>
+    <p class="dek">The vocabulary of FRC control, from the whole course. Search it, or filter by topic. A quick refresher when a word slips your mind.</p>
+  </div>
+
+  <div class="tools">
+    <input class="search" id="search" type="text" placeholder="Search terms and definitions… (e.g. kV, Motion Magic, feedforward)" autocomplete="off" spellcheck="false" />
+    <div class="chips" id="chips"></div>
+    <div class="count" id="count"></div>
+  </div>
+
+  <main id="list"></main>
+
+  <a class="backlink" href="index.html">← Back to the course map</a>
+</div>
+
+<footer>Closing the Loop · A control systems course for FRC</footer>
+
+<script>
+(function(){
+  "use strict";
+  var ACCENT={Concepts:"#34D7C5",Gains:"#FFB020","Tuning & SysId":"#8E8CF8",Motion:"#43D67E",
+    "WPILib (Java)":"#34D7C5","Phoenix 6 / CTRE":"#FFB020",Mechanisms:"#8E8CF8","Drive & Vision":"#43D67E","State-Space":"#FF6B6B"};
+
+  var TERMS=[
+    // ---- Concepts ----
+    {c:"Concepts",t:"Setpoint",d:"Where you want the system to be — the target value the controller aims for.",r:"I.1"},
+    {c:"Concepts",t:"Measurement",d:"Where the system actually is right now, read from a sensor.",r:"I.1"},
+    {c:"Concepts",t:"Error",d:"Setpoint minus measurement — the gap the controller reacts to.",r:"I.1"},
+    {c:"Concepts",t:"Open loop",d:"Acting without checking the result (set it and hope).",r:"I.1"},
+    {c:"Concepts",t:"Closed loop",d:"Measure, compare, correct — repeatedly. The loop that 'closes' through feedback.",r:"I.1"},
+    {c:"Concepts",t:"Feedback",d:"Reacting to the measured error after it appears.",r:"I.1"},
+    {c:"Concepts",t:"Feedforward",d:"Predicting the voltage a move needs from physics, before any error appears.",r:"I.6"},
+    {c:"Concepts",t:"Steady-state error (droop)",d:"The leftover offset pure P keeps because it needs error to fight gravity.",r:"I.2"},
+    {c:"Concepts",t:"Overshoot",d:"Sailing past the target before settling — too much gain, too little damping.",r:"I.4"},
+    {c:"Concepts",t:"Oscillation",d:"Hunting back and forth around the target instead of settling.",r:"I.5"},
+    {c:"Concepts",t:"Disturbance",d:"An unmodeled push or load the controller didn't plan for.",r:"I.1"},
+    {c:"Concepts",t:"Tolerance",d:"How close to the setpoint counts as 'there' (setTolerance / atSetpoint).",r:"II.3"},
+
+    // ---- Gains ----
+    {c:"Gains",t:"kP — proportional",d:"Output per unit of error. Push harder the further you're off.",r:"I.2"},
+    {c:"Gains",t:"kI — integral",d:"Accumulates past error to erase a stubborn steady-state gap.",r:"I.3"},
+    {c:"Gains",t:"kD — derivative",d:"Reacts to the rate of change — a brake that reads your speed.",r:"I.4"},
+    {c:"Gains",t:"kS — static friction",d:"Volts needed just to break free and start moving.",r:"I.6"},
+    {c:"Gains",t:"kG — gravity",d:"Volts to hold position against gravity (constant for an elevator).",r:"I.6"},
+    {c:"Gains",t:"kV — velocity",d:"Volts per unit of speed — the workhorse of a velocity loop.",r:"I.6"},
+    {c:"Gains",t:"kA — acceleration",d:"Extra volts to accelerate the mass.",r:"I.6"},
+
+    // ---- Tuning & SysId ----
+    {c:"Tuning & SysId",t:"Tuning",d:"Dialing in gains in a repeatable order until the response is crisp.",r:"I.5"},
+    {c:"Tuning & SysId",t:"System identification",d:"Measuring a mechanism's gains from test data instead of guessing.",r:"I.7"},
+    {c:"Tuning & SysId",t:"Quasistatic (ramp) test",d:"A slow voltage ramp; steady-state data gives kS, kG, kV.",r:"I.7"},
+    {c:"Tuning & SysId",t:"Dynamic (step) test",d:"A hard voltage step; the acceleration reveals kA.",r:"I.7"},
+    {c:"Tuning & SysId",t:"SysIdRoutine",d:"WPILib helper that drives the ramp + step tests for you.",r:"III.5"},
+    {c:"Tuning & SysId",t:"SignalLogger / .hoot",d:"Phoenix 6 logging to a .hoot file, analyzed for gains in Tuner X.",r:"III.5"},
+
+    // ---- Motion ----
+    {c:"Motion",t:"Motion profile",d:"A smooth ramp-cruise-slow plan for a move, bounded by limits.",r:"II.5"},
+    {c:"Motion",t:"Trapezoid profile",d:"WPILib's profile shape, set by max velocity and acceleration.",r:"II.5"},
+    {c:"Motion",t:"Cruise velocity",d:"The top speed a profiled move reaches.",r:"III.4"},
+    {c:"Motion",t:"Jerk",d:"Rate of change of acceleration — rounds the corners of a profile.",r:"III.4"},
+    {c:"Motion",t:"Position control",d:"Hold/reach a position (elevator, arm).",r:"III.3"},
+    {c:"Motion",t:"Velocity control",d:"Hold a speed (flywheel). kV dominant, kP small.",r:"IV.3"},
+
+    // ---- WPILib ----
+    {c:"WPILib (Java)",t:"WPILib",d:"The standard FRC library every team builds on.",r:"II.1"},
+    {c:"WPILib (Java)",t:"Subsystem",d:"One mechanism: its hardware, state, and control loop.",r:"II.1"},
+    {c:"WPILib (Java)",t:"Command",d:"An action that uses subsystems to do something.",r:"II.1"},
+    {c:"WPILib (Java)",t:"periodic()",d:"The method WPILib calls every 20 ms — where the loop lives.",r:"II.1"},
+    {c:"WPILib (Java)",t:"CommandScheduler",d:"Runs every subsystem and command, every loop.",r:"II.1"},
+    {c:"WPILib (Java)",t:"PIDController",d:"WPILib class implementing P, I, D; calculate(measurement, goal).",r:"II.3"},
+    {c:"WPILib (Java)",t:"ProfiledPIDController",d:"A trapezoid profile + PID feedback in one class.",r:"II.5"},
+    {c:"WPILib (Java)",t:"ElevatorFeedforward",d:"Feedforward from kS, kG, kV, kA for a constant-gravity load.",r:"II.4"},
+    {c:"WPILib (Java)",t:"ArmFeedforward",d:"Feedforward that takes the angle and scales kG by cos(angle).",r:"IV.2"},
+    {c:"WPILib (Java)",t:"The 20 ms loop",d:"The roboRIO runs your code 50 times per second.",r:"II.1"},
+
+    // ---- Phoenix 6 ----
+    {c:"Phoenix 6 / CTRE",t:"TalonFX",d:"The motor controller inside a Kraken/Falcon; runs the loop on board.",r:"III.1"},
+    {c:"Phoenix 6 / CTRE",t:"Kraken",d:"A brushless FRC motor with an integrated TalonFX.",r:"III.1"},
+    {c:"Phoenix 6 / CTRE",t:"Phoenix 6",d:"CTRE's library for configuring and commanding their devices.",r:"III.1"},
+    {c:"Phoenix 6 / CTRE",t:"Tuner X",d:"CTRE's desktop app for firmware, ids, plots, and SysId.",r:"III.1"},
+    {c:"Phoenix 6 / CTRE",t:"TalonFXConfiguration",d:"One object holding every device setting.",r:"III.2"},
+    {c:"Phoenix 6 / CTRE",t:"Slot0",d:"Where the eight gains (kS/kV/kA/kG/kP/kI/kD) live on the device.",r:"III.3"},
+    {c:"Phoenix 6 / CTRE",t:"SensorToMechanismRatio",d:"Gear ratio set once, so getPosition() reads mechanism rotations.",r:"II.2"},
+    {c:"Phoenix 6 / CTRE",t:"FusedCANcoder",d:"Absolute CANcoder angle fused with the fast internal rotor.",r:"III.2"},
+    {c:"Phoenix 6 / CTRE",t:"NeutralMode",d:"Brake (holds) vs Coast (rolls free) when idle.",r:"III.2"},
+    {c:"Phoenix 6 / CTRE",t:"Current limit",d:"Stator (motor) and supply (breaker) protection, in amps.",r:"III.2"},
+    {c:"Phoenix 6 / CTRE",t:"GravityType",d:"Elevator_Static (constant) or Arm_Cosine (× cos angle) for kG.",r:"III.3"},
+    {c:"Phoenix 6 / CTRE",t:"Control request",d:"PositionVoltage / VelocityVoltage / MotionMagicVoltage — names a target.",r:"III.3"},
+    {c:"Phoenix 6 / CTRE",t:"Motion Magic",d:"Onboard motion profile from a single control request.",r:"III.4"},
+    {c:"Phoenix 6 / CTRE",t:"Motion Magic Expo",d:"kV/kA-shaped exponential profile; no cruise-velocity guess.",r:"III.4"},
+    {c:"Phoenix 6 / CTRE",t:"getValueAsDouble()",d:"Reads a status signal (position, velocity) as a plain number.",r:"III.1"},
+
+    // ---- Mechanisms ----
+    {c:"Mechanisms",t:"Elevator",d:"Position control with constant gravity (Elevator_Static).",r:"IV.1"},
+    {c:"Mechanisms",t:"Arm",d:"Position control with gravity that scales by cos(angle).",r:"IV.2"},
+    {c:"Mechanisms",t:"Flywheel",d:"Velocity control; kV holds the speed, kP recovers dips.",r:"IV.3"},
+
+    // ---- Drive & Vision ----
+    {c:"Drive & Vision",t:"Swerve module",d:"A steer motor (position) + a drive motor (velocity) at one corner.",r:"V.1"},
+    {c:"Drive & Vision",t:"Kinematics",d:"Converts chassis speeds (vx, vy, omega) to module angle + speed.",r:"V.1"},
+    {c:"Drive & Vision",t:"Odometry",d:"Integrating module motion to track the robot's field pose.",r:"V.1"},
+    {c:"Drive & Vision",t:"ChassisSpeeds",d:"The driver's wish: forward, strafe, and rotation rates.",r:"V.1"},
+    {c:"Drive & Vision",t:"AprilTag",d:"A fiducial marker with a known field location.",r:"V.2"},
+    {c:"Drive & Vision",t:"tx",d:"Camera's horizontal angle to a target — an error to drive to zero.",r:"V.2"},
+    {c:"Drive & Vision",t:"Pose estimator",d:"Blends odometry with vision (addVisionMeasurement) for an accurate pose.",r:"V.2"},
+
+    // ---- State-Space ----
+    {c:"State-Space",t:"State (x)",d:"The few numbers describing the system now (e.g. position, velocity).",r:"V.3"},
+    {c:"State-Space",t:"State-space model",d:"ẋ = Ax + Bu — how the state changes with input.",r:"V.3"},
+    {c:"State-Space",t:"State feedback",d:"u = K(reference − x). On [pos, vel] it's exactly PD.",r:"V.3"},
+    {c:"State-Space",t:"LQR",d:"Picks the optimal gains K by trading off error (Q) vs effort (R).",r:"V.3"},
+    {c:"State-Space",t:"Q and R",d:"How much you penalize state error (Q) vs control effort (R).",r:"V.3"}
+  ];
+
+  var CATS=[];
+  TERMS.forEach(function(x){ if(CATS.indexOf(x.c)<0) CATS.push(x.c); });
+
+  var listEl=document.getElementById("list");
+  var countEl=document.getElementById("count");
+  var searchEl=document.getElementById("search");
+  var chipsEl=document.getElementById("chips");
+  var activeCat=null, query="";
+
+  // chips
+  var allChip=document.createElement("button"); allChip.className="chip active"; allChip.textContent="All"; allChip.setAttribute("data-cat","");
+  chipsEl.appendChild(allChip);
+  CATS.forEach(function(c){ var b=document.createElement("button"); b.className="chip"; b.textContent=c; b.setAttribute("data-cat",c); chipsEl.appendChild(b); });
+  chipsEl.querySelectorAll(".chip").forEach(function(b){
+    b.addEventListener("click",function(){
+      activeCat=b.getAttribute("data-cat")||null;
+      chipsEl.querySelectorAll(".chip").forEach(function(x){x.classList.toggle("active",x===b);});
+      render();
+    });
+  });
+  searchEl.addEventListener("input",function(){ query=searchEl.value.trim().toLowerCase(); render(); });
+
+  function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+  function render(){
+    var shown=0, html="";
+    CATS.forEach(function(cat){
+      if(activeCat && cat!==activeCat) return;
+      var items=TERMS.filter(function(x){
+        if(x.c!==cat) return false;
+        if(!query) return true;
+        return (x.t+" "+x.d).toLowerCase().indexOf(query)>=0;
+      });
+      if(!items.length) return;
+      html+='<section class="cat"><h2>'+esc(cat)+'</h2><div class="terms">';
+      items.forEach(function(x){
+        shown++;
+        html+='<div class="term" style="--accent:'+(ACCENT[cat]||"#34D7C5")+'">'+
+          '<div class="t">'+esc(x.t)+'</div>'+
+          '<div class="d">'+esc(x.d)+'</div>'+
+          '<div class="ref">Lesson '+esc(x.r)+'</div>'+
+        '</div>';
+      });
+      html+='</div></section>';
+    });
+    listEl.innerHTML = shown ? html : '<div class="empty">No terms match "'+esc(query)+'".</div>';
+    countEl.textContent = shown+" term"+(shown===1?"":"s")+(query||activeCat?" shown":" total");
+  }
+  render();
+})();
+</script>
+</body>
+</html>
