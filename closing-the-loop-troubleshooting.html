@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Closing the Loop · Field Guide — Troubleshooting</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ink); color:var(--text);
+    font-family:var(--sans); font-size:17px; line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(900px 500px at 80% -10%, rgba(255,176,32,.06), transparent 60%),
+      radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--teal);box-shadow:0 0 12px var(--teal)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:56px 0 18px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  h1{font-size:clamp(2.2rem,5.5vw,3.8rem);line-height:1.03;margin:.1em 0 .3em;letter-spacing:-.03em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--teal),var(--indigo));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(16px,2.3vw,19px);color:var(--text);max-width:54ch;margin-top:6px}
+
+  section{padding:28px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--teal);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.6rem,3.4vw,2.3rem);line-height:1.1;letter-spacing:-.02em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  .lead{font-size:19px}
+  em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .demo-stage{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line)}
+  @media(min-width:600px){.demo-stage{grid-template-columns:minmax(150px,0.78fr) 1.5fr}}
+  .stage-cell{background:#0B1322;position:relative}
+  .stage-cell .cell-label{position:absolute;top:8px;left:10px;z-index:2;font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);pointer-events:none}
+  canvas.world{display:block;width:100%;height:320px}
+  canvas.scope{display:block;width:100%;height:320px}
+  .bugbar{padding:12px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px}
+  .bugbar button{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:9px 12px;border-radius:8px;cursor:pointer;transition:.12s}
+  .bugbar button:hover{color:var(--text);border-color:var(--muted)}
+  .bugbar button.active{background:var(--teal);border-color:var(--teal);color:#06121f;font-weight:700}
+  .bugbar button.active.bad{background:var(--red);border-color:var(--red);color:#160606}
+  .diag{padding:0;border-top:1px solid var(--line)}
+  .diag .dcard{padding:16px 18px}
+  .diag .sym{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .diag .sym.ok{color:var(--green)}
+  .diag h4{margin:0 0 8px;font-size:17px;color:var(--text)}
+  .diag p{margin:0 0 8px;font-size:15px;color:var(--muted)}
+  .diag .fix{font-size:15px;color:var(--text)}
+  .diag .fix b{color:var(--teal)}
+  .diag .ref{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-top:8px}
+  .legend{display:flex;flex-wrap:wrap;gap:16px;padding:11px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .legend i{width:16px;height:2px;border-radius:2px;display:inline-block}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  /* symptom reference grid */
+  .symgrid{display:grid;gap:10px;margin-top:6px}
+  @media(min-width:620px){.symgrid{grid-template-columns:1fr 1fr}}
+  .sg{border:1px solid var(--line);border-radius:11px;background:var(--panel);padding:13px 15px;border-left:3px solid var(--accent,var(--red))}
+  .sg .s{font-weight:650;color:var(--text);font-size:15px;margin-bottom:3px}
+  .sg .c{font-size:13.5px;color:var(--muted);line-height:1.45}
+  .sg .c b{color:var(--teal)}
+  .sg .r{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-top:6px}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.teal{border-color:var(--teal);background:rgba(52,215,197,.06)} .note.teal .nh{color:var(--teal)}
+  .note ol{margin:6px 0 0;padding-left:20px;color:var(--text);font-size:15.5px}
+  .note ol li{margin:3px 0}
+  .note ol b{color:var(--teal)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)}
+  .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7}
+  .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--teal);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--teal);color:var(--text)}
+  .coursenav a.map{border-color:transparent;color:var(--indigo)}
+
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><span class="name">Closing the Loop</span></a>
+    <div class="top-meta">Field Guide</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Field Guide · Troubleshooting</div>
+    <h1>When it<br><span class="accent">doesn't</span> work.</h1>
+    <p class="dek">Every mechanism misbehaves in the same handful of ways. Learn to read the symptom on the scope and you'll find the cause in seconds — not hours.</p>
+  </div>
+
+  <section>
+    <p class="lead">Debugging control is pattern recognition.</p>
+    <p>A mechanism that oscillates, sags, or runs away isn't a mystery — each look has a short list of usual suspects. Below, <strong>break the elevator on purpose</strong> and watch each classic failure on the scope, with the diagnosis right there. Then keep the symptom table handy for the day your real robot acts up.</p>
+  </section>
+
+  <section>
+    <div class="kicker">See the bug</div>
+    <h2>Break it, then read it</h2>
+    <p>Pick a fault. The elevator runs with that bug live, and the card below tells you what you're seeing, why, and the fix.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head">
+        <span class="demo-title">Elevator · fault demonstrator</span>
+        <span class="demo-tag" id="tag">tuned</span>
+      </div>
+      <div class="demo-stage">
+        <div class="stage-cell"><span class="cell-label">Height</span><canvas class="world" id="world"></canvas></div>
+        <div class="stage-cell"><span class="cell-label">Scope · signal vs time</span><canvas class="scope" id="scope"></canvas></div>
+      </div>
+      <div class="legend">
+        <span><i style="background:var(--amber)"></i> Setpoint</span>
+        <span><i style="background:var(--teal)"></i> Position</span>
+        <span><i style="background:var(--indigo)"></i> Voltage</span>
+      </div>
+      <div class="bugbar" id="bugbar">
+        <button data-bug="tuned" class="active">✓ Tuned</button>
+        <button data-bug="highkp">kP too high</button>
+        <button data-bug="nokg">No kG</button>
+        <button data-bug="lowkp">kP too low</button>
+        <button data-bug="inverted">Inverted</button>
+      </div>
+      <div class="diag"><div class="dcard" id="dcard"></div></div>
+    </div>
+    <p class="caption">The scope shape is the tell: a sine wave means too much gain, a flat gap means missing feedforward, a slow crawl means too little gain.</p>
+  </section>
+
+  <section>
+    <div class="kicker">The five-question triage</div>
+    <h2>Ask these, in order</h2>
+    <div class="note teal">
+      <div class="nh">When anything misbehaves, walk down this list</div>
+      <ol>
+        <li><b>Does it move the right way?</b> If not — motor or sensor <em>inverted</em>.</li>
+        <li><b>Are the numbers sane?</b> Reads 2 m at 0.2 m — wrong <em>gear ratio / units</em>.</li>
+        <li><b>Does it hold position?</b> Sags below target — missing <em>kG</em> (feedforward).</li>
+        <li><b>Is it stable?</b> Oscillates — too much <em>kP</em>, too little <em>kD</em>.</li>
+        <li><b>Is it safe?</b> Hot motor, tripped breaker — no <em>current limit</em>.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Symptom → fix</div>
+    <h2>The reference table</h2>
+    <p>The full field guide — symptoms the demo can't show, and the one-line fix for each.</p>
+    <div class="symgrid" id="symgrid"></div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">On the scope, the position is a steady sine wave around the setpoint. The most likely cause?</div>
+        <div class="opts">
+          <button class="opt">Missing feedforward (kG)</button>
+          <button class="opt">kP too high (and/or too little kD) — the loop is over-reacting</button>
+          <button class="opt">The CAN id is wrong</button>
+        </div>
+        <div class="explain">Oscillation is the signature of too much proportional gain: every correction overshoots, so it swings back and forth. Lower kP, or add kD to damp it.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">The elevator settles a few centimeters below every target and just stays there. The fix?</div>
+        <div class="opts">
+          <button class="opt">Lower the current limit</button>
+          <button class="opt">Invert the motor</button>
+          <button class="opt">Add feedforward kG so gravity is supplied directly</button>
+        </div>
+        <div class="explain">A constant droop is gravity winning. Pure P needs leftover error to make holding voltage; feedforward kG supplies it outright, so the error goes to zero. (Integral also works, but slower.)</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">A swerve module's wheel points the wrong way the instant the robot powers on. Most likely cause?</div>
+        <div class="opts">
+          <button class="opt">Steering isn't using an absolute sensor (FusedCANcoder) — it doesn't know its true angle at boot</button>
+          <button class="opt">kV is too small</button>
+          <button class="opt">The flywheel isn't at speed</button>
+        </div>
+        <div class="explain">The internal rotor only counts from wherever it booted, so steering starts from a wrong zero. A FusedCANcoder gives the true absolute angle immediately — the same fix as the arm.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="note">
+      <div class="nh">Where to go deeper</div>
+      <p>You've covered the core. When you're ready for more: <strong>PathPlanner</strong> or <strong>Choreo</strong> for swerve autonomous paths · <strong>pose estimation / Kalman filters</strong> for fusing many sensors · <strong>brownout &amp; voltage compensation</strong> for late-match battery sag · and the official <a href="https://v6.docs.ctr-electronics.com/" style="color:var(--teal)">CTRE Phoenix 6</a> and <a href="https://docs.wpilib.org/" style="color:var(--teal)">WPILib</a> docs — which you can now read fluently.</p>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="closing-the-loop-lesson-24.html">← Part V · 03 · State-Space &amp; LQR</a>
+    <a class="map" href="index.html">Course map</a>
+    <a href="glossary.html">Glossary →</a>
+  </nav>
+
+</div>
+
+<footer>Closing the Loop · A control systems course for FRC</footer>
+
+<script>
+(function(){
+  "use strict";
+  var clamp=function(x,a,b){return x<a?a:(x>b?b:x);};
+
+  function makeCanvas(cv){
+    var ctx=cv.getContext('2d'); var o={cv:cv,ctx:ctx,w:0,h:0};
+    function fit(){
+      var r=cv.getBoundingClientRect(); if(!r.width)return;
+      var dpr=window.devicePixelRatio||1;
+      cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr);
+      ctx.setTransform(dpr,0,0,dpr,0,0); o.w=r.width; o.h=r.height;
+    }
+    o.fit=fit; fit(); return o;
+  }
+  function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+
+  function drawElevator(o,y,sp,volt){
+    var ctx=o.ctx,W=o.w,H=o.h; ctx.clearRect(0,0,W,H);
+    var pad=24,top=pad,bot=H-pad,span=bot-top,cx=W*0.5;
+    function py(v){return bot-clamp(v,0,1)*span;}
+    ctx.strokeStyle='#2B3A57';ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(cx-26,top-6);ctx.lineTo(cx-26,bot);ctx.moveTo(cx+26,top-6);ctx.lineTo(cx+26,bot);ctx.stroke();
+    ctx.fillStyle='#1B2540';ctx.strokeStyle='#33415e';ctx.lineWidth=1.5;
+    roundRect(ctx,cx-30,top-16,60,12,3);ctx.fill();ctx.stroke();
+    ctx.strokeStyle='rgba(120,140,180,0.16)';ctx.lineWidth=1;
+    for(var i=0;i<=10;i++){var ty=top+span*(i/10);ctx.beginPath();ctx.moveTo(cx-34,ty);ctx.lineTo(cx-30,ty);ctx.stroke();}
+    ctx.strokeStyle='#FFB020';ctx.lineWidth=1.5;ctx.setLineDash([6,5]);
+    ctx.beginPath();ctx.moveTo(cx-42,py(sp));ctx.lineTo(cx+42,py(sp));ctx.stroke();ctx.setLineDash([]);
+    var my=py(y);
+    ctx.strokeStyle='#475679';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(cx,top-4);ctx.lineTo(cx,my-10);ctx.stroke();
+    var fmag=clamp(Math.abs(volt)*15,0,30);
+    if(fmag>1.5){
+      var up=volt>=0, ay=up?my+12:my-12, dir=up?1:-1, col=up?'#34D7C5':'#FF6B6B';
+      ctx.strokeStyle=col;ctx.globalAlpha=0.7;ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(cx,ay);ctx.lineTo(cx,ay+dir*fmag);
+      ctx.moveTo(cx-4,ay+dir*(fmag-5));ctx.lineTo(cx,ay+dir*fmag);ctx.lineTo(cx+4,ay+dir*(fmag-5));
+      ctx.stroke();ctx.globalAlpha=1;
+    }
+    ctx.shadowColor='#34D7C5';ctx.shadowBlur=16;
+    ctx.fillStyle='#0e2b2a';ctx.strokeStyle='#34D7C5';ctx.lineWidth=2;
+    roundRect(ctx,cx-22,my-11,44,22,5);ctx.fill();ctx.stroke();
+    ctx.shadowBlur=0;
+    ctx.fillStyle='#34D7C5';ctx.fillRect(cx-12,my-3,24,2);
+    ctx.beginPath();ctx.arc(cx,my+3,3,0,7);ctx.fill();
+  }
+
+  function Scope(o,signals,len){this.o=o;this.signals=signals;this.len=len||300;this.buf=[];}
+  Scope.prototype.push=function(s){this.buf.push(s);if(this.buf.length>this.len)this.buf.shift();};
+  Scope.prototype.clear=function(){this.buf=[];};
+  Scope.prototype.draw=function(){
+    var o=this.o,ctx=o.ctx,W=o.w,H=o.h;ctx.clearRect(0,0,W,H);
+    var pad=14,top=pad,bot=H-pad,left=8,right=W-8,span=bot-top,wspan=right-left;
+    ctx.strokeStyle='rgba(120,140,180,0.07)';ctx.lineWidth=1;
+    for(var gy=0;gy<=4;gy++){var yy=top+span*(gy/4);ctx.beginPath();ctx.moveTo(left,yy);ctx.lineTo(right,yy);ctx.stroke();}
+    for(var gx=0;gx<=8;gx++){var xx=left+wspan*(gx/8);ctx.beginPath();ctx.moveTo(xx,top);ctx.lineTo(xx,bot);ctx.stroke();}
+    var n=this.buf.length;if(n<2)return;var self=this;
+    function pyv(v){return bot-clamp(v,0,1)*span;}
+    for(var s=0;s<this.signals.length;s++){
+      var sig=this.signals[s];
+      ctx.strokeStyle=sig.color;ctx.lineWidth=sig.w||2;
+      ctx.setLineDash(sig.dash||[]);
+      ctx.shadowColor=sig.color;ctx.shadowBlur=sig.glow?7:0;
+      ctx.beginPath();
+      for(var i=0;i<n;i++){
+        var v=self.buf[i][sig.key];
+        var X=left+wspan*((i+(self.len-n))/(self.len-1));
+        var Y=pyv(v);
+        if(i===0)ctx.moveTo(X,Y);else ctx.lineTo(X,Y);
+      }
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);ctx.shadowBlur=0;
+  };
+
+  var BUGS={
+    tuned:   {label:"tuned", bad:false, kG:0.45,kP:6,kD:2.5,invert:false,
+      sym:"Healthy ✓", ok:true,
+      h:"This is what 'good' looks like.",
+      why:"Feedforward holds gravity, kP closes the gap, kD damps the approach. It reaches the line and sits on it.",
+      fix:"<b>Nothing to fix.</b> Crisp rise, no overshoot, zero steady error. Compare the broken modes to this.",
+      ref:"Part IV.1"},
+    highkp:  {label:"kP too high", bad:true, kG:0.45,kP:26,kD:0,invert:false,
+      sym:"Symptom · oscillation",
+      h:"It vibrates / hunts around the target.",
+      why:"Each correction is so strong it overshoots, then over-corrects the other way — a self-sustaining sine wave on the scope.",
+      fix:"<b>Lower kP</b>, and/or <b>add kD</b> to brake the approach. Tune kP up only until it's just shy of oscillating.",
+      ref:"Lessons I.4, I.5"},
+    nokg:    {label:"no kG", bad:true, kG:0,kP:6,kD:2.5,invert:false,
+      sym:"Symptom · droop",
+      h:"It settles a constant gap below the target.",
+      why:"With no gravity feedforward, the only way P makes holding voltage is to keep some error around. So it parks low and stays.",
+      fix:"<b>Add feedforward kG</b> (from SysId) to supply gravity directly. The error drops to zero. Integral also works, but slowly.",
+      ref:"Lessons I.6, IV.1"},
+    lowkp:   {label:"kP too low", bad:true, kG:0.45,kP:1.2,kD:0.6,invert:false,
+      sym:"Symptom · sluggish",
+      h:"It crawls toward the target and barely gets there.",
+      why:"The gain is so small the controller pushes feebly — long, lazy rise, and it may never fully close the last bit of error.",
+      fix:"<b>Raise kP</b> until the response is crisp (then back off if it starts to overshoot). On Phoenix, also check Motion Magic limits.",
+      ref:"Lessons I.2, I.5"},
+    inverted:{label:"inverted", bad:true, kG:0.45,kP:6,kD:2.5,invert:true,
+      sym:"Symptom · runs the wrong way",
+      h:"It drives away from the target and pins at a hard stop.",
+      why:"The motor (or sensor) is inverted, so every correction pushes the wrong direction. Positive feedback instead of negative — it can never settle.",
+      fix:"<b>Flip the direction:</b> set MotorOutput.Inverted (or fix the sensor phase) so up means up. Test with a tiny command first.",
+      ref:"Lesson III.2"}
+  };
+
+  var SYMS=[
+    {a:"#FF6B6B", s:"Position reads wildly wrong (2 m at 0.2 m)", c:"Wrong gear ratio or unit mix. <b>Fix:</b> set SensorToMechanismRatio; convert inches→meters once.", r:"Lessons II.2, III.2"},
+    {a:"#FFB020", s:"Motor gets hot / trips the breaker", c:"No current limit. <b>Fix:</b> set stator and supply current limits.", r:"Lesson III.2"},
+    {a:"#8E8CF8", s:"Arm holds at horizontal but drifts elsewhere", c:"Flat kG instead of cosine. <b>Fix:</b> GravityType.Arm_Cosine, with zero at horizontal.", r:"Lesson IV.2"},
+    {a:"#FF6B6B", s:"Arm / swerve starts at a wrong angle on boot", c:"No absolute sensor. <b>Fix:</b> use a FusedCANcoder so it knows its angle immediately.", r:"Lessons III.2, V.1"},
+    {a:"#34D7C5", s:"Flywheel speed hunts up and down", c:"kP too high for a velocity loop. <b>Fix:</b> small kP, lean on kV.", r:"Lesson IV.3"},
+    {a:"#FFB020", s:"Shots come out inconsistent", c:"Firing before it's at speed. <b>Fix:</b> wait for atSpeed(); let it recover between shots.", r:"Lesson IV.3"},
+    {a:"#8E8CF8", s:"Overshoots, then corrects back", c:"Too much kP / too little kD, or no profile. <b>Fix:</b> add kD; use Motion Magic.", r:"Lessons I.4, III.4"},
+    {a:"#34D7C5", s:"Move is jerky / slams at the start", c:"Snapping the setpoint. <b>Fix:</b> use a motion profile (Motion Magic).", r:"Lessons II.5, III.4"},
+    {a:"#FF6B6B", s:"Integral makes it slowly drift / overshoot", c:"Integral windup. <b>Fix:</b> prefer feedforward; clamp or limit kI.", r:"Lesson I.3"},
+    {a:"#FFB020", s:"Two motors fight each other on one mechanism", c:"A follower set up wrong. <b>Fix:</b> use Follower control with the right direction.", r:"Lesson III.3"}
+  ];
+
+  var world=makeCanvas(document.getElementById('world'));
+  var scope=makeCanvas(document.getElementById('scope'));
+  var scopeObj=new Scope(scope,[
+    {key:'volt',color:'#8E8CF8',w:1.5},
+    {key:'sp',color:'#FFB020',w:1.5,dash:[5,4]},
+    {key:'pos',color:'#34D7C5',w:2,glow:true}
+  ]);
+
+  var S={y:0.12,v:0,prevM:0.12,sp:0.75,kG:0.45,kP:6,kD:2.5,invert:false,g:0.45,drag:1.8,u:0,t:0};
+
+  function applyBug(key){
+    var b=BUGS[key];
+    S.kG=b.kG; S.kP=b.kP; S.kD=b.kD; S.invert=b.invert;
+    S.y=0.12; S.v=0; S.prevM=0.12; S.t=0; scopeObj.clear();
+    document.getElementById('tag').textContent=b.label;
+    document.querySelectorAll('#bugbar button').forEach(function(btn){
+      var on=btn.getAttribute('data-bug')===key;
+      btn.classList.toggle('active',on);
+      btn.classList.toggle('bad', on && b.bad);
+    });
+    document.getElementById('dcard').innerHTML=
+      '<div class="sym'+(b.ok?' ok':'')+'">'+b.sym+'</div>'+
+      '<h4>'+b.h+'</h4>'+
+      '<p>'+b.why+'</p>'+
+      '<div class="fix">'+b.fix+'</div>'+
+      '<div class="ref">See '+b.ref+'</div>';
+  }
+  document.querySelectorAll('#bugbar button').forEach(function(btn){
+    btn.addEventListener('click',function(){ applyBug(btn.getAttribute('data-bug')); });
+  });
+
+  function step(dt){
+    S.t+=dt;
+    // re-trigger the move periodically so the failure repeats
+    if(S.t>4.5){ S.t=0; S.y=0.12; S.v=0; S.prevM=0.12; }
+    var meas=S.y;
+    var err=S.sp-meas;
+    var deriv=-(meas-S.prevM)/dt; S.prevM=meas;
+    var fb=S.kP*err+S.kD*deriv;
+    S.u = S.invert ? (S.kG - fb) : (S.kG + fb);
+    var a=S.u-S.g-S.drag*S.v;
+    S.v+=a*dt; S.y+=S.v*dt;
+    if(S.y<0){S.y=0;if(S.v<0)S.v=0;} if(S.y>1){S.y=1;if(S.v>0)S.v=0;}
+    scopeObj.push({sp:S.sp,pos:S.y,volt:clamp(0.12+S.u*0.20,0,1)});
+    drawElevator(world,S.y,S.sp,S.u);
+    scopeObj.draw();
+  }
+  var last=0;
+  function frame(ts){var t=ts/1000;var dt=last?Math.min(0.033,t-last):0.016;last=t;step(dt);requestAnimationFrame(frame);}
+  requestAnimationFrame(frame);
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){world.fit();scope.fit();},120);});
+
+  // symptom grid
+  document.getElementById('symgrid').innerHTML=SYMS.map(function(x){
+    return '<div class="sg" style="--accent:'+x.a+'"><div class="s">'+x.s+'</div><div class="c">'+x.c+'</div><div class="r">'+x.r+'</div></div>';
+  }).join('');
+
+  // quiz
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){
+      opt.addEventListener('click',function(){
+        if(done)return;done=true;
+        opts.forEach(function(o){o.classList.add('locked');});
+        if(idx===correct){opt.classList.add('correct');}
+        else{opt.classList.add('wrong');opts[correct].classList.add('correct');}
+        explain.classList.add('show');
+      });
+    });
+  });
+
+  applyBug('tuned');
+})();
+</script>
+</body>
+</html>
