@@ -144,11 +144,11 @@
     {code:"1", title:"The Toolchain", sub:"The dev environment",
      blurb:"Before any robot code, you need the setup: the software, the roboRIO, and the loop of writing → deploying → running. Get comfortable here and everything after is just typing.",
      lessons:[
-       {n:1, title:"What a Robot Program Is", desc:"The roboRIO, your laptop, and the deploy loop that ties them together.", file:null},
-       {n:2, title:"Setting Up WPILib", desc:"Install the WPILib VS Code, create your first project, tour the files.", file:null},
-       {n:3, title:"Build, Deploy, Run", desc:"Push code to the robot and drive it from the Driver Station.", file:null},
-       {n:4, title:"Git & GitHub for Teams", desc:"Version control, branches, and the workflow that keeps a team sane.", file:null},
-       {n:5, title:"Docs & Vendordeps", desc:"Install CTRE/REV libraries; read the official docs fluently.", file:null}
+       {n:1, title:"What a Robot Program Is", desc:"The roboRIO, your laptop, and the deploy loop that ties them together.", file:"deploy-lesson-1.html"},
+       {n:2, title:"Setting Up WPILib", desc:"Install the WPILib VS Code, create your first project, tour the files.", file:"deploy-lesson-2.html"},
+       {n:3, title:"Build, Deploy, Run", desc:"Push code to the robot and drive it from the Driver Station.", file:"deploy-lesson-3.html"},
+       {n:4, title:"Git & GitHub for Teams", desc:"Version control, branches, and the workflow that keeps a team sane.", file:"deploy-lesson-4.html"},
+       {n:5, title:"Docs & Vendordeps", desc:"Install CTRE/REV libraries; read the official docs fluently.", file:"deploy-lesson-5.html"}
      ]},
     {code:"2", title:"Just-Enough Java", sub:"Programming basics, for robots",
      blurb:"You don't need a CS degree — just the handful of Java ideas robot code leans on, taught with motors and sensors instead of toy examples.",
@@ -212,7 +212,7 @@
      ]}
   ];
 
-  var NEXT_ID="1-1";
+  var NEXT_ID="2-1";
   var STORE_KEY="deploy:done";
   function loadDone(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY))||{}; }catch(e){ return {}; } }
   function saveDone(d){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(d)); }catch(e){} }
