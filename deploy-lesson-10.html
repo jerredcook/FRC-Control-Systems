@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deploy · Part 2.5 — Collections &amp; Enums</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(138,140,248,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--indigo);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:13.5px;line-height:1.85;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic} .code .kw{color:#ff9bbf} .code .ty{color:var(--teal)} .code .fn{color:var(--indigo)} .code .num{color:var(--amber)} .code .str{color:#9ad6a0} .code .en{color:var(--amber)}
+
+  .play{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .play-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .play-title{font-family:var(--mono);font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+  .play-tag{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .states{display:flex;flex-wrap:wrap;gap:8px;padding:16px 16px 4px}
+  .stt{font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;color:var(--muted);border:1px solid var(--line-2);border-radius:20px;padding:7px 13px;transition:.12s}
+  .stt.on{background:var(--indigo);border-color:var(--indigo);color:#0a0f24;font-weight:700;box-shadow:0 0 16px -4px var(--indigo)}
+  .play pre{font-family:var(--mono);font-size:12.5px;line-height:1.8;margin:12px 0 0;padding:14px 16px;white-space:pre;overflow-x:auto;color:#cdd9ec;background:#080d16}
+  .play .hl{background:rgba(138,140,248,.16);border-radius:3px;box-shadow:-4px 0 0 rgba(138,140,248,.6)}
+  .play .ctrls{padding:13px 16px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .btn.primary{background:linear-gradient(180deg,#a7adff,var(--indigo));color:#0a0f24;font-weight:700;border:none}
+  .doing{font-family:var(--mono);font-size:12.5px;color:var(--green);margin-left:auto}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(138,140,248,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .code-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .code-ex .chead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .code-ex .chead .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,176,32,.14);display:grid;place-items:center;color:var(--amber);font-size:13px}
+  .code-ex .ctask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .code-ex pre.code{margin:0 0 14px}
+  .blank{font-family:var(--mono);font-size:13px;width:7ch;text-align:center;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:2px 4px;outline:none}
+  .blank:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
+  .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:100px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)} .coursenav a.next-link{color:var(--teal);border-color:rgba(52,215,197,.4)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="code.html"><span class="dot"></span><span class="name">Deploy</span></a>
+    <div class="top-meta">Part 2 · 05 / 05 · Just-Enough Java</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 2 · 05</b> Just-Enough Java</div>
+    <div class="eyebrow">Collections &amp; Enums</div>
+    <h1>Many things,<br>named <span class="accent">states</span>.</h1>
+    <p class="dek">Hold a whole group of values at once with arrays and lists — and give a robot a clear set of states with an enum. The last Java you need before building robots.</p>
+  </div>
+
+  <section>
+    <p class="lead">Sometimes one variable isn't enough.</p>
+    <p>A swerve drive has four modules; you don't want four separate variables. An <strong>array</strong> holds a fixed group; a <strong>List</strong> holds a growable one. You access an array by index — and indexes start at <strong>0</strong>:</p>
+    <div class="codewrap">
+      <div class="clabel">Arrays and Lists <span class="badge">Java</span></div>
+<pre class="code"><span class="ty">SwerveModule</span>[] modules = { frontLeft, frontRight, backLeft, backRight };
+modules[<span class="num">0</span>].<span class="fn">setState</span>(...);          <span class="cm">// the FIRST module (index 0!)</span>
+<span class="kw">for</span> (<span class="ty">var</span> m : modules) m.<span class="fn">stop</span>();    <span class="cm">// do something to every module</span>
+
+<span class="ty">List</span>&lt;<span class="ty">Command</span>&gt; autos = <span class="kw">new</span> <span class="ty">ArrayList</span>&lt;&gt;();  <span class="cm">// growable</span>
+autos.<span class="fn">add</span>(scoreThenLeave);              <span class="cm">// add as many as you like</span></pre>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Try it</div>
+    <h2>An enum is a robot's states</h2>
+    <p>An <strong>enum</strong> is a fixed list of named values — perfect for the states a mechanism moves through. Instead of mystery numbers, you write <span class="k">State.SHOOTING</span>. A <span class="k">switch</span> then does the right thing for whichever state you're in. Step a shooter through its states:</p>
+
+    <div class="play">
+      <div class="play-head"><span class="play-title">enum State + switch</span><span class="play-tag">step the machine</span></div>
+      <div class="states" id="states"></div>
+      <pre id="swCode"></pre>
+      <div class="ctrls">
+        <button class="btn primary" id="advBtn">Advance ▸</button>
+        <button class="btn" id="resetBtn">Reset</button>
+        <span class="doing" id="doing"></span>
+      </div>
+    </div>
+    <p class="caption">The highlighted chip is the current state; the highlighted case is the code that runs for it. Named states make a robot's behavior readable — and impossible to set to a value that doesn't exist.</p>
+  </section>
+
+  <section>
+    <div class="kicker">Why enums beat numbers</div>
+    <h2>Readable and bullet-proof</h2>
+    <p>You <em>could</em> track state with an <span class="k">int</span> — 0 for idle, 1 for intaking, 2 for shooting. But then nothing stops you from writing <span class="k">state = 7</span> (a state that doesn't exist), and <span class="k">if (state == 2)</span> means nothing to a teammate. An enum fixes both: only the listed values are allowed, and the names explain themselves.</p>
+    <div class="note indigo">
+      <div class="nh">This is a state machine</div>
+      <p>A mechanism that moves through named states based on events — intake until you have a game piece, spin up, then shoot — is a <strong>state machine</strong>. Enums plus a switch are the simplest way to build one, and you'll use this pattern constantly for shooters, intakes, and superstructures.</p>
+    </div>
+
+    <div class="code-ex">
+      <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
+      <div class="ctask">Grab the <strong>first</strong> swerve module from the array. Fill in the index.</div>
+<pre class="code"><span class="ty">SwerveModule</span> first = modules[<input class="blank" data-ans="0" aria-label="blank" autocomplete="off" spellcheck="false">];</pre>
+      <div class="code-actions">
+        <button class="btn" id="check">Check</button>
+        <button class="btn" id="reveal">Reveal</button>
+        <span class="code-result" id="cres"></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="2">
+        <div class="qn">Question 1</div>
+        <div class="qt">What's the index of the first element in a Java array?</div>
+        <div class="opts">
+          <button class="opt">1</button>
+          <button class="opt">-1</button>
+          <button class="opt">0 — arrays are zero-indexed</button>
+        </div>
+        <div class="explain">Java arrays start at index 0, so modules[0] is the first and modules[3] is the fourth of four. Off-by-one mistakes here are a classic bug.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 2</div>
+        <div class="qt">Why use an enum for a shooter's states instead of ints?</div>
+        <div class="opts">
+          <button class="opt">Only the named states are allowed, and the names are self-explanatory</button>
+          <button class="opt">Enums are faster than ints</button>
+          <button class="opt">Ints can't be used in a switch</button>
+        </div>
+        <div class="explain">An enum restricts the value to your listed states (no rogue state = 7) and reads clearly (State.SHOOTING vs 2). That safety and clarity is exactly what a state machine needs.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 3</div>
+        <div class="qt">You have a growing number of autonomous routines. Which fits?</div>
+        <div class="opts">
+          <button class="opt">A single double variable</button>
+          <button class="opt">A List — it grows as you add more</button>
+          <button class="opt">An enum with one value</button>
+        </div>
+        <div class="explain">A List (like ArrayList) holds a variable number of items and grows with add(). Arrays are fixed-size; use a List when the count can change.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 2 · 05 · Recap · Part 2 complete ★</h3>
+      <div class="glossary">
+        <div class="gl"><b>Array</b><span>A fixed-size group; access by index.</span></div>
+        <div class="gl"><b>Index from 0</b><span>modules[0] is the first element.</span></div>
+        <div class="gl"><b>List</b><span>A growable collection; add() items.</span></div>
+        <div class="gl"><b>Enum</b><span>A fixed set of named values.</span></div>
+        <div class="gl"><b>switch</b><span>Branch on which enum value you have.</span></div>
+        <div class="gl"><b>State machine</b><span>States + events = clear behavior.</span></div>
+      </div>
+      <a class="next" href="code.html">
+        <div class="n-eyebrow">Part 2 complete · Just-Enough Java</div>
+        <h3>On to Part 3 — Command-Based Robots →</h3>
+        <p>You now know enough Java to read and write robot code. Next, the framework that organizes it all — subsystems and commands. Continue from the course map.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="deploy-lesson-9.html">← Part 2 · 04 · Inheritance &amp; Interfaces</a>
+    <a class="map" href="code.html">Course map</a>
+    <a class="next-link" href="code.html">Part 3 · Command-Based Robots →</a>
+  </nav>
+
+</div>
+
+<footer>Deploy · Programming an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var STATES=[
+    {n:'IDLE',     act:'do nothing — wait for input', body:'motors off'},
+    {n:'INTAKING', act:'run the intake until a game piece is in', body:'intake.run()'},
+    {n:'READY',    act:'spin the shooter up to speed', body:'shooter.setSpeed(60)'},
+    {n:'SHOOTING', act:'feed the piece and fire', body:'feeder.run()'}
+  ];
+  var idx=0;
+  var statesEl=document.getElementById('states'), swCode=document.getElementById('swCode'), doing=document.getElementById('doing');
+  statesEl.innerHTML=STATES.map(function(s,i){ return '<span class="stt" data-i="'+i+'">'+s.n+'</span>'; }).join('');
+  var chips=statesEl.querySelectorAll('.stt');
+
+  function render(){
+    chips.forEach(function(c,i){ c.classList.toggle('on', i===idx); });
+    var lines=['<span class="kw">enum</span> <span class="ty">State</span> { <span class="en">IDLE</span>, <span class="en">INTAKING</span>, <span class="en">READY</span>, <span class="en">SHOOTING</span> }','<span class="ty">State</span> state = <span class="ty">State</span>.<span class="en">'+STATES[idx].n+'</span>;','','<span class="kw">switch</span> (state) {'];
+    STATES.forEach(function(s,i){
+      var hl=i===idx?'hl':'';
+      lines.push('  <span class="'+hl+'"><span class="kw">case</span> <span class="en">'+s.n+'</span> -> '+s.body+';</span>');
+    });
+    lines.push('}');
+    swCode.innerHTML=lines.join('\n');
+    doing.textContent='→ '+STATES[idx].act;
+  }
+  chips.forEach(function(c){ c.addEventListener('click',function(){ idx=parseInt(c.getAttribute('data-i'),10); render(); }); });
+  document.getElementById('advBtn').addEventListener('click',function(){ idx=(idx+1)%STATES.length; render(); });
+  document.getElementById('resetBtn').addEventListener('click',function(){ idx=0; render(); });
+  render();
+
+  var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
+  function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'');}
+  document.getElementById('check').addEventListener('click',function(){
+    var all=true;
+    blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓ → the first one':'Not quite — the first index is 0'; res.className='code-result '+(all?'ok':'no');
+  });
+  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='0';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx2){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(idx2===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="deploy:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

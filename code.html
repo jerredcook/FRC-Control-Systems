@@ -153,11 +153,11 @@
     {code:"2", title:"Just-Enough Java", sub:"Programming basics, for robots",
      blurb:"You don't need a CS degree — just the handful of Java ideas robot code leans on, taught with motors and sensors instead of toy examples.",
      lessons:[
-       {n:1, title:"Variables, Types & Math", desc:"The building blocks: numbers, booleans, and doing arithmetic.", file:null},
-       {n:2, title:"Methods & Logic", desc:"Functions, if/else, and loops — making decisions in code.", file:null},
-       {n:3, title:"Classes & Objects", desc:"The heart of Java: objects that model real hardware.", file:null},
-       {n:4, title:"Inheritance & Interfaces", desc:"extends, @Override, and why WPILib is built on them.", file:null},
-       {n:5, title:"Collections & Enums", desc:"Lists, maps, and enums for clean robot states.", file:null}
+       {n:1, title:"Variables, Types & Math", desc:"The building blocks: numbers, booleans, and doing arithmetic.", file:"deploy-lesson-6.html"},
+       {n:2, title:"Methods & Logic", desc:"Functions, if/else, and loops — making decisions in code.", file:"deploy-lesson-7.html"},
+       {n:3, title:"Classes & Objects", desc:"The heart of Java: objects that model real hardware.", file:"deploy-lesson-8.html"},
+       {n:4, title:"Inheritance & Interfaces", desc:"extends, @Override, and why WPILib is built on them.", file:"deploy-lesson-9.html"},
+       {n:5, title:"Collections & Enums", desc:"Lists, maps, and enums for clean robot states.", file:"deploy-lesson-10.html"}
      ]},
     {code:"3", title:"Command-Based Robots", sub:"How robot code is organized",
      blurb:"The framework nearly every team uses. Once you see how subsystems and commands fit together, the rest of robot programming clicks into place.",
@@ -212,7 +212,7 @@
      ]}
   ];
 
-  var NEXT_ID="2-1";
+  var NEXT_ID="3-1";
   var STORE_KEY="deploy:done";
   function loadDone(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY))||{}; }catch(e){ return {}; } }
   function saveDone(d){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(d)); }catch(e){} }

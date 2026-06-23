@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deploy · Part 2.1 — Variables, Types &amp; Math</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(138,140,248,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  p .sub,.sub{color:var(--muted)}
+  .lead{font-size:19px}
+  em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .terms{display:grid;gap:12px;margin:22px 0 6px}
+  @media(min-width:560px){.terms{grid-template-columns:repeat(2,1fr)}}
+  .term{border:1px solid var(--line);border-radius:10px;padding:13px 15px;background:var(--panel);border-top:2px solid var(--accent,var(--indigo))}
+  .term h4{margin:0 0 4px;font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--accent,var(--indigo))}
+  .term p{margin:0;font-size:14px;color:var(--muted);line-height:1.5}
+  .term code{font-family:var(--mono);color:var(--teal);font-size:12.5px}
+
+  /* code + playground */
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--indigo);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:13.5px;line-height:1.85;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic}
+  .code .kw{color:#ff9bbf}
+  .code .ty{color:var(--teal)}
+  .code .fn{color:var(--indigo)}
+  .code .num{color:var(--amber)}
+  .code .str{color:#9ad6a0}
+  .code .out{color:var(--green)}
+
+  .play{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .play-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .play-title{font-family:var(--mono);font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+  .play-tag{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .play pre{font-family:var(--mono);font-size:13.5px;line-height:1.85;margin:0;padding:16px 18px;white-space:pre;overflow-x:auto;color:#cdd9ec;background:#080d16}
+  .play .ctrls{padding:13px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:14px}
+  .slg{flex:1 1 200px;display:flex;flex-direction:column;gap:6px;min-width:170px}
+  .slg label{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+  .slg label .val{color:var(--amber)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:var(--line-2);outline:none;width:100%}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--indigo);cursor:pointer;box-shadow:0 0 10px -1px var(--indigo)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
+  .out-line{padding:12px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:14px;background:#080d16;color:var(--muted)}
+  .out-line b{color:var(--green)}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.red{border-color:var(--red);background:rgba(255,107,107,.07)} .note.red .nh{color:var(--red)}
+
+  .code-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .code-ex .chead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .code-ex .chead .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,176,32,.14);display:grid;place-items:center;color:var(--amber);font-size:13px}
+  .code-ex .ctask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .code-ex pre.code{margin:0 0 14px}
+  .blank{font-family:var(--mono);font-size:13px;width:11ch;text-align:center;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:2px 4px;outline:none}
+  .blank:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
+  .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)}
+  .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7}
+  .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px}
+  @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px}
+  .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:110px;text-transform:uppercase}
+  .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)}
+  .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)}
+  .coursenav a.map{border-color:transparent;color:var(--teal)}
+
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="code.html"><span class="dot"></span><span class="name">Deploy</span></a>
+    <div class="top-meta">Part 2 · 01 / 05 · Just-Enough Java</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 2 · 01</b> Just-Enough Java</div>
+    <div class="eyebrow">Variables, Types &amp; Math</div>
+    <h1>Numbers the<br>robot <span class="accent">remembers</span>.</h1>
+    <p class="dek">A variable is a labeled box that holds a value. Get the handful of types and one division gotcha, and you can compute anything a robot needs.</p>
+  </div>
+
+  <section>
+    <p class="lead">Code is mostly nouns and arithmetic.</p>
+    <p>A <strong>variable</strong> stores a value under a name so you can use it later: <span class="k">double speed = 2.4;</span> makes a box called <span class="k">speed</span> holding 2.4. The word in front — the <strong>type</strong> — says what kind of value goes in the box. You'll use four constantly:</p>
+    <div class="terms">
+      <div class="term"><h4><code>int</code></h4><p>A whole number: <code>5</code>, <code>-12</code>, <code>0</code>. CAN ids, counts, button numbers.</p></div>
+      <div class="term"><h4><code>double</code></h4><p>A decimal number: <code>2.4</code>, <code>-0.5</code>, <code>3.14159</code>. Almost everything physical — speeds, voltages, positions.</p></div>
+      <div class="term"><h4><code>boolean</code></h4><p>True or false: <code>true</code>, <code>false</code>. Is the button pressed? Are we at the target?</p></div>
+      <div class="term"><h4><code>String</code></h4><p>Text: <code>"Elevator"</code>. Mostly for names and dashboard labels.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Try it</div>
+    <h2>A live calculation</h2>
+    <p>Here's a tiny program that turns a joystick value into a motor speed. Drag the variables and watch the result recompute — this is exactly the kind of math your robot does every loop.</p>
+
+    <div class="play" id="play">
+      <div class="play-head"><span class="play-title">RobotMath.java</span><span class="play-tag">live</span></div>
+      <pre id="playCode"></pre>
+      <div class="ctrls">
+        <div class="slg"><label>joystick <span class="val" id="jVal">0.80</span></label><input type="range" id="j" min="-1" max="1" step="0.05" value="0.8" /></div>
+        <div class="slg"><label>maxSpeed (m/s) <span class="val" id="mVal">3.0</span></label><input type="range" id="m" min="0" max="5" step="0.1" value="3" /></div>
+      </div>
+      <div class="out-line" id="out"></div>
+    </div>
+    <p class="caption">Change a number, the output follows. A running robot does this thousands of times a second with real sensor values in those boxes.</p>
+  </section>
+
+  <section>
+    <div class="kicker">The classic trap</div>
+    <h2>int math throws away the decimal</h2>
+    <p>One gotcha bites every beginner. When you divide two <span class="k">int</span>s, Java does <strong>integer division</strong> — it drops the fractional part. So <span class="k">5 / 2</span> is <span class="k">2</span>, not 2.5. The fix: make at least one side a <span class="k">double</span>.</p>
+    <div class="codewrap">
+      <div class="clabel">The trap, and the fix <span class="badge">Java</span></div>
+<pre class="code"><span class="ty">int</span> a = <span class="num">5</span>, b = <span class="num">2</span>;
+
+<span class="ty">double</span> wrong = a / b;            <span class="cm">// 2.0  ← int ÷ int = int, decimal lost!</span>
+<span class="ty">double</span> right = a / (<span class="ty">double</span>) b;   <span class="cm">// 2.5  ← cast one side to double</span>
+<span class="ty">double</span> also  = a / <span class="num">2.0</span>;          <span class="cm">// 2.5  ← a decimal literal works too</span></pre>
+    </div>
+    <div class="note red">
+      <div class="nh">Where it bites a robot</div>
+      <p>Gear-ratio and unit math is full of division. <span class="k">ticks / countsPerRev</span> with two ints silently rounds to a whole number, and your mechanism thinks it's at the wrong place. When a value can have a decimal, make it a <span class="k">double</span>.</p>
+    </div>
+
+    <div class="code-ex">
+      <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
+      <div class="ctask">Compute the average of two integer sensor readings <em>without</em> losing the decimal. Fill the blank so <code style="font-family:var(--mono);color:var(--teal)">avg</code> is 2.5 when the readings are 2 and 3.</div>
+<pre class="code"><span class="ty">int</span> r1 = <span class="num">2</span>, r2 = <span class="num">3</span>;
+<span class="ty">double</span> avg = (r1 + r2) / <input class="blank" data-ans="2.0|(double)2|2d" aria-label="blank" autocomplete="off" spellcheck="false">;   <span class="cm">// want 2.5</span></pre>
+      <div class="code-actions">
+        <button class="btn" id="check">Check</button>
+        <button class="btn" id="reveal">Reveal</button>
+        <span class="code-result" id="cres"></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">Which type would you use for a motor's speed in meters per second?</div>
+        <div class="opts">
+          <button class="opt">int</button>
+          <button class="opt">double — it needs decimals</button>
+          <button class="opt">String</button>
+        </div>
+        <div class="explain">Speeds, voltages, and positions are rarely whole numbers, so they're doubles. int is for whole-number things like CAN ids and counts.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">In Java, what is <code style="font-family:var(--mono);color:var(--teal)">7 / 2</code> when both are ints?</div>
+        <div class="opts">
+          <button class="opt">3.5</button>
+          <button class="opt">4</button>
+          <button class="opt">3 — integer division drops the decimal</button>
+        </div>
+        <div class="explain">int ÷ int gives an int: the .5 is thrown away, leaving 3. Use 7 / 2.0 (or cast) to get 3.5.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">What does a variable's <em>type</em> tell you?</div>
+        <div class="opts">
+          <button class="opt">What kind of value the box can hold (whole number, decimal, true/false, text)</button>
+          <button class="opt">How fast the code runs</button>
+          <button class="opt">Which motor it controls</button>
+        </div>
+        <div class="explain">The type (int, double, boolean, String…) declares what sort of value lives in that variable — and the compiler keeps you honest about it.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 2 · 01 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Variable</b><span>A named box that holds a value.</span></div>
+        <div class="gl"><b>int</b><span>Whole numbers — ids, counts.</span></div>
+        <div class="gl"><b>double</b><span>Decimals — speeds, voltages, positions.</span></div>
+        <div class="gl"><b>boolean</b><span>true / false — pressed? at target?</span></div>
+        <div class="gl"><b>String</b><span>Text — names and labels.</span></div>
+        <div class="gl"><b>int division</b><span>5 / 2 = 2; cast to double for 2.5.</span></div>
+      </div>
+      <a class="next" href="deploy-lesson-7.html">
+        <div class="n-eyebrow">Up next · Part 2 · 02</div>
+        <h3>Methods &amp; Logic</h3>
+        <p>Variables hold values; now make decisions and reuse code. Methods, if/else, and loops — the verbs of a program.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="deploy-lesson-5.html">← Part 1 · 05 · Docs &amp; Vendordeps</a>
+    <a class="map" href="code.html">Course map</a>
+    <a href="deploy-lesson-7.html">Part 2 · 02 · Methods &amp; Logic →</a>
+  </nav>
+
+</div>
+
+<footer>Deploy · Programming an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var j=document.getElementById('j'), m=document.getElementById('m');
+  var jVal=document.getElementById('jVal'), mVal=document.getElementById('mVal');
+  var codeEl=document.getElementById('playCode'), outEl=document.getElementById('out');
+  function f(x){ return (x<0?'-':'')+Math.abs(x).toFixed(2); }
+  function render(){
+    var jv=parseFloat(j.value), mv=parseFloat(m.value), sp=jv*mv;
+    jVal.textContent=f(jv); mVal.textContent=mv.toFixed(1);
+    codeEl.innerHTML=
+      '<span class="ty">double</span> joystick = <span class="num">'+f(jv)+'</span>;   <span class="cm">// from the controller</span>\n'+
+      '<span class="ty">double</span> maxSpeed = <span class="num">'+mv.toFixed(2)+'</span>;   <span class="cm">// meters per second</span>\n'+
+      '<span class="ty">double</span> speed = joystick * maxSpeed;\n'+
+      '<span class="ty">System</span>.out.<span class="fn">println</span>(speed);   <span class="out">// '+f(sp)+'</span>';
+    outEl.innerHTML='&gt; output: <b>'+f(sp)+'</b> m/s';
+  }
+  j.addEventListener('input',render); m.addEventListener('input',render); render();
+
+  var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
+  function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'');}
+  document.getElementById('check').addEventListener('click',function(){
+    var all=true;
+    blanks.forEach(function(b){
+      var ans=(b.getAttribute('data-ans')||'').split('|');
+      var ok=ans.indexOf(norm(b.value))!==-1;
+      b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false;
+    });
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓ → 2.5':'Not quite — make one side a double';
+    res.className='code-result '+(all?'ok':'no');
+  });
+  document.getElementById('reveal').addEventListener('click',function(){
+    blanks.forEach(function(b){b.value='2.0';b.classList.remove('bad');b.classList.add('ok');});
+    document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok';
+  });
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){
+      opt.addEventListener('click',function(){
+        if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');});
+        if(idx===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');}
+        explain.classList.add('show');
+      });
+    });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="deploy:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

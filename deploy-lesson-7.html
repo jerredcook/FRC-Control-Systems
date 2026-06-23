@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deploy · Part 2.2 — Methods &amp; Logic</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(138,140,248,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  .lead{font-size:19px}
+  em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--indigo);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:13.5px;line-height:1.85;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic} .code .kw{color:#ff9bbf} .code .ty{color:var(--teal)} .code .fn{color:var(--indigo)} .code .num{color:var(--amber)} .code .out{color:var(--green)}
+
+  .play{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .play-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .play-title{font-family:var(--mono);font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+  .play-tag{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .play pre{font-family:var(--mono);font-size:13px;line-height:1.85;margin:0;padding:16px 18px;white-space:pre;overflow-x:auto;color:#cdd9ec;background:#080d16}
+  .play .hl{background:rgba(67,214,126,.14);border-radius:3px;box-shadow:-4px 0 0 rgba(67,214,126,.5)}
+  .play .dim{opacity:.4}
+  .play .ctrls{padding:13px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:14px}
+  .slg{flex:1 1 200px;display:flex;flex-direction:column;gap:6px;min-width:170px}
+  .slg label{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+  .slg label .val{color:var(--amber)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:var(--line-2);outline:none;width:100%}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--indigo);cursor:pointer;box-shadow:0 0 10px -1px var(--indigo)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
+  .out-line{padding:12px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:14px;background:#080d16;color:var(--muted)}
+  .out-line b{color:var(--green)}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(138,140,248,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .code-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .code-ex .chead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .code-ex .chead .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,176,32,.14);display:grid;place-items:center;color:var(--amber);font-size:13px}
+  .code-ex .ctask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .code-ex pre.code{margin:0 0 14px}
+  .blank{font-family:var(--mono);font-size:13px;width:8ch;text-align:center;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:2px 4px;outline:none}
+  .blank:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
+  .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:100px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="code.html"><span class="dot"></span><span class="name">Deploy</span></a>
+    <div class="top-meta">Part 2 · 02 / 05 · Just-Enough Java</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 2 · 02</b> Just-Enough Java</div>
+    <div class="eyebrow">Methods &amp; Logic</div>
+    <h1>Decisions and<br><span class="accent">reusable</span> code.</h1>
+    <p class="dek">A method is a named block of code you can run anytime. Add if/else to make decisions and loops to repeat — and you can express any robot behavior.</p>
+  </div>
+
+  <section>
+    <p class="lead">A method packages an action behind a name.</p>
+    <p>You give it inputs (<strong>parameters</strong>), it does some work, and it hands back a result (the <strong>return</strong> value). Then you call it by name as many times as you like. Here's one every robot has: a <span class="k">deadband</span> that ignores tiny joystick wiggle so the robot doesn't creep when you're not touching the stick.</p>
+
+    <div class="play" id="play">
+      <div class="play-head"><span class="play-title">deadband(x, tol)</span><span class="play-tag">which branch runs?</span></div>
+      <pre id="playCode"></pre>
+      <div class="ctrls">
+        <div class="slg"><label>x — joystick <span class="val" id="xVal">0.05</span></label><input type="range" id="x" min="-1" max="1" step="0.01" value="0.05" /></div>
+        <div class="slg"><label>tol — deadband <span class="val" id="tVal">0.10</span></label><input type="range" id="t" min="0" max="0.4" step="0.01" value="0.10" /></div>
+      </div>
+      <div class="out-line" id="out"></div>
+    </div>
+    <p class="caption">The highlighted line is the branch that actually runs. Inside the deadband, the method returns 0; outside, it passes the joystick straight through.</p>
+  </section>
+
+  <section>
+    <div class="kicker">Repeat without copy-paste</div>
+    <h2>Loops do a thing N times</h2>
+    <p>When you need to do the same thing to four swerve modules, you don't write it four times — you <strong>loop</strong>. A <span class="k">for</span> loop has three parts: where to start, how long to keep going, and how to step:</p>
+    <div class="codewrap">
+      <div class="clabel">A for loop <span class="badge">Java</span></div>
+<pre class="code"><span class="kw">for</span> (<span class="ty">int</span> i = <span class="num">0</span>; i &lt; <span class="num">4</span>; i++) {   <span class="cm">// start at 0, while i &lt; 4, add 1 each time</span>
+  modules[i].<span class="fn">configure</span>();        <span class="cm">// runs for i = 0, 1, 2, 3  → four times</span>
+}</pre>
+    </div>
+    <p>A <span class="k">while</span> loop is the same idea with just a condition: <span class="k">while (!atTarget) { ... }</span> repeats until you've arrived. Both let one block of code handle many cases.</p>
+    <div class="note indigo">
+      <div class="nh">Methods are how code stays readable</div>
+      <p>Instead of one giant <span class="k">teleopPeriodic</span> with a hundred lines, you write small methods with clear names — <span class="k">deadband()</span>, <span class="k">aimAtTarget()</span>, <span class="k">scoreHigh()</span> — and call them. Code you can read is code you can fix at 2 a.m. before a competition.</p>
+    </div>
+
+    <div class="code-ex">
+      <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
+      <div class="ctask">Loop over all <strong>four</strong> swerve modules. Fill the blank so the loop runs for i = 0, 1, 2, 3.</div>
+<pre class="code"><span class="kw">for</span> (<span class="ty">int</span> i = <span class="num">0</span>; i &lt; <input class="blank" data-ans="4|modules.length" aria-label="blank" autocomplete="off" spellcheck="false">; i++) {
+  modules[i].<span class="fn">configure</span>();
+}</pre>
+      <div class="code-actions">
+        <button class="btn" id="check">Check</button>
+        <button class="btn" id="reveal">Reveal</button>
+        <span class="code-result" id="cres"></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="2">
+        <div class="qn">Question 1</div>
+        <div class="qt">What does a method's <em>return value</em> give you?</div>
+        <div class="opts">
+          <button class="opt">A new motor</button>
+          <button class="opt">The names of its parameters</button>
+          <button class="opt">The result it hands back when you call it</button>
+        </div>
+        <div class="explain">You call a method with inputs (parameters); it does work and returns a value you can use — like deadband(x, tol) returning the cleaned-up joystick value.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 2</div>
+        <div class="qt">In the deadband, when does it return 0 instead of x?</div>
+        <div class="opts">
+          <button class="opt">When |x| is less than tol — the stick is barely moved</button>
+          <button class="opt">When x is exactly 1.0</button>
+          <button class="opt">Never</button>
+        </div>
+        <div class="explain">The if checks Math.abs(x) &lt; tol. If the joystick is inside that small band, it's treated as zero so noise doesn't drive the robot; outside, x passes through.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 3</div>
+        <div class="qt">Why use a loop to configure four modules?</div>
+        <div class="opts">
+          <button class="opt">Loops make the robot faster</button>
+          <button class="opt">One block of code handles all four — no copy-paste, no missed module</button>
+          <button class="opt">It's the only way to use arrays</button>
+        </div>
+        <div class="explain">A for loop runs the same code for each index. Write it once; it can't drift out of sync the way four copy-pasted blocks can.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 2 · 02 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Method</b><span>A named, reusable block of code.</span></div>
+        <div class="gl"><b>Parameter</b><span>An input you pass to a method.</span></div>
+        <div class="gl"><b>return</b><span>The result a method hands back.</span></div>
+        <div class="gl"><b>if / else</b><span>Choose a branch from a condition.</span></div>
+        <div class="gl"><b>for / while</b><span>Repeat a block N times / until done.</span></div>
+        <div class="gl"><b>Small methods</b><span>Keep code readable and fixable.</span></div>
+      </div>
+      <a class="next" href="deploy-lesson-8.html">
+        <div class="n-eyebrow">Up next · Part 2 · 03</div>
+        <h3>Classes &amp; Objects</h3>
+        <p>The big one. Classes are blueprints; objects are the real things you make from them — and they're how your code models real hardware.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="deploy-lesson-6.html">← Part 2 · 01 · Variables &amp; Types</a>
+    <a class="map" href="code.html">Course map</a>
+    <a href="deploy-lesson-8.html">Part 2 · 03 · Classes &amp; Objects →</a>
+  </nav>
+
+</div>
+
+<footer>Deploy · Programming an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var x=document.getElementById('x'), t=document.getElementById('t');
+  var xVal=document.getElementById('xVal'), tVal=document.getElementById('tVal');
+  var codeEl=document.getElementById('playCode'), outEl=document.getElementById('out');
+  function f(v){ return (v<0?'-':'')+Math.abs(v).toFixed(2); }
+  function render(){
+    var xv=parseFloat(x.value), tv=parseFloat(t.value);
+    var inside=Math.abs(xv)<tv, result=inside?0:xv;
+    xVal.textContent=f(xv); tVal.textContent=tv.toFixed(2);
+    var ifCls=inside?'hl':'dim', elseCls=inside?'dim':'hl';
+    codeEl.innerHTML=
+      '<span class="ty">double</span> <span class="fn">deadband</span>(<span class="ty">double</span> x, <span class="ty">double</span> tol) {\n'+
+      '  <span class="kw">if</span> (<span class="ty">Math</span>.<span class="fn">abs</span>(x) &lt; tol) {        <span class="cm">// |'+f(xv)+'| &lt; '+tv.toFixed(2)+' ? '+(inside?'yes':'no')+'</span>\n'+
+      '    <span class="'+ifCls+'"><span class="kw">return</span> <span class="num">0.0</span>;</span>                <span class="cm">// inside the deadband</span>\n'+
+      '  } <span class="kw">else</span> {\n'+
+      '    <span class="'+elseCls+'"><span class="kw">return</span> x;</span>                  <span class="cm">// pass it through</span>\n'+
+      '  }\n}\n\n'+
+      '<span class="fn">deadband</span>(<span class="num">'+f(xv)+'</span>, <span class="num">'+tv.toFixed(2)+'</span>);   <span class="out">// '+f(result)+'</span>';
+    outEl.innerHTML='&gt; returns: <b>'+f(result)+'</b>'+(inside?'  (inside the deadband)':'  (passed through)');
+  }
+  x.addEventListener('input',render); t.addEventListener('input',render); render();
+
+  var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
+  function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'');}
+  document.getElementById('check').addEventListener('click',function(){
+    var all=true;
+    blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓ → runs 4 times':'Not quite — there are 4 modules (0…3)'; res.className='code-result '+(all?'ok':'no');
+  });
+  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='4';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(idx===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="deploy:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>
