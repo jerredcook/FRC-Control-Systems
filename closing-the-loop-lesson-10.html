@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Closing the Loop · Part II.2 — Units, Gears & Conversions</title>
+<title>Closing the Loop · Part II.2 - Units, Gears & Conversions</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -157,15 +157,15 @@
     <div class="lesson-no"><b>Part II · 02</b> From Math to Code</div>
     <div class="eyebrow">Units, Gears &amp; Conversions</div>
     <h1>Rotations in,<br><span class="accent">meters</span> out.</h1>
-    <p class="dek">Your motor counts in turns. Your elevator moves in meters. The gearbox sits in between — and getting this conversion wrong is the single most common real-robot bug.</p>
+    <p class="dek">Your motor counts in turns. Your elevator moves in meters. The gearbox sits in between - and getting this conversion wrong is the single most common real-robot bug.</p>
   </div>
 
   <section>
     <p class="lead">A motor doesn't know what a meter is.</p>
-    <p>A TalonFX reports one thing: how many times its shaft has spun — <strong>rotations</strong>. But you think in meters (elevator height) or degrees (arm angle). Two things stand between the motor and the mechanism, and you have to account for both:</p>
+    <p>A TalonFX reports one thing: how many times its shaft has spun - <strong>rotations</strong>. But you think in meters (elevator height) or degrees (arm angle). Two things stand between the motor and the mechanism, and you have to account for both:</p>
     <div class="formula">
-      <b>gear ratio</b> — the gearbox spins the motor many times per one output turn<br>
-      <span class="t">circumference</span> — one output turn pays out one drum's worth of cable
+      <b>gear ratio</b> - the gearbox spins the motor many times per one output turn<br>
+      <span class="t">circumference</span> - one output turn pays out one drum's worth of cable
     </div>
     <p>Miss either one and your robot will think it's at 2 meters when it's at 20 centimeters. Let's make the conversion something you can see.</p>
   </section>
@@ -201,7 +201,7 @@
         <div class="ch"><div class="k2">Height</div><div class="v amber" id="cHeight">0.00 m</div><div class="op">= the answer</div></div>
       </div>
     </div>
-    <p class="caption">A bigger gear ratio means more motor turns per meter — finer control, but a slower mechanism. This trade-off is yours to choose when you design the robot.</p>
+    <p class="caption">A bigger gear ratio means more motor turns per meter - finer control, but a slower mechanism. This trade-off is yours to choose when you design the robot.</p>
   </section>
 
   <section>
@@ -212,7 +212,7 @@
       meters = ( motorRotations ÷ <b>G</b> ) × <span class="t">π · diameter</span>
       <span class="small">G = gear ratio &nbsp;·&nbsp; circumference = π · diameter (use meters!)</span>
     </div>
-    <p>To go the <em>other</em> way — turning a target height into the motor rotations to command — you just run it backwards: multiply by G, divide by circumference. An arm is even simpler: there's no drum, so output rotations convert straight to degrees (× 360).</p>
+    <p>To go the <em>other</em> way - turning a target height into the motor rotations to command - you just run it backwards: multiply by G, divide by circumference. An arm is even simpler: there's no drum, so output rotations convert straight to degrees (× 360).</p>
     <div class="note red">
       <div class="nh">The classic bug</div>
       <p>Mixing units. A drum diameter in <em>inches</em> with a height in <em>meters</em>, or radians where the code wants rotations. Pick one unit system, convert everything to it once at the boundary, and never mix. Inches → meters: multiply by 0.0254.</p>
@@ -222,7 +222,7 @@
   <section>
     <div class="kicker">In Phoenix 6</div>
     <h2>Let the motor do the conversion</h2>
-    <p>You could scatter <span class="k">/ G * circumference</span> math all over your code — or you can tell the TalonFX the ratio <em>once</em>, and then ask it for position in mechanism units directly. Phoenix 6 has a config field for exactly this:</p>
+    <p>You could scatter <span class="k">/ G * circumference</span> math all over your code - or you can tell the TalonFX the ratio <em>once</em>, and then ask it for position in mechanism units directly. Phoenix 6 has a config field for exactly this:</p>
     <div class="codewrap">
       <div class="clabel">Configure the ratio once <span class="badge">Java · Phoenix 6</span></div>
 <pre class="code"><span class="ty">var</span> cfg = <span class="kw">new</span> <span class="ty">TalonFXConfiguration</span>();
@@ -233,7 +233,7 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(cf
 <span class="ty">double</span> outputRotations = motor.<span class="fn">getPosition</span>().<span class="fn">getValueAsDouble</span>();
 <span class="ty">double</span> meters = outputRotations * (<span class="ty">Math</span>.PI * drumDiameterMeters);</pre>
     </div>
-    <p>With the ratio configured, the gearbox disappears from your day-to-day code — the motor reports output turns, and you only have the drum left to handle. One source of bugs, gone.</p>
+    <p>With the ratio configured, the gearbox disappears from your day-to-day code - the motor reports output turns, and you only have the drum left to handle. One source of bugs, gone.</p>
 
     <div class="code-ex">
       <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
@@ -282,7 +282,7 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(cf
           <button class="opt">Changes the PID gains automatically</button>
           <button class="opt">Makes getPosition() report output rotations, with the gear ratio already removed</button>
         </div>
-        <div class="explain">You give the TalonFX the gear ratio once, and from then on its position and velocity come back in mechanism (output) units — so you don't divide by the gear ratio by hand all over your code.</div>
+        <div class="explain">You give the TalonFX the gear ratio once, and from then on its position and velocity come back in mechanism (output) units - so you don't divide by the gear ratio by hand all over your code.</div>
       </div>
     </div>
   </section>
@@ -292,8 +292,8 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(cf
       <h3>Part II · 02 · Recap</h3>
       <div class="glossary">
         <div class="gl"><b>Rotations</b><span>What the motor actually measures.</span></div>
-        <div class="gl"><b>Gear ratio (G)</b><span>Motor turns per one output turn — divide by it.</span></div>
-        <div class="gl"><b>Circumference</b><span>π × diameter — output turns × this = distance.</span></div>
+        <div class="gl"><b>Gear ratio (G)</b><span>Motor turns per one output turn - divide by it.</span></div>
+        <div class="gl"><b>Circumference</b><span>π × diameter - output turns × this = distance.</span></div>
         <div class="gl"><b>Inches → meters</b><span>Multiply by 0.0254; never mix unit systems.</span></div>
         <div class="gl"><b>SensorToMechanismRatio</b><span>Phoenix 6 config to report output units directly.</span></div>
         <div class="gl"><b>Arm vs elevator</b><span>Arm: output turns × 360 = degrees (no drum).</span></div>
@@ -436,7 +436,7 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(cf
       if(!ok)all=false;
     });
     var res=document.getElementById('cres');
-    res.textContent=all?'All correct ✓':'Not quite — divide by G, multiply by circumference';
+    res.textContent=all?'All correct ✓':'Not quite - divide by G, multiply by circumference';
     res.className='code-result '+(all?'ok':'no');
   });
   document.getElementById('reveal').addEventListener('click',function(){

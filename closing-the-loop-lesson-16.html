@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Closing the Loop · Part III.3 — On-Motor Closed Loop</title>
+<title>Closing the Loop · Part III.3 - On-Motor Closed Loop</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -162,19 +162,19 @@
     <div class="lesson-no"><b>Part III · 03</b> CTRE Phoenix 6</div>
     <div class="eyebrow">On-Motor Closed Loop</div>
     <h1>Send a target,<br>not a <span class="accent">voltage</span>.</h1>
-    <p class="dek">Put your gains in Slot0, fire off a control request, and the Kraken runs the whole PID + feedforward loop on board — at 1 kHz, without your periodic() lifting a finger.</p>
+    <p class="dek">Put your gains in Slot0, fire off a control request, and the Kraken runs the whole PID + feedforward loop on board - at 1 kHz, without your periodic() lifting a finger.</p>
   </div>
 
   <section>
     <p class="lead">This is the moment it all moves onto the motor.</p>
-    <p>In Part II you computed volts every loop. Now you do something different: you store your gains in the device's <span class="k">Slot0</span> — all eight of them, <span class="k">kP kI kD</span> and <span class="k">kS kV kA kG</span> — then each time you want to move, you send a <strong>control request</strong> naming a target. The TalonFX runs feedforward + PID against that target itself, a thousand times a second.</p>
-    <p>The simulation below holds the elevator with an onboard position loop. Tune the Slot0 gains and pick a target — you're not setting voltage anywhere, just telling the motor where to go.</p>
+    <p>In Part II you computed volts every loop. Now you do something different: you store your gains in the device's <span class="k">Slot0</span> - all eight of them, <span class="k">kP kI kD</span> and <span class="k">kS kV kA kG</span> - then each time you want to move, you send a <strong>control request</strong> naming a target. The TalonFX runs feedforward + PID against that target itself, a thousand times a second.</p>
+    <p>The simulation below holds the elevator with an onboard position loop. Tune the Slot0 gains and pick a target - you're not setting voltage anywhere, just telling the motor where to go.</p>
   </section>
 
   <section>
     <div class="kicker">Command it</div>
     <h2>An onboard position loop</h2>
-    <p>Set a <strong>target</strong> and watch the Kraken drive to it and hold — no droop, because <span class="k">kG</span> in Slot0 supplies gravity. Push <span class="k">kP</span> for a snappier approach. The whole loop is running on the motor; your code just sent the number.</p>
+    <p>Set a <strong>target</strong> and watch the Kraken drive to it and hold - no droop, because <span class="k">kG</span> in Slot0 supplies gravity. Push <span class="k">kP</span> for a snappier approach. The whole loop is running on the motor; your code just sent the number.</p>
 
     <div class="demo" id="demo">
       <div class="demo-head">
@@ -212,15 +212,15 @@
         <div class="ro"><div class="k2">Computed by</div><div class="v amber">TalonFX</div></div>
       </div>
     </div>
-    <p class="caption">Your roboRIO sent one number — the target. Everything you see the motor doing to reach it happened on the Kraken.</p>
+    <p class="caption">Your roboRIO sent one number - the target. Everything you see the motor doing to reach it happened on the Kraken.</p>
   </section>
 
   <section>
     <div class="kicker">The code</div>
     <h2>Gains in Slot0, a request to move</h2>
-    <p>Configure the eight gains once (these come from SysId — next lesson). Note <span class="k">GravityType</span>: tell the device whether gravity is constant (elevator) or angle-dependent (arm), and it applies kG correctly:</p>
+    <p>Configure the eight gains once (these come from SysId - next lesson). Note <span class="k">GravityType</span>: tell the device whether gravity is constant (elevator) or angle-dependent (arm), and it applies kG correctly:</p>
     <div class="codewrap">
-      <div class="clabel">Constructor — Slot0 gains <span class="badge">Java · Phoenix 6</span></div>
+      <div class="clabel">Constructor - Slot0 gains <span class="badge">Java · Phoenix 6</span></div>
 <pre class="code">cfg.Slot0.kS = <span class="num">0.12</span>;   <span class="cm">// volts to overcome static friction</span>
 cfg.Slot0.kG = <span class="num">0.30</span>;   <span class="cm">// volts to hold against gravity</span>
 cfg.Slot0.kV = <span class="num">0.11</span>;   <span class="cm">// volts per rotation/sec</span>
@@ -242,7 +242,7 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(cf
     </div>
     <div class="note teal">
       <div class="nh">Velocity works the same way</div>
-      <p>A flywheel wants to hold a <em>speed</em>, not a position. Swap in <span class="k">VelocityVoltage</span> and call <span class="k">withVelocity(rps)</span> — same Slot0 gains idea, but now kV does the heavy lifting and kP trims. There are torque-current versions too (<span class="k">PositionTorqueCurrentFOC</span>, etc.) for even crisper control. Same pattern every time: configure gains, send a request.</p>
+      <p>A flywheel wants to hold a <em>speed</em>, not a position. Swap in <span class="k">VelocityVoltage</span> and call <span class="k">withVelocity(rps)</span> - same Slot0 gains idea, but now kV does the heavy lifting and kP trims. There are torque-current versions too (<span class="k">PositionTorqueCurrentFOC</span>, etc.) for even crisper control. Same pattern every time: configure gains, send a request.</p>
     </div>
 
     <div class="code-ex">
@@ -284,7 +284,7 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(cf
           <button class="opt">Computes the voltage and calls setVoltage() every loop</button>
           <button class="opt">Writes the position to a file</button>
         </div>
-        <div class="explain">You command a target with a control request like PositionVoltage. The device runs the loop itself — you never compute the voltage. That's the whole point of on-motor control.</div>
+        <div class="explain">You command a target with a control request like PositionVoltage. The device runs the loop itself - you never compute the voltage. That's the whole point of on-motor control.</div>
       </div>
       <div class="q" data-correct="2">
         <div class="qn">Question 3</div>
@@ -292,7 +292,7 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(cf
         <div class="opts">
           <button class="opt">The motor's maximum speed</button>
           <button class="opt">Which CAN bus it uses</button>
-          <button class="opt">How kG is applied — a constant for an elevator, scaled by cos(angle) for an arm</button>
+          <button class="opt">How kG is applied - a constant for an elevator, scaled by cos(angle) for an arm</button>
         </div>
         <div class="explain">Gravity is constant on an elevator but changes with angle on an arm. GravityType tells the onboard loop which model to use so kG holds correctly in both cases.</div>
       </div>
@@ -304,7 +304,7 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(cf
       <h3>Part III · 03 · Recap</h3>
       <div class="glossary">
         <div class="gl"><b>Slot0</b><span>Where the 8 gains live on the device.</span></div>
-        <div class="gl"><b>Control request</b><span>PositionVoltage / VelocityVoltage — names a target.</span></div>
+        <div class="gl"><b>Control request</b><span>PositionVoltage / VelocityVoltage - names a target.</span></div>
         <div class="gl"><b>setControl()</b><span>Sends the request; the motor runs the loop.</span></div>
         <div class="gl"><b>withPosition / withVelocity</b><span>Sets the target on the request.</span></div>
         <div class="gl"><b>GravityType</b><span>Elevator_Static or Arm_Cosine for kG.</span></div>
@@ -313,7 +313,7 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(cf
       <a class="next" href="closing-the-loop-lesson-17.html">
         <div class="n-eyebrow">Up next · Part III · 04</div>
         <h3>Motion Magic</h3>
-        <p>Right now the target snaps and the motor lunges. Motion Magic adds the smooth profile from Part II — onboard, from a single control request.</p>
+        <p>Right now the target snaps and the motor lunges. Motion Magic adds the smooth profile from Part II - onboard, from a single control request.</p>
       </a>
     </div>
   </section>
@@ -456,7 +456,7 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(cf
       if(!ok)all=false;
     });
     var res=document.getElementById('cres');
-    res.textContent=all?'All correct ✓':'Not quite — pass the target rotations';
+    res.textContent=all?'All correct ✓':'Not quite - pass the target rotations';
     res.className='code-result '+(all?'ok':'no');
   });
   document.getElementById('reveal').addEventListener('click',function(){

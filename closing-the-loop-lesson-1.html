@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Closing the Loop · Lesson 1 — Feedback &amp; Control</title>
+<title>Closing the Loop · Lesson 1 - Feedback &amp; Control</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -238,21 +238,21 @@
     <div class="lesson-no"><b>Lesson 01</b> Foundations</div>
     <div class="eyebrow">Feedback &amp; Control</div>
     <h1>The one idea<br>everything is <span class="accent">built on</span>.</h1>
-    <p class="dek">Before any code. Before any math. Just the loop you've been running your whole life — made deliberate.</p>
+    <p class="dek">Before any code. Before any math. Just the loop you've been running your whole life - made deliberate.</p>
   </div>
 
   <!-- INTRO -->
   <section>
     <p class="lead">You already know how to do this.</p>
-    <p>Every time you steer a car back toward the middle of a lane, nudge the shower knob because the water's too cold, or ease off as your cup fills near the top — you're running a <strong>control loop</strong>. You look at where things are, compare it to where you want them, and adjust. Then you do it again. And again. Without ever thinking about it.</p>
-    <p>This whole course is about teaching a robot to do that same thing — on purpose, precisely, in code. But the idea underneath it is something you've done since you learned to walk. So let's not start with code. Let's start by <strong>feeling it</strong>.</p>
+    <p>Every time you lean your bike back upright when it starts to tip, nudge the shower knob because the water's too cold, or ease off as your cup fills near the top, you're running a <strong>control loop</strong>.  You look at where things are, compare it to where you want them, and adjust.  Then you do it again.  And again.  Without ever thinking about it.</p>
+    <p>This whole course is about teaching a robot to do that same thing - on purpose, precisely, in code. But the idea underneath it is something you've done since you learned to walk. So let's not start with code. Let's start by <strong>feeling it</strong>.</p>
   </section>
 
   <!-- INTERACTIVE A -->
   <section>
     <div class="kicker">Try it</div>
     <h2>You are the controller</h2>
-    <p>Below is a thruster fighting gravity. <strong>Hold the THRUST button</strong> (or press <strong>Space</strong>) to push it up; let go and it falls. Your job: keep the marker on the dashed line. Give it a few seconds — it's harder than it looks.</p>
+    <p>Below is a thruster fighting gravity. <strong>Hold the THRUST button</strong> (or press <strong>Space</strong>) to push it up; let go and it falls. Your job: keep the marker on the dashed line. Give it a few seconds - it's harder than it looks.</p>
 
     <div class="demo" id="demoA">
       <div class="demo-head">
@@ -286,19 +286,19 @@
     <h2>That was feedback control</h2>
     <p>You watched the gap between where the marker <em>was</em> and where you <em>wanted</em> it (the line). You thrust harder when it sank, eased off when it rose. Pull that apart and you get the three words this entire field is built on:</p>
     <div class="terms">
-      <div class="term" style="--accent:var(--amber)"><h4>Setpoint</h4><p>Where you want to be. The dashed line — your goal.</p></div>
-      <div class="term" style="--accent:var(--teal)"><h4>Measurement</h4><p>Where you actually are. The marker — what's really happening.</p></div>
+      <div class="term" style="--accent:var(--amber)"><h4>Setpoint</h4><p>Where you want to be. The dashed line - your goal.</p></div>
+      <div class="term" style="--accent:var(--teal)"><h4>Measurement</h4><p>Where you actually are. The marker - what's really happening.</p></div>
       <div class="term" style="--accent:var(--indigo)"><h4>Error</h4><p>The gap between them. Setpoint minus measurement.</p></div>
     </div>
-    <p style="margin-top:20px">A <strong>controller</strong> is simply something that looks at the error and decides what to do about it — over and over. You were the controller just now. For the rest of the course, we hand that job to the robot.</p>
+    <p style="margin-top:20px">A <strong>controller</strong> is simply something that looks at the error and decides what to do about it - over and over. You were the controller just now. For the rest of the course, we hand that job to the robot.</p>
   </section>
 
   <!-- OPEN VS CLOSED -->
   <section>
     <div class="kicker">The big distinction</div>
     <h2>Two ways to control anything</h2>
-    <p><strong>Open loop</strong> is "set it and hope." You pick an action up front, commit to it, and never check the result. Like microwaving popcorn for exactly 3:00 and walking away — if your microwave runs hot, you burn it, because nothing is watching.</p>
-    <p><strong>Closed loop</strong> is "watch and correct." You keep measuring the result and adjust as you go. That feedback — the loop running from measurement back to action — is what makes control survive surprises.</p>
+    <p><strong>Open loop</strong> is "set it and hope." You pick an action up front, commit to it, and never check the result. Like microwaving popcorn for exactly 3:00 and walking away - if your microwave runs hot, you burn it, because nothing is watching.</p>
+    <p><strong>Closed loop</strong> is "watch and correct." You keep measuring the result and adjust as you go. That feedback - the loop running from measurement back to action - is what makes control survive surprises.</p>
     <p>Same thruster below, run both ways. It's tuned <em>perfectly</em> for dead-calm air. Now drag the <strong>disturbance</strong> slider to add a gust, and watch what each one does.</p>
 
     <div class="demo" id="demoB">
@@ -332,10 +332,10 @@
         <div class="ro"><div class="k">Error</div><div class="v indigo" id="bErr">0.00</div></div>
       </div>
     </div>
-    <p style="margin-top:18px">Open loop was flawless in calm air — and the instant the world changed, it drifted off and <strong>never recovered</strong>. It has no idea it's failing, because it never looks. Closed loop measures the error and keeps correcting, so it rides out the gust and holds the line.</p>
+    <p style="margin-top:18px">Open loop was flawless in calm air - and the instant the world changed, it drifted off and <strong>never recovered</strong>. It has no idea it's failing, because it never looks. Closed loop measures the error and keeps correcting, so it rides out the gust and holds the line.</p>
     <div class="note teal">
       <div class="nh">File this away</div>
-      <p>The closed-loop controller pushes <strong>harder when the gap is bigger</strong>. That little phrase — "how hard, exactly?" — is the whole subject of Lesson 2.</p>
+      <p>The closed-loop controller pushes <strong>harder when the gap is bigger</strong>. That little phrase - "how hard, exactly?" - is the whole subject of Lesson 2.</p>
     </div>
   </section>
 
@@ -343,7 +343,7 @@
   <section>
     <div class="kicker">The shape of it</div>
     <h2>The control loop</h2>
-    <p>Every controller in this course — from the one line you'll write next lesson to the state-space math at the end — is this same loop, running about 50 times a second:</p>
+    <p>Every controller in this course - from the one line you'll write next lesson to the state-space math at the end - is this same loop, running about 50 times a second:</p>
     <div class="diagram">
       <svg viewBox="0 0 780 250" xmlns="http://www.w3.org/2000/svg" font-family="ui-monospace,Menlo,Consolas,monospace">
         <defs>
@@ -383,7 +383,7 @@
         <line x1="690" y1="115" x2="690" y2="205" stroke="#34D7C5" stroke-width="1.5"/>
         <line x1="690" y1="205" x2="205" y2="205" stroke="#34D7C5" stroke-width="1.5"/>
         <line x1="205" y1="205" x2="205" y2="139" stroke="#34D7C5" stroke-width="1.5" marker-end="url(#arr)"/>
-        <text x="447" y="222" fill="#34D7C5" font-size="10.5" text-anchor="middle">measurement — what a sensor actually reads</text>
+        <text x="447" y="222" fill="#34D7C5" font-size="10.5" text-anchor="middle">measurement - what a sensor actually reads</text>
       </svg>
     </div>
     <p style="margin-top:6px"><strong>Measure. Compare to the setpoint. Compute the error. Act. Repeat.</strong> Master this shape and everything else is just choosing a smarter box in the middle.</p>
@@ -410,8 +410,8 @@
         </svg>
       </div>
       <div>
-        <p>For the rest of the course we control <strong>one machine</strong>: a robot elevator — a carriage that rides up and down on rails, lifted by a motor. It's the perfect teacher because it has every ingredient that makes control interesting:</p>
-        <p style="margin:0"><strong>Gravity</strong> always pulling it down. <strong>Weight</strong> that resists speeding up and slowing down. And a crisp, testable job: <em>go to a height, then hold it</em>. Everything you just felt with the thruster applies directly — from here on, we simply get precise about it.</p>
+        <p>For the rest of the course we control <strong>one machine</strong>: a robot elevator - a carriage that rides up and down on rails, lifted by a motor. It's the perfect teacher because it has every ingredient that makes control interesting:</p>
+        <p style="margin:0"><strong>Gravity</strong> always pulling it down. <strong>Weight</strong> that resists speeding up and slowing down. And a crisp, testable job: <em>go to a height, then hold it</em>. Everything you just felt with the thruster applies directly - from here on, we simply get precise about it.</p>
       </div>
     </div>
   </section>
@@ -420,7 +420,7 @@
   <section>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>
-    <p>No math — just the ideas. Pick an answer to see why.</p>
+    <p>No math - just the ideas. Pick an answer to see why.</p>
     <div class="quiz" id="quiz">
       <div class="q" data-correct="0">
         <div class="qn">Question 1</div>
@@ -439,7 +439,7 @@
           <button class="opt">Error</button>
           <button class="opt">Measurement</button>
         </div>
-        <div class="explain">Error — it's the setpoint minus the measurement. Almost everything a controller does is a reaction to this single number.</div>
+        <div class="explain">Error - it's the setpoint minus the measurement. Almost everything a controller does is a reaction to this single number.</div>
       </div>
       <div class="q" data-correct="2">
         <div class="qn">Question 3</div>
@@ -449,7 +449,7 @@
           <button class="opt">It plans the whole motion before starting</button>
           <button class="opt">It keeps measuring and corrects based on the error</button>
         </div>
-        <div class="explain">It keeps measuring. Because it's constantly comparing where it is to where it wants to be, an unexpected push just shows up as error — and it corrects. Open loop never looks back, so it can't react to anything it didn't expect.</div>
+        <div class="explain">It keeps measuring. Because it's constantly comparing where it is to where it wants to be, an unexpected push just shows up as error - and it corrects. Open loop never looks back, so it can't react to anything it didn't expect.</div>
       </div>
     </div>
   </section>
@@ -461,15 +461,15 @@
       <div class="glossary">
         <div class="gl"><b>Setpoint</b><span>Where you want the system to be.</span></div>
         <div class="gl"><b>Measurement</b><span>Where the system actually is, per a sensor.</span></div>
-        <div class="gl"><b>Error</b><span>Setpoint minus measurement — the gap.</span></div>
+        <div class="gl"><b>Error</b><span>Setpoint minus measurement - the gap.</span></div>
         <div class="gl"><b>Open loop</b><span>Act without checking the result.</span></div>
-        <div class="gl"><b>Closed loop</b><span>Measure, compare, correct — repeatedly.</span></div>
+        <div class="gl"><b>Closed loop</b><span>Measure, compare, correct - repeatedly.</span></div>
         <div class="gl"><b>Control loop</b><span>Measure → compare → act → repeat.</span></div>
       </div>
       <div class="next">
         <div class="n-eyebrow">Up next · Lesson 02</div>
         <h3>Proportional control</h3>
-        <p style="margin-bottom:0">We said a controller "pushes harder when the gap is bigger." Next, we turn that sentence into the simplest possible controller — and you'll meet your first real line of code: <code>output = kP × error</code>.</p>
+        <p style="margin-bottom:0">We said a controller "pushes harder when the gap is bigger." Next, we turn that sentence into the simplest possible controller - and you'll meet your first real line of code: <code>output = kP × error</code>.</p>
       </div>
     </div>
   </section>

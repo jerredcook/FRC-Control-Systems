@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Deploy · Part 3.2 — Subsystems</title>
+<title>Deploy · Part 3.2 - Subsystems</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -121,12 +121,12 @@
     <div class="lesson-no"><b>Part 3 · 02</b> Command-Based Robots</div>
     <div class="eyebrow">Subsystems</div>
     <h1>A home for<br>one <span class="accent">mechanism</span>.</h1>
-    <p class="dek">A subsystem wraps one piece of hardware — its motor, its sensor, its state — behind a clean set of methods. It's the noun the rest of your robot talks to.</p>
+    <p class="dek">A subsystem wraps one piece of hardware - its motor, its sensor, its state - behind a clean set of methods. It's the noun the rest of your robot talks to.</p>
   </div>
 
   <section>
     <p class="lead">One subsystem, one mechanism.</p>
-    <p>An <span class="k">Elevator</span> subsystem owns the elevator's motor, remembers what it's trying to do, and updates itself every loop. Nothing else in your code touches that motor directly — they ask the subsystem. Click each part of a real subsystem to see its job.</p>
+    <p>An <span class="k">Elevator</span> subsystem owns the elevator's motor, remembers what it's trying to do, and updates itself every loop. Nothing else in your code touches that motor directly - they ask the subsystem. Click each part of a real subsystem to see its job.</p>
 
     <div class="demo" id="demo">
       <div class="demo-head"><span class="demo-title">Elevator.java</span><span class="demo-tag">click a part</span></div>
@@ -143,7 +143,7 @@
 }</pre>
       <div class="detail" id="detail">Click a highlighted line to learn what it does.</div>
     </div>
-    <p class="caption">Everything the elevator needs is in one file. Commands and the rest of the robot only ever call its public methods — they never reach in and grab the motor.</p>
+    <p class="caption">Everything the elevator needs is in one file. Commands and the rest of the robot only ever call its public methods - they never reach in and grab the motor.</p>
   </section>
 
   <section>
@@ -152,7 +152,7 @@
     <p>This is the discipline that keeps a robot sane: <strong>only the subsystem touches its own motors and sensors.</strong> Commands and other code ask through public methods like <span class="k">setGoal()</span>. That way there's exactly one place that controls the elevator, and the scheduler can guarantee two things never fight over it (more in Lesson 3.6).</p>
     <div class="note indigo">
       <div class="nh">periodic() is the subsystem's heartbeat</div>
-      <p>The scheduler calls every subsystem's <span class="k">periodic()</span> once per loop, no matter what command is running. It's the natural home for the control loop — reading the sensor and driving the motor toward the goal. (Exactly the loops from the Control course live here.)</p>
+      <p>The scheduler calls every subsystem's <span class="k">periodic()</span> once per loop, no matter what command is running. It's the natural home for the control loop - reading the sensor and driving the motor toward the goal. (Exactly the loops from the Control course live here.)</p>
     </div>
 
     <div class="code-ex">
@@ -180,7 +180,7 @@
         <div class="qt">What does a subsystem contain?</div>
         <div class="opts">
           <button class="opt">The whole robot's code in one place</button>
-          <button class="opt">One mechanism — its hardware, its state, and its periodic loop</button>
+          <button class="opt">One mechanism - its hardware, its state, and its periodic loop</button>
           <button class="opt">Only the controller bindings</button>
         </div>
         <div class="explain">A subsystem models one mechanism: it owns that mechanism's motor and sensor, holds its state (like a goal), and updates itself in periodic(). The Elevator subsystem is everything-elevator.</div>
@@ -189,7 +189,7 @@
         <div class="qn">Question 2</div>
         <div class="qt">Who is allowed to command the elevator's motor directly?</div>
         <div class="opts">
-          <button class="opt">Only the Elevator subsystem — others call its public methods</button>
+          <button class="opt">Only the Elevator subsystem - others call its public methods</button>
           <button class="opt">Any command, any time</button>
           <button class="opt">The Driver Station</button>
         </div>
@@ -201,7 +201,7 @@
         <div class="opts">
           <button class="opt">Only when a command uses it</button>
           <button class="opt">Once at startup</button>
-          <button class="opt">Every loop, always — the scheduler calls it for every subsystem</button>
+          <button class="opt">Every loop, always - the scheduler calls it for every subsystem</button>
         </div>
         <div class="explain">periodic() runs every 20 ms regardless of what commands are active, so it's the reliable home for a subsystem's continuous control loop.</div>
       </div>
@@ -242,10 +242,10 @@
   "use strict";
   var DETAIL={
     ext:'<span class="tg">extends SubsystemBase</span><b>It\'s a subsystem.</b> Extending SubsystemBase auto-registers it with the scheduler, so its periodic() gets called every loop (Lesson 2.4).',
-    hw:'<span class="tg">hardware</span><b>The motor it owns.</b> A TalonFX field — the physical device on CAN id 10. This subsystem, and only this subsystem, controls it.',
+    hw:'<span class="tg">hardware</span><b>The motor it owns.</b> A TalonFX field - the physical device on CAN id 10. This subsystem, and only this subsystem, controls it.',
     state:'<span class="tg">state</span><b>What it remembers.</b> goalMeters holds where the elevator is trying to go. Commands change it; periodic() works toward it.',
-    api:'<span class="tg">public API</span><b>How others ask it to act.</b> setGoal() is the door in — commands call it to set a target, without ever touching the motor directly.',
-    per:'<span class="tg">periodic()</span><b>The per-loop loop.</b> Called every 20 ms by the scheduler. Here you read the sensor and drive the motor toward goalMeters — the control loop\'s home.'
+    api:'<span class="tg">public API</span><b>How others ask it to act.</b> setGoal() is the door in - commands call it to set a target, without ever touching the motor directly.',
+    per:'<span class="tg">periodic()</span><b>The per-loop loop.</b> Called every 20 ms by the scheduler. Here you read the sensor and drive the motor toward goalMeters - the control loop\'s home.'
   };
   var detail=document.getElementById('detail');
   document.querySelectorAll('#anat .ln.click').forEach(function(l){
@@ -260,7 +260,7 @@
   document.getElementById('check').addEventListener('click',function(){
     var all=true;
     blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
-    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite — it\'s periodic'; res.className='code-result '+(all?'ok':'no');
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - it\'s periodic'; res.className='code-result '+(all?'ok':'no');
   });
   document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='periodic';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
 

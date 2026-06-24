@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Deploy · Part 2.2 — Methods &amp; Logic</title>
+<title>Deploy · Part 2.2 - Methods &amp; Logic</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -127,7 +127,7 @@
     <div class="lesson-no"><b>Part 2 · 02</b> Just-Enough Java</div>
     <div class="eyebrow">Methods &amp; Logic</div>
     <h1>Decisions and<br><span class="accent">reusable</span> code.</h1>
-    <p class="dek">A method is a named block of code you can run anytime. Add if/else to make decisions and loops to repeat — and you can express any robot behavior.</p>
+    <p class="dek">A method is a named block of code you can run anytime. Add if/else to make decisions and loops to repeat - and you can express any robot behavior.</p>
   </div>
 
   <section>
@@ -138,8 +138,8 @@
       <div class="play-head"><span class="play-title">deadband(x, tol)</span><span class="play-tag">which branch runs?</span></div>
       <pre id="playCode"></pre>
       <div class="ctrls">
-        <div class="slg"><label>x — joystick <span class="val" id="xVal">0.05</span></label><input type="range" id="x" min="-1" max="1" step="0.01" value="0.05" /></div>
-        <div class="slg"><label>tol — deadband <span class="val" id="tVal">0.10</span></label><input type="range" id="t" min="0" max="0.4" step="0.01" value="0.10" /></div>
+        <div class="slg"><label>x - joystick <span class="val" id="xVal">0.05</span></label><input type="range" id="x" min="-1" max="1" step="0.01" value="0.05" /></div>
+        <div class="slg"><label>tol - deadband <span class="val" id="tVal">0.10</span></label><input type="range" id="t" min="0" max="0.4" step="0.01" value="0.10" /></div>
       </div>
       <div class="out-line" id="out"></div>
     </div>
@@ -149,7 +149,7 @@
   <section>
     <div class="kicker">Repeat without copy-paste</div>
     <h2>Loops do a thing N times</h2>
-    <p>When you need to do the same thing to four swerve modules, you don't write it four times — you <strong>loop</strong>. A <span class="k">for</span> loop has three parts: where to start, how long to keep going, and how to step:</p>
+    <p>When you need to do the same thing to four swerve modules, you don't write it four times - you <strong>loop</strong>. A <span class="k">for</span> loop has three parts: where to start, how long to keep going, and how to step:</p>
     <div class="codewrap">
       <div class="clabel">A for loop <span class="badge">Java</span></div>
 <pre class="code"><span class="kw">for</span> (<span class="ty">int</span> i = <span class="num">0</span>; i &lt; <span class="num">4</span>; i++) {   <span class="cm">// start at 0, while i &lt; 4, add 1 each time</span>
@@ -159,7 +159,7 @@
     <p>A <span class="k">while</span> loop is the same idea with just a condition: <span class="k">while (!atTarget) { ... }</span> repeats until you've arrived. Both let one block of code handle many cases.</p>
     <div class="note indigo">
       <div class="nh">Methods are how code stays readable</div>
-      <p>Instead of one giant <span class="k">teleopPeriodic</span> with a hundred lines, you write small methods with clear names — <span class="k">deadband()</span>, <span class="k">aimAtTarget()</span>, <span class="k">scoreHigh()</span> — and call them. Code you can read is code you can fix at 2 a.m. before a competition.</p>
+      <p>Instead of one giant <span class="k">teleopPeriodic</span> with a hundred lines, you write small methods with clear names - <span class="k">deadband()</span>, <span class="k">aimAtTarget()</span>, <span class="k">scoreHigh()</span> - and call them. Code you can read is code you can fix at 2 a.m. before a competition.</p>
     </div>
 
     <div class="code-ex">
@@ -189,13 +189,13 @@
           <button class="opt">The names of its parameters</button>
           <button class="opt">The result it hands back when you call it</button>
         </div>
-        <div class="explain">You call a method with inputs (parameters); it does work and returns a value you can use — like deadband(x, tol) returning the cleaned-up joystick value.</div>
+        <div class="explain">You call a method with inputs (parameters); it does work and returns a value you can use - like deadband(x, tol) returning the cleaned-up joystick value.</div>
       </div>
       <div class="q" data-correct="0">
         <div class="qn">Question 2</div>
         <div class="qt">In the deadband, when does it return 0 instead of x?</div>
         <div class="opts">
-          <button class="opt">When |x| is less than tol — the stick is barely moved</button>
+          <button class="opt">When |x| is less than tol - the stick is barely moved</button>
           <button class="opt">When x is exactly 1.0</button>
           <button class="opt">Never</button>
         </div>
@@ -206,7 +206,7 @@
         <div class="qt">Why use a loop to configure four modules?</div>
         <div class="opts">
           <button class="opt">Loops make the robot faster</button>
-          <button class="opt">One block of code handles all four — no copy-paste, no missed module</button>
+          <button class="opt">One block of code handles all four - no copy-paste, no missed module</button>
           <button class="opt">It's the only way to use arrays</button>
         </div>
         <div class="explain">A for loop runs the same code for each index. Write it once; it can't drift out of sync the way four copy-pasted blocks can.</div>
@@ -228,7 +228,7 @@
       <a class="next" href="deploy-lesson-8.html">
         <div class="n-eyebrow">Up next · Part 2 · 03</div>
         <h3>Classes &amp; Objects</h3>
-        <p>The big one. Classes are blueprints; objects are the real things you make from them — and they're how your code models real hardware.</p>
+        <p>The big one. Classes are blueprints; objects are the real things you make from them - and they're how your code models real hardware.</p>
       </a>
     </div>
   </section>
@@ -272,7 +272,7 @@
   document.getElementById('check').addEventListener('click',function(){
     var all=true;
     blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
-    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓ → runs 4 times':'Not quite — there are 4 modules (0…3)'; res.className='code-result '+(all?'ok':'no');
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓ → runs 4 times':'Not quite - there are 4 modules (0…3)'; res.className='code-result '+(all?'ok':'no');
   });
   document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='4';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
 

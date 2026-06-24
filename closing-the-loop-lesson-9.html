@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Closing the Loop · Part II.1 — Robot Code Anatomy</title>
+<title>Closing the Loop · Part II.1 - Robot Code Anatomy</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -176,19 +176,19 @@
     <div class="lesson-no"><b>Part II · 01</b> From Math to Code</div>
     <div class="eyebrow">Robot Code Anatomy</div>
     <h1>Where the<br><span class="accent">loop</span> lives.</h1>
-    <p class="dek">Part I taught the ideas. Now meet the real robot program that runs them — the 20-millisecond loop, and the handful of files where your control code actually goes.</p>
+    <p class="dek">Part I taught the ideas. Now meet the real robot program that runs them - the 20-millisecond loop, and the handful of files where your control code actually goes.</p>
   </div>
 
   <section>
     <p class="lead">Welcome to real code.</p>
-    <p>Everything in Part I happened in a simulation. Now we move to an actual FRC robot, programmed in <strong>Java</strong> with <strong>WPILib</strong> — the standard library every team builds on. Don't worry: you won't write a whole robot today. The goal of this lesson is orientation — to see the <em>shape</em> of a robot program and find the exact spot where the controller you already understand goes.</p>
-    <p>Remember how every controller in Part I ran "about 50 times a second"? On a real robot that's not a metaphor. The roboRIO — the robot's computer — runs your code on a fixed heartbeat: once every <strong>20 milliseconds</strong>, 50 times per second, forever. Measure, decide, act. Measure, decide, act. The whole job of robot code is to fill in what happens on each beat.</p>
+    <p>Everything in Part I happened in a simulation. Now we move to an actual FRC robot, programmed in <strong>Java</strong> with <strong>WPILib</strong> - the standard library every team builds on. Don't worry: you won't write a whole robot today. The goal of this lesson is orientation - to see the <em>shape</em> of a robot program and find the exact spot where the controller you already understand goes.</p>
+    <p>Remember how every controller in Part I ran "about 50 times a second"? On a real robot that's not a metaphor. The roboRIO - the robot's computer - runs your code on a fixed heartbeat: once every <strong>20 milliseconds</strong>, 50 times per second, forever. Measure, decide, act. Measure, decide, act. The whole job of robot code is to fill in what happens on each beat.</p>
   </section>
 
   <section>
     <div class="kicker">Watch it</div>
     <h2>The robot's heartbeat</h2>
-    <p>Here's that loop, slowed way down so you can see it. Each lap is one <strong>iteration</strong>: the robot reads its sensors, the controller decides on a voltage, the motors are commanded, and then it waits a few milliseconds before going again. It's the Part I loop — now it's the literal structure of the program.</p>
+    <p>Here's that loop, slowed way down so you can see it. Each lap is one <strong>iteration</strong>: the robot reads its sensors, the controller decides on a voltage, the motors are commanded, and then it waits a few milliseconds before going again. It's the Part I loop - now it's the literal structure of the program.</p>
 
     <div class="demo" id="demo">
       <div class="demo-head">
@@ -206,13 +206,13 @@
         <div class="ro"><div class="k2">Real robot rate</div><div class="v amber">50 Hz</div></div>
       </div>
     </div>
-    <p class="caption">On the real robot one full lap takes 20 ms — far too fast to see. The work on each beat is your code.</p>
+    <p class="caption">On the real robot one full lap takes 20 ms - far too fast to see. The work on each beat is your code.</p>
   </section>
 
   <section>
     <div class="kicker">The layout</div>
     <h2>The shape of a project</h2>
-    <p>A WPILib robot is just a folder of Java files. Most teams use the <strong>command-based</strong> structure, which sorts everything into a few clear roles. Click through the files below to see what each one is for — the whole map fits on one screen.</p>
+    <p>A WPILib robot is just a folder of Java files. Most teams use the <strong>command-based</strong> structure, which sorts everything into a few clear roles. Click through the files below to see what each one is for - the whole map fits on one screen.</p>
 
     <div class="explorer" id="explorer">
       <div class="tree" id="tree"></div>
@@ -224,9 +224,9 @@
   <section>
     <div class="kicker">The important file</div>
     <h2>A subsystem is a mechanism</h2>
-    <p>A <span class="k">Subsystem</span> represents one piece of hardware — the elevator, an arm, the shooter. It owns that mechanism's motor and sensor, and it has a special method, <span class="k">periodic()</span>, that the robot calls <strong>every 20 ms</strong>. That method is where the control loop from Part I lives:</p>
+    <p>A <span class="k">Subsystem</span> represents one piece of hardware - the elevator, an arm, the shooter. It owns that mechanism's motor and sensor, and it has a special method, <span class="k">periodic()</span>, that the robot calls <strong>every 20 ms</strong>. That method is where the control loop from Part I lives:</p>
     <div class="codewrap">
-      <div class="clabel">Elevator.java — a subsystem <span class="badge">Java</span></div>
+      <div class="clabel">Elevator.java - a subsystem <span class="badge">Java</span></div>
 <pre class="code"><span class="kw">public class</span> <span class="ty">Elevator</span> <span class="kw">extends</span> <span class="ty">SubsystemBase</span> {
   <span class="kw">private final</span> <span class="ty">TalonFX</span> motor = <span class="kw">new</span> <span class="ty">TalonFX</span>(<span class="num">10</span>);          <span class="cm">// the hardware (CAN id 10)</span>
   <span class="kw">private final</span> <span class="ty">PIDController</span> pid = <span class="kw">new</span> <span class="ty">PIDController</span>(<span class="num">4.8</span>, <span class="num">0</span>, <span class="num">0.2</span>);
@@ -244,19 +244,19 @@
   }
 }</pre>
     </div>
-    <p>That's the entire idea. <span class="k">periodic()</span> reads where the elevator is, asks the PID controller for a voltage, and applies it — exactly "measure, decide, act," running on the robot's heartbeat. Over the rest of Part II we'll make every line of that method correct and robust.</p>
+    <p>That's the entire idea. <span class="k">periodic()</span> reads where the elevator is, asks the PID controller for a voltage, and applies it - exactly "measure, decide, act," running on the robot's heartbeat. Over the rest of Part II we'll make every line of that method correct and robust.</p>
     <div class="note teal">
       <div class="nh">You don't call periodic() yourself</div>
-      <p>You never write "run this 50 times a second." You just define <span class="k">periodic()</span>, and WPILib's <strong>CommandScheduler</strong> — kicked off once in <code style="font-family:var(--mono)">Robot.java</code> — calls it for every subsystem, every beat. Your job is only to say what happens on one beat.</p>
+      <p>You never write "run this 50 times a second." You just define <span class="k">periodic()</span>, and WPILib's <strong>CommandScheduler</strong> - kicked off once in <code style="font-family:var(--mono)">Robot.java</code> - calls it for every subsystem, every beat. Your job is only to say what happens on one beat.</p>
     </div>
   </section>
 
   <section>
     <div class="kicker">The other half</div>
     <h2>Commands tell subsystems what to do</h2>
-    <p>If subsystems are the <em>nouns</em> (the elevator), <span class="k">Command</span>s are the <em>verbs</em> (raise the elevator to 1.2 m). A command runs over time, "requires" the subsystems it uses, and is started by something — usually a button press wired up in <span class="k">RobotContainer</span>:</p>
+    <p>If subsystems are the <em>nouns</em> (the elevator), <span class="k">Command</span>s are the <em>verbs</em> (raise the elevator to 1.2 m). A command runs over time, "requires" the subsystems it uses, and is started by something - usually a button press wired up in <span class="k">RobotContainer</span>:</p>
     <div class="codewrap">
-      <div class="clabel">RobotContainer.java — wiring a button to an action <span class="badge">Java</span></div>
+      <div class="clabel">RobotContainer.java - wiring a button to an action <span class="badge">Java</span></div>
 <pre class="code"><span class="kw">private final</span> <span class="ty">Elevator</span> elevator = <span class="kw">new</span> <span class="ty">Elevator</span>();
 <span class="kw">private final</span> <span class="ty">CommandXboxController</span> driver = <span class="kw">new</span> <span class="ty">CommandXboxController</span>(<span class="num">0</span>);
 
@@ -265,7 +265,7 @@
   driver.<span class="fn">a</span>().<span class="fn">onTrue</span>(elevator.<span class="fn">runOnce</span>(() -&gt; elevator.<span class="fn">setGoal</span>(<span class="num">1.2</span>)));
 }</pre>
     </div>
-    <p>The command sets the goal; the subsystem's <span class="k">periodic()</span> does the continuous work of getting there. Pressing the button doesn't move the motor directly — it just changes the target the loop is chasing.</p>
+    <p>The command sets the goal; the subsystem's <span class="k">periodic()</span> does the continuous work of getting there. Pressing the button doesn't move the motor directly - it just changes the target the loop is chasing.</p>
 
     <div class="code-ex">
       <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
@@ -293,10 +293,10 @@
         <div class="qt">How often does a standard FRC robot run its periodic code?</div>
         <div class="opts">
           <button class="opt">Once, when the robot turns on</button>
-          <button class="opt">Every 20 ms — about 50 times every second</button>
+          <button class="opt">Every 20 ms - about 50 times every second</button>
           <button class="opt">Only when a button is pressed</button>
         </div>
-        <div class="explain">The roboRIO runs the loop on a fixed 20 ms beat (50 Hz). Everything — reading sensors, running controllers, setting motors — happens fresh on every one of those beats.</div>
+        <div class="explain">The roboRIO runs the loop on a fixed 20 ms beat (50 Hz). Everything - reading sensors, running controllers, setting motors - happens fresh on every one of those beats.</div>
       </div>
       <div class="q" data-correct="2">
         <div class="qn">Question 2</div>
@@ -326,7 +326,7 @@
       <h3>Part II · 01 · Recap</h3>
       <div class="glossary">
         <div class="gl"><b>The 20 ms loop</b><span>The robot runs your code 50 times a second.</span></div>
-        <div class="gl"><b>periodic()</b><span>The method called every beat — where the control loop lives.</span></div>
+        <div class="gl"><b>periodic()</b><span>The method called every beat - where the control loop lives.</span></div>
         <div class="gl"><b>Subsystem</b><span>One mechanism: its hardware, state, and loop.</span></div>
         <div class="gl"><b>Command</b><span>An action that uses subsystems to do something.</span></div>
         <div class="gl"><b>RobotContainer</b><span>Where subsystems are created and buttons are bound.</span></div>
@@ -335,7 +335,7 @@
       <a class="next" href="closing-the-loop-lesson-10.html">
         <div class="n-eyebrow">Up next · Part II · 02</div>
         <h3>Units, Gears &amp; Conversions</h3>
-        <p>Your motor spins in rotations, but your elevator moves in meters. Getting between them — through the gearbox — is the single most common source of real-robot bugs. Next, we make it foolproof.</p>
+        <p>Your motor spins in rotations, but your elevator moves in meters. Getting between them - through the gearbox - is the single most common source of real-robot bugs. Next, we make it foolproof.</p>
       </a>
     </div>
   </section>
@@ -462,16 +462,16 @@
     {type:'dir', indent:0, name:'robot-project/'},
     {type:'dir', indent:1, name:'…/frc/robot/'},
     {type:'file', indent:2, name:'Main.java', role:'Entry point',
-      desc:'Launches the robot, then gets out of the way. You almost never edit this — it exists to start your Robot class.',
+      desc:'Launches the robot, then gets out of the way. You almost never edit this - it exists to start your Robot class.',
       code:'public static void main(String... a) {\n  RobotBase.startRobot(Robot::new);\n}'},
     {type:'file', indent:2, name:'Robot.java', role:'The lifecycle + heartbeat',
-      desc:'Defines what happens in each mode (disabled / autonomous / teleop) and, crucially, runs the CommandScheduler every 20 ms — which is what calls every subsystem’s periodic().',
+      desc:'Defines what happens in each mode (disabled / autonomous / teleop) and, crucially, runs the CommandScheduler every 20 ms - which is what calls every subsystem’s periodic().',
       code:'@Override\npublic void robotPeriodic() {\n  CommandScheduler.getInstance().run();  // every 20 ms\n}'},
     {type:'file', indent:2, name:'RobotContainer.java', role:'The wiring',
       desc:'The map of your robot: it creates the subsystems, builds commands, and binds them to controller buttons. If you want to know "what does the A button do?", you look here.',
       code:'private final Elevator elevator = new Elevator();\n\ndriver.a().onTrue(\n  elevator.runOnce(() -> elevator.setGoal(1.2)));'},
     {type:'file', indent:2, name:'Constants.java', role:'The numbers',
-      desc:'One home for all your tunable values — gains (kP, kG…), CAN IDs, gear ratios. Keeping them here means you tune in one place instead of hunting through the code.',
+      desc:'One home for all your tunable values - gains (kP, kG…), CAN IDs, gear ratios. Keeping them here means you tune in one place instead of hunting through the code.',
       code:'public static final int  kMotorId = 10;\npublic static final double kP = 4.8;\npublic static final double kGearRatio = 12.0;'},
     {type:'dir', indent:2, name:'subsystems/'},
     {type:'file', indent:3, name:'Elevator.java', role:'A mechanism ★',
@@ -527,7 +527,7 @@
       if(!ok)all=false;
     });
     var res=document.getElementById('cres');
-    res.textContent=all?'All correct ✓':'Not quite — compare to the subsystem above';
+    res.textContent=all?'All correct ✓':'Not quite - compare to the subsystem above';
     res.className='code-result '+(all?'ok':'no');
   });
   document.getElementById('reveal').addEventListener('click',function(){

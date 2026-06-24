@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Closing the Loop · Part IV.2 — The Arm</title>
+<title>Closing the Loop · Part IV.2 - The Arm</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -167,7 +167,7 @@
     <div class="lesson-no"><b>Part IV · 02</b> Tune a Real Mechanism</div>
     <div class="eyebrow">The Arm</div>
     <h1>Gravity that<br><span class="accent">moves</span>.</h1>
-    <p class="dek">An elevator fights the same gravity everywhere. An arm's load changes with its angle — full at horizontal, zero straight up. One cosine fixes it.</p>
+    <p class="dek">An elevator fights the same gravity everywhere. An arm's load changes with its angle - full at horizontal, zero straight up. One cosine fixes it.</p>
   </div>
 
   <section>
@@ -183,7 +183,7 @@
   <section>
     <div class="kicker">Try it</div>
     <h2>Cosine on, cosine off</h2>
-    <p>Drag the <strong>target angle</strong> around. With <strong>cosine compensation on</strong>, the arm holds wherever you point it. Switch it <strong>off</strong> — now feedforward applies a flat kG that's only right at horizontal, and the arm drifts high as you raise the target.</p>
+    <p>Drag the <strong>target angle</strong> around. With <strong>cosine compensation on</strong>, the arm holds wherever you point it. Switch it <strong>off</strong> - now feedforward applies a flat kG that's only right at horizontal, and the arm drifts high as you raise the target.</p>
 
     <div class="demo" id="demo">
       <div class="demo-head">
@@ -206,7 +206,7 @@
           <input type="range" id="tgt" min="-25" max="105" step="1" value="45" />
         </div>
         <div class="slider-group">
-          <label>kG — gravity @ horizontal <span class="val" id="kgVal">0.50</span></label>
+          <label>kG - gravity @ horizontal <span class="val" id="kgVal">0.50</span></label>
           <input type="range" id="kg" min="0" max="0.9" step="0.01" value="0.5" />
         </div>
       </div>
@@ -223,9 +223,9 @@
   <section>
     <div class="kicker">In code</div>
     <h2>One line tells the motor about gravity</h2>
-    <p>On Phoenix 6, you don't compute the cosine yourself — you set the gravity <em>type</em>, and the device scales kG by <span class="k">cos(position)</span> on every loop. The one rule: the arm's <strong>zero must be horizontal</strong>, so cos(0) = 1 lines up with full gravity.</p>
+    <p>On Phoenix 6, you don't compute the cosine yourself - you set the gravity <em>type</em>, and the device scales kG by <span class="k">cos(position)</span> on every loop. The one rule: the arm's <strong>zero must be horizontal</strong>, so cos(0) = 1 lines up with full gravity.</p>
     <div class="codewrap">
-      <div class="clabel">Arm gains — the key difference <span class="badge">Java · Phoenix 6</span></div>
+      <div class="clabel">Arm gains - the key difference <span class="badge">Java · Phoenix 6</span></div>
 <pre class="code">cfg.Slot0.kG = <span class="num">0.40</span>;                                  <span class="cm">// volts to hold the arm HORIZONTAL</span>
 cfg.Slot0.kS = <span class="num">0.10</span>;  cfg.Slot0.kV = <span class="num">0.9</span>;  cfg.Slot0.kA = <span class="num">0.02</span>;
 cfg.Slot0.kP = <span class="num">60</span>;    cfg.Slot0.kD = <span class="num">0.5</span>;
@@ -234,7 +234,7 @@ cfg.Slot0.GravityType = <span class="ty">GravityTypeValue</span>.Arm_Cosine;    
 <span class="cm">// position 0 = horizontal. Use a FusedCANcoder so the arm knows</span>
 <span class="cm">// its true angle the instant the robot powers on (Lesson III.2).</span></pre>
     </div>
-    <p>That's the whole change from the elevator: <span class="k">Arm_Cosine</span> instead of <span class="k">Elevator_Static</span>, and a horizontal zero. Everything else — Motion Magic, the control request, the workflow — is identical. On the WPILib side it's <span class="k">ArmFeedforward</span>, which takes the angle directly:</p>
+    <p>That's the whole change from the elevator: <span class="k">Arm_Cosine</span> instead of <span class="k">Elevator_Static</span>, and a horizontal zero. Everything else - Motion Magic, the control request, the workflow - is identical. On the WPILib side it's <span class="k">ArmFeedforward</span>, which takes the angle directly:</p>
     <div class="codewrap">
       <div class="clabel">If you compute feedforward yourself <span class="badge">Java · WPILib</span></div>
 <pre class="code"><span class="ty">ArmFeedforward</span> ff = <span class="kw">new</span> <span class="ty">ArmFeedforward</span>(kS, kG, kV, kA);
@@ -264,7 +264,7 @@ cfg.Slot0.GravityType = <span class="ty">GravityTypeValue</span>.<input class="b
         <div class="qt">Why does an arm's gravity feedforward depend on its angle?</div>
         <div class="opts">
           <button class="opt">Because the motor weakens at angles</button>
-          <button class="opt">It doesn't — gravity is always the same</button>
+          <button class="opt">It doesn't - gravity is always the same</button>
           <button class="opt">The gravity torque scales with cos(angle): full at horizontal, zero straight up</button>
         </div>
         <div class="explain">Horizontal, the arm's whole weight pulls down on the pivot (cos 0° = 1). Straight up, the weight pulls along the arm, creating no turning torque (cos 90° = 0). So the hold voltage is kG·cos(angle).</div>
@@ -287,7 +287,7 @@ cfg.Slot0.GravityType = <span class="ty">GravityTypeValue</span>.<input class="b
           <button class="opt">A FusedCANcoder (absolute angle + fast rotor)</button>
           <button class="opt">A current sensor</button>
         </div>
-        <div class="explain">The rotor only counts from boot, so it can't know an absolute angle. A FusedCANcoder gives the true angle immediately — essential for an arm, where cosine feedforward needs a correct angle from the first instant.</div>
+        <div class="explain">The rotor only counts from boot, so it can't know an absolute angle. A FusedCANcoder gives the true angle immediately - essential for an arm, where cosine feedforward needs a correct angle from the first instant.</div>
       </div>
     </div>
   </section>
@@ -460,7 +460,7 @@ cfg.Slot0.GravityType = <span class="ty">GravityTypeValue</span>.<input class="b
       if(!ok)all=false;
     });
     var res=document.getElementById('cres');
-    res.textContent=all?'All correct ✓':'Not quite — it’s Arm_Cosine';
+    res.textContent=all?'All correct ✓':'Not quite - it’s Arm_Cosine';
     res.className='code-result '+(all?'ok':'no');
   });
   document.getElementById('reveal').addEventListener('click',function(){

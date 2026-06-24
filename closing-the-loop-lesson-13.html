@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Closing the Loop · Part II.5 — Motion Profiles</title>
+<title>Closing the Loop · Part II.5 - Motion Profiles</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -172,19 +172,19 @@
     <div class="lesson-no"><b>Part II · 05</b> From Math to Code</div>
     <div class="eyebrow">Motion Profiles</div>
     <h1>Give the move<br>a <span class="accent">plan</span>.</h1>
-    <p class="dek">Stop snapping the setpoint and hoping. A motion profile maps out a smooth ramp-cruise-slow — and assembles the entire gold-standard controller in code.</p>
+    <p class="dek">Stop snapping the setpoint and hoping. A motion profile maps out a smooth ramp-cruise-slow - and assembles the entire gold-standard controller in code.</p>
   </div>
 
   <section>
     <p class="lead">Until now, every move has been a jump.</p>
-    <p>We've set the target to 0.7 and let the loop scramble to catch up. That works, but it's harsh: a huge error appears instantly, the controller slams full voltage, and the mechanism lurches. A <strong>motion profile</strong> fixes this by handing the controller a <em>plan</em> — a setpoint that eases up to speed, cruises, and gently slows into the target, never exceeding limits you choose.</p>
-    <p>And there's a bonus. A profile knows the intended <em>velocity</em> and <em>acceleration</em> at every instant — exactly what feedforward's <span class="k">kV</span> and <span class="k">kA</span> have been waiting for. Profile + feedforward + feedback is the complete controller from Part I, Lesson 8 — now in real code.</p>
+    <p>We've set the target to 0.7 and let the loop scramble to catch up. That works, but it's harsh: a huge error appears instantly, the controller slams full voltage, and the mechanism lurches. A <strong>motion profile</strong> fixes this by handing the controller a <em>plan</em> - a setpoint that eases up to speed, cruises, and gently slows into the target, never exceeding limits you choose.</p>
+    <p>And there's a bonus. A profile knows the intended <em>velocity</em> and <em>acceleration</em> at every instant - exactly what feedforward's <span class="k">kV</span> and <span class="k">kA</span> have been waiting for. Profile + feedforward + feedback is the complete controller from Part I, Lesson 8 - now in real code.</p>
   </section>
 
   <section>
     <div class="kicker">Compare them</div>
     <h2>Snap vs. profiled</h2>
-    <p>Press <strong>Move</strong> with the profile <strong>off</strong>: the amber setpoint jumps, and the carriage lunges and overshoots. Turn the profile <strong>on</strong> and move again — the setpoint glides, and the carriage tracks it almost perfectly. Tighten <span class="k">max velocity</span> and <span class="k">max acceleration</span> to shape the move.</p>
+    <p>Press <strong>Move</strong> with the profile <strong>off</strong>: the amber setpoint jumps, and the carriage lunges and overshoots. Turn the profile <strong>on</strong> and move again - the setpoint glides, and the carriage tracks it almost perfectly. Tighten <span class="k">max velocity</span> and <span class="k">max acceleration</span> to shape the move.</p>
 
     <div class="demo" id="demo">
       <div class="demo-head">
@@ -219,7 +219,7 @@
         <div class="ro"><div class="k2">Total (V)</div><div class="v ink" id="roVolt">0.00</div></div>
       </div>
     </div>
-    <p class="caption">With the profile on, the carriage rides the amber plan — error stays tiny the whole move because feedforward already knows the planned speed at every instant.</p>
+    <p class="caption">With the profile on, the carriage rides the amber plan - error stays tiny the whole move because feedforward already knows the planned speed at every instant.</p>
   </section>
 
   <section>
@@ -227,7 +227,7 @@
     <h2>Everything, in code</h2>
     <p>WPILib bundles the profile and the PID into one class: <span class="k">ProfiledPIDController</span>. You give it gains and motion limits; it generates the trapezoid plan <em>and</em> runs feedback against it. Pair it with an <span class="k">ElevatorFeedforward</span> fed the profile's velocity, and you've built the gold standard:</p>
     <div class="codewrap">
-      <div class="clabel">Elevator.java — the complete mechanism controller <span class="badge">Java · WPILib</span></div>
+      <div class="clabel">Elevator.java - the complete mechanism controller <span class="badge">Java · WPILib</span></div>
 <pre class="code"><span class="kw">private final</span> <span class="ty">ElevatorFeedforward</span> ff =
     <span class="kw">new</span> <span class="ty">ElevatorFeedforward</span>(kS, kG, kV, kA);
 <span class="kw">private final</span> <span class="ty">ProfiledPIDController</span> pid =
@@ -244,9 +244,9 @@
   motor.<span class="fn">setVoltage</span>(ffVolts + fbVolts);
 }</pre>
     </div>
-    <p>Eight lessons of intuition and five of code collapse into this. <span class="k">pid.getSetpoint().velocity</span> is the profile's planned speed right now — hand it to feedforward and kV/kA do the heavy lifting, while feedback nudges out the rest.</p>
+    <p>Eight lessons of intuition and five of code collapse into this. <span class="k">pid.getSetpoint().velocity</span> is the profile's planned speed right now - hand it to feedforward and kV/kA do the heavy lifting, while feedback nudges out the rest.</p>
     <div class="note teal">
-      <div class="nh">This is the recipe — for everything</div>
+      <div class="nh">This is the recipe - for everything</div>
       <p>An arm swaps in <span class="k">ArmFeedforward</span> and an angle; a flywheel uses velocity control instead of position. But the shape never changes: a planned motion, feedforward to predict it, feedback to correct it. You now have the controller behind essentially every FRC mechanism.</p>
     </div>
 
@@ -277,7 +277,7 @@ motor.<span class="fn">setVoltage</span>(ffVolts + fbVolts);</pre>
           <button class="opt">It removes the need for feedback entirely</button>
           <button class="opt">A planned velocity and acceleration at every instant, with smooth, limited motion</button>
         </div>
-        <div class="explain">A raw setpoint just says "be there now," creating a huge instant error. A profile lays out a smooth ramp-cruise-slow — and its velocity/acceleration are exactly what feedforward needs to keep error tiny throughout the move.</div>
+        <div class="explain">A raw setpoint just says "be there now," creating a huge instant error. A profile lays out a smooth ramp-cruise-slow - and its velocity/acceleration are exactly what feedforward needs to keep error tiny throughout the move.</div>
       </div>
       <div class="q" data-correct="0">
         <div class="qn">Question 2</div>
@@ -287,14 +287,14 @@ motor.<span class="fn">setVoltage</span>(ffVolts + fbVolts);</pre>
           <button class="opt">Two motors</button>
           <button class="opt">Feedforward and feedback</button>
         </div>
-        <div class="explain">It generates the trapezoid motion profile and runs PID feedback against that moving setpoint — all in one object. You still add feedforward separately.</div>
+        <div class="explain">It generates the trapezoid motion profile and runs PID feedback against that moving setpoint - all in one object. You still add feedforward separately.</div>
       </div>
       <div class="q" data-correct="1">
         <div class="qn">Question 3</div>
         <div class="qt">In the gold-standard loop, what velocity do you pass to ElevatorFeedforward?</div>
         <div class="opts">
           <button class="opt">The final goal position</button>
-          <button class="opt">The profile's current setpoint velocity — pid.getSetpoint().velocity</button>
+          <button class="opt">The profile's current setpoint velocity - pid.getSetpoint().velocity</button>
           <button class="opt">Always zero</button>
         </div>
         <div class="explain">Feedforward needs to know how fast the plan says to be moving right now, so you feed it pid.getSetpoint().velocity. That lets kV and kA supply the voltage for the planned speed-up, cruise, and slow-down.</div>
@@ -305,9 +305,9 @@ motor.<span class="fn">setVoltage</span>(ffVolts + fbVolts);</pre>
   <section>
     <div class="kicker">You finished Part II</div>
     <h2>From idea to working code</h2>
-    <p>You can now take any mechanism from a sensor reading to a smooth, accurate, robust move — entirely in WPILib Java. That's a real, shippable skill. What's left is making it faster, sturdier, and competition-ready on actual hardware:</p>
+    <p>You can now take any mechanism from a sensor reading to a smooth, accurate, robust move - entirely in WPILib Java. That's a real, shippable skill. What's left is making it faster, sturdier, and competition-ready on actual hardware:</p>
     <div class="roadmap">
-      <div class="rm" style="--accent:var(--indigo)"><div class="pt">Part III · Coming up</div><h4>CTRE Phoenix 6</h4><p>Run this exact controller <em>on the Kraken itself</em> — slot gains, Motion Magic, and SysId, at 1 kHz instead of 50 Hz.</p></div>
+      <div class="rm" style="--accent:var(--indigo)"><div class="pt">Part III · Coming up</div><h4>CTRE Phoenix 6</h4><p>Run this exact controller <em>on the Kraken itself</em> - slot gains, Motion Magic, and SysId, at 1 kHz instead of 50 Hz.</p></div>
       <div class="rm" style="--accent:var(--amber)"><div class="pt">Part IV</div><h4>Tune a Real Mechanism</h4><p>An elevator, an arm, and a flywheel, each taken start-to-finish the way a competitive team does it.</p></div>
       <div class="rm" style="--accent:var(--teal)"><div class="pt">Part V</div><h4>Beyond</h4><p>Swerve drive control, vision-assisted aiming, and a first real look at state-space.</p></div>
       <div class="rm" style="--accent:var(--red)"><div class="pt">Anytime</div><h4>Revisit Part I</h4><p>The intuition behind every line of code you just wrote is one click away on the course map.</p></div>
@@ -327,7 +327,7 @@ motor.<span class="fn">setVoltage</span>(ffVolts + fbVolts);</pre>
       </div>
       <a class="next" href="closing-the-loop.html">
         <div class="n-eyebrow">Part II complete · From Math to Code</div>
-        <h3>On to Part III — CTRE Phoenix 6 →</h3>
+        <h3>On to Part III - CTRE Phoenix 6 →</h3>
         <p>Head back to the course map to continue, where this controller moves onto the motor controller itself and runs faster than your robot code ever could.</p>
       </a>
     </div>
@@ -495,7 +495,7 @@ motor.<span class="fn">setVoltage</span>(ffVolts + fbVolts);</pre>
       if(!ok)all=false;
     });
     var res=document.getElementById('cres');
-    res.textContent=all?'All correct ✓':'Not quite — feed the profile’s current velocity';
+    res.textContent=all?'All correct ✓':'Not quite - feed the profile’s current velocity';
     res.className='code-result '+(all?'ok':'no');
   });
   document.getElementById('reveal').addEventListener('click',function(){

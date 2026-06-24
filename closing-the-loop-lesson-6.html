@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Closing the Loop · Lesson 6 — Feedforward</title>
+<title>Closing the Loop · Lesson 6 - Feedforward</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -196,19 +196,19 @@
 
   <section>
     <p class="lead">Every controller so far has been reactive.</p>
-    <p>PID waits for an error, then responds. That's powerful, but it's always a step behind — it can only correct a mistake after the mistake happens. <strong>Feedforward</strong> flips it around: if you know the physics of your mechanism, you can compute most of the voltage a move needs <em>in advance</em>, before any error shows up.</p>
+    <p>PID waits for an error, then responds. That's powerful, but it's always a step behind - it can only correct a mistake after the mistake happens. <strong>Feedforward</strong> flips it around: if you know the physics of your mechanism, you can compute most of the voltage a move needs <em>in advance</em>, before any error shows up.</p>
     <p>Take gravity. Your elevator needs the same voltage just to hang in place, every time. Why make the controller rediscover that through accumulated error on every move, when you can simply <em>tell</em> it?</p>
     <div class="formula">
       voltage = kS·sign(v) + <b>kG</b> + kV·v + kA·a
       <span class="small">a model of exactly what voltage each part of a move requires</span>
     </div>
-    <p>Four terms, each a piece of physics: <span class="k">kS</span> the static friction to break free and start moving, <span class="k">kG</span> the constant pull of gravity, <span class="k">kV</span> the voltage to sustain a given speed, and <span class="k">kA</span> the extra to accelerate the mass. Feedforward computes this predicted voltage from where you <em>want</em> to go, and leaves PID to mop up only the small leftover — disturbances, a sagging battery, a game piece you didn't model.</p>
+    <p>Four terms, each a piece of physics: <span class="k">kS</span> the static friction to break free and start moving, <span class="k">kG</span> the constant pull of gravity, <span class="k">kV</span> the voltage to sustain a given speed, and <span class="k">kA</span> the extra to accelerate the mass. Feedforward computes this predicted voltage from where you <em>want</em> to go, and leaves PID to mop up only the small leftover - disturbances, a sagging battery, a game piece you didn't model.</p>
   </section>
 
   <section>
     <div class="kicker">Try it</div>
     <h2>Predict the load</h2>
-    <p>Here's the elevator with feedforward. Notice the integral is <strong>off</strong> (kI = 0) — yet with <span class="k">kG</span> set right, the carriage holds dead on the line. That's feedforward supplying gravity directly. Switch <strong>Feedforward off</strong> and Lesson 2's droop snaps back. Then mis-set kG and watch it park high or low.</p>
+    <p>Here's the elevator with feedforward. Notice the integral is <strong>off</strong> (kI = 0) - yet with <span class="k">kG</span> set right, the carriage holds dead on the line. That's feedforward supplying gravity directly. Switch <strong>Feedforward off</strong> and Lesson 2's droop snaps back. Then mis-set kG and watch it park high or low.</p>
 
     <div class="demo" id="demo">
       <div class="demo-head">
@@ -229,19 +229,19 @@
         <button class="btn" id="run">Pause</button>
         <button class="btn active" id="ff">Feedforward: on</button>
         <div class="slider-group">
-          <label>kG — gravity FF <span class="val" id="kgVal">0.45</span></label>
+          <label>kG - gravity FF <span class="val" id="kgVal">0.45</span></label>
           <input type="range" id="kg" min="0" max="0.9" step="0.01" value="0.45" />
         </div>
         <div class="slider-group">
-          <label>kP — gain <span class="val" id="kpVal">4.0</span></label>
+          <label>kP - gain <span class="val" id="kpVal">4.0</span></label>
           <input type="range" id="kp" min="0.5" max="20" step="0.5" value="4" />
         </div>
         <div class="slider-group">
-          <label>kI — integral <span class="val" id="kiVal">0.0</span></label>
+          <label>kI - integral <span class="val" id="kiVal">0.0</span></label>
           <input type="range" id="ki" min="0" max="3" step="0.1" value="0" />
         </div>
         <div class="slider-group">
-          <label>kD — derivative <span class="val" id="kdVal">2.0</span></label>
+          <label>kD - derivative <span class="val" id="kdVal">2.0</span></label>
           <input type="range" id="kd" min="0" max="6" step="0.5" value="2" />
         </div>
         <div class="slider-group">
@@ -256,17 +256,17 @@
         <div class="ro"><div class="k2">Voltage (V)</div><div class="v ink" id="roVolt">0.00</div></div>
       </div>
     </div>
-    <p class="caption">With kG matched to the load and feedforward on, the error sits at zero from the first instant — no droop, no integral, no waiting.</p>
+    <p class="caption">With kG matched to the load and feedforward on, the error sits at zero from the first instant - no droop, no integral, no waiting.</p>
   </section>
 
   <section>
     <div class="kicker">Why it works</div>
     <h2>Feedforward does the heavy lifting</h2>
-    <p>Remember the droop from Lesson 2 — the gap pure P couldn't close because it needed leftover error to fight gravity? And how Lesson 3's integral erased it, slowly, by accumulating that error over time? Feedforward erases it a third way: <strong>instantly, and in advance.</strong> <span class="k">kG</span> hands the motor exactly the gravity-holding voltage from the first instant, so there's nothing for the error to compensate for. No droop, no waiting, no windup to manage.</p>
-    <p>Watch the <span style="color:var(--indigo)">feedforward readout</span>: with feedforward on it sits at the gravity-holding voltage the entire time, doing the steady work — while PID's contribution stays near zero unless something disturbs the carriage.</p>
+    <p>Remember the droop from Lesson 2 - the gap pure P couldn't close because it needed leftover error to fight gravity? And how Lesson 3's integral erased it, slowly, by accumulating that error over time? Feedforward erases it a third way: <strong>instantly, and in advance.</strong> <span class="k">kG</span> hands the motor exactly the gravity-holding voltage from the first instant, so there's nothing for the error to compensate for. No droop, no waiting, no windup to manage.</p>
+    <p>Watch the <span style="color:var(--indigo)">feedforward readout</span>: with feedforward on it sits at the gravity-holding voltage the entire time, doing the steady work - while PID's contribution stays near zero unless something disturbs the carriage.</p>
     <div class="note teal">
       <div class="nh">Feedforward + feedback, together</div>
-      <p>Feedforward isn't a replacement for PID — it's a head start. The predicted voltage gets the mechanism most of the way; PID cleans up the rest: friction you under-modeled, a battery sagging, an unexpected load. A strong feedforward with a light PID on top is the gold standard for nearly every FRC mechanism — and exactly the recipe your final lessons build toward.</p>
+      <p>Feedforward isn't a replacement for PID - it's a head start. The predicted voltage gets the mechanism most of the way; PID cleans up the rest: friction you under-modeled, a battery sagging, an unexpected load. A strong feedforward with a light PID on top is the gold standard for nearly every FRC mechanism - and exactly the recipe your final lessons build toward.</p>
     </div>
   </section>
 
@@ -298,8 +298,8 @@
 }</pre>
     </div>
     <div class="note">
-      <div class="nh">Under the hood — where kV and kA come alive</div>
-      <p>For a static hold, feed velocity 0 and feedforward returns just <span class="k">kG</span>. The velocity and acceleration terms only earn their keep when the setpoint is actually <em>moving</em> — fed a planned trajectory. As of WPILib 2026 the single-argument <span class="k">calculate(velocity)</span> is deprecated in favor of the discrete <span class="k">calculate(currentVelocity, nextVelocity)</span>. Generating that smooth moving trajectory is <strong>motion profiling</strong>, which we reach at the end of the course — where kV and kA finally shine.</p>
+      <div class="nh">Under the hood - where kV and kA come alive</div>
+      <p>For a static hold, feed velocity 0 and feedforward returns just <span class="k">kG</span>. The velocity and acceleration terms only earn their keep when the setpoint is actually <em>moving</em> - fed a planned trajectory. As of WPILib 2026 the single-argument <span class="k">calculate(velocity)</span> is deprecated in favor of the discrete <span class="k">calculate(currentVelocity, nextVelocity)</span>. Generating that smooth moving trajectory is <strong>motion profiling</strong>, which we reach at the end of the course - where kV and kA finally shine.</p>
     </div>
   </section>
 
@@ -341,7 +341,7 @@ motor.<span class="fn">setVoltage</span>(feedforward + <input class="blank" data
           <button class="opt">The integral is secretly still running</button>
           <button class="opt">Gravity stops acting once it reaches the target</button>
         </div>
-        <div class="explain">In Lesson 2 the droop existed because P needed error to generate the holding voltage. Feedforward provides that voltage outright, so the error can sit at zero — no integral required.</div>
+        <div class="explain">In Lesson 2 the droop existed because P needed error to generate the holding voltage. Feedforward provides that voltage outright, so the error can sit at zero - no integral required.</div>
       </div>
       <div class="q" data-correct="2">
         <div class="qn">Question 3</div>
@@ -349,9 +349,9 @@ motor.<span class="fn">setVoltage</span>(feedforward + <input class="blank" data
         <div class="opts">
           <button class="opt">kS and kG</button>
           <button class="opt">kG alone</button>
-          <button class="opt">kV and kA — velocity and acceleration</button>
+          <button class="opt">kV and kA - velocity and acceleration</button>
         </div>
-        <div class="explain">kG (gravity) and kS (static friction at the start) apply even for a hold. kV and kA respond to commanded speed and acceleration, so they need a moving trajectory to act on — which is what motion profiling provides.</div>
+        <div class="explain">kG (gravity) and kS (static friction at the start) apply even for a hold. kV and kA respond to commanded speed and acceleration, so they need a moving trajectory to act on - which is what motion profiling provides.</div>
       </div>
     </div>
   </section>
@@ -361,8 +361,8 @@ motor.<span class="fn">setVoltage</span>(feedforward + <input class="blank" data
       <h3>Lesson 06 · Recap</h3>
       <div class="glossary">
         <div class="gl"><b>Feedforward</b><span>Predicting the needed voltage from physics, before any error.</span></div>
-        <div class="gl"><b>kS</b><span>Static friction — voltage to break free and start moving.</span></div>
-        <div class="gl"><b>kG</b><span>Gravity — the constant voltage to hold position.</span></div>
+        <div class="gl"><b>kS</b><span>Static friction - voltage to break free and start moving.</span></div>
+        <div class="gl"><b>kG</b><span>Gravity - the constant voltage to hold position.</span></div>
         <div class="gl"><b>kV, kA</b><span>Voltage for a target speed and acceleration (moving only).</span></div>
         <div class="gl"><b>Predictive vs reactive</b><span>Feedforward acts in advance; PID corrects the rest.</span></div>
         <div class="gl"><b>The combination</b><span>Strong feedforward + light PID = the FRC gold standard.</span></div>
@@ -370,7 +370,7 @@ motor.<span class="fn">setVoltage</span>(feedforward + <input class="blank" data
       <div class="next">
         <div class="n-eyebrow">Up next · Lesson 07</div>
         <h3>System identification</h3>
-        <p style="margin-bottom:0">You've been typing in <code>kG</code>, <code>kV</code>, and <code>kP</code> like they fell from the sky. Lesson 7 is how you actually <em>measure</em> them — the characterization tests that turn a few runs of your real mechanism into trustworthy numbers.</p>
+        <p style="margin-bottom:0">You've been typing in <code>kG</code>, <code>kV</code>, and <code>kP</code> like they fell from the sky. Lesson 7 is how you actually <em>measure</em> them - the characterization tests that turn a few runs of your real mechanism into trustworthy numbers.</p>
       </div>
     </div>
   </section>
@@ -540,7 +540,7 @@ motor.<span class="fn">setVoltage</span>(feedforward + <input class="blank" data
       if(!ok)all=false;
     });
     var res=document.getElementById('cres');
-    res.textContent=all?'All correct ✓':'Not quite — keep at it';
+    res.textContent=all?'All correct ✓':'Not quite - keep at it';
     res.className='code-result '+(all?'ok':'no');
   });
   document.getElementById('reveal').addEventListener('click',function(){

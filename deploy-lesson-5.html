@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Deploy · Part 1.5 — Docs &amp; Vendordeps</title>
+<title>Deploy · Part 1.5 - Docs &amp; Vendordeps</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -137,7 +137,7 @@
     <div class="lesson-no"><b>Part 1 · 05</b> The Toolchain</div>
     <div class="eyebrow">Docs &amp; Vendordeps</div>
     <h1>Add libraries,<br>never get <span class="accent">stuck</span>.</h1>
-    <p class="dek">WPILib covers the basics, but your motors come from vendors. A vendordep pulls in their library — and the docs are how you answer your own questions.</p>
+    <p class="dek">WPILib covers the basics, but your motors come from vendors. A vendordep pulls in their library - and the docs are how you answer your own questions.</p>
   </div>
 
   <section>
@@ -155,22 +155,22 @@
         <div class="rcol"><div class="rh">Now you can import</div><div id="impList"></div></div>
       </div>
     </div>
-    <p class="caption">Only add what you use — extra libraries are extra weight. Most teams run WPILib plus one motor vendor, maybe PathPlanner and a vision library.</p>
+    <p class="caption">Only add what you use - extra libraries are extra weight. Most teams run WPILib plus one motor vendor, maybe PathPlanner and a vision library.</p>
   </section>
 
   <section>
     <div class="kicker">Your lifelines</div>
     <h2>Reading the docs</h2>
-    <p>You will not memorize every class — nobody does. The skill is <strong>finding the answer</strong>. Each library has docs with examples and an API reference (the list of every class and method). When you wonder "how do I read the encoder?", search the docs for the class and skim its methods.</p>
+    <p>You will not memorize every class - nobody does. The skill is <strong>finding the answer</strong>. Each library has docs with examples and an API reference (the list of every class and method). When you wonder "how do I read the encoder?", search the docs for the class and skim its methods.</p>
     <div class="docs">
-      <a class="doc" style="--accent:var(--teal)" href="https://docs.wpilib.org/" target="_blank" rel="noopener"><div class="dn">WPILib Docs</div><div class="dd">The foundation — command-based, sensors, math, examples.</div></a>
-      <a class="doc" style="--accent:var(--amber)" href="https://v6.docs.ctr-electronics.com/" target="_blank" rel="noopener"><div class="dn">CTRE Phoenix 6</div><div class="dd">TalonFX, CANcoder, Tuner X — everything Kraken/Falcon.</div></a>
+      <a class="doc" style="--accent:var(--teal)" href="https://docs.wpilib.org/" target="_blank" rel="noopener"><div class="dn">WPILib Docs</div><div class="dd">The foundation - command-based, sensors, math, examples.</div></a>
+      <a class="doc" style="--accent:var(--amber)" href="https://v6.docs.ctr-electronics.com/" target="_blank" rel="noopener"><div class="dn">CTRE Phoenix 6</div><div class="dd">TalonFX, CANcoder, Tuner X - everything Kraken/Falcon.</div></a>
       <a class="doc" style="--accent:var(--green)" href="https://docs.revrobotics.com/" target="_blank" rel="noopener"><div class="dn">REV Docs</div><div class="dd">SparkMax/SparkFlex, NEO motors, the REV ecosystem.</div></a>
-      <a class="doc" style="--accent:var(--indigo)" href="https://www.chiefdelphi.com/" target="_blank" rel="noopener"><div class="dn">Chief Delphi</div><div class="dd">The FRC forum — someone has hit your problem before.</div></a>
+      <a class="doc" style="--accent:var(--indigo)" href="https://www.chiefdelphi.com/" target="_blank" rel="noopener"><div class="dn">Chief Delphi</div><div class="dd">The FRC forum - someone has hit your problem before.</div></a>
     </div>
     <div class="note indigo">
       <div class="nh">How to read a Javadoc</div>
-      <p>An API page lists a class's <strong>methods</strong>: each has a name, what you pass it (parameters), and what it gives back (return type). To find "how do I set a motor's speed?", open the class and scan for a method like <span class="k">setVoltage(double)</span>. Your editor helps too — type a dot after an object and it lists everything you can call.</p>
+      <p>An API page lists a class's <strong>methods</strong>: each has a name, what you pass it (parameters), and what it gives back (return type). To find "how do I set a motor's speed?", open the class and scan for a method like <span class="k">setVoltage(double)</span>. Your editor helps too - type a dot after an object and it lists everything you can call.</p>
     </div>
   </section>
 
@@ -183,7 +183,7 @@
         <div class="qn">Question 1</div>
         <div class="qt">You bought Krakens. What do you need to control them in code?</div>
         <div class="opts">
-          <button class="opt">Nothing — WPILib includes every motor library</button>
+          <button class="opt">Nothing - WPILib includes every motor library</button>
           <button class="opt">Install the CTRE Phoenix 6 vendordep</button>
           <button class="opt">Install the REV REVLib vendordep</button>
         </div>
@@ -197,7 +197,7 @@
           <button class="opt">Email the vendor</button>
           <button class="opt">Manage Vendor Libraries → Install new (online) → paste the JSON URL</button>
         </div>
-        <div class="explain">The WPILib VS Code installs a vendordep from a URL — it adds a small JSON to vendordeps/ and the build pulls in the library. No copying source by hand.</div>
+        <div class="explain">The WPILib VS Code installs a vendordep from a URL - it adds a small JSON to vendordeps/ and the build pulls in the library. No copying source by hand.</div>
       </div>
       <div class="q" data-correct="0">
         <div class="qn">Question 3</div>
@@ -207,7 +207,7 @@
           <button class="opt">Guess method names until one compiles</button>
           <button class="opt">Give up and use a different sensor</button>
         </div>
-        <div class="explain">The docs and API reference list every class and what its methods do. Finding the answer there (or on Chief Delphi) is the core skill — far faster and more reliable than guessing.</div>
+        <div class="explain">The docs and API reference list every class and what its methods do. Finding the answer there (or on Chief Delphi) is the core skill - far faster and more reliable than guessing.</div>
       </div>
     </div>
   </section>
@@ -225,8 +225,8 @@
       </div>
       <a class="next" href="code.html">
         <div class="n-eyebrow">Part 1 complete · The Toolchain</div>
-        <h3>On to Part 2 — Just-Enough Java →</h3>
-        <p>You can create, deploy, run, and version a robot project. Next, the handful of Java ideas robot code is built on — taught with motors, not toy examples. Continue from the course map.</p>
+        <h3>On to Part 2 - Just-Enough Java →</h3>
+        <p>You can create, deploy, run, and version a robot project. Next, the handful of Java ideas robot code is built on - taught with motors, not toy examples. Continue from the course map.</p>
       </a>
     </div>
   </section>

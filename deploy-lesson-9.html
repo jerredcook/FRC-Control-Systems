@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Deploy · Part 2.4 — Inheritance &amp; Interfaces</title>
+<title>Deploy · Part 2.4 - Inheritance &amp; Interfaces</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -135,7 +135,7 @@
 
   <section>
     <p class="lead">You rarely start a robot class from nothing.</p>
-    <p>WPILib gives you a base class — <span class="k">SubsystemBase</span> — that already knows how to register with the scheduler and run every loop. When you write <span class="k">class Elevator extends SubsystemBase</span>, your Elevator <strong>inherits</strong> all of that for free. You then <strong>override</strong> the one method you care about (<span class="k">periodic</span>) and <strong>add</strong> your own. Click the Elevator's members to see where each comes from.</p>
+    <p>WPILib gives you a base class - <span class="k">SubsystemBase</span> - that already knows how to register with the scheduler and run every loop. When you write <span class="k">class Elevator extends SubsystemBase</span>, your Elevator <strong>inherits</strong> all of that for free. You then <strong>override</strong> the one method you care about (<span class="k">periodic</span>) and <strong>add</strong> your own. Click the Elevator's members to see where each comes from.</p>
 
     <div class="demo" id="demo">
       <div class="demo-head"><span class="demo-title">class Elevator extends SubsystemBase</span><span class="demo-tag">inherit · override · add</span></div>
@@ -166,7 +166,7 @@
   <section>
     <div class="kicker">In code</div>
     <h2>extends and @Override</h2>
-    <p>Two keywords do all the work. <span class="k">extends</span> says "build on this parent." The <span class="k">@Override</span> annotation marks a method as replacing a parent's — and the compiler checks you spelled it right, catching a whole class of silent bugs:</p>
+    <p>Two keywords do all the work. <span class="k">extends</span> says "build on this parent." The <span class="k">@Override</span> annotation marks a method as replacing a parent's - and the compiler checks you spelled it right, catching a whole class of silent bugs:</p>
     <div class="codewrap">
       <div class="clabel">Elevator.java <span class="badge">Java · WPILib</span></div>
 <pre class="code"><span class="kw">public class</span> <span class="ty">Elevator</span> <span class="kw">extends</span> <span class="ty">SubsystemBase</span> {   <span class="cm">// inherit everything SubsystemBase has</span>
@@ -181,8 +181,8 @@
 }</pre>
     </div>
     <div class="note indigo">
-      <div class="nh">Interfaces — a promise instead of a parent</div>
-      <p>An <strong>interface</strong> is a list of methods a class promises to provide — a contract, not a parent. WPILib's <span class="k">Command</span>, <span class="k">Sendable</span>, and others are interfaces. You'll mostly <em>use</em> them rather than write them; just know "implements X" means "this class fills out X's required methods."</p>
+      <div class="nh">Interfaces - a promise instead of a parent</div>
+      <p>An <strong>interface</strong> is a list of methods a class promises to provide - a contract, not a parent. WPILib's <span class="k">Command</span>, <span class="k">Sendable</span>, and others are interfaces. You'll mostly <em>use</em> them rather than write them; just know "implements X" means "this class fills out X's required methods."</p>
     </div>
 
     <div class="code-ex">
@@ -209,21 +209,21 @@
         <div class="qn">Question 1</div>
         <div class="qt">When Elevator <code style="font-family:var(--mono);color:var(--teal)">extends SubsystemBase</code>, what does it get?</div>
         <div class="opts">
-          <button class="opt">Nothing — it just renames the class</button>
+          <button class="opt">Nothing - it just renames the class</button>
           <button class="opt">A copy it has to maintain by hand</button>
           <button class="opt">All of SubsystemBase's members for free, which it can use or override</button>
         </div>
-        <div class="explain">Inheritance gives the child everything the parent has. Elevator automatically registers with the scheduler and gets called each loop — you only write the parts that are unique to your elevator.</div>
+        <div class="explain">Inheritance gives the child everything the parent has. Elevator automatically registers with the scheduler and gets called each loop - you only write the parts that are unique to your elevator.</div>
       </div>
       <div class="q" data-correct="0">
         <div class="qn">Question 2</div>
         <div class="qt">What does <code style="font-family:var(--mono);color:var(--amber)">@Override</code> do?</div>
         <div class="opts">
-          <button class="opt">Marks a method as replacing a parent's — and the compiler verifies it really does</button>
+          <button class="opt">Marks a method as replacing a parent's - and the compiler verifies it really does</button>
           <button class="opt">Makes the method run faster</button>
           <button class="opt">Deletes the parent method</button>
         </div>
-        <div class="explain">@Override says "I'm replacing an inherited method." If you misspell the name or get the parameters wrong, the compiler errors instead of silently creating a new, never-called method — a classic bug it prevents.</div>
+        <div class="explain">@Override says "I'm replacing an inherited method." If you misspell the name or get the parameters wrong, the compiler errors instead of silently creating a new, never-called method - a classic bug it prevents.</div>
       </div>
       <div class="q" data-correct="1">
         <div class="qn">Question 3</div>
@@ -233,7 +233,7 @@
           <button class="opt">An interface is a contract of methods a class promises to provide, not code it inherits</button>
           <button class="opt">An interface can only have one method</button>
         </div>
-        <div class="explain">Extending a class inherits its actual code. Implementing an interface only promises to supply the methods the interface lists — the contract. WPILib uses both; you mostly consume interfaces like Command and Sendable.</div>
+        <div class="explain">Extending a class inherits its actual code. Implementing an interface only promises to supply the methods the interface lists - the contract. WPILib uses both; you mostly consume interfaces like Command and Sendable.</div>
       </div>
     </div>
   </section>
@@ -271,11 +271,11 @@
 (function(){
   "use strict";
   var DETAIL={
-    periodic:'<b>periodic()</b> — overridden. SubsystemBase has an empty one the scheduler calls every loop; you replace it with your control code.',
-    motor:'<b>motor</b> — new. A field that exists only on Elevator; SubsystemBase knows nothing about it.',
-    setGoal:'<b>setGoal()</b> — new. A method you add so commands can tell the elevator where to go.',
-    register:'<b>register()</b> — inherited. Comes straight from SubsystemBase; it’s how the subsystem joins the scheduler. You never write it.',
-    getName:'<b>getName()</b> — inherited. Free from SubsystemBase, used by dashboards. Use it as-is.'
+    periodic:'<b>periodic()</b> - overridden. SubsystemBase has an empty one the scheduler calls every loop; you replace it with your control code.',
+    motor:'<b>motor</b> - new. A field that exists only on Elevator; SubsystemBase knows nothing about it.',
+    setGoal:'<b>setGoal()</b> - new. A method you add so commands can tell the elevator where to go.',
+    register:'<b>register()</b> - inherited. Comes straight from SubsystemBase; it’s how the subsystem joins the scheduler. You never write it.',
+    getName:'<b>getName()</b> - inherited. Free from SubsystemBase, used by dashboards. Use it as-is.'
   };
   var detail=document.getElementById('detail');
   document.querySelectorAll('#childCls .mem.click').forEach(function(m){
@@ -291,7 +291,7 @@
   document.getElementById('check').addEventListener('click',function(){
     var all=true;
     blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
-    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite — extend SubsystemBase'; res.className='code-result '+(all?'ok':'no');
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - extend SubsystemBase'; res.className='code-result '+(all?'ok':'no');
   });
   document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='SubsystemBase';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
 

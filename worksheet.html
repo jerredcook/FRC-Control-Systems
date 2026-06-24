@@ -161,7 +161,7 @@
   </div>
 
   <div class="note no-print">
-    <div class="nh">Get the gains from SysId — don't guess</div>
+    <div class="nh">Get the gains from SysId - don't guess</div>
     <p>kS, kG, kV, kA come from running the characterization (Lessons I.7 + III.5), not from a slider. Measure them, paste them here, then trim kP. Tuning order: configure → characterize → kP → Motion Magic → validate.</p>
   </div>
 
@@ -186,7 +186,7 @@
           {k:"gear", l:"Gear ratio (motor:out)", v:"12.0"},
           {k:"stator", l:"Stator current limit (A)", v:"60"}
         ]},
-        {t:"Slot0 gains — from SysId", f:[
+        {t:"Slot0 gains - from SysId", f:[
           {k:"kS", l:"kS (static, V)", v:"0.14"},
           {k:"kG", l:"kG (gravity, V)", v:"0.31"},
           {k:"kV", l:"kV (V per rot/s)", v:"0.115"},
@@ -210,7 +210,7 @@
           {k:"gear", l:"Rotor:sensor ratio", v:"50.0"},
           {k:"stator", l:"Stator current limit (A)", v:"40"}
         ]},
-        {t:"Slot0 gains — from SysId  ·  0 = horizontal!", f:[
+        {t:"Slot0 gains - from SysId  ·  0 = horizontal!", f:[
           {k:"kS", l:"kS (static, V)", v:"0.10"},
           {k:"kG", l:"kG @ horizontal (V)", v:"0.40"},
           {k:"kV", l:"kV (V per rot/s)", v:"0.9"},
@@ -232,10 +232,10 @@
           {k:"canId", l:"Motor CAN id", v:"12"},
           {k:"stator", l:"Stator current limit (A)", v:"60"}
         ]},
-        {t:"Slot0 gains — from SysId  ·  no kG, small kP", f:[
+        {t:"Slot0 gains - from SysId  ·  no kG, small kP", f:[
           {k:"kS", l:"kS (static, V)", v:"0.10"},
-          {k:"kV", l:"kV — dominant (V per rot/s)", v:"0.12"},
-          {k:"kP", l:"kP — keep small", v:"0.18"},
+          {k:"kV", l:"kV - dominant (V per rot/s)", v:"0.12"},
+          {k:"kP", l:"kP - keep small", v:"0.18"},
           {k:"target", l:"Target speed (rot/s)", v:"60"}
         ]}
       ]
@@ -341,7 +341,7 @@
     var sp=SPEC[type], html="";
     sp.groups.forEach(function(grp){
       grp.f.forEach(function(f){
-        html+='<div class="rrow"><span class="rk">'+esc(f.l)+'</span><span class="rv">'+esc(state[f.k]||"—")+'</span></div>';
+        html+='<div class="rrow"><span class="rk">'+esc(f.l)+'</span><span class="rv">'+esc(state[f.k]||"-")+'</span></div>';
       });
     });
     document.getElementById("record").innerHTML=html;

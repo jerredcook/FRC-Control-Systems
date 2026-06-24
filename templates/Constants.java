@@ -1,7 +1,7 @@
 package frc.robot;
 
 /**
- * One home for CAN ids, gear ratios, and tuned gains — so you change a number
+ * One home for CAN ids, gear ratios, and tuned gains - so you change a number
  * in exactly one place. From "Closing the Loop" Part II.1.
  *
  * The subsystem templates inline their constants for clarity; this file is the

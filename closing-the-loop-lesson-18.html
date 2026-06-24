@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Closing the Loop · Part III.5 — SysId on Phoenix 6</title>
+<title>Closing the Loop · Part III.5 - SysId on Phoenix 6</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -182,14 +182,14 @@
 
   <section>
     <p class="lead">You've been borrowing numbers. Time to earn them.</p>
-    <p>Back in Part I, Lesson 7, you learned the idea: run a slow voltage ramp, plot voltage against velocity, and the line's slope is <span class="k">kV</span> while its intercept is <span class="k">kS + kG</span>. Phoenix 6 automates the whole thing. A <span class="k">SysIdRoutine</span> drives the ramp and a step, <span class="k">SignalLogger</span> records every sample to a <span class="k">.hoot</span> file, and <span class="k">Tuner X</span> fits the line across hundreds of points — then you paste the gains into Slot0.</p>
+    <p>Back in Part I, Lesson 7, you learned the idea: run a slow voltage ramp, plot voltage against velocity, and the line's slope is <span class="k">kV</span> while its intercept is <span class="k">kS + kG</span>. Phoenix 6 automates the whole thing. A <span class="k">SysIdRoutine</span> drives the ramp and a step, <span class="k">SignalLogger</span> records every sample to a <span class="k">.hoot</span> file, and <span class="k">Tuner X</span> fits the line across hundreds of points - then you paste the gains into Slot0.</p>
     <p>Here's that quasistatic ramp again, the test Phoenix runs for you. Collect the data, then fit the line to read the gains.</p>
   </section>
 
   <section>
     <div class="kicker">Run it</div>
     <h2>The characterization, by hand</h2>
-    <p>Press <strong>Run ramp test</strong> — voltage climbs slowly while the mechanism cruises, and each instant drops a dot (<span style="color:var(--indigo)">velocity</span> across, <span class="sub">voltage</span> up). Then fit the line: its <strong>slope is kV</strong>, its <strong>intercept is kS + kG</strong>.</p>
+    <p>Press <strong>Run ramp test</strong> - voltage climbs slowly while the mechanism cruises, and each instant drops a dot (<span style="color:var(--indigo)">velocity</span> across, <span class="sub">voltage</span> up). Then fit the line: its <strong>slope is kV</strong>, its <strong>intercept is kS + kG</strong>.</p>
 
     <div class="demo" id="demo">
       <div class="demo-head">
@@ -222,16 +222,16 @@
         <div class="ro"><div class="k2">Voltage</div><div class="v ink" id="roU">0.00</div></div>
         <div class="ro"><div class="k2">Velocity</div><div class="v indigo" id="roV">0.00</div></div>
         <div class="ro"><div class="k2">Samples</div><div class="v teal" id="roN">0</div></div>
-        <div class="ro"><div class="k2">Fit error (RMS)</div><div class="v amber" id="roErr">—</div></div>
+        <div class="ro"><div class="k2">Fit error (RMS)</div><div class="v amber" id="roErr">-</div></div>
       </div>
     </div>
-    <p class="caption">Tuner X does exactly this fit, automatically, across hundreds of logged samples — and adds a step test for kA. You just read off the answers.</p>
+    <p class="caption">Tuner X does exactly this fit, automatically, across hundreds of logged samples - and adds a step test for kA. You just read off the answers.</p>
   </section>
 
   <section>
     <div class="kicker">The code</div>
     <h2>A SysId routine in Phoenix 6</h2>
-    <p>The routine drives the motor with a plain <span class="k">VoltageOut</span> request while <span class="k">SignalLogger</span> captures position, velocity, and voltage in the background. You bind four commands — quasistatic and dynamic, each direction — and run them on the real robot:</p>
+    <p>The routine drives the motor with a plain <span class="k">VoltageOut</span> request while <span class="k">SignalLogger</span> captures position, velocity, and voltage in the background. You bind four commands - quasistatic and dynamic, each direction - and run them on the real robot:</p>
     <div class="codewrap">
       <div class="clabel">A Phoenix 6 SysId routine <span class="badge">Java</span></div>
 <pre class="code"><span class="kw">private final</span> <span class="ty">VoltageOut</span> sysIdReq = <span class="kw">new</span> <span class="ty">VoltageOut</span>(<span class="num">0</span>);
@@ -285,7 +285,7 @@ cfg.Slot0.kP = <span class="num">12</span>;     <span class="cm">// then tune kP
           <button class="opt">The feedforward gains kS, kV, kA (and kG) of your real mechanism</button>
           <button class="opt">The CAN bus speed</button>
         </div>
-        <div class="explain">SysId runs a ramp and a step, then fits the voltage/velocity/acceleration data to recover kS, kV, kA, and (for gravity-loaded mechanisms) kG — the model of how your hardware turns voltage into motion.</div>
+        <div class="explain">SysId runs a ramp and a step, then fits the voltage/velocity/acceleration data to recover kS, kV, kA, and (for gravity-loaded mechanisms) kG - the model of how your hardware turns voltage into motion.</div>
       </div>
       <div class="q" data-correct="0">
         <div class="qn">Question 2</div>
@@ -293,9 +293,9 @@ cfg.Slot0.kP = <span class="num">12</span>;     <span class="cm">// then tune kP
         <div class="opts">
           <button class="opt">SignalLogger records it to a .hoot file, which you analyze in Tuner X</button>
           <button class="opt">You write the numbers down off the dashboard</button>
-          <button class="opt">It isn't recorded — you estimate</button>
+          <button class="opt">It isn't recorded - you estimate</button>
         </div>
-        <div class="explain">SignalLogger streams every device signal to a .hoot log. Tuner X opens that log, runs the line-fit you just did by hand, and reports the gains — no manual graphing.</div>
+        <div class="explain">SignalLogger streams every device signal to a .hoot log. Tuner X opens that log, runs the line-fit you just did by hand, and reports the gains - no manual graphing.</div>
       </div>
       <div class="q" data-correct="2">
         <div class="qn">Question 3</div>
@@ -303,7 +303,7 @@ cfg.Slot0.kP = <span class="num">12</span>;     <span class="cm">// then tune kP
         <div class="opts">
           <button class="opt">Into a spreadsheet, forever</button>
           <button class="opt">Into the roboRIO's PIDController</button>
-          <button class="opt">Into the device's Slot0 — then you tune kP for tracking</button>
+          <button class="opt">Into the device's Slot0 - then you tune kP for tracking</button>
         </div>
         <div class="explain">The feedforward gains go straight into Slot0. With them in place, the onboard loop already does most of the work, so you only need a modest kP (and maybe kD) to clean up tracking.</div>
       </div>
@@ -313,9 +313,9 @@ cfg.Slot0.kP = <span class="num">12</span>;     <span class="cm">// then tune kP
   <section>
     <div class="kicker">You finished Part III</div>
     <h2>The loop now lives on the motor</h2>
-    <p>You can configure a Kraken, store gains in Slot0, command it with position, velocity, or Motion Magic, and measure those gains with SysId — the full competitive workflow, running at 1 kHz on the device. From here it's about doing it for real, on whole mechanisms:</p>
+    <p>You can configure a Kraken, store gains in Slot0, command it with position, velocity, or Motion Magic, and measure those gains with SysId - the full competitive workflow, running at 1 kHz on the device. From here it's about doing it for real, on whole mechanisms:</p>
     <div class="roadmap">
-      <div class="rm" style="--accent:var(--amber)"><div class="pt">Part IV · Coming up</div><h4>Tune a Real Mechanism</h4><p>An elevator, an arm, and a flywheel — each taken start-to-finish: SysId → Slot0 → Motion Magic → validated.</p></div>
+      <div class="rm" style="--accent:var(--amber)"><div class="pt">Part IV · Coming up</div><h4>Tune a Real Mechanism</h4><p>An elevator, an arm, and a flywheel - each taken start-to-finish: SysId → Slot0 → Motion Magic → validated.</p></div>
       <div class="rm" style="--accent:var(--teal)"><div class="pt">Part V</div><h4>Beyond</h4><p>Swerve drive control, vision-assisted aiming, and a first real look at state-space.</p></div>
       <div class="rm" style="--accent:var(--indigo)"><div class="pt">Anytime</div><h4>Parts I &amp; II</h4><p>The intuition and the WPILib code behind every Phoenix feature, one click away on the map.</p></div>
       <div class="rm" style="--accent:var(--green)"><div class="pt">Reference</div><h4>CTRE docs &amp; Tuner X</h4><p>You now have the vocabulary to read the official Phoenix 6 docs fluently. Go deep whenever you need to.</p></div>
@@ -335,7 +335,7 @@ cfg.Slot0.kP = <span class="num">12</span>;     <span class="cm">// then tune kP
       </div>
       <a class="next" href="closing-the-loop.html">
         <div class="n-eyebrow">Part III complete · CTRE Phoenix 6</div>
-        <h3>On to Part IV — Tune a Real Mechanism →</h3>
+        <h3>On to Part IV - Tune a Real Mechanism →</h3>
         <p>Back to the course map to keep going, where you take an elevator, an arm, and a flywheel from bare hardware to dialed-in.</p>
       </a>
     </div>
@@ -492,7 +492,7 @@ cfg.Slot0.kP = <span class="num">12</span>;     <span class="cm">// then tune kP
     el.roV.textContent=Math.max(0,S.v).toFixed(3);
     el.roN.textContent=String(S.pts.length);
     var e=rmsError();
-    el.roErr.textContent=(e==null)?'—':e.toFixed(3);
+    el.roErr.textContent=(e==null)?'-':e.toFixed(3);
     el.roErr.className='v '+((e!=null&&e<0.03)?'green':'amber');
   }
   var last=0;
@@ -512,7 +512,7 @@ cfg.Slot0.kP = <span class="num">12</span>;     <span class="cm">// then tune kP
       if(!ok)all=false;
     });
     var res=document.getElementById('cres');
-    res.textContent=all?'All correct ✓':'Not quite — apply the voltage SysId gave you';
+    res.textContent=all?'All correct ✓':'Not quite - apply the voltage SysId gave you';
     res.className='code-result '+(all?'ok':'no');
   });
   document.getElementById('reveal').addEventListener('click',function(){

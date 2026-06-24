@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Deploy · Part 2.5 — Collections &amp; Enums</title>
+<title>Deploy · Part 2.5 - Collections &amp; Enums</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -121,12 +121,12 @@
     <div class="lesson-no"><b>Part 2 · 05</b> Just-Enough Java</div>
     <div class="eyebrow">Collections &amp; Enums</div>
     <h1>Many things,<br>named <span class="accent">states</span>.</h1>
-    <p class="dek">Hold a whole group of values at once with arrays and lists — and give a robot a clear set of states with an enum. The last Java you need before building robots.</p>
+    <p class="dek">Hold a whole group of values at once with arrays and lists - and give a robot a clear set of states with an enum. The last Java you need before building robots.</p>
   </div>
 
   <section>
     <p class="lead">Sometimes one variable isn't enough.</p>
-    <p>A swerve drive has four modules; you don't want four separate variables. An <strong>array</strong> holds a fixed group; a <strong>List</strong> holds a growable one. You access an array by index — and indexes start at <strong>0</strong>:</p>
+    <p>A swerve drive has four modules; you don't want four separate variables. An <strong>array</strong> holds a fixed group; a <strong>List</strong> holds a growable one. You access an array by index - and indexes start at <strong>0</strong>:</p>
     <div class="codewrap">
       <div class="clabel">Arrays and Lists <span class="badge">Java</span></div>
 <pre class="code"><span class="ty">SwerveModule</span>[] modules = { frontLeft, frontRight, backLeft, backRight };
@@ -141,7 +141,7 @@ autos.<span class="fn">add</span>(scoreThenLeave);              <span class="cm"
   <section>
     <div class="kicker">Try it</div>
     <h2>An enum is a robot's states</h2>
-    <p>An <strong>enum</strong> is a fixed list of named values — perfect for the states a mechanism moves through. Instead of mystery numbers, you write <span class="k">State.SHOOTING</span>. A <span class="k">switch</span> then does the right thing for whichever state you're in. Step a shooter through its states:</p>
+    <p>An <strong>enum</strong> is a fixed list of named values - perfect for the states a mechanism moves through. Instead of mystery numbers, you write <span class="k">State.SHOOTING</span>. A <span class="k">switch</span> then does the right thing for whichever state you're in. Step a shooter through its states:</p>
 
     <div class="play">
       <div class="play-head"><span class="play-title">enum State + switch</span><span class="play-tag">step the machine</span></div>
@@ -153,16 +153,16 @@ autos.<span class="fn">add</span>(scoreThenLeave);              <span class="cm"
         <span class="doing" id="doing"></span>
       </div>
     </div>
-    <p class="caption">The highlighted chip is the current state; the highlighted case is the code that runs for it. Named states make a robot's behavior readable — and impossible to set to a value that doesn't exist.</p>
+    <p class="caption">The highlighted chip is the current state; the highlighted case is the code that runs for it. Named states make a robot's behavior readable - and impossible to set to a value that doesn't exist.</p>
   </section>
 
   <section>
     <div class="kicker">Why enums beat numbers</div>
     <h2>Readable and bullet-proof</h2>
-    <p>You <em>could</em> track state with an <span class="k">int</span> — 0 for idle, 1 for intaking, 2 for shooting. But then nothing stops you from writing <span class="k">state = 7</span> (a state that doesn't exist), and <span class="k">if (state == 2)</span> means nothing to a teammate. An enum fixes both: only the listed values are allowed, and the names explain themselves.</p>
+    <p>You <em>could</em> track state with an <span class="k">int</span> - 0 for idle, 1 for intaking, 2 for shooting. But then nothing stops you from writing <span class="k">state = 7</span> (a state that doesn't exist), and <span class="k">if (state == 2)</span> means nothing to a teammate. An enum fixes both: only the listed values are allowed, and the names explain themselves.</p>
     <div class="note indigo">
       <div class="nh">This is a state machine</div>
-      <p>A mechanism that moves through named states based on events — intake until you have a game piece, spin up, then shoot — is a <strong>state machine</strong>. Enums plus a switch are the simplest way to build one, and you'll use this pattern constantly for shooters, intakes, and superstructures.</p>
+      <p>A mechanism that moves through named states based on events - intake until you have a game piece, spin up, then shoot - is a <strong>state machine</strong>. Enums plus a switch are the simplest way to build one, and you'll use this pattern constantly for shooters, intakes, and superstructures.</p>
     </div>
 
     <div class="code-ex">
@@ -188,7 +188,7 @@ autos.<span class="fn">add</span>(scoreThenLeave);              <span class="cm"
         <div class="opts">
           <button class="opt">1</button>
           <button class="opt">-1</button>
-          <button class="opt">0 — arrays are zero-indexed</button>
+          <button class="opt">0 - arrays are zero-indexed</button>
         </div>
         <div class="explain">Java arrays start at index 0, so modules[0] is the first and modules[3] is the fourth of four. Off-by-one mistakes here are a classic bug.</div>
       </div>
@@ -207,7 +207,7 @@ autos.<span class="fn">add</span>(scoreThenLeave);              <span class="cm"
         <div class="qt">You have a growing number of autonomous routines. Which fits?</div>
         <div class="opts">
           <button class="opt">A single double variable</button>
-          <button class="opt">A List — it grows as you add more</button>
+          <button class="opt">A List - it grows as you add more</button>
           <button class="opt">An enum with one value</button>
         </div>
         <div class="explain">A List (like ArrayList) holds a variable number of items and grows with add(). Arrays are fixed-size; use a List when the count can change.</div>
@@ -228,8 +228,8 @@ autos.<span class="fn">add</span>(scoreThenLeave);              <span class="cm"
       </div>
       <a class="next" href="code.html">
         <div class="n-eyebrow">Part 2 complete · Just-Enough Java</div>
-        <h3>On to Part 3 — Command-Based Robots →</h3>
-        <p>You now know enough Java to read and write robot code. Next, the framework that organizes it all — subsystems and commands. Continue from the course map.</p>
+        <h3>On to Part 3 - Command-Based Robots →</h3>
+        <p>You now know enough Java to read and write robot code. Next, the framework that organizes it all - subsystems and commands. Continue from the course map.</p>
       </a>
     </div>
   </section>
@@ -248,7 +248,7 @@ autos.<span class="fn">add</span>(scoreThenLeave);              <span class="cm"
 (function(){
   "use strict";
   var STATES=[
-    {n:'IDLE',     act:'do nothing — wait for input', body:'motors off'},
+    {n:'IDLE',     act:'do nothing - wait for input', body:'motors off'},
     {n:'INTAKING', act:'run the intake until a game piece is in', body:'intake.run()'},
     {n:'READY',    act:'spin the shooter up to speed', body:'shooter.setSpeed(60)'},
     {n:'SHOOTING', act:'feed the piece and fire', body:'feeder.run()'}
@@ -279,7 +279,7 @@ autos.<span class="fn">add</span>(scoreThenLeave);              <span class="cm"
   document.getElementById('check').addEventListener('click',function(){
     var all=true;
     blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
-    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓ → the first one':'Not quite — the first index is 0'; res.className='code-result '+(all?'ok':'no');
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓ → the first one':'Not quite - the first index is 0'; res.className='code-result '+(all?'ok':'no');
   });
   document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='0';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
 

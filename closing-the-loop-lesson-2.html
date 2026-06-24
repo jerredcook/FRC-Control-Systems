@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Closing the Loop · Lesson 2 — Proportional Control</title>
+<title>Closing the Loop · Lesson 2 - Proportional Control</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -201,13 +201,13 @@
       output = <b>kP</b> × error
       <span class="small">where error = setpoint − measurement</span>
     </div>
-    <p>That's the whole idea. <span class="k">kP</span> is the <strong>gain</strong> — the dial that sets how aggressively the controller reacts. A big kP slams the motor at the smallest gap; a small kP nudges gently. Everything else this lesson is just consequences of that one choice.</p>
+    <p>That's the whole idea. <span class="k">kP</span> is the <strong>gain</strong> - the dial that sets how aggressively the controller reacts. A big kP slams the motor at the smallest gap; a small kP nudges gently. Everything else this lesson is just consequences of that one choice.</p>
   </section>
 
   <section>
     <div class="kicker">Try it</div>
     <h2>Tune the gain</h2>
-    <p>Here's the elevator, now under proportional control. Press <strong>Step</strong> to send it from the floor up to the target line. Then drag <span class="k">kP</span> and watch how a single number changes everything — and keep an eye on where it actually comes to rest.</p>
+    <p>Here's the elevator, now under proportional control. Press <strong>Step</strong> to send it from the floor up to the target line. Then drag <span class="k">kP</span> and watch how a single number changes everything - and keep an eye on where it actually comes to rest.</p>
 
     <div class="demo" id="demo">
       <div class="demo-head">
@@ -227,7 +227,7 @@
         <button class="btn primary" id="step">Step ▸</button>
         <button class="btn" id="run">Pause</button>
         <div class="slider-group">
-          <label>kP — gain <span class="val" id="kpVal">4.0</span></label>
+          <label>kP - gain <span class="val" id="kpVal">4.0</span></label>
           <input type="range" id="kp" min="0.5" max="20" step="0.5" value="4" />
         </div>
         <div class="slider-group">
@@ -242,15 +242,15 @@
         <div class="ro"><div class="k2">Droop (g/kP)</div><div class="v indigo" id="roDroop">0.00</div></div>
       </div>
     </div>
-    <p class="caption">Low kP and the carriage gives up far below the line. Crank it up and it races there — then overshoots and rings.</p>
+    <p class="caption">Low kP and the carriage gives up far below the line. Crank it up and it races there - then overshoots and rings.</p>
   </section>
 
   <section>
     <div class="kicker">The catch</div>
     <h2>It never quite arrives</h2>
-    <p>Did you notice the carriage settles <em>below</em> the target? Turn kP down to 1 and the gap is enormous; turn it up and the gap shrinks but stubbornly refuses to close. This isn't a bug — it's the defining limitation of proportional control, and the reason is worth understanding completely.</p>
-    <p>To hold the carriage up, the motor has to keep pushing against gravity — forever. But with proportional control, <strong>the only way to get a push is to have some error.</strong> Zero error would mean zero output, and the carriage would fall. So it settles at exactly the height where the leftover error produces just enough voltage to balance gravity. That permanent gap is called <strong>steady-state error</strong>, or <em>droop</em>.</p>
-    <p>Watch the <span style="color:var(--indigo)">voltage trace</span>: it settles at the gravity-holding value, not at zero. The droop is the price of that hold. Mathematically it's exactly <span class="k">g / kP</span> — bigger gain shrinks it, but you'll pay for that gain in overshoot.</p>
+    <p>Did you notice the carriage settles <em>below</em> the target? Turn kP down to 1 and the gap is enormous; turn it up and the gap shrinks but stubbornly refuses to close. This isn't a bug - it's the defining limitation of proportional control, and the reason is worth understanding completely.</p>
+    <p>To hold the carriage up, the motor has to keep pushing against gravity - forever. But with proportional control, <strong>the only way to get a push is to have some error.</strong> Zero error would mean zero output, and the carriage would fall. So it settles at exactly the height where the leftover error produces just enough voltage to balance gravity. That permanent gap is called <strong>steady-state error</strong>, or <em>droop</em>.</p>
+    <p>Watch the <span style="color:var(--indigo)">voltage trace</span>: it settles at the gravity-holding value, not at zero. The droop is the price of that hold. Mathematically it's exactly <span class="k">g / kP</span> - bigger gain shrinks it, but you'll pay for that gain in overshoot.</p>
     <div class="note teal">
       <div class="nh">You can't win with P alone</div>
       <p>Small kP → big droop. Big kP → overshoot and oscillation. There is no single gain that's both tight <em>and</em> smooth. That exact tension is why the next two lessons exist.</p>
@@ -269,18 +269,18 @@
   <span class="ty">double</span> measurement = encoder.<span class="fn">getPosition</span>();
   <span class="ty">double</span> error       = setpoint - measurement;  <span class="cm">// the gap</span>
 
-  <span class="ty">double</span> kP     = <span class="num">4.0</span>;                       <span class="cm">// gain — volts per meter of error</span>
+  <span class="ty">double</span> kP     = <span class="num">4.0</span>;                       <span class="cm">// gain - volts per meter of error</span>
   <span class="ty">double</span> output = kP * error;                <span class="cm">// push harder when the gap is bigger</span>
 
   motor.<span class="fn">setVoltage</span>(output);
 }</pre>
     </div>
-    <p>Read it top to bottom: ask the encoder where the carriage is, subtract that from where you want it to get the error, multiply by the gain, and send the result to the motor as a voltage. That's a complete proportional controller. The whole loop is "measure, compare, act" — exactly the shape from Lesson 1.</p>
+    <p>Read it top to bottom: ask the encoder where the carriage is, subtract that from where you want it to get the error, multiply by the gain, and send the result to the motor as a voltage. That's a complete proportional controller. The whole loop is "measure, compare, act" - exactly the shape from Lesson 1.</p>
 
-    <p>You won't hand-roll this forever, though. WPILib ships a <span class="k">PIDController</span> that does the same arithmetic — you give it the gains and call <span class="k">calculate</span>:</p>
+    <p>You won't hand-roll this forever, though. WPILib ships a <span class="k">PIDController</span> that does the same arithmetic - you give it the gains and call <span class="k">calculate</span>:</p>
     <div class="codewrap">
       <div class="clabel">The same thing, with WPILib <span class="badge">Java</span></div>
-<pre class="code"><span class="cm">// kP = 4.0, then kI = 0.0 and kD = 0.0 — pure proportional, for now</span>
+<pre class="code"><span class="cm">// kP = 4.0, then kI = 0.0 and kD = 0.0 - pure proportional, for now</span>
 <span class="kw">private final</span> <span class="ty">PIDController</span> controller = <span class="kw">new</span> <span class="ty">PIDController</span>(<span class="num">4.0</span>, <span class="num">0.0</span>, <span class="num">0.0</span>);
 
 <span class="kw">public</span> <span class="kw">void</span> <span class="fn">periodic</span>() {
@@ -288,11 +288,11 @@
   motor.<span class="fn">setVoltage</span>(output);
 }</pre>
     </div>
-    <p>The constructor takes the three gains in order — <span class="k">kP</span>, <span class="k">kI</span>, <span class="k">kD</span>. We're leaving the last two at zero because they're the next two lessons. <span class="k">calculate(measurement, setpoint)</span> returns the same <span class="k">kP × error</span> you wrote by hand.</p>
+    <p>The constructor takes the three gains in order - <span class="k">kP</span>, <span class="k">kI</span>, <span class="k">kD</span>. We're leaving the last two at zero because they're the next two lessons. <span class="k">calculate(measurement, setpoint)</span> returns the same <span class="k">kP × error</span> you wrote by hand.</p>
 
     <div class="note">
-      <div class="nh">Under the hood — gains have units</div>
-      <p>Because output is in volts and error is in meters, <span class="k">kP</span> is <em>volts per meter</em>. That's why a gain that works on one mechanism won't transfer to another — and why guessing gains gets old fast. Lesson 7 (system identification) is how you measure the right numbers instead of fishing for them.</p>
+      <div class="nh">Under the hood - gains have units</div>
+      <p>Because output is in volts and error is in meters, <span class="k">kP</span> is <em>volts per meter</em>. That's why a gain that works on one mechanism won't transfer to another - and why guessing gains gets old fast. Lesson 7 (system identification) is how you measure the right numbers instead of fishing for them.</p>
     </div>
   </section>
 
@@ -324,7 +324,7 @@ motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="output" 
           <button class="opt">Shrink steady-state error but never remove it</button>
           <button class="opt">Have no effect on steady-state error</button>
         </div>
-        <div class="explain">Droop is g/kP — a bigger gain makes it smaller, but it only reaches zero if kP were infinite (which would make the system wildly unstable). P alone can't fully close the gap.</div>
+        <div class="explain">Droop is g/kP - a bigger gain makes it smaller, but it only reaches zero if kP were infinite (which would make the system wildly unstable). P alone can't fully close the gap.</div>
       </div>
       <div class="q" data-correct="1">
         <div class="qn">Question 2</div>
@@ -334,7 +334,7 @@ motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="output" 
           <button class="opt">The motor needs some error to produce the voltage that holds against gravity</button>
           <button class="opt">kP is set to a negative number</button>
         </div>
-        <div class="explain">Output is kP × error. Holding against gravity needs a nonzero voltage, which needs a nonzero error — so the carriage parks exactly where the leftover error supplies the holding voltage.</div>
+        <div class="explain">Output is kP × error. Holding against gravity needs a nonzero voltage, which needs a nonzero error - so the carriage parks exactly where the leftover error supplies the holding voltage.</div>
       </div>
       <div class="q" data-correct="2">
         <div class="qn">Question 3</div>
@@ -342,7 +342,7 @@ motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="output" 
         <div class="opts">
           <button class="opt">A higher gain is always better</button>
           <button class="opt">kP only changes speed, never stability</button>
-          <button class="opt">The tradeoff — higher kP shrinks droop but adds overshoot and ringing</button>
+          <button class="opt">The tradeoff - higher kP shrinks droop but adds overshoot and ringing</button>
         </div>
         <div class="explain">Exactly the proportional bind: you can dial out the droop or dial out the overshoot, but not both with kP alone. The fix is adding other terms, which is where we're headed.</div>
       </div>
@@ -355,7 +355,7 @@ motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="output" 
       <div class="glossary">
         <div class="gl"><b>Proportional control</b><span>Output proportional to the error: kP × error.</span></div>
         <div class="gl"><b>Gain (kP)</b><span>How aggressively the controller reacts; units of volts per meter.</span></div>
-        <div class="gl"><b>Steady-state error</b><span>The permanent gap P leaves behind — equals g/kP.</span></div>
+        <div class="gl"><b>Steady-state error</b><span>The permanent gap P leaves behind - equals g/kP.</span></div>
         <div class="gl"><b>Overshoot</b><span>Sailing past the target before settling; grows with kP.</span></div>
         <div class="gl"><b>Oscillation</b><span>Ringing back and forth when the gain is too high.</span></div>
         <div class="gl"><b>periodic()</b><span>The ~50 Hz loop where the controller runs every cycle.</span></div>
@@ -363,7 +363,7 @@ motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="output" 
       <div class="next">
         <div class="n-eyebrow">Up next · Lesson 03</div>
         <h3>Integral control</h3>
-        <p style="margin-bottom:0">Proportional parks below the line forever. The <strong>Integral</strong> term gives the controller a memory — it adds up the error over time and keeps pushing until the gap is truly gone. You'll meet <code>kI</code> and watch the droop disappear.</p>
+        <p style="margin-bottom:0">Proportional parks below the line forever. The <strong>Integral</strong> term gives the controller a memory - it adds up the error over time and keeps pushing until the gap is truly gone. You'll meet <code>kI</code> and watch the droop disappear.</p>
       </div>
     </div>
   </section>
@@ -518,7 +518,7 @@ motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="output" 
       if(!ok)all=false;
     });
     var res=document.getElementById('cres');
-    res.textContent=all?'All correct ✓':'Not quite — keep at it';
+    res.textContent=all?'All correct ✓':'Not quite - keep at it';
     res.className='code-result '+(all?'ok':'no');
   });
   document.getElementById('reveal').addEventListener('click',function(){

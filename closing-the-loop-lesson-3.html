@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Closing the Loop · Lesson 3 — Integral Control</title>
+<title>Closing the Loop · Lesson 3 - Integral Control</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -196,19 +196,19 @@
 
   <section>
     <p class="lead">Proportional control left something behind.</p>
-    <p>Last lesson, the elevator climbed toward the line and stopped just short — the <strong>steady-state error</strong> that pure P can never quite close, because holding against gravity requires some leftover error to generate the voltage. Cranking <span class="k">kP</span> only shrinks the gap; it never erases it. To actually reach the line, the controller needs to notice that a small error has been hanging around — and do something about it.</p>
-    <p>That's the <strong>integral</strong> term. It keeps a running total of the error over time — a memory. As long as <em>any</em> error persists, that total keeps growing, and so does the push, until the gap is genuinely gone.</p>
+    <p>Last lesson, the elevator climbed toward the line and stopped just short - the <strong>steady-state error</strong> that pure P can never quite close, because holding against gravity requires some leftover error to generate the voltage. Cranking <span class="k">kP</span> only shrinks the gap; it never erases it. To actually reach the line, the controller needs to notice that a small error has been hanging around - and do something about it.</p>
+    <p>That's the <strong>integral</strong> term. It keeps a running total of the error over time - a memory. As long as <em>any</em> error persists, that total keeps growing, and so does the push, until the gap is genuinely gone.</p>
     <div class="formula">
       output = kP × error + <b>kI</b> × <span class="t">∫</span> error
       <span class="small">the integral ∫ error is just the error, summed up every loop</span>
     </div>
-    <p><span class="k">kI</span> is the integral gain — how strongly that accumulated history feeds back into the output. Turn it up and the memory pushes harder; turn it to zero and you're back to plain proportional.</p>
+    <p><span class="k">kI</span> is the integral gain - how strongly that accumulated history feeds back into the output. Turn it up and the memory pushes harder; turn it to zero and you're back to plain proportional.</p>
   </section>
 
   <section>
     <div class="kicker">Try it</div>
     <h2>Add a memory</h2>
-    <p>Same elevator. Start with <span class="k">kI</span> at zero and press <strong>Step</strong> — you'll see last lesson's droop, parked below the line. Now raise <span class="k">kI</span> and watch the carriage finally climb the rest of the way, while the integral term builds up underneath it.</p>
+    <p>Same elevator. Start with <span class="k">kI</span> at zero and press <strong>Step</strong> - you'll see last lesson's droop, parked below the line. Now raise <span class="k">kI</span> and watch the carriage finally climb the rest of the way, while the integral term builds up underneath it.</p>
 
     <div class="demo" id="demo">
       <div class="demo-head">
@@ -228,11 +228,11 @@
         <button class="btn primary" id="step">Step ▸</button>
         <button class="btn" id="run">Pause</button>
         <div class="slider-group">
-          <label>kP — gain <span class="val" id="kpVal">4.0</span></label>
+          <label>kP - gain <span class="val" id="kpVal">4.0</span></label>
           <input type="range" id="kp" min="0.5" max="20" step="0.5" value="4" />
         </div>
         <div class="slider-group">
-          <label>kI — integral <span class="val" id="kiVal">1.0</span></label>
+          <label>kI - integral <span class="val" id="kiVal">1.0</span></label>
           <input type="range" id="ki" min="0" max="3" step="0.1" value="1" />
         </div>
         <div class="slider-group">
@@ -253,11 +253,11 @@
   <section>
     <div class="kicker">Why it works</div>
     <h2>The memory takes over the hold</h2>
-    <p>Watch the numbers as the carriage settles with <span class="k">kI</span> turned up. The <span style="color:var(--indigo)">I-term</span> climbs and climbs — then levels off at exactly the voltage needed to hold against gravity. The instant the integral is supplying that hold on its own, the proportional term no longer needs any error to do it. So the error falls all the way to <strong>zero</strong>, and the carriage sits right on the line.</p>
-    <p>That's the whole trick: the integral <em>remembers</em> the leftover error and accumulates until it can carry the steady load by itself. Steady-state error doesn't get smaller — it gets <strong>eliminated</strong>.</p>
+    <p>Watch the numbers as the carriage settles with <span class="k">kI</span> turned up. The <span style="color:var(--indigo)">I-term</span> climbs and climbs - then levels off at exactly the voltage needed to hold against gravity. The instant the integral is supplying that hold on its own, the proportional term no longer needs any error to do it. So the error falls all the way to <strong>zero</strong>, and the carriage sits right on the line.</p>
+    <p>That's the whole trick: the integral <em>remembers</em> the leftover error and accumulates until it can carry the steady load by itself. Steady-state error doesn't get smaller - it gets <strong>eliminated</strong>.</p>
     <div class="note teal">
-      <div class="nh">The cost — overshoot and windup</div>
-      <p>A memory is slow to change its mind. The integral keeps pushing for a moment even after you reach the line, so it tends to <strong>overshoot</strong>. Worse: if the target is far away (or the motor is maxed out and physically can't keep up), the integral piles up a backlog of error it couldn't act on — then sails past the target and takes ages to unwind. That runaway accumulation is <strong>integral windup</strong>, and every real controller needs a way to limit it.</p>
+      <div class="nh">The cost - overshoot and windup</div>
+      <p>A memory is slow to change its mind. The integral keeps pushing for a moment even after you reach the line, so it tends to <strong>overshoot</strong>. Worse: if the target is far away (or the motor is maxed out and physically can't keep up), the integral piles up a backlog of error it couldn't act on - then sails past the target and takes ages to unwind. That runaway accumulation is <strong>integral windup</strong>, and every real controller needs a way to limit it.</p>
     </div>
   </section>
 
@@ -268,7 +268,7 @@
     <div class="codewrap">
       <div class="clabel">Proportional + integral, by hand <span class="badge">Java</span></div>
 <pre class="code"><span class="ty">double</span> kP = <span class="num">4.0</span>, kI = <span class="num">1.0</span>;
-<span class="kw">private</span> <span class="ty">double</span> integral = <span class="num">0.0</span>;        <span class="cm">// accumulator — persists between loops</span>
+<span class="kw">private</span> <span class="ty">double</span> integral = <span class="num">0.0</span>;        <span class="cm">// accumulator - persists between loops</span>
 
 <span class="kw">public</span> <span class="kw">void</span> <span class="fn">periodic</span>() {
   <span class="ty">double</span> error = setpoint - encoder.<span class="fn">getPosition</span>();
@@ -278,11 +278,11 @@
   motor.<span class="fn">setVoltage</span>(output);
 }</pre>
     </div>
-    <p>Each loop adds a sliver of the current error — <span class="k">error × dt</span> — onto the running total. While an error lingers, the total grows; once the error hits zero, it stops growing and holds its value. That held value is what keeps the carriage up.</p>
+    <p>Each loop adds a sliver of the current error - <span class="k">error × dt</span> - onto the running total. While an error lingers, the total grows; once the error hits zero, it stops growing and holds its value. That held value is what keeps the carriage up.</p>
 
     <p>But remember windup. The honest fix is to <strong>clamp</strong> the accumulator so it can't run away:</p>
     <div class="codewrap">
-      <div class="clabel">Anti-windup — clamp the accumulator <span class="badge">Java</span></div>
+      <div class="clabel">Anti-windup - clamp the accumulator <span class="badge">Java</span></div>
 <pre class="code">integral += error * <span class="num">0.02</span>;
 integral = <span class="ty">MathUtil</span>.<span class="fn">clamp</span>(integral, -<span class="num">2.0</span>, <span class="num">2.0</span>);   <span class="cm">// keep the memory bounded</span></pre>
     </div>
@@ -293,10 +293,10 @@ integral = <span class="ty">MathUtil</span>.<span class="fn">clamp</span>(integr
 <pre class="code"><span class="kw">private final</span> <span class="ty">PIDController</span> controller = <span class="kw">new</span> <span class="ty">PIDController</span>(<span class="num">4.0</span>, <span class="num">1.0</span>, <span class="num">0.0</span>);
 <span class="cm">// kP = 4.0,  kI = 1.0,  kD = 0.0</span>
 
-controller.<span class="fn">setIZone</span>(<span class="num">0.15</span>);   <span class="cm">// only integrate within 0.15 m of target — common anti-windup</span></pre>
+controller.<span class="fn">setIZone</span>(<span class="num">0.15</span>);   <span class="cm">// only integrate within 0.15 m of target - common anti-windup</span></pre>
     </div>
     <div class="note">
-      <div class="nh">Under the hood — taming the integral</div>
+      <div class="nh">Under the hood - taming the integral</div>
       <p>WPILib's <span class="k">PIDController</span> accumulates the integral for you. To stop windup, FRC teams reach for one of two knobs: <span class="k">setIntegratorRange(min, max)</span> clamps the term's contribution, and <span class="k">setIZone(zone)</span> only lets the integral build once you're within <span class="k">zone</span> of the target. A small iZone is the usual first move when an integral overshoots on long moves.</p>
     </div>
   </section>
@@ -339,14 +339,14 @@ motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="output" 
           <button class="opt">It makes kP larger automatically</button>
           <button class="opt">It ignores small errors below a threshold</button>
         </div>
-        <div class="explain">As long as any error remains, the integral keeps climbing. It stops only when it's large enough to hold the load on its own — at which point no leftover error is needed, so the error settles at zero.</div>
+        <div class="explain">As long as any error remains, the integral keeps climbing. It stops only when it's large enough to hold the load on its own - at which point no leftover error is needed, so the error settles at zero.</div>
       </div>
       <div class="q" data-correct="1">
         <div class="qn">Question 3</div>
         <div class="qt">A move to a far target overshoots badly and takes forever to settle. The likely culprit is…</div>
         <div class="opts">
           <button class="opt">kP set too low</button>
-          <button class="opt">Integral windup — the accumulator piled up while the carriage couldn't keep up</button>
+          <button class="opt">Integral windup - the accumulator piled up while the carriage couldn't keep up</button>
           <button class="opt">The encoder sampling too fast</button>
         </div>
         <div class="explain">During the long approach the integral accumulates error it can't immediately act on. By arrival it's hugely overcharged, so it overshoots and unwinds slowly. Clamping the integral or using an iZone prevents it.</div>
@@ -358,7 +358,7 @@ motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="output" 
     <div class="recap">
       <h3>Lesson 03 · Recap</h3>
       <div class="glossary">
-        <div class="gl"><b>Integral term</b><span>A running sum of the error over time — the controller's memory.</span></div>
+        <div class="gl"><b>Integral term</b><span>A running sum of the error over time - the controller's memory.</span></div>
         <div class="gl"><b>Gain (kI)</b><span>How strongly the accumulated error feeds back into the output.</span></div>
         <div class="gl"><b>Eliminates droop</b><span>Integral drives steady-state error fully to zero, not just smaller.</span></div>
         <div class="gl"><b>Integral windup</b><span>Runaway accumulation when the system can't keep up; causes big overshoot.</span></div>
@@ -368,7 +368,7 @@ motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="output" 
       <div class="next">
         <div class="n-eyebrow">Up next · Lesson 04</div>
         <h3>Derivative control</h3>
-        <p style="margin-bottom:0">Integral fixed the droop but added overshoot and ringing. The <strong>Derivative</strong> term watches how fast the error is changing and eases off before you arrive — the damping that calms everything down. You'll meet <code>kD</code>, and the full PID at last.</p>
+        <p style="margin-bottom:0">Integral fixed the droop but added overshoot and ringing. The <strong>Derivative</strong> term watches how fast the error is changing and eases off before you arrive - the damping that calms everything down. You'll meet <code>kD</code>, and the full PID at last.</p>
       </div>
     </div>
   </section>
@@ -529,7 +529,7 @@ motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="output" 
       if(!ok)all=false;
     });
     var res=document.getElementById('cres');
-    res.textContent=all?'All correct ✓':'Not quite — keep at it';
+    res.textContent=all?'All correct ✓':'Not quite - keep at it';
     res.className='code-result '+(all?'ok':'no');
   });
   document.getElementById('reveal').addEventListener('click',function(){

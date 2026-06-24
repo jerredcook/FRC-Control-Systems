@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Deploy · Part 3.3 — Commands</title>
+<title>Deploy · Part 3.3 - Commands</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -125,7 +125,7 @@
     <div class="lesson-no"><b>Part 3 · 03</b> Command-Based Robots</div>
     <div class="eyebrow">Commands</div>
     <h1>Actions over<br><span class="accent">time</span>.</h1>
-    <p class="dek">A command is a verb that plays out across many loops. Four little methods describe its whole life — start, repeat, finish, clean up.</p>
+    <p class="dek">A command is a verb that plays out across many loops. Four little methods describe its whole life - start, repeat, finish, clean up.</p>
   </div>
 
   <section>
@@ -152,13 +152,13 @@
         <button class="btn" id="resetBtn">Reset</button>
       </div>
     </div>
-    <p class="caption">execute() and isFinished() repeat every loop until isFinished() returns true — then end() runs once and the command is done.</p>
+    <p class="caption">execute() and isFinished() repeat every loop until isFinished() returns true - then end() runs once and the command is done.</p>
   </section>
 
   <section>
     <div class="kicker">In code</div>
-    <h2>The four methods — and the easy way</h2>
-    <p>Written out as a full class, those four methods look like this. Notice <span class="k">addRequirements</span> — it tells the scheduler which subsystem this command needs (Lesson 3.6):</p>
+    <h2>The four methods - and the easy way</h2>
+    <p>Written out as a full class, those four methods look like this. Notice <span class="k">addRequirements</span> - it tells the scheduler which subsystem this command needs (Lesson 3.6):</p>
     <div class="codewrap">
       <div class="clabel">A Command class <span class="badge">Java · WPILib</span></div>
 <pre class="code"><span class="kw">public class</span> <span class="ty">RunIntakeUntilLoaded</span> <span class="kw">extends</span> <span class="ty">Command</span> {
@@ -173,15 +173,15 @@
   <span class="an">@Override</span> <span class="kw">public</span> <span class="kw">void</span> <span class="fn">end</span>(<span class="bl">boolean</span> interrupted) { intake.<span class="fn">stop</span>(); }
 }</pre>
     </div>
-    <p>But you'll rarely write all that. WPILib gives subsystems <strong>command factories</strong> that build the same thing inline — far less code for simple actions:</p>
+    <p>But you'll rarely write all that. WPILib gives subsystems <strong>command factories</strong> that build the same thing inline - far less code for simple actions:</p>
     <div class="codewrap">
       <div class="clabel">The same command, inline <span class="badge">Java · WPILib</span></div>
 <pre class="code">intake.<span class="fn">run</span>(intake::run)                 <span class="cm">// execute(): run the intake every loop</span>
       .<span class="fn">until</span>(intake::hasGamePiece);    <span class="cm">// isFinished(): stop when loaded</span></pre>
     </div>
     <div class="note indigo">
-      <div class="nh">end() always runs — even when interrupted</div>
-      <p>If another command grabs the Intake mid-run, yours is <strong>interrupted</strong>: its <span class="k">end(true)</span> still fires so it can stop the motor cleanly. That guarantee is why you put "shut things off safely" in <span class="k">end()</span> — it can't be skipped.</p>
+      <div class="nh">end() always runs - even when interrupted</div>
+      <p>If another command grabs the Intake mid-run, yours is <strong>interrupted</strong>: its <span class="k">end(true)</span> still fires so it can stop the motor cleanly. That guarantee is why you put "shut things off safely" in <span class="k">end()</span> - it can't be skipped.</p>
     </div>
 
     <div class="code-ex">
@@ -209,10 +209,10 @@
         <div class="qt">Which command method runs every single loop while the command is active?</div>
         <div class="opts">
           <button class="opt">initialize()</button>
-          <button class="opt">execute() — it's the repeating work</button>
+          <button class="opt">execute() - it's the repeating work</button>
           <button class="opt">end()</button>
         </div>
-        <div class="explain">execute() is called every loop while the command runs. initialize() and end() each run exactly once — at the start and the stop.</div>
+        <div class="explain">execute() is called every loop while the command runs. initialize() and end() each run exactly once - at the start and the stop.</div>
       </div>
       <div class="q" data-correct="2">
         <div class="qn">Question 2</div>
@@ -232,7 +232,7 @@
           <button class="opt">end() is skipped entirely</button>
           <button class="opt">The robot crashes</button>
         </div>
-        <div class="explain">end() always runs — with interrupted = true when something cut it short. That's why "turn things off" belongs in end(): it's guaranteed to fire either way.</div>
+        <div class="explain">end() always runs - with interrupted = true when something cut it short. That's why "turn things off" belongs in end(): it's guaranteed to fire either way.</div>
       </div>
     </div>
   </section>
@@ -245,13 +245,13 @@
         <div class="gl"><b>initialize()</b><span>Once, at the start.</span></div>
         <div class="gl"><b>execute()</b><span>Every loop while running.</span></div>
         <div class="gl"><b>isFinished()</b><span>Checked each loop; true → done.</span></div>
-        <div class="gl"><b>end(interrupted)</b><span>Once at the stop — always runs.</span></div>
+        <div class="gl"><b>end(interrupted)</b><span>Once at the stop - always runs.</span></div>
         <div class="gl"><b>Factories</b><span>Inline commands; less boilerplate.</span></div>
       </div>
       <a class="next" href="deploy-lesson-14.html">
         <div class="n-eyebrow">Up next · Part 3 · 04</div>
         <h3>Command Compositions</h3>
-        <p>One command is a verb. Glue them into sentences: run in sequence, in parallel, or race to the finish — and watch each play out on a timeline.</p>
+        <p>One command is a verb. Glue them into sentences: run in sequence, in parallel, or race to the finish - and watch each play out on a timeline.</p>
       </a>
     </div>
   </section>
@@ -270,16 +270,16 @@
 (function(){
   "use strict";
   var STEPS=[
-    {on:['init'], log:'<span class="t">0:</span> <b>initialize()</b> — set up'},
+    {on:['init'], log:'<span class="t">0:</span> <b>initialize()</b> - set up'},
     {on:['exec','fin'], log:'<span class="t">1:</span> execute() · isFinished()? <span class="no">no</span>'},
     {on:['exec','fin'], log:'<span class="t">2:</span> execute() · isFinished()? <span class="no">no</span>'},
     {on:['exec','fin'], log:'<span class="t">3:</span> execute() · isFinished()? <span class="no">no</span>'},
-    {on:['exec','fin'], log:'<span class="t">4:</span> execute() · isFinished()? <span class="yes">YES</span> — game piece in!'},
-    {on:['end'], log:'<span class="t">5:</span> <span class="end">end(false)</span> — stop intake. <span class="yes">done ✓</span>'}
+    {on:['exec','fin'], log:'<span class="t">4:</span> execute() · isFinished()? <span class="yes">YES</span> - game piece in!'},
+    {on:['end'], log:'<span class="t">5:</span> <span class="end">end(false)</span> - stop intake. <span class="yes">done ✓</span>'}
   ];
   var step=-1, meths=document.querySelectorAll('.meth'), logEl=document.getElementById('log');
   function highlight(on){ meths.forEach(function(m){ m.classList.toggle('on', on&&on.indexOf(m.getAttribute('data-m'))>=0); }); }
-  function reset(){ step=-1; logEl.innerHTML='<div class="l" style="color:var(--faint)">— press Step to walk the command through its life —</div>'; highlight(null); document.getElementById('stepBtn').disabled=false; }
+  function reset(){ step=-1; logEl.innerHTML='<div class="l" style="color:var(--faint)">- press Step to walk the command through its life -</div>'; highlight(null); document.getElementById('stepBtn').disabled=false; }
   function advance(){
     if(step>=STEPS.length-1) return false;
     step++;
@@ -303,7 +303,7 @@
   document.getElementById('check').addEventListener('click',function(){
     var all=true;
     blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
-    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite — it\'s isFinished'; res.className='code-result '+(all?'ok':'no');
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - it\'s isFinished'; res.className='code-result '+(all?'ok':'no');
   });
   document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='isFinished';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
 

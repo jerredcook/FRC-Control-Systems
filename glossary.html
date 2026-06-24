@@ -102,27 +102,27 @@
 
   var TERMS=[
     // ---- Concepts ----
-    {c:"Concepts",t:"Setpoint",d:"Where you want the system to be — the target value the controller aims for.",r:"I.1"},
+    {c:"Concepts",t:"Setpoint",d:"Where you want the system to be - the target value the controller aims for.",r:"I.1"},
     {c:"Concepts",t:"Measurement",d:"Where the system actually is right now, read from a sensor.",r:"I.1"},
-    {c:"Concepts",t:"Error",d:"Setpoint minus measurement — the gap the controller reacts to.",r:"I.1"},
+    {c:"Concepts",t:"Error",d:"Setpoint minus measurement - the gap the controller reacts to.",r:"I.1"},
     {c:"Concepts",t:"Open loop",d:"Acting without checking the result (set it and hope).",r:"I.1"},
-    {c:"Concepts",t:"Closed loop",d:"Measure, compare, correct — repeatedly. The loop that 'closes' through feedback.",r:"I.1"},
+    {c:"Concepts",t:"Closed loop",d:"Measure, compare, correct - repeatedly. The loop that 'closes' through feedback.",r:"I.1"},
     {c:"Concepts",t:"Feedback",d:"Reacting to the measured error after it appears.",r:"I.1"},
     {c:"Concepts",t:"Feedforward",d:"Predicting the voltage a move needs from physics, before any error appears.",r:"I.6"},
     {c:"Concepts",t:"Steady-state error (droop)",d:"The leftover offset pure P keeps because it needs error to fight gravity.",r:"I.2"},
-    {c:"Concepts",t:"Overshoot",d:"Sailing past the target before settling — too much gain, too little damping.",r:"I.4"},
+    {c:"Concepts",t:"Overshoot",d:"Sailing past the target before settling - too much gain, too little damping.",r:"I.4"},
     {c:"Concepts",t:"Oscillation",d:"Hunting back and forth around the target instead of settling.",r:"I.5"},
     {c:"Concepts",t:"Disturbance",d:"An unmodeled push or load the controller didn't plan for.",r:"I.1"},
     {c:"Concepts",t:"Tolerance",d:"How close to the setpoint counts as 'there' (setTolerance / atSetpoint).",r:"II.3"},
 
     // ---- Gains ----
-    {c:"Gains",t:"kP — proportional",d:"Output per unit of error. Push harder the further you're off.",r:"I.2"},
-    {c:"Gains",t:"kI — integral",d:"Accumulates past error to erase a stubborn steady-state gap.",r:"I.3"},
-    {c:"Gains",t:"kD — derivative",d:"Reacts to the rate of change — a brake that reads your speed.",r:"I.4"},
-    {c:"Gains",t:"kS — static friction",d:"Volts needed just to break free and start moving.",r:"I.6"},
-    {c:"Gains",t:"kG — gravity",d:"Volts to hold position against gravity (constant for an elevator).",r:"I.6"},
-    {c:"Gains",t:"kV — velocity",d:"Volts per unit of speed — the workhorse of a velocity loop.",r:"I.6"},
-    {c:"Gains",t:"kA — acceleration",d:"Extra volts to accelerate the mass.",r:"I.6"},
+    {c:"Gains",t:"kP - proportional",d:"Output per unit of error. Push harder the further you're off.",r:"I.2"},
+    {c:"Gains",t:"kI - integral",d:"Accumulates past error to erase a stubborn steady-state gap.",r:"I.3"},
+    {c:"Gains",t:"kD - derivative",d:"Reacts to the rate of change - a brake that reads your speed.",r:"I.4"},
+    {c:"Gains",t:"kS - static friction",d:"Volts needed just to break free and start moving.",r:"I.6"},
+    {c:"Gains",t:"kG - gravity",d:"Volts to hold position against gravity (constant for an elevator).",r:"I.6"},
+    {c:"Gains",t:"kV - velocity",d:"Volts per unit of speed - the workhorse of a velocity loop.",r:"I.6"},
+    {c:"Gains",t:"kA - acceleration",d:"Extra volts to accelerate the mass.",r:"I.6"},
 
     // ---- Tuning & SysId ----
     {c:"Tuning & SysId",t:"Tuning",d:"Dialing in gains in a repeatable order until the response is crisp.",r:"I.5"},
@@ -136,7 +136,7 @@
     {c:"Motion",t:"Motion profile",d:"A smooth ramp-cruise-slow plan for a move, bounded by limits.",r:"II.5"},
     {c:"Motion",t:"Trapezoid profile",d:"WPILib's profile shape, set by max velocity and acceleration.",r:"II.5"},
     {c:"Motion",t:"Cruise velocity",d:"The top speed a profiled move reaches.",r:"III.4"},
-    {c:"Motion",t:"Jerk",d:"Rate of change of acceleration — rounds the corners of a profile.",r:"III.4"},
+    {c:"Motion",t:"Jerk",d:"Rate of change of acceleration - rounds the corners of a profile.",r:"III.4"},
     {c:"Motion",t:"Position control",d:"Hold/reach a position (elevator, arm).",r:"III.3"},
     {c:"Motion",t:"Velocity control",d:"Hold a speed (flywheel). kV dominant, kP small.",r:"IV.3"},
 
@@ -144,7 +144,7 @@
     {c:"WPILib (Java)",t:"WPILib",d:"The standard FRC library every team builds on.",r:"II.1"},
     {c:"WPILib (Java)",t:"Subsystem",d:"One mechanism: its hardware, state, and control loop.",r:"II.1"},
     {c:"WPILib (Java)",t:"Command",d:"An action that uses subsystems to do something.",r:"II.1"},
-    {c:"WPILib (Java)",t:"periodic()",d:"The method WPILib calls every 20 ms — where the loop lives.",r:"II.1"},
+    {c:"WPILib (Java)",t:"periodic()",d:"The method WPILib calls every 20 ms - where the loop lives.",r:"II.1"},
     {c:"WPILib (Java)",t:"CommandScheduler",d:"Runs every subsystem and command, every loop.",r:"II.1"},
     {c:"WPILib (Java)",t:"PIDController",d:"WPILib class implementing P, I, D; calculate(measurement, goal).",r:"II.3"},
     {c:"WPILib (Java)",t:"ProfiledPIDController",d:"A trapezoid profile + PID feedback in one class.",r:"II.5"},
@@ -164,7 +164,7 @@
     {c:"Phoenix 6 / CTRE",t:"NeutralMode",d:"Brake (holds) vs Coast (rolls free) when idle.",r:"III.2"},
     {c:"Phoenix 6 / CTRE",t:"Current limit",d:"Stator (motor) and supply (breaker) protection, in amps.",r:"III.2"},
     {c:"Phoenix 6 / CTRE",t:"GravityType",d:"Elevator_Static (constant) or Arm_Cosine (× cos angle) for kG.",r:"III.3"},
-    {c:"Phoenix 6 / CTRE",t:"Control request",d:"PositionVoltage / VelocityVoltage / MotionMagicVoltage — names a target.",r:"III.3"},
+    {c:"Phoenix 6 / CTRE",t:"Control request",d:"PositionVoltage / VelocityVoltage / MotionMagicVoltage - names a target.",r:"III.3"},
     {c:"Phoenix 6 / CTRE",t:"Motion Magic",d:"Onboard motion profile from a single control request.",r:"III.4"},
     {c:"Phoenix 6 / CTRE",t:"Motion Magic Expo",d:"kV/kA-shaped exponential profile; no cruise-velocity guess.",r:"III.4"},
     {c:"Phoenix 6 / CTRE",t:"getValueAsDouble()",d:"Reads a status signal (position, velocity) as a plain number.",r:"III.1"},
@@ -180,12 +180,12 @@
     {c:"Drive & Vision",t:"Odometry",d:"Integrating module motion to track the robot's field pose.",r:"V.1"},
     {c:"Drive & Vision",t:"ChassisSpeeds",d:"The driver's wish: forward, strafe, and rotation rates.",r:"V.1"},
     {c:"Drive & Vision",t:"AprilTag",d:"A fiducial marker with a known field location.",r:"V.2"},
-    {c:"Drive & Vision",t:"tx",d:"Camera's horizontal angle to a target — an error to drive to zero.",r:"V.2"},
+    {c:"Drive & Vision",t:"tx",d:"Camera's horizontal angle to a target - an error to drive to zero.",r:"V.2"},
     {c:"Drive & Vision",t:"Pose estimator",d:"Blends odometry with vision (addVisionMeasurement) for an accurate pose.",r:"V.2"},
 
     // ---- State-Space ----
     {c:"State-Space",t:"State (x)",d:"The few numbers describing the system now (e.g. position, velocity).",r:"V.3"},
-    {c:"State-Space",t:"State-space model",d:"ẋ = Ax + Bu — how the state changes with input.",r:"V.3"},
+    {c:"State-Space",t:"State-space model",d:"ẋ = Ax + Bu - how the state changes with input.",r:"V.3"},
     {c:"State-Space",t:"State feedback",d:"u = K(reference − x). On [pos, vel] it's exactly PD.",r:"V.3"},
     {c:"State-Space",t:"LQR",d:"Picks the optimal gains K by trading off error (Q) vs effort (R).",r:"V.3"},
     {c:"State-Space",t:"Q and R",d:"How much you penalize state error (Q) vs control effort (R).",r:"V.3"}

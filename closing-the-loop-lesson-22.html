@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Closing the Loop · Part V.1 — Swerve Drive Control</title>
+<title>Closing the Loop · Part V.1 - Swerve Drive Control</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -146,19 +146,19 @@
     <div class="lesson-no"><b>Part V · 01</b> Beyond</div>
     <div class="eyebrow">Swerve Drive Control</div>
     <h1>Eight motors,<br>one <span class="accent">intention</span>.</h1>
-    <p class="dek">Four wheels that each steer and drive independently. The magic is turning one simple wish — go this way, spin this fast — into eight perfectly coordinated loops.</p>
+    <p class="dek">Four wheels that each steer and drive independently. The magic is turning one simple wish - go this way, spin this fast - into eight perfectly coordinated loops.</p>
   </div>
 
   <section>
     <p class="lead">A swerve drive is just the mechanisms you already know, times four.</p>
-    <p>Each corner of the robot is a <strong>module</strong>: a <span class="k">steer</span> motor that points the wheel (position control — like the arm) and a <span class="k">drive</span> motor that spins it (velocity control — like the flywheel). Four modules, eight motors. Nothing new at the motor level — you tuned both kinds in Part IV.</p>
-    <p>What's new is the layer above: taking what the <em>driver</em> wants — a forward speed, a sideways speed, and a rotation — and computing, for each module, which way to point and how fast to spin. That conversion is called <strong>kinematics</strong>.</p>
+    <p>Each corner of the robot is a <strong>module</strong>: a <span class="k">steer</span> motor that points the wheel (position control - like the arm) and a <span class="k">drive</span> motor that spins it (velocity control - like the flywheel). Four modules, eight motors. Nothing new at the motor level - you tuned both kinds in Part IV.</p>
+    <p>What's new is the layer above: taking what the <em>driver</em> wants - a forward speed, a sideways speed, and a rotation - and computing, for each module, which way to point and how fast to spin. That conversion is called <strong>kinematics</strong>.</p>
   </section>
 
   <section>
     <div class="kicker">Drive it</div>
     <h2>One command, four modules</h2>
-    <p>Move the three sliders — <strong>forward</strong>, <strong>strafe</strong>, and <strong>rotate</strong>. Watch each module instantly point where it needs to and spin the right amount. The robot obeys, gliding and turning at once. This is field-oriented control: "forward" means forward on the field, no matter which way the robot faces.</p>
+    <p>Move the three sliders - <strong>forward</strong>, <strong>strafe</strong>, and <strong>rotate</strong>. Watch each module instantly point where it needs to and spin the right amount. The robot obeys, gliding and turning at once. This is field-oriented control: "forward" means forward on the field, no matter which way the robot faces.</p>
 
     <div class="demo" id="demo">
       <div class="demo-head">
@@ -188,7 +188,7 @@
         <div class="ro"><div class="k2">Front-left module</div><div class="v indigo" id="roM">0° · 0.0</div></div>
       </div>
     </div>
-    <p class="caption">Rotate alone and the wheels form a circle — each points tangent to its corner. Add forward and they all lean the same way. Kinematics figures out the blend.</p>
+    <p class="caption">Rotate alone and the wheels form a circle - each points tangent to its corner. Add forward and they all lean the same way. Kinematics figures out the blend.</p>
   </section>
 
   <section>
@@ -197,9 +197,9 @@
     <p>The whole pipeline is three steps, and you've built two of them already:</p>
     <div class="terms">
       <div class="term" style="--accent:var(--amber)"><h4>1 · Chassis speeds</h4><p>The driver's wish becomes <span class="k">ChassisSpeeds</span>: vx, vy, and omega. Field-oriented control rotates the stick direction by the gyro angle so "forward" stays forward.</p></div>
-      <div class="term" style="--accent:var(--teal)"><h4>2 · Kinematics</h4><p><span class="k">SwerveDriveKinematics</span> turns those three numbers into four <span class="k">SwerveModuleState</span>s — an angle and a speed for each corner.</p></div>
-      <div class="term" style="--accent:var(--indigo)"><h4>3 · Two loops per module</h4><p>Each module runs a steer loop (position, like the arm) and a drive loop (velocity, like the flywheel) — the Part IV mechanisms, on the motors.</p></div>
-      <div class="term" style="--accent:var(--green)"><h4>+ · Odometry</h4><p>Reading the modules <em>backwards</em>, the robot integrates how far each wheel went to track its <span class="k">pose</span> on the field — where it is and which way it faces.</p></div>
+      <div class="term" style="--accent:var(--teal)"><h4>2 · Kinematics</h4><p><span class="k">SwerveDriveKinematics</span> turns those three numbers into four <span class="k">SwerveModuleState</span>s - an angle and a speed for each corner.</p></div>
+      <div class="term" style="--accent:var(--indigo)"><h4>3 · Two loops per module</h4><p>Each module runs a steer loop (position, like the arm) and a drive loop (velocity, like the flywheel) - the Part IV mechanisms, on the motors.</p></div>
+      <div class="term" style="--accent:var(--green)"><h4>+ · Odometry</h4><p>Reading the modules <em>backwards</em>, the robot integrates how far each wheel went to track its <span class="k">pose</span> on the field - where it is and which way it faces.</p></div>
     </div>
     <div class="codewrap">
       <div class="clabel">The control pipeline <span class="badge">Java · WPILib + Phoenix 6</span></div>
@@ -221,7 +221,7 @@
     </div>
     <div class="note teal">
       <div class="nh">Two tricks that matter</div>
-      <p><strong>Optimize:</strong> if a module is at 0° and asked for 179°, it's faster to flip to −1° and drive the wheel backward. <span class="k">optimize()</span> does that automatically. <strong>Absolute angle:</strong> steering needs a <span class="k">FusedCANcoder</span> (Lesson III.2) so each module knows its angle the instant the robot boots — otherwise the wheels start crooked.</p>
+      <p><strong>Optimize:</strong> if a module is at 0° and asked for 179°, it's faster to flip to −1° and drive the wheel backward. <span class="k">optimize()</span> does that automatically. <strong>Absolute angle:</strong> steering needs a <span class="k">FusedCANcoder</span> (Lesson III.2) so each module knows its angle the instant the robot boots - otherwise the wheels start crooked.</p>
     </div>
   </section>
 
@@ -238,7 +238,7 @@
           <button class="opt">A steer loop (position, like the arm) and a drive loop (velocity, like the flywheel)</button>
           <button class="opt">A single PID for everything</button>
         </div>
-        <div class="explain">Each module points its wheel with position control and spins it with velocity control — exactly the two Part IV mechanisms, one per motor. Four modules means eight motors and eight loops.</div>
+        <div class="explain">Each module points its wheel with position control and spins it with velocity control - exactly the two Part IV mechanisms, one per motor. Four modules means eight motors and eight loops.</div>
       </div>
       <div class="q" data-correct="0">
         <div class="qn">Question 2</div>
@@ -248,17 +248,17 @@
           <button class="opt">Charges the battery</button>
           <button class="opt">Tunes the PID gains</button>
         </div>
-        <div class="explain">SwerveDriveKinematics turns the three chassis numbers (forward, strafe, rotate) into four SwerveModuleStates. Run it backward — from how far the wheels actually moved — and you get odometry.</div>
+        <div class="explain">SwerveDriveKinematics turns the three chassis numbers (forward, strafe, rotate) into four SwerveModuleStates. Run it backward - from how far the wheels actually moved - and you get odometry.</div>
       </div>
       <div class="q" data-correct="2">
         <div class="qn">Question 3</div>
         <div class="qt">Why does a swerve module's steering need a FusedCANcoder?</div>
         <div class="opts">
           <button class="opt">To spin faster</button>
-          <button class="opt">It doesn't — any sensor works</button>
+          <button class="opt">It doesn't - any sensor works</button>
           <button class="opt">So the wheel knows its absolute angle at power-on and doesn't start crooked</button>
         </div>
-        <div class="explain">Steering is position control, and the rotor alone forgets its zero at power-off. An absolute CANcoder, fused with the fast rotor, gives the true wheel angle immediately — just like the arm.</div>
+        <div class="explain">Steering is position control, and the rotor alone forgets its zero at power-off. An absolute CANcoder, fused with the fast rotor, gives the true wheel angle immediately - just like the arm.</div>
       </div>
     </div>
   </section>
@@ -268,8 +268,8 @@
       <h3>Part V · 01 · Recap</h3>
       <div class="glossary">
         <div class="gl"><b>Module</b><span>A steer motor + a drive motor at one corner.</span></div>
-        <div class="gl"><b>Steer = position</b><span>Points the wheel — like the arm.</span></div>
-        <div class="gl"><b>Drive = velocity</b><span>Spins the wheel — like the flywheel.</span></div>
+        <div class="gl"><b>Steer = position</b><span>Points the wheel - like the arm.</span></div>
+        <div class="gl"><b>Drive = velocity</b><span>Spins the wheel - like the flywheel.</span></div>
         <div class="gl"><b>Kinematics</b><span>ChassisSpeeds → four module states.</span></div>
         <div class="gl"><b>Optimize</b><span>Take the shorter path; drive backward if closer.</span></div>
         <div class="gl"><b>Odometry</b><span>Integrate module motion → field pose.</span></div>
@@ -277,7 +277,7 @@
       <a class="next" href="closing-the-loop-lesson-23.html">
         <div class="n-eyebrow">Up next · Part V · 02</div>
         <h3>Vision-Assisted Control</h3>
-        <p>Odometry drifts. A camera doesn't. Next, you close the loop on what the robot can see — aiming at a target and snapping to a tag.</p>
+        <p>Odometry drifts. A camera doesn't. Next, you close the loop on what the robot can see - aiming at a target and snapping to a tag.</p>
       </a>
     </div>
   </section>

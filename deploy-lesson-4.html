@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Deploy · Part 1.4 — Git &amp; GitHub for Teams</title>
+<title>Deploy · Part 1.4 - Git &amp; GitHub for Teams</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -130,12 +130,12 @@
     <div class="lesson-no"><b>Part 1 · 04</b> The Toolchain</div>
     <div class="eyebrow">Git &amp; GitHub for Teams</div>
     <h1>Many hands,<br>one <span class="accent">robot</span>.</h1>
-    <p class="dek">A robot is written by a whole team. Git is how a dozen people edit the same code without clobbering each other — and how you undo a mistake instead of panicking.</p>
+    <p class="dek">A robot is written by a whole team. Git is how a dozen people edit the same code without clobbering each other - and how you undo a mistake instead of panicking.</p>
   </div>
 
   <section>
     <p class="lead">Git is a time machine and a merge tool.</p>
-    <p>Every change is saved as a <strong>commit</strong> — a labeled snapshot you can always return to. You do your work on a <strong>branch</strong> (a private copy), so you never break the main code. <strong>GitHub</strong> is the website that holds the team's shared copy. When your branch is ready, you open a <strong>pull request</strong> so teammates review it before it joins <span class="k">main</span>. Step through the whole flow below.</p>
+    <p>Every change is saved as a <strong>commit</strong> - a labeled snapshot you can always return to. You do your work on a <strong>branch</strong> (a private copy), so you never break the main code. <strong>GitHub</strong> is the website that holds the team's shared copy. When your branch is ready, you open a <strong>pull request</strong> so teammates review it before it joins <span class="k">main</span>. Step through the whole flow below.</p>
 
     <div class="demo" id="demo">
       <div class="demo-head">
@@ -150,13 +150,13 @@
         <span class="stepcount" id="stepcount"></span>
       </div>
     </div>
-    <p class="caption">Small branches, frequent commits, and a pull request for every change — that's how a team ships a robot without chaos on the night before competition.</p>
+    <p class="caption">Small branches, frequent commits, and a pull request for every change - that's how a team ships a robot without chaos on the night before competition.</p>
   </section>
 
   <section>
     <div class="kicker">The commands</div>
     <h2>The everyday five</h2>
-    <p>You'll type these constantly. Don't memorize — just recognize them; your editor has buttons for all of them too:</p>
+    <p>You'll type these constantly. Don't memorize - just recognize them; your editor has buttons for all of them too:</p>
     <div class="codewrap">
       <div class="clabel">Your daily git</div>
 <pre class="code"><span class="cmd">git checkout -b intake</span>    <span class="cm"># start a branch for your feature</span>
@@ -167,7 +167,7 @@
     </div>
     <div class="note indigo">
       <div class="nh">Two habits that save seasons</div>
-      <p><strong>Pull before you push</strong> so you build on the team's latest, not an old copy. And <strong>never commit secrets or huge files</strong> — the generated <span class="k">.gitignore</span> already skips build output, but keep passwords and binaries out of the repo entirely.</p>
+      <p><strong>Pull before you push</strong> so you build on the team's latest, not an old copy. And <strong>never commit secrets or huge files</strong> - the generated <span class="k">.gitignore</span> already skips build output, but keep passwords and binaries out of the repo entirely.</p>
     </div>
   </section>
 
@@ -184,7 +184,7 @@
           <button class="opt">A saved, labeled snapshot of your code you can always return to</button>
           <button class="opt">A type of motor controller</button>
         </div>
-        <div class="explain">A commit records the state of your files with a message. The full history of commits lets you see what changed, when, and roll back to any point — Git's time-machine superpower.</div>
+        <div class="explain">A commit records the state of your files with a message. The full history of commits lets you see what changed, when, and roll back to any point - Git's time-machine superpower.</div>
       </div>
       <div class="q" data-correct="2">
         <div class="qn">Question 2</div>
@@ -204,7 +204,7 @@
           <button class="opt">Downloading the latest code</button>
           <button class="opt">Restarting the roboRIO</button>
         </div>
-        <div class="explain">A pull request (PR) on GitHub says "here's my branch — please review and merge." It's where teammates catch bugs and discuss changes before they reach main. (git pull, a different thing, downloads the latest.)</div>
+        <div class="explain">A pull request (PR) on GitHub says "here's my branch - please review and merge." It's where teammates catch bugs and discuss changes before they reach main. (git pull, a different thing, downloads the latest.)</div>
       </div>
     </div>
   </section>
@@ -252,9 +252,9 @@
   // steps: 0..6
   var STEPS=[
     {cmd:'main has the team’s working code', plain:true, desc:'Everyone’s robot builds from main. You start here.'},
-    {cmd:'git checkout -b intake', desc:'Branch off main to work safely on the intake — your own line.'},
+    {cmd:'git checkout -b intake', desc:'Branch off main to work safely on the intake - your own line.'},
     {cmd:'git commit -m "add intake motor"', desc:'Save a snapshot on your branch. Small, frequent commits beat one giant one.'},
-    {cmd:'git commit -m "tune intake speed"', desc:'Keep committing as you go — each is a point you can return to.'},
+    {cmd:'git commit -m "tune intake speed"', desc:'Keep committing as you go - each is a point you can return to.'},
     {cmd:'git push -u origin intake', desc:'Send your branch up to GitHub so the team can see it.'},
     {cmd:'open a Pull Request', plain:true, desc:'Propose merging into main. Teammates review and catch issues first.'},
     {cmd:'merge the PR', plain:true, desc:'Your intake joins main. Everyone pulls it and builds on top.'}

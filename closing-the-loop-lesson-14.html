@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Closing the Loop · Part III.1 — Meet Phoenix 6 & the Kraken</title>
+<title>Closing the Loop · Part III.1 - Meet Phoenix 6 & the Kraken</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -145,19 +145,19 @@
     <div class="lesson-no"><b>Part III · 01</b> CTRE Phoenix 6</div>
     <div class="eyebrow">Meet Phoenix 6 &amp; the Kraken</div>
     <h1>The motor that<br><span class="accent">thinks</span>.</h1>
-    <p class="dek">A Kraken isn't just a motor — it's a controller with its own processor, running your control loop on board at 1 kHz. Time to move the loop off the roboRIO.</p>
+    <p class="dek">A Kraken isn't just a motor - it's a controller with its own processor, running your control loop on board at 1 kHz. Time to move the loop off the roboRIO.</p>
   </div>
 
   <section>
     <p class="lead">Your loop has been running in the wrong place.</p>
-    <p>In Part II, your PID lived on the <strong>roboRIO</strong> and ran every 20 ms — 50 times a second. That's fine, but the roboRIO is busy with everything else on the robot, and 50 Hz is slow. Inside a <strong>Kraken X60</strong> (and a Falcon 500) is a <span class="k">TalonFX</span> motor controller with its own processor that can run the very same loop at <strong>1,000 Hz</strong> — 20× faster — right next to the motor it's driving.</p>
-    <p>CTRE's software for these devices is <span class="k">Phoenix 6</span>, and the desktop app for configuring and watching them is <span class="k">Tuner X</span>. The big idea of this whole part: stop sending the motor raw voltage, and start sending it a <em>target</em> — let it close the loop itself.</p>
+    <p>In Part II, your PID lived on the <strong>roboRIO</strong> and ran every 20 ms - 50 times a second. That's fine, but the roboRIO is busy with everything else on the robot, and 50 Hz is slow. Inside a <strong>Kraken X60</strong> (and a Falcon 500) is a <span class="k">TalonFX</span> motor controller with its own processor that can run the very same loop at <strong>1,000 Hz</strong> - 20× faster - right next to the motor it's driving.</p>
+    <p>CTRE's software for these devices is <span class="k">Phoenix 6</span>, and the desktop app for configuring and watching them is <span class="k">Tuner X</span>. The big idea of this whole part: stop sending the motor raw voltage, and start sending it a <em>target</em> - let it close the loop itself.</p>
   </section>
 
   <section>
     <div class="kicker">See the difference</div>
     <h2>Two places the loop can live</h2>
-    <p>Toggle where the control loop runs. On the <strong>roboRIO</strong>, your code computes volts and ships them out 50 times a second. On the <strong>TalonFX</strong>, you send a target once and the motor grinds out its own loop 1,000 times a second — watch the iteration counters pull apart.</p>
+    <p>Toggle where the control loop runs. On the <strong>roboRIO</strong>, your code computes volts and ships them out 50 times a second. On the <strong>TalonFX</strong>, you send a target once and the motor grinds out its own loop 1,000 times a second - watch the iteration counters pull apart.</p>
 
     <div class="demo" id="demo">
       <div class="demo-head">
@@ -183,7 +183,7 @@
   <section>
     <div class="kicker">Why bother</div>
     <h2>Faster, steadier, off your plate</h2>
-    <p>Running the loop on the motor isn't just bragging rights. A 1 kHz loop reacts to a stalled mechanism or a bumped arm almost instantly, where a 50 Hz loop might let it sag for a whole frame. The timing is rock-steady — no competing with vision code for CPU. And your roboRIO is freed up to think about strategy instead of grinding PID for eight motors at once.</p>
+    <p>Running the loop on the motor isn't just bragging rights. A 1 kHz loop reacts to a stalled mechanism or a bumped arm almost instantly, where a 50 Hz loop might let it sag for a whole frame. The timing is rock-steady - no competing with vision code for CPU. And your roboRIO is freed up to think about strategy instead of grinding PID for eight motors at once.</p>
     <div class="note teal">
       <div class="nh">The same ideas, a new home</div>
       <p>Nothing you learned changes. It's still measure → compare → act, still kP/kI/kD plus kS/kG/kV/kA, still motion profiles. You're just configuring the motor to run that loop itself, and sending it targets instead of voltages. Every concept from Parts I and II carries straight over.</p>
@@ -195,9 +195,9 @@
     <h2>The pieces you'll work with</h2>
     <div class="terms">
       <div class="term" style="--accent:var(--teal)"><h4>TalonFX</h4><p>The controller inside every Kraken and Falcon. It drives the motor and runs the onboard loop. You talk to it in code by its CAN id.</p></div>
-      <div class="term" style="--accent:var(--indigo)"><h4>CAN bus</h4><p>The single wire-pair network linking every device — motors, CANcoders, the Pigeon gyro — to the roboRIO. Each device has a unique id.</p></div>
+      <div class="term" style="--accent:var(--indigo)"><h4>CAN bus</h4><p>The single wire-pair network linking every device - motors, CANcoders, the Pigeon gyro - to the roboRIO. Each device has a unique id.</p></div>
       <div class="term" style="--accent:var(--amber)"><h4>Phoenix 6</h4><p>CTRE's Java/C++/Python library. It's how your code configures devices, sends control requests, and reads sensor signals.</p></div>
-      <div class="term" style="--accent:var(--green)"><h4>Tuner X</h4><p>The desktop app to update firmware, set CAN ids, plot signals live, and run SysId — your dashboard for the whole bus.</p></div>
+      <div class="term" style="--accent:var(--green)"><h4>Tuner X</h4><p>The desktop app to update firmware, set CAN ids, plot signals live, and run SysId - your dashboard for the whole bus.</p></div>
     </div>
     <p style="margin-top:18px">In code, grabbing a motor and reading its position is two lines. Phoenix keeps that position fresh in the background as a <strong>status signal</strong>, already in rotations:</p>
     <div class="codewrap">
@@ -208,7 +208,7 @@
 <span class="ty">double</span> rotations = motor.<span class="fn">getPosition</span>().<span class="fn">getValueAsDouble</span>();  <span class="cm">// a status signal, auto-refreshed</span>
 <span class="ty">double</span> rps       = motor.<span class="fn">getVelocity</span>().<span class="fn">getValueAsDouble</span>();  <span class="cm">// rotations per second</span></pre>
     </div>
-    <p>That's the foundation. Next lesson we <em>configure</em> this motor — current limits, sensor ratios, brake mode — so it behaves the way your mechanism needs.</p>
+    <p>That's the foundation. Next lesson we <em>configure</em> this motor - current limits, sensor ratios, brake mode - so it behaves the way your mechanism needs.</p>
   </section>
 
   <section>
@@ -224,13 +224,13 @@
           <button class="opt">The roboRIO's main processor</button>
           <button class="opt">The motor controller inside a Kraken or Falcon that can run the control loop on board</button>
         </div>
-        <div class="explain">The TalonFX is the brain built into each Kraken/Falcon. It drives the motor and can run PID + feedforward itself at 1 kHz — you address it in code by its CAN id.</div>
+        <div class="explain">The TalonFX is the brain built into each Kraken/Falcon. It drives the motor and can run PID + feedforward itself at 1 kHz - you address it in code by its CAN id.</div>
       </div>
       <div class="q" data-correct="0">
         <div class="qn">Question 2</div>
         <div class="qt">Why is running the loop on the TalonFX (1 kHz) better than on the roboRIO (50 Hz)?</div>
         <div class="opts">
-          <button class="opt">It corrects 20× more often, so it reacts faster and with steadier timing — and frees the roboRIO</button>
+          <button class="opt">It corrects 20× more often, so it reacts faster and with steadier timing - and frees the roboRIO</button>
           <button class="opt">It uses less battery</button>
           <button class="opt">It makes the motor physically stronger</button>
         </div>
@@ -242,7 +242,7 @@
         <div class="opts">
           <button class="opt">A new voltage every 20 ms</button>
           <button class="opt">A target (like a position or velocity), and the motor closes the loop itself</button>
-          <button class="opt">Nothing — the motor is fully autonomous</button>
+          <button class="opt">Nothing - the motor is fully autonomous</button>
         </div>
         <div class="explain">You send a control request with a target. The TalonFX runs PID + feedforward against that target on board, so you're commanding "go here" instead of computing volts yourself.</div>
       </div>

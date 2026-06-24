@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Closing the Loop · Lesson 5 — Tuning PID</title>
+<title>Closing the Loop · Lesson 5 - Tuning PID</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -210,7 +210,7 @@
 
   <section>
     <p class="lead">Knowing what each gain does is only half the battle.</p>
-    <p>You've met <span class="k">kP</span>, <span class="k">kI</span>, and <span class="k">kD</span> and seen each one's effect on its own. On a real mechanism they interact, and you're handed three blank dials and a carriage misbehaving in some specific way. Tuning is the skill of reading <em>how</em> it misbehaves and knowing which dial fixes it — instead of flailing.</p>
+    <p>You've met <span class="k">kP</span>, <span class="k">kI</span>, and <span class="k">kD</span> and seen each one's effect on its own. On a real mechanism they interact, and you're handed three blank dials and a carriage misbehaving in some specific way. Tuning is the skill of reading <em>how</em> it misbehaves and knowing which dial fixes it - instead of flailing.</p>
     <p>There's no magic recipe, but there is a dependable order and a short diagnostic table. Together they'll get almost any mechanism dialed in within a few minutes.</p>
   </section>
 
@@ -219,18 +219,18 @@
     <h2>Tune in this order</h2>
     <p>Always start from zero and add one term at a time. Adding gains in this sequence keeps each one's effect readable:</p>
     <ol class="steps">
-      <li><b>Zero everything.</b> kP, kI, kD all at 0 (plus feedforward, if you have it — next lesson).</li>
+      <li><b>Zero everything.</b> kP, kI, kD all at 0 (plus feedforward, if you have it - next lesson).</li>
       <li><b>Raise kP</b> until the response is snappy and <em>just</em> begins to overshoot. Too low and it's sluggish; too high and it oscillates.</li>
       <li><b>Add kD</b> to damp that overshoot into a clean settle. Back off the moment it starts to buzz.</li>
       <li><b>Add kI last,</b> and only if a steady-state error remains. Keep it small, and pair it with an iZone to avoid windup.</li>
-      <li><b>Test the whole range</b> — short moves, long moves, with a game piece loaded, on a low battery. A tune that only works in one spot isn't tuned.</li>
+      <li><b>Test the whole range</b> - short moves, long moves, with a game piece loaded, on a low battery. A tune that only works in one spot isn't tuned.</li>
     </ol>
   </section>
 
   <section>
     <div class="kicker">Try it</div>
     <h2>The tuning clinic</h2>
-    <p>Load a misbehaving tune, read what the scope is telling you, then fix it with the sliders. The diagnostic table below is your cheat sheet — match the symptom to the cause to the cure.</p>
+    <p>Load a misbehaving tune, read what the scope is telling you, then fix it with the sliders. The diagnostic table below is your cheat sheet - match the symptom to the cause to the cure.</p>
 
     <div class="demo" id="demo">
       <div class="demo-head">
@@ -259,15 +259,15 @@
         <button class="btn" id="run">Pause</button>
         <button class="btn" id="noise">Noise: off</button>
         <div class="slider-group">
-          <label>kP — gain <span class="val" id="kpVal">4.0</span></label>
+          <label>kP - gain <span class="val" id="kpVal">4.0</span></label>
           <input type="range" id="kp" min="0.5" max="20" step="0.5" value="4" />
         </div>
         <div class="slider-group">
-          <label>kI — integral <span class="val" id="kiVal">1.0</span></label>
+          <label>kI - integral <span class="val" id="kiVal">1.0</span></label>
           <input type="range" id="ki" min="0" max="3" step="0.1" value="1" />
         </div>
         <div class="slider-group">
-          <label>kD — derivative <span class="val" id="kdVal">2.0</span></label>
+          <label>kD - derivative <span class="val" id="kdVal">2.0</span></label>
           <input type="range" id="kd" min="0" max="6" step="0.5" value="2" />
         </div>
         <div class="slider-group">
@@ -305,18 +305,18 @@
     <p>Re-deploying code for every gain tweak is painfully slow. Instead, push the gains to <strong>Shuffleboard</strong> (or SmartDashboard) and read them back each loop, so you can turn the knobs while the robot runs:</p>
     <div class="codewrap">
       <div class="clabel">Live-tunable gains <span class="badge">Java</span></div>
-<pre class="code"><span class="cm">// once, in robotInit — seed the dashboard with starting values</span>
+<pre class="code"><span class="cm">// once, in robotInit - seed the dashboard with starting values</span>
 <span class="ty">SmartDashboard</span>.<span class="fn">putNumber</span>(<span class="num">"kP"</span>, <span class="num">4.0</span>);
 <span class="ty">SmartDashboard</span>.<span class="fn">putNumber</span>(<span class="num">"kD"</span>, <span class="num">2.0</span>);
 
-<span class="cm">// each loop — read whatever you've dialed in and apply it</span>
+<span class="cm">// each loop - read whatever you've dialed in and apply it</span>
 <span class="ty">double</span> kP = <span class="ty">SmartDashboard</span>.<span class="fn">getNumber</span>(<span class="num">"kP"</span>, <span class="num">4.0</span>);
 <span class="ty">double</span> kD = <span class="ty">SmartDashboard</span>.<span class="fn">getNumber</span>(<span class="num">"kD"</span>, <span class="num">2.0</span>);
 controller.<span class="fn">setPID</span>(kP, <span class="num">0.0</span>, kD);</pre>
     </div>
     <div class="note">
       <div class="nh">Tune against the plot, not your gut</div>
-      <p>Eyeballing the mechanism only gets you so far. Log the setpoint and measurement and watch them on a real scope — <span class="k">AdvantageScope</span>, or Shuffleboard's graph — exactly like the trace in the clinic above. Overshoot, droop, and ringing are obvious on a plot and easy to miss by eye.</p>
+      <p>Eyeballing the mechanism only gets you so far. Log the setpoint and measurement and watch them on a real scope - <span class="k">AdvantageScope</span>, or Shuffleboard's graph - exactly like the trace in the clinic above. Overshoot, droop, and ringing are obvious on a plot and easy to miss by eye.</p>
     </div>
   </section>
 
@@ -358,7 +358,7 @@ controller.<span class="fn">setPID</span>(<input class="blank" data-ans="kp" ari
           <button class="opt">Raise kD (or lower kP)</button>
           <button class="opt">Increase the setpoint</button>
         </div>
-        <div class="explain">Overshoot and ringing are a damping problem — raise kD to brake the approach, or back off kP if it's too aggressive. Adding kI here would only make the overshoot worse.</div>
+        <div class="explain">Overshoot and ringing are a damping problem - raise kD to brake the approach, or back off kP if it's too aggressive. Adding kI here would only make the overshoot worse.</div>
       </div>
       <div class="q" data-correct="2">
         <div class="qn">Question 3</div>
@@ -387,7 +387,7 @@ controller.<span class="fn">setPID</span>(<input class="blank" data-ans="kp" ari
       <div class="next">
         <div class="n-eyebrow">Up next · Lesson 06</div>
         <h3>Feedforward</h3>
-        <p style="margin-bottom:0">PID corrects errors <em>after</em> they happen. Feedforward predicts the voltage a move needs <em>in advance</em> — for gravity, friction, and speed — so PID barely has to lift a finger. Meet <code>kS</code>, <code>kG</code>, <code>kV</code>, and <code>kA</code>.</p>
+        <p style="margin-bottom:0">PID corrects errors <em>after</em> they happen. Feedforward predicts the voltage a move needs <em>in advance</em> - for gravity, friction, and speed - so PID barely has to lift a finger. Meet <code>kS</code>, <code>kG</code>, <code>kV</code>, and <code>kA</code>.</p>
       </div>
     </div>
   </section>
@@ -576,7 +576,7 @@ controller.<span class="fn">setPID</span>(<input class="blank" data-ans="kp" ari
       if(!ok)all=false;
     });
     var res=document.getElementById('cres');
-    res.textContent=all?'All correct ✓':'Not quite — keep at it';
+    res.textContent=all?'All correct ✓':'Not quite - keep at it';
     res.className='code-result '+(all?'ok':'no');
   });
   document.getElementById('reveal').addEventListener('click',function(){

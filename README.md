@@ -7,12 +7,12 @@ with no install.
 
 ### 🌐 Live: https://jerredcook.github.io/FRC-Control-Systems/
 
-Three courses — three pillars:
+Three courses - three pillars:
 
 | | Course | Covers | Status |
 |---|--------|--------|--------|
-| 🎯 **Control** | **Closing the Loop** | Feedback, PID, feedforward, CTRE Phoenix 6, tuning, swerve, vision, state-space | ✅ **Complete — 24 lessons** + glossary, certificate, worksheet, field guide |
-| 🎮 **Code** | **Deploy** | Toolchain, Java, command-based robots, hardware, autonomous, vision, pro practices | 🚧 **In progress** — full curriculum mapped (8 parts) |
+| 🎯 **Control** | **Closing the Loop** | Feedback, PID, feedforward, CTRE Phoenix 6, tuning, swerve, vision, state-space | ✅ **Complete - 24 lessons** + glossary, certificate, worksheet, field guide |
+| 🎮 **Code** | **Deploy** | Toolchain, Java, command-based robots, hardware, autonomous, vision, pro practices | 🚧 **In progress** - full curriculum mapped (8 parts) |
 | 🔧 **Build** | **Fabricate** | CAD, motors & gearboxes, drivetrains, mechanisms, electrical, pneumatics, manufacturing | 📋 Planned |
 
 The pillars connect: **Deploy**'s "Make It Move" unit *is* the **Closing the Loop**
@@ -23,23 +23,23 @@ course, so the control material is shared rather than rebuilt.
 Open **`index.html`** (the academy landing) in any browser, or visit the live
 site. Pick a course:
 
-- **`closing-the-loop.html`** — the Control course hub (complete).
-- **`code.html`** — the Code course hub (curriculum mapped; lessons in progress).
+- **`closing-the-loop.html`** - the Control course hub (complete).
+- **`code.html`** - the Code course hub (curriculum mapped; lessons in progress).
 
 No install, no build step, no internet required. Progress is saved per-course in
 your browser; finishing a lesson's quiz marks it done automatically.
 
-## Closing the Loop — for your robot
+## Closing the Loop - for your robot
 
 The Control course ships with companions that turn lessons into real code:
 
-- **[Tuning worksheet](worksheet.html)** — enter your mechanism's numbers → paste-ready Phoenix 6 Java + a printable gains record.
-- **[Java templates](templates/)** — complete `Elevator`, `Arm`, `Flywheel` subsystems with `// TODO` markers.
+- **[Tuning worksheet](worksheet.html)** - enter your mechanism's numbers → paste-ready Phoenix 6 Java + a printable gains record.
+- **[Java templates](templates/)** - complete `Elevator`, `Arm`, `Flywheel` subsystems with `// TODO` markers.
 - **[Glossary](glossary.html)** · **[Certificate](certificate.html)** · **[Troubleshooting field guide](closing-the-loop-troubleshooting.html)**
 
 ## How it's built
 
-- Plain HTML/CSS/JavaScript — **no dependencies, no build tools, no framework**.
+- Plain HTML/CSS/JavaScript - **no dependencies, no build tools, no framework**.
 - Each lesson is one self-contained file; simulations are hand-written `<canvas>`
   physics (elevator, arm, flywheel, swerve, vision, and more).
 - Each course hub is **data-driven**: a `COURSE` array at the top of its script

@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
- * Elevator — position control on a Kraken/TalonFX with Motion Magic.
+ * Elevator - position control on a Kraken/TalonFX with Motion Magic.
  *
  * Straight out of "Closing the Loop" Part IV.1 (the end-to-end elevator).
  * Fill in every // TODO with YOUR robot's numbers:
@@ -74,7 +74,7 @@ public class Elevator extends SubsystemBase {
     return Math.abs(getPositionRotations() - targetRotations) < TOLERANCE_ROT;
   }
 
-  /** Go to a height and finish once arrived — handy for autos and button binds. */
+  /** Go to a height and finish once arrived - handy for autos and button binds. */
   public Command goTo(double rotations) {
     return run(() -> setGoalRotations(rotations)).until(() -> atGoal(rotations));
   }

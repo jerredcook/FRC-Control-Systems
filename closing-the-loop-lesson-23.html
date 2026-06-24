@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Closing the Loop · Part V.2 — Vision-Assisted Control</title>
+<title>Closing the Loop · Part V.2 - Vision-Assisted Control</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -158,12 +158,12 @@
     <div class="lesson-no"><b>Part V · 02</b> Beyond</div>
     <div class="eyebrow">Vision-Assisted Control</div>
     <h1>Close the loop<br>on what it <span class="accent">sees</span>.</h1>
-    <p class="dek">A camera hands you one number — how far off-target you are. Drive that number to zero and you've got auto-aim. It's the very first controller you ever built, fed by a new sensor.</p>
+    <p class="dek">A camera hands you one number - how far off-target you are. Drive that number to zero and you've got auto-aim. It's the very first controller you ever built, fed by a new sensor.</p>
   </div>
 
   <section>
     <p class="lead">Vision isn't a new kind of control. It's a new kind of sensor.</p>
-    <p>A camera — a Limelight or PhotonVision running on a coprocessor — spots an AprilTag or target and reports <span class="k">tx</span>: the horizontal angle, in degrees, between where the robot is pointed and the target. That's an <strong>error</strong>. And you know exactly what to do with an error:</p>
+    <p>A camera - a Limelight or PhotonVision running on a coprocessor - spots an AprilTag or target and reports <span class="k">tx</span>: the horizontal angle, in degrees, between where the robot is pointed and the target. That's an <strong>error</strong>. And you know exactly what to do with an error:</p>
     <div class="formula">
       turn rate = −<b>kP</b> · tx
       <span class="small">setpoint = 0 (centered) · measurement = tx from the camera · it's a P controller</span>
@@ -174,7 +174,7 @@
   <section>
     <div class="kicker">Aim it</div>
     <h2>Auto-aim, live</h2>
-    <p>The camera sees a target up the field. Move the <strong>target</strong> and watch <span class="k">tx</span> — the offset — change. Flip <strong>auto-aim on</strong> and the robot rotates to drive tx to zero and lock on. Crank <span class="k">kP</span> too high and the aim overshoots and hunts, exactly like an over-tuned PID.</p>
+    <p>The camera sees a target up the field. Move the <strong>target</strong> and watch <span class="k">tx</span> - the offset - change. Flip <strong>auto-aim on</strong> and the robot rotates to drive tx to zero and lock on. Crank <span class="k">kP</span> too high and the aim overshoots and hunts, exactly like an over-tuned PID.</p>
 
     <div class="demo" id="demo">
       <div class="demo-head">
@@ -189,7 +189,7 @@
           <input type="range" id="tgt" min="-42" max="42" step="1" value="25" />
         </div>
         <div class="slider-group">
-          <label>kP — aim gain <span class="val" id="kpVal">4.0</span></label>
+          <label>kP - aim gain <span class="val" id="kpVal">4.0</span></label>
           <input type="range" id="kp" min="0.5" max="14" step="0.5" value="4" />
         </div>
       </div>
@@ -199,7 +199,7 @@
         <div class="ro"><div class="k2">Locked on?</div><div class="v ink" id="roLock">no</div></div>
       </div>
     </div>
-    <p class="caption">The amber wedge is the camera's view of the offset; the teal line is where the robot points. Auto-aim closes the gap — pure proportional control.</p>
+    <p class="caption">The amber wedge is the camera's view of the offset; the teal line is where the robot points. Auto-aim closes the gap - pure proportional control.</p>
   </section>
 
   <section>
@@ -223,7 +223,7 @@ poseEstimator.<span class="fn">addVisionMeasurement</span>(estimatedPose, timest
     </div>
     <div class="note teal">
       <div class="nh">Two cautions the camera adds</div>
-      <p><strong>Latency:</strong> a camera frame is tens of milliseconds old, so you time-stamp measurements and let the estimator account for the delay. <strong>Trust:</strong> a single noisy frame shouldn't yank the robot — you reject wild jumps and weight vision against odometry. The control idea stays simple; the plumbing is where the care goes.</p>
+      <p><strong>Latency:</strong> a camera frame is tens of milliseconds old, so you time-stamp measurements and let the estimator account for the delay. <strong>Trust:</strong> a single noisy frame shouldn't yank the robot - you reject wild jumps and weight vision against odometry. The control idea stays simple; the plumbing is where the care goes.</p>
     </div>
 
     <div class="code-ex">
@@ -251,15 +251,15 @@ drive.<span class="fn">drive</span>(<span class="num">0</span>, <span class="num
         <div class="opts">
           <button class="opt">The setpoint</button>
           <button class="opt">The output voltage</button>
-          <button class="opt">The error — how far off-target the robot is pointed</button>
+          <button class="opt">The error - how far off-target the robot is pointed</button>
         </div>
-        <div class="explain">tx is the angle between bore-sight and the target. The setpoint is 0 (centered), so tx is the error. Multiply it by kP and you have a turn command — proportional control with a camera for a sensor.</div>
+        <div class="explain">tx is the angle between bore-sight and the target. The setpoint is 0 (centered), so tx is the error. Multiply it by kP and you have a turn command - proportional control with a camera for a sensor.</div>
       </div>
       <div class="q" data-correct="0">
         <div class="qn">Question 2</div>
         <div class="qt">Crank the aim kP way up. What happens, and why?</div>
         <div class="opts">
-          <button class="opt">The aim overshoots and hunts — same instability as an over-tuned PID</button>
+          <button class="opt">The aim overshoots and hunts - same instability as an over-tuned PID</button>
           <button class="opt">The camera sees farther</button>
           <button class="opt">Nothing changes</button>
         </div>
@@ -273,7 +273,7 @@ drive.<span class="fn">drive</span>(<span class="num">0</span>, <span class="num
           <button class="opt">Give an absolute field position from a known tag, correcting odometry drift</button>
           <button class="opt">Replace the gyro entirely</button>
         </div>
-        <div class="explain">Odometry accumulates error as wheels slip. A recognized AprilTag has a known field location, so it pins down where the robot truly is — you blend it in with addVisionMeasurement to keep the pose honest.</div>
+        <div class="explain">Odometry accumulates error as wheels slip. A recognized AprilTag has a known field location, so it pins down where the robot truly is - you blend it in with addVisionMeasurement to keep the pose honest.</div>
       </div>
     </div>
   </section>
@@ -283,7 +283,7 @@ drive.<span class="fn">drive</span>(<span class="num">0</span>, <span class="num
       <h3>Part V · 02 · Recap</h3>
       <div class="glossary">
         <div class="gl"><b>tx</b><span>Camera's horizontal offset to the target = error.</span></div>
-        <div class="gl"><b>Auto-aim</b><span>omega = −kP · tx — proportional control.</span></div>
+        <div class="gl"><b>Auto-aim</b><span>omega = −kP · tx - proportional control.</span></div>
         <div class="gl"><b>Setpoint 0</b><span>Centered on target means tx = 0.</span></div>
         <div class="gl"><b>AprilTag</b><span>Known field location → absolute position.</span></div>
         <div class="gl"><b>addVisionMeasurement</b><span>Blend vision into odometry, fix drift.</span></div>
@@ -292,7 +292,7 @@ drive.<span class="fn">drive</span>(<span class="num">0</span>, <span class="num
       <a class="next" href="closing-the-loop-lesson-24.html">
         <div class="n-eyebrow">Up next · Part V · 03 · Finale</div>
         <h3>State-Space &amp; LQR</h3>
-        <p>One last idea — the math the whole course kept hinting at. It turns out PID has a bigger, smarter sibling, and it's more approachable than it sounds.</p>
+        <p>One last idea - the math the whole course kept hinting at. It turns out PID has a bigger, smarter sibling, and it's more approachable than it sounds.</p>
       </a>
     </div>
   </section>
@@ -423,7 +423,7 @@ drive.<span class="fn">drive</span>(<span class="num">0</span>, <span class="num
       if(!ok)all=false;
     });
     var res=document.getElementById('cres');
-    res.textContent=all?'All correct ✓':'Not quite — drive the offset tx to zero';
+    res.textContent=all?'All correct ✓':'Not quite - drive the offset tx to zero';
     res.className='code-result '+(all?'ok':'no');
   });
   document.getElementById('reveal').addEventListener('click',function(){

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Deploy · Part 2.3 — Classes &amp; Objects</title>
+<title>Deploy · Part 2.3 - Classes &amp; Objects</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -133,9 +133,9 @@
 
   <section>
     <p class="lead">A class describes a kind of thing.</p>
-    <p>It bundles <strong>data</strong> (fields) and <strong>actions</strong> (methods) together, plus a <strong>constructor</strong> — the recipe for building one. From a single class you can make as many <strong>objects</strong> as you want, each with its own data. Here's a tiny <span class="k">Motor</span> blueprint:</p>
+    <p>It bundles <strong>data</strong> (fields) and <strong>actions</strong> (methods) together, plus a <strong>constructor</strong> - the recipe for building one. From a single class you can make as many <strong>objects</strong> as you want, each with its own data. Here's a tiny <span class="k">Motor</span> blueprint:</p>
     <div class="codewrap">
-      <div class="clabel">Motor.java — a class <span class="badge">Java</span></div>
+      <div class="clabel">Motor.java - a class <span class="badge">Java</span></div>
 <pre class="code"><span class="kw">public class</span> <span class="ty">Motor</span> {
   <span class="ty">int</span> canId;                 <span class="cm">// ◂ field: this motor's data</span>
   <span class="ty">String</span> name;
@@ -155,7 +155,7 @@
   <section>
     <div class="kicker">Try it</div>
     <h2>One class, many objects</h2>
-    <p>The word <span class="k">new</span> stamps out an object from the class. Make a few <span class="k">Motor</span>s below — give each a name and CAN id, and watch each become its own independent thing with its own data.</p>
+    <p>The word <span class="k">new</span> stamps out an object from the class. Make a few <span class="k">Motor</span>s below - give each a name and CAN id, and watch each become its own independent thing with its own data.</p>
 
     <div class="play">
       <div class="play-head"><span class="play-title">in RobotContainer…</span><span class="play-tag">new Motor(…)</span></div>
@@ -174,7 +174,7 @@
   <section>
     <div class="kicker">Why it matters</div>
     <h2>Objects model hardware</h2>
-    <p>This is the whole reason robot code is built on classes. A <span class="k">TalonFX</span> object <em>is</em> a real motor — you make one with its CAN id, then call methods on it to read and command the physical motor. An <span class="k">Elevator</span> object holds its motor and its state. The robot, in code, is a collection of objects mirroring the metal.</p>
+    <p>This is the whole reason robot code is built on classes. A <span class="k">TalonFX</span> object <em>is</em> a real motor - you make one with its CAN id, then call methods on it to read and command the physical motor. An <span class="k">Elevator</span> object holds its motor and its state. The robot, in code, is a collection of objects mirroring the metal.</p>
     <div class="note indigo">
       <div class="nh">"this" means "this object"</div>
       <p>Inside the constructor, <span class="k">this.canId = canId</span> means "set <em>this particular object's</em> canId field to the value passed in." It's how each object keeps its own data straight, even though they all ran the same constructor code.</p>
@@ -205,7 +205,7 @@
           <button class="opt">A class is the blueprint; an object is a specific thing built from it</button>
           <button class="opt">A class is faster than an object</button>
         </div>
-        <div class="explain">The class describes the kind of thing (its fields and methods). Each object is one real instance with its own data — like two Motors built from the same Motor class.</div>
+        <div class="explain">The class describes the kind of thing (its fields and methods). Each object is one real instance with its own data - like two Motors built from the same Motor class.</div>
       </div>
       <div class="q" data-correct="0">
         <div class="qn">Question 2</div>
@@ -215,7 +215,7 @@
           <button class="opt">Deletes an object</button>
           <button class="opt">Deploys the code</button>
         </div>
-        <div class="explain">The constructor is the recipe called by new — it runs once per object to initialize that object's fields (e.g., its name and CAN id).</div>
+        <div class="explain">The constructor is the recipe called by new - it runs once per object to initialize that object's fields (e.g., its name and CAN id).</div>
       </div>
       <div class="q" data-correct="2">
         <div class="qn">Question 3</div>
@@ -223,7 +223,7 @@
         <div class="opts">
           <button class="opt">It changes too</button>
           <button class="opt">The program crashes</button>
-          <button class="opt">Nothing — each object has its own separate fields</button>
+          <button class="opt">Nothing - each object has its own separate fields</button>
         </div>
         <div class="explain">Objects have independent state. left.canId and right.canId are different boxes; changing one leaves the other untouched. That independence is why objects model separate pieces of hardware so well.</div>
       </div>
@@ -244,7 +244,7 @@
       <a class="next" href="deploy-lesson-9.html">
         <div class="n-eyebrow">Up next · Part 2 · 04</div>
         <h3>Inheritance &amp; Interfaces</h3>
-        <p>Classes can build on other classes. That's how every WPILib subsystem works — and why you write <code>extends SubsystemBase</code> and <code>@Override</code>.</p>
+        <p>Classes can build on other classes. That's how every WPILib subsystem works - and why you write <code>extends SubsystemBase</code> and <code>@Override</code>.</p>
       </a>
     </div>
   </section>
@@ -267,7 +267,7 @@
   var objs=[], varNames=['left','right','intake','arm','shooter','climber','feeder','wrist'];
   function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
   function render(){
-    if(!objs.length){ objsEl.innerHTML='<div class="emptyobjs">no objects yet — make one above</div>'; newCode.innerHTML='<span class="cm">// press "new Motor" to create an object</span>'; return; }
+    if(!objs.length){ objsEl.innerHTML='<div class="emptyobjs">no objects yet - make one above</div>'; newCode.innerHTML='<span class="cm">// press "new Motor" to create an object</span>'; return; }
     objsEl.innerHTML=objs.map(function(o,i){
       return '<div class="obj"><div class="on">'+esc(o.v)+' &nbsp;·&nbsp; Motor #'+(i+1)+'</div>'+
         '<div class="row"><span class="f">name</span><span>"'+esc(o.name)+'"</span></div>'+
@@ -290,7 +290,7 @@
   document.getElementById('check').addEventListener('click',function(){
     var all=true;
     blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
-    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite — the keyword is new'; res.className='code-result '+(all?'ok':'no');
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - the keyword is new'; res.className='code-result '+(all?'ok':'no');
   });
   document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='new';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
 

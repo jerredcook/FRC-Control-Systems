@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Closing the Loop · Part IV.1 — The Elevator, End to End</title>
+<title>Closing the Loop · Part IV.1 - The Elevator, End to End</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -162,7 +162,7 @@
 
   <section>
     <p class="lead">You have all the parts. Now the assembly order.</p>
-    <p>Tuning a mechanism isn't magic and it isn't guess-and-check — it's a repeatable sequence. Do the steps in the right order and each one makes the next easier. Skip ahead and you'll fight yourself. Here's the whole workflow for the elevator, start to finish.</p>
+    <p>Tuning a mechanism isn't magic and it isn't guess-and-check - it's a repeatable sequence. Do the steps in the right order and each one makes the next easier. Skip ahead and you'll fight yourself. Here's the whole workflow for the elevator, start to finish.</p>
   </section>
 
   <section>
@@ -173,14 +173,14 @@
       <div class="stp"><div class="num">2</div><div><h4>Characterize with SysId <span class="tag">Lesson III.5</span></h4><p>Run the ramp and step tests, let Tuner X fit the line, and drop kS, kG, kV, kA into Slot0. Now feedforward already does most of the work.</p></div></div>
       <div class="stp"><div class="num">3</div><div><h4>Add kP for tracking <span class="tag">Lesson I.5</span></h4><p>With feedforward in place, raise kP until the elevator hits targets crisply. If it overshoots, add a little kD. You're only trimming the small leftover error.</p></div></div>
       <div class="stp"><div class="num">4</div><div><h4>Set Motion Magic limits <span class="tag">Lesson III.4</span></h4><p>Pick a cruise velocity and acceleration that move fast without slamming. Now every command is a smooth, profiled move from one request.</p></div></div>
-      <div class="stp"><div class="num">5</div><div><h4>Validate <span class="tag">on the robot</span></h4><p>Send it to every scoring height, repeatedly. It should nail each one, hold under load, and never oscillate. If it does, you're done — for real.</p></div></div>
+      <div class="stp"><div class="num">5</div><div><h4>Validate <span class="tag">on the robot</span></h4><p>Send it to every scoring height, repeatedly. It should nail each one, hold under load, and never oscillate. If it does, you're done - for real.</p></div></div>
     </div>
   </section>
 
   <section>
     <div class="kicker">The result</div>
     <h2>A validated elevator</h2>
-    <p>Below is the elevator after all five steps: SysId gains in Slot0, kP trimmed, Motion Magic shaping every move. Send it to scoring presets and it glides in and holds. Add a <strong>load</strong> — a game piece, a worn belt — and feedforward plus a touch of feedback shrug it off.</p>
+    <p>Below is the elevator after all five steps: SysId gains in Slot0, kP trimmed, Motion Magic shaping every move. Send it to scoring presets and it glides in and holds. Add a <strong>load</strong> - a game piece, a worn belt - and feedforward plus a touch of feedback shrug it off.</p>
 
     <div class="demo" id="demo">
       <div class="demo-head">
@@ -213,7 +213,7 @@
         <div class="ro"><div class="k2">On target?</div><div class="v ink" id="roAt">yes</div></div>
       </div>
     </div>
-    <p class="caption">Tap the scoring presets — each move is a clean profile, and the carriage holds dead-on even as you drag the load up.</p>
+    <p class="caption">Tap the scoring presets - each move is a clean profile, and the carriage holds dead-on even as you drag the load up.</p>
   </section>
 
   <section>
@@ -221,7 +221,7 @@
     <h2>The whole subsystem</h2>
     <p>Here is everything from Parts II and III, assembled into one real elevator subsystem. The constructor configures the device and loads the SysId gains and Motion Magic limits; <span class="k">goToHeight</span> commands a profiled move. That's a competition-ready mechanism:</p>
     <div class="codewrap">
-      <div class="clabel">Elevator.java — complete <span class="badge">Java · Phoenix 6</span></div>
+      <div class="clabel">Elevator.java - complete <span class="badge">Java · Phoenix 6</span></div>
 <pre class="code"><span class="kw">public class</span> <span class="ty">Elevator</span> <span class="kw">extends</span> <span class="ty">SubsystemBase</span> {
   <span class="kw">private final</span> <span class="ty">TalonFX</span> motor = <span class="kw">new</span> <span class="ty">TalonFX</span>(<span class="num">10</span>);
   <span class="kw">private final</span> <span class="ty">MotionMagicVoltage</span> request = <span class="kw">new</span> <span class="ty">MotionMagicVoltage</span>(<span class="num">0</span>).<span class="fn">withSlot</span>(<span class="num">0</span>);
@@ -252,7 +252,7 @@
     </div>
     <div class="note teal">
       <div class="nh">The order is the lesson</div>
-      <p>Feedforward <em>before</em> feedback, always. If you start by cranking kP with no kG, you're using error to fight gravity — exactly the droop from Lesson 2 — and you'll never get it stable. Characterize first; then kP has almost nothing to do, and tuning becomes easy.</p>
+      <p>Feedforward <em>before</em> feedback, always. If you start by cranking kP with no kG, you're using error to fight gravity - exactly the droop from Lesson 2 - and you'll never get it stable. Characterize first; then kP has almost nothing to do, and tuning becomes easy.</p>
     </div>
   </section>
 
@@ -279,7 +279,7 @@
           <button class="opt">Because the motor is weak</button>
           <button class="opt">Because feedforward already supplies most of the voltage, so kP only corrects the small remaining error</button>
         </div>
-        <div class="explain">With good feedforward, the predicted voltage is nearly right on its own. kP just cleans up disturbances and model error — so it can be modest, which keeps the loop calm and stable.</div>
+        <div class="explain">With good feedforward, the predicted voltage is nearly right on its own. kP just cleans up disturbances and model error - so it can be modest, which keeps the loop calm and stable.</div>
       </div>
       <div class="q" data-correct="0">
         <div class="qn">Question 3</div>
@@ -308,7 +308,7 @@
       <a class="next" href="closing-the-loop-lesson-20.html">
         <div class="n-eyebrow">Up next · Part IV · 02</div>
         <h3>The Arm</h3>
-        <p>An elevator fights the same gravity everywhere. An arm doesn't — its load changes with angle. Next you'll meet cosine feedforward and Arm_Cosine gravity.</p>
+        <p>An elevator fights the same gravity everywhere. An arm doesn't - its load changes with angle. Next you'll meet cosine feedforward and Arm_Cosine gravity.</p>
       </a>
     </div>
   </section>

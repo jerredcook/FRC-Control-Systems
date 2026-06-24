@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Deploy · Part 3.5 — Triggers &amp; Button Bindings</title>
+<title>Deploy · Part 3.5 - Triggers &amp; Button Bindings</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -130,19 +130,19 @@
     <div class="lesson-no"><b>Part 3 · 05</b> Command-Based Robots</div>
     <div class="eyebrow">Triggers &amp; Button Bindings</div>
     <h1>Press a button,<br><span class="accent">fire</span> a command.</h1>
-    <p class="dek">Bindings connect the controller to your commands. A button press starts an action — once, or for as long as you hold it. Try the gamepad.</p>
+    <p class="dek">Bindings connect the controller to your commands. A button press starts an action - once, or for as long as you hold it. Try the gamepad.</p>
   </div>
 
   <section>
     <p class="lead">A binding wires a condition to a command.</p>
-    <p>In <span class="k">RobotContainer</span> you say "when this happens, run that." The most common condition is a button. <span class="k">onTrue</span> fires once when it's pressed; <span class="k">whileTrue</span> runs only while it's held and ends on release. Press the buttons below — watch what fires, and what keeps running.</p>
+    <p>In <span class="k">RobotContainer</span> you say "when this happens, run that." The most common condition is a button. <span class="k">onTrue</span> fires once when it's pressed; <span class="k">whileTrue</span> runs only while it's held and ends on release. Press the buttons below - watch what fires, and what keeps running.</p>
 
     <div class="demo" id="demo">
       <div class="demo-head"><span class="demo-title">CommandXboxController</span><span class="demo-tag">press a button</span></div>
       <div class="padwrap">
         <div class="pad"><div class="btnrow" id="btnrow"></div></div>
         <div class="side">
-          <div class="active"><div class="h">Running now (whileTrue)</div><div id="activeList"><div class="none">— nothing held —</div></div></div>
+          <div class="active"><div class="h">Running now (whileTrue)</div><div id="activeList"><div class="none">- nothing held -</div></div></div>
           <div class="log"><div class="h">Event log</div><div id="log"></div></div>
         </div>
       </div>
@@ -164,7 +164,7 @@ driver.<span class="fn">rightBumper</span>().<span class="fn">whileTrue</span>(d
     </div>
     <div class="note indigo">
       <div class="nh">A Trigger doesn't have to be a button</div>
-      <p>Under the hood, <span class="k">driver.a()</span> is just a <span class="k">Trigger</span> — a boolean condition. <em>Any</em> boolean can be one. Want the controller to rumble when the intake loads a game piece? <span class="k">new Trigger(intake::hasGamePiece).onTrue(rumble())</span>. That's how robots react to sensors, not just buttons.</p>
+      <p>Under the hood, <span class="k">driver.a()</span> is just a <span class="k">Trigger</span> - a boolean condition. <em>Any</em> boolean can be one. Want the controller to rumble when the intake loads a game piece? <span class="k">new Trigger(intake::hasGamePiece).onTrue(rumble())</span>. That's how robots react to sensors, not just buttons.</p>
     </div>
 
     <div class="code-ex">
@@ -200,9 +200,9 @@ driver.<span class="fn">rightBumper</span>().<span class="fn">whileTrue</span>(d
         <div class="opts">
           <button class="opt">Only the A button</button>
           <button class="opt">Nothing else</button>
-          <button class="opt">Any boolean — like a sensor reading "game piece detected"</button>
+          <button class="opt">Any boolean - like a sensor reading "game piece detected"</button>
         </div>
-        <div class="explain">A Trigger wraps any boolean condition. new Trigger(intake::hasGamePiece) lets the robot react to a sensor automatically — the same binding machinery, no button required.</div>
+        <div class="explain">A Trigger wraps any boolean condition. new Trigger(intake::hasGamePiece) lets the robot react to a sensor automatically - the same binding machinery, no button required.</div>
       </div>
       <div class="q" data-correct="0">
         <div class="qn">Question 3</div>
@@ -267,7 +267,7 @@ driver.<span class="fn">rightBumper</span>().<span class="fn">whileTrue</span>(d
   function logLine(html){ var l=document.createElement('div'); l.className='l'; l.innerHTML=html; logEl.insertBefore(l, logEl.firstChild); while(logEl.children.length>8) logEl.removeChild(logEl.lastChild); }
   function renderActive(){
     var keys=Object.keys(active);
-    activeEl.innerHTML = keys.length ? keys.map(function(k){return '<div class="ac">▶ '+active[k]+'</div>';}).join('') : '<div class="none">— nothing held —</div>';
+    activeEl.innerHTML = keys.length ? keys.map(function(k){return '<div class="ac">▶ '+active[k]+'</div>';}).join('') : '<div class="none">- nothing held -</div>';
   }
   function press(b, el){
     if(b.type==='onTrue'){
@@ -280,14 +280,14 @@ driver.<span class="fn">rightBumper</span>().<span class="fn">whileTrue</span>(d
       renderActive();
     }
   }
-  logLine('<span style="color:var(--faint)">— press a button to bind it —</span>'); renderActive();
+  logLine('<span style="color:var(--faint)">- press a button to bind it -</span>'); renderActive();
 
   var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
   function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'').replace(/\(\)$/,'');}
   document.getElementById('check').addEventListener('click',function(){
     var all=true;
     blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
-    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite — "only while held" is whileTrue'; res.className='code-result '+(all?'ok':'no');
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - "only while held" is whileTrue'; res.className='code-result '+(all?'ok':'no');
   });
   document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='whileTrue';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
 

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Closing the Loop · Part II.4 — Feedforward in Code</title>
+<title>Closing the Loop · Part II.4 - Feedforward in Code</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -169,14 +169,14 @@
 
   <section>
     <p class="lead">Last lesson left a droop. Here's the fix.</p>
-    <p>In Part I you learned feedforward: compute the voltage a move needs from physics, before any error appears. WPILib packages that into a class — <span class="k">ElevatorFeedforward</span> — built from the gains you'd measure with SysId (Lesson 7). You create it with <span class="k">kS, kG, kV, kA</span>, ask it for volts, and <strong>add</strong> that to your PID output. That's the whole pattern.</p>
-    <p>Flip <strong>Feedforward</strong> on below and the droop vanishes — not because the gain got bigger, but because the gravity voltage is now supplied directly. Turn it off and Lesson II.3's droop snaps right back.</p>
+    <p>In Part I you learned feedforward: compute the voltage a move needs from physics, before any error appears. WPILib packages that into a class - <span class="k">ElevatorFeedforward</span> - built from the gains you'd measure with SysId (Lesson 7). You create it with <span class="k">kS, kG, kV, kA</span>, ask it for volts, and <strong>add</strong> that to your PID output. That's the whole pattern.</p>
+    <p>Flip <strong>Feedforward</strong> on below and the droop vanishes - not because the gain got bigger, but because the gravity voltage is now supplied directly. Turn it off and Lesson II.3's droop snaps right back.</p>
   </section>
 
   <section>
     <div class="kicker">Toggle it</div>
     <h2>Feedforward + PID, live</h2>
-    <p>With feedforward <strong>on</strong> and <span class="k">kG</span> matched to the load, the carriage sits dead on the line — no droop, no integral. Mis-set kG and watch it park high or low; that's feedforward over- or under-guessing gravity.</p>
+    <p>With feedforward <strong>on</strong> and <span class="k">kG</span> matched to the load, the carriage sits dead on the line - no droop, no integral. Mis-set kG and watch it park high or low; that's feedforward over- or under-guessing gravity.</p>
 
     <div class="demo" id="demo">
       <div class="demo-head">
@@ -196,11 +196,11 @@
         <button class="btn primary" id="move">Move ▸</button>
         <button class="btn active" id="ff">Feedforward: on</button>
         <div class="slider-group">
-          <label>kG — gravity FF <span class="val" id="kgVal">0.45</span></label>
+          <label>kG - gravity FF <span class="val" id="kgVal">0.45</span></label>
           <input type="range" id="kg" min="0" max="0.9" step="0.01" value="0.45" />
         </div>
         <div class="slider-group">
-          <label>kP — gain <span class="val" id="kpVal">4.0</span></label>
+          <label>kP - gain <span class="val" id="kpVal">4.0</span></label>
           <input type="range" id="kp" min="0.5" max="20" step="0.5" value="4" />
         </div>
         <div class="slider-group">
@@ -215,15 +215,15 @@
         <div class="ro"><div class="k2">Total (V)</div><div class="v ink" id="roVolt">0.00</div></div>
       </div>
     </div>
-    <p class="caption">Watch the feedforward readout: with FF on it holds the gravity voltage the whole time, while PID's share stays near zero — exactly the division of labor from Lesson 6.</p>
+    <p class="caption">Watch the feedforward readout: with FF on it holds the gravity voltage the whole time, while PID's share stays near zero - exactly the division of labor from Lesson 6.</p>
   </section>
 
   <section>
     <div class="kicker">The code</div>
     <h2>Two objects, one sum</h2>
-    <p>Create the feedforward and the PID side by side. Each loop, ask both for volts and add them. For a steady hold you pass velocity <span class="k">0</span> to the feedforward — and it returns just <span class="k">kG</span>, the gravity-holding voltage:</p>
+    <p>Create the feedforward and the PID side by side. Each loop, ask both for volts and add them. For a steady hold you pass velocity <span class="k">0</span> to the feedforward - and it returns just <span class="k">kG</span>, the gravity-holding voltage:</p>
     <div class="codewrap">
-      <div class="clabel">Elevator.java — feedforward + feedback <span class="badge">Java · WPILib</span></div>
+      <div class="clabel">Elevator.java - feedforward + feedback <span class="badge">Java · WPILib</span></div>
 <pre class="code"><span class="kw">private final</span> <span class="ty">ElevatorFeedforward</span> ff = <span class="kw">new</span> <span class="ty">ElevatorFeedforward</span>(kS, kG, kV, kA);
 <span class="kw">private final</span> <span class="ty">PIDController</span> pid = <span class="kw">new</span> <span class="ty">PIDController</span>(kP, <span class="num">0</span>, kD);
 
@@ -236,7 +236,7 @@
 }</pre>
     </div>
     <div class="note teal">
-      <div class="nh">An arm is almost the same — with one twist</div>
+      <div class="nh">An arm is almost the same - with one twist</div>
       <p>An arm uses <span class="k">ArmFeedforward</span> instead. Gravity's pull on an arm depends on its angle (full at horizontal, zero straight up), so you pass the angle too: <span class="k">armFF.calculate(angleRadians, velocity)</span>. It scales kG by <span class="k">cos(angle)</span> for you. An elevator's gravity is constant, so it needs no angle. Same idea, one extra input.</p>
     </div>
   </section>
@@ -265,11 +265,11 @@ motor.<span class="fn">setVoltage</span>( <input class="blank" data-ans="ffvolts
         <div class="qn">Question 1</div>
         <div class="qt">For a static hold, <code style="font-family:var(--mono);color:var(--teal)">ff.calculate(0)</code> returns approximately…</div>
         <div class="opts">
-          <button class="opt">Zero — nothing is moving</button>
-          <button class="opt">kG — the constant voltage that holds against gravity</button>
+          <button class="opt">Zero - nothing is moving</button>
+          <button class="opt">kG - the constant voltage that holds against gravity</button>
           <button class="opt">The full battery voltage</button>
         </div>
-        <div class="explain">At zero velocity the kV and kA terms vanish and kS doesn't apply, so the feedforward returns kG — exactly the voltage needed to hang in place. That's what erases the droop.</div>
+        <div class="explain">At zero velocity the kV and kA terms vanish and kS doesn't apply, so the feedforward returns kG - exactly the voltage needed to hang in place. That's what erases the droop.</div>
       </div>
       <div class="q" data-correct="2">
         <div class="qn">Question 2</div>
@@ -289,7 +289,7 @@ motor.<span class="fn">setVoltage</span>( <input class="blank" data-ans="ffvolts
           <button class="opt">Arms use a different kind of motor</button>
           <button class="opt">Elevators don't experience gravity</button>
         </div>
-        <div class="explain">A horizontal arm fights full gravity; a vertical one fights none — so the holding voltage scales with cos(angle). An elevator pulls straight up against the same gravity everywhere, so a single kG covers it.</div>
+        <div class="explain">A horizontal arm fights full gravity; a vertical one fights none - so the holding voltage scales with cos(angle). An elevator pulls straight up against the same gravity everywhere, so a single kG covers it.</div>
       </div>
     </div>
   </section>
@@ -299,7 +299,7 @@ motor.<span class="fn">setVoltage</span>( <input class="blank" data-ans="ffvolts
       <h3>Part II · 04 · Recap</h3>
       <div class="glossary">
         <div class="gl"><b>ElevatorFeedforward</b><span>WPILib class built from kS, kG, kV, kA.</span></div>
-        <div class="gl"><b>ff.calculate(0)</b><span>Holding voltage — returns kG at zero velocity.</span></div>
+        <div class="gl"><b>ff.calculate(0)</b><span>Holding voltage - returns kG at zero velocity.</span></div>
         <div class="gl"><b>Add the outputs</b><span>setVoltage(ffVolts + fbVolts).</span></div>
         <div class="gl"><b>Droop, gone</b><span>Gravity supplied directly, so error → 0.</span></div>
         <div class="gl"><b>ArmFeedforward</b><span>Takes angle too; scales kG by cos(angle).</span></div>
@@ -308,7 +308,7 @@ motor.<span class="fn">setVoltage</span>( <input class="blank" data-ans="ffvolts
       <a class="next" href="closing-the-loop-lesson-13.html">
         <div class="n-eyebrow">Up next · Part II · 05</div>
         <h3>Motion Profiles</h3>
-        <p>So far we've snapped the setpoint and let the loop chase it. The finale gives moves a smooth plan — a TrapezoidProfile — so feedforward's kV and kA finally come alive. The full controller, assembled.</p>
+        <p>So far we've snapped the setpoint and let the loop chase it. The finale gives moves a smooth plan - a TrapezoidProfile - so feedforward's kV and kA finally come alive. The full controller, assembled.</p>
       </a>
     </div>
   </section>
@@ -456,7 +456,7 @@ motor.<span class="fn">setVoltage</span>( <input class="blank" data-ans="ffvolts
       if(!ok)all=false;
     });
     var res=document.getElementById('cres');
-    res.textContent=all?'All correct ✓':'Not quite — add the two voltages';
+    res.textContent=all?'All correct ✓':'Not quite - add the two voltages';
     res.className='code-result '+(all?'ok':'no');
   });
   document.getElementById('reveal').addEventListener('click',function(){

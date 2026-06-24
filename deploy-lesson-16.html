@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Deploy · Part 3.6 — Default Commands &amp; Requirements</title>
+<title>Deploy · Part 3.6 - Default Commands &amp; Requirements</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -138,7 +138,7 @@
 
   <section>
     <p class="lead">Every command declares what it needs.</p>
-    <p>When a command calls <span class="k">addRequirements(drive)</span>, it tells the scheduler "I need the drivetrain." The scheduler then guarantees only <strong>one</strong> command uses Drive at a time — scheduling a new one <strong>interrupts</strong> the old. Below, try to make two commands fight over the Drive subsystem. You can't.</p>
+    <p>When a command calls <span class="k">addRequirements(drive)</span>, it tells the scheduler "I need the drivetrain." The scheduler then guarantees only <strong>one</strong> command uses Drive at a time - scheduling a new one <strong>interrupts</strong> the old. Below, try to make two commands fight over the Drive subsystem. You can't.</p>
 
     <div class="demo" id="demo">
       <div class="demo-head"><span class="demo-title">Who controls each subsystem?</span><span class="demo-tag">requirements in action</span></div>
@@ -161,26 +161,26 @@
         <button class="btn ghost" data-act="reset">Reset</button>
       </div>
     </div>
-    <p class="caption">Schedule Aim then FollowPath — FollowPath <em>interrupts</em> Aim, because both need Drive. RunIntake never disturbs Drive; different requirement. End the Drive command and its default, TeleopDrive, resumes on its own.</p>
+    <p class="caption">Schedule Aim then FollowPath - FollowPath <em>interrupts</em> Aim, because both need Drive. RunIntake never disturbs Drive; different requirement. End the Drive command and its default, TeleopDrive, resumes on its own.</p>
   </section>
 
   <section>
     <div class="kicker">In code</div>
     <h2>setDefaultCommand + requirements</h2>
-    <p>Two lines make this work. <span class="k">addRequirements</span> (you saw it in Lesson 3.3) declares the need; <span class="k">setDefaultCommand</span> gives the subsystem something to run whenever no other command requires it — usually joystick driving:</p>
+    <p>Two lines make this work. <span class="k">addRequirements</span> (you saw it in Lesson 3.3) declares the need; <span class="k">setDefaultCommand</span> gives the subsystem something to run whenever no other command requires it - usually joystick driving:</p>
     <div class="codewrap">
       <div class="clabel">RobotContainer <span class="badge">Java · WPILib</span></div>
 <pre class="code"><span class="cm">// runs whenever nothing else requires the drivetrain</span>
 drive.<span class="fn">setDefaultCommand</span>(
     drive.<span class="fn">teleopDrive</span>(driver::getLeftY, driver::getRightX));
 
-<span class="cm">// aim needs Drive too, so while it runs it takes over —</span>
+<span class="cm">// aim needs Drive too, so while it runs it takes over -</span>
 <span class="cm">// and the default resumes the instant it ends:</span>
 driver.<span class="fn">x</span>().<span class="fn">whileTrue</span>(drive.<span class="fn">aimAtTarget</span>());</pre>
     </div>
     <div class="note indigo">
       <div class="nh">This is why command-based scales</div>
-      <p>Because the scheduler tracks requirements, you never write "is something else using the drivetrain right now?" logic — it's handled. Add a tenth mechanism and a fiftieth command; nothing can secretly double-drive a motor. That guarantee is the whole payoff of the framework.</p>
+      <p>Because the scheduler tracks requirements, you never write "is something else using the drivetrain right now?" logic - it's handled. Add a tenth mechanism and a fiftieth command; nothing can secretly double-drive a motor. That guarantee is the whole payoff of the framework.</p>
     </div>
 
     <div class="code-ex">
@@ -206,7 +206,7 @@ driver.<span class="fn">x</span>().<span class="fn">whileTrue</span>(drive.<span
         <div class="opts">
           <button class="opt">They run at the same time</button>
           <button class="opt">The new one is rejected</button>
-          <button class="opt">The new one interrupts the old — only one command owns Drive at a time</button>
+          <button class="opt">The new one interrupts the old - only one command owns Drive at a time</button>
         </div>
         <div class="explain">Requirements guarantee a single owner per subsystem. Scheduling a new command that needs Drive interrupts whatever held it (its end(true) runs). No two commands can drive the same motors at once.</div>
       </div>
@@ -218,14 +218,14 @@ driver.<span class="fn">x</span>().<span class="fn">whileTrue</span>(drive.<span
           <button class="opt">The first command you write</button>
           <button class="opt">A command that can't be interrupted</button>
         </div>
-        <div class="explain">setDefaultCommand gives a subsystem a fallback action — usually teleop driving — that runs in the gaps when nothing else needs it, and resumes automatically when a higher-priority command ends.</div>
+        <div class="explain">setDefaultCommand gives a subsystem a fallback action - usually teleop driving - that runs in the gaps when nothing else needs it, and resumes automatically when a higher-priority command ends.</div>
       </div>
       <div class="q" data-correct="1">
         <div class="qn">Question 3</div>
-        <div class="qt">Running a command that requires Intake — does it disturb a command using Drive?</div>
+        <div class="qt">Running a command that requires Intake - does it disturb a command using Drive?</div>
         <div class="opts">
           <button class="opt">Yes, always</button>
-          <button class="opt">No — they require different subsystems, so they coexist</button>
+          <button class="opt">No - they require different subsystems, so they coexist</button>
           <button class="opt">Only on Tuesdays</button>
         </div>
         <div class="explain">Interruption only happens between commands that share a requirement. Intake and Drive are separate subsystems, so their commands run side by side without conflict.</div>
@@ -236,12 +236,12 @@ driver.<span class="fn">x</span>().<span class="fn">whileTrue</span>(drive.<span
   <section>
     <div class="kicker">You finished Part 3</div>
     <h2>You can structure a whole robot now</h2>
-    <p>Subsystems, commands, compositions, bindings, and the scheduler that runs it all — that's the framework every line of robot code lives in. From here, you fill it with real hardware and behavior:</p>
+    <p>Subsystems, commands, compositions, bindings, and the scheduler that runs it all - that's the framework every line of robot code lives in. From here, you fill it with real hardware and behavior:</p>
     <div class="roadmap">
-      <div class="rm" style="--accent:var(--teal)"><div class="pt">Part 4 · Coming up</div><h4>Talking to Hardware</h4><p>Motors, encoders, gyros, switches, the gamepad — make your subsystems read and move real devices.</p></div>
-      <div class="rm" style="--accent:var(--amber)"><div class="pt">Part 5</div><h4>Make It Move</h4><p>The Control course — PID, feedforward, CTRE — runs inside your subsystems' periodic().</p></div>
+      <div class="rm" style="--accent:var(--teal)"><div class="pt">Part 4 · Coming up</div><h4>Talking to Hardware</h4><p>Motors, encoders, gyros, switches, the gamepad - make your subsystems read and move real devices.</p></div>
+      <div class="rm" style="--accent:var(--amber)"><div class="pt">Part 5</div><h4>Make It Move</h4><p>The Control course - PID, feedforward, CTRE - runs inside your subsystems' periodic().</p></div>
       <div class="rm" style="--accent:var(--indigo)"><div class="pt">Part 6</div><h4>Driving &amp; Autonomous</h4><p>Drivetrains, odometry, and command-group autos built on everything here.</p></div>
-      <div class="rm" style="--accent:var(--green)"><div class="pt">Parts 7–8</div><h4>Vision &amp; Pro Practices</h4><p>Cameras, pose, dashboards, simulation, and competition-ready code.</p></div>
+      <div class="rm" style="--accent:var(--green)"><div class="pt">Parts 7-8</div><h4>Vision &amp; Pro Practices</h4><p>Cameras, pose, dashboards, simulation, and competition-ready code.</p></div>
     </div>
   </section>
 
@@ -258,8 +258,8 @@ driver.<span class="fn">x</span>().<span class="fn">whileTrue</span>(drive.<span
       </div>
       <a class="next" href="code.html">
         <div class="n-eyebrow">Part 3 complete · Command-Based Robots</div>
-        <h3>On to Part 4 — Talking to Hardware →</h3>
-        <p>The framework is yours. Next, fill it with real devices — motors, sensors, the controller. Continue from the course map.</p>
+        <h3>On to Part 4 - Talking to Hardware →</h3>
+        <p>The framework is yours. Next, fill it with real devices - motors, sensors, the controller. Continue from the course map.</p>
       </a>
     </div>
   </section>
@@ -291,7 +291,7 @@ driver.<span class="fn">x</span>().<span class="fn">whileTrue</span>(drive.<span
   }
   function schedule(sub, cmd){
     var prev=state[sub];
-    if(prev!==DEFAULTS[sub] && prev!==cmd){ logLine('<span class="int">'+cmd+' interrupts '+prev+'</span> — both need '+(sub==='drive'?'Drive':'Intake')); }
+    if(prev!==DEFAULTS[sub] && prev!==cmd){ logLine('<span class="int">'+cmd+' interrupts '+prev+'</span> - both need '+(sub==='drive'?'Drive':'Intake')); }
     else { logLine('<span class="ok">'+cmd+' scheduled</span> on '+(sub==='drive'?'Drive':'Intake')); }
     state[sub]=cmd; render();
   }
@@ -307,17 +307,17 @@ driver.<span class="fn">x</span>().<span class="fn">whileTrue</span>(drive.<span
       else if(a==='path') schedule('drive','FollowPath');
       else if(a==='intake') schedule('intake','RunIntake');
       else if(a==='endDrive') endCmd('drive');
-      else if(a==='reset'){ state={drive:'TeleopDrive', intake:'Idle'}; logEl.innerHTML=''; logLine('<span class="dft">— reset —</span>'); render(); }
+      else if(a==='reset'){ state={drive:'TeleopDrive', intake:'Idle'}; logEl.innerHTML=''; logLine('<span class="dft">- reset -</span>'); render(); }
     });
   });
-  logLine('<span class="dft">— schedule commands and watch the owners —</span>'); render();
+  logLine('<span class="dft">- schedule commands and watch the owners -</span>'); render();
 
   var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
   function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'').replace(/\(\)$/,'');}
   document.getElementById('check').addEventListener('click',function(){
     var all=true;
     blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
-    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite — it\'s setDefaultCommand'; res.className='code-result '+(all?'ok':'no');
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - it\'s setDefaultCommand'; res.className='code-result '+(all?'ok':'no');
   });
   document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='setDefaultCommand';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
 

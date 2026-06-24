@@ -180,7 +180,7 @@
   <div class="hero">
     <div class="eyebrow">A control systems course for FRC</div>
     <h1>Closing<br>the <span class="accent">Loop</span>.</h1>
-    <p class="dek">From the <b>one idea</b> behind all control, to real <b>WPILib code</b>, to tuning a Kraken with <b>CTRE Phoenix&nbsp;6</b> — and beyond. Start at zero, finish able to make a mechanism do exactly what you tell it.</p>
+    <p class="dek">From the <b>one idea</b> behind all control, to real <b>WPILib code</b>, to tuning a Kraken with <b>CTRE Phoenix&nbsp;6</b> - and beyond. Start at zero, finish able to make a mechanism do exactly what you tell it.</p>
 
     <!-- PROGRESS -->
     <div class="progress-card">
@@ -195,7 +195,7 @@
       </div>
       <button class="reset-btn" id="resetBtn" title="Clear saved progress on this device">Reset</button>
     </div>
-    <p class="howto">Work through the lessons in order. Tap the circle on a lesson to mark it done — your progress is saved in this browser.</p>
+    <p class="howto">Work through the lessons in order. Tap the circle on a lesson to mark it done - your progress is saved in this browser.</p>
   </div>
 
   <!-- COURSE renders here -->
@@ -209,7 +209,7 @@
       <a href="https://github.com/jerredcook/FRC-Control-Systems/tree/main/templates"><div class="rt">&lt; &gt; Java Templates</div><div class="rd">Complete Elevator, Arm &amp; Flywheel subsystems to drop into your robot project.</div></a>
       <a href="glossary.html"><div class="rt">📖 Glossary</div><div class="rd">Every control term from the course, on one searchable page.</div></a>
       <a href="certificate.html"><div class="rt">★ Certificate</div><div class="rd">Print a completion certificate with your name when you finish all 24.</div></a>
-      <a href="closing-the-loop-troubleshooting.html"><div class="rt">🛠 Field Guide</div><div class="rd">Troubleshooting — diagnose oscillation, droop, and runaway from the symptom.</div></a>
+      <a href="closing-the-loop-troubleshooting.html"><div class="rt">🛠 Field Guide</div><div class="rd">Troubleshooting - diagnose oscillation, droop, and runaway from the symptom.</div></a>
     </div>
   </section>
 
@@ -228,23 +228,23 @@
   var COURSE = [
     {
       code:"I", title:"The Idea", sub:"Concepts · no code yet",
-      blurb:"Feel control before you formalize it. By the end you'll understand every piece of a PID + feedforward controller — with zero code, just intuition, simulations, and your own hands on the loop.",
+      blurb:"Feel control before you formalize it. By the end you'll understand every piece of a PID + feedforward controller - with zero code, just intuition, simulations, and your own hands on the loop.",
       lessons:[
         {n:1, title:"Feedback & Control",       desc:"The one loop behind everything: measure, compare, correct, repeat.", file:"closing-the-loop-lesson-1.html"},
         {n:2, title:"Proportional Control",     desc:"Push harder when you're further off. Meet output = kP × error.",      file:"closing-the-loop-lesson-2.html"},
         {n:3, title:"Integral Control",         desc:"Give the controller a memory to erase stubborn steady-state error.",  file:"closing-the-loop-lesson-3.html"},
         {n:4, title:"Derivative Control",       desc:"Add brakes that read your speed and kill the overshoot.",             file:"closing-the-loop-lesson-4.html"},
-        {n:5, title:"Tuning PID",               desc:"A repeatable order to dial in kP, kI, kD — and read a scope.",        file:"closing-the-loop-lesson-5.html"},
+        {n:5, title:"Tuning PID",               desc:"A repeatable order to dial in kP, kI, kD - and read a scope.",        file:"closing-the-loop-lesson-5.html"},
         {n:6, title:"Feedforward",              desc:"Predict the load and do the heavy lifting before error appears.",     file:"closing-the-loop-lesson-6.html"},
         {n:7, title:"System Identification",    desc:"Measure your mechanism to compute kS, kV, kA instead of guessing.",   file:"closing-the-loop-lesson-7.html"},
-        {n:8, title:"The Complete Controller",  desc:"Feedback + feedforward together — the full control law, and where to go next.", file:"closing-the-loop-lesson-8.html"}
+        {n:8, title:"The Complete Controller",  desc:"Feedback + feedforward together - the full control law, and where to go next.", file:"closing-the-loop-lesson-8.html"}
       ]
     },
     {
       code:"II", title:"From Math to Code", sub:"WPILib · Java",
       blurb:"Turn everything from Part I into real robot code. We assume you've seen a little programming, then build up the robot project, the 20 ms loop, and your first closed loop that actually moves something.",
       lessons:[
-        {n:1, title:"Robot Code Anatomy",          desc:"The project, the 20 ms loop, subsystems & commands — where control lives.", file:"closing-the-loop-lesson-9.html"},
+        {n:1, title:"Robot Code Anatomy",          desc:"The project, the 20 ms loop, subsystems & commands - where control lives.", file:"closing-the-loop-lesson-9.html"},
         {n:2, title:"Units, Gears & Conversions",  desc:"Rotations ↔ meters ↔ degrees. The #1 source of real-robot bugs.",          file:"closing-the-loop-lesson-10.html"},
         {n:3, title:"Your First Closed Loop in Code", desc:"Wire WPILib's PIDController to a sensor and move the elevator.",         file:"closing-the-loop-lesson-11.html"},
         {n:4, title:"Feedforward in Code",         desc:"ElevatorFeedforward & ArmFeedforward, combined with PID.",                  file:"closing-the-loop-lesson-12.html"},
@@ -277,12 +277,12 @@
       lessons:[
         {n:1, title:"Swerve Drive Control",     desc:"Per-module steer & drive loops, and odometry.",            file:"closing-the-loop-lesson-22.html"},
         {n:2, title:"Vision-Assisted Control",  desc:"Close the loop on a camera: pose, aiming, alignment.",      file:"closing-the-loop-lesson-23.html"},
-        {n:3, title:"State-Space & LQR",        desc:"The math the course kept hinting at — made approachable.", file:"closing-the-loop-lesson-24.html"}
+        {n:3, title:"State-Space & LQR",        desc:"The math the course kept hinting at - made approachable.", file:"closing-the-loop-lesson-24.html"}
       ]
     }
   ];
 
-  // course complete — every lesson is built, so nothing is flagged "up next"
+  // course complete - every lesson is built, so nothing is flagged "up next"
   var NEXT_ID = "";
 
   var STORE_KEY = "closing-the-loop:done";

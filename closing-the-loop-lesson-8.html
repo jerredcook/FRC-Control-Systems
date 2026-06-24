@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Closing the Loop · Lesson 8 — The Complete Controller</title>
+<title>Closing the Loop · Lesson 8 - The Complete Controller</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -193,23 +193,23 @@
     <div class="lesson-no"><b>Lesson 08</b> Synthesis</div>
     <div class="eyebrow">The Complete Controller</div>
     <h1>Everything,<br><span class="accent">together</span>.</h1>
-    <p class="dek">Feedforward to predict. Feedback to correct. A motion profile to follow. This is the controller real FRC teams ship — and the bridge to writing it for real.</p>
+    <p class="dek">Feedforward to predict. Feedback to correct. A motion profile to follow. This is the controller real FRC teams ship - and the bridge to writing it for real.</p>
   </div>
 
   <section>
     <p class="lead">You now hold every piece.</p>
-    <p>Feedback (Lessons 2–5) reacts to error — P, I, and D, tuned in a deliberate order. Feedforward (Lesson 6) predicts the voltage a move needs from physics, and Lesson 7 showed you how to <em>measure</em> those gains. Each is powerful alone. The whole point of this final lesson is that they're far better <strong>together</strong>, and the way you combine them is not a compromise — it's the standard recipe.</p>
+    <p>Feedback (Lessons 2-5) reacts to error - P, I, and D, tuned in a deliberate order. Feedforward (Lesson 6) predicts the voltage a move needs from physics, and Lesson 7 showed you how to <em>measure</em> those gains. Each is powerful alone. The whole point of this final lesson is that they're far better <strong>together</strong>, and the way you combine them is not a compromise - it's the standard recipe.</p>
     <div class="formula">
       voltage = <span class="i">feedforward(planned&nbsp;motion)</span> + <span class="t">feedback(error)</span>
       <span class="small">predict almost all of it, then correct the little that's left</span>
     </div>
-    <p>There's one new ingredient hiding in "planned motion." Instead of telling the controller "go to 0.8 <em>now</em>," we hand it a smooth <strong>motion profile</strong> — a gentle ramp up to speed, a cruise, and a gentle slow-down. Feedforward reads the profile's velocity and acceleration at every instant and supplies exactly the voltage that motion requires; feedback only has to clean up the difference.</p>
+    <p>There's one new ingredient hiding in "planned motion." Instead of telling the controller "go to 0.8 <em>now</em>," we hand it a smooth <strong>motion profile</strong> - a gentle ramp up to speed, a cruise, and a gentle slow-down. Feedforward reads the profile's velocity and acceleration at every instant and supplies exactly the voltage that motion requires; feedback only has to clean up the difference.</p>
   </section>
 
   <section>
     <div class="kicker">Try it</div>
     <h2>Three controllers, one move</h2>
-    <p>Press <strong>Move</strong> to send the carriage to a new height. Switch between the three modes and watch the same move play out. Then drag in an <strong>added load</strong> — an unmodeled disturbance, like a game piece you forgot to account for — and see which controllers even notice.</p>
+    <p>Press <strong>Move</strong> to send the carriage to a new height. Switch between the three modes and watch the same move play out. Then drag in an <strong>added load</strong> - an unmodeled disturbance, like a game piece you forgot to account for - and see which controllers even notice.</p>
 
     <div class="demo" id="demo">
       <div class="demo-head">
@@ -237,7 +237,7 @@
           <input type="range" id="load" min="0" max="0.5" step="0.01" value="0" />
         </div>
         <div class="slider-group">
-          <label>kP — feedback gain <span class="val" id="kpVal">6.0</span></label>
+          <label>kP - feedback gain <span class="val" id="kpVal">6.0</span></label>
           <input type="range" id="kp" min="0" max="20" step="0.5" value="6" />
         </div>
       </div>
@@ -248,27 +248,27 @@
         <div class="ro"><div class="k2">Feedback (V)</div><div class="v ink" id="roFb">0.00</div></div>
       </div>
     </div>
-    <p class="caption">FF + FB tracks the amber profile almost perfectly and shrugs off the load. Feedforward-only follows beautifully — until you add load. Feedback-only lags the move and droops under gravity.</p>
+    <p class="caption">FF + FB tracks the amber profile almost perfectly and shrugs off the load. Feedforward-only follows beautifully - until you add load. Feedback-only lags the move and droops under gravity.</p>
   </section>
 
   <section>
     <div class="kicker">What you just saw</div>
     <h2>Each piece doing its job</h2>
     <div class="terms">
-      <div class="term" style="--accent:var(--indigo)"><h4>Feedforward only</h4><p>Glides along the planned profile with almost no error — until an unmodeled load appears, then it settles with a steady offset. It can't correct what it can't see.</p></div>
+      <div class="term" style="--accent:var(--indigo)"><h4>Feedforward only</h4><p>Glides along the planned profile with almost no error - until an unmodeled load appears, then it settles with a steady offset. It can't correct what it can't see.</p></div>
       <div class="term" style="--accent:var(--teal)"><h4>Feedback only</h4><p>Eventually gets there, but lags behind the moving target and droops under gravity. It's always reacting to an error that already happened.</p></div>
     </div>
-    <p style="margin-top:8px">Now look at the <span style="color:var(--indigo)">feedforward</span> and <span class="sub">feedback</span> readouts in <strong>FF + FB</strong> mode. Feedforward carries the big numbers — gravity, the speed-up, the slow-down. Feedback stays near zero, twitching to life only when the load hits or the model is slightly off. That division of labor <em>is</em> the gold standard:</p>
+    <p style="margin-top:8px">Now look at the <span style="color:var(--indigo)">feedforward</span> and <span class="sub">feedback</span> readouts in <strong>FF + FB</strong> mode. Feedforward carries the big numbers - gravity, the speed-up, the slow-down. Feedback stays near zero, twitching to life only when the load hits or the model is slightly off. That division of labor <em>is</em> the gold standard:</p>
     <div class="note teal">
       <div class="nh">The recipe</div>
-      <p>A strong <strong>feedforward</strong> built from measured gains does 90% of the work, riding a smooth motion profile. A light <strong>feedback</strong> loop on top mops up the last 10% — disturbances, battery sag, the things you didn't model. Predict almost everything; correct the rest.</p>
+      <p>A strong <strong>feedforward</strong> built from measured gains does 90% of the work, riding a smooth motion profile. A light <strong>feedback</strong> loop on top mops up the last 10% - disturbances, battery sag, the things you didn't model. Predict almost everything; correct the rest.</p>
     </div>
   </section>
 
   <section>
     <div class="kicker">In Java</div>
     <h2>The whole thing, in one loop</h2>
-    <p>WPILib hands you the two halves pre-built. A <span class="k">ProfiledPIDController</span> generates the motion profile <em>and</em> runs the feedback against it; an <span class="k">ElevatorFeedforward</span> turns the profile's velocity into predicted volts. You add their outputs — exactly the equation from the top of this lesson.</p>
+    <p>WPILib hands you the two halves pre-built. A <span class="k">ProfiledPIDController</span> generates the motion profile <em>and</em> runs the feedback against it; an <span class="k">ElevatorFeedforward</span> turns the profile's velocity into predicted volts. You add their outputs - exactly the equation from the top of this lesson.</p>
     <div class="codewrap">
       <div class="clabel">The gold-standard mechanism controller <span class="badge">Java</span></div>
 <pre class="code"><span class="kw">private final</span> <span class="ty">ElevatorFeedforward</span> ff =
@@ -288,7 +288,7 @@
   motor.<span class="fn">setVoltage</span>(feedforward + feedback);          <span class="cm">// predict + correct</span>
 }</pre>
     </div>
-    <p>That's it. Eight lessons of intuition collapse into four lines of <code style="font-family:var(--mono);color:var(--teal)">periodic()</code>. Every serious FRC mechanism — elevators, arms, shooters — is some version of this.</p>
+    <p>That's it. Eight lessons of intuition collapse into four lines of <code style="font-family:var(--mono);color:var(--teal)">periodic()</code>. Every serious FRC mechanism - elevators, arms, shooters - is some version of this.</p>
 
     <div class="code-ex">
       <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
@@ -317,15 +317,15 @@ motor.<span class="fn">setVoltage</span>( <input class="blank" data-ans="feedfor
           <button class="opt">Feedforward predicts most of the voltage from the planned motion; feedback corrects the small leftover</button>
           <button class="opt">They each control a different motor</button>
         </div>
-        <div class="explain">Feedforward uses the model to supply most of the voltage up front; feedback only has to handle the residual — disturbances, model error, battery sag. Predict almost everything, correct the rest.</div>
+        <div class="explain">Feedforward uses the model to supply most of the voltage up front; feedback only has to handle the residual - disturbances, model error, battery sag. Predict almost everything, correct the rest.</div>
       </div>
       <div class="q" data-correct="2">
         <div class="qn">Question 2</div>
         <div class="qt">With feedforward only and a sudden load the controller never modeled, what did you observe?</div>
         <div class="opts">
-          <button class="opt">It tracked perfectly — feedforward handles everything</button>
+          <button class="opt">It tracked perfectly - feedforward handles everything</button>
           <button class="opt">It went unstable and oscillated</button>
-          <button class="opt">It settled with a steady error — feedforward can't see a disturbance it didn't predict</button>
+          <button class="opt">It settled with a steady error - feedforward can't see a disturbance it didn't predict</button>
         </div>
         <div class="explain">Feedforward is open-loop: it acts on the plan, not on measurement. An unmodeled load just sits there as a steady offset until a feedback term notices the error and pushes back.</div>
       </div>
@@ -337,7 +337,7 @@ motor.<span class="fn">setVoltage</span>( <input class="blank" data-ans="feedfor
           <button class="opt">Because the goal is a secret until the move ends</button>
           <button class="opt">It makes the motor quieter</button>
         </div>
-        <div class="explain">A bare goal tells feedforward nothing about how fast to be moving right now. The profile gives a velocity and acceleration at every instant, so kV and kA can supply the right voltage throughout — not just once you've arrived.</div>
+        <div class="explain">A bare goal tells feedforward nothing about how fast to be moving right now. The profile gives a velocity and acceleration at every instant, so kV and kA can supply the right voltage throughout - not just once you've arrived.</div>
       </div>
     </div>
   </section>
@@ -345,11 +345,11 @@ motor.<span class="fn">setVoltage</span>( <input class="blank" data-ans="feedfor
   <section>
     <div class="kicker">You finished Part I</div>
     <h2>Where you go from here</h2>
-    <p>You started by holding a thruster against gravity with your own hand. You end able to describe — and assemble — the controller behind nearly every robot mechanism. That's the hard part. Everything ahead is about putting it on real hardware:</p>
+    <p>You started by holding a thruster against gravity with your own hand. You end able to describe - and assemble - the controller behind nearly every robot mechanism. That's the hard part. Everything ahead is about putting it on real hardware:</p>
     <div class="roadmap">
-      <div class="rm" style="--accent:var(--teal)"><div class="pt">Part II · Coming up</div><h4>From Math to Code</h4><p>Turn this loop into real WPILib Java — the robot project, units &amp; gear ratios, and your first closed loop that moves actual hardware.</p></div>
-      <div class="rm" style="--accent:var(--indigo)"><div class="pt">Part III</div><h4>CTRE Phoenix 6</h4><p>Run this exact controller <em>on the motor itself</em> — slot gains, Motion Magic, and SysId on a Kraken.</p></div>
-      <div class="rm" style="--accent:var(--amber)"><div class="pt">Part IV</div><h4>Tune a Real Mechanism</h4><p>An elevator, an arm, a flywheel — each taken start-to-finish the way a competitive team does it.</p></div>
+      <div class="rm" style="--accent:var(--teal)"><div class="pt">Part II · Coming up</div><h4>From Math to Code</h4><p>Turn this loop into real WPILib Java - the robot project, units &amp; gear ratios, and your first closed loop that moves actual hardware.</p></div>
+      <div class="rm" style="--accent:var(--indigo)"><div class="pt">Part III</div><h4>CTRE Phoenix 6</h4><p>Run this exact controller <em>on the motor itself</em> - slot gains, Motion Magic, and SysId on a Kraken.</p></div>
+      <div class="rm" style="--accent:var(--amber)"><div class="pt">Part IV</div><h4>Tune a Real Mechanism</h4><p>An elevator, an arm, a flywheel - each taken start-to-finish the way a competitive team does it.</p></div>
       <div class="rm" style="--accent:var(--red)"><div class="pt">Part V</div><h4>Beyond</h4><p>Swerve drive, vision-assisted control, and a first real look at state-space.</p></div>
     </div>
   </section>
@@ -361,13 +361,13 @@ motor.<span class="fn">setVoltage</span>( <input class="blank" data-ans="feedfor
         <div class="gl"><b>The control law</b><span>voltage = feedforward(plan) + feedback(error).</span></div>
         <div class="gl"><b>Motion profile</b><span>A smooth ramp-cruise-slow plan the controller follows.</span></div>
         <div class="gl"><b>Feedforward's job</b><span>Predict ~90% of the voltage from the planned motion.</span></div>
-        <div class="gl"><b>Feedback's job</b><span>Correct the leftover — disturbances and model error.</span></div>
+        <div class="gl"><b>Feedback's job</b><span>Correct the leftover - disturbances and model error.</span></div>
         <div class="gl"><b>ProfiledPIDController</b><span>WPILib class: profile + feedback in one.</span></div>
-        <div class="gl"><b>The gold standard</b><span>Strong feedforward, light feedback — every FRC mechanism.</span></div>
+        <div class="gl"><b>The gold standard</b><span>Strong feedforward, light feedback - every FRC mechanism.</span></div>
       </div>
       <a class="next" href="closing-the-loop.html">
         <div class="n-eyebrow">Course complete · Part I</div>
-        <h3>On to Part II — From Math to Code →</h3>
+        <h3>On to Part II - From Math to Code →</h3>
         <p>Head back to the course map to pick up the next part, where this controller becomes real, running WPILib Java on a robot.</p>
       </a>
     </div>
@@ -565,7 +565,7 @@ motor.<span class="fn">setVoltage</span>( <input class="blank" data-ans="feedfor
       if(!ok)all=false;
     });
     var res=document.getElementById('cres');
-    res.textContent=all?'All correct ✓':'Not quite — add the two halves together';
+    res.textContent=all?'All correct ✓':'Not quite - add the two halves together';
     res.className='code-result '+(all?'ok':'no');
   });
   document.getElementById('reveal').addEventListener('click',function(){

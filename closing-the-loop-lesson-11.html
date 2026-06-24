@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Closing the Loop · Part II.3 — Your First Closed Loop in Code</title>
+<title>Closing the Loop · Part II.3 - Your First Closed Loop in Code</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -164,13 +164,13 @@
     <div class="lesson-no"><b>Part II · 03</b> From Math to Code</div>
     <div class="eyebrow">Your First Closed Loop in Code</div>
     <h1>Make it move,<br>in <span class="accent">code</span>.</h1>
-    <p class="dek">Read the sensor, ask a PIDController for a voltage, send it to the motor. The Part I loop — now four real lines of WPILib that actually drive the elevator.</p>
+    <p class="dek">Read the sensor, ask a PIDController for a voltage, send it to the motor. The Part I loop - now four real lines of WPILib that actually drive the elevator.</p>
   </div>
 
   <section>
     <p class="lead">You don't write the PID math.</p>
-    <p>You learned exactly what P, I, and D do in Part I — and the good news is WPILib already implements them. You hand a <span class="k">PIDController</span> your gains and, every loop, give it two numbers: where you <em>are</em> and where you <em>want to be</em>. It hands back the voltage. Your job is to wire it up correctly and feed it good measurements (the ones you just learned to convert).</p>
-    <p>Below is a real PID loop running the elevator. Drive it with the gains — it behaves exactly like Lesson 2 and 4, because it <em>is</em> the same controller, now in code.</p>
+    <p>You learned exactly what P, I, and D do in Part I - and the good news is WPILib already implements them. You hand a <span class="k">PIDController</span> your gains and, every loop, give it two numbers: where you <em>are</em> and where you <em>want to be</em>. It hands back the voltage. Your job is to wire it up correctly and feed it good measurements (the ones you just learned to convert).</p>
+    <p>Below is a real PID loop running the elevator. Drive it with the gains - it behaves exactly like Lesson 2 and 4, because it <em>is</em> the same controller, now in code.</p>
   </section>
 
   <section>
@@ -195,11 +195,11 @@
       <div class="controls">
         <button class="btn primary" id="move">Move ▸</button>
         <div class="slider-group">
-          <label>kP — gain <span class="val" id="kpVal">6.0</span></label>
+          <label>kP - gain <span class="val" id="kpVal">6.0</span></label>
           <input type="range" id="kp" min="0" max="20" step="0.5" value="6" />
         </div>
         <div class="slider-group">
-          <label>kD — derivative <span class="val" id="kdVal">2.0</span></label>
+          <label>kD - derivative <span class="val" id="kdVal">2.0</span></label>
           <input type="range" id="kd" min="0" max="6" step="0.5" value="2" />
         </div>
         <div class="slider-group">
@@ -214,15 +214,15 @@
         <div class="ro"><div class="k2">At setpoint?</div><div class="v ink" id="roAt">no</div></div>
       </div>
     </div>
-    <p class="caption">Crank kP and it still parks a hair <em>below</em> the line. That's the Lesson 2 droop — and it's a sign of what's missing, not a bug.</p>
+    <p class="caption">Crank kP and it still parks a hair <em>below</em> the line. That's the Lesson 2 droop - and it's a sign of what's missing, not a bug.</p>
   </section>
 
   <section>
     <div class="kicker">The whole loop</div>
     <h2>Four lines that matter</h2>
-    <p>Here's the subsystem. The controller is created once with its gains; <span class="k">periodic()</span> runs the loop every 20 ms — read, calculate, apply. That's the entire thing:</p>
+    <p>Here's the subsystem. The controller is created once with its gains; <span class="k">periodic()</span> runs the loop every 20 ms - read, calculate, apply. That's the entire thing:</p>
     <div class="codewrap">
-      <div class="clabel">Elevator.java — closed-loop position control <span class="badge">Java · WPILib</span></div>
+      <div class="clabel">Elevator.java - closed-loop position control <span class="badge">Java · WPILib</span></div>
 <pre class="code"><span class="kw">private final</span> <span class="ty">PIDController</span> pid = <span class="kw">new</span> <span class="ty">PIDController</span>(<span class="num">4.8</span>, <span class="num">0</span>, <span class="num">0.2</span>);  <span class="cm">// kP, kI, kD</span>
 <span class="kw">private</span> <span class="ty">double</span> goalMeters = <span class="num">0</span>;
 
@@ -239,10 +239,10 @@
   motor.<span class="fn">setVoltage</span>(volts);                       <span class="cm">// act</span>
 }</pre>
     </div>
-    <p>Notice what <span class="k">calculate</span> takes: the measurement first, the goal second. It computes the error internally, applies your gains, and returns volts. You never touch the formula — you just feed it the right numbers and use what it returns.</p>
+    <p>Notice what <span class="k">calculate</span> takes: the measurement first, the goal second. It computes the error internally, applies your gains, and returns volts. You never touch the formula - you just feed it the right numbers and use what it returns.</p>
     <div class="note teal">
       <div class="nh">Why it still droops</div>
-      <p>Pure P needs a leftover error to produce the voltage that holds against gravity — so it settles just short of the target, exactly like Lesson 2. Cranking kP shrinks the droop but invites oscillation. The clean fix isn't more gain; it's <strong>feedforward</strong> — supplying the gravity voltage directly. That's the very next lesson.</p>
+      <p>Pure P needs a leftover error to produce the voltage that holds against gravity - so it settles just short of the target, exactly like Lesson 2. Cranking kP shrinks the droop but invites oscillation. The clean fix isn't more gain; it's <strong>feedforward</strong> - supplying the gravity voltage directly. That's the very next lesson.</p>
     </div>
   </section>
 
@@ -276,7 +276,7 @@
           <button class="opt">The output voltage to send to the motor</button>
           <button class="opt">Whether the robot is enabled</button>
         </div>
-        <div class="explain">It computes the error for you, applies the P/I/D gains, and returns the controller's output — the voltage you hand straight to setVoltage().</div>
+        <div class="explain">It computes the error for you, applies the P/I/D gains, and returns the controller's output - the voltage you hand straight to setVoltage().</div>
       </div>
       <div class="q" data-correct="0">
         <div class="qn">Question 2</div>
@@ -296,7 +296,7 @@
           <button class="opt">There's no way to know</button>
           <button class="opt">Call setTolerance(...) once, then check pid.atSetpoint()</button>
         </div>
-        <div class="explain">setTolerance defines how close counts as "there," and atSetpoint() returns true once the measurement is within that band — handy for ending a command when the move finishes.</div>
+        <div class="explain">setTolerance defines how close counts as "there," and atSetpoint() returns true once the measurement is within that band - handy for ending a command when the move finishes.</div>
       </div>
     </div>
   </section>
@@ -315,7 +315,7 @@
       <a class="next" href="closing-the-loop-lesson-12.html">
         <div class="n-eyebrow">Up next · Part II · 04</div>
         <h3>Feedforward in Code</h3>
-        <p>Kill the droop the right way. WPILib's ElevatorFeedforward predicts the gravity-holding voltage so PID can relax — and you'll add the two together in one line.</p>
+        <p>Kill the droop the right way. WPILib's ElevatorFeedforward predicts the gravity-holding voltage so PID can relax - and you'll add the two together in one line.</p>
       </a>
     </div>
   </section>
@@ -463,7 +463,7 @@
       if(!ok)all=false;
     });
     var res=document.getElementById('cres');
-    res.textContent=all?'All correct ✓':'Not quite — goal second, then apply volts';
+    res.textContent=all?'All correct ✓':'Not quite - goal second, then apply volts';
     res.className='code-result '+(all?'ok':'no');
   });
   document.getElementById('reveal').addEventListener('click',function(){

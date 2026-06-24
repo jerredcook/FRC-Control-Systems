@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Deploy · Part 3.4 — Command Compositions</title>
+<title>Deploy · Part 3.4 - Command Compositions</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -122,12 +122,12 @@
     <div class="lesson-no"><b>Part 3 · 04</b> Command-Based Robots</div>
     <div class="eyebrow">Command Compositions</div>
     <h1>Glue verbs into<br><span class="accent">sentences</span>.</h1>
-    <p class="dek">One command is an action. Combine them — in order, all at once, or racing to the finish — and you describe a whole routine. Watch each rule on a timeline.</p>
+    <p class="dek">One command is an action. Combine them - in order, all at once, or racing to the finish - and you describe a whole routine. Watch each rule on a timeline.</p>
   </div>
 
   <section>
     <p class="lead">Real behaviors are several commands woven together.</p>
-    <p>"Drive to the goal, <em>then</em> shoot." "Aim <em>while</em> spinning up." WPILib gives you composition operators to express exactly that. Pick one below and play it — three commands (<b>A</b>=2 s, <b>B</b>=3 s, <b>C</b>=1 s) run, and the whole group ends by that rule.</p>
+    <p>"Drive to the goal, <em>then</em> shoot." "Aim <em>while</em> spinning up." WPILib gives you composition operators to express exactly that. Pick one below and play it - three commands (<b>A</b>=2 s, <b>B</b>=3 s, <b>C</b>=1 s) run, and the whole group ends by that rule.</p>
 
     <div class="demo" id="demo">
       <div class="demo-head"><span class="demo-title">Composition timeline</span><span class="demo-tag" id="typeTag">sequence</span></div>
@@ -163,12 +163,12 @@ drive.<span class="fn">withTimeout</span>(<span class="num">3</span>);   <span c
     </div>
     <div class="note indigo">
       <div class="nh">withTimeout is just a race</div>
-      <p><span class="k">command.withTimeout(3)</span> races your command against a 3-second timer — whichever finishes first ends the group. It's the everyday way to say "do this, but give up after 3 seconds," and it keeps an autonomous routine from hanging forever.</p>
+      <p><span class="k">command.withTimeout(3)</span> races your command against a 3-second timer - whichever finishes first ends the group. It's the everyday way to say "do this, but give up after 3 seconds," and it keeps an autonomous routine from hanging forever.</p>
     </div>
 
     <div class="code-ex">
       <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
-      <div class="ctask">Run "drive to the goal" and then "score" — one after the other. Fill in the composition.</div>
+      <div class="ctask">Run "drive to the goal" and then "score" - one after the other. Fill in the composition.</div>
 <pre class="code"><span class="ty">Commands</span>.<input class="blank" data-ans="sequence" aria-label="blank" autocomplete="off" spellcheck="false">(driveToGoal, score);</pre>
       <div class="code-actions">
         <button class="btn" id="check">Check</button>
@@ -201,14 +201,14 @@ drive.<span class="fn">withTimeout</span>(<span class="num">3</span>);   <span c
           <button class="opt">Commands.sequence(aim)</button>
           <button class="opt">aim.withTimeout(2)</button>
         </div>
-        <div class="explain">withTimeout(2) races aim against a 2-second timer — whichever ends first stops the group. It's the standard "do it, but don't hang" pattern.</div>
+        <div class="explain">withTimeout(2) races aim against a 2-second timer - whichever ends first stops the group. It's the standard "do it, but don't hang" pattern.</div>
       </div>
       <div class="q" data-correct="1">
         <div class="qn">Question 3</div>
         <div class="qt">In a race(A, B, C), when does the whole group end?</div>
         <div class="opts">
           <button class="opt">When all three finish</button>
-          <button class="opt">The instant the first one finishes — the rest are interrupted</button>
+          <button class="opt">The instant the first one finishes - the rest are interrupted</button>
           <button class="opt">Never</button>
         </div>
         <div class="explain">A race ends the moment any member finishes; the others are interrupted (and their end(true) runs). Useful for "shoot OR time out," for example.</div>
@@ -261,17 +261,17 @@ drive.<span class="fn">withTimeout</span>(<span class="num">3</span>);   <span c
     var s=[], g=0, rule='';
     if(type==='sequence'){
       var t=0; CMDS.forEach(function(c){ s.push({start:t,end:t+c.dur,cut:false}); t+=c.dur; }); g=t;
-      rule='<b>Sequence</b> — A, then B, then C. Ends when the last finishes: <b>'+g+' s</b>.';
+      rule='<b>Sequence</b> - A, then B, then C. Ends when the last finishes: <b>'+g+' s</b>.';
     } else if(type==='parallel'){
       CMDS.forEach(function(c){ s.push({start:0,end:c.dur,cut:false}); }); g=Math.max(2,3,1);
-      rule='<b>Parallel</b> — all together. Ends when <b>ALL</b> finish: at the slowest, <b>'+g+' s</b>.';
+      rule='<b>Parallel</b> - all together. Ends when <b>ALL</b> finish: at the slowest, <b>'+g+' s</b>.';
     } else if(type==='deadline'){
       g=CMDS[0].dur; // A is the deadline
       CMDS.forEach(function(c,i){ var e=Math.min(c.dur,g); s.push({start:0,end:e,cut:c.dur>g}); });
-      rule='<b>Deadline (A)</b> — all together, ends when <b>A</b> finishes (<b>'+g+' s</b>). B is cut short.';
+      rule='<b>Deadline (A)</b> - all together, ends when <b>A</b> finishes (<b>'+g+' s</b>). B is cut short.';
     } else { // race
       g=Math.min(2,3,1); CMDS.forEach(function(c){ var e=Math.min(c.dur,g); s.push({start:0,end:e,cut:c.dur>g}); });
-      rule='<b>Race</b> — all together, ends when the <b>first</b> finishes (C at <b>'+g+' s</b>). A and B are cut.';
+      rule='<b>Race</b> - all together, ends when the <b>first</b> finishes (C at <b>'+g+' s</b>). A and B are cut.';
     }
     return {s:s, g:g, rule:rule};
   }
@@ -335,7 +335,7 @@ drive.<span class="fn">withTimeout</span>(<span class="num">3</span>);   <span c
   document.getElementById('check').addEventListener('click',function(){
     var all=true;
     blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
-    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite — one after another is sequence'; res.className='code-result '+(all?'ok':'no');
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - one after another is sequence'; res.className='code-result '+(all?'ok':'no');
   });
   document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='sequence';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
 

@@ -13,14 +13,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
- * Arm — position control with cosine gravity feedforward.
+ * Arm - position control with cosine gravity feedforward.
  *
  * From "Closing the Loop" Part IV.2. The only real differences from the
  * elevator: GravityType.Arm_Cosine (kG is scaled by cos(angle)) and a
  * FusedCANcoder so the arm knows its absolute angle the instant it powers on.
  *
  * IMPORTANT: zero the CANcoder (its MagnetOffset) so that 0 rotations means the
- * arm is HORIZONTAL — that's where gravity is strongest and cos(0) = 1.
+ * arm is HORIZONTAL - that's where gravity is strongest and cos(0) = 1.
  */
 public class Arm extends SubsystemBase {
   private static final int    MOTOR_CAN_ID    = 11;   // TODO

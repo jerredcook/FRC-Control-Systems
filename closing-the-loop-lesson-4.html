@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Closing the Loop · Lesson 4 — Derivative Control</title>
+<title>Closing the Loop · Lesson 4 - Derivative Control</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -195,20 +195,20 @@
   </div>
 
   <section>
-    <p class="lead">Integral fixed the droop — but you saw the cost.</p>
-    <p>With the integral pushing until the gap closes, the carriage tends to sail past the line and ring before it settles. What we want is a way to <em>anticipate</em> the target and ease off before arriving — to apply the brakes on the approach. That's the <strong>derivative</strong> term.</p>
-    <p>The derivative watches the <strong>rate of change</strong> of the error — how fast the gap is closing. Rushing toward the target, the derivative is large, and it pushes back against the motion to damp it. Three terms together make a complete <strong>PID controller</strong>, the workhorse of nearly every FRC mechanism.</p>
+    <p class="lead">Integral fixed the droop - but you saw the cost.</p>
+    <p>With the integral pushing until the gap closes, the carriage tends to sail past the line and ring before it settles. What we want is a way to <em>anticipate</em> the target and ease off before arriving - to apply the brakes on the approach. That's the <strong>derivative</strong> term.</p>
+    <p>The derivative watches the <strong>rate of change</strong> of the error - how fast the gap is closing. Rushing toward the target, the derivative is large, and it pushes back against the motion to damp it. Three terms together make a complete <strong>PID controller</strong>, the workhorse of nearly every FRC mechanism.</p>
     <div class="formula">
       output = kP × error + kI × <span class="t">∫</span> error + <b>kD</b> × (de/dt)
-      <span class="small">de/dt is the error's rate of change — how fast it's moving</span>
+      <span class="small">de/dt is the error's rate of change - how fast it's moving</span>
     </div>
-    <p><span class="k">kD</span> is the derivative gain — how hard the brake bites. Turn it up to smooth the approach; turn it to zero and you're back to PI and its overshoot.</p>
+    <p><span class="k">kD</span> is the derivative gain - how hard the brake bites. Turn it up to smooth the approach; turn it to zero and you're back to PI and its overshoot.</p>
   </section>
 
   <section>
     <div class="kicker">Try it</div>
     <h2>Apply the brakes</h2>
-    <p>Here's the full PID. Press <strong>Step</strong>, then drag <span class="k">kD</span> to zero — the overshoot and ringing come straight back. Bring it up and watch the derivative damp the approach into a smooth landing. Then flip on <strong>Noise</strong> and push kD high to meet derivative's dark side.</p>
+    <p>Here's the full PID. Press <strong>Step</strong>, then drag <span class="k">kD</span> to zero - the overshoot and ringing come straight back. Bring it up and watch the derivative damp the approach into a smooth landing. Then flip on <strong>Noise</strong> and push kD high to meet derivative's dark side.</p>
 
     <div class="demo" id="demo">
       <div class="demo-head">
@@ -229,15 +229,15 @@
         <button class="btn" id="run">Pause</button>
         <button class="btn" id="noise">Noise: off</button>
         <div class="slider-group">
-          <label>kP — gain <span class="val" id="kpVal">4.0</span></label>
+          <label>kP - gain <span class="val" id="kpVal">4.0</span></label>
           <input type="range" id="kp" min="0.5" max="20" step="0.5" value="4" />
         </div>
         <div class="slider-group">
-          <label>kI — integral <span class="val" id="kiVal">1.0</span></label>
+          <label>kI - integral <span class="val" id="kiVal">1.0</span></label>
           <input type="range" id="ki" min="0" max="3" step="0.1" value="1" />
         </div>
         <div class="slider-group">
-          <label>kD — derivative <span class="val" id="kdVal">2.0</span></label>
+          <label>kD - derivative <span class="val" id="kdVal">2.0</span></label>
           <input type="range" id="kd" min="0" max="6" step="0.5" value="2" />
         </div>
         <div class="slider-group">
@@ -252,24 +252,24 @@
         <div class="ro"><div class="k2">Voltage (V)</div><div class="v ink" id="roVolt">0.00</div></div>
       </div>
     </div>
-    <p class="caption">Drop kD to zero and the ringing returns. Raise it and the landing smooths out — until you overdo it, or turn on noise.</p>
+    <p class="caption">Drop kD to zero and the ringing returns. Raise it and the landing smooths out - until you overdo it, or turn on noise.</p>
   </section>
 
   <section>
     <div class="kicker">Why it works</div>
     <h2>A brake that reads your speed</h2>
-    <p>The derivative term is, in effect, a brake proportional to how fast you're closing on the target. Far away and barely moving, it stays out of the way. But as you rush up on the line, the gap shrinks quickly — the derivative grows and pushes back, bleeding off speed so you arrive gently instead of blowing past. That damping is what turns the integral's ringing into a clean settle.</p>
-    <p>Watch the <span style="color:var(--indigo)">D-term</span> as the carriage approaches: it swings negative during the fast part of the climb — that's the brake — then fades to nothing once you've stopped at the line.</p>
+    <p>The derivative term is, in effect, a brake proportional to how fast you're closing on the target. Far away and barely moving, it stays out of the way. But as you rush up on the line, the gap shrinks quickly - the derivative grows and pushes back, bleeding off speed so you arrive gently instead of blowing past. That damping is what turns the integral's ringing into a clean settle.</p>
+    <p>Watch the <span style="color:var(--indigo)">D-term</span> as the carriage approaches: it swings negative during the fast part of the climb - that's the brake - then fades to nothing once you've stopped at the line.</p>
     <div class="note teal">
       <div class="nh">The two cautions</div>
-      <p>Derivative is powerful but touchy. First, <strong>there's a sweet spot</strong>: a little tames the overshoot, but too much and the response degrades again rather than improving. Second, and more dangerous — <strong>derivative amplifies noise</strong>. A real encoder reading jitters, and differentiating jitter turns small wiggles into violent voltage spikes. Flip on <strong>Noise</strong> and push <span class="k">kD</span> up: the motor command turns to hash. Teams keep kD modest and often filter the measurement.</p>
+      <p>Derivative is powerful but touchy. First, <strong>there's a sweet spot</strong>: a little tames the overshoot, but too much and the response degrades again rather than improving. Second, and more dangerous - <strong>derivative amplifies noise</strong>. A real encoder reading jitters, and differentiating jitter turns small wiggles into violent voltage spikes. Flip on <strong>Noise</strong> and push <span class="k">kD</span> up: the motor command turns to hash. Teams keep kD modest and often filter the measurement.</p>
     </div>
   </section>
 
   <section>
     <div class="kicker">In Java</div>
     <h2>Completing the PID</h2>
-    <p>One more remembered value, one more line. The derivative is just the change in error since last loop, divided by the loop time — the error's speed:</p>
+    <p>One more remembered value, one more line. The derivative is just the change in error since last loop, divided by the loop time - the error's speed:</p>
     <div class="codewrap">
       <div class="clabel">Full PID, by hand <span class="badge">Java</span></div>
 <pre class="code"><span class="ty">double</span> kP = <span class="num">4.0</span>, kI = <span class="num">1.0</span>, kD = <span class="num">2.0</span>;
@@ -285,14 +285,14 @@
   motor.<span class="fn">setVoltage</span>(output);
 }</pre>
     </div>
-    <p>That's a complete PID controller — every mechanism term you've learned, in seven lines. The derivative line subtracts when the error is shrinking fast, which eases the motor off on the approach.</p>
+    <p>That's a complete PID controller - every mechanism term you've learned, in seven lines. The derivative line subtracts when the error is shrinking fast, which eases the motor off on the approach.</p>
 
-    <p>One catch: taking the derivative of the <em>error</em> means a sudden setpoint change makes the error jump, spiking the output for one loop — a jolt called <strong>derivative kick</strong>. Differentiating the <em>measurement</em> instead avoids it:</p>
+    <p>One catch: taking the derivative of the <em>error</em> means a sudden setpoint change makes the error jump, spiking the output for one loop - a jolt called <strong>derivative kick</strong>. Differentiating the <em>measurement</em> instead avoids it:</p>
     <div class="codewrap">
-      <div class="clabel">Derivative-on-measurement — no setpoint kick <span class="badge">Java</span></div>
+      <div class="clabel">Derivative-on-measurement - no setpoint kick <span class="badge">Java</span></div>
 <pre class="code"><span class="ty">double</span> derivative = -(measurement - prevMeasurement) / <span class="num">0.02</span>;   <span class="cm">// no jump when you retarget</span></pre>
     </div>
-    <p>For a fixed target the two are identical — this simulator uses the measurement form, which is why retargeting here stays smooth. And the WPILib version is the full trio of gains:</p>
+    <p>For a fixed target the two are identical - this simulator uses the measurement form, which is why retargeting here stays smooth. And the WPILib version is the full trio of gains:</p>
     <div class="codewrap">
       <div class="clabel">The same thing, with WPILib <span class="badge">Java</span></div>
 <pre class="code"><span class="kw">private final</span> <span class="ty">PIDController</span> controller = <span class="kw">new</span> <span class="ty">PIDController</span>(<span class="num">4.0</span>, <span class="num">1.0</span>, <span class="num">2.0</span>);
@@ -301,8 +301,8 @@
 <span class="ty">double</span> output = controller.<span class="fn">calculate</span>(encoder.<span class="fn">getPosition</span>(), setpoint);</pre>
     </div>
     <div class="note">
-      <div class="nh">Under the hood — WPILib's derivative, and the kick</div>
-      <p>WPILib's <span class="k">PIDController</span> computes the derivative from the <em>error</em> (<span class="k">kD·de/dt</span>), so a large setpoint change can produce a one-loop derivative kick. Two common fixes: differentiate the measurement yourself, or — better — feed the controller a smoothly moving setpoint instead of a hard step. That second idea, <strong>motion profiling</strong>, is a technique we build later in the course.</p>
+      <div class="nh">Under the hood - WPILib's derivative, and the kick</div>
+      <p>WPILib's <span class="k">PIDController</span> computes the derivative from the <em>error</em> (<span class="k">kD·de/dt</span>), so a large setpoint change can produce a one-loop derivative kick. Two common fixes: differentiate the measurement yourself, or - better - feed the controller a smoothly moving setpoint instead of a hard step. That second idea, <strong>motion profiling</strong>, is a technique we build later in the course.</p>
     </div>
   </section>
 
@@ -336,7 +336,7 @@ motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="output" 
           <button class="opt">How fast the error is changing</button>
           <button class="opt">The total error accumulated so far</button>
         </div>
-        <div class="explain">Derivative is the error's rate of change — its speed. That's what lets it anticipate the target and ease off before you arrive, rather than reacting only to how far off you are.</div>
+        <div class="explain">Derivative is the error's rate of change - its speed. That's what lets it anticipate the target and ease off before you arrive, rather than reacting only to how far off you are.</div>
       </div>
       <div class="q" data-correct="1">
         <div class="qn">Question 2</div>
@@ -346,7 +346,7 @@ motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="output" 
           <button class="opt">It acts like a brake proportional to how fast you're closing in</button>
           <button class="opt">It removes the steady-state error</button>
         </div>
-        <div class="explain">When the gap is shrinking fast, the derivative pushes back against the motion — bleeding off speed on the approach so the carriage settles instead of sailing past. That's damping.</div>
+        <div class="explain">When the gap is shrinking fast, the derivative pushes back against the motion - bleeding off speed on the approach so the carriage settles instead of sailing past. That's damping.</div>
       </div>
       <div class="q" data-correct="1">
         <div class="qn">Question 3</div>
@@ -356,7 +356,7 @@ motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="output" 
           <button class="opt">Differentiating a noisy measurement amplifies the noise into big spikes</button>
           <button class="opt">kD has been set negative</button>
         </div>
-        <div class="explain">Taking the rate of change of a jittery signal turns tiny wiggles into large jumps — and kD multiplies them straight into the output. It's the central reason to keep kD modest and filter noisy sensors.</div>
+        <div class="explain">Taking the rate of change of a jittery signal turns tiny wiggles into large jumps - and kD multiplies them straight into the output. It's the central reason to keep kD modest and filter noisy sensors.</div>
       </div>
     </div>
   </section>
@@ -365,7 +365,7 @@ motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="output" 
     <div class="recap">
       <h3>Lesson 04 · Recap</h3>
       <div class="glossary">
-        <div class="gl"><b>Derivative term</b><span>Responds to the error's rate of change — the damping brake.</span></div>
+        <div class="gl"><b>Derivative term</b><span>Responds to the error's rate of change - the damping brake.</span></div>
         <div class="gl"><b>Gain (kD)</b><span>How hard the derivative brake bites on the approach.</span></div>
         <div class="gl"><b>Damping</b><span>Easing off as you close in, to stop overshoot and ringing.</span></div>
         <div class="gl"><b>Derivative kick</b><span>One-loop output spike when the setpoint jumps (derivative-on-error).</span></div>
@@ -375,7 +375,7 @@ motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="output" 
       <div class="next">
         <div class="n-eyebrow">Up next · Lesson 05</div>
         <h3>Tuning PID</h3>
-        <p style="margin-bottom:0">You have all three terms — but how do you actually pick <code>kP</code>, <code>kI</code>, and <code>kD</code> for a real mechanism? Lesson 5 is a systematic method and a diagnostic guide: read the response on the scope and know exactly which gain to turn.</p>
+        <p style="margin-bottom:0">You have all three terms - but how do you actually pick <code>kP</code>, <code>kI</code>, and <code>kD</code> for a real mechanism? Lesson 5 is a systematic method and a diagnostic guide: read the response on the scope and know exactly which gain to turn.</p>
       </div>
     </div>
   </section>
@@ -543,7 +543,7 @@ motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="output" 
       if(!ok)all=false;
     });
     var res=document.getElementById('cres');
-    res.textContent=all?'All correct ✓':'Not quite — keep at it';
+    res.textContent=all?'All correct ✓':'Not quite - keep at it';
     res.className='code-result '+(all?'ok':'no');
   });
   document.getElementById('reveal').addEventListener('click',function(){

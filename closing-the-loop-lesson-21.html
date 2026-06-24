@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Closing the Loop · Part IV.3 — The Flywheel</title>
+<title>Closing the Loop · Part IV.3 - The Flywheel</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -171,19 +171,19 @@
     <div class="lesson-no"><b>Part IV · 03</b> Tune a Real Mechanism</div>
     <div class="eyebrow">The Flywheel</div>
     <h1>Hold a <span class="accent">speed</span>,<br>not a place.</h1>
-    <p class="dek">A shooter doesn't go somewhere — it spins at a target RPM and recovers the instant a game piece steals its energy. Welcome to velocity control, where kV runs the show.</p>
+    <p class="dek">A shooter doesn't go somewhere - it spins at a target RPM and recovers the instant a game piece steals its energy. Welcome to velocity control, where kV runs the show.</p>
   </div>
 
   <section>
     <p class="lead">Same loop, different target.</p>
-    <p>The elevator and arm controlled <em>position</em>. A flywheel controls <strong>velocity</strong> — you don't care where it is, only how fast it's spinning. The control law barely changes: it's still feedforward plus feedback. But the balance flips. For velocity, <span class="k">kV</span> — volts per unit of speed — does almost all the work, and <span class="k">kP</span> shrinks to a whisper.</p>
-    <p>There's no kG (gravity doesn't slow a wheel), and big kP is actually <em>harmful</em> here — it makes the speed hunt and oscillate. Spin it up below, then steal its energy with <strong>Shoot</strong> and watch it recover.</p>
+    <p>The elevator and arm controlled <em>position</em>. A flywheel controls <strong>velocity</strong> - you don't care where it is, only how fast it's spinning. The control law barely changes: it's still feedforward plus feedback. But the balance flips. For velocity, <span class="k">kV</span> - volts per unit of speed - does almost all the work, and <span class="k">kP</span> shrinks to a whisper.</p>
+    <p>There's no kG (gravity doesn't slow a wheel), and big kP is actually <em>harmful</em> here - it makes the speed hunt and oscillate. Spin it up below, then steal its energy with <strong>Shoot</strong> and watch it recover.</p>
   </section>
 
   <section>
     <div class="kicker">Spin it</div>
     <h2>Velocity control, live</h2>
-    <p>Set a <strong>target speed</strong> and the flywheel ramps up — that's the spin-up time. Once it's <span style="color:var(--green)">at speed</span>, hit <strong>Shoot</strong>: a game piece grabs energy, the speed dips, and feedback drives it back. Nudge <span class="k">kV</span> and <span class="k">kP</span> to feel their very different jobs.</p>
+    <p>Set a <strong>target speed</strong> and the flywheel ramps up - that's the spin-up time. Once it's <span style="color:var(--green)">at speed</span>, hit <strong>Shoot</strong>: a game piece grabs energy, the speed dips, and feedback drives it back. Nudge <span class="k">kV</span> and <span class="k">kP</span> to feel their very different jobs.</p>
 
     <div class="demo" id="demo">
       <div class="demo-head">
@@ -206,11 +206,11 @@
           <input type="range" id="tgt" min="0" max="0.95" step="0.01" value="0.7" />
         </div>
         <div class="slider-group">
-          <label>kV — velocity (dominant) <span class="val" id="kvVal">0.90</span></label>
+          <label>kV - velocity (dominant) <span class="val" id="kvVal">0.90</span></label>
           <input type="range" id="kv" min="0.3" max="1.4" step="0.02" value="0.9" />
         </div>
         <div class="slider-group">
-          <label>kP — feedback (small!) <span class="val" id="kpVal">1.5</span></label>
+          <label>kP - feedback (small!) <span class="val" id="kpVal">1.5</span></label>
           <input type="range" id="kp" min="0" max="8" step="0.2" value="1.5" />
         </div>
       </div>
@@ -221,18 +221,18 @@
         <div class="ro"><div class="k2">At speed?</div><div class="v ink" id="roAt">no</div></div>
       </div>
     </div>
-    <p class="caption">Turn kP way up and the recovery starts to oscillate — the speed overshoots and hunts. Velocity loves a strong kV and a gentle kP.</p>
+    <p class="caption">Turn kP way up and the recovery starts to oscillate - the speed overshoots and hunts. Velocity loves a strong kV and a gentle kP.</p>
   </section>
 
   <section>
     <div class="kicker">In code</div>
     <h2>kV leads, kP follows</h2>
-    <p>The setup is the on-motor loop you already know — just a <span class="k">VelocityVoltage</span> request and gains weighted toward kV. No kG, and a deliberately small kP:</p>
+    <p>The setup is the on-motor loop you already know - just a <span class="k">VelocityVoltage</span> request and gains weighted toward kV. No kG, and a deliberately small kP:</p>
     <div class="codewrap">
       <div class="clabel">Flywheel.java <span class="badge">Java · Phoenix 6</span></div>
 <pre class="code">cfg.Slot0.kS = <span class="num">0.10</span>;   <span class="cm">// volts to overcome friction and start spinning</span>
 cfg.Slot0.kV = <span class="num">0.12</span>;   <span class="cm">// the workhorse: volts per rotation/sec</span>
-cfg.Slot0.kP = <span class="num">0.18</span>;   <span class="cm">// small — big kP makes the speed hunt</span>
+cfg.Slot0.kP = <span class="num">0.18</span>;   <span class="cm">// small - big kP makes the speed hunt</span>
 <span class="cm">// no kG: a flywheel doesn't fight gravity</span>
 
 <span class="kw">private final</span> <span class="ty">VelocityVoltage</span> request = <span class="kw">new</span> <span class="ty">VelocityVoltage</span>(<span class="num">0</span>).<span class="fn">withSlot</span>(<span class="num">0</span>);
@@ -247,7 +247,7 @@ cfg.Slot0.kP = <span class="num">0.18</span>;   <span class="cm">// small — bi
     </div>
     <div class="note teal">
       <div class="nh">Wait for "at speed" before you shoot</div>
-      <p>The whole game is timing. Spin up, confirm <span class="k">atSpeed()</span>, <em>then</em> feed a game piece — fire while it's still ramping and the shot goes short. After each shot the speed dips; kV holds the base and kP closes the gap so you're ready for the next one fast. That recovery time is what separates a good shooter from a great one.</p>
+      <p>The whole game is timing. Spin up, confirm <span class="k">atSpeed()</span>, <em>then</em> feed a game piece - fire while it's still ramping and the shot goes short. After each shot the speed dips; kV holds the base and kP closes the gap so you're ready for the next one fast. That recovery time is what separates a good shooter from a great one.</p>
     </div>
 
     <div class="code-ex">
@@ -267,6 +267,38 @@ cfg.Slot0.kP = <span class="num">0.18</span>;   <span class="cm">// small — bi
   </section>
 
   <section>
+    <div class="kicker">From the field</div>
+    <h2>Why a flywheel fights back</h2>
+    <p>A flywheel has one job: hold a <em>repeatable</em> speed, because the shot rides on it.  That makes velocity control fussier than almost anything else on the robot, and it leans hard on two things most mechanisms never worry about: how cleanly and quickly you can <em>measure</em> speed, and how finely you can <em>tune</em> the loop.</p>
+
+    <p><strong>The measurement problem.</strong>  Velocity isn't sensed directly; it's computed from how fast the encoder counts change, and a coarse or noisy speed signal forces an ugly trade.  Filter it heavily and the number comes out smooth but late, so the loop reacts a beat behind and recovery drags.  Filter it lightly and it's jumpy, so kP amplifies the jitter and the speed hunts up and down.  You get stuck in the middle, never quite clean and never quite fast.</p>
+
+    <p><strong>The granularity problem.</strong>  If the speed signal is coarse and the loop is configured in big steps, small gain changes either do nothing or tip the whole thing into oscillation.  There's no fine adjustment left to find the sweet spot, so tuning turns into guesswork.</p>
+
+    <p>We ran a NEO on a SPARK MAX, and that combo reads velocity off the NEO's built-in encoder through the controller's own filtering, which is relatively coarse and already smoothed.  For most mechanisms that's fine.  For a shooter chasing a tight, repeatable RPM it's exactly the lag-versus-noise wall above, and it's why a NEO flywheel can be maddening to dial in.</p>
+
+    <div class="note teal">
+      <div class="nh">Hardware note: where the granularity comes from</div>
+      <p>A Kraken or Falcon (TalonFX) measures speed from its integrated rotor sensor at high resolution and runs the closed loop at 1 kHz <em>on the motor controller itself</em>, so the velocity signal is both cleaner and lower latency.  You set kS / kV / kA feedforward in real units and lean on kV, with a light kP to recover between shots.  With torque-current (FOC) control you can command torque straight to the rotor for an even smoother spin-up.  That finer resolution is what actually lets you nail a steady RPM.  If you've fought a SPARK MAX flywheel that won't hold speed, a TalonFX-based motor is the common upgrade path, and the reason is granularity, not magic.</p>
+    </div>
+
+    <div class="codewrap">
+      <div class="clabel">Flywheel.java · the CTRE angle <span class="badge">Java · Phoenix 6</span></div>
+<pre class="code"><span class="cm">// torque-current FOC: command torque straight to the rotor,</span>
+<span class="cm">// the tightest, fastest-recovering way to hold a flywheel speed</span>
+<span class="kw">private final</span> <span class="ty">VelocityTorqueCurrentFOC</span> request =
+    <span class="kw">new</span> <span class="ty">VelocityTorqueCurrentFOC</span>(<span class="num">0</span>).<span class="fn">withSlot</span>(<span class="num">0</span>);
+
+<span class="cm">// gains are in AMPS now, not volts, and run at 1 kHz on the motor (illustrative)</span>
+cfg.Slot0.kS = <span class="num">4.0</span>;    <span class="cm">// amps to break static friction</span>
+cfg.Slot0.kV = <span class="num">0.10</span>;   <span class="cm">// amps per rotation/sec to hold speed against drag</span>
+cfg.Slot0.kP = <span class="num">5.0</span>;    <span class="cm">// amps per rps of error, the fine high-rate correction</span></pre>
+    </div>
+
+    <p>Whatever the hardware, the tuning order doesn't change: lean on feedforward first (kV, or kS in current mode), keep kP small, wait for <span class="k">atSpeed()</span> before you fire, and leave room in the routine for the speed to recover between shots.  Better hardware just gives you more room to get all four right.</p>
+  </section>
+
+  <section>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>
     <p>Pick an answer to see why.</p>
@@ -276,7 +308,7 @@ cfg.Slot0.kP = <span class="num">0.18</span>;   <span class="cm">// small — bi
         <div class="qt">For velocity control, which gain does most of the work?</div>
         <div class="opts">
           <button class="opt">kP</button>
-          <button class="opt">kV — volts per unit of speed</button>
+          <button class="opt">kV - volts per unit of speed</button>
           <button class="opt">kG</button>
         </div>
         <div class="explain">kV directly predicts the voltage needed to sustain a given speed, so it carries a velocity loop. kP only trims small errors, and there's no kG because gravity doesn't resist a spinning wheel.</div>
@@ -285,7 +317,7 @@ cfg.Slot0.kP = <span class="num">0.18</span>;   <span class="cm">// small — bi
         <div class="qn">Question 2</div>
         <div class="qt">Why keep kP small on a flywheel?</div>
         <div class="opts">
-          <button class="opt">A large kP makes the speed overshoot and hunt — kV already holds it, so kP only needs to nudge</button>
+          <button class="opt">A large kP makes the speed overshoot and hunt - kV already holds it, so kP only needs to nudge</button>
           <button class="opt">Large kP draws too much current</button>
           <button class="opt">kP does nothing for velocity</button>
         </div>
@@ -295,7 +327,7 @@ cfg.Slot0.kP = <span class="num">0.18</span>;   <span class="cm">// small — bi
         <div class="qn">Question 3</div>
         <div class="qt">After a game piece dips the speed, what brings it back up?</div>
         <div class="opts">
-          <button class="opt">Nothing — you wait it out</button>
+          <button class="opt">Nothing - you wait it out</button>
           <button class="opt">Gravity</button>
           <button class="opt">Feedback (kP) reacting to the velocity error, on top of kV holding the base voltage</button>
         </div>
@@ -307,12 +339,12 @@ cfg.Slot0.kP = <span class="num">0.18</span>;   <span class="cm">// small — bi
   <section>
     <div class="kicker">You finished Part IV</div>
     <h2>You can tune anything now</h2>
-    <p>Elevator, arm, flywheel — three mechanisms, one method. Position or velocity, constant gravity or cosine, you know the workflow: configure, characterize, set feedforward, trim feedback, profile, validate. That covers the vast majority of what an FRC robot does. The last part is the frontier:</p>
+    <p>Elevator, arm, flywheel - three mechanisms, one method. Position or velocity, constant gravity or cosine, you know the workflow: configure, characterize, set feedforward, trim feedback, profile, validate. That covers the vast majority of what an FRC robot does. The last part is the frontier:</p>
     <div class="roadmap">
       <div class="rm" style="--accent:var(--teal)"><div class="pt">Part V · Coming up</div><h4>Swerve Drive Control</h4><p>Eight motors, four modules: independent steer and drive loops, plus odometry to know where you are on the field.</p></div>
-      <div class="rm" style="--accent:var(--indigo)"><div class="pt">Part V</div><h4>Vision-Assisted Control</h4><p>Close the loop on a camera — aim at a target, align to a tag, drive to a pose.</p></div>
+      <div class="rm" style="--accent:var(--indigo)"><div class="pt">Part V</div><h4>Vision-Assisted Control</h4><p>Close the loop on a camera - aim at a target, align to a tag, drive to a pose.</p></div>
       <div class="rm" style="--accent:var(--amber)"><div class="pt">Part V</div><h4>State-Space &amp; LQR</h4><p>The math the whole course kept hinting at, finally made approachable.</p></div>
-      <div class="rm" style="--accent:var(--green)"><div class="pt">Anytime</div><h4>The full map</h4><p>Twenty-one lessons of intuition, code, and CTRE — all one click away.</p></div>
+      <div class="rm" style="--accent:var(--green)"><div class="pt">Anytime</div><h4>The full map</h4><p>Twenty-one lessons of intuition, code, and CTRE - all one click away.</p></div>
     </div>
   </section>
 
@@ -329,7 +361,7 @@ cfg.Slot0.kP = <span class="num">0.18</span>;   <span class="cm">// small — bi
       </div>
       <a class="next" href="closing-the-loop.html">
         <div class="n-eyebrow">Part IV complete · Tune a Real Mechanism</div>
-        <h3>On to Part V — Beyond →</h3>
+        <h3>On to Part V - Beyond →</h3>
         <p>Back to the course map for the frontier: swerve, vision, and a first real look at state-space control.</p>
       </a>
     </div>
@@ -483,7 +515,7 @@ cfg.Slot0.kP = <span class="num">0.18</span>;   <span class="cm">// small — bi
       if(!ok)all=false;
     });
     var res=document.getElementById('cres');
-    res.textContent=all?'All correct ✓':'Not quite — pass the target rps';
+    res.textContent=all?'All correct ✓':'Not quite - pass the target rps';
     res.className='code-result '+(all?'ok':'no');
   });
   document.getElementById('reveal').addEventListener('click',function(){

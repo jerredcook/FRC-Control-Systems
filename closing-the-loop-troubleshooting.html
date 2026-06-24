@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Closing the Loop · Field Guide — Troubleshooting</title>
+<title>Closing the Loop · Field Guide - Troubleshooting</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -131,12 +131,12 @@
   <div class="hero">
     <div class="eyebrow">Field Guide · Troubleshooting</div>
     <h1>When it<br><span class="accent">doesn't</span> work.</h1>
-    <p class="dek">Every mechanism misbehaves in the same handful of ways. Learn to read the symptom on the scope and you'll find the cause in seconds — not hours.</p>
+    <p class="dek">Every mechanism misbehaves in the same handful of ways. Learn to read the symptom on the scope and you'll find the cause in seconds - not hours.</p>
   </div>
 
   <section>
     <p class="lead">Debugging control is pattern recognition.</p>
-    <p>A mechanism that oscillates, sags, or runs away isn't a mystery — each look has a short list of usual suspects. Below, <strong>break the elevator on purpose</strong> and watch each classic failure on the scope, with the diagnosis right there. Then keep the symptom table handy for the day your real robot acts up.</p>
+    <p>A mechanism that oscillates, sags, or runs away isn't a mystery - each look has a short list of usual suspects. Below, <strong>break the elevator on purpose</strong> and watch each classic failure on the scope, with the diagnosis right there. Then keep the symptom table handy for the day your real robot acts up.</p>
   </section>
 
   <section>
@@ -176,11 +176,11 @@
     <div class="note teal">
       <div class="nh">When anything misbehaves, walk down this list</div>
       <ol>
-        <li><b>Does it move the right way?</b> If not — motor or sensor <em>inverted</em>.</li>
-        <li><b>Are the numbers sane?</b> Reads 2 m at 0.2 m — wrong <em>gear ratio / units</em>.</li>
-        <li><b>Does it hold position?</b> Sags below target — missing <em>kG</em> (feedforward).</li>
-        <li><b>Is it stable?</b> Oscillates — too much <em>kP</em>, too little <em>kD</em>.</li>
-        <li><b>Is it safe?</b> Hot motor, tripped breaker — no <em>current limit</em>.</li>
+        <li><b>Does it move the right way?</b> If not - motor or sensor <em>inverted</em>.</li>
+        <li><b>Are the numbers sane?</b> Reads 2 m at 0.2 m - wrong <em>gear ratio / units</em>.</li>
+        <li><b>Does it hold position?</b> Sags below target - missing <em>kG</em> (feedforward).</li>
+        <li><b>Is it stable?</b> Oscillates - too much <em>kP</em>, too little <em>kD</em>.</li>
+        <li><b>Is it safe?</b> Hot motor, tripped breaker - no <em>current limit</em>.</li>
       </ol>
     </div>
   </section>
@@ -188,7 +188,7 @@
   <section>
     <div class="kicker">Symptom → fix</div>
     <h2>The reference table</h2>
-    <p>The full field guide — symptoms the demo can't show, and the one-line fix for each.</p>
+    <p>The full field guide - symptoms the demo can't show, and the one-line fix for each.</p>
     <div class="symgrid" id="symgrid"></div>
   </section>
 
@@ -202,7 +202,7 @@
         <div class="qt">On the scope, the position is a steady sine wave around the setpoint. The most likely cause?</div>
         <div class="opts">
           <button class="opt">Missing feedforward (kG)</button>
-          <button class="opt">kP too high (and/or too little kD) — the loop is over-reacting</button>
+          <button class="opt">kP too high (and/or too little kD) - the loop is over-reacting</button>
           <button class="opt">The CAN id is wrong</button>
         </div>
         <div class="explain">Oscillation is the signature of too much proportional gain: every correction overshoots, so it swings back and forth. Lower kP, or add kD to damp it.</div>
@@ -221,11 +221,11 @@
         <div class="qn">Question 3</div>
         <div class="qt">A swerve module's wheel points the wrong way the instant the robot powers on. Most likely cause?</div>
         <div class="opts">
-          <button class="opt">Steering isn't using an absolute sensor (FusedCANcoder) — it doesn't know its true angle at boot</button>
+          <button class="opt">Steering isn't using an absolute sensor (FusedCANcoder) - it doesn't know its true angle at boot</button>
           <button class="opt">kV is too small</button>
           <button class="opt">The flywheel isn't at speed</button>
         </div>
-        <div class="explain">The internal rotor only counts from wherever it booted, so steering starts from a wrong zero. A FusedCANcoder gives the true absolute angle immediately — the same fix as the arm.</div>
+        <div class="explain">The internal rotor only counts from wherever it booted, so steering starts from a wrong zero. A FusedCANcoder gives the true absolute angle immediately - the same fix as the arm.</div>
       </div>
     </div>
   </section>
@@ -233,7 +233,7 @@
   <section>
     <div class="note">
       <div class="nh">Where to go deeper</div>
-      <p>You've covered the core. When you're ready for more: <strong>PathPlanner</strong> or <strong>Choreo</strong> for swerve autonomous paths · <strong>pose estimation / Kalman filters</strong> for fusing many sensors · <strong>brownout &amp; voltage compensation</strong> for late-match battery sag · and the official <a href="https://v6.docs.ctr-electronics.com/" style="color:var(--teal)">CTRE Phoenix 6</a> and <a href="https://docs.wpilib.org/" style="color:var(--teal)">WPILib</a> docs — which you can now read fluently.</p>
+      <p>You've covered the core. When you're ready for more: <strong>PathPlanner</strong> or <strong>Choreo</strong> for swerve autonomous paths · <strong>pose estimation / Kalman filters</strong> for fusing many sensors · <strong>brownout &amp; voltage compensation</strong> for late-match battery sag · and the official <a href="https://v6.docs.ctr-electronics.com/" style="color:var(--teal)">CTRE Phoenix 6</a> and <a href="https://docs.wpilib.org/" style="color:var(--teal)">WPILib</a> docs - which you can now read fluently.</p>
     </div>
   </section>
 
@@ -333,7 +333,7 @@
     highkp:  {label:"kP too high", bad:true, kG:0.45,kP:26,kD:0,invert:false,
       sym:"Symptom · oscillation",
       h:"It vibrates / hunts around the target.",
-      why:"Each correction is so strong it overshoots, then over-corrects the other way — a self-sustaining sine wave on the scope.",
+      why:"Each correction is so strong it overshoots, then over-corrects the other way - a self-sustaining sine wave on the scope.",
       fix:"<b>Lower kP</b>, and/or <b>add kD</b> to brake the approach. Tune kP up only until it's just shy of oscillating.",
       ref:"Lessons I.4, I.5"},
     nokg:    {label:"no kG", bad:true, kG:0,kP:6,kD:2.5,invert:false,
@@ -345,13 +345,13 @@
     lowkp:   {label:"kP too low", bad:true, kG:0.45,kP:1.2,kD:0.6,invert:false,
       sym:"Symptom · sluggish",
       h:"It crawls toward the target and barely gets there.",
-      why:"The gain is so small the controller pushes feebly — long, lazy rise, and it may never fully close the last bit of error.",
+      why:"The gain is so small the controller pushes feebly - long, lazy rise, and it may never fully close the last bit of error.",
       fix:"<b>Raise kP</b> until the response is crisp (then back off if it starts to overshoot). On Phoenix, also check Motion Magic limits.",
       ref:"Lessons I.2, I.5"},
     inverted:{label:"inverted", bad:true, kG:0.45,kP:6,kD:2.5,invert:true,
       sym:"Symptom · runs the wrong way",
       h:"It drives away from the target and pins at a hard stop.",
-      why:"The motor (or sensor) is inverted, so every correction pushes the wrong direction. Positive feedback instead of negative — it can never settle.",
+      why:"The motor (or sensor) is inverted, so every correction pushes the wrong direction. Positive feedback instead of negative - it can never settle.",
       fix:"<b>Flip the direction:</b> set MotorOutput.Inverted (or fix the sensor phase) so up means up. Test with a tiny command first.",
       ref:"Lesson III.2"}
   };

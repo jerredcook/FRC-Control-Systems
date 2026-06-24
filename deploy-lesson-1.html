@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Deploy · Part 1.1 — What a Robot Program Is</title>
+<title>Deploy · Part 1.1 - What a Robot Program Is</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -148,19 +148,19 @@
 
   <section>
     <p class="lead">A robot program isn't an app on your laptop.</p>
-    <p>It's code that runs on a small rugged computer bolted into the robot — the <strong>roboRIO</strong>. You write it on your laptop, send it across a cable or radio, and from then on it runs <em>on the robot</em>, all by itself, fifty times a second. Your laptop can even walk away.</p>
+    <p>It's code that runs on a small rugged computer bolted into the robot - the <strong>roboRIO</strong>. You write it on your laptop, send it across a cable or radio, and from then on it runs <em>on the robot</em>, all by itself, fifty times a second. Your laptop can even walk away.</p>
     <p>Three machines do the work, and it helps to know who's who before you write a line:</p>
     <div class="terms">
       <div class="term" style="--accent:var(--teal)"><div class="ic">💻</div><h4>Your laptop</h4><p>Where you <strong>write</strong> the code, in VS Code. It compiles the program and sends it to the robot. After that, it's optional.</p></div>
       <div class="term" style="--accent:var(--indigo)"><div class="ic">🤖</div><h4>The roboRIO</h4><p>The robot's brain. It <strong>runs</strong> your program on a fixed loop, reading sensors and driving motors over the CAN bus.</p></div>
-      <div class="term" style="--accent:var(--amber)"><div class="ic">🎮</div><h4>Driver Station</h4><p>The laptop app that <strong>enables</strong> the robot and shows you what it's doing — your window in while it runs.</p></div>
+      <div class="term" style="--accent:var(--amber)"><div class="ic">🎮</div><h4>Driver Station</h4><p>The laptop app that <strong>enables</strong> the robot and shows you what it's doing - your window in while it runs.</p></div>
     </div>
   </section>
 
   <section>
     <div class="kicker">Watch it</div>
     <h2>The loop you'll live in</h2>
-    <p>Writing robot code is a cycle: <strong>write</strong> a change, <strong>build</strong> it, <strong>deploy</strong> it to the robot, <strong>run</strong> it and watch what happens — then go again. You'll spin this loop constantly. Here it is, one lap at a time.</p>
+    <p>Writing robot code is a cycle: <strong>write</strong> a change, <strong>build</strong> it, <strong>deploy</strong> it to the robot, <strong>run</strong> it and watch what happens - then go again. You'll spin this loop constantly. Here it is, one lap at a time.</p>
 
     <div class="demo" id="demo">
       <div class="demo-head">
@@ -178,15 +178,15 @@
         <div class="ro"><div class="k2">A real build season</div><div class="v teal">hundreds</div></div>
       </div>
     </div>
-    <p class="caption">Most of programming a robot is shrinking this loop — making each lap faster, so you can try more ideas before the match.</p>
+    <p class="caption">Most of programming a robot is shrinking this loop - making each lap faster, so you can try more ideas before the match.</p>
   </section>
 
   <section>
     <div class="kicker">The thing that runs</div>
     <h2>One class is the entry point</h2>
-    <p>When the roboRIO powers on, it looks for one special class — <span class="k">Robot</span> — and runs it. You rarely touch it directly, but it's the seed everything grows from. A brand-new project's <span class="k">Robot.java</span> is mostly empty methods waiting for you:</p>
+    <p>When the roboRIO powers on, it looks for one special class - <span class="k">Robot</span> - and runs it. You rarely touch it directly, but it's the seed everything grows from. A brand-new project's <span class="k">Robot.java</span> is mostly empty methods waiting for you:</p>
     <div class="codewrap">
-      <div class="clabel">Robot.java — the roboRIO's entry point <span class="badge">Java · WPILib</span></div>
+      <div class="clabel">Robot.java - the roboRIO's entry point <span class="badge">Java · WPILib</span></div>
 <pre class="code"><span class="kw">public class</span> <span class="ty">Robot</span> <span class="kw">extends</span> <span class="ty">TimedRobot</span> {
   <span class="an">@Override</span>
   <span class="kw">public</span> <span class="kw">void</span> <span class="fn">robotInit</span>() { }        <span class="cm">// once, at power-on</span>
@@ -198,10 +198,10 @@
   <span class="kw">public</span> <span class="kw">void</span> <span class="fn">teleopPeriodic</span>() { }   <span class="cm">// every 20 ms, while you're driving</span>
 }</pre>
     </div>
-    <p><span class="k">TimedRobot</span> is WPILib's base class that calls these methods for you on a clock — <span class="k">robotInit</span> once, the <span class="k">periodic</span> methods every 20 ms. You'll spend the course filling them in (and soon, a tidier structure on top called <em>command-based</em>). For now, just know: <strong>this</strong> is what 'runs on the robot.'</p>
+    <p><span class="k">TimedRobot</span> is WPILib's base class that calls these methods for you on a clock - <span class="k">robotInit</span> once, the <span class="k">periodic</span> methods every 20 ms. You'll spend the course filling them in (and soon, a tidier structure on top called <em>command-based</em>). For now, just know: <strong>this</strong> is what 'runs on the robot.'</p>
     <div class="note indigo">
       <div class="nh">You won't write this from scratch</div>
-      <p>WPILib generates <span class="k">Robot.java</span>, <span class="k">Main.java</span>, and a starter project for you — you never start from a blank file. The next lesson sets all that up. Today is just the map: laptop writes, roboRIO runs, Driver Station watches.</p>
+      <p>WPILib generates <span class="k">Robot.java</span>, <span class="k">Main.java</span>, and a starter project for you - you never start from a blank file. The next lesson sets all that up. Today is just the map: laptop writes, roboRIO runs, Driver Station watches.</p>
     </div>
   </section>
 
@@ -215,10 +215,10 @@
         <div class="qt">Where does your robot program actually run?</div>
         <div class="opts">
           <button class="opt">On your laptop, which stays plugged in the whole match</button>
-          <button class="opt">On the roboRIO — the computer on the robot — after you deploy it</button>
+          <button class="opt">On the roboRIO - the computer on the robot - after you deploy it</button>
           <button class="opt">In the cloud</button>
         </div>
-        <div class="explain">You write and build on your laptop, then deploy the program to the roboRIO. From then on it runs on the robot itself — the laptop can disconnect entirely.</div>
+        <div class="explain">You write and build on your laptop, then deploy the program to the roboRIO. From then on it runs on the robot itself - the laptop can disconnect entirely.</div>
       </div>
       <div class="q" data-correct="2">
         <div class="qn">Question 2</div>
@@ -238,7 +238,7 @@
           <button class="opt">Compiling your code</button>
           <button class="opt">Charging the battery</button>
         </div>
-        <div class="explain">The Driver Station is the app on the laptop that enables/disables the robot, selects the mode (teleop, autonomous, test), and surfaces telemetry and errors — your live window into the running robot.</div>
+        <div class="explain">The Driver Station is the app on the laptop that enables/disables the robot, selects the mode (teleop, autonomous, test), and surfaces telemetry and errors - your live window into the running robot.</div>
       </div>
     </div>
   </section>

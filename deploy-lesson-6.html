@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Deploy · Part 2.1 — Variables, Types &amp; Math</title>
+<title>Deploy · Part 2.1 - Variables, Types &amp; Math</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -157,10 +157,10 @@
 
   <section>
     <p class="lead">Code is mostly nouns and arithmetic.</p>
-    <p>A <strong>variable</strong> stores a value under a name so you can use it later: <span class="k">double speed = 2.4;</span> makes a box called <span class="k">speed</span> holding 2.4. The word in front — the <strong>type</strong> — says what kind of value goes in the box. You'll use four constantly:</p>
+    <p>A <strong>variable</strong> stores a value under a name so you can use it later: <span class="k">double speed = 2.4;</span> makes a box called <span class="k">speed</span> holding 2.4. The word in front - the <strong>type</strong> - says what kind of value goes in the box. You'll use four constantly:</p>
     <div class="terms">
       <div class="term"><h4><code>int</code></h4><p>A whole number: <code>5</code>, <code>-12</code>, <code>0</code>. CAN ids, counts, button numbers.</p></div>
-      <div class="term"><h4><code>double</code></h4><p>A decimal number: <code>2.4</code>, <code>-0.5</code>, <code>3.14159</code>. Almost everything physical — speeds, voltages, positions.</p></div>
+      <div class="term"><h4><code>double</code></h4><p>A decimal number: <code>2.4</code>, <code>-0.5</code>, <code>3.14159</code>. Almost everything physical - speeds, voltages, positions.</p></div>
       <div class="term"><h4><code>boolean</code></h4><p>True or false: <code>true</code>, <code>false</code>. Is the button pressed? Are we at the target?</p></div>
       <div class="term"><h4><code>String</code></h4><p>Text: <code>"Elevator"</code>. Mostly for names and dashboard labels.</p></div>
     </div>
@@ -169,7 +169,7 @@
   <section>
     <div class="kicker">Try it</div>
     <h2>A live calculation</h2>
-    <p>Here's a tiny program that turns a joystick value into a motor speed. Drag the variables and watch the result recompute — this is exactly the kind of math your robot does every loop.</p>
+    <p>Here's a tiny program that turns a joystick value into a motor speed. Drag the variables and watch the result recompute - this is exactly the kind of math your robot does every loop.</p>
 
     <div class="play" id="play">
       <div class="play-head"><span class="play-title">RobotMath.java</span><span class="play-tag">live</span></div>
@@ -186,7 +186,7 @@
   <section>
     <div class="kicker">The classic trap</div>
     <h2>int math throws away the decimal</h2>
-    <p>One gotcha bites every beginner. When you divide two <span class="k">int</span>s, Java does <strong>integer division</strong> — it drops the fractional part. So <span class="k">5 / 2</span> is <span class="k">2</span>, not 2.5. The fix: make at least one side a <span class="k">double</span>.</p>
+    <p>One gotcha bites every beginner. When you divide two <span class="k">int</span>s, Java does <strong>integer division</strong> - it drops the fractional part. So <span class="k">5 / 2</span> is <span class="k">2</span>, not 2.5. The fix: make at least one side a <span class="k">double</span>.</p>
     <div class="codewrap">
       <div class="clabel">The trap, and the fix <span class="badge">Java</span></div>
 <pre class="code"><span class="ty">int</span> a = <span class="num">5</span>, b = <span class="num">2</span>;
@@ -223,7 +223,7 @@
         <div class="qt">Which type would you use for a motor's speed in meters per second?</div>
         <div class="opts">
           <button class="opt">int</button>
-          <button class="opt">double — it needs decimals</button>
+          <button class="opt">double - it needs decimals</button>
           <button class="opt">String</button>
         </div>
         <div class="explain">Speeds, voltages, and positions are rarely whole numbers, so they're doubles. int is for whole-number things like CAN ids and counts.</div>
@@ -234,7 +234,7 @@
         <div class="opts">
           <button class="opt">3.5</button>
           <button class="opt">4</button>
-          <button class="opt">3 — integer division drops the decimal</button>
+          <button class="opt">3 - integer division drops the decimal</button>
         </div>
         <div class="explain">int ÷ int gives an int: the .5 is thrown away, leaving 3. Use 7 / 2.0 (or cast) to get 3.5.</div>
       </div>
@@ -246,7 +246,7 @@
           <button class="opt">How fast the code runs</button>
           <button class="opt">Which motor it controls</button>
         </div>
-        <div class="explain">The type (int, double, boolean, String…) declares what sort of value lives in that variable — and the compiler keeps you honest about it.</div>
+        <div class="explain">The type (int, double, boolean, String…) declares what sort of value lives in that variable - and the compiler keeps you honest about it.</div>
       </div>
     </div>
   </section>
@@ -256,16 +256,16 @@
       <h3>Part 2 · 01 · Recap</h3>
       <div class="glossary">
         <div class="gl"><b>Variable</b><span>A named box that holds a value.</span></div>
-        <div class="gl"><b>int</b><span>Whole numbers — ids, counts.</span></div>
-        <div class="gl"><b>double</b><span>Decimals — speeds, voltages, positions.</span></div>
-        <div class="gl"><b>boolean</b><span>true / false — pressed? at target?</span></div>
-        <div class="gl"><b>String</b><span>Text — names and labels.</span></div>
+        <div class="gl"><b>int</b><span>Whole numbers - ids, counts.</span></div>
+        <div class="gl"><b>double</b><span>Decimals - speeds, voltages, positions.</span></div>
+        <div class="gl"><b>boolean</b><span>true / false - pressed? at target?</span></div>
+        <div class="gl"><b>String</b><span>Text - names and labels.</span></div>
         <div class="gl"><b>int division</b><span>5 / 2 = 2; cast to double for 2.5.</span></div>
       </div>
       <a class="next" href="deploy-lesson-7.html">
         <div class="n-eyebrow">Up next · Part 2 · 02</div>
         <h3>Methods &amp; Logic</h3>
-        <p>Variables hold values; now make decisions and reuse code. Methods, if/else, and loops — the verbs of a program.</p>
+        <p>Variables hold values; now make decisions and reuse code. Methods, if/else, and loops - the verbs of a program.</p>
       </a>
     </div>
   </section>
@@ -308,7 +308,7 @@
       var ok=ans.indexOf(norm(b.value))!==-1;
       b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false;
     });
-    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓ → 2.5':'Not quite — make one side a double';
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓ → 2.5':'Not quite - make one side a double';
     res.className='code-result '+(all?'ok':'no');
   });
   document.getElementById('reveal').addEventListener('click',function(){

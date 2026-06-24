@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Closing the Loop · Part III.4 — Motion Magic</title>
+<title>Closing the Loop · Part III.4 - Motion Magic</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -163,13 +163,13 @@
     <div class="lesson-no"><b>Part III · 04</b> CTRE Phoenix 6</div>
     <div class="eyebrow">Motion Magic</div>
     <h1>A smooth move,<br>from <span class="accent">one</span> request.</h1>
-    <p class="dek">Part II's motion profile — now built into the motor. Set a cruise speed and acceleration, send a target, and the Kraken plans and tracks the whole trajectory itself.</p>
+    <p class="dek">Part II's motion profile - now built into the motor. Set a cruise speed and acceleration, send a target, and the Kraken plans and tracks the whole trajectory itself.</p>
   </div>
 
   <section>
     <p class="lead">Last lesson's move was a lunge.</p>
-    <p>A plain <span class="k">PositionVoltage</span> request snaps the target, so the motor slams toward it and overshoots — just like the unprofiled move back in Lesson II.5. <strong>Motion Magic</strong> is the onboard version of the trapezoid profile you built there: you give the device a cruise velocity and an acceleration, and it generates a smooth ramp-cruise-slow plan and tracks it with your Slot0 gains — all on the motor, from a single request.</p>
-    <p>Toggle Motion Magic below and feel the difference. Same target, same gains — but one lunges and one glides.</p>
+    <p>A plain <span class="k">PositionVoltage</span> request snaps the target, so the motor slams toward it and overshoots - just like the unprofiled move back in Lesson II.5. <strong>Motion Magic</strong> is the onboard version of the trapezoid profile you built there: you give the device a cruise velocity and an acceleration, and it generates a smooth ramp-cruise-slow plan and tracks it with your Slot0 gains - all on the motor, from a single request.</p>
+    <p>Toggle Motion Magic below and feel the difference. Same target, same gains - but one lunges and one glides.</p>
   </section>
 
   <section>
@@ -210,7 +210,7 @@
         <div class="ro"><div class="k2">Applied (V)</div><div class="v ink" id="roVolt">0.00</div></div>
       </div>
     </div>
-    <p class="caption">Motion Magic uses your Slot0 gains to track its own plan — so the carriage rides the amber profile, and the error stays small the whole way.</p>
+    <p class="caption">Motion Magic uses your Slot0 gains to track its own plan - so the carriage rides the amber profile, and the error stays small the whole way.</p>
   </section>
 
   <section>
@@ -218,7 +218,7 @@
     <h2>Three numbers and a request</h2>
     <p>Motion Magic settings live in the config alongside Slot0. Set the cruise velocity, acceleration, and (optionally) jerk to round the corners, then send a <span class="k">MotionMagicVoltage</span> request just like a position request:</p>
     <div class="codewrap">
-      <div class="clabel">Constructor — Motion Magic limits <span class="badge">Java · Phoenix 6</span></div>
+      <div class="clabel">Constructor - Motion Magic limits <span class="badge">Java · Phoenix 6</span></div>
 <pre class="code">cfg.MotionMagic.MotionMagicCruiseVelocity = <span class="num">80</span>;    <span class="cm">// rotations / sec (top speed)</span>
 cfg.MotionMagic.MotionMagicAcceleration   = <span class="num">160</span>;   <span class="cm">// rotations / sec² (ramp rate)</span>
 cfg.MotionMagic.MotionMagicJerk           = <span class="num">1600</span>;  <span class="cm">// rotations / sec³ (smooths corners)</span>
@@ -233,8 +233,8 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(cf
 }</pre>
     </div>
     <div class="note teal">
-      <div class="nh">Motion Magic Expo — even smarter</div>
-      <p>Regular Motion Magic uses a fixed cruise velocity. <strong>Motion Magic Expo</strong> instead uses your mechanism's <span class="k">kV</span> and <span class="k">kA</span> to shape an <em>exponential</em> profile that matches what the motor can actually achieve — accelerating hard, then easing as it nears its real top speed. Set <span class="k">MotionMagicExpo_kV</span> and <span class="k">MotionMagicExpo_kA</span> and send a <span class="k">MotionMagicExpoVoltage</span>. No guessing a cruise velocity — the physics picks it.</p>
+      <div class="nh">Motion Magic Expo - even smarter</div>
+      <p>Regular Motion Magic uses a fixed cruise velocity. <strong>Motion Magic Expo</strong> instead uses your mechanism's <span class="k">kV</span> and <span class="k">kA</span> to shape an <em>exponential</em> profile that matches what the motor can actually achieve - accelerating hard, then easing as it nears its real top speed. Set <span class="k">MotionMagicExpo_kV</span> and <span class="k">MotionMagicExpo_kA</span> and send a <span class="k">MotionMagicExpoVoltage</span>. No guessing a cruise velocity - the physics picks it.</p>
     </div>
 
     <div class="code-ex">
@@ -265,13 +265,13 @@ motor.<span class="fn">setControl</span>(request.<span class="fn">withPosition</
           <button class="opt">A second motor</button>
           <button class="opt">A smooth onboard motion profile, so the move ramps up and slows down instead of lunging</button>
         </div>
-        <div class="explain">It's the Part II trapezoid profile, generated and tracked on the device. Instead of snapping to the target, the motor follows a planned ramp-cruise-slow trajectory — gentler and more accurate.</div>
+        <div class="explain">It's the Part II trapezoid profile, generated and tracked on the device. Instead of snapping to the target, the motor follows a planned ramp-cruise-slow trajectory - gentler and more accurate.</div>
       </div>
       <div class="q" data-correct="0">
         <div class="qn">Question 2</div>
         <div class="qt">What do MotionMagicCruiseVelocity and MotionMagicAcceleration control?</div>
         <div class="opts">
-          <button class="opt">The top speed of the move and how quickly it ramps to that speed — the profile's shape</button>
+          <button class="opt">The top speed of the move and how quickly it ramps to that speed - the profile's shape</button>
           <button class="opt">The PID gains</button>
           <button class="opt">The motor's CAN id</button>
         </div>
@@ -285,7 +285,7 @@ motor.<span class="fn">setControl</span>(request.<span class="fn">withPosition</
           <button class="opt">It uses the mechanism's kV and kA to shape an exponential profile matched to what the motor can really do</button>
           <button class="opt">It only works on drivetrains</button>
         </div>
-        <div class="explain">Instead of a fixed cruise velocity you guess, Expo uses kV/kA so the profile naturally respects the motor's real top speed — accelerating hard, then easing in as it approaches it.</div>
+        <div class="explain">Instead of a fixed cruise velocity you guess, Expo uses kV/kA so the profile naturally respects the motor's real top speed - accelerating hard, then easing in as it approaches it.</div>
       </div>
     </div>
   </section>
@@ -304,7 +304,7 @@ motor.<span class="fn">setControl</span>(request.<span class="fn">withPosition</
       <a class="next" href="closing-the-loop-lesson-18.html">
         <div class="n-eyebrow">Up next · Part III · 05</div>
         <h3>SysId on Phoenix 6</h3>
-        <p>Every gain you've typed — kS, kV, kA, kG — comes from one place: measuring your real mechanism. The finale runs SysId through Phoenix and drops the numbers straight into Slot0.</p>
+        <p>Every gain you've typed - kS, kV, kA, kG - comes from one place: measuring your real mechanism. The finale runs SysId through Phoenix and drops the numbers straight into Slot0.</p>
       </a>
     </div>
   </section>
@@ -470,7 +470,7 @@ motor.<span class="fn">setControl</span>(request.<span class="fn">withPosition</
       if(!ok)all=false;
     });
     var res=document.getElementById('cres');
-    res.textContent=all?'All correct ✓':'Not quite — it’s MotionMagicVoltage';
+    res.textContent=all?'All correct ✓':'Not quite - it’s MotionMagicVoltage';
     res.className='code-result '+(all?'ok':'no');
   });
   document.getElementById('reveal').addEventListener('click',function(){

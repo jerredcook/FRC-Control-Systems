@@ -113,7 +113,7 @@
       <div class="sub">A control systems course for FRC</div>
       <div class="awarded">This certifies that</div>
       <div class="who" id="who">Your Name</div>
-      <div class="for">has completed all 24 lessons — from feedback fundamentals through PID, feedforward, real WPILib code, CTRE Phoenix 6, tuned mechanisms, and state-space control.</div>
+      <div class="for">has completed all 24 lessons - from feedback fundamentals through PID, feedforward, real WPILib code, CTRE Phoenix 6, tuned mechanisms, and state-space control.</div>
       <div class="parts">
         <span class="pchip">I · The Idea</span>
         <span class="pchip">II · From Math to Code</span>
@@ -127,7 +127,7 @@
           <div class="line">Course</div>
         </div>
         <div class="date">
-          <div class="d" id="date">—</div>
+          <div class="d" id="date">-</div>
           <div class="line" style="border-top:1px solid var(--line-2);padding-top:6px;text-align:right">Date completed</div>
         </div>
       </div>
@@ -156,7 +156,7 @@
     try{ localStorage.setItem(NAME_KEY, v); }catch(e){}
   });
 
-  // date — today, formatted
+  // date - today, formatted
   try{
     var d=new Date();
     dateEl.textContent=d.toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"});
@@ -169,7 +169,7 @@
   if(done>=TOTAL){
     progEl.innerHTML='<b>✓ All '+TOTAL+' lessons complete.</b> Print it and hang it up.';
   }else{
-    progEl.innerHTML='You’ve marked <b>'+done+' / '+TOTAL+'</b> lessons complete. The certificate is yours to print whenever you finish — keep going!';
+    progEl.innerHTML='You’ve marked <b>'+done+' / '+TOTAL+'</b> lessons complete. The certificate is yours to print whenever you finish - keep going!';
   }
 
   document.getElementById("print").addEventListener("click",function(){

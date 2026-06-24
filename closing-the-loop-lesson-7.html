@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Closing the Loop · Lesson 7 — System Identification</title>
+<title>Closing the Loop · Lesson 7 - System Identification</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -191,24 +191,24 @@
 
   <section>
     <p class="lead">Last lesson, you typed in <span class="k">kG</span> and friends like they fell from the sky.</p>
-    <p>They didn't. Every feedforward gain is a real, measurable property of <em>your</em> mechanism — this motor, this gearbox, this much weight. The process of measuring them is called <strong>system identification</strong> (sysid for short, or "characterization"). It turns a couple of test runs into trustworthy numbers, so your feedforward describes the robot you actually built instead of one you hoped for.</p>
+    <p>They didn't. Every feedforward gain is a real, measurable property of <em>your</em> mechanism - this motor, this gearbox, this much weight. The process of measuring them is called <strong>system identification</strong> (sysid for short, or "characterization"). It turns a couple of test runs into trustworthy numbers, so your feedforward describes the robot you actually built instead of one you hoped for.</p>
     <p>Here's the whole trick, hiding in the feedforward equation from Lesson 6:</p>
     <div class="formula">
       voltage = <b>kS</b>·sign(v) + <b>kG</b> + <span class="i">kV·v</span> + <span class="t">kA·a</span>
-      <span class="small">four physics terms — and each one leaves a fingerprint we can read</span>
+      <span class="small">four physics terms - and each one leaves a fingerprint we can read</span>
     </div>
     <p>Watch what happens if you move the carriage at a <em>constant</em> speed. Constant speed means acceleration is zero, so the <span class="t">kA·a</span> term vanishes entirely. What's left is a plain straight line:</p>
     <div class="formula">
       voltage = (<b>kS + kG</b>) + <span class="i">kV</span>·velocity
       <span class="small">a line: <b>intercept</b> = kS + kG &nbsp;·&nbsp; <span class="i">slope</span> = kV</span>
     </div>
-    <p>So if we run the elevator at a bunch of steady speeds and record the voltage each one needs, the data falls on a line — and the line's <strong>slope and intercept hand us the gains</strong>. That's it. That's system identification.</p>
+    <p>So if we run the elevator at a bunch of steady speeds and record the voltage each one needs, the data falls on a line - and the line's <strong>slope and intercept hand us the gains</strong>. That's it. That's system identification.</p>
   </section>
 
   <section>
     <div class="kicker">Try it</div>
     <h2>Run the ramp test</h2>
-    <p>Press <strong>Run ramp test</strong>. The motor voltage rises <em>slowly</em> — slow enough that the carriage is always cruising at its steady speed for that voltage (engineers call this a <strong>quasistatic</strong> test). Each instant we plot a dot: <span style="color:var(--indigo)">velocity</span> across, <span class="sub">voltage</span> up. Watch the cloud of dots line up.</p>
+    <p>Press <strong>Run ramp test</strong>. The motor voltage rises <em>slowly</em> - slow enough that the carriage is always cruising at its steady speed for that voltage (engineers call this a <strong>quasistatic</strong> test). Each instant we plot a dot: <span style="color:var(--indigo)">velocity</span> across, <span class="sub">voltage</span> up. Watch the cloud of dots line up.</p>
 
     <div class="demo" id="demo">
       <div class="demo-head">
@@ -241,17 +241,17 @@
         <div class="ro"><div class="k2">Voltage</div><div class="v ink" id="roU">0.00</div></div>
         <div class="ro"><div class="k2">Velocity</div><div class="v indigo" id="roV">0.00</div></div>
         <div class="ro"><div class="k2">Data points</div><div class="v teal" id="roN">0</div></div>
-        <div class="ro"><div class="k2">Fit error (RMS)</div><div class="v amber" id="roErr">—</div></div>
+        <div class="ro"><div class="k2">Fit error (RMS)</div><div class="v amber" id="roErr">-</div></div>
       </div>
     </div>
-    <p class="caption">Drag the two sliders until the indigo line lies right through the cloud. When it does, you've measured your gains by hand — then hit Auto-fit to see how close you got.</p>
+    <p class="caption">Drag the two sliders until the indigo line lies right through the cloud. When it does, you've measured your gains by hand - then hit Auto-fit to see how close you got.</p>
   </section>
 
   <section>
     <div class="kicker">What the line tells you</div>
     <h2>Slope is kV, intercept is the rest</h2>
-    <p>Once the line fits, read it off directly. The <span class="i">slope</span> — how much extra voltage each extra unit of speed costs — is <span class="k">kV</span>. The <strong>intercept</strong>, where the line meets zero velocity, is the voltage the mechanism needs just to creep: that's <span class="k">kS</span> (static friction) plus <span class="k">kG</span> (gravity), bundled together.</p>
-    <p>But "bundled together" is a problem — feedforward needs <span class="k">kS</span> and <span class="k">kG</span> <em>separately</em>. One ramp can't split them. The fix is beautifully simple: run the ramp <strong>downward</strong> too.</p>
+    <p>Once the line fits, read it off directly. The <span class="i">slope</span> - how much extra voltage each extra unit of speed costs - is <span class="k">kV</span>. The <strong>intercept</strong>, where the line meets zero velocity, is the voltage the mechanism needs just to creep: that's <span class="k">kS</span> (static friction) plus <span class="k">kG</span> (gravity), bundled together.</p>
+    <p>But "bundled together" is a problem - feedforward needs <span class="k">kS</span> and <span class="k">kG</span> <em>separately</em>. One ramp can't split them. The fix is beautifully simple: run the ramp <strong>downward</strong> too.</p>
     <div class="formula">
       up&nbsp;&nbsp;: intercept = <b>kG + kS</b><br>
       down: intercept = <b>kG − kS</b>
@@ -269,8 +269,8 @@
 
   <section>
     <div class="kicker">The missing gain</div>
-    <h2>And kA — the step test</h2>
-    <p>Notice the ramp never told us <span class="k">kA</span>. That's on purpose: we kept acceleration near zero so the <span class="t">kA·a</span> term would disappear and leave a clean line. To measure <span class="k">kA</span> we do the opposite — a <strong>dynamic step test</strong>: slam the voltage to a fixed value and watch how <em>hard</em> the carriage accelerates in the first instant, before speed has a chance to build.</p>
+    <h2>And kA - the step test</h2>
+    <p>Notice the ramp never told us <span class="k">kA</span>. That's on purpose: we kept acceleration near zero so the <span class="t">kA·a</span> term would disappear and leave a clean line. To measure <span class="k">kA</span> we do the opposite - a <strong>dynamic step test</strong>: slam the voltage to a fixed value and watch how <em>hard</em> the carriage accelerates in the first instant, before speed has a chance to build.</p>
     <p>At that first instant velocity is still ~0, so kV and the line's intercept are already accounted for, and every leftover volt is going into acceleration:</p>
     <div class="formula">
       <b>kA</b> = (voltage − intercept) / acceleration
@@ -282,7 +282,7 @@
   <section>
     <div class="kicker">In practice</div>
     <h2>You don't do this by hand</h2>
-    <p>You <em>could</em> run these tests with a stopwatch and graph paper — but you won't. WPILib's <span class="k">SysId</span> tool and CTRE's <span class="k">Tuner X</span> automate the whole thing: a routine drives the ramp and the step for you, logs voltage, position, and velocity at high speed, then fits the line and reports kS, kG, kV, and kA. In WPILib that routine looks like this:</p>
+    <p>You <em>could</em> run these tests with a stopwatch and graph paper - but you won't. WPILib's <span class="k">SysId</span> tool and CTRE's <span class="k">Tuner X</span> automate the whole thing: a routine drives the ramp and the step for you, logs voltage, position, and velocity at high speed, then fits the line and reports kS, kG, kV, and kA. In WPILib that routine looks like this:</p>
     <div class="codewrap">
       <div class="clabel">A SysId characterization routine <span class="badge">Java</span></div>
 <pre class="code"><span class="kw">private final</span> <span class="ty">SysIdRoutine</span> routine = <span class="kw">new</span> <span class="ty">SysIdRoutine</span>(
@@ -301,7 +301,7 @@
 <span class="ty">Command</span> stepUp   = routine.<span class="fn">dynamic</span>(Direction.<span class="ty">kForward</span>);
 <span class="ty">Command</span> stepDown = routine.<span class="fn">dynamic</span>(Direction.<span class="ty">kReverse</span>);</pre>
     </div>
-    <p>Run those four commands on the real robot, hand the logs to the analyzer, and it spits out the same slope and intercept you just fit by hand — only with hundreds of data points and no eyeballing.</p>
+    <p>Run those four commands on the real robot, hand the logs to the analyzer, and it spits out the same slope and intercept you just fit by hand - only with hundreds of data points and no eyeballing.</p>
 
     <div class="code-ex">
       <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
@@ -325,11 +325,11 @@
         <div class="qn">Question 1</div>
         <div class="qt">In the ramp test, you plot voltage against velocity and the data forms a line. The <em>slope</em> of that line is…</div>
         <div class="opts">
-          <button class="opt">kG — the gravity gain</button>
-          <button class="opt">kV — the velocity gain</button>
-          <button class="opt">kA — the acceleration gain</button>
+          <button class="opt">kG - the gravity gain</button>
+          <button class="opt">kV - the velocity gain</button>
+          <button class="opt">kA - the acceleration gain</button>
         </div>
-        <div class="explain">kV. Slope is "extra voltage per extra unit of speed" — exactly what kV means. The intercept holds kS + kG, and kA never appears because acceleration is held near zero.</div>
+        <div class="explain">kV. Slope is "extra voltage per extra unit of speed" - exactly what kV means. The intercept holds kS + kG, and kA never appears because acceleration is held near zero.</div>
       </div>
       <div class="q" data-correct="2">
         <div class="qn">Question 2</div>
@@ -337,19 +337,19 @@
         <div class="opts">
           <button class="opt">To double-check the slope kV</button>
           <button class="opt">To give the battery time to recover</button>
-          <button class="opt">To separate kS from kG — the two intercepts differ because friction flips sign</button>
+          <button class="opt">To separate kS from kG - the two intercepts differ because friction flips sign</button>
         </div>
         <div class="explain">A single ramp only gives you kS + kG lumped together. Going the other direction flips friction's sign, so the up-intercept is kG + kS and the down-intercept is kG − kS. Average them for kG, halve their difference for kS.</div>
       </div>
       <div class="q" data-correct="0">
         <div class="qn">Question 3</div>
-        <div class="qt">The slow ramp test never reveals kA. Why not — and what does?</div>
+        <div class="qt">The slow ramp test never reveals kA. Why not - and what does?</div>
         <div class="opts">
           <button class="opt">The ramp keeps acceleration near zero, so kA·a stays ~0; the dynamic step test reveals it</button>
-          <button class="opt">kA can't be measured at all — you always have to guess it</button>
+          <button class="opt">kA can't be measured at all - you always have to guess it</button>
           <button class="opt">kA only matters for drivetrains, never elevators</button>
         </div>
-        <div class="explain">The ramp is deliberately slow so acceleration ≈ 0 and the line stays clean — which means kA never shows up. A dynamic step test creates a big, brief acceleration so kA finally has something to act on, and you read it from how hard the mechanism accelerates.</div>
+        <div class="explain">The ramp is deliberately slow so acceleration ≈ 0 and the line stays clean - which means kA never shows up. A dynamic step test creates a big, brief acceleration so kA finally has something to act on, and you read it from how hard the mechanism accelerates.</div>
       </div>
     </div>
   </section>
@@ -361,14 +361,14 @@
         <div class="gl"><b>System ID</b><span>Measuring a mechanism's gains instead of guessing them.</span></div>
         <div class="gl"><b>Quasistatic ramp</b><span>A slow voltage ramp; data forms a line at steady speed.</span></div>
         <div class="gl"><b>Slope → kV</b><span>Extra voltage per extra unit of velocity.</span></div>
-        <div class="gl"><b>Intercept → kS + kG</b><span>Voltage at zero velocity — friction plus gravity.</span></div>
+        <div class="gl"><b>Intercept → kS + kG</b><span>Voltage at zero velocity - friction plus gravity.</span></div>
         <div class="gl"><b>Up + down</b><span>Two intercepts split kS from kG.</span></div>
         <div class="gl"><b>Dynamic step → kA</b><span>A hard, brief push reveals the acceleration gain.</span></div>
       </div>
       <a class="next" href="closing-the-loop-lesson-8.html">
         <div class="n-eyebrow">Up next · Lesson 08</div>
         <h3>The Complete Controller</h3>
-        <p>You can tune feedback (Lessons 2–5) and now <em>measure</em> feedforward (6–7). The finale fuses them into the exact controller real FRC teams ship — and points you toward writing it in real robot code.</p>
+        <p>You can tune feedback (Lessons 2-5) and now <em>measure</em> feedforward (6-7). The finale fuses them into the exact controller real FRC teams ship - and points you toward writing it in real robot code.</p>
       </a>
     </div>
   </section>
@@ -556,7 +556,7 @@
     el.roV.textContent=Math.max(0,S.v).toFixed(3);
     el.roN.textContent=String(S.pts.length);
     var e=rmsError();
-    el.roErr.textContent=(e==null)?'—':e.toFixed(3);
+    el.roErr.textContent=(e==null)?'-':e.toFixed(3);
     el.roErr.className='v '+((e!=null&&e<0.03)?'green':'amber');
   }
 
@@ -578,7 +578,7 @@
       if(!ok)all=false;
     });
     var res=document.getElementById('cres');
-    res.textContent=all?'All correct ✓':'Not quite — check the formulas above';
+    res.textContent=all?'All correct ✓':'Not quite - check the formulas above';
     res.className='code-result '+(all?'ok':'no');
   });
   document.getElementById('reveal').addEventListener('click',function(){

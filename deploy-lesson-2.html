@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Deploy · Part 1.2 — Setting Up WPILib</title>
+<title>Deploy · Part 1.2 - Setting Up WPILib</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -131,23 +131,23 @@
     <div class="lesson-no"><b>Part 1 · 02</b> The Toolchain</div>
     <div class="eyebrow">Setting Up WPILib</div>
     <h1>Your first<br><span class="accent">project</span>.</h1>
-    <p class="dek">Install the tools, generate a project, and meet every file it makes for you — so the folder full of code stops looking like a maze.</p>
+    <p class="dek">Install the tools, generate a project, and meet every file it makes for you - so the folder full of code stops looking like a maze.</p>
   </div>
 
   <section>
     <p class="lead">You don't install "Java" and start typing.</p>
-    <p>FRC programming runs on <strong>WPILib</strong> — a library plus a customized copy of VS Code with the whole toolchain baked in. One installer sets it all up, and a menu command stamps out a complete starter project. Three steps and you're writing robot code:</p>
+    <p>FRC programming runs on <strong>WPILib</strong> - a library plus a customized copy of VS Code with the whole toolchain baked in. One installer sets it all up, and a menu command stamps out a complete starter project. Three steps and you're writing robot code:</p>
     <div class="steps">
-      <div class="stp"><div class="num">1</div><div><h4>Install WPILib</h4><p>Download the WPILib release installer for your season and run it. It gives you a dedicated <strong>WPILib VS Code</strong> with Java, Gradle, and the robot tools already configured — separate from any other VS Code you have.</p></div></div>
+      <div class="stp"><div class="num">1</div><div><h4>Install WPILib</h4><p>Download the WPILib release installer for your season and run it. It gives you a dedicated <strong>WPILib VS Code</strong> with Java, Gradle, and the robot tools already configured - separate from any other VS Code you have.</p></div></div>
       <div class="stp"><div class="num">2</div><div><h4>Create a project</h4><p>Open the WPILib VS Code, hit <code>Ctrl/Cmd + Shift + P</code>, run <strong>WPILib: Create a new project</strong>. Pick the <em>Command Robot</em> template, language <em>Java</em>, and type your team number.</p></div></div>
-      <div class="stp"><div class="num">3</div><div><h4>Open it</h4><p>That's it — you have a full, buildable robot project. No blank files, nothing missing. Now let's see what's inside.</p></div></div>
+      <div class="stp"><div class="num">3</div><div><h4>Open it</h4><p>That's it - you have a full, buildable robot project. No blank files, nothing missing. Now let's see what's inside.</p></div></div>
     </div>
   </section>
 
   <section>
     <div class="kicker">Explore it</div>
     <h2>Every file, and what it's for</h2>
-    <p>Here's a fresh command-based project. It looks like a lot, but you'll only edit a few files day to day. Click each one to see its job — the ★ files are where you'll live.</p>
+    <p>Here's a fresh command-based project. It looks like a lot, but you'll only edit a few files day to day. Click each one to see its job - the ★ files are where you'll live.</p>
 
     <div class="explorer" id="explorer">
       <div class="tree" id="tree"></div>
@@ -159,10 +159,10 @@
   <section>
     <div class="kicker">Two flavors</div>
     <h2>Command Robot vs Timed Robot</h2>
-    <p>When you create the project you choose a template. <span class="k">Timed Robot</span> is the bare-bones version — just the <span class="k">Robot.java</span> methods from the last lesson. <span class="k">Command Robot</span> adds the <strong>command-based</strong> structure: a <span class="k">RobotContainer</span>, and folders for <span class="k">subsystems</span> and <span class="k">commands</span>.</p>
+    <p>When you create the project you choose a template. <span class="k">Timed Robot</span> is the bare-bones version - just the <span class="k">Robot.java</span> methods from the last lesson. <span class="k">Command Robot</span> adds the <strong>command-based</strong> structure: a <span class="k">RobotContainer</span>, and folders for <span class="k">subsystems</span> and <span class="k">commands</span>.</p>
     <div class="note indigo">
       <div class="nh">Pick Command Robot</div>
-      <p>Nearly every successful FRC team uses command-based — it keeps a growing robot organized instead of a tangle of if-statements. This whole course teaches it, starting in Part 3. If a menu offers "Command Robot Skeleton," that's the clean starting point.</p>
+      <p>Nearly every successful FRC team uses command-based - it keeps a growing robot organized instead of a tangle of if-statements. This whole course teaches it, starting in Part 3. If a menu offers "Command Robot Skeleton," that's the clean starting point.</p>
     </div>
   </section>
 
@@ -179,7 +179,7 @@
           <button class="opt">Use 'WPILib: Create a new project' in the WPILib VS Code</button>
           <button class="opt">Download someone else's robot and delete their code</button>
         </div>
-        <div class="explain">The WPILib VS Code generates a complete, buildable project from a template — pick Command Robot, Java, and your team number. You never start from a blank file.</div>
+        <div class="explain">The WPILib VS Code generates a complete, buildable project from a template - pick Command Robot, Java, and your team number. You never start from a blank file.</div>
       </div>
       <div class="q" data-correct="0">
         <div class="qn">Question 2</div>
@@ -199,7 +199,7 @@
           <button class="opt">It's required by the rules</button>
           <button class="opt">It adds the command-based structure that keeps a growing robot organized</button>
         </div>
-        <div class="explain">Command-based gives you subsystems and commands — a clean way to scale from one mechanism to a whole robot without your code turning into spaghetti. It's what this course (and most teams) use.</div>
+        <div class="explain">Command-based gives you subsystems and commands - a clean way to scale from one mechanism to a whole robot without your code turning into spaghetti. It's what this course (and most teams) use.</div>
       </div>
     </div>
   </section>
@@ -239,12 +239,12 @@
   var FILES=[
     {type:'dir', indent:0, name:'MyRobot/'},
     {type:'file', indent:1, name:'build.gradle', role:'The build script', star:false,
-     desc:'GradleRIO — the recipe that compiles your code and deploys it to the roboRIO. You edit it only to add a library or bump a version.'},
+     desc:'GradleRIO - the recipe that compiles your code and deploys it to the roboRIO. You edit it only to add a library or bump a version.'},
     {type:'file', indent:1, name:'gradlew', role:'The build wrapper', star:false,
      desc:'A small launcher so everyone on the team builds with the exact same Gradle version. Never edit it; it just makes "build" work everywhere.'},
     {type:'dir', indent:1, name:'vendordeps/'},
     {type:'file', indent:2, name:'WPILibNewCommands.json', role:'A vendor library', star:false,
-     desc:'Each JSON here tells the build to pull in a library — command-based comes by default; you add CTRE Phoenix and REV here later (Lesson 1.5).'},
+     desc:'Each JSON here tells the build to pull in a library - command-based comes by default; you add CTRE Phoenix and REV here later (Lesson 1.5).'},
     {type:'dir', indent:1, name:'.wpilib/'},
     {type:'file', indent:2, name:'wpilib_preferences.json', role:'Project settings', star:false,
      desc:'Holds your team number and project type. Set once when you create the project.'},
@@ -255,12 +255,12 @@
     {type:'file', indent:3, name:'Robot.java', role:'The lifecycle', star:false,
      desc:'Defines the modes and, in a command-based project, runs the CommandScheduler every 20 ms. Mostly leave it alone.'},
     {type:'file', indent:3, name:'RobotContainer.java', role:'The robot, assembled ★', star:true,
-     desc:'Where you create your subsystems, build commands, and bind them to controller buttons. The map of your whole robot — you live here.'},
+     desc:'Where you create your subsystems, build commands, and bind them to controller buttons. The map of your whole robot - you live here.'},
     {type:'dir', indent:3, name:'subsystems/', star:true},
     {type:'dir', indent:3, name:'commands/', star:true},
     {type:'dir', indent:2, name:'deploy/'},
     {type:'file', indent:3, name:'(paths, configs)', role:'Files sent to the robot', star:false,
-     desc:'Anything here is copied to the roboRIO on deploy — e.g., PathPlanner auto paths your code reads at runtime.'},
+     desc:'Anything here is copied to the roboRIO on deploy - e.g., PathPlanner auto paths your code reads at runtime.'},
     {type:'file', indent:1, name:'.gitignore', role:'Git ignore list', star:false,
      desc:'Tells Git to skip build output and editor junk. Already set up correctly for you (more in Lesson 1.4).'}
   ];

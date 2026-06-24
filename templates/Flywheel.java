@@ -10,13 +10,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
- * Flywheel / shooter — VELOCITY control.
+ * Flywheel / shooter - VELOCITY control.
  *
  * From "Closing the Loop" Part IV.3. The big difference from position
  * mechanisms: kV does almost all the work, kP is deliberately SMALL (a large
  * kP makes the speed hunt), and there is no kG (gravity doesn't slow a wheel).
  *
- * Spin up, wait for atSpeed(), THEN shoot — and let it recover between shots.
+ * Spin up, wait for atSpeed(), THEN shoot - and let it recover between shots.
  */
 public class Flywheel extends SubsystemBase {
   private static final int    MOTOR_CAN_ID = 12;   // TODO
@@ -41,7 +41,7 @@ public class Flywheel extends SubsystemBase {
 
     cfg.Slot0.kS = kS; cfg.Slot0.kV = kV; cfg.Slot0.kA = kA;
     cfg.Slot0.kP = kP; cfg.Slot0.kI = kI; cfg.Slot0.kD = kD;
-    // no GravityType — a flywheel has no gravity load
+    // no GravityType - a flywheel has no gravity load
 
     motor.getConfigurator().apply(cfg);
   }

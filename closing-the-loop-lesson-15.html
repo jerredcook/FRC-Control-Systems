@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Closing the Loop · Part III.2 — Configuring a TalonFX</title>
+<title>Closing the Loop · Part III.2 - Configuring a TalonFX</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -162,12 +162,12 @@
     <div class="lesson-no"><b>Part III · 02</b> CTRE Phoenix 6</div>
     <div class="eyebrow">Configuring a TalonFX</div>
     <h1>Set it up<br><span class="accent">once</span>.</h1>
-    <p class="dek">Current limits, brake mode, sensor ratios — a one-time setup before the motor can safely run your loop. Build one below and watch the Java write itself.</p>
+    <p class="dek">Current limits, brake mode, sensor ratios - a one-time setup before the motor can safely run your loop. Build one below and watch the Java write itself.</p>
   </div>
 
   <section>
     <p class="lead">Configuration is just a settings object.</p>
-    <p>Every TalonFX setting lives in a <span class="k">TalonFXConfiguration</span> — one object with nested groups: <span class="k">MotorOutput</span> (brake/coast, direction), <span class="k">CurrentLimits</span> (protect the motor and breakers), <span class="k">Feedback</span> (the sensor ratio from Lesson II.2), and later <span class="k">Slot0</span> and <span class="k">MotionMagic</span>. You fill in the fields, then call <span class="k">apply()</span> once at startup, and the motor remembers.</p>
+    <p>Every TalonFX setting lives in a <span class="k">TalonFXConfiguration</span> - one object with nested groups: <span class="k">MotorOutput</span> (brake/coast, direction), <span class="k">CurrentLimits</span> (protect the motor and breakers), <span class="k">Feedback</span> (the sensor ratio from Lesson II.2), and later <span class="k">Slot0</span> and <span class="k">MotionMagic</span>. You fill in the fields, then call <span class="k">apply()</span> once at startup, and the motor remembers.</p>
     <p>Play with the settings below. The exact Java you'd paste into your subsystem updates as you go.</p>
   </section>
 
@@ -219,7 +219,7 @@
         <div class="bcode"><pre id="cfgCode"></pre></div>
       </div>
     </div>
-    <p class="caption">This is real, paste-ready Phoenix 6. Notice the Feedback block change when you pick a Fused CANcoder — that's how you add an absolute sensor.</p>
+    <p class="caption">This is real, paste-ready Phoenix 6. Notice the Feedback block change when you pick a Fused CANcoder - that's how you add an absolute sensor.</p>
   </section>
 
   <section>
@@ -228,21 +228,21 @@
     <div class="terms">
       <div class="term" style="--accent:var(--red)"><h4>Current limits</h4><p>The most important safety setting. A <strong>stator</strong> limit caps torque and protects the motor from burning up; a <strong>supply</strong> limit keeps you from tripping a breaker. Always set them.</p></div>
       <div class="term" style="--accent:var(--teal)"><h4>Neutral mode</h4><p><strong>Brake</strong> resists motion when idle (an arm holds its spot); <strong>Coast</strong> lets it spin free (a drivetrain rolls). Pick per mechanism.</p></div>
-      <div class="term" style="--accent:var(--indigo)"><h4>SensorToMechanismRatio</h4><p>The Lesson II.2 gear ratio, set once — now getPosition() returns mechanism rotations and the onboard loop tunes in mechanism units.</p></div>
-      <div class="term" style="--accent:var(--amber)"><h4>FusedCANcoder</h4><p>Combines an absolute CANcoder (knows its angle at power-on) with the fast internal rotor — best of both. Essential for arms and swerve steering.</p></div>
+      <div class="term" style="--accent:var(--indigo)"><h4>SensorToMechanismRatio</h4><p>The Lesson II.2 gear ratio, set once - now getPosition() returns mechanism rotations and the onboard loop tunes in mechanism units.</p></div>
+      <div class="term" style="--accent:var(--amber)"><h4>FusedCANcoder</h4><p>Combines an absolute CANcoder (knows its angle at power-on) with the fast internal rotor - best of both. Essential for arms and swerve steering.</p></div>
     </div>
     <div class="note teal">
       <div class="nh">Why "Fused"</div>
-      <p>A bare CANcoder is absolute but updates slowly; the internal rotor is fast but forgets its zero at power-off. <strong>FusedCANcoder</strong> uses the CANcoder for the true angle and the rotor for speed and smoothness — so an arm knows exactly where it is the instant the robot boots, and still runs a crisp 1 kHz loop.</p>
+      <p>A bare CANcoder is absolute but updates slowly; the internal rotor is fast but forgets its zero at power-off. <strong>FusedCANcoder</strong> uses the CANcoder for the true angle and the rotor for speed and smoothness - so an arm knows exactly where it is the instant the robot boots, and still runs a crisp 1 kHz loop.</p>
     </div>
   </section>
 
   <section>
     <div class="kicker">Applying it</div>
     <h2>One call at startup</h2>
-    <p>In the subsystem constructor, build the config and apply it. <span class="k">apply()</span> sends every setting to the device and waits for confirmation — do it once, not every loop:</p>
+    <p>In the subsystem constructor, build the config and apply it. <span class="k">apply()</span> sends every setting to the device and waits for confirmation - do it once, not every loop:</p>
     <div class="codewrap">
-      <div class="clabel">Elevator.java — constructor <span class="badge">Java · Phoenix 6</span></div>
+      <div class="clabel">Elevator.java - constructor <span class="badge">Java · Phoenix 6</span></div>
 <pre class="code"><span class="kw">private final</span> <span class="ty">TalonFX</span> motor = <span class="kw">new</span> <span class="ty">TalonFX</span>(<span class="num">10</span>);
 
 <span class="kw">public</span> <span class="ty">Elevator</span>() {
@@ -251,7 +251,7 @@
   cfg.CurrentLimits.StatorCurrentLimit = <span class="num">80</span>;
   cfg.CurrentLimits.StatorCurrentLimitEnable = <span class="kw">true</span>;
   cfg.Feedback.SensorToMechanismRatio = <span class="num">9.0</span>;
-  motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(cfg);     <span class="cm">// once — the device remembers</span>
+  motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(cfg);     <span class="cm">// once - the device remembers</span>
 }</pre>
     </div>
 
@@ -283,15 +283,15 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(<i
           <button class="opt">The stator current limit</button>
           <button class="opt">The CAN id</button>
         </div>
-        <div class="explain">The stator current limit caps the current actually flowing through the motor windings — that's what generates heat and torque. A supply limit additionally protects your breaker. Always set both.</div>
+        <div class="explain">The stator current limit caps the current actually flowing through the motor windings - that's what generates heat and torque. A supply limit additionally protects your breaker. Always set both.</div>
       </div>
       <div class="q" data-correct="2">
         <div class="qn">Question 2</div>
         <div class="qt">For an arm that must hold its position when the robot is disabled, which neutral mode do you want?</div>
         <div class="opts">
-          <button class="opt">Coast — let it swing freely</button>
+          <button class="opt">Coast - let it swing freely</button>
           <button class="opt">It doesn't matter</button>
-          <button class="opt">Brake — resist motion so it stays put</button>
+          <button class="opt">Brake - resist motion so it stays put</button>
         </div>
         <div class="explain">Brake mode shorts the motor leads when idle, resisting motion, so the arm doesn't flop down. Coast is for things you want to roll free, like a drivetrain you push around the pit.</div>
       </div>
@@ -303,7 +303,7 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(<i
           <button class="opt">More torque</button>
           <button class="opt">A faster CAN bus</button>
         </div>
-        <div class="explain">The internal rotor is fast but only counts from wherever it booted. A CANcoder is absolute — it knows the true angle immediately. Fusing them gives an arm or swerve module instant, accurate position plus a smooth high-rate loop.</div>
+        <div class="explain">The internal rotor is fast but only counts from wherever it booted. A CANcoder is absolute - it knows the true angle immediately. Fusing them gives an arm or swerve module instant, accurate position plus a smooth high-rate loop.</div>
       </div>
     </div>
   </section>
@@ -404,7 +404,7 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(<i
       if(!ok)all=false;
     });
     var res=document.getElementById('cres');
-    res.textContent=all?'All correct ✓':'Not quite — apply the config object';
+    res.textContent=all?'All correct ✓':'Not quite - apply the config object';
     res.className='code-result '+(all?'ok':'no');
   });
   document.getElementById('reveal').addEventListener('click',function(){

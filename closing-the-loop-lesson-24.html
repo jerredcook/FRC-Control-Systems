@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Closing the Loop · Part V.3 — State-Space &amp; LQR</title>
+<title>Closing the Loop · Part V.3 - State-Space &amp; LQR</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -176,17 +176,17 @@
     <div class="lesson-no"><b>Part V · 03</b> Beyond · Finale</div>
     <div class="eyebrow">State-Space &amp; LQR</div>
     <h1>PID's smarter<br><span class="accent">sibling</span>.</h1>
-    <p class="dek">The math the whole course kept promising. It's less scary than it sounds — and it turns out you've been doing a simple version of it the entire time.</p>
+    <p class="dek">The math the whole course kept promising. It's less scary than it sounds - and it turns out you've been doing a simple version of it the entire time.</p>
   </div>
 
   <section>
     <p class="lead">One more way to think about a controller.</p>
-    <p>So far, control meant "react to the error." State-space zooms out. It describes a system by its <strong>state</strong> — the few numbers that capture everything about it right now. For our elevator, that's just two: <span class="k">position</span> and <span class="k">velocity</span>. The physics of how the state changes when you apply a voltage is written compactly:</p>
+    <p>So far, control meant "react to the error." State-space zooms out. It describes a system by its <strong>state</strong> - the few numbers that capture everything about it right now. For our elevator, that's just two: <span class="k">position</span> and <span class="k">velocity</span>. The physics of how the state changes when you apply a voltage is written compactly:</p>
     <div class="formula">
       ẋ = <b>A</b>·x + <b>B</b>·u
       <span class="small">x = state [position, velocity] · u = voltage · A, B = the mechanism's physics</span>
     </div>
-    <p>The controller is just as compact: pick a gain for each state and push back. <span class="k">u = K·(reference − x)</span>. That's <strong>state feedback</strong> — and here's the secret it's been hiding.</p>
+    <p>The controller is just as compact: pick a gain for each state and push back. <span class="k">u = K·(reference − x)</span>. That's <strong>state feedback</strong> - and here's the secret it's been hiding.</p>
   </section>
 
   <section>
@@ -197,7 +197,7 @@
       u = <span class="t">k₁</span>·(position error) + <span class="i">k₂</span>·(velocity) = <span class="t">kP</span>·error + <span class="i">kD</span>·(velocity)
       <span class="small">state feedback on [position, velocity] <em>is</em> PD control</span>
     </div>
-    <p>k₁ is your kP. k₂ is your kD. PD wasn't a trick — it was state feedback the whole time, on a two-state system. So what does state-space buy you? Two big things: a principled way to <em>choose</em> the gains, and the ability to scale past two states to systems PID can't touch.</p>
+    <p>k₁ is your kP. k₂ is your kD. PD wasn't a trick - it was state feedback the whole time, on a two-state system. So what does state-space buy you? Two big things: a principled way to <em>choose</em> the gains, and the ability to scale past two states to systems PID can't touch.</p>
 
     <div class="demo" id="demo">
       <div class="demo-head">
@@ -216,7 +216,7 @@
       <div class="controls">
         <button class="btn primary" id="move">Move ▸</button>
         <div class="slider-group">
-          <label>LQR aggressiveness — high Q (tight error) vs high R (cheap, gentle effort) <span class="val" id="aggVal">balanced</span></label>
+          <label>LQR aggressiveness - high Q (tight error) vs high R (cheap, gentle effort) <span class="val" id="aggVal">balanced</span></label>
           <input type="range" id="agg" min="0" max="1" step="0.01" value="0.5" />
         </div>
       </div>
@@ -233,10 +233,10 @@
   <section>
     <div class="kicker">The optimal part</div>
     <h2>LQR chooses the gains for you</h2>
-    <p>Trial-and-error tuning is fine for one PID. But what if you have five states? You can't eyeball ten gains. <strong>LQR</strong> — the Linear-Quadratic Regulator — computes the best K for you from two simple choices:</p>
+    <p>Trial-and-error tuning is fine for one PID. But what if you have five states? You can't eyeball ten gains. <strong>LQR</strong> - the Linear-Quadratic Regulator - computes the best K for you from two simple choices:</p>
     <div class="formula">
-      <span class="t">Q</span> — how much you care about each state's error<br>
-      <span class="i">R</span> — how much control effort costs you
+      <span class="t">Q</span> - how much you care about each state's error<br>
+      <span class="i">R</span> - how much control effort costs you
       <span class="small">crank Q → tighter, snappier · crank R → gentler, calmer · LQR solves for the K that balances them</span>
     </div>
     <p>That's the whole mental model: tell LQR your priorities, and it hands back the optimal gains. In WPILib it's a few lines built on the mechanism model you'd get from SysId:</p>
@@ -259,12 +259,12 @@
     </div>
     <div class="note teal">
       <div class="nh">When you'd actually reach for it</div>
-      <p>For an elevator or flywheel, on-motor PID + feedforward is simpler and plenty. State-space earns its keep on systems with <em>coupled</em> states a single PID can't handle — a double-jointed arm, a flywheel-and-hood shooter, a balancing robot. Same idea, more states. You now know what those teams are talking about.</p>
+      <p>For an elevator or flywheel, on-motor PID + feedforward is simpler and plenty. State-space earns its keep on systems with <em>coupled</em> states a single PID can't handle - a double-jointed arm, a flywheel-and-hood shooter, a balancing robot. Same idea, more states. You now know what those teams are talking about.</p>
     </div>
 
     <div class="code-ex">
       <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
-      <div class="ctask">The reference is the goal state: this height, and — since you want it to stop there — what velocity? Fill the blank, then Check.</div>
+      <div class="ctask">The reference is the goal state: this height, and - since you want it to stop there - what velocity? Fill the blank, then Check.</div>
 <pre class="code"><span class="ty">var</span> reference = <span class="ty">VecBuilder</span>.<span class="fn">fill</span>(goalMeters, <input class="blank" data-ans="0|0.0" aria-label="blank" autocomplete="off" spellcheck="false">);   <span class="cm">// position, velocity</span></pre>
       <div class="code-actions">
         <button class="btn" id="check">Check</button>
@@ -287,7 +287,7 @@
           <button class="opt">Its position and velocity</button>
           <button class="opt">Its CAN id</button>
         </div>
-        <div class="explain">State is the minimal set of numbers describing the system right now. For an elevator that's position and velocity — together they tell you everything about its motion.</div>
+        <div class="explain">State is the minimal set of numbers describing the system right now. For an elevator that's position and velocity - together they tell you everything about its motion.</div>
       </div>
       <div class="q" data-correct="2">
         <div class="qn">Question 2</div>
@@ -303,11 +303,11 @@
         <div class="qn">Question 3</div>
         <div class="qt">State feedback on [position, velocity] turns out to be…</div>
         <div class="opts">
-          <button class="opt">PD control — k₁ is kP, k₂ is kD</button>
+          <button class="opt">PD control - k₁ is kP, k₂ is kD</button>
           <button class="opt">Completely unrelated to PID</button>
           <button class="opt">Only usable in simulation</button>
         </div>
-        <div class="explain">With a two-state system, K has two entries that multiply position error and velocity — exactly kP and kD. State-space is the general framework; PID is the special case you've been using all along.</div>
+        <div class="explain">With a two-state system, K has two entries that multiply position error and velocity - exactly kP and kD. State-space is the general framework; PID is the special case you've been using all along.</div>
       </div>
     </div>
   </section>
@@ -316,13 +316,13 @@
     <div class="finale">
       <div class="fk">★ Course Complete ★</div>
       <h2>You closed the loop.</h2>
-      <p>You started by holding a thruster against gravity with your own hand, feeling an error you couldn't yet name. You finish knowing the entire arc — intuition, real code, the Kraken, tuned mechanisms, and the state-space math behind all of it. That's a genuine control-systems engineer's toolkit.</p>
+      <p>You started by holding a thruster against gravity with your own hand, feeling an error you couldn't yet name. You finish knowing the entire arc - intuition, real code, the Kraken, tuned mechanisms, and the state-space math behind all of it. That's a genuine control-systems engineer's toolkit.</p>
       <div class="journey">
-        <div class="jr"><b>Part I</b><span><span class="chk">✓</span> The Idea — feedback, PID, feedforward, system ID</span></div>
-        <div class="jr"><b>Part II</b><span><span class="chk">✓</span> From Math to Code — WPILib, units, the whole controller</span></div>
-        <div class="jr"><b>Part III</b><span><span class="chk">✓</span> CTRE Phoenix 6 — on-motor loops, Motion Magic, SysId</span></div>
-        <div class="jr"><b>Part IV</b><span><span class="chk">✓</span> Tune a Real Mechanism — elevator, arm, flywheel</span></div>
-        <div class="jr"><b>Part V</b><span><span class="chk">✓</span> Beyond — swerve, vision, state-space &amp; LQR</span></div>
+        <div class="jr"><b>Part I</b><span><span class="chk">✓</span> The Idea - feedback, PID, feedforward, system ID</span></div>
+        <div class="jr"><b>Part II</b><span><span class="chk">✓</span> From Math to Code - WPILib, units, the whole controller</span></div>
+        <div class="jr"><b>Part III</b><span><span class="chk">✓</span> CTRE Phoenix 6 - on-motor loops, Motion Magic, SysId</span></div>
+        <div class="jr"><b>Part IV</b><span><span class="chk">✓</span> Tune a Real Mechanism - elevator, arm, flywheel</span></div>
+        <div class="jr"><b>Part V</b><span><span class="chk">✓</span> Beyond - swerve, vision, state-space &amp; LQR</span></div>
       </div>
     </div>
     <p style="text-align:center;color:var(--muted);font-style:italic;margin-top:18px">Now go build something that moves exactly where you tell it.</p>
@@ -492,7 +492,7 @@
       if(!ok)all=false;
     });
     var res=document.getElementById('cres');
-    res.textContent=all?'All correct ✓':'Not quite — you want it to stop, so velocity 0';
+    res.textContent=all?'All correct ✓':'Not quite - you want it to stop, so velocity 0';
     res.className='code-result '+(all?'ok':'no');
   });
   document.getElementById('reveal').addEventListener('click',function(){

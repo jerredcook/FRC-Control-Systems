@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Deploy · Part 1.3 — Build, Deploy, Run</title>
+<title>Deploy · Part 1.3 - Build, Deploy, Run</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -144,12 +144,12 @@
     <div class="lesson-no"><b>Part 1 · 03</b> The Toolchain</div>
     <div class="eyebrow">Build, Deploy, Run</div>
     <h1>Push it to<br>the <span class="accent">robot</span>.</h1>
-    <p class="dek">Compile your project, send it across, and enable it from the Driver Station — closing the loop from Lesson 1 for real.</p>
+    <p class="dek">Compile your project, send it across, and enable it from the Driver Station - closing the loop from Lesson 1 for real.</p>
   </div>
 
   <section>
     <p class="lead">Three verbs turn your folder of files into a moving robot.</p>
-    <p><strong>Build</strong> compiles your Java into a program. <strong>Deploy</strong> copies that program onto the roboRIO and starts it. Then the <strong>Driver Station</strong> — the app that talks to the robot — <strong>enables</strong> it, so motors are allowed to move. Try the whole thing below: deploy the code, pick a mode, and enable.</p>
+    <p><strong>Build</strong> compiles your Java into a program. <strong>Deploy</strong> copies that program onto the roboRIO and starts it. Then the <strong>Driver Station</strong> - the app that talks to the robot - <strong>enables</strong> it, so motors are allowed to move. Try the whole thing below: deploy the code, pick a mode, and enable.</p>
 
     <div class="demo" id="demo">
       <div class="demo-head">
@@ -184,20 +184,20 @@
         <button class="btn" id="resetBtn">Reset</button>
       </div>
     </div>
-    <p class="caption">You can't enable until code is deployed and the robot reports "Robot Code" — the Driver Station won't let motors move otherwise. That's a safety feature, not a bug.</p>
+    <p class="caption">You can't enable until code is deployed and the robot reports "Robot Code" - the Driver Station won't let motors move otherwise. That's a safety feature, not a bug.</p>
   </section>
 
   <section>
     <div class="kicker">The four modes</div>
     <h2>What "enabled" means</h2>
-    <p>An FRC robot is always in one of a few states, and the Driver Station picks which. While <strong>disabled</strong>, your code still runs — but motor outputs are forced to zero, so nothing moves. <strong>Enable</strong> a mode and the matching code takes over:</p>
+    <p>An FRC robot is always in one of a few states, and the Driver Station picks which. While <strong>disabled</strong>, your code still runs - but motor outputs are forced to zero, so nothing moves. <strong>Enable</strong> a mode and the matching code takes over:</p>
     <div class="note">
       <div class="nh">Disabled · Teleoperated · Autonomous · Test</div>
-      <p><strong>Teleoperated</strong> — you drive with the controller. <strong>Autonomous</strong> — the robot runs a pre-programmed routine on its own. <strong>Test</strong> — for checking mechanisms in the pit. <strong>Disabled</strong> — code runs, motors don't. In a real match the field controls these for you; on the bench, the Driver Station does.</p>
+      <p><strong>Teleoperated</strong> - you drive with the controller. <strong>Autonomous</strong> - the robot runs a pre-programmed routine on its own. <strong>Test</strong> - for checking mechanisms in the pit. <strong>Disabled</strong> - code runs, motors don't. In a real match the field controls these for you; on the bench, the Driver Station does.</p>
     </div>
     <div class="note red">
       <div class="nh">The space bar is E-STOP</div>
-      <p>In the Driver Station, the spacebar (and the big red button on a real one) is an emergency stop — it kills the robot instantly. Know where it is before you ever enable a robot near people.</p>
+      <p>In the Driver Station, the spacebar (and the big red button on a real one) is an emergency stop - it kills the robot instantly. Know where it is before you ever enable a robot near people.</p>
     </div>
   </section>
 
@@ -224,7 +224,7 @@
           <button class="opt">The robot drives anyway</button>
           <button class="opt">Your code keeps running, but all motor outputs are forced to zero</button>
         </div>
-        <div class="explain">Disabled doesn't stop your program — periodic methods still run. It just blocks motor output for safety. Nothing moves until you enable a mode.</div>
+        <div class="explain">Disabled doesn't stop your program - periodic methods still run. It just blocks motor output for safety. Nothing moves until you enable a mode.</div>
       </div>
       <div class="q" data-correct="0">
         <div class="qn">Question 3</div>
@@ -234,7 +234,7 @@
           <button class="opt">Teleoperated</button>
           <button class="opt">Test</button>
         </div>
-        <div class="explain">Autonomous runs your autonomousPeriodic / auto command on its own — the first ~15 seconds of an FRC match. Teleoperated is driver control; Test is for pit checks.</div>
+        <div class="explain">Autonomous runs your autonomousPeriodic / auto command on its own - the first ~15 seconds of an FRC match. Teleoperated is driver control; Test is for pit checks.</div>
       </div>
     </div>
   </section>
@@ -248,12 +248,12 @@
         <div class="gl"><b>Driver Station</b><span>Enables the robot; picks the mode.</span></div>
         <div class="gl"><b>Robot Code light</b><span>Green once a deploy is running.</span></div>
         <div class="gl"><b>Disabled</b><span>Code runs; motors forced to zero.</span></div>
-        <div class="gl"><b>E-Stop</b><span>Spacebar — kills the robot instantly.</span></div>
+        <div class="gl"><b>E-Stop</b><span>Spacebar - kills the robot instantly.</span></div>
       </div>
       <a class="next" href="deploy-lesson-4.html">
         <div class="n-eyebrow">Up next · Part 1 · 04</div>
         <h3>Git &amp; GitHub for Teams</h3>
-        <p>One laptop's code isn't a team's code. Next: version control — how a whole team writes the same robot without overwriting each other.</p>
+        <p>One laptop's code isn't a team's code. Next: version control - how a whole team writes the same robot without overwriting each other.</p>
       </a>
     </div>
   </section>
@@ -281,7 +281,7 @@
   var S={deployed:false, enabled:false, mode:"Teleoperated", busy:false};
 
   function line(html){ var d=document.createElement("div"); d.className="cl"; d.innerHTML=html; consoleEl.appendChild(d); consoleEl.scrollTop=consoleEl.scrollHeight; }
-  function clearConsole(){ consoleEl.innerHTML='<div class="cl dim">— ready — press Deploy code —</div>'; }
+  function clearConsole(){ consoleEl.innerHTML='<div class="cl dim">- ready - press Deploy code -</div>'; }
 
   function renderState(){
     if(S.enabled){ stateEl.classList.add("enabled"); stateBig.textContent=S.mode.toUpperCase()+" · ENABLED"; }
@@ -315,7 +315,7 @@
   });
   resetBtn.addEventListener("click",function(){ S.deployed=false; S.enabled=false; S.busy=false; setCode(false); deployBtn.disabled=false; clearConsole(); renderState(); });
   modeBtns.forEach(function(b){ b.addEventListener("click",function(){ S.mode=b.getAttribute("data-mode"); modeBtns.forEach(function(x){x.classList.toggle("active",x===b);}); renderState(); }); });
-  enableBtn.addEventListener("click",function(){ if(!S.deployed||S.busy) return; S.enabled=true; line('<span class="warn">▶ Enabled — '+S.mode+'.</span> Motors live.'); renderState(); });
+  enableBtn.addEventListener("click",function(){ if(!S.deployed||S.busy) return; S.enabled=true; line('<span class="warn">▶ Enabled - '+S.mode+'.</span> Motors live.'); renderState(); });
   disableBtn.addEventListener("click",function(){ if(!S.enabled) return; S.enabled=false; line('<span class="dim">■ Disabled. Motors off.</span>'); renderState(); });
 
   clearConsole(); renderState();
