@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fabricate · Part 4.4 - Arms &amp; Wrists</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  canvas.arm{display:block;width:100%;height:260px}
+  .readouts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:17px;font-weight:600;margin-top:3px;color:var(--muted)}
+  .ro .v.indigo{color:var(--indigo)} .ro .v.green{color:var(--green)} .ro .v.amber{color:var(--amber)} .ro .v.red{color:var(--red)}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+  .slider-group{flex:1 1 100%;display:flex;flex-direction:column;gap:6px}
+  .slider-group label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+  .slider-group label .val{color:var(--indigo)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:var(--line-2);outline:none;width:100%}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--indigo);cursor:pointer;box-shadow:0 0 10px -1px var(--indigo)}
+  input[type=range]::-moz-range-thumb{width:18px;height:18px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(255,138,76,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .rules{display:grid;gap:10px;margin:18px 0} @media(min-width:560px){.rules{grid-template-columns:1fr 1fr}}
+  .rule{display:flex;gap:11px;border:1px solid var(--line);border-radius:11px;padding:13px 14px;background:var(--panel)}
+  .rule .ri{font-size:20px;flex:0 0 auto}
+  .rule b{display:block;font-size:14.5px;color:var(--text);margin-bottom:2px}
+  .rule span{font-size:13.5px;color:var(--muted)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:108px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="build.html"><span class="dot"></span><span class="name">Fabricate</span></a>
+    <div class="top-meta">Part 4 · 04 / 06 · Mechanisms</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 4 · 04</b> Mechanisms</div>
+    <div class="eyebrow">Arms &amp; Wrists</div>
+    <h1>Gravity hits<br><span class="accent">sideways</span>.</h1>
+    <p class="dek">An arm is the easiest mechanism to build and one of the trickiest to hold in place, because gravity's pull on it changes with the angle. It fights hardest when the arm sticks straight out, and not at all when it points straight up or down.</p>
+  </div>
+
+  <section>
+    <p class="lead">The holding torque follows a cosine.</p>
+    <p>Hold an arm at an angle and the motor has to fight gravity's twist on it. That twist depends on the <strong>horizontal reach</strong> of the load: maximum when the arm is level (sticking straight out), zero when it's vertical (load directly over the pivot). Swing the arm and watch the torque it takes to hold.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Holding torque vs angle</span><span class="demo-tag" id="angTag">horizontal</span></div>
+      <canvas class="arm" id="cv"></canvas>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Arm angle (from horizontal)</div><div class="v indigo" id="roAng">0°</div></div>
+        <div class="ro"><div class="k2">Holding torque</div><div class="v" id="roTq">100%</div></div>
+        <div class="ro"><div class="k2">Hardest at</div><div class="v amber">horizontal</div></div>
+      </div>
+      <div class="controls">
+        <div class="slider-group"><label>Arm angle <span class="val" id="angv">0°</span></label><input type="range" id="ang" min="-30" max="120" value="0"></div>
+      </div>
+    </div>
+    <p class="caption">The dashed line is the moment arm, the horizontal distance from the pivot to the load. It's longest when the arm is level, so the holding torque (the amber bar) is biggest there. Point the arm straight up and the load sits over the pivot, moment arm zero, no torque needed.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In the shop</div>
+    <h2>Taming an arm</h2>
+    <p>Because the load on the motor swings from zero to maximum as the arm moves, arms need a little extra care, in the structure and in the code:</p>
+    <div class="rules">
+      <div class="rule"><div class="ri">📉</div><div><b>Torque ∝ cos(angle)</b><span>Max holding torque when horizontal, zero when vertical. Size the gearing for the worst case.</span></div></div>
+      <div class="rule"><div class="ri">🛑</div><div><b>Hard stops</b><span>Physical limits so the arm can't swing past where it should and break something.</span></div></div>
+      <div class="rule"><div class="ri">🪀</div><div><b>Counterbalance</b><span>A gas spring or rubber band can offload gravity so the motor does less work.</span></div></div>
+      <div class="rule"><div class="ri">🧠</div><div><b>Feedforward in code</b><span>The Control course's ArmFeedforward adds kG·cos(angle) to hold against gravity automatically.</span></div></div>
+    </div>
+    <div class="note indigo">
+      <div class="nh">This is where building meets coding</div>
+      <p>That cosine curve is exactly why the Control course's <span class="k">ArmFeedforward</span> has a <span class="k">kG</span> term multiplied by <span class="k">cos(angle)</span>: the code predicts the gravity torque from the arm's angle and feeds in just enough motor effort to cancel it. On the build side, you size the gearbox for the horizontal worst case, add hard stops, and maybe a counterbalance so the motor isn't fighting gravity alone. A good arm is designed and tuned together.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">At what angle does gravity fight an arm the hardest?</div>
+        <div class="opts">
+          <button class="opt">Straight up</button>
+          <button class="opt">Horizontal (sticking straight out)</button>
+          <button class="opt">Straight down</button>
+        </div>
+        <div class="explain">Horizontal is the worst case: the load's full weight acts at the longest horizontal distance from the pivot, so the holding torque peaks. Vertical puts the load over the pivot, requiring none.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">How does the holding torque change as the arm rotates from horizontal to vertical?</div>
+        <div class="opts">
+          <button class="opt">It stays the same</button>
+          <button class="opt">It increases</button>
+          <button class="opt">It falls off as the cosine of the angle, reaching zero at vertical</button>
+        </div>
+        <div class="explain">Torque is proportional to cos(angle from horizontal). It's at maximum when level and drops to zero when the arm is vertical and the load sits right over the pivot.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">How does robot code automatically hold an arm against gravity?</div>
+        <div class="opts">
+          <button class="opt">ArmFeedforward adds a kG·cos(angle) term to predict and cancel the gravity torque</button>
+          <button class="opt">It guesses</button>
+          <button class="opt">It can't; only counterweights work</button>
+        </div>
+        <div class="explain">The Control course's ArmFeedforward computes the gravity torque from the angle (kG times the cosine) and feeds in exactly that much motor effort, so the arm holds steady at any angle.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 4 · 04 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Arm</b><span>A rotating joint swinging a tool.</span></div>
+        <div class="gl"><b>Moment arm</b><span>Horizontal distance to the load.</span></div>
+        <div class="gl"><b>Torque ∝ cos</b><span>Max horizontal, zero vertical.</span></div>
+        <div class="gl"><b>Hard stops</b><span>Limit how far it can swing.</span></div>
+        <div class="gl"><b>Counterbalance</b><span>Offloads gravity from the motor.</span></div>
+        <div class="gl"><b>ArmFeedforward</b><span>kG·cos cancels gravity in code.</span></div>
+      </div>
+      <a class="next" href="build-lesson-20.html">
+        <div class="n-eyebrow">Up next · Part 4 · 05</div>
+        <h3>Intakes &amp; Rollers</h3>
+        <p>How a robot grabs a game piece off the floor: spinning compliant wheels that compress, grip, and pull it in. Tune the compression and watch it work.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="build-lesson-18.html">← Part 4 · 03 · Elevators &amp; Lifts</a>
+    <a class="map" href="build.html">Course map</a>
+    <a href="build-lesson-20.html">Part 4 · 05 · Intakes &amp; Rollers →</a>
+  </nav>
+
+</div>
+
+<footer>Fabricate · Building an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var cv=document.getElementById('cv'), ctx=cv.getContext('2d'), W=0,H=0,dpr=1;
+  function fit(){ var r=cv.getBoundingClientRect(); if(!r.width)return; dpr=window.devicePixelRatio||1; cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr); ctx.setTransform(dpr,0,0,dpr,0,0); W=r.width; H=r.height; }
+  fit();
+  var angDeg=0;
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    var px=W*0.30, py=H*0.62, L=Math.min(W*0.30,H*0.40), th=angDeg*Math.PI/180;
+    var ex=px+Math.cos(th)*L, ey=py-Math.sin(th)*L;
+    var torque=Math.abs(Math.cos(th)); // 0..1
+    // ground / pivot post
+    ctx.fillStyle='#33415e'; ctx.fillRect(px-10, py, 20, H*0.30);
+    ctx.strokeStyle='#5E6F8E'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(px-40,py+H*0.30); ctx.lineTo(px+40,py+H*0.30); ctx.stroke();
+    // horizontal reference
+    ctx.strokeStyle='rgba(120,140,180,0.18)'; ctx.setLineDash([4,4]); ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(px+L+30,py); ctx.stroke(); ctx.setLineDash([]);
+    // moment arm (horizontal projection from pivot to under load)
+    ctx.strokeStyle='rgba(255,176,32,0.7)'; ctx.setLineDash([3,3]); ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(px,ey); ctx.lineTo(ex,ey); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle='#FFB020'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText('moment arm', (px+ex)/2, ey-6);
+    // arm
+    ctx.strokeStyle='#aeb9d1'; ctx.lineWidth=8; ctx.lineCap='round'; ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(ex,ey); ctx.stroke();
+    // pivot
+    ctx.beginPath(); ctx.arc(px,py,7,0,Math.PI*2); ctx.fillStyle='#0B1322'; ctx.fill(); ctx.strokeStyle='#92A2BE'; ctx.lineWidth=2; ctx.stroke();
+    // load at end
+    ctx.beginPath(); ctx.arc(ex,ey,15,0,Math.PI*2); ctx.fillStyle='#1B2540'; ctx.fill(); ctx.strokeStyle='#FF8A4C'; ctx.lineWidth=2; ctx.stroke();
+    // gravity arrow (down, constant)
+    ctx.strokeStyle='#FF6B6B'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(ex,ey+16); ctx.lineTo(ex,ey+42); ctx.stroke(); ctx.fillStyle='#FF6B6B'; ctx.beginPath(); ctx.moveTo(ex,ey+48); ctx.lineTo(ex-5,ey+40); ctx.lineTo(ex+5,ey+40); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#FF6B6B'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.fillText('weight', ex, ey+60);
+    // torque gauge (right, vertical bar)
+    var gx=W*0.80, gy=H*0.18, gw=26, gh=H*0.58;
+    ctx.fillStyle='#5E6F8E'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText('HOLDING', gx+gw/2, gy-14); ctx.fillText('TORQUE', gx+gw/2, gy-4);
+    ctx.fillStyle='#0B1322'; ctx.strokeStyle='#26324A'; ctx.lineWidth=1; ctx.fillRect(gx,gy,gw,gh); ctx.strokeRect(gx,gy,gw,gh);
+    var col= torque>0.66?'#FF6B6B':(torque>0.33?'#FFB020':'#43D67E');
+    ctx.fillStyle=col; ctx.fillRect(gx, gy+gh-torque*gh, gw, torque*gh);
+    ctx.fillStyle=col; ctx.font='700 13px ui-monospace,Menlo,monospace'; ctx.fillText(Math.round(torque*100)+'%', gx+gw/2, gy+gh+16);
+  }
+  function refresh(){
+    var torque=Math.abs(Math.cos(angDeg*Math.PI/180));
+    document.getElementById('roAng').textContent=angDeg+'°';
+    var rt=document.getElementById('roTq'); rt.textContent=Math.round(torque*100)+'%'; rt.className='v '+(torque>0.66?'red':(torque>0.33?'amber':'green'));
+    document.getElementById('angTag').textContent = Math.abs(angDeg)<6?'horizontal':(angDeg>84?'vertical':(angDeg+'°'));
+  }
+  function loop(){ draw(); requestAnimationFrame(loop); }
+  document.getElementById('ang').addEventListener('input',function(e){ angDeg=+e.target.value; document.getElementById('angv').textContent=angDeg+'°'; refresh(); });
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
+  refresh(); requestAnimationFrame(loop);
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="build:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

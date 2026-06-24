@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fabricate · Part 4.1 - The Mechanism Toolbox</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .task{padding:18px 16px 6px;text-align:center}
+  .task .tno{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-bottom:8px}
+  .task .tp{font-size:18px;color:var(--text);font-weight:600;max-width:46ch;margin:0 auto}
+  .tools{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;padding:14px 16px} @media(min-width:560px){.tools{grid-template-columns:repeat(3,1fr)}}
+  .tool{border:1px solid var(--line-2);background:var(--panel-2);border-radius:10px;padding:13px 8px;cursor:pointer;text-align:center;transition:.12s;display:flex;flex-direction:column;align-items:center;gap:6px}
+  .tool:hover{border-color:var(--indigo)} .tool .ti{font-size:22px}
+  .tool .tl{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.02em;line-height:1.25}
+  .tool.correct{border-color:var(--green);background:rgba(67,214,126,.12)} .tool.correct .tl{color:var(--green)}
+  .tool.wrong{border-color:var(--red);background:rgba(255,107,107,.1)} .tool.wrong .tl{color:var(--red)}
+  .tool.locked{cursor:default}
+  .fb{padding:0 16px 14px;min-height:48px}
+  .fb .line{border-left:2px solid var(--indigo);padding:6px 0 6px 12px;font-size:14.5px;color:var(--muted);display:none}
+  .fb .line.show{display:block} .fb .line b{color:var(--text)}
+  .controls{padding:12px 16px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)} .btn:disabled{opacity:.4;cursor:not-allowed}
+  .btn.primary{background:linear-gradient(180deg,#ffb37e,var(--indigo));color:#2a1503;font-weight:700;border:none}
+  .score{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--indigo)}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(255,138,76,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .rules{display:grid;gap:10px;margin:18px 0} @media(min-width:560px){.rules{grid-template-columns:1fr 1fr}}
+  .rule{display:flex;gap:11px;border:1px solid var(--line);border-radius:11px;padding:13px 14px;background:var(--panel)}
+  .rule .ri{font-size:20px;flex:0 0 auto}
+  .rule b{display:block;font-size:14.5px;color:var(--text);margin-bottom:2px}
+  .rule span{font-size:13.5px;color:var(--muted)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:96px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="build.html"><span class="dot"></span><span class="name">Fabricate</span></a>
+    <div class="top-meta">Part 4 · 01 / 06 · Mechanisms</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 4 · 01</b> Mechanisms</div>
+    <div class="eyebrow">The Mechanism Toolbox</div>
+    <h1>A few shapes,<br>endless <span class="accent">robots</span>.</h1>
+    <p class="dek">Almost every FRC robot is built from the same small set of mechanism archetypes. Once you can name them, designing a robot becomes a matter of choosing the right ones for the game and bolting them together.</p>
+  </div>
+
+  <section>
+    <p class="lead">Match the job to the mechanism.</p>
+    <p>Reach high, grab low, launch far, place gently, each is a job a particular archetype is built for. Read the task and pick the mechanism you'd reach for.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Pick the mechanism</span><span class="demo-tag" id="tag">match it</span></div>
+      <div class="task"><div class="tno" id="tno">Job 1 of 6</div><div class="tp" id="tp"></div></div>
+      <div class="tools" id="tools"></div>
+      <div class="fb"><div class="line" id="fb"></div></div>
+      <div class="controls">
+        <button class="btn primary" id="next" disabled>Next ▸</button>
+        <span class="score" id="score">0 / 0</span>
+      </div>
+    </div>
+    <p class="caption">There's a best fit for each task, but a few could half-work. Real designs combine two or three of these, an arm with a gripper, an elevator with a shooter on top.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In the shop</div>
+    <h2>The archetypes</h2>
+    <p>This is the whole toolbox. Every mechanism in the rest of this part is one of these, and the rest of building a robot is choosing and combining them:</p>
+    <div class="rules">
+      <div class="rule"><div class="ri">🛗</div><div><b>Elevator / lift</b><span>Moves something straight up and down. Great for vertical reach.</span></div></div>
+      <div class="rule"><div class="ri">💪</div><div><b>Arm</b><span>A rotating joint that swings a tool through an arc.</span></div></div>
+      <div class="rule"><div class="ri">🔗</div><div><b>Four-bar linkage</b><span>Extends reach while keeping the end effector at a fixed angle.</span></div></div>
+      <div class="rule"><div class="ri">🌀</div><div><b>Intake / roller</b><span>Spinning wheels that grab game pieces off the floor.</span></div></div>
+      <div class="rule"><div class="ri">🎯</div><div><b>Shooter</b><span>A flywheel that launches a game piece across the field.</span></div></div>
+      <div class="rule"><div class="ri">🤏</div><div><b>Gripper / end effector</b><span>Holds, carries, and releases a game piece.</span></div></div>
+    </div>
+    <div class="note indigo">
+      <div class="nh">Pick the simplest thing that wins</div>
+      <p>The temptation is to build the fanciest mechanism you can. The better instinct is to ask what the game actually rewards and choose the <em>simplest</em> archetype that does it reliably. A robot that does one job flawlessly beats one that does three jobs poorly. When you're stuck, look at what the best teams build, it's almost always a clean combination of these few shapes, not something exotic.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">What is a mechanism archetype?</div>
+        <div class="opts">
+          <button class="opt">A brand of motor</button>
+          <button class="opt">A common mechanism pattern, like an elevator or an arm, that you reuse and combine</button>
+          <button class="opt">A type of bolt</button>
+        </div>
+        <div class="explain">Archetypes are the standard mechanism shapes, elevators, arms, four-bars, intakes, shooters, grippers, that nearly every robot is built from. You pick and combine them for the game.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">You need to launch a game piece across the field. Which archetype?</div>
+        <div class="opts">
+          <button class="opt">Elevator</button>
+          <button class="opt">Gripper</button>
+          <button class="opt">Shooter (flywheel)</button>
+        </div>
+        <div class="explain">Launching a piece at distance is exactly what a flywheel shooter does: spin a wheel up and feed the piece into it. An elevator lifts; a gripper holds.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">When in doubt about which mechanism to build, what's the best instinct?</div>
+        <div class="opts">
+          <button class="opt">Pick the simplest archetype that reliably does what the game rewards</button>
+          <button class="opt">Build the most complex one possible</button>
+          <button class="opt">Build all of them</button>
+        </div>
+        <div class="explain">Simplicity wins. A robot that does one job flawlessly beats one that does several poorly. Choose the simplest archetype that scores reliably.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 4 · 01 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Elevator</b><span>Straight up-and-down reach.</span></div>
+        <div class="gl"><b>Arm</b><span>Rotating joint, swings an arc.</span></div>
+        <div class="gl"><b>Four-bar</b><span>Reach while staying level.</span></div>
+        <div class="gl"><b>Intake</b><span>Rollers grab game pieces.</span></div>
+        <div class="gl"><b>Shooter</b><span>Flywheel launches a piece.</span></div>
+        <div class="gl"><b>Gripper</b><span>Holds and releases.</span></div>
+      </div>
+      <a class="next" href="build-lesson-17.html">
+        <div class="n-eyebrow">Up next · Part 4 · 02</div>
+        <h3>Linkages &amp; Four-Bars</h3>
+        <p>The cleverest archetype first: a four-bar linkage that reaches outward while keeping its end effector perfectly level. Watch the geometry work.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="build-lesson-15.html">← Part 3 · 06 · Gearboxes</a>
+    <a class="map" href="build.html">Course map</a>
+    <a href="build-lesson-17.html">Part 4 · 02 · Linkages &amp; Four-Bars →</a>
+  </nav>
+
+</div>
+
+<footer>Fabricate · Building an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var ARCH=[
+    {id:'elevator', ic:'🛗', l:'Elevator'},
+    {id:'arm', ic:'💪', l:'Arm'},
+    {id:'fourbar', ic:'🔗', l:'Four-bar'},
+    {id:'intake', ic:'🌀', l:'Intake / roller'},
+    {id:'shooter', ic:'🎯', l:'Shooter'},
+    {id:'gripper', ic:'🤏', l:'Gripper'}
+  ];
+  var TASKS=[
+    {prompt:'Lift a game piece straight up to a tall goal.', ans:'elevator', why:'An <b>elevator</b> gives clean vertical reach, straight up and down.'},
+    {prompt:'Grab a game piece up off the floor.', ans:'intake', why:'An <b>intake</b> uses spinning rollers to grab pieces off the ground.'},
+    {prompt:'Launch a game piece across the field into a goal.', ans:'shooter', why:'A <b>shooter</b> (flywheel) flings a piece at distance.'},
+    {prompt:'Swing a scoring hand up and over the bumper.', ans:'arm', why:'An <b>arm</b> rotates a tool through an arc, up and over.'},
+    {prompt:'Keep a scoring tray level as it extends outward.', ans:'fourbar', why:'A <b>four-bar</b> linkage extends while holding the end effector level.'},
+    {prompt:'Hold a game piece, then place it down gently.', ans:'gripper', why:'A <b>gripper</b> grabs, carries, and releases a piece.'}
+  ];
+  var idx=0, answered=false, score=0, total=0;
+  var toolsEl=document.getElementById('tools'), tools=[];
+  ARCH.forEach(function(a){ var b=document.createElement('div'); b.className='tool'; b.setAttribute('data-id',a.id);
+    b.innerHTML='<span class="ti">'+a.ic+'</span><span class="tl">'+a.l+'</span>';
+    b.addEventListener('click',function(){ pick(a.id,b); }); toolsEl.appendChild(b); tools.push(b); });
+  function showTask(){
+    answered=false;
+    document.getElementById('tno').textContent='Job '+(idx+1)+' of '+TASKS.length;
+    document.getElementById('tp').textContent=TASKS[idx].prompt;
+    tools.forEach(function(b){ b.className='tool'; });
+    document.getElementById('fb').className='line'; document.getElementById('fb').innerHTML='';
+    document.getElementById('next').disabled=true;
+    document.getElementById('next').textContent = idx<TASKS.length-1 ? 'Next ▸' : 'Restart';
+  }
+  function pick(id,b){
+    if(answered) return; answered=true; total++;
+    var T=TASKS[idx], ok=(id===T.ans);
+    if(ok){ b.classList.add('correct'); score++; }
+    else { b.classList.add('wrong'); tools.forEach(function(x){ if(x.getAttribute('data-id')===T.ans) x.classList.add('correct'); }); }
+    tools.forEach(function(x){ x.classList.add('locked'); });
+    var fb=document.getElementById('fb'); fb.className='line show'; fb.innerHTML=(ok?'<b>Good fit.</b> ':'<b>Closer fit:</b> ')+T.why;
+    document.getElementById('next').disabled=false;
+    document.getElementById('score').textContent=score+' / '+total;
+  }
+  document.getElementById('next').addEventListener('click',function(){
+    if(idx<TASKS.length-1){ idx++; showTask(); } else { idx=0; score=0; total=0; document.getElementById('score').textContent='0 / 0'; showTask(); }
+  });
+  showTask();
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="build:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

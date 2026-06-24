@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fabricate · Part 4.5 - Intakes &amp; Rollers</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  canvas.intake{display:block;width:100%;height:240px}
+  .readouts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:17px;font-weight:600;margin-top:3px;color:var(--muted)}
+  .ro .v.indigo{color:var(--indigo)} .ro .v.green{color:var(--green)} .ro .v.amber{color:var(--amber)} .ro .v.red{color:var(--red)}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+  .slider-group{flex:1 1 200px;display:flex;flex-direction:column;gap:6px;min-width:170px}
+  .slider-group label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+  .slider-group label .val{color:var(--indigo)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:var(--line-2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--indigo);cursor:pointer;box-shadow:0 0 10px -1px var(--indigo)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .btn.primary{background:linear-gradient(180deg,#ffb37e,var(--indigo));color:#2a1503;font-weight:700;border:none}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(255,138,76,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .rules{display:grid;gap:10px;margin:18px 0} @media(min-width:560px){.rules{grid-template-columns:1fr 1fr}}
+  .rule{display:flex;gap:11px;border:1px solid var(--line);border-radius:11px;padding:13px 14px;background:var(--panel)}
+  .rule .ri{font-size:20px;flex:0 0 auto}
+  .rule b{display:block;font-size:14.5px;color:var(--text);margin-bottom:2px}
+  .rule span{font-size:13.5px;color:var(--muted)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:108px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="build.html"><span class="dot"></span><span class="name">Fabricate</span></a>
+    <div class="top-meta">Part 4 · 05 / 06 · Mechanisms</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 4 · 05</b> Mechanisms</div>
+    <div class="eyebrow">Intakes &amp; Rollers</div>
+    <h1>Grab it off<br>the <span class="accent">floor</span>.</h1>
+    <p class="dek">An intake is how a robot picks game pieces up off the ground: spinning squishy wheels that squeeze the piece a little and pull it in. Too little squeeze and it slips; too much and it jams. There's a sweet spot.</p>
+  </div>
+
+  <section>
+    <p class="lead">Compression is the whole trick.</p>
+    <p>The rollers sit a bit closer to the floor than the game piece is tall, so they <strong>compress</strong> it and grip. The spinning surface then drags the piece in. Set the compression and roller speed, then feed a piece and see if the intake grabs it.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Roller intake</span><span class="demo-tag" id="stTag">ready</span></div>
+      <canvas class="intake" id="cv"></canvas>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Compression</div><div class="v indigo" id="roComp">45%</div></div>
+        <div class="ro"><div class="k2">Roller speed</div><div class="v" id="roSpd">60%</div></div>
+        <div class="ro"><div class="k2">Result</div><div class="v" id="roRes">-</div></div>
+      </div>
+      <div class="controls">
+        <button class="btn primary" id="feed">Feed game piece</button>
+        <div class="slider-group"><label>Compression <span class="val" id="compv">45%</span></label><input type="range" id="comp" min="0" max="100" value="45"></div>
+        <div class="slider-group"><label>Roller speed <span class="val" id="spdv">60%</span></label><input type="range" id="spd" min="0" max="100" value="60"></div>
+      </div>
+    </div>
+    <p class="caption">In the green band, the roller compresses just enough to grip and pulls the piece into the robot. Too little compression or too slow and the piece slips and gets spat back out. Crank compression too high and the piece can't even fit, it jams at the mouth.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In the shop</div>
+    <h2>Building an intake that works</h2>
+    <p>Intakes look simple but are finicky. A few choices make the difference between a reliable grab and a frustrating one:</p>
+    <div class="rules">
+      <div class="rule"><div class="ri">🫧</div><div><b>Compliant wheels</b><span>Squishy wheels conform to the game piece and grip without crushing it.</span></div></div>
+      <div class="rule"><div class="ri">🤏</div><div><b>Compression</b><span>Set the gap smaller than the piece so it's squeezed, but it can still enter.</span></div></div>
+      <div class="rule"><div class="ri">🌀</div><div><b>Surface speed</b><span>Fast enough to drag the piece in, not so fast it bounces off.</span></div></div>
+      <div class="rule"><div class="ri">🛡️</div><div><b>Over or under bumper</b><span>The intake reaches over the bumper or scoops from below, depending on the game.</span></div></div>
+    </div>
+    <div class="note indigo">
+      <div class="nh">Prototype the intake first, always</div>
+      <p>You can't calculate the perfect compression and speed; you find them by testing. Smart teams build a rough intake out of scrap on day one and feed real game pieces through it, tweaking the gap, wheel type, and speed until it grabs every time. An intake that works on paper but fumbles on the field loses matches, so it's usually the first thing a team prototypes and the last thing they stop tuning.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="2">
+        <div class="qn">Question 1</div>
+        <div class="qt">How does a roller intake grip a game piece?</div>
+        <div class="opts">
+          <button class="opt">With glue</button>
+          <button class="opt">With magnets</button>
+          <button class="opt">By compressing it slightly between the spinning roller and a surface, then dragging it in</button>
+        </div>
+        <div class="explain">The roller sits closer than the piece is tall, so it squeezes the piece. That compression creates grip, and the spinning surface pulls the piece into the robot.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 2</div>
+        <div class="qt">What happens with too little compression?</div>
+        <div class="opts">
+          <button class="opt">The roller can't grip, so the piece slips and isn't pulled in</button>
+          <button class="opt">The piece is crushed</button>
+          <button class="opt">Nothing changes</button>
+        </div>
+        <div class="explain">Without enough squeeze there's no grip, the roller spins against the piece and it slips out. Too much compression is the opposite problem: the piece can't fit and jams.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 3</div>
+        <div class="qt">What's the best way to dial in an intake's compression and speed?</div>
+        <div class="opts">
+          <button class="opt">Calculate it exactly from the game manual</button>
+          <button class="opt">Prototype it and test with real game pieces, then tune</button>
+          <button class="opt">Copy a random number</button>
+        </div>
+        <div class="explain">There's no formula for the perfect grab. You build a rough intake, feed real pieces through it, and adjust the gap, wheels, and speed until it works every time.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 4 · 05 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Intake</b><span>Rollers that grab pieces off the floor.</span></div>
+        <div class="gl"><b>Compression</b><span>Squeeze the piece to grip it.</span></div>
+        <div class="gl"><b>Too little</b><span>Slips, no grip.</span></div>
+        <div class="gl"><b>Too much</b><span>Jams at the mouth.</span></div>
+        <div class="gl"><b>Compliant wheels</b><span>Squishy, conform to the piece.</span></div>
+        <div class="gl"><b>Prototype it</b><span>Test with real pieces, then tune.</span></div>
+      </div>
+      <a class="next" href="build-lesson-21.html">
+        <div class="n-eyebrow">Up next · Part 4 · 06 · Finale</div>
+        <h3>Shooters &amp; End Effectors</h3>
+        <p>The business end. A flywheel shooter launches a piece across the field, set the RPM and angle, and try to score on the target.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="build-lesson-19.html">← Part 4 · 04 · Arms &amp; Wrists</a>
+    <a class="map" href="build.html">Course map</a>
+    <a href="build-lesson-21.html">Part 4 · 06 · Shooters &amp; End Effectors →</a>
+  </nav>
+
+</div>
+
+<footer>Fabricate · Building an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var cv=document.getElementById('cv'), ctx=cv.getContext('2d'), W=0,H=0,dpr=1;
+  function fit(){ var r=cv.getBoundingClientRect(); if(!r.width)return; dpr=window.devicePixelRatio||1; cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr); ctx.setTransform(dpr,0,0,dpr,0,0); W=r.width; H=r.height; }
+  fit();
+  var comp=45, spd=60, rollA=0, ball=null, result='';
+  function outcome(){ var c=comp/100, s=spd/100; if(c>0.85) return 'jam'; if(c<0.20||s<0.25) return 'slip'; return 'in'; }
+  function feed(){ ball={x:W*0.86, y:0, st:'incoming'}; result=''; }
+  function step(){
+    rollA += spd/100*0.5 + 0.02;
+    var floorY=H*0.70, rollerX=W*0.34, rollerY=floorY-44, br=14;
+    if(ball){ ball.y = floorY-br;
+      if(ball.st==='incoming'){ ball.x -= 1.7; if(ball.x <= rollerX+br+10){ ball.st=outcome(); } }
+      else if(ball.st==='in'){ ball.x -= 1.4; ball.y -= 1.2; if(ball.x < W*0.16){ ball=null; result='in'; } }
+      else if(ball.st==='slip'){ ball.x += 1.6; if(ball.x > W*0.92){ ball=null; result='slip'; } }
+      else if(ball.st==='jam'){ result='jam'; }
+    }
+    draw(floorY, rollerX, rollerY, br);
+    var rr=document.getElementById('roRes');
+    var r = ball? ball.st : result;
+    if(r==='in'||r===''&&result==='in'){ rr.textContent='intaken ✓'; rr.className='v green'; }
+    else if(r==='slip'){ rr.textContent='slipped out'; rr.className='v red'; }
+    else if(r==='jam'){ rr.textContent='jammed'; rr.className='v amber'; }
+    else if(r==='incoming'){ rr.textContent='incoming...'; rr.className='v'; }
+    else { rr.textContent='-'; rr.className='v'; }
+    requestAnimationFrame(step);
+  }
+  function draw(floorY, rollerX, rollerY, br){
+    ctx.clearRect(0,0,W,H);
+    // floor
+    ctx.strokeStyle='#5E6F8E'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(0,floorY); ctx.lineTo(W,floorY); ctx.stroke();
+    // robot body on left
+    ctx.fillStyle='#11192B'; ctx.strokeStyle='#33415e'; ctx.lineWidth=2; ctx.fillRect(0, floorY-90, W*0.22, 90); ctx.strokeRect(0, floorY-90, W*0.22, 90);
+    ctx.fillStyle='#5E6F8E'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText('ROBOT', W*0.11, floorY-96);
+    // roller, spinning, gap = compression
+    var gap = br*2*(1 - comp/100*0.7); var ry=floorY - gap - 18;
+    ctx.save(); ctx.translate(rollerX, ry); ctx.rotate(rollA);
+    ctx.beginPath(); ctx.arc(0,0,18,0,Math.PI*2); ctx.fillStyle='#1B2540'; ctx.fill(); ctx.strokeStyle='#FF8A4C'; ctx.lineWidth=2; ctx.stroke();
+    for(var i=0;i<6;i++){ ctx.save(); ctx.rotate(i*Math.PI/3); ctx.strokeStyle='#FF8A4C'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,-15); ctx.stroke(); ctx.restore(); }
+    ctx.restore();
+    // spin-direction arrow (inward)
+    ctx.fillStyle='#5E6F8E'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText('roller', rollerX, ry-24);
+    ctx.fillStyle='#FF8A4C'; ctx.fillText('↺ pulls in', rollerX, floorY+16);
+    // gap indicator
+    ctx.strokeStyle='rgba(255,138,76,0.4)'; ctx.setLineDash([3,3]); ctx.beginPath(); ctx.moveTo(rollerX+24, ry+18); ctx.lineTo(rollerX+24, floorY); ctx.stroke(); ctx.setLineDash([]);
+    // ball
+    if(ball){ ctx.beginPath(); ctx.arc(ball.x, ball.y, br, 0, Math.PI*2); ctx.fillStyle='#FFB020'; ctx.fill(); ctx.strokeStyle='#2a1a00'; ctx.lineWidth=2; ctx.stroke();
+      if(ball.st==='jam'){ ctx.fillStyle='#FF6B6B'; ctx.font='10px ui-monospace,Menlo,monospace'; ctx.fillText('JAM', ball.x, ball.y-22); } }
+  }
+  document.getElementById('feed').addEventListener('click',feed);
+  document.getElementById('comp').addEventListener('input',function(e){ comp=+e.target.value; document.getElementById('compv').textContent=comp+'%'; document.getElementById('roComp').textContent=comp+'%'; });
+  document.getElementById('spd').addEventListener('input',function(e){ spd=+e.target.value; document.getElementById('spdv').textContent=spd+'%'; document.getElementById('roSpd').textContent=spd+'%'; });
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
+  requestAnimationFrame(step);
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="build:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

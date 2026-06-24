@@ -168,12 +168,12 @@
     {code:"4", title:"Mechanisms", sub:"How robots move",
      blurb:"Every robot is a handful of mechanism archetypes. Learn how four-bars, elevators, arms, intakes, and shooters turn motion into game pieces scored.",
      lessons:[
-       {n:1, title:"The Mechanism Toolbox", desc:"The common archetypes and how to pick one.", file:null},
-       {n:2, title:"Linkages & Four-Bars", desc:"Keeping an end effector level as an arm swings.", file:null},
-       {n:3, title:"Elevators & Lifts", desc:"Cascade vs continuous rigging for vertical reach.", file:null},
-       {n:4, title:"Arms & Wrists", desc:"Rotating joints, gravity, and hard stops.", file:null},
-       {n:5, title:"Intakes & Rollers", desc:"Grabbing game pieces off the floor.", file:null},
-       {n:6, title:"Shooters & End Effectors", desc:"Flywheels, grippers, and the business end.", file:null}
+       {n:1, title:"The Mechanism Toolbox", desc:"The common archetypes and how to pick one.", file:"build-lesson-16.html"},
+       {n:2, title:"Linkages & Four-Bars", desc:"Keeping an end effector level as an arm swings.", file:"build-lesson-17.html"},
+       {n:3, title:"Elevators & Lifts", desc:"Cascade vs continuous rigging for vertical reach.", file:"build-lesson-18.html"},
+       {n:4, title:"Arms & Wrists", desc:"Rotating joints, gravity, and hard stops.", file:"build-lesson-19.html"},
+       {n:5, title:"Intakes & Rollers", desc:"Grabbing game pieces off the floor.", file:"build-lesson-20.html"},
+       {n:6, title:"Shooters & End Effectors", desc:"Flywheels, grippers, and the business end.", file:"build-lesson-21.html"}
      ]},
     {code:"5", title:"The Drivetrain", sub:"The base that moves",
      blurb:"The drivetrain is the foundation everything bolts to. Frames, kit drivetrains, wheels and traction, swerve modules, and the bumpers the rules demand.",
@@ -212,7 +212,7 @@
      ]}
   ];
 
-  var NEXT_ID="4-1";
+  var NEXT_ID="5-1";
   var STORE_KEY="build:done";
   function loadDone(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY))||{}; }catch(e){ return {}; } }
   function saveDone(d){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(d)); }catch(e){} }

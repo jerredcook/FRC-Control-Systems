@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fabricate · Part 4.6 - Shooters &amp; End Effectors</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  canvas.shoot{display:block;width:100%;height:260px}
+  .readouts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:17px;font-weight:600;margin-top:3px;color:var(--muted)}
+  .ro .v.indigo{color:var(--indigo)} .ro .v.green{color:var(--green)} .ro .v.amber{color:var(--amber)} .ro .v.red{color:var(--red)}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+  .slider-group{flex:1 1 200px;display:flex;flex-direction:column;gap:6px;min-width:170px}
+  .slider-group label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+  .slider-group label .val{color:var(--indigo)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:var(--line-2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--indigo);cursor:pointer;box-shadow:0 0 10px -1px var(--indigo)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;padding:11px 16px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .btn.primary{background:linear-gradient(180deg,#ffb37e,var(--indigo));color:#2a1503;font-weight:700;border:none}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(255,138,76,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .rules{display:grid;gap:10px;margin:18px 0} @media(min-width:560px){.rules{grid-template-columns:1fr 1fr}}
+  .rule{display:flex;gap:11px;border:1px solid var(--line);border-radius:11px;padding:13px 14px;background:var(--panel)}
+  .rule .ri{font-size:20px;flex:0 0 auto}
+  .rule b{display:block;font-size:14.5px;color:var(--text);margin-bottom:2px}
+  .rule span{font-size:13.5px;color:var(--muted)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:108px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(255,176,32,0.12),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--amber);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--amber)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)} .coursenav a.next-link{color:var(--amber);border-color:rgba(255,176,32,.4)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="build.html"><span class="dot"></span><span class="name">Fabricate</span></a>
+    <div class="top-meta">Part 4 · 06 / 06 · Finale</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 4 · 06</b> Mechanisms · Finale</div>
+    <div class="eyebrow">Shooters &amp; End Effectors</div>
+    <h1>Launch it home.</h1>
+    <p class="dek">The end effector is the business end of the robot, the part that actually scores. A flywheel shooter spins a wheel up, feeds a game piece into it, and flings it across the field. Dial in the speed and angle, and put it in the goal.</p>
+  </div>
+
+  <section>
+    <p class="lead">Wheel speed plus launch angle equals a trajectory.</p>
+    <p>A flywheel shooter throws a game piece at roughly the wheel's surface speed: faster wheel, faster shot. The hood sets the launch angle. Together they decide where the piece lands. Set the RPM and angle below, watch the predicted arc, and shoot for the goal.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Flywheel shooter</span><span class="demo-tag" id="resTag">aim &amp; fire</span></div>
+      <canvas class="shoot" id="cv"></canvas>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Flywheel RPM</div><div class="v indigo" id="roRpm">4000</div></div>
+        <div class="ro"><div class="k2">Launch angle</div><div class="v" id="roAng">55°</div></div>
+        <div class="ro"><div class="k2">Result</div><div class="v" id="roRes">-</div></div>
+      </div>
+      <div class="controls">
+        <button class="btn primary" id="shoot">Shoot ▸</button>
+        <div class="slider-group"><label>Flywheel RPM <span class="val" id="rpmv">4000</span></label><input type="range" id="rpm" min="2200" max="6000" value="4000" step="50"></div>
+        <div class="slider-group"><label>Launch angle <span class="val" id="angv">55°</span></label><input type="range" id="ang" min="25" max="70" value="55"></div>
+      </div>
+    </div>
+    <p class="caption">The dashed line is the predicted path, change RPM or angle and it moves, so you can aim before firing. Land the piece in the teal goal to score. More RPM throws it farther; the angle controls the height of the arc.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In the shop</div>
+    <h2>The business end</h2>
+    <p>Shooters are the flashiest end effector, but the family is bigger. What they share is that they're the part that finally does the scoring:</p>
+    <div class="rules">
+      <div class="rule"><div class="ri">🎯</div><div><b>Flywheel shooter</b><span>A spinning wheel launches a piece at its surface speed. RPM sets range.</span></div></div>
+      <div class="rule"><div class="ri">🪧</div><div><b>Hood</b><span>A curved guide that sets the launch angle and adds backspin for a stable shot.</span></div></div>
+      <div class="rule"><div class="ri">🤏</div><div><b>Gripper</b><span>Grabs, holds, and places a piece precisely instead of throwing it.</span></div></div>
+      <div class="rule"><div class="ri">📥</div><div><b>Indexer</b><span>Feeds pieces into the shooter one at a time, at the right moment.</span></div></div>
+    </div>
+    <div class="note indigo">
+      <div class="nh">A shot is only as good as the RPM holding steady</div>
+      <p>Range depends directly on flywheel speed, so if the RPM sags between shots, every shot lands somewhere different. That's exactly the problem the Control course's flywheel lesson tackles: a velocity loop with strong feedforward (kV) that holds the wheel at a rock-steady RPM and recovers fast after each piece. The mechanical build gives you a shooter; the control loop is what makes it <em>consistent</em>. Building and coding meet here too.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">How does a flywheel shooter launch a game piece?</div>
+        <div class="opts">
+          <button class="opt">With a spring</button>
+          <button class="opt">A spinning wheel grips the piece and flings it at roughly the wheel's surface speed</button>
+          <button class="opt">With compressed air only</button>
+        </div>
+        <div class="explain">The spinning flywheel contacts the piece and accelerates it to near the wheel's surface speed, then releases it. Faster wheel, faster and farther the shot.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">What two things together determine where a shot lands?</div>
+        <div class="opts">
+          <button class="opt">Battery voltage and weight</button>
+          <button class="opt">Wheel color and size only</button>
+          <button class="opt">Exit speed (from RPM) and launch angle (from the hood)</button>
+        </div>
+        <div class="explain">Like any projectile, the trajectory comes from how fast it leaves (RPM) and at what angle (the hood). Tune both to put the piece in the goal.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">Why does a shooter need its flywheel RPM held steady?</div>
+        <div class="opts">
+          <button class="opt">Range depends on RPM, so a sagging speed makes every shot land differently</button>
+          <button class="opt">To save battery</button>
+          <button class="opt">It doesn't matter</button>
+        </div>
+        <div class="explain">Shot distance is set by exit speed. If the RPM dips after feeding a piece, the next shot goes short. A velocity control loop with feedforward keeps it steady, the Control course's flywheel lesson.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 4 · 06 · Recap · Part 4 complete ★</h3>
+      <div class="glossary">
+        <div class="gl"><b>End effector</b><span>The part that scores.</span></div>
+        <div class="gl"><b>Flywheel</b><span>Spins up, launches at surface speed.</span></div>
+        <div class="gl"><b>Hood</b><span>Sets launch angle + backspin.</span></div>
+        <div class="gl"><b>RPM sets range</b><span>Faster wheel, farther shot.</span></div>
+        <div class="gl"><b>Gripper</b><span>Place gently instead of throw.</span></div>
+        <div class="gl"><b>Steady RPM</b><span>Consistent shots; a control job.</span></div>
+      </div>
+      <a class="next" href="build.html">
+        <div class="n-eyebrow">Part 4 complete · Mechanisms</div>
+        <h3>On to Part 5 - The Drivetrain →</h3>
+        <p>You can build every mechanism a robot needs. Next, the base they all bolt to: frames, kit drivetrains, wheels, and swerve. Continue from the course map.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="build-lesson-20.html">← Part 4 · 05 · Intakes &amp; Rollers</a>
+    <a class="map" href="build.html">Course map</a>
+    <a class="next-link" href="build.html">Part 5 · The Drivetrain →</a>
+  </nav>
+
+</div>
+
+<footer>Fabricate · Building an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var cv=document.getElementById('cv'), ctx=cv.getContext('2d'), W=0,H=0,dpr=1;
+  function fit(){ var r=cv.getBoundingClientRect(); if(!r.width)return; dpr=window.devicePixelRatio||1; cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr); ctx.setTransform(dpr,0,0,dpr,0,0); W=r.width; H=r.height; }
+  fit();
+  var rpm=4000, angDeg=55, ball=null, result='', wheelA=0;
+  var G=0.16, VMAX=10.5;
+  function geom(){ var floorY=H*0.84; return {floorY:floorY, sx:W*0.13, sy:floorY-34, tx:W*0.84, ty:H*0.30, tr:18, br:8}; }
+  function vel(){ return (rpm-1000)/5000*VMAX; }
+  function predict(){
+    var g=geom(), th=angDeg*Math.PI/180, v=vel();
+    var pts=[], x=g.sx, y=g.sy, vx=v*Math.cos(th), vy=-v*Math.sin(th);
+    for(var i=0;i<400;i++){ pts.push({x:x,y:y}); x+=vx; vy+=G; y+=vy; if(y>g.floorY||x>W+10) break; }
+    return pts;
+  }
+  function shoot(){ var g=geom(), th=angDeg*Math.PI/180, v=vel(); ball={x:g.sx,y:g.sy,vx:v*Math.cos(th),vy:-v*Math.sin(th),scored:false}; result=''; }
+  function step(){
+    wheelA += rpm/600;
+    var g=geom();
+    if(ball && !ball.scored){
+      ball.x+=ball.vx; ball.vy+=G; ball.y+=ball.vy;
+      if(Math.hypot(ball.x-g.tx, ball.y-g.ty) < g.tr+g.br){ ball.scored=true; result='score'; }
+      else if(ball.y>g.floorY+g.br || ball.x>W+20){ ball=null; result='miss'; }
+    }
+    if(ball && ball.scored){ ball.vy+=G; ball.y+=ball.vy; ball.x+=ball.vx*0.3; if(ball.y>g.floorY){ ball=null; } }
+    draw(g);
+    var rr=document.getElementById('roRes');
+    if(result==='score'){ rr.textContent='SCORE ✓'; rr.className='v green'; document.getElementById('resTag').textContent='score!'; }
+    else if(result==='miss'){ rr.textContent='missed'; rr.className='v red'; document.getElementById('resTag').textContent='missed'; }
+    else if(ball){ rr.textContent='in flight'; rr.className='v amber'; }
+    else { rr.textContent='-'; rr.className='v'; }
+    requestAnimationFrame(step);
+  }
+  function draw(g){
+    ctx.clearRect(0,0,W,H);
+    // ground
+    ctx.strokeStyle='#5E6F8E'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(0,g.floorY); ctx.lineTo(W,g.floorY); ctx.stroke();
+    // predicted arc (when not in flight)
+    if(!ball){ var pts=predict(); ctx.strokeStyle='rgba(255,138,76,0.5)'; ctx.setLineDash([4,4]); ctx.lineWidth=1.5; ctx.beginPath(); pts.forEach(function(p,i){ if(i===0)ctx.moveTo(p.x,p.y); else ctx.lineTo(p.x,p.y); }); ctx.stroke(); ctx.setLineDash([]); }
+    // target goal (ring)
+    ctx.strokeStyle='#34D7C5'; ctx.lineWidth=4; ctx.beginPath(); ctx.arc(g.tx,g.ty,g.tr,0,Math.PI*2); ctx.stroke();
+    ctx.fillStyle='rgba(52,215,197,0.12)'; ctx.beginPath(); ctx.arc(g.tx,g.ty,g.tr,0,Math.PI*2); ctx.fill();
+    // goal post
+    ctx.strokeStyle='#33415e'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(g.tx,g.ty+g.tr); ctx.lineTo(g.tx,g.floorY); ctx.stroke();
+    ctx.fillStyle='#5E6F8E'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText('GOAL', g.tx, g.ty-g.tr-6);
+    // shooter robot + spinning flywheel + barrel
+    ctx.fillStyle='#11192B'; ctx.strokeStyle='#33415e'; ctx.lineWidth=2; ctx.fillRect(g.sx-30, g.floorY-26, 54, 26); ctx.strokeRect(g.sx-30, g.floorY-26, 54, 26);
+    // flywheel
+    ctx.save(); ctx.translate(g.sx, g.sy); ctx.rotate(wheelA);
+    ctx.beginPath(); ctx.arc(0,0,14,0,Math.PI*2); ctx.fillStyle='#1B2540'; ctx.fill(); ctx.strokeStyle='#FF8A4C'; ctx.lineWidth=2; ctx.stroke();
+    ctx.strokeStyle='#FF8A4C'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,-12); ctx.stroke();
+    ctx.restore();
+    // barrel oriented at launch angle
+    var th=angDeg*Math.PI/180; ctx.strokeStyle='#aeb9d1'; ctx.lineWidth=6; ctx.lineCap='round'; ctx.beginPath(); ctx.moveTo(g.sx, g.sy); ctx.lineTo(g.sx+Math.cos(th)*26, g.sy-Math.sin(th)*26); ctx.stroke();
+    // ball
+    if(ball){ ctx.beginPath(); ctx.arc(ball.x,ball.y,g.br,0,Math.PI*2); ctx.fillStyle=ball.scored?'#43D67E':'#FFB020'; ctx.fill(); ctx.strokeStyle='#2a1a00'; ctx.lineWidth=1.5; ctx.stroke(); }
+  }
+  document.getElementById('shoot').addEventListener('click',shoot);
+  document.getElementById('rpm').addEventListener('input',function(e){ rpm=+e.target.value; document.getElementById('rpmv').textContent=rpm; document.getElementById('roRpm').textContent=rpm; });
+  document.getElementById('ang').addEventListener('input',function(e){ angDeg=+e.target.value; document.getElementById('angv').textContent=angDeg+'°'; document.getElementById('roAng').textContent=angDeg+'°'; });
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
+  requestAnimationFrame(step);
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="build:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

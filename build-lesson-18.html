@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fabricate · Part 4.3 - Elevators &amp; Lifts</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  canvas.elev{display:block;width:100%;height:280px}
+  .readouts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:17px;font-weight:600;margin-top:3px;color:var(--muted)}
+  .ro .v.indigo{color:var(--indigo)} .ro .v.teal{color:var(--teal)} .ro .v.amber{color:var(--amber)}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+  .seg{display:flex;border:1px solid var(--line-2);border-radius:9px;overflow:hidden}
+  .seg button{border:none;background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;padding:9px 11px;cursor:pointer;transition:.12s;border-right:1px solid var(--line-2)}
+  .seg button:last-child{border-right:none}
+  .seg button:hover{color:var(--text)} .seg button.active{background:var(--indigo);color:#2a1503;font-weight:700}
+  .slider-group{flex:1 1 240px;display:flex;flex-direction:column;gap:6px;min-width:200px}
+  .slider-group label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+  .slider-group label .val{color:var(--indigo)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:var(--line-2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--indigo);cursor:pointer;box-shadow:0 0 10px -1px var(--indigo)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(255,138,76,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .rules{display:grid;gap:10px;margin:18px 0} @media(min-width:560px){.rules{grid-template-columns:1fr 1fr}}
+  .rule{display:flex;gap:11px;border:1px solid var(--line);border-radius:11px;padding:13px 14px;background:var(--panel)}
+  .rule .ri{font-size:20px;flex:0 0 auto}
+  .rule b{display:block;font-size:14.5px;color:var(--text);margin-bottom:2px}
+  .rule span{font-size:13.5px;color:var(--muted)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:104px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="build.html"><span class="dot"></span><span class="name">Fabricate</span></a>
+    <div class="top-meta">Part 4 · 03 / 06 · Mechanisms</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 4 · 03</b> Mechanisms</div>
+    <div class="eyebrow">Elevators &amp; Lifts</div>
+    <h1>Go straight<br><span class="accent">up</span>.</h1>
+    <p class="dek">When you need clean vertical reach, an elevator beats an arm. And with the right rigging, a multi-stage elevator does something surprising: the carriage climbs faster than the cable you're pulling, reaching twice as high for the same motor turn.</p>
+  </div>
+
+  <section>
+    <p class="lead">Stages telescope, and the rigging multiplies travel.</p>
+    <p>An elevator is one or more <strong>stages</strong> that slide up out of each other. How you route the cable, the <strong>rigging</strong>, decides how the stages move. <strong>Cascade</strong> rigging makes each stage drive the next, so the carriage moves several times faster than the cable. <strong>Continuous</strong> rigging moves them one-to-one. Extend it both ways.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Two-stage elevator</span><span class="demo-tag" id="rigTag">cascade</span></div>
+      <canvas class="elev" id="cv"></canvas>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Cable pulled</div><div class="v amber" id="roCable">0%</div></div>
+        <div class="ro"><div class="k2">Carriage height</div><div class="v teal" id="roHeight">0%</div></div>
+        <div class="ro"><div class="k2">Speed ratio</div><div class="v indigo" id="roRatio">2:1</div></div>
+      </div>
+      <div class="controls">
+        <div class="seg" id="rigSeg">
+          <button data-r="cascade" class="active">Cascade</button>
+          <button data-r="cont">Continuous</button>
+        </div>
+        <div class="slider-group"><label>Extend (cable pulled) <span class="val" id="extv">0%</span></label><input type="range" id="ext" min="0" max="100" value="0"></div>
+      </div>
+    </div>
+    <p class="caption">Same slider, same cable pulled, but the cascade elevator reaches the dashed line while the continuous one only makes it halfway. Cascade buys you reach. The catch is on the next card.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In the shop</div>
+    <h2>Cascade vs continuous</h2>
+    <p>Both rig the same stages; they just route the cable differently. The choice trades reach against the load on your rigging:</p>
+    <div class="rules">
+      <div class="rule"><div class="ri">⬆️</div><div><b>Cascade</b><span>Each stage drives the next, so the carriage moves N× the cable speed.</span></div></div>
+      <div class="rule"><div class="ri">📏</div><div><b>More reach per turn</b><span>A 2-stage cascade doubles travel for the same motor rotation.</span></div></div>
+      <div class="rule"><div class="ri">🪢</div><div><b>Continuous</b><span>Stages move together, one-to-one with the cable. Simpler, even loading.</span></div></div>
+      <div class="rule"><div class="ri">⚖️</div><div><b>The tradeoff</b><span>Cascade's speed comes with more tension on the cable, and less lifting force.</span></div></div>
+    </div>
+    <div class="note indigo">
+      <div class="nh">Speed and force always trade, even here</div>
+      <p>Cascade rigging moves the carriage twice as fast, but by the same rule as gears, it also has <em>half</em> the lifting force and puts more tension on the cable and pulleys. Continuous rigging is slower but stronger and easier on the hardware. Pick cascade when you need height and speed and the load is light; pick continuous when you're lifting something heavy and want it simple and reliable. It's the speed-versus-torque trade from Part 3, wearing a different hat.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">When is an elevator a better choice than an arm?</div>
+        <div class="opts">
+          <button class="opt">When you need to swing in an arc</button>
+          <button class="opt">When you need clean straight-up-and-down vertical reach</button>
+          <button class="opt">Never</button>
+        </div>
+        <div class="explain">An elevator moves its carriage in a straight vertical line. When the job is pure height with no need to swing, that's simpler and more predictable than an arm's arc.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">In a 2-stage cascade elevator, how fast does the carriage move vs the cable?</div>
+        <div class="opts">
+          <button class="opt">Half as fast</button>
+          <button class="opt">The same speed</button>
+          <button class="opt">Twice as fast - each stage adds the cable's motion</button>
+        </div>
+        <div class="explain">Cascade rigging stacks the stage motions: with two moving stages the carriage travels twice the cable, reaching higher per motor turn. Continuous rigging is one-to-one.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">What's the downside of cascade's extra speed?</div>
+        <div class="opts">
+          <button class="opt">Less lifting force and more tension on the cable</button>
+          <button class="opt">It uses more battery only</button>
+          <button class="opt">There is no downside</button>
+        </div>
+        <div class="explain">Speed and force trade. Cascade moves twice as fast but lifts with half the force and loads the rigging harder. For heavy lifts, continuous is the safer, stronger choice.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 4 · 03 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Elevator</b><span>Vertical reach via sliding stages.</span></div>
+        <div class="gl"><b>Stage</b><span>A section that telescopes up.</span></div>
+        <div class="gl"><b>Rigging</b><span>How the cable routes the stages.</span></div>
+        <div class="gl"><b>Cascade</b><span>Carriage moves N× the cable.</span></div>
+        <div class="gl"><b>Continuous</b><span>Stages move one-to-one.</span></div>
+        <div class="gl"><b>Speed vs force</b><span>Cascade is fast but weaker.</span></div>
+      </div>
+      <a class="next" href="build-lesson-19.html">
+        <div class="n-eyebrow">Up next · Part 4 · 04</div>
+        <h3>Arms &amp; Wrists</h3>
+        <p>Arms are simple to build and a pain to hold. Gravity fights hardest when the arm is horizontal. See exactly how the holding torque changes with angle.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="build-lesson-17.html">← Part 4 · 02 · Linkages &amp; Four-Bars</a>
+    <a class="map" href="build.html">Course map</a>
+    <a href="build-lesson-19.html">Part 4 · 04 · Arms &amp; Wrists →</a>
+  </nav>
+
+</div>
+
+<footer>Fabricate · Building an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var cv=document.getElementById('cv'), ctx=cv.getContext('2d'), W=0,H=0,dpr=1;
+  function fit(){ var r=cv.getBoundingClientRect(); if(!r.width)return; dpr=window.devicePixelRatio||1; cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr); ctx.setTransform(dpr,0,0,dpr,0,0); W=r.width; H=r.height; }
+  fit();
+  var rig='cascade', ext=0; // ext 0..1
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    var groundY=H*0.88, top=H*0.10, maxH=groundY-top;
+    var T=maxH/2, w=46, x=W*0.5-w/2;
+    var c=ext;
+    var carriageH = rig==='cascade' ? 2*c*T : c*T;
+    var stage1H = rig==='cascade' ? c*T : 0;
+    // dashed max-reach line
+    ctx.strokeStyle='rgba(52,215,197,0.4)'; ctx.setLineDash([5,4]); ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(x-40, groundY-maxH); ctx.lineTo(x+w+40, groundY-maxH); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle='#34D7C5'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='left'; ctx.fillText('max reach', x+w+44, groundY-maxH+3);
+    // ground
+    ctx.strokeStyle='#5E6F8E'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x-50,groundY); ctx.lineTo(x+w+50,groundY); ctx.stroke();
+    // base tube (fixed)
+    ctx.fillStyle='#1B2540'; ctx.strokeStyle='#33415e'; ctx.lineWidth=2; ctx.fillRect(x, groundY-T-10, w, T+10); ctx.strokeRect(x, groundY-T-10, w, T+10);
+    ctx.fillStyle='#5E6F8E'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText('base', x+w/2, groundY+16);
+    // stage 1 (cascade only meaningfully moves)
+    var s1y = groundY - 10 - stage1H;
+    ctx.fillStyle='#26324A'; ctx.fillRect(x+5, s1y-T, w-10, T); ctx.strokeStyle='#5b6a86'; ctx.strokeRect(x+5, s1y-T, w-10, T);
+    // carriage
+    var cy = groundY - carriageH;
+    ctx.fillStyle='#FFB020'; ctx.fillRect(x-6, cy-16, w+12, 16); ctx.strokeStyle='#2a1a00'; ctx.lineWidth=1; ctx.strokeRect(x-6, cy-16, w+12, 16);
+    // game piece on carriage
+    ctx.beginPath(); ctx.arc(x+w/2, cy-26, 9, 0, Math.PI*2); ctx.fillStyle='#34D7C5'; ctx.fill(); ctx.strokeStyle='#06222a'; ctx.lineWidth=1.5; ctx.stroke();
+    // cable indicator on the left
+    var cbx=x-30; ctx.strokeStyle='#92A2BE'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(cbx, groundY); ctx.lineTo(cbx, groundY - c*maxH*0.5); ctx.stroke();
+    ctx.fillStyle='#92A2BE'; ctx.beginPath(); ctx.arc(cbx, groundY, 6, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle='#5E6F8E'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText('cable', cbx, groundY+16);
+    // height bracket
+    ctx.strokeStyle='rgba(255,176,32,0.5)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(x+w+20, groundY); ctx.lineTo(x+w+20, cy); ctx.stroke();
+    ctx.fillStyle='#FFB020'; ctx.textAlign='left'; ctx.fillText(Math.round(carriageH/maxH*100)+'%', x+w+24, (groundY+cy)/2);
+  }
+  function refresh(){
+    document.getElementById('roCable').textContent=Math.round(ext*100)+'%';
+    var carriagePct = rig==='cascade' ? Math.min(100,ext*200) : ext*100;
+    document.getElementById('roHeight').textContent=Math.round(carriagePct)+'%';
+    document.getElementById('roRatio').textContent= rig==='cascade'?'2:1':'1:1';
+  }
+  function loop(){ draw(); requestAnimationFrame(loop); }
+  document.querySelectorAll('#rigSeg button').forEach(function(b){ b.addEventListener('click',function(){ rig=b.getAttribute('data-r'); document.getElementById('rigTag').textContent= rig==='cascade'?'cascade':'continuous'; document.querySelectorAll('#rigSeg button').forEach(function(x){x.classList.toggle('active',x===b);}); refresh(); }); });
+  document.getElementById('ext').addEventListener('input',function(e){ ext=(+e.target.value)/100; document.getElementById('extv').textContent=(+e.target.value)+'%'; refresh(); });
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
+  refresh(); requestAnimationFrame(loop);
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="build:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>
