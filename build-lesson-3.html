@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fabricate · Part 1.3 - Power Tools</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  canvas.drill{display:block;width:100%;height:250px}
+  .readouts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:17px;font-weight:600;margin-top:3px;color:var(--muted)}
+  .ro .v.indigo{color:var(--indigo)} .ro .v.green{color:var(--green)} .ro .v.amber{color:var(--amber)} .ro .v.red{color:var(--red)}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+  .seg{display:flex;border:1px solid var(--line-2);border-radius:9px;overflow:hidden}
+  .seg button{border:none;background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;padding:9px 10px;cursor:pointer;transition:.12s;border-right:1px solid var(--line-2)}
+  .seg button:last-child{border-right:none}
+  .seg button:hover{color:var(--text)} .seg button.active{background:var(--indigo);color:#2a1503;font-weight:700}
+  .slider-group{flex:1 1 230px;display:flex;flex-direction:column;gap:6px;min-width:200px}
+  .slider-group label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+  .slider-group label .val{color:var(--indigo)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:var(--line-2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--indigo);cursor:pointer;box-shadow:0 0 10px -1px var(--indigo)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(255,138,76,.07)} .note.indigo .nh{color:var(--indigo)}
+  .note.red{border-color:var(--red);background:rgba(255,107,107,.07)} .note.red .nh{color:var(--red)}
+
+  .rules{display:grid;gap:10px;margin:18px 0} @media(min-width:560px){.rules{grid-template-columns:1fr 1fr}}
+  .rule{display:flex;gap:11px;border:1px solid var(--line);border-radius:11px;padding:13px 14px;background:var(--panel)}
+  .rule .ri{font-size:20px;flex:0 0 auto}
+  .rule b{display:block;font-size:14.5px;color:var(--text);margin-bottom:2px}
+  .rule span{font-size:13.5px;color:var(--muted)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:108px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="build.html"><span class="dot"></span><span class="name">Fabricate</span></a>
+    <div class="top-meta">Part 1 · 03 / 05 · The Shop</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 1 · 03</b> The Shop</div>
+    <div class="eyebrow">Power Tools</div>
+    <h1>Match the<br><span class="accent">speed</span>.</h1>
+    <p class="dek">A power tool does in seconds what a hand tool does in minutes, which also means it makes mistakes in seconds. The first skill is matching the tool's speed to the material. Too fast burns; too slow chatters.</p>
+  </div>
+
+  <section>
+    <p class="lead">Different materials want different speeds.</p>
+    <p>Drill a hole in steel at wood speed and you'll burn the bit dull. Drill plastic too fast and it melts and grabs. Each material has a sweet spot. Pick a material below and dial the drill speed into the green band.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Drill speed vs material</span><span class="demo-tag" id="matTag">aluminum</span></div>
+      <canvas class="drill" id="cv"></canvas>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Material</div><div class="v indigo" id="roMat">Aluminum</div></div>
+        <div class="ro"><div class="k2">Drill speed</div><div class="v" id="roRpm">1200 rpm</div></div>
+        <div class="ro"><div class="k2">Result</div><div class="v" id="roRes">-</div></div>
+      </div>
+      <div class="controls">
+        <div class="seg" id="matSeg">
+          <button data-m="alum" class="active">Aluminum</button>
+          <button data-m="steel">Steel</button>
+          <button data-m="wood">Wood</button>
+          <button data-m="poly">Polycarb</button>
+        </div>
+        <div class="slider-group"><label>Drill speed <span class="val" id="rpmv">1200 rpm</span></label><input type="range" id="rpm" min="100" max="3000" value="1200" step="50"></div>
+      </div>
+    </div>
+    <p class="caption">The green band on the gauge is the right speed for the chosen material. Land in it for a clean cut. Push past it and the contact point glows, that's heat ruining the bit and the part.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In the shop</div>
+    <h2>The shop's power tools</h2>
+    <p>A handful of machines do most of the work. Each has the same two rules: secure the part, and let the tool reach speed before it touches the work:</p>
+    <div class="rules">
+      <div class="rule"><div class="ri">🛠️</div><div><b>Drill press</b><span>Accurate, square holes. Clamp the part; never hold it by hand.</span></div></div>
+      <div class="rule"><div class="ri">🪚</div><div><b>Bandsaw</b><span>Fast straight and curved cuts in stock. Keep fingers clear of the blade line.</span></div></div>
+      <div class="rule"><div class="ri">🔌</div><div><b>Hand drill / driver</b><span>For drilling and driving in place; two hands, steady.</span></div></div>
+      <div class="rule"><div class="ri">🌀</div><div><b>Belt / disc sander</b><span>Deburr and shape edges fast. It removes skin just as fast.</span></div></div>
+    </div>
+    <div class="note red">
+      <div class="nh">Clamp it. Always clamp it.</div>
+      <p>The most common power-tool injury is a part that grabs and spins. A drill bit catches the workpiece and whips it around like a propeller, with your hand right there. <strong>Clamp every part down</strong> so the tool fights the clamp, not your fingers. If you can't clamp it, it's too small to machine safely, find another way.</p>
+    </div>
+    <div class="note indigo">
+      <div class="nh">Let it reach speed, then ease in</div>
+      <p>Start the tool and let it spin up before it meets the material, then feed slowly and steadily. Forcing a tool or stalling it is how bits snap and motors burn. For metal, a drop of cutting fluid keeps things cool and the edge sharp. Steady pressure, not brute force.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">You drill steel at the same high speed you'd use for wood. What happens?</div>
+        <div class="opts">
+          <button class="opt">It cuts cleaner</button>
+          <button class="opt">The heat burns the bit dull and can harden the steel</button>
+          <button class="opt">Nothing different</button>
+        </div>
+        <div class="explain">Harder materials need slower speeds. Too fast generates heat that dulls the bit and can work-harden the steel, making it even tougher to drill. Slow down for steel.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">Polycarbonate (clear plastic) drilled too fast tends to…</div>
+        <div class="opts">
+          <button class="opt">Get stronger</button>
+          <button class="opt">Stay perfectly clean</button>
+          <button class="opt">Melt, web, and grab the bit</button>
+        </div>
+        <div class="explain">Plastic has a low melting point, so excess speed and heat melt it. It re-welds behind the bit (webbing) and can grab. Moderate speed and steady feed keep it clean.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">Before drilling a part on the drill press, you should…</div>
+        <div class="opts">
+          <button class="opt">Clamp the part down securely</button>
+          <button class="opt">Hold it firmly with your fingers</button>
+          <button class="opt">Set the highest speed for power</button>
+        </div>
+        <div class="explain">Always clamp. If the bit grabs an unclamped part, it spins it into a blur right where your hand is. Clamping makes the tool fight the clamp instead of you.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 1 · 03 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Match speed</b><span>Hard / plastic = slow; wood = fast.</span></div>
+        <div class="gl"><b>Too fast</b><span>Heat: burns bits, melts plastic.</span></div>
+        <div class="gl"><b>Too slow</b><span>Chatter, tearing, grabbing.</span></div>
+        <div class="gl"><b>Clamp it</b><span>Never hold a part by hand.</span></div>
+        <div class="gl"><b>Reach speed first</b><span>Then ease the tool in.</span></div>
+        <div class="gl"><b>Cutting fluid</b><span>Keeps metal cool and edges sharp.</span></div>
+      </div>
+      <a class="next" href="build-lesson-4.html">
+        <div class="n-eyebrow">Up next · Part 1 · 04</div>
+        <h3>Measure &amp; Mark</h3>
+        <p>Cuts are only as good as the lines you cut to. Read a caliper to the thousandth, understand tolerance, and mark a part right the first time.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="build-lesson-2.html">← Part 1 · 02 · Hand Tools</a>
+    <a class="map" href="build.html">Course map</a>
+    <a href="build-lesson-4.html">Part 1 · 04 · Measure &amp; Mark →</a>
+  </nav>
+
+</div>
+
+<footer>Fabricate · Building an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var cv=document.getElementById('cv'), ctx=cv.getContext('2d'), W=0,H=0,dpr=1;
+  function fit(){ var r=cv.getBoundingClientRect(); if(!r.width)return; dpr=window.devicePixelRatio||1; cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr); ctx.setTransform(dpr,0,0,dpr,0,0); W=r.width; H=r.height; }
+  fit();
+  var MATS={
+    alum:{label:'Aluminum', lo:1400, hi:2400, col:'#c2c9d6', fast:'gums and grabs', slow:'chatters'},
+    steel:{label:'Steel', lo:350, hi:850, col:'#8b96a8', fast:'burns the bit', slow:'work-hardens'},
+    wood:{label:'Wood', lo:1900, hi:3000, col:'#c79a5e', fast:'scorches', slow:'tears'},
+    poly:{label:'Polycarbonate', lo:700, hi:1400, col:'#6fcadd', fast:'melts and webs', slow:'cracks'}
+  };
+  var mat='alum', rpm=1200, angle=0, MAXR=3000;
+  function status(){ var m=MATS[mat]; if(rpm<m.lo) return {s:'slow', t:'too slow: '+m.slow, c:'amber'}; if(rpm>m.hi) return {s:'fast', t:'too fast: '+m.fast, c:'red'}; return {s:'ok', t:'clean cut', c:'green'}; }
+  function step(){
+    angle += rpm/700;
+    var st=status();
+    draw(st);
+    document.getElementById('roMat').textContent=MATS[mat].label;
+    document.getElementById('roRpm').textContent=rpm+' rpm';
+    var rr=document.getElementById('roRes'); rr.textContent=st.t; rr.className='v '+st.c;
+    requestAnimationFrame(step);
+  }
+  function draw(st){
+    ctx.clearRect(0,0,W,H);
+    var m=MATS[mat];
+    var cx=W*0.34, wpTop=H*0.50, wpH=42, wpX=W*0.10, wpW=W*0.48;
+    // workpiece
+    ctx.fillStyle=m.col; ctx.fillRect(wpX,wpTop,wpW,wpH);
+    ctx.strokeStyle='rgba(0,0,0,0.3)'; ctx.lineWidth=1; ctx.strokeRect(wpX,wpTop,wpW,wpH);
+    // hole being drilled at cx
+    ctx.fillStyle='#0B1322'; ctx.beginPath(); ctx.ellipse(cx,wpTop+wpH/2,9,5,0,0,Math.PI*2); ctx.fill();
+    // drill bit (shaft + flutes) above
+    var bx=cx, tip=wpTop+4;
+    ctx.strokeStyle='#9aa6bc'; ctx.lineWidth=10; ctx.beginPath(); ctx.moveTo(bx,H*0.12); ctx.lineTo(bx,tip-14); ctx.stroke();
+    // flutes (spinning) - a few rotating ticks
+    ctx.save(); ctx.translate(bx,tip-7);
+    for(var i=0;i<2;i++){ ctx.save(); ctx.rotate(angle*0.5+i*Math.PI); ctx.strokeStyle='#c7d0e0'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(-7,-7); ctx.lineTo(7,7); ctx.stroke(); ctx.restore(); }
+    ctx.fillStyle='#c7d0e0'; ctx.beginPath(); ctx.moveTo(-7,-14); ctx.lineTo(7,-14); ctx.lineTo(0,2); ctx.closePath(); ctx.fill();
+    ctx.restore();
+    // heat glow / chips at contact
+    if(st.s==='fast'){ var g=ctx.createRadialGradient(cx,tip,0,cx,tip,26); g.addColorStop(0,'rgba(255,120,60,0.8)'); g.addColorStop(1,'rgba(255,120,60,0)'); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(cx,tip,26,0,Math.PI*2); ctx.fill();
+      // smoke
+      ctx.fillStyle='rgba(150,150,150,0.25)'; for(var s=0;s<3;s++){ ctx.beginPath(); ctx.arc(cx+Math.sin(angle*0.1+s)*6, tip-18-s*10, 5+s*2, 0,Math.PI*2); ctx.fill(); }
+    } else if(st.s==='ok'){ for(var c=0;c<4;c++){ ctx.fillStyle='rgba(255,210,120,0.7)'; var a=angle*0.3+c*1.6; ctx.beginPath(); ctx.arc(cx+Math.cos(a)*14, tip+Math.sin(a)*3, 1.6,0,Math.PI*2); ctx.fill(); } }
+    // ===== RPM gauge =====
+    var gx=W*0.66, gy=H*0.20, gw=W*0.28, gh=H*0.62;
+    ctx.fillStyle='#5E6F8E'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText('SPEED', gx+gw/2, gy-8);
+    ctx.strokeStyle='#26324A'; ctx.lineWidth=1; ctx.strokeRect(gx,gy,gw,gh);
+    function yFor(v){ return gy+gh - (v/MAXR)*gh; }
+    // green band
+    ctx.fillStyle='rgba(67,214,126,0.18)'; ctx.fillRect(gx, yFor(m.hi), gw, yFor(m.lo)-yFor(m.hi));
+    ctx.strokeStyle='rgba(67,214,126,0.6)'; ctx.beginPath(); ctx.moveTo(gx,yFor(m.lo)); ctx.lineTo(gx+gw,yFor(m.lo)); ctx.moveTo(gx,yFor(m.hi)); ctx.lineTo(gx+gw,yFor(m.hi)); ctx.stroke();
+    // marker
+    var my=yFor(rpm); ctx.fillStyle=(st.c==='green'?'#43D67E':(st.c==='amber'?'#FFB020':'#FF6B6B')); ctx.fillRect(gx-3, my-2, gw+6, 4);
+    ctx.fillStyle='#92A2BE'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='left'; ctx.fillText(rpm+' rpm', gx+gw+4, my+3);
+    ctx.fillStyle='#5E6F8E'; ctx.textAlign='right'; ctx.fillText('0', gx-4, gy+gh); ctx.fillText('3000', gx-4, gy+6);
+  }
+  function setMat(mm){ mat=mm; document.getElementById('matTag').textContent=MATS[mm].label.toLowerCase(); document.querySelectorAll('#matSeg button').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-m')===mm);}); }
+  document.querySelectorAll('#matSeg button').forEach(function(b){ b.addEventListener('click',function(){ setMat(b.getAttribute('data-m')); }); });
+  document.getElementById('rpm').addEventListener('input',function(e){ rpm=+e.target.value; document.getElementById('rpmv').textContent=rpm+' rpm'; });
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
+  requestAnimationFrame(step);
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="build:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

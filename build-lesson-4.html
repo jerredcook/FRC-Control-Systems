@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fabricate · Part 1.4 - Measure &amp; Mark</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  canvas.cal{display:block;width:100%;height:200px}
+  .readouts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:20px;font-weight:600;margin-top:3px;color:var(--muted)}
+  .ro .v.indigo{color:var(--indigo)} .ro .v.amber{color:var(--amber)} .ro .v.green{color:var(--green)} .ro .v.red{color:var(--red)}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .slider-group{flex:1 1 100%;display:flex;flex-direction:column;gap:6px}
+  .slider-group label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+  .slider-group label .val{color:var(--indigo)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:var(--line-2);outline:none;width:100%}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--indigo);cursor:pointer;box-shadow:0 0 10px -1px var(--indigo)}
+  input[type=range]::-moz-range-thumb{width:18px;height:18px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .btn.primary{background:linear-gradient(180deg,#ffb37e,var(--indigo));color:#2a1503;font-weight:700;border:none}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(255,138,76,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .rules{display:grid;gap:10px;margin:18px 0} @media(min-width:560px){.rules{grid-template-columns:1fr 1fr}}
+  .rule{display:flex;gap:11px;border:1px solid var(--line);border-radius:11px;padding:13px 14px;background:var(--panel)}
+  .rule .ri{font-size:20px;flex:0 0 auto}
+  .rule b{display:block;font-size:14.5px;color:var(--text);margin-bottom:2px}
+  .rule span{font-size:13.5px;color:var(--muted)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:108px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="build.html"><span class="dot"></span><span class="name">Fabricate</span></a>
+    <div class="top-meta">Part 1 · 04 / 05 · The Shop</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 1 · 04</b> The Shop</div>
+    <div class="eyebrow">Measure &amp; Mark</div>
+    <h1>Measure twice,<br>cut <span class="accent">once</span>.</h1>
+    <p class="dek">A robot is hundreds of parts that all have to line up. That precision starts at the measurement. A caliper reads to the thousandth of an inch, and knowing how to use one separates parts that bolt together from parts that don't.</p>
+  </div>
+
+  <section>
+    <p class="lead">A caliper measures far finer than a ruler.</p>
+    <p>A ruler gets you to about a sixteenth of an inch. A <strong>caliper</strong> reads to the thousandth, 0.001 inch, which is the precision a robot's holes and shafts need. Slide the jaws below to a target measurement and land it within tolerance.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Read the caliper</span><span class="demo-tag">set the jaws</span></div>
+      <canvas class="cal" id="cv"></canvas>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Reading</div><div class="v indigo" id="roRead">0.000 in</div></div>
+        <div class="ro"><div class="k2">Target (±0.005)</div><div class="v amber" id="roTgt">1.250 in</div></div>
+        <div class="ro"><div class="k2">Result</div><div class="v" id="roRes">-</div></div>
+      </div>
+      <div class="controls">
+        <div class="slider-group"><label>Slide the jaws <span class="val" id="measv">0.000 in</span></label><input type="range" id="meas" min="0" max="2500" value="0" step="1"></div>
+        <button class="btn primary" id="check">Check</button>
+        <button class="btn" id="newt">New target</button>
+      </div>
+    </div>
+    <p class="caption">The amber block between the jaws is the part you're measuring. Get the reading within 0.005 inch of the target and it counts. That tolerance band is exactly how a real part is judged.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In the shop</div>
+    <h2>Tolerance, and marking a part</h2>
+    <p>Nothing is ever exactly its dimension, so every measurement comes with a <strong>tolerance</strong>, the amount of error that's still acceptable. Knowing how to measure, and how to mark a part to cut, is the difference between a clean build and a pile of scrap:</p>
+    <div class="rules">
+      <div class="rule"><div class="ri">📐</div><div><b>Caliper</b><span>Length, depth, inside and outside diameters, to 0.001 inch.</span></div></div>
+      <div class="rule"><div class="ri">±</div><div><b>Tolerance</b><span>The allowed range, like 1.250 ± 0.005 in. Tighter costs more time.</span></div></div>
+      <div class="rule"><div class="ri">✏️</div><div><b>Mark &amp; scribe</b><span>Mark the line, then center-punch a hole before drilling so the bit can't wander.</span></div></div>
+      <div class="rule"><div class="ri">🔁</div><div><b>Measure twice</b><span>Re-check before every cut. Aluminum doesn't grow back.</span></div></div>
+    </div>
+    <div class="note indigo">
+      <div class="nh">Why tolerance is the whole game</div>
+      <p>Two parts have to fit, so their tolerances have to agree. A 0.500 inch shaft in a 0.500 inch hole won't spin, it's a press fit. The hole needs to be a few thousandths bigger. Get tolerance right and parts slide together; get it wrong and you're filing holes at midnight. When in doubt, hold the tight tolerance only where parts actually meet, and leave the rest loose to save time.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="2">
+        <div class="qn">Question 1</div>
+        <div class="qt">Why use a caliper instead of a ruler for robot parts?</div>
+        <div class="opts">
+          <button class="opt">It's faster to read</button>
+          <button class="opt">It measures angles</button>
+          <button class="opt">It reads to a thousandth of an inch, the precision parts need to fit</button>
+        </div>
+        <div class="explain">A ruler stops at about a sixteenth of an inch. A caliper reads to 0.001 inch, which is the precision holes and shafts need to line up and fit together.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 2</div>
+        <div class="qt">A part is spec'd at 1.250 ± 0.005 in. What does the ± 0.005 mean?</div>
+        <div class="opts">
+          <button class="opt">Anywhere from 1.245 to 1.255 in is acceptable</button>
+          <button class="opt">It must be exactly 1.250 in</button>
+          <button class="opt">It can be any size</button>
+        </div>
+        <div class="explain">Tolerance is the allowed range. ± 0.005 means 0.005 over or under is fine, so 1.245 to 1.255 in all pass. Nothing is ever perfectly on size, so you specify how close is close enough.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 3</div>
+        <div class="qt">Why center-punch a hole location before drilling?</div>
+        <div class="opts">
+          <button class="opt">To make the hole bigger</button>
+          <button class="opt">So the drill bit starts on the mark instead of wandering</button>
+          <button class="opt">To harden the metal</button>
+        </div>
+        <div class="explain">A center punch makes a small dimple that catches the drill tip, so the bit bites exactly on your mark instead of skating across the surface. Mark, punch, then drill.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 1 · 04 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Caliper</b><span>Reads length to 0.001 inch.</span></div>
+        <div class="gl"><b>Tolerance</b><span>The allowed +/- range.</span></div>
+        <div class="gl"><b>Press fit</b><span>Same size = won't move.</span></div>
+        <div class="gl"><b>Center punch</b><span>Stops the bit wandering.</span></div>
+        <div class="gl"><b>Measure twice</b><span>Re-check before cutting.</span></div>
+        <div class="gl"><b>Tight where it counts</b><span>Loose tolerance elsewhere.</span></div>
+      </div>
+      <a class="next" href="build-lesson-5.html">
+        <div class="n-eyebrow">Up next · Part 1 · 05 · Finale</div>
+        <h3>Fasteners</h3>
+        <p>The last shop skill: holding it all together. Bolt sizes, thread pitch, and how to torque a fastener tight without stripping the threads.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="build-lesson-3.html">← Part 1 · 03 · Power Tools</a>
+    <a class="map" href="build.html">Course map</a>
+    <a href="build-lesson-5.html">Part 1 · 05 · Fasteners →</a>
+  </nav>
+
+</div>
+
+<footer>Fabricate · Building an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var cv=document.getElementById('cv'), ctx=cv.getContext('2d'), W=0,H=0,dpr=1;
+  function fit(){ var r=cv.getBoundingClientRect(); if(!r.width)return; dpr=window.devicePixelRatio||1; cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr); ctx.setTransform(dpr,0,0,dpr,0,0); W=r.width; H=r.height; }
+  fit();
+  var meas=0; // thousandths of an inch
+  var TARGETS=[1250,750,2000,875,1500,2125,500,1750], ti=0, target=TARGETS[0];
+  var RANGE=2.5; // inches full scale
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    var x0=40, x1=W-40, span=x1-x0, ppi=span/RANGE;
+    var beamY=H*0.62;
+    function X(inch){ return x0+inch*ppi; }
+    var mIn=meas/1000;
+    // main beam
+    ctx.fillStyle='#1B2540'; ctx.fillRect(x0,beamY,span,14); ctx.strokeStyle='#33415e'; ctx.lineWidth=1; ctx.strokeRect(x0,beamY,span,14);
+    // ticks
+    ctx.strokeStyle='#5E6F8E'; ctx.fillStyle='#5E6F8E'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='center';
+    for(var t=0;t<=RANGE*10;t++){ var inch=t/10, x=X(inch); var big=(t%10===0), mid=(t%5===0); ctx.beginPath(); ctx.moveTo(x,beamY); ctx.lineTo(x,beamY-(big?11:mid?7:4)); ctx.stroke(); if(big) ctx.fillText(inch.toFixed(0)+'"', x, beamY-14); }
+    // fixed jaw at 0
+    ctx.fillStyle='#9aa6bc'; ctx.fillRect(X(0)-10, beamY-70, 12, 78);
+    // measured object between jaws
+    var ox=X(0)+2, ow=mIn*ppi;
+    if(ow>1){ ctx.fillStyle='rgba(255,176,32,0.85)'; ctx.fillRect(ox, beamY-52, ow, 50); ctx.strokeStyle='#2a1a00'; ctx.lineWidth=1; ctx.strokeRect(ox, beamY-52, ow, 50); }
+    // sliding jaw at meas
+    var sx=X(mIn);
+    ctx.fillStyle='#aeb9d1'; ctx.fillRect(sx-2, beamY-70, 12, 78);        // jaw
+    ctx.fillStyle='#33415e'; ctx.fillRect(sx-2, beamY-2, 46, 26);          // slider body riding the beam
+    // digital display on the slider
+    ctx.fillStyle='#06121f'; ctx.fillRect(sx+2, beamY+3, 40, 16);
+    ctx.fillStyle='#43D67E'; ctx.font='700 11px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText(mIn.toFixed(3), sx+22, beamY+15);
+    // label
+    ctx.fillStyle='#5E6F8E'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='left'; ctx.fillText('CALIPER', x0, 18);
+  }
+  function refresh(){
+    document.getElementById('roRead').textContent=(meas/1000).toFixed(3)+' in';
+    document.getElementById('measv').textContent=(meas/1000).toFixed(3)+' in';
+    document.getElementById('roTgt').textContent=(target/1000).toFixed(3)+' in';
+  }
+  function loop(){ draw(); requestAnimationFrame(loop); }
+  document.getElementById('meas').addEventListener('input',function(e){ meas=+e.target.value; refresh(); var rr=document.getElementById('roRes'); rr.textContent='-'; rr.className='v'; });
+  document.getElementById('check').addEventListener('click',function(){
+    var diff=Math.abs(meas-target), rr=document.getElementById('roRes');
+    if(diff<=5){ rr.textContent='✓ in tolerance'; rr.className='v green'; }
+    else { rr.textContent='off by '+(diff/1000).toFixed(3)+'"'; rr.className='v red'; }
+  });
+  document.getElementById('newt').addEventListener('click',function(){ ti=(ti+1)%TARGETS.length; target=TARGETS[ti]; refresh(); var rr=document.getElementById('roRes'); rr.textContent='-'; rr.className='v'; });
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
+  refresh(); requestAnimationFrame(loop);
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="build:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

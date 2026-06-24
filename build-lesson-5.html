@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fabricate · Part 1.5 - Fasteners</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  canvas.torque{display:block;width:100%;height:240px}
+  .readouts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:17px;font-weight:600;margin-top:3px;color:var(--muted)}
+  .ro .v.indigo{color:var(--indigo)} .ro .v.green{color:var(--green)} .ro .v.amber{color:var(--amber)} .ro .v.red{color:var(--red)}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .seg{display:flex;border:1px solid var(--line-2);border-radius:9px;overflow:hidden}
+  .seg button{border:none;background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;padding:9px 11px;cursor:pointer;transition:.12s;border-right:1px solid var(--line-2)}
+  .seg button:last-child{border-right:none}
+  .seg button:hover{color:var(--text)} .seg button.active{background:var(--indigo);color:#2a1503;font-weight:700}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;padding:11px 16px;border-radius:8px;cursor:pointer;transition:.12s;user-select:none;touch-action:none}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .btn.primary{background:linear-gradient(180deg,#ffb37e,var(--indigo));color:#2a1503;font-weight:700;border:none}
+  .hint{font-family:var(--mono);font-size:11px;color:var(--faint)}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(255,138,76,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .ref{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:18px 0}
+  .ref .rh,.ref .rr{display:grid;grid-template-columns:1.1fr 1fr 1fr 1.6fr;gap:1px}
+  .ref .rh>div,.ref .rr>div{background:#0B1322;padding:10px 12px;font-size:13.5px;color:var(--text)}
+  .ref .rh>div{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);background:#0E1525}
+  .ref .rr>div:first-child{font-family:var(--mono);color:var(--indigo);font-weight:600}
+  .ref{background:var(--line)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:108px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(255,176,32,0.12),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--amber);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--amber)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)} .coursenav a.next-link{color:var(--amber);border-color:rgba(255,176,32,.4)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="build.html"><span class="dot"></span><span class="name">Fabricate</span></a>
+    <div class="top-meta">Part 1 · 05 / 05 · Finale</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 1 · 05</b> The Shop · Finale</div>
+    <div class="eyebrow">Fasteners</div>
+    <h1>Tight, but not<br><span class="accent">too</span> tight.</h1>
+    <p class="dek">A robot is held together by hundreds of bolts. Pick the right size, thread it into the right hole, and torque it just enough. Too loose and it rattles out mid-match; too tight and you strip the threads.</p>
+  </div>
+
+  <section>
+    <p class="lead">There's a sweet spot for tightness.</p>
+    <p>Tighten a bolt and the clamping force climbs. Stop too early and vibration backs it out. Keep going past the limit and the threads <strong>strip</strong>, the bolt spins forever and grips nothing. Hold the button to tighten, and try to stop in the green band.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Torque a bolt</span><span class="demo-tag" id="szTag">1/4-20</span></div>
+      <canvas class="torque" id="cv"></canvas>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Bolt</div><div class="v indigo" id="roSz">1/4-20</div></div>
+        <div class="ro"><div class="k2">Applied torque</div><div class="v" id="roTq">0 in-lb</div></div>
+        <div class="ro"><div class="k2">Result</div><div class="v" id="roRes">-</div></div>
+      </div>
+      <div class="controls">
+        <div class="seg" id="szSeg">
+          <button data-s="10" class="active">#10-32</button>
+          <button data-s="14">1/4-20</button>
+        </div>
+        <button class="btn primary" id="tighten">Hold to tighten</button>
+        <button class="btn" id="reset">Reset</button>
+        <span class="hint">stop in the green band</span>
+      </div>
+    </div>
+    <p class="caption">Each bolt size has its own proper torque, bigger bolts take more. Stop in the green and it's snug and secure. Blow past the red line and you've stripped the threads, and the part has to come apart to fix it.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In the shop</div>
+    <h2>Reading a bolt</h2>
+    <p>A bolt's name tells you its size and thread. <span class="k">1/4-20</span> means a quarter-inch diameter with 20 threads per inch. The thread has to match its hole or nut exactly:</p>
+    <div class="ref">
+      <div class="rh"><div>Size</div><div>Diameter</div><div>Threads/in</div><div>Where you'll use it</div></div>
+      <div class="rr"><div>#8-32</div><div>0.164"</div><div>32</div><div>Light brackets, small mounts</div></div>
+      <div class="rr"><div>#10-32</div><div>0.190"</div><div>32</div><div>Electronics, brackets, gussets</div></div>
+      <div class="rr"><div>1/4-20</div><div>0.250"</div><div>20</div><div>The FRC workhorse: structure, gearboxes</div></div>
+      <div class="rr"><div>M3 / M5</div><div>metric</div><div>-</div><div>Motors and COTS parts from metric vendors</div></div>
+    </div>
+    <div class="note indigo">
+      <div class="nh">Keep it from rattling loose</div>
+      <p>FRC robots vibrate hard, and a plain nut will walk right off. Two fixes: a <strong>nylock</strong> nut has a nylon ring that grips the threads, and <strong>threadlocker</strong> (blue Loctite) is a liquid that sets and holds. Use one or the other on anything that matters. And thread engagement counts: a bolt needs at least a couple of full threads biting, too short and it pulls out under load.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">What does "1/4-20" tell you about a bolt?</div>
+        <div class="opts">
+          <button class="opt">It's 20 inches long</button>
+          <button class="opt">Quarter-inch diameter, 20 threads per inch</button>
+          <button class="opt">It takes 20 in-lb of torque</button>
+        </div>
+        <div class="explain">The first number is the diameter (1/4 inch), the second is the thread pitch (20 threads per inch). The hole or nut it goes into must match both exactly.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">You keep tightening a bolt well past snug. What happens?</div>
+        <div class="opts">
+          <button class="opt">It gets stronger and stronger</button>
+          <button class="opt">Nothing, you can't over-tighten</button>
+          <button class="opt">The threads strip and the bolt grips nothing</button>
+        </div>
+        <div class="explain">Past the proper torque, the threads shear off. Now the bolt spins freely with no clamping force, and you have to drill it out or replace the part. Snug, then stop.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">A bolt on a vibrating robot keeps working loose. Best fix?</div>
+        <div class="opts">
+          <button class="opt">Use a nylock nut or threadlocker</button>
+          <button class="opt">Tighten it until the threads strip</button>
+          <button class="opt">Use a bigger screwdriver</button>
+        </div>
+        <div class="explain">A nylock nut grips the threads with a nylon insert, and threadlocker bonds them chemically. Either keeps a fastener from rattling out under FRC's constant vibration.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 1 · 05 · Recap · Part 1 complete ★</h3>
+      <div class="glossary">
+        <div class="gl"><b>1/4-20</b><span>Diameter, then threads per inch.</span></div>
+        <div class="gl"><b>Proper torque</b><span>Snug; over-torque strips threads.</span></div>
+        <div class="gl"><b>Match the thread</b><span>Bolt and hole must agree.</span></div>
+        <div class="gl"><b>Nylock</b><span>Nylon-insert locking nut.</span></div>
+        <div class="gl"><b>Threadlocker</b><span>Blue Loctite holds it fast.</span></div>
+        <div class="gl"><b>Engagement</b><span>Enough threads must bite.</span></div>
+      </div>
+      <a class="next" href="build.html">
+        <div class="n-eyebrow">Part 1 complete · The Shop</div>
+        <h3>On to Part 2 - Materials &amp; Stock →</h3>
+        <p>You can work the shop safely and skillfully. Next, what you'll actually be cutting and bolting: aluminum extrusion, plate, and polycarbonate. Continue from the course map.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="build-lesson-4.html">← Part 1 · 04 · Measure &amp; Mark</a>
+    <a class="map" href="build.html">Course map</a>
+    <a class="next-link" href="build.html">Part 2 · Materials &amp; Stock →</a>
+  </nav>
+
+</div>
+
+<footer>Fabricate · Building an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var cv=document.getElementById('cv'), ctx=cv.getContext('2d'), W=0,H=0,dpr=1;
+  function fit(){ var r=cv.getBoundingClientRect(); if(!r.width)return; dpr=window.devicePixelRatio||1; cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr); ctx.setTransform(dpr,0,0,dpr,0,0); W=r.width; H=r.height; }
+  fit();
+  var SIZES={ '10':{label:'#10-32', lo:12, hi:22, strip:30, max:38}, '14':{label:'1/4-20', lo:55, hi:80, strip:100, max:130} };
+  var sz='10', tq=0, holding=false, stripped=false, headAng=0;
+  function S(){ return SIZES[sz]; }
+  function status(){ if(stripped) return {t:'STRIPPED', c:'red'}; var s=S(); if(tq<s.lo) return {t:'loose - backs out', c:'amber'}; if(tq<=s.hi) return {t:'snug ✓', c:'green'}; return {t:'over-tight!', c:'amber'}; }
+  function step(){
+    if(holding && !stripped){ tq += S().max*0.012; headAng += 0.12; if(tq>=S().strip){ tq=S().strip; stripped=true; } }
+    if(stripped && holding){ headAng += 0.35; } // spins free
+    draw();
+    var st=status();
+    document.getElementById('roTq').textContent=Math.round(tq)+' in-lb';
+    var rr=document.getElementById('roRes'); rr.textContent=st.t; rr.className='v '+st.c;
+    requestAnimationFrame(step);
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    var s=S(), st=status();
+    // ===== left: bolt clamping two plates =====
+    var cx=W*0.27, topY=H*0.30;
+    var clamp=stripped?0:Math.min(1, tq/s.hi); // 0..1 how closed the gap is
+    var gap=(1-clamp)*10;
+    // plates
+    ctx.fillStyle='#8b96a8'; ctx.fillRect(cx-50, topY+34, 100, 16);          // bottom plate
+    ctx.fillStyle='#aeb9d1'; ctx.fillRect(cx-50, topY+12-gap, 100, 16);      // top plate (moves down as it clamps)
+    // bolt shaft through plates
+    ctx.fillStyle='#c7d0e0'; ctx.fillRect(cx-4, topY-2-gap, 8, 56+gap);
+    // threads at bottom (strip = broken)
+    ctx.strokeStyle=stripped?'#FF6B6B':'#7f8aa0'; ctx.lineWidth=1.5;
+    for(var i=0;i<5;i++){ var yy=topY+40+i*3; ctx.beginPath(); ctx.moveTo(cx-5,yy); ctx.lineTo(cx+5,yy+ (stripped? (i%2?2:-2):0)); ctx.stroke(); }
+    // bolt head (hex) on top, rotates as you tighten
+    ctx.save(); ctx.translate(cx, topY-8-gap); ctx.rotate(headAng);
+    ctx.fillStyle=stripped?'#FF6B6B':'#FFB020'; ctx.beginPath();
+    for(var h=0;h<6;h++){ var a=h/6*Math.PI*2; var px=Math.cos(a)*13, py=Math.sin(a)*13; if(h===0)ctx.moveTo(px,py); else ctx.lineTo(px,py); }
+    ctx.closePath(); ctx.fill(); ctx.fillStyle='#2a1a00'; ctx.beginPath(); ctx.arc(0,0,4,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+    ctx.fillStyle='#5E6F8E'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText(stripped?'threads stripped':'clamping', cx, topY+74);
+    // ===== right: torque arc gauge =====
+    var gx=W*0.72, gy=H*0.58, R=Math.min(W*0.20,H*0.40);
+    ctx.lineWidth=10; ctx.lineCap='round';
+    // background arc 180..360 (left to right, top half)
+    ctx.strokeStyle='#26324A'; ctx.beginPath(); ctx.arc(gx,gy,R,Math.PI,2*Math.PI); ctx.stroke();
+    function ang(v){ return Math.PI + Math.min(1,v/s.max)*Math.PI; }
+    // green band
+    ctx.strokeStyle='rgba(67,214,126,0.6)'; ctx.beginPath(); ctx.arc(gx,gy,R,ang(s.lo),ang(s.hi)); ctx.stroke();
+    // red zone (strip)
+    ctx.strokeStyle='rgba(255,107,107,0.5)'; ctx.beginPath(); ctx.arc(gx,gy,R,ang(s.strip),2*Math.PI); ctx.stroke();
+    // needle
+    var na=ang(tq); ctx.strokeStyle=(st.c==='green'?'#43D67E':(st.c==='red'?'#FF6B6B':'#FFB020')); ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(gx,gy); ctx.lineTo(gx+Math.cos(na)*R*0.92, gy+Math.sin(na)*R*0.92); ctx.stroke();
+    ctx.fillStyle='#E7ECF6'; ctx.beginPath(); ctx.arc(gx,gy,4,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#5E6F8E'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText('TORQUE', gx, gy+18);
+    ctx.fillStyle='#43D67E'; ctx.fillText('proper', gx, gy-R-6);
+  }
+  function setSz(k){ sz=k; tq=0; stripped=false; document.getElementById('szTag').textContent=SIZES[k].label; document.getElementById('roSz').textContent=SIZES[k].label; document.querySelectorAll('#szSeg button').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-s')===k);}); }
+  document.querySelectorAll('#szSeg button').forEach(function(b){ b.addEventListener('click',function(){ setSz(b.getAttribute('data-s')); }); });
+  var tb=document.getElementById('tighten');
+  tb.addEventListener('pointerdown',function(e){ e.preventDefault(); holding=true; });
+  tb.addEventListener('pointerup',function(){ holding=false; }); tb.addEventListener('pointerleave',function(){ holding=false; }); tb.addEventListener('pointercancel',function(){ holding=false; });
+  document.getElementById('reset').addEventListener('click',function(){ tq=0; stripped=false; });
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
+  requestAnimationFrame(step);
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="build:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>
