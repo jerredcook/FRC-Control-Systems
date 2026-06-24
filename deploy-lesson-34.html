@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deploy · Part 8.3 - Unit Testing</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(138,140,248,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .summary{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line)}
+  .summary .bar{flex:1;height:8px;border-radius:5px;background:var(--line-2);overflow:hidden;display:flex}
+  .summary .bar .pass{height:100%;background:var(--green);width:0;transition:width .3s}
+  .summary .bar .fail{height:100%;background:var(--red);width:0;transition:width .3s}
+  .summary .res{font-family:var(--mono);font-size:13px;color:var(--muted);min-width:118px;text-align:right}
+  .summary .res.green{color:var(--green)} .summary .res.red{color:var(--red)}
+  .tests{padding:6px 0}
+  .test{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid rgba(120,140,180,.06)}
+  .test:last-child{border-bottom:none}
+  .test .pill{width:54px;text-align:center;font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;padding:4px 0;border-radius:5px;border:1px solid var(--line-2);color:var(--faint);flex:0 0 auto}
+  .test.pass .pill{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .test.fail .pill{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .test.run .pill{border-color:var(--amber);color:var(--amber)}
+  .test .nm{font-family:var(--mono);font-size:12.5px;color:var(--text)}
+  .test .as{font-family:var(--mono);font-size:11px;color:var(--faint);margin-top:2px}
+  .test.fail .as{color:var(--red)}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .btn.primary{background:linear-gradient(180deg,#a7adff,var(--indigo));color:#0a0f24;font-weight:700;border:none}
+  .btn.fix.on{background:var(--green);border-color:var(--green);color:#06210f;font-weight:700}
+  .hint{font-family:var(--mono);font-size:11px;color:var(--faint)}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--indigo);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:13px;line-height:1.8;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic} .code .kw{color:#ff9bbf} .code .ty{color:var(--teal)} .code .fn{color:var(--indigo)} .code .num{color:var(--amber)} .code .an{color:var(--amber)}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(138,140,248,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .code-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .code-ex .chead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .code-ex .chead .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,176,32,.14);display:grid;place-items:center;color:var(--amber);font-size:13px}
+  .code-ex .ctask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .code-ex pre.code{margin:0 0 14px}
+  .blank{font-family:var(--mono);font-size:13px;width:13ch;text-align:center;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:2px 4px;outline:none}
+  .blank:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
+  .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:110px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="code.html"><span class="dot"></span><span class="name">Deploy</span></a>
+    <div class="top-meta">Part 8 · 03 / 05 · Pro Practices</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 8 · 03</b> Pro Practices</div>
+    <div class="eyebrow">Unit Testing</div>
+    <h1>Prove the logic<br><span class="accent">right</span>.</h1>
+    <p class="dek">Some code is pure logic: a gear-ratio conversion, a state transition, a deadband. You can test those in milliseconds, with no robot, and lock them down so a future change can't quietly break them.</p>
+  </div>
+
+  <section>
+    <p class="lead">A test is a tiny claim that runs itself.</p>
+    <p>"Forty motor rotations through a 10:1 gearbox should equal four mechanism rotations." Write that as an <strong>assertion</strong> and a test runner checks it instantly, green if it holds, red if it doesn't. Run the suite below: one test is red because of a real bug in the height conversion. Apply the fix and watch it go green.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">JUnit · ConversionsTest</span><span class="demo-tag" id="hwTag">no robot needed</span></div>
+      <div class="summary">
+        <div class="bar"><div class="pass" id="barPass"></div><div class="fail" id="barFail"></div></div>
+        <div class="res" id="res">not run</div>
+      </div>
+      <div class="tests" id="tests"></div>
+      <div class="controls">
+        <button class="btn primary" id="run">Run tests ▸</button>
+        <button class="btn fix" id="fix">Apply fix</button>
+        <span class="hint" id="hint">one test fails - find out which</span>
+      </div>
+    </div>
+    <p class="caption">The red test caught a bug before it ever reached the field: the height conversion forgot to multiply by pi. Apply the fix, re-run, and the whole suite is green. That green is your proof the math is right.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In code</div>
+    <h2>assertEquals, and that's most of it</h2>
+    <p>A JUnit test is a method marked <span class="k">@Test</span> that calls your real code and asserts the result. No robot, no hardware, just logic checked against expectations:</p>
+    <div class="codewrap">
+      <div class="clabel">ConversionsTest.java <span class="badge">Java · JUnit 5</span></div>
+<pre class="code"><span class="kw">import static</span> org.junit.jupiter.api.Assertions.assertEquals;
+<span class="kw">import</span> org.junit.jupiter.api.Test;
+
+<span class="kw">class</span> <span class="ty">ConversionsTest</span> {
+  <span class="an">@Test</span> <span class="kw">void</span> <span class="fn">mechanismRotations</span>() {
+    <span class="cm">// 40 motor turns, 10:1 gearbox -> 4 mechanism turns</span>
+    assertEquals(<span class="num">4.0</span>, <span class="ty">Conversions</span>.<span class="fn">toMechRotations</span>(<span class="num">40</span>, <span class="num">10</span>), <span class="num">1e-6</span>);
+  }
+
+  <span class="an">@Test</span> <span class="kw">void</span> <span class="fn">heightFromRotations</span>() {
+    <span class="cm">// 2 drum turns, 1.0" drum -> 2 * pi inches</span>
+    assertEquals(<span class="num">6.283</span>, <span class="ty">Conversions</span>.<span class="fn">inches</span>(<span class="num">2</span>, <span class="num">1.0</span>), <span class="num">1e-3</span>);
+  }
+}</pre>
+    </div>
+    <div class="note indigo">
+      <div class="nh">Tests are a safety net for change</div>
+      <p>The real value isn't writing the test once, it's the next time someone edits the gear math. If they break it, the test fails on their laptop in seconds, not on the field on Saturday. Test the things that are pure logic, conversions, state machines, command decisions, and run the suite on every commit (CI) so a regression can't sneak past.</p>
+    </div>
+
+    <div class="code-ex">
+      <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
+      <div class="ctask">Assert that the conversion returns the expected 4.0 mechanism rotations. Fill in the assertion.</div>
+<pre class="code"><input class="blank" data-ans="assertequals" aria-label="blank" autocomplete="off" spellcheck="false">(<span class="num">4.0</span>, <span class="ty">Conversions</span>.<span class="fn">toMechRotations</span>(<span class="num">40</span>, <span class="num">10</span>), <span class="num">1e-6</span>);</pre>
+      <div class="code-actions">
+        <button class="btn" id="check">Check</button>
+        <button class="btn" id="reveal">Reveal</button>
+        <span class="code-result" id="cres"></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">What kind of code is a good fit for unit testing?</div>
+        <div class="opts">
+          <button class="opt">Only code that talks to motors</button>
+          <button class="opt">Pure logic - conversions, state transitions, command decisions</button>
+          <button class="opt">Nothing in robot code can be tested</button>
+        </div>
+        <div class="explain">Unit tests shine on logic that doesn't need hardware: math, state machines, decision functions. You feed inputs and assert outputs, all in milliseconds on your computer.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 2</div>
+        <div class="qt">What's the main long-term benefit of a test suite?</div>
+        <div class="opts">
+          <button class="opt">It catches regressions when someone later changes the code</button>
+          <button class="opt">It makes the robot faster</button>
+          <button class="opt">It charges the battery</button>
+        </div>
+        <div class="explain">Tests are a safety net. When a future edit breaks the gear math, the suite fails immediately instead of letting the bug reach a match. Run them on every commit.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 3</div>
+        <div class="qt">A test is red. What does that tell you?</div>
+        <div class="opts">
+          <button class="opt">The robot is on fire</button>
+          <button class="opt">The test is wrong and should be deleted</button>
+          <button class="opt">The actual result didn't match the expected one - there's a bug to fix</button>
+        </div>
+        <div class="explain">A red test means the code's output disagreed with the assertion. That's the test doing its job: it points you straight at a bug, which you fix until the test goes green.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 8 · 03 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Unit test</b><span>A self-checking claim about code.</span></div>
+        <div class="gl"><b>@Test</b><span>Marks a JUnit test method.</span></div>
+        <div class="gl"><b>assertEquals</b><span>Expected vs actual.</span></div>
+        <div class="gl"><b>Red / green</b><span>Fail points at a bug; pass proves it.</span></div>
+        <div class="gl"><b>Test pure logic</b><span>Math, state, decisions.</span></div>
+        <div class="gl"><b>Run on commit</b><span>CI catches regressions.</span></div>
+      </div>
+      <a class="next" href="deploy-lesson-35.html">
+        <div class="n-eyebrow">Up next · Part 8 · 04</div>
+        <h3>Debugging &amp; Robust Code</h3>
+        <p>Tests catch logic bugs. The field throws physics at you: brownouts, slipping wheels, dead sensors. Learn to write code that survives a real match.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="deploy-lesson-33.html">← Part 8 · 02 · Simulation</a>
+    <a class="map" href="code.html">Course map</a>
+    <a href="deploy-lesson-35.html">Part 8 · 04 · Debugging &amp; Robust Code →</a>
+  </nav>
+
+</div>
+
+<footer>Deploy · Programming an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var fixed=false;
+  function toMech(motor,ratio){ return motor/ratio; }
+  function inches(rot,dia){ return fixed ? rot*Math.PI*dia : rot*dia; }  // bug: missing pi until fixed
+  function stateAfter(s,ev){ var T={LOADED:{shoot:'SHOOTING'}}; return (T[s]&&T[s][ev])||s; }
+  var TESTS=[
+    {name:'mechanismRotations', as:'toMechRotations(40,10) == 4.0', run:function(){ return {exp:4, act:toMech(40,10)}; }},
+    {name:'mechanismRotationsTwo', as:'toMechRotations(25,5) == 5.0', run:function(){ return {exp:5, act:toMech(25,5)}; }},
+    {name:'heightFromRotations', as:'inches(2, 1.0) == 6.283', run:function(){ return {exp:6.283, act:inches(2,1.0)}; }},
+    {name:'idleNoteIgnored', as:'stateAfter(LOADED, shoot) == SHOOTING', run:function(){ return {exp:'SHOOTING', act:stateAfter('LOADED','shoot')}; }},
+    {name:'mechZero', as:'toMechRotations(0,10) == 0.0', run:function(){ return {exp:0, act:toMech(0,10)}; }}
+  ];
+  var testsEl=document.getElementById('tests'), els=[];
+  TESTS.forEach(function(t){ var d=document.createElement('div'); d.className='test';
+    d.innerHTML='<div class="pill">·</div><div><div class="nm">'+t.name+'()</div><div class="as">'+t.as+'</div></div>';
+    testsEl.appendChild(d); els.push(d); });
+  function approx(a,b){ return (typeof a==='number') ? Math.abs(a-b)<1e-2 : a===b; }
+  function setSummary(pass,total,done){
+    document.getElementById('barPass').style.width=(pass/total*100)+'%';
+    document.getElementById('barFail').style.width=((done-pass)/total*100)+'%';
+    var r=document.getElementById('res');
+    if(done<total){ r.textContent=done+'/'+total+' run'; r.className='res'; }
+    else { r.textContent=pass+'/'+total+' passed'; r.className='res '+(pass===total?'green':'red'); }
+  }
+  var running=false;
+  function runAll(){
+    if(running)return; running=true;
+    els.forEach(function(e){ e.className='test'; e.querySelector('.pill').textContent='·'; });
+    setSummary(0,TESTS.length,0);
+    var i=0, pass=0;
+    function next(){
+      if(i>=TESTS.length){ running=false; document.getElementById('hint').textContent = pass===TESTS.length?'all green - the logic is proven':'red test = a bug caught before the field'; return; }
+      var e=els[i]; e.classList.add('run'); e.querySelector('.pill').textContent='run';
+      setTimeout(function(){
+        var r=TESTS[i].run(); var ok=approx(r.act,r.exp);
+        e.classList.remove('run'); e.classList.add(ok?'pass':'fail'); e.querySelector('.pill').textContent=ok?'pass':'fail';
+        if(!ok){ e.querySelector('.as').textContent=TESTS[i].as+'   (got '+(typeof r.act==='number'?r.act.toFixed(3):r.act)+')'; }
+        else { e.querySelector('.as').textContent=TESTS[i].as; }
+        if(ok)pass++;
+        setSummary(pass,TESTS.length,i+1);
+        i++; next();
+      }, 220);
+    }
+    next();
+  }
+  document.getElementById('run').addEventListener('click',runAll);
+  document.getElementById('fix').addEventListener('click',function(){ fixed=!fixed; this.classList.toggle('on',fixed); this.textContent=fixed?'Fix applied ✓':'Apply fix'; runAll(); });
+
+  var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
+  function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'').replace(/\(\)$/,'');}
+  document.getElementById('check').addEventListener('click',function(){
+    var all=true;
+    blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - assertEquals'; res.className='code-result '+(all?'ok':'no');
+  });
+  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='assertEquals';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(idx===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="deploy:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

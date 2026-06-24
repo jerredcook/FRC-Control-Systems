@@ -204,15 +204,15 @@
     {code:"8", title:"Pro Practices", sub:"Dashboards, sim, testing, comp",
      blurb:"The difference between code that works on the bench and code that wins on Saturday: telemetry, simulation, tests, and competition-day discipline.",
      lessons:[
-       {n:1, title:"Dashboards & Telemetry", desc:"Elastic and AdvantageScope; log everything that matters.", file:null},
-       {n:2, title:"Simulation", desc:"Test your robot code without a robot.", file:null},
-       {n:3, title:"Unit Testing", desc:"JUnit for robot code - catch bugs before the field does.", file:null},
-       {n:4, title:"Debugging & Robust Code", desc:"Defensive coding, brownouts, and fail-safes.", file:null},
-       {n:5, title:"Competition-Ready", desc:"Deploy hygiene and the build-season workflow.", file:null}
+       {n:1, title:"Dashboards & Telemetry", desc:"Elastic and AdvantageScope; log everything that matters.", file:"deploy-lesson-32.html"},
+       {n:2, title:"Simulation", desc:"Test your robot code without a robot.", file:"deploy-lesson-33.html"},
+       {n:3, title:"Unit Testing", desc:"JUnit for robot code - catch bugs before the field does.", file:"deploy-lesson-34.html"},
+       {n:4, title:"Debugging & Robust Code", desc:"Defensive coding, brownouts, and fail-safes.", file:"deploy-lesson-35.html"},
+       {n:5, title:"Competition-Ready", desc:"Deploy hygiene and the build-season workflow.", file:"deploy-lesson-36.html"}
      ]}
   ];
 
-  var NEXT_ID="8-1";
+  var NEXT_ID="";
   var STORE_KEY="deploy:done";
   function loadDone(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY))||{}; }catch(e){ return {}; } }
   function saveDone(d){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(d)); }catch(e){} }
