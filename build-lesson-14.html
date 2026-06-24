@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fabricate · Part 3.5 - Shafts, Hex &amp; Hubs</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  canvas.hubcv{display:block;width:100%;height:230px}
+  .readouts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:17px;font-weight:600;margin-top:3px;color:var(--muted)}
+  .ro .v.indigo{color:var(--indigo)} .ro .v.green{color:var(--green)} .ro .v.amber{color:var(--amber)} .ro .v.red{color:var(--red)}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+  .seg{display:flex;border:1px solid var(--line-2);border-radius:9px;overflow:hidden}
+  .seg button{border:none;background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:10.5px;letter-spacing:.02em;text-transform:uppercase;padding:9px 10px;cursor:pointer;transition:.12s;border-right:1px solid var(--line-2)}
+  .seg button:last-child{border-right:none}
+  .seg button:hover{color:var(--text)} .seg button.active{background:var(--indigo);color:#2a1503;font-weight:700}
+  .slider-group{flex:1 1 220px;display:flex;flex-direction:column;gap:6px;min-width:190px}
+  .slider-group label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+  .slider-group label .val{color:var(--indigo)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:var(--line-2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--indigo);cursor:pointer;box-shadow:0 0 10px -1px var(--indigo)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(255,138,76,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .rules{display:grid;gap:10px;margin:18px 0} @media(min-width:560px){.rules{grid-template-columns:1fr 1fr}}
+  .rule{display:flex;gap:11px;border:1px solid var(--line);border-radius:11px;padding:13px 14px;background:var(--panel)}
+  .rule .ri{font-size:20px;flex:0 0 auto}
+  .rule b{display:block;font-size:14.5px;color:var(--text);margin-bottom:2px}
+  .rule span{font-size:13.5px;color:var(--muted)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:108px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="build.html"><span class="dot"></span><span class="name">Fabricate</span></a>
+    <div class="top-meta">Part 3 · 05 / 06 · Power</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 3 · 05</b> Power Transmission</div>
+    <div class="eyebrow">Shafts, Hex &amp; Hubs</div>
+    <h1>Don't let it<br><span class="accent">slip</span>.</h1>
+    <p class="dek">A gear is useless if it spins freely on its shaft. Something has to lock the two together so torque passes through. A hex shaft does it with its shape; a round shaft needs a key or a clamp. Get it wrong and the shaft turns while the gear stays still.</p>
+  </div>
+
+  <section>
+    <p class="lead">The shape can be the lock.</p>
+    <p>Push torque through three ways of mounting a gear on a shaft. A <strong>hex shaft</strong> in a hex bore can't rotate independently, the shape itself transmits torque. A round shaft held by a <strong>set screw</strong> slips once the torque gets high. A round shaft with a <strong>key</strong> holds. Turn up the torque.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Transmit torque through the hub</span><span class="demo-tag" id="typeTag">hex shaft</span></div>
+      <canvas class="hubcv" id="cv"></canvas>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Mounting</div><div class="v indigo" id="roType">Hex shaft</div></div>
+        <div class="ro"><div class="k2">Torque</div><div class="v" id="roTq">40%</div></div>
+        <div class="ro"><div class="k2">Result</div><div class="v" id="roRes">-</div></div>
+      </div>
+      <div class="controls">
+        <div class="seg" id="typeSeg">
+          <button data-t="hex" class="active">Hex shaft</button>
+          <button data-t="screw">Round + set screw</button>
+          <button data-t="key">Round + key</button>
+        </div>
+        <div class="slider-group"><label>Torque <span class="val" id="tqv">40%</span></label><input type="range" id="tq" min="0" max="100" value="40"></div>
+      </div>
+    </div>
+    <p class="caption">The teal mark is on the shaft, the amber mark is on the gear. When they stay aligned, torque is passing through. Crank the torque on the set-screw mount and the shaft mark pulls ahead, the gear is slipping, exactly what you don't want under load.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In the shop</div>
+    <h2>Why FRC runs on hex</h2>
+    <p>The standard FRC shaft is 1/2-inch hex, and almost every gear, sprocket, pulley, and wheel comes with a matching hex bore. The reason is simplicity:</p>
+    <div class="rules">
+      <div class="rule"><div class="ri">⬡</div><div><b>Hex shaft</b><span>The hexagon shape transmits torque on its own, slide a part on and it can't slip.</span></div></div>
+      <div class="rule"><div class="ri">🔩</div><div><b>Set screw</b><span>A screw pressing on a round shaft. Easy, but it backs out and slips under shock.</span></div></div>
+      <div class="rule"><div class="ri">🗝️</div><div><b>Key &amp; keyway</b><span>A bar in matching slots that carries the torque. Strong, but more machining.</span></div></div>
+      <div class="rule"><div class="ri">🔗</div><div><b>Hub</b><span>An adapter that bolts a wheel or sprocket onto a shaft.</span></div></div>
+    </div>
+    <div class="note indigo">
+      <div class="nh">Hex won the popularity contest for a reason</div>
+      <p>You can build a perfectly good drive with round shaft and keys, plenty of teams do. But hex is forgiving: there's nothing to torque to spec, nothing to align, nothing to back out. Cut the shaft to length, slide parts on, add a retaining clip, done. For a robot built by students under a deadline, "can't be assembled wrong" is worth a lot. That's why hex is the default and set screws are treated with suspicion.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="2">
+        <div class="qn">Question 1</div>
+        <div class="qt">How does a hex shaft transmit torque to a gear?</div>
+        <div class="opts">
+          <button class="opt">With a set screw</button>
+          <button class="opt">With glue</button>
+          <button class="opt">The hexagon shape locks into the gear's hex bore - it can't slip</button>
+        </div>
+        <div class="explain">The flats of the hex push directly on the matching flats of the bore. The shape itself carries the torque, so a hex-bored part can't rotate independently on a hex shaft.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 2</div>
+        <div class="qt">What's the weakness of a set screw on a round shaft?</div>
+        <div class="opts">
+          <button class="opt">It's too expensive</button>
+          <button class="opt">It can back out and slip under high torque or shock loads</button>
+          <button class="opt">It only works on hex shaft</button>
+        </div>
+        <div class="explain">A set screw grips with a tiny contact point. Under high torque or vibration it can loosen and let the shaft spin inside the part. That's why teams prefer hex or a key for anything loaded.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">Why is hex the default shaft for student-built robots?</div>
+        <div class="opts">
+          <button class="opt">It's hard to assemble wrong - slide on and go, nothing to torque or align</button>
+          <button class="opt">It's the only legal shaft</button>
+          <button class="opt">It spins faster</button>
+        </div>
+        <div class="explain">Hex needs no keys, no set-screw torque spec, and nothing to align. Parts slide on and can't slip. Under a build-season deadline, that reliability is exactly why hex dominates.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 3 · 05 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Hex shaft</b><span>Shape transmits torque; no slip.</span></div>
+        <div class="gl"><b>1/2" hex</b><span>The FRC standard size.</span></div>
+        <div class="gl"><b>Set screw</b><span>Easy, but slips under load.</span></div>
+        <div class="gl"><b>Key &amp; keyway</b><span>Strong; more machining.</span></div>
+        <div class="gl"><b>Hub</b><span>Adapts a part onto a shaft.</span></div>
+        <div class="gl"><b>Retaining clip</b><span>Keeps parts from sliding off.</span></div>
+      </div>
+      <a class="next" href="build-lesson-15.html">
+        <div class="n-eyebrow">Up next · Part 3 · 06 · Finale</div>
+        <h3>Gearboxes</h3>
+        <p>One gear pair gives one ratio. A gearbox stacks several stages into a small package, multiplying the reduction. Build one by stacking stages.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="build-lesson-13.html">← Part 3 · 04 · Bearings</a>
+    <a class="map" href="build.html">Course map</a>
+    <a href="build-lesson-15.html">Part 3 · 06 · Gearboxes →</a>
+  </nav>
+
+</div>
+
+<footer>Fabricate · Building an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var cv=document.getElementById('cv'), ctx=cv.getContext('2d'), W=0,H=0,dpr=1;
+  function fit(){ var r=cv.getBoundingClientRect(); if(!r.width)return; dpr=window.devicePixelRatio||1; cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr); ctx.setTransform(dpr,0,0,dpr,0,0); W=r.width; H=r.height; }
+  fit();
+  var type='hex', torque=40, shaftA=0, gearA=0;
+  var THR=50;
+  function grips(){ return type!=='screw' || torque<=THR; }
+  function step(){
+    var w=0.045;
+    shaftA += w;
+    if(grips()){ gearA = shaftA; }
+    else { var slipRate = (torque-THR)/100*0.9; gearA += Math.max(0, w-slipRate); }
+    draw();
+    document.getElementById('roType').textContent = type==='hex'?'Hex shaft':(type==='screw'?'Set screw':'Key');
+    document.getElementById('roTq').textContent = torque+'%';
+    var rr=document.getElementById('roRes');
+    if(grips()){ rr.textContent='gripping ✓'; rr.className='v green'; }
+    else { rr.textContent='SLIPPING'; rr.className='v red'; }
+    requestAnimationFrame(step);
+  }
+  function poly(cx,cy,r,n,ang){ ctx.beginPath(); for(var i=0;i<n;i++){ var a=ang+i/n*Math.PI*2; var x=cx+Math.cos(a)*r, y=cy+Math.sin(a)*r; if(i===0)ctx.moveTo(x,y); else ctx.lineTo(x,y); } ctx.closePath(); }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    var cx=W*0.32, cy=H*0.5, R=Math.min(W*0.16,H*0.34), rs=R*0.5;
+    // hub / gear disc, rotates with gearA
+    ctx.save(); ctx.translate(cx,cy); ctx.rotate(gearA);
+    // teeth ring
+    var N=16;
+    ctx.beginPath();
+    for(var i=0;i<N;i++){ var a0=i/N*Math.PI*2; ctx.lineTo(Math.cos(a0)*R, Math.sin(a0)*R); var am=(i+0.5)/N*Math.PI*2; ctx.lineTo(Math.cos(am)*R*0.9, Math.sin(am)*R*0.9); }
+    ctx.closePath(); ctx.fillStyle='#1B2540'; ctx.fill(); ctx.strokeStyle='#9aa6bc'; ctx.lineWidth=2; ctx.stroke();
+    // bore
+    if(type==='hex'){ poly(0,0,rs+3,6,0); ctx.strokeStyle='#5E6F8E'; ctx.lineWidth=1.5; ctx.stroke(); }
+    else { ctx.beginPath(); ctx.arc(0,0,rs+3,0,Math.PI*2); ctx.strokeStyle='#5E6F8E'; ctx.lineWidth=1.5; ctx.stroke(); }
+    // gear mark (amber)
+    ctx.strokeStyle='#FFB020'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(0,-R*0.9); ctx.lineTo(0,-R*0.62); ctx.stroke();
+    // set screw (in the hub)
+    if(type==='screw'){ ctx.fillStyle=grips()?'#92A2BE':'#FF6B6B'; ctx.fillRect(R-2, -4, 16, 8); ctx.strokeStyle='#0B1322'; ctx.strokeRect(R-2,-4,16,8);
+      ctx.fillStyle=grips()?'#92A2BE':'#FF6B6B'; ctx.beginPath(); ctx.moveTo(rs+3,0); ctx.lineTo(rs+9,-3); ctx.lineTo(rs+9,3); ctx.closePath(); ctx.fill(); }
+    ctx.restore();
+    // shaft cross-section, rotates with shaftA (drawn on top)
+    ctx.save(); ctx.translate(cx,cy); ctx.rotate(shaftA);
+    if(type==='hex'){ poly(0,0,rs,6,0); }
+    else { ctx.beginPath(); ctx.arc(0,0,rs,0,Math.PI*2); }
+    ctx.fillStyle='#33415e'; ctx.fill(); ctx.strokeStyle='#aeb9d1'; ctx.lineWidth=2; ctx.stroke();
+    // key
+    if(type==='key'){ ctx.fillStyle='#FFB020'; ctx.fillRect(-4, -rs-5, 8, 10); ctx.strokeStyle='#2a1a00'; ctx.strokeRect(-4,-rs-5,8,10); }
+    // shaft mark (teal)
+    ctx.strokeStyle='#34D7C5'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,-rs*0.8); ctx.stroke();
+    ctx.beginPath(); ctx.arc(0,0,3,0,Math.PI*2); ctx.fillStyle='#E7ECF6'; ctx.fill();
+    ctx.restore();
+    // labels + torque arrow
+    ctx.fillStyle='#5E6F8E'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='center';
+    ctx.fillText('gear (amber mark)', cx, cy+R+18); ctx.fillStyle='#34D7C5'; ctx.fillText('shaft (teal mark)', cx, cy+R+32);
+    // torque dial on right
+    var dx=W*0.74, dy=H*0.5, dr=Math.min(W*0.16,H*0.30);
+    ctx.strokeStyle='#26324A'; ctx.lineWidth=8; ctx.lineCap='round'; ctx.beginPath(); ctx.arc(dx,dy,dr,Math.PI*0.75, Math.PI*2.25); ctx.stroke();
+    ctx.strokeStyle=grips()?'#43D67E':'#FF6B6B'; ctx.beginPath(); ctx.arc(dx,dy,dr,Math.PI*0.75, Math.PI*0.75 + (torque/100)*Math.PI*1.5); ctx.stroke();
+    // slip threshold mark for screw
+    if(type==='screw'){ var ta=Math.PI*0.75+(THR/100)*Math.PI*1.5; ctx.strokeStyle='#FFB020'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(dx+Math.cos(ta)*(dr-8), dy+Math.sin(ta)*(dr-8)); ctx.lineTo(dx+Math.cos(ta)*(dr+8), dy+Math.sin(ta)*(dr+8)); ctx.stroke(); ctx.fillStyle='#FFB020'; ctx.font='8px ui-monospace,Menlo,monospace'; ctx.fillText('slip', dx, dy-dr-6); }
+    ctx.fillStyle='#5E6F8E'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.fillText('TORQUE', dx, dy+4);
+  }
+  function setType(t){ type=t; torque=+document.getElementById('tq').value; document.getElementById('typeTag').textContent= t==='hex'?'hex shaft':(t==='screw'?'set screw':'key'); document.querySelectorAll('#typeSeg button').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-t')===t);}); }
+  document.querySelectorAll('#typeSeg button').forEach(function(b){ b.addEventListener('click',function(){ setType(b.getAttribute('data-t')); }); });
+  document.getElementById('tq').addEventListener('input',function(e){ torque=+e.target.value; document.getElementById('tqv').textContent=torque+'%'; });
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
+  requestAnimationFrame(step);
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="build:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

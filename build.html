@@ -158,12 +158,12 @@
     {code:"3", title:"Power Transmission", sub:"Moving power around",
      blurb:"A motor spins fast and weak. Gears, chain, and belts trade that speed for the torque a mechanism needs, carried on shafts and bearings.",
      lessons:[
-       {n:1, title:"Gears & Gear Ratios", desc:"Teeth, ratios, and trading speed for torque.", file:null},
-       {n:2, title:"Sprockets & Chain", desc:"Transmitting power across a distance with #25 and #35 chain.", file:null},
-       {n:3, title:"Belts & Pulleys", desc:"GT2 and HTD belts: quiet, clean, no lubrication.", file:null},
-       {n:4, title:"Bearings", desc:"Letting shafts spin freely; bore sizes and mounting.", file:null},
-       {n:5, title:"Shafts, Hex & Hubs", desc:"Hex shaft, round shaft, keys, and how things attach.", file:null},
-       {n:6, title:"Gearboxes", desc:"MAXPlanetary, VersaPlanetary, and motor-mounted reductions.", file:null}
+       {n:1, title:"Gears & Gear Ratios", desc:"Teeth, ratios, and trading speed for torque.", file:"build-lesson-10.html"},
+       {n:2, title:"Sprockets & Chain", desc:"Transmitting power across a distance with #25 and #35 chain.", file:"build-lesson-11.html"},
+       {n:3, title:"Belts & Pulleys", desc:"GT2 and HTD belts: quiet, clean, no lubrication.", file:"build-lesson-12.html"},
+       {n:4, title:"Bearings", desc:"Letting shafts spin freely; bore sizes and mounting.", file:"build-lesson-13.html"},
+       {n:5, title:"Shafts, Hex & Hubs", desc:"Hex shaft, round shaft, keys, and how things attach.", file:"build-lesson-14.html"},
+       {n:6, title:"Gearboxes", desc:"MAXPlanetary, VersaPlanetary, and motor-mounted reductions.", file:"build-lesson-15.html"}
      ]},
     {code:"4", title:"Mechanisms", sub:"How robots move",
      blurb:"Every robot is a handful of mechanism archetypes. Learn how four-bars, elevators, arms, intakes, and shooters turn motion into game pieces scored.",
@@ -212,7 +212,7 @@
      ]}
   ];
 
-  var NEXT_ID="3-1";
+  var NEXT_ID="4-1";
   var STORE_KEY="build:done";
   function loadDone(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY))||{}; }catch(e){ return {}; } }
   function saveDone(d){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(d)); }catch(e){} }

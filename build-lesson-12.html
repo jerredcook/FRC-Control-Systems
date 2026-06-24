@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fabricate · Part 3.3 - Belts &amp; Pulleys</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  canvas.belt{display:block;width:100%;height:240px}
+  .readouts{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  @media(min-width:560px){.readouts{grid-template-columns:repeat(4,1fr)}}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:17px;font-weight:600;margin-top:3px;color:var(--muted)}
+  .ro .v.indigo{color:var(--indigo)} .ro .v.teal{color:var(--teal)} .ro .v.amber{color:var(--amber)} .ro .v.green{color:var(--green)} .ro .v.red{color:var(--red)}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .seg{display:flex;border:1px solid var(--line-2);border-radius:9px;overflow:hidden}
+  .seg button{border:none;background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:10.5px;letter-spacing:.02em;text-transform:uppercase;padding:9px 11px;cursor:pointer;transition:.12s;border-right:1px solid var(--line-2)}
+  .seg button:last-child{border-right:none}
+  .seg button:hover{color:var(--text)} .seg button.active{background:var(--indigo);color:#2a1503;font-weight:700}
+  .slider-group{flex:1 1 180px;display:flex;flex-direction:column;gap:6px;min-width:150px}
+  .slider-group label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+  .slider-group label .val{color:var(--indigo)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:var(--line-2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--indigo);cursor:pointer;box-shadow:0 0 10px -1px var(--indigo)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(255,138,76,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .rules{display:grid;gap:10px;margin:18px 0} @media(min-width:560px){.rules{grid-template-columns:1fr 1fr}}
+  .rule{display:flex;gap:11px;border:1px solid var(--line);border-radius:11px;padding:13px 14px;background:var(--panel)}
+  .rule .ri{font-size:20px;flex:0 0 auto}
+  .rule b{display:block;font-size:14.5px;color:var(--text);margin-bottom:2px}
+  .rule span{font-size:13.5px;color:var(--muted)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:108px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="build.html"><span class="dot"></span><span class="name">Fabricate</span></a>
+    <div class="top-meta">Part 3 · 03 / 06 · Power</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 3 · 03</b> Power Transmission</div>
+    <div class="eyebrow">Belts &amp; Pulleys</div>
+    <h1>Quiet and<br><span class="accent">clean</span>.</h1>
+    <p class="dek">A timing belt does chain's job with none of the noise, grease, or stretch. The toothed belt grips toothed pulleys so it can't slip. The one catch: a belt comes in a fixed length, so the pulley spacing has to match it.</p>
+  </div>
+
+  <section>
+    <p class="lead">The belt length fixes the spacing.</p>
+    <p>Pick your two pulleys and a belt, and the center distance between them is <em>determined</em>, you can't just slide them anywhere like a tensioned chain. Choose a belt and pulleys below: the spacing follows, and a belt that's too short simply won't fit.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Belt drive</span><span class="demo-tag" id="fitTag">fits</span></div>
+      <canvas class="belt" id="cv"></canvas>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Ratio</div><div class="v indigo" id="roRatio">2.0:1</div></div>
+        <div class="ro"><div class="k2">Belt</div><div class="v amber" id="roBelt">90T</div></div>
+        <div class="ro"><div class="k2">Center distance</div><div class="v teal" id="roCD">-</div></div>
+        <div class="ro"><div class="k2">Fit</div><div class="v" id="roFit">ok</div></div>
+      </div>
+      <div class="controls">
+        <div class="seg" id="beltSeg">
+          <button data-b="60">60T belt</button>
+          <button data-b="90" class="active">90T</button>
+          <button data-b="110">110T</button>
+          <button data-b="140">140T</button>
+        </div>
+        <div class="slider-group"><label>Pulley A <span class="val" id="t1v">18</span></label><input type="range" id="t1" min="12" max="36" value="18"></div>
+        <div class="slider-group"><label>Pulley B <span class="val" id="t2v">36</span></label><input type="range" id="t2" min="12" max="48" value="36"></div>
+      </div>
+    </div>
+    <p class="caption">Bigger belt, pulleys farther apart. Shrink the belt or grow the pulleys too far and they'd have to overlap, the belt won't reach, and the demo flags it. In real life you choose the belt and the layout together.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In the shop</div>
+    <h2>Belt vs chain</h2>
+    <p>Belts and chain do the same job. Belts win on smoothness and cleanliness; chain wins on flexibility of layout. Most modern FRC mechanisms use timing belts:</p>
+    <div class="rules">
+      <div class="rule"><div class="ri">🤫</div><div><b>Quiet &amp; clean</b><span>No metal-on-metal clatter, and no oil to fling around.</span></div></div>
+      <div class="rule"><div class="ri">🦷</div><div><b>Toothed = no slip</b><span>GT2 and HTD belts mesh with pulley teeth, so they can't slip like a flat belt.</span></div></div>
+      <div class="rule"><div class="ri">📏</div><div><b>Fixed length</b><span>Belts come in set tooth counts, so the center distance is constrained.</span></div></div>
+      <div class="rule"><div class="ri">🔧</div><div><b>Less maintenance</b><span>No lubrication and almost no stretch, set it and forget it.</span></div></div>
+    </div>
+    <div class="note indigo">
+      <div class="nh">Design the layout and the belt together</div>
+      <p>Because belts come in discrete lengths, you can't pick the pulley positions first and hope a belt fits. Teams design the two together: choose a belt tooth count, and place the pulleys at the exact center distance it needs (often with one pulley on a small adjustable slot for fine-tuning). Chain is more forgiving of layout because you can add a tensioner or a half-link, which is why chain still shows up where the geometry is awkward.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="0">
+        <div class="qn">Question 1</div>
+        <div class="qt">What's a timing belt's main advantage over chain?</div>
+        <div class="opts">
+          <button class="opt">Quieter, cleaner, and needs no lubrication</button>
+          <button class="opt">It can change ratio mid-run</button>
+          <button class="opt">It's always cheaper</button>
+        </div>
+        <div class="explain">A toothed belt runs quiet, throws no oil, and barely stretches, so it needs almost no maintenance. Chain clatters and needs lubrication and tensioning.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">Why is a belt drive's center distance constrained?</div>
+        <div class="opts">
+          <button class="opt">Belts can stretch to any length</button>
+          <button class="opt">Pulleys can only be certain sizes</button>
+          <button class="opt">Belts come in fixed tooth counts, so the spacing must match the belt</button>
+        </div>
+        <div class="explain">A belt is a closed loop with a set number of teeth. For given pulleys, only one center distance makes that belt fit, so you design the layout around the belt length.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 3</div>
+        <div class="qt">Why doesn't a GT2 timing belt slip like an old flat belt?</div>
+        <div class="opts">
+          <button class="opt">It's glued to the pulleys</button>
+          <button class="opt">Its teeth mesh with teeth on the pulleys</button>
+          <button class="opt">It's magnetic</button>
+        </div>
+        <div class="explain">Timing belts are toothed and run on toothed pulleys. The teeth interlock, so the belt drives positively without slipping, just like chain and sprockets.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 3 · 03 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Timing belt</b><span>Toothed belt, no slip.</span></div>
+        <div class="gl"><b>GT2 / HTD</b><span>Common FRC belt profiles.</span></div>
+        <div class="gl"><b>Quiet &amp; clean</b><span>No noise, no oil.</span></div>
+        <div class="gl"><b>Fixed length</b><span>Set tooth counts to choose from.</span></div>
+        <div class="gl"><b>Spacing follows</b><span>Center distance matches the belt.</span></div>
+        <div class="gl"><b>Low maintenance</b><span>No lube, almost no stretch.</span></div>
+      </div>
+      <a class="next" href="build-lesson-13.html">
+        <div class="n-eyebrow">Up next · Part 3 · 04</div>
+        <h3>Bearings</h3>
+        <p>Gears, sprockets, and pulleys all ride on shafts, and a shaft needs bearings to spin freely. Get the support right or the whole thing wobbles.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="build-lesson-11.html">← Part 3 · 02 · Sprockets &amp; Chain</a>
+    <a class="map" href="build.html">Course map</a>
+    <a href="build-lesson-13.html">Part 3 · 04 · Bearings →</a>
+  </nav>
+
+</div>
+
+<footer>Fabricate · Building an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var cv=document.getElementById('cv'), ctx=cv.getContext('2d'), W=0,H=0,dpr=1;
+  function fit(){ var r=cv.getBoundingClientRect(); if(!r.width)return; dpr=window.devicePixelRatio||1; cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr); ctx.setTransform(dpr,0,0,dpr,0,0); W=r.width; H=r.height; }
+  fit();
+  var t1=18, t2=36, belt=90, phase=0, a1=0, a2=0;
+  // tooth-pitch units: r = teeth/(2*pi); CD ~ (belt - (t1+t2)/2)/2
+  function CD(){ return (belt - (t1+t2)/2)/2; }
+  function r1u(){ return t1/(2*Math.PI); }
+  function r2u(){ return t2/(2*Math.PI); }
+  function fits(){ return CD() > (r1u()+r2u())+0.6; }
+  function geom(){
+    var cdu=Math.max(CD(), r1u()+r2u()+0.6);
+    var spanU = r1u()+cdu+r2u();
+    var margin=24;
+    var pp = Math.min((W-2*margin)/spanU, (H*0.34)/Math.max(r1u(),r2u()));
+    var x1=margin + r1u()*pp, cy=H*0.46, x2=x1+cdu*pp;
+    return {x1:x1,x2:x2,cy:cy,r1:r1u()*pp,r2:r2u()*pp,pp:pp};
+  }
+  function buildLoop(g){
+    var segs=[], total=0;
+    function line(p0,p1){ var len=Math.hypot(p1.x-p0.x,p1.y-p0.y); segs.push({t:'l',p0:p0,p1:p1,len:len,off:total}); total+=len; }
+    function arc(cx,cy,r,a0,a1){ var len=r*Math.abs(a1-a0); segs.push({t:'a',cx:cx,cy:cy,r:r,a0:a0,a1:a1,len:len,off:total}); total+=len; }
+    line({x:g.x1,y:g.cy-g.r1},{x:g.x2,y:g.cy-g.r2});
+    arc(g.x2,g.cy,g.r2,-Math.PI/2, Math.PI/2);
+    line({x:g.x2,y:g.cy+g.r2},{x:g.x1,y:g.cy+g.r1});
+    arc(g.x1,g.cy,g.r1, Math.PI/2, 3*Math.PI/2);
+    return {segs:segs,total:total};
+  }
+  function pathStroke(loop){ ctx.beginPath(); loop.segs.forEach(function(sg){ if(sg.t==='l'){ ctx.moveTo(sg.p0.x,sg.p0.y); ctx.lineTo(sg.p1.x,sg.p1.y);} else { ctx.moveTo(sg.cx+Math.cos(sg.a0)*sg.r, sg.cy+Math.sin(sg.a0)*sg.r); ctx.arc(sg.cx,sg.cy,sg.r,sg.a0,sg.a1);} }); }
+  function pointAt(loop,s){ s=((s%loop.total)+loop.total)%loop.total; for(var i=0;i<loop.segs.length;i++){ var sg=loop.segs[i]; if(s<=sg.off+sg.len){ var u=(s-sg.off)/sg.len; if(sg.t==='l') return {x:sg.p0.x+(sg.p1.x-sg.p0.x)*u, y:sg.p0.y+(sg.p1.y-sg.p0.y)*u}; var a=sg.a0+(sg.a1-sg.a0)*u; return {x:sg.cx+Math.cos(a)*sg.r, y:sg.cy+Math.sin(a)*sg.r}; } } return {x:0,y:0}; }
+  function pulley(cx,cy,r,ang,col){
+    ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fillStyle='#1B2540'; ctx.fill(); ctx.strokeStyle=col; ctx.lineWidth=2; ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx,cy,r*0.34,0,Math.PI*2); ctx.strokeStyle=col; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.strokeStyle=col; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+Math.cos(ang)*r*0.78, cy+Math.sin(ang)*r*0.78); ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx,cy,3,0,Math.PI*2); ctx.fillStyle='#E7ECF6'; ctx.fill();
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    var g=geom();
+    if(!fits()){
+      // overlapping pulleys + warning
+      pulley(g.x1,g.cy,g.r1,a1,'#FFB020'); pulley(g.x2,g.cy,g.r2,a2,'#34D7C5');
+      ctx.fillStyle='#FF6B6B'; ctx.font='700 14px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText('belt too short - won\'t reach', W/2, g.cy-g.r1-22);
+      return;
+    }
+    var loop=buildLoop(g);
+    // belt band
+    ctx.lineWidth=7; ctx.strokeStyle='#414e6b'; pathStroke(loop); ctx.stroke();
+    ctx.lineWidth=2; ctx.strokeStyle='#6a779a'; pathStroke(loop); ctx.stroke();
+    // moving belt teeth
+    var spacing=12, n=Math.round(loop.total/spacing);
+    for(var i=0;i<n;i++){ var p=pointAt(loop, phase+i*(loop.total/n)); ctx.fillStyle='#92A2BE'; ctx.fillRect(p.x-1.3,p.y-1.3,2.6,2.6); }
+    pulley(g.x1,g.cy,g.r1,a1,'#FFB020'); pulley(g.x2,g.cy,g.r2,a2,'#34D7C5');
+    ctx.fillStyle='#5E6F8E'; ctx.font='10px ui-monospace,Menlo,monospace'; ctx.textAlign='center';
+    ctx.fillText('A '+t1+'T', g.x1, g.cy+g.r1+18); ctx.fillText('B '+t2+'T', g.x2, g.cy+g.r2+18);
+  }
+  function step(){ var g=geom(); var sp=1.7; if(fits()){ phase+=sp; a1+=sp/g.r1; a2+=sp/g.r2; } draw(); requestAnimationFrame(step); }
+  function refresh(){
+    var ratio=t2/t1, ok=fits();
+    document.getElementById('roRatio').textContent=ratio.toFixed(2)+':1';
+    document.getElementById('roBelt').textContent=belt+'T';
+    document.getElementById('roCD').textContent= ok? CD().toFixed(1)+' p' : '-';
+    var rf=document.getElementById('roFit'); rf.textContent= ok?'fits':'too short'; rf.className='v '+(ok?'green':'red');
+    document.getElementById('fitTag').textContent= ok?'fits':'belt too short';
+  }
+  document.querySelectorAll('#beltSeg button').forEach(function(b){ b.addEventListener('click',function(){ belt=+b.getAttribute('data-b'); document.querySelectorAll('#beltSeg button').forEach(function(x){x.classList.toggle('active',x===b);}); refresh(); }); });
+  document.getElementById('t1').addEventListener('input',function(e){ t1=+e.target.value; document.getElementById('t1v').textContent=t1; refresh(); });
+  document.getElementById('t2').addEventListener('input',function(e){ t2=+e.target.value; document.getElementById('t2v').textContent=t2; refresh(); });
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
+  refresh(); requestAnimationFrame(step);
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="build:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

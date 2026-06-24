@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fabricate · Part 3.2 - Sprockets &amp; Chain</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  canvas.chain{display:block;width:100%;height:240px}
+  .readouts{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  @media(min-width:560px){.readouts{grid-template-columns:repeat(4,1fr)}}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:17px;font-weight:600;margin-top:3px;color:var(--muted)}
+  .ro .v.indigo{color:var(--indigo)} .ro .v.teal{color:var(--teal)} .ro .v.amber{color:var(--amber)}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .slider-group{flex:1 1 180px;display:flex;flex-direction:column;gap:6px;min-width:150px}
+  .slider-group label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+  .slider-group label .val{color:var(--indigo)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:var(--line-2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--indigo);cursor:pointer;box-shadow:0 0 10px -1px var(--indigo)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(255,138,76,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .rules{display:grid;gap:10px;margin:18px 0} @media(min-width:560px){.rules{grid-template-columns:1fr 1fr}}
+  .rule{display:flex;gap:11px;border:1px solid var(--line);border-radius:11px;padding:13px 14px;background:var(--panel)}
+  .rule .ri{font-size:20px;flex:0 0 auto}
+  .rule b{display:block;font-size:14.5px;color:var(--text);margin-bottom:2px}
+  .rule span{font-size:13.5px;color:var(--muted)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:108px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="build.html"><span class="dot"></span><span class="name">Fabricate</span></a>
+    <div class="top-meta">Part 3 · 02 / 06 · Power</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 3 · 02</b> Power Transmission</div>
+    <div class="eyebrow">Sprockets &amp; Chain</div>
+    <h1>Span the<br><span class="accent">gap</span>.</h1>
+    <p class="dek">Gears have to touch to mesh, so they can't move power very far. Chain solves that: it loops over two sprockets that might be a foot apart and carries the same ratio across the gap, the way a bike chain links the pedals to the rear wheel.</p>
+  </div>
+
+  <section>
+    <p class="lead">A chain is a flexible gear train.</p>
+    <p>The ratio works exactly like gears, driven teeth over driver teeth, but the two sprockets can sit wherever your design needs them. Change the sprocket sizes and the spacing below and watch the chain carry the power across.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Chain drive</span><span class="demo-tag" id="ratioTag">2.0:1</span></div>
+      <canvas class="chain" id="cv"></canvas>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Ratio</div><div class="v indigo" id="roRatio">2.0:1</div></div>
+        <div class="ro"><div class="k2">Driver</div><div class="v amber" id="roT1">18T</div></div>
+        <div class="ro"><div class="k2">Driven</div><div class="v teal" id="roT2">36T</div></div>
+        <div class="ro"><div class="k2">Chain length</div><div class="v" id="roLinks">~ 60 links</div></div>
+      </div>
+      <div class="controls">
+        <div class="slider-group"><label>Driver teeth <span class="val" id="t1v">18</span></label><input type="range" id="t1" min="12" max="40" value="18"></div>
+        <div class="slider-group"><label>Driven teeth <span class="val" id="t2v">36</span></label><input type="range" id="t2" min="12" max="54" value="36"></div>
+        <div class="slider-group"><label>Center distance <span class="val" id="cdv">mid</span></label><input type="range" id="cd" min="0" max="100" value="55"></div>
+      </div>
+    </div>
+    <p class="caption">Both sprockets spin the same direction, unlike meshed gears. Spread them apart and the chain gets longer; the ratio doesn't change, but the chain length does, and you have to buy or build a chain to match.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In the shop</div>
+    <h2>Picking and tensioning chain</h2>
+    <p>FRC uses roller chain in a couple of sizes, joined into a loop with a master link. The one thing chain demands that gears don't is the right tension:</p>
+    <div class="rules">
+      <div class="rule"><div class="ri">🔗</div><div><b>#25 chain</b><span>Small and light. The default for most FRC mechanisms.</span></div></div>
+      <div class="rule"><div class="ri">⛓️</div><div><b>#35 chain</b><span>Bigger and stronger, for high-load jobs like a heavy drivetrain.</span></div></div>
+      <div class="rule"><div class="ri">🔓</div><div><b>Master link</b><span>A removable link that closes the loop so you can install it.</span></div></div>
+      <div class="rule"><div class="ri">↔️</div><div><b>Tension matters</b><span>Too loose and it skips teeth; too tight and it wears fast.</span></div></div>
+    </div>
+    <div class="note indigo">
+      <div class="nh">Plan for tension from the start</div>
+      <p>Chain stretches a little as it wears, so a brand-new tight chain goes slightly slack over a season. Good designs build in a way to take up that slack: a <strong>tensioner</strong> (an idler sprocket on a spring or slot), or a <strong>movable</strong> sprocket mount you can slide. A common trick is the half-link, which lets you shorten a loop by one pitch. If a chain is skipping under load, it's almost always too loose.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">What can chain do that meshed gears can't?</div>
+        <div class="opts">
+          <button class="opt">Change the ratio while spinning</button>
+          <button class="opt">Carry power across a gap between two shafts</button>
+          <button class="opt">Eliminate the need for a motor</button>
+        </div>
+        <div class="explain">Gears must touch to transfer power. Chain loops over two sprockets that can be far apart, moving the same ratio across a distance, like a bike chain.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">An 18T sprocket drives a 54T sprocket. What's the ratio?</div>
+        <div class="opts">
+          <button class="opt">1:3 overdrive</button>
+          <button class="opt">18:54</button>
+          <button class="opt">3:1 reduction - driven ÷ driver = 54 / 18</button>
+        </div>
+        <div class="explain">Sprocket ratios work just like gears: driven teeth over driver teeth. 54 / 18 = 3, a 3:1 reduction. The output spins a third as fast with triple the torque.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">A chain is skipping teeth under load. Most likely cause?</div>
+        <div class="opts">
+          <button class="opt">It's too loose - it needs more tension</button>
+          <button class="opt">It's too tight</button>
+          <button class="opt">The ratio is wrong</button>
+        </div>
+        <div class="explain">A slack chain rides up and jumps over the sprocket teeth. Tighten it with a tensioner or by moving a sprocket, or remove a half-link, so it seats properly under load.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 3 · 02 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Chain</b><span>Carries a ratio across a gap.</span></div>
+        <div class="gl"><b>Ratio</b><span>Driven ÷ driver teeth, like gears.</span></div>
+        <div class="gl"><b>Same direction</b><span>Both sprockets turn the same way.</span></div>
+        <div class="gl"><b>#25 / #35</b><span>Light / heavy chain sizes.</span></div>
+        <div class="gl"><b>Master link</b><span>Closes the loop.</span></div>
+        <div class="gl"><b>Tensioner</b><span>Takes up slack as it stretches.</span></div>
+      </div>
+      <a class="next" href="build-lesson-12.html">
+        <div class="n-eyebrow">Up next · Part 3 · 03</div>
+        <h3>Belts &amp; Pulleys</h3>
+        <p>Timing belts do the same job as chain, but quieter and cleaner, with one catch: the belt length is fixed, so the spacing has to match.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="build-lesson-10.html">← Part 3 · 01 · Gears &amp; Gear Ratios</a>
+    <a class="map" href="build.html">Course map</a>
+    <a href="build-lesson-12.html">Part 3 · 03 · Belts &amp; Pulleys →</a>
+  </nav>
+
+</div>
+
+<footer>Fabricate · Building an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var cv=document.getElementById('cv'), ctx=cv.getContext('2d'), W=0,H=0,dpr=1;
+  function fit(){ var r=cv.getBoundingClientRect(); if(!r.width)return; dpr=window.devicePixelRatio||1; cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr); ctx.setTransform(dpr,0,0,dpr,0,0); W=r.width; H=r.height; }
+  fit();
+  var t1=18, t2=36, cdFrac=0.55, phase=0, a1=0, a2=0, links=0;
+  function geom(){
+    var kk=Math.min((H*0.30)/Math.max(t1,t2), 4.2);
+    var r1=t1*kk*0.5, r2=t2*kk*0.5;
+    var margin=Math.max(r1,r2)+30, cy=H*0.46;
+    var minGap=r1+r2+16, maxX=W-margin, x1=margin;
+    var maxD=Math.max(minGap, (maxX-x1));
+    var D=minGap + cdFrac*(maxD-minGap);
+    var x2=x1+D;
+    return {x1:x1,x2:x2,cy:cy,r1:r1,r2:r2,D:D};
+  }
+  function buildLoop(g){
+    var segs=[], total=0;
+    function line(p0,p1){ var len=Math.hypot(p1.x-p0.x,p1.y-p0.y); segs.push({t:'l',p0:p0,p1:p1,len:len,off:total}); total+=len; }
+    function arc(cx,cy,r,a0,a1){ var len=r*Math.abs(a1-a0); segs.push({t:'a',cx:cx,cy:cy,r:r,a0:a0,a1:a1,len:len,off:total}); total+=len; }
+    line({x:g.x1,y:g.cy-g.r1},{x:g.x2,y:g.cy-g.r2});      // top run
+    arc(g.x2,g.cy,g.r2,-Math.PI/2, Math.PI/2);            // right wrap
+    line({x:g.x2,y:g.cy+g.r2},{x:g.x1,y:g.cy+g.r1});      // bottom run
+    arc(g.x1,g.cy,g.r1, Math.PI/2, 3*Math.PI/2);          // left wrap
+    return {segs:segs,total:total};
+  }
+  function pointAt(loop,s){
+    s=((s%loop.total)+loop.total)%loop.total;
+    for(var i=0;i<loop.segs.length;i++){ var sg=loop.segs[i]; if(s<=sg.off+sg.len){ var u=(s-sg.off)/sg.len;
+      if(sg.t==='l') return {x:sg.p0.x+(sg.p1.x-sg.p0.x)*u, y:sg.p0.y+(sg.p1.y-sg.p0.y)*u};
+      var a=sg.a0+(sg.a1-sg.a0)*u; return {x:sg.cx+Math.cos(a)*sg.r, y:sg.cy+Math.sin(a)*sg.r};
+    }}
+    return {x:0,y:0};
+  }
+  function sprocket(cx,cy,r,N,ang,col){
+    var inner=r*0.80;
+    ctx.beginPath();
+    for(var i=0;i<N;i++){ var a0=ang+i/N*Math.PI*2; ctx.lineTo(cx+Math.cos(a0)*r, cy+Math.sin(a0)*r); var am=ang+(i+0.5)/N*Math.PI*2; ctx.lineTo(cx+Math.cos(am)*inner, cy+Math.sin(am)*inner); }
+    ctx.closePath(); ctx.fillStyle='#1B2540'; ctx.fill(); ctx.strokeStyle=col; ctx.lineWidth=2; ctx.stroke();
+    ctx.strokeStyle=col; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+Math.cos(ang)*inner*0.85, cy+Math.sin(ang)*inner*0.85); ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx,cy,3,0,Math.PI*2); ctx.fillStyle='#E7ECF6'; ctx.fill();
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    var g=geom(), loop=buildLoop(g);
+    var spacing=13; links=Math.round(loop.total/spacing);
+    // chain links
+    for(var i=0;i<links;i++){ var p=pointAt(loop, phase + i*(loop.total/links)); ctx.fillStyle=(i%2?'#5b6a86':'#92A2BE'); ctx.beginPath(); ctx.arc(p.x,p.y,3.2,0,Math.PI*2); ctx.fill(); }
+    sprocket(g.x1,g.cy,g.r1,t1,a1,'#FFB020');
+    sprocket(g.x2,g.cy,g.r2,t2,a2,'#34D7C5');
+    ctx.fillStyle='#5E6F8E'; ctx.font='10px ui-monospace,Menlo,monospace'; ctx.textAlign='center';
+    ctx.fillText('DRIVER '+t1+'T', g.x1, g.cy+g.r1+18);
+    ctx.fillText('DRIVEN '+t2+'T', g.x2, g.cy+g.r2+18);
+  }
+  function step(){
+    var g=geom();
+    var sp=1.7; phase+=sp; a1+=sp/g.r1; a2+=sp/g.r2;
+    draw();
+    requestAnimationFrame(step);
+  }
+  function refresh(){
+    var ratio=t2/t1;
+    document.getElementById('ratioTag').textContent=ratio.toFixed(1)+':1';
+    document.getElementById('roRatio').textContent=ratio.toFixed(2)+':1';
+    document.getElementById('roT1').textContent=t1+'T';
+    document.getElementById('roT2').textContent=t2+'T';
+    document.getElementById('roLinks').textContent='~ '+links+' links';
+  }
+  document.getElementById('t1').addEventListener('input',function(e){ t1=+e.target.value; document.getElementById('t1v').textContent=t1; refresh(); });
+  document.getElementById('t2').addEventListener('input',function(e){ t2=+e.target.value; document.getElementById('t2v').textContent=t2; refresh(); });
+  document.getElementById('cd').addEventListener('input',function(e){ cdFrac=(+e.target.value)/100; document.getElementById('cdv').textContent=(cdFrac<0.34?'close':cdFrac<0.67?'mid':'far'); refresh(); });
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
+  refresh(); requestAnimationFrame(step);
+  setInterval(refresh, 400); // keep link count fresh as geometry changes
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="build:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>
