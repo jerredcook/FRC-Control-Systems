@@ -196,23 +196,23 @@
     {code:"7", title:"Design & CAD", sub:"Designing before you cut",
      blurb:"Great robots are designed, not improvised. A repeatable design process and CAD (Onshape) let you catch problems on a screen instead of in aluminum.",
      lessons:[
-       {n:1, title:"The Design Process", desc:"Requirements, concepts, and picking a direction.", file:null},
-       {n:2, title:"CAD with Onshape", desc:"Sketches, parts, and assemblies in the browser.", file:null},
-       {n:3, title:"Prototyping", desc:"Cardboard, wood, and quick tests before committing.", file:null},
-       {n:4, title:"Design for Manufacture", desc:"Designing parts your shop can actually make.", file:null}
+       {n:1, title:"The Design Process", desc:"Requirements, concepts, and picking a direction.", file:"build-lesson-32.html"},
+       {n:2, title:"CAD with Onshape", desc:"Sketches, parts, and assemblies in the browser.", file:"build-lesson-33.html"},
+       {n:3, title:"Prototyping", desc:"Cardboard, wood, and quick tests before committing.", file:"build-lesson-34.html"},
+       {n:4, title:"Design for Manufacture", desc:"Designing parts your shop can actually make.", file:"build-lesson-35.html"}
      ]},
     {code:"8", title:"Build Season", sub:"Making it real",
      blurb:"Six weeks, one robot. The manufacturing methods, assembly, and competition-day discipline that carry a design from CAD to the field.",
      lessons:[
-       {n:1, title:"Planning the Season", desc:"Timeline, subsystems, and dividing the work.", file:null},
-       {n:2, title:"Manufacturing Methods", desc:"Cutting, drilling, the mill, the lathe, 3D printing.", file:null},
-       {n:3, title:"Assembling the Robot", desc:"Bringing subsystems together into one machine.", file:null},
-       {n:4, title:"Maintenance & Spares", desc:"Keeping the robot alive through a competition.", file:null},
-       {n:5, title:"Competition-Ready", desc:"Inspection, the pit, and game day.", file:null}
+       {n:1, title:"Planning the Season", desc:"Timeline, subsystems, and dividing the work.", file:"build-lesson-36.html"},
+       {n:2, title:"Manufacturing Methods", desc:"Cutting, drilling, the mill, the lathe, 3D printing.", file:"build-lesson-37.html"},
+       {n:3, title:"Assembling the Robot", desc:"Bringing subsystems together into one machine.", file:"build-lesson-38.html"},
+       {n:4, title:"Maintenance & Spares", desc:"Keeping the robot alive through a competition.", file:"build-lesson-39.html"},
+       {n:5, title:"Competition-Ready", desc:"Inspection, the pit, and game day.", file:"build-lesson-40.html"}
      ]}
   ];
 
-  var NEXT_ID="7-1";
+  var NEXT_ID="";
   var STORE_KEY="build:done";
   function loadDone(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY))||{}; }catch(e){ return {}; } }
   function saveDone(d){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(d)); }catch(e){} }

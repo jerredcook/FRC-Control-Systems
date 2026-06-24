@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fabricate · Part 8.3 - Assembling the Robot</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .stack{min-height:172px;display:flex;flex-direction:column-reverse;justify-content:flex-start;gap:5px;padding:18px 16px;align-items:center}
+  .layer{width:min(280px,80%);border-radius:7px;padding:10px 12px;font-family:var(--mono);font-size:12.5px;display:flex;align-items:center;gap:9px;color:#0B1322;font-weight:700;animation:pop .25s ease}
+  @keyframes pop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .layer.frame{background:#5E6F8E} .layer.drive{background:#FFB020} .layer.elec{background:#FF8A4C} .layer.mech{background:#34D7C5} .layer.bumper{background:#FF6B6B}
+  .stack .empty{color:var(--faint);font-family:var(--mono);font-size:12px;align-self:center;margin:auto}
+  .palette{border-top:1px solid var(--line);padding:14px 16px;display:flex;flex-wrap:wrap;gap:9px}
+  .pbtn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--text);font-family:var(--mono);font-size:12px;padding:10px 13px;border-radius:9px;cursor:pointer;transition:.12s;display:flex;align-items:center;gap:7px}
+  .pbtn:hover{border-color:var(--indigo)} .pbtn.done{opacity:.4;cursor:default;border-color:var(--green)}
+  .fb{padding:0 16px 12px;min-height:38px}
+  .fb .line{border-left:2px solid var(--indigo);padding:6px 0 6px 12px;font-size:14.5px;color:var(--muted)} .fb .line b{color:var(--text)}
+  .fb .line.ok{border-color:var(--green)} .fb .line.ok b{color:var(--green)}
+  .fb .line.bad{border-color:var(--red)} .fb .line.bad b{color:var(--red)}
+  .controls{padding:0 16px 14px;display:flex;gap:10px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:9px 13px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(255,138,76,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .rules{display:grid;gap:10px;margin:18px 0} @media(min-width:560px){.rules{grid-template-columns:1fr 1fr}}
+  .rule{display:flex;gap:11px;border:1px solid var(--line);border-radius:11px;padding:13px 14px;background:var(--panel)}
+  .rule .ri{font-size:20px;flex:0 0 auto}
+  .rule b{display:block;font-size:14.5px;color:var(--text);margin-bottom:2px}
+  .rule span{font-size:13.5px;color:var(--muted)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:108px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="build.html"><span class="dot"></span><span class="name">Fabricate</span></a>
+    <div class="top-meta">Part 8 · 03 / 05 · Build Season</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 8 · 03</b> Build Season</div>
+    <div class="eyebrow">Assembling the Robot</div>
+    <h1>Build it in<br><span class="accent">order</span>.</h1>
+    <p class="dek">All the subsystems are done; now they become one machine. Assembly order matters more than it looks, because each layer you add covers up the one beneath it. Put the wiring in after the arm blocks it and you'll be fishing for connectors with tweezers.</p>
+  </div>
+
+  <section>
+    <p class="lead">Stack the robot from the base up.</p>
+    <p>Add the subsystems in the order that keeps everything reachable: structure first, then the parts that move it, then the wiring while you can still get to it, then the mechanisms, and bumpers last. Click them in the right order and watch the robot come together.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Assembly order</span><span class="demo-tag" id="tag">0 / 5</span></div>
+      <div class="stack" id="stack"><div class="empty">click a subsystem to start the build</div></div>
+      <div class="palette" id="palette"></div>
+      <div class="fb"><div class="line" id="fb">What goes on first?</div></div>
+      <div class="controls"><button class="btn" id="reset">Start over</button></div>
+    </div>
+    <p class="caption">Try adding bumpers first and it tells you no, they wrap a finished robot. The right order builds upward: frame, drivetrain, electrical, mechanisms, bumpers, each step leaving room to reach the next.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In the shop</div>
+    <h2>Order is about access</h2>
+    <p>Every rule of assembly order comes down to one question, can you still reach it later?</p>
+    <div class="rules">
+      <div class="rule"><div class="ri">🔲</div><div><b>Frame first</b><span>The structure everything else bolts onto.</span></div></div>
+      <div class="rule"><div class="ri">⚙️</div><div><b>Then drivetrain</b><span>Mount it while the inside is still open.</span></div></div>
+      <div class="rule"><div class="ri">⚡</div><div><b>Wire while you can reach</b><span>Electrical before mechanisms close off the space.</span></div></div>
+      <div class="rule"><div class="ri">🟥</div><div><b>Bumpers last</b><span>They wrap the finished frame; nothing goes on after.</span></div></div>
+    </div>
+    <div class="note indigo">
+      <div class="nh">Design for assembly and maintenance from the start</div>
+      <p>The smartest teams think about this back in CAD: can a hand reach the battery to swap it? Can you pull a dead motor without removing the whole arm? A robot you can't service quickly will lose matches in the pit. Leave access panels, route wiring along reachable paths, and order the build so nothing important gets buried. It ties back to design for manufacture, the best design isn't just buildable, it's <em>serviceable</em>.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="0">
+        <div class="qn">Question 1</div>
+        <div class="qt">What gets assembled first?</div>
+        <div class="opts">
+          <button class="opt">The frame - the structure everything else bolts to</button>
+          <button class="opt">The bumpers</button>
+          <button class="opt">The arm</button>
+        </div>
+        <div class="explain">The frame is the foundation. Every other subsystem mounts to it, so it has to come first.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">Why wire the electrical before adding the mechanisms?</div>
+        <div class="opts">
+          <button class="opt">It looks neater</button>
+          <button class="opt">No reason</button>
+          <button class="opt">So you can still reach the inside before mechanisms block access</button>
+        </div>
+        <div class="explain">Once an arm or intake fills the space, the wiring is buried. Run it while the inside is still open and reachable.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 3</div>
+        <div class="qt">What's the real reason assembly order matters?</div>
+        <div class="opts">
+          <button class="opt">It doesn't</button>
+          <button class="opt">Access - each layer can cover up the one beneath it</button>
+          <button class="opt">To make it heavier</button>
+        </div>
+        <div class="explain">Order is about access. Build so that nothing you'll need to reach later gets buried under something added earlier.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 8 · 03 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Frame first</b><span>The structural base.</span></div>
+        <div class="gl"><b>Drivetrain</b><span>Mount while inside is open.</span></div>
+        <div class="gl"><b>Electrical</b><span>Wire while reachable.</span></div>
+        <div class="gl"><b>Mechanisms</b><span>The moving parts go on.</span></div>
+        <div class="gl"><b>Bumpers last</b><span>Wrap the finished frame.</span></div>
+        <div class="gl"><b>Serviceable</b><span>Design for access too.</span></div>
+      </div>
+      <a class="next" href="build-lesson-39.html">
+        <div class="n-eyebrow">Up next · Part 8 · 04</div>
+        <h3>Maintenance &amp; Spares</h3>
+        <p>A finished robot still needs care. Run the pre-match checklist that keeps it alive through a long competition day.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="build-lesson-37.html">← Part 8 · 02 · Manufacturing Methods</a>
+    <a class="map" href="build.html">Course map</a>
+    <a href="build-lesson-39.html">Part 8 · 04 · Maintenance &amp; Spares →</a>
+  </nav>
+
+</div>
+
+<footer>Fabricate · Building an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var STEPS=[
+    {id:'frame', label:'Frame', icon:'🔲'},
+    {id:'drive', label:'Drivetrain', icon:'⚙️'},
+    {id:'elec', label:'Electrical', icon:'⚡'},
+    {id:'mech', label:'Mechanisms', icon:'🦾'},
+    {id:'bumper', label:'Bumpers', icon:'🟥'}
+  ];
+  var DISPLAY=['mech','bumper','frame','elec','drive']; // scrambled palette order
+  var progress=0;
+  var stack=document.getElementById('stack'), palette=document.getElementById('palette');
+  function byId(id){ for(var i=0;i<STEPS.length;i++) if(STEPS[i].id===id) return STEPS[i]; return null; }
+  function buildPalette(){
+    palette.innerHTML='';
+    DISPLAY.forEach(function(id){ var s=byId(id); var b=document.createElement('button'); b.className='pbtn'; b.id='pb_'+id; b.innerHTML='<span>'+s.icon+'</span>'+s.label; b.addEventListener('click',function(){ pick(id); }); palette.appendChild(b); });
+  }
+  function reset(){
+    progress=0; stack.innerHTML='<div class="empty">click a subsystem to start the build</div>';
+    buildPalette(); document.getElementById('tag').textContent='0 / 5';
+    var fb=document.getElementById('fb'); fb.className='line'; fb.textContent='What goes on first?';
+  }
+  function pick(id){
+    if(progress>=STEPS.length) return;
+    var fb=document.getElementById('fb');
+    var btn=document.getElementById('pb_'+id);
+    if(btn.classList.contains('done')) return;
+    if(id===STEPS[progress].id){
+      var s=STEPS[progress];
+      var em=stack.querySelector('.empty'); if(em) em.remove();
+      var lay=document.createElement('div'); lay.className='layer '+s.id; lay.innerHTML='<span>'+s.icon+'</span>'+(progress+1)+'. '+s.label; stack.appendChild(lay);
+      btn.classList.add('done'); progress++;
+      document.getElementById('tag').textContent=progress+' / 5';
+      if(progress===STEPS.length){ fb.className='line ok'; fb.innerHTML='<b>Robot assembled.</b> Frame up to bumpers, everything stayed reachable along the way.'; }
+      else { fb.className='line ok'; fb.innerHTML='<b>'+s.label+' on.</b> Next: what keeps the most access?'; }
+    } else {
+      var need=STEPS[progress].label, picked=byId(id).label;
+      fb.className='line bad';
+      var msg = id==='bumper' ? 'Bumpers wrap a finished robot, they go on last.' : (picked+' comes later, you would bury something you still need. Add the '+need+' first.');
+      fb.innerHTML='<b>Not yet.</b> '+msg;
+    }
+  }
+  document.getElementById('reset').addEventListener('click',reset);
+  reset();
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="build:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

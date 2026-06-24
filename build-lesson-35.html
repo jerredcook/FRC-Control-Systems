@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fabricate · Part 7.4 - Design for Manufacture</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .prompt{padding:16px 16px 6px;text-align:center}
+  .prompt .pn{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-bottom:6px}
+  .prompt .pt{font-size:17px;color:var(--text)}
+  .ab{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:14px 16px}
+  .card{border:1px solid var(--line-2);background:var(--panel-2);border-radius:11px;padding:16px 14px;cursor:pointer;text-align:center;transition:.12s}
+  .card:hover{border-color:var(--muted)}
+  .card .ci{font-size:30px;line-height:1;margin-bottom:8px}
+  .card .ct{font-size:14.5px;color:var(--text)}
+  .card.correct{border-color:var(--green);background:rgba(67,214,126,.12)}
+  .card.wrong{border-color:var(--red);background:rgba(255,107,107,.1)}
+  .card.locked{cursor:default}
+  .fb{padding:4px 16px 12px;min-height:40px}
+  .fb .line{border-left:2px solid var(--indigo);padding:6px 0 6px 12px;font-size:14.5px;color:var(--muted)} .fb .line b{color:var(--text)}
+  .fb .line.ok{border-color:var(--green)} .fb .line.ok b{color:var(--green)}
+  .fb .line.bad{border-color:var(--red)} .fb .line.bad b{color:var(--red)}
+  .controls{padding:12px 16px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn.primary{background:linear-gradient(180deg,#ffb37e,var(--indigo));color:#2a1503;font-weight:700;border:none}
+  .btn:hover{filter:brightness(1.08)}
+  .score{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--indigo)}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(255,138,76,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .rules{display:grid;gap:10px;margin:18px 0} @media(min-width:560px){.rules{grid-template-columns:1fr 1fr}}
+  .rule{display:flex;gap:11px;border:1px solid var(--line);border-radius:11px;padding:13px 14px;background:var(--panel)}
+  .rule .ri{font-size:20px;flex:0 0 auto}
+  .rule b{display:block;font-size:14.5px;color:var(--text);margin-bottom:2px}
+  .rule span{font-size:13.5px;color:var(--muted)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:108px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(255,176,32,0.12),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--amber);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--amber)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)} .coursenav a.next-link{color:var(--amber);border-color:rgba(255,176,32,.4)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="build.html"><span class="dot"></span><span class="name">Fabricate</span></a>
+    <div class="top-meta">Part 7 · 04 / 04 · Finale</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 7 · 04</b> Design &amp; CAD · Finale</div>
+    <div class="eyebrow">Design for Manufacture</div>
+    <h1>Design what<br>you can <span class="accent">build</span>.</h1>
+    <p class="dek">A perfect CAD model is worthless if your shop can't make the part. Design for manufacture, DFM, means making choices that fit your real tools and skills: standard stock, sensible tolerances, and simple shapes. The best design is the one that actually gets built well, on time.</p>
+  </div>
+
+  <section>
+    <p class="lead">Which one is easier to make?</p>
+    <p>Two designs can do the same job, but one drops onto the bandsaw in five minutes and the other needs a CNC mill and a perfect setup. For each pair below, pick the version your shop will thank you for.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Pick the manufacturable design</span><span class="demo-tag" id="tag">round 1</span></div>
+      <div class="prompt"><div class="pn" id="pn">Round 1 of 4</div><div class="pt" id="pt"></div></div>
+      <div class="ab" id="ab">
+        <div class="card" data-i="0"><div class="ci" id="ic0"></div><div class="ct" id="tc0"></div></div>
+        <div class="card" data-i="1"><div class="ci" id="ic1"></div><div class="ct" id="tc1"></div></div>
+      </div>
+      <div class="fb"><div class="line" id="fb">Choose the design that's easier to manufacture.</div></div>
+      <div class="controls">
+        <button class="btn primary" id="next">Next round ▸</button>
+        <span class="score" id="score">0 / 0</span>
+      </div>
+    </div>
+    <p class="caption">The easy-to-make choice usually wins twice: it gets built faster <em>and</em> it's easier to fix or replace at competition. Designing for your shop is designing for reliability.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In the shop</div>
+    <h2>What makes a part easy to make</h2>
+    <p>DFM is mostly a handful of habits that keep parts on the simple side:</p>
+    <div class="rules">
+      <div class="rule"><div class="ri">📐</div><div><b>Standard stock</b><span>Design around tube and plate sizes you already buy.</span></div></div>
+      <div class="rule"><div class="ri">🕳️</div><div><b>Holes on a grid</b><span>Line up holes to a pattern so they're fast and repeatable to drill.</span></div></div>
+      <div class="rule"><div class="ri">📏</div><div><b>Sensible tolerances</b><span>Only ask for tight precision where it truly matters.</span></div></div>
+      <div class="rule"><div class="ri">🟦</div><div><b>Simple shapes</b><span>Flat plates and straight cuts beat complex 3D forms.</span></div></div>
+    </div>
+    <div class="note indigo">
+      <div class="nh">Design for the shop you actually have</div>
+      <p>A part that needs a five-axis mill is useless if all you own is a drill press and a bandsaw. Great FRC designers know exactly what their team can make, and they design right up to that edge and no further. Every unnecessary tight tolerance, oddball angle, or custom thickness is time you don't have in a six-week season, and a part that's harder to remake when it breaks at an event. Simple, standard, and buildable wins.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">What does "design for manufacture" mean?</div>
+        <div class="opts">
+          <button class="opt">Making the fanciest possible part</button>
+          <button class="opt">Designing parts your shop can actually make well, with the tools you have</button>
+          <button class="opt">Avoiding CAD</button>
+        </div>
+        <div class="explain">DFM means choosing geometry, materials, and tolerances that fit your real tools and time, so the part gets built well and on schedule.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">When should you call for a very tight tolerance?</div>
+        <div class="opts">
+          <button class="opt">On every dimension</button>
+          <button class="opt">Never</button>
+          <button class="opt">Only where it genuinely matters, like a bearing fit</button>
+        </div>
+        <div class="explain">Tight tolerances are slow and hard to hit. Reserve them for the few spots that need them and leave everything else generous.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">Why design around standard stock and simple shapes?</div>
+        <div class="opts">
+          <button class="opt">They're faster to make and easier to replace when something breaks</button>
+          <button class="opt">They look worse on purpose</button>
+          <button class="opt">There's no reason</button>
+        </div>
+        <div class="explain">Standard, simple parts cut fast, fit the tools you have, and can be remade quickly at an event, which is reliability you can build.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 7 · 04 · Recap · Part 7 complete ★</h3>
+      <div class="glossary">
+        <div class="gl"><b>DFM</b><span>Design what your shop can make.</span></div>
+        <div class="gl"><b>Standard stock</b><span>Use sizes you already buy.</span></div>
+        <div class="gl"><b>Holes on a grid</b><span>Fast, repeatable drilling.</span></div>
+        <div class="gl"><b>Sensible tolerance</b><span>Tight only where it matters.</span></div>
+        <div class="gl"><b>Simple shapes</b><span>Flat plates beat 3D forms.</span></div>
+        <div class="gl"><b>Buildable wins</b><span>On time and easy to remake.</span></div>
+      </div>
+      <a class="next" href="build.html">
+        <div class="n-eyebrow">Part 7 complete · Design &amp; CAD</div>
+        <h3>On to Part 8 - Build Season →</h3>
+        <p>You can design it on purpose and for your shop. The last part puts it all in motion: six weeks, real machines, and game day. Continue from the course map.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="build-lesson-34.html">← Part 7 · 03 · Prototyping</a>
+    <a class="map" href="build.html">Course map</a>
+    <a class="next-link" href="build.html">Part 8 · Build Season →</a>
+  </nav>
+
+</div>
+
+<footer>Fabricate · Building an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var ROUNDS=[
+    {q:'A mounting plate that needs four bolt holes.', a:{i:'🟦',t:'Holes lined up on a standard grid'}, b:{i:'🧩',t:'Holes scattered at odd spots'}, correct:0,
+     ok:'Holes on a grid drill fast and line up with other parts.', bad:'Scattered holes are slow to mark and easy to misplace.'},
+    {q:'A bracket to join two tubes.', a:{i:'🌀',t:'A curved 3D weldment'}, b:{i:'📐',t:'A flat plate with simple bends'}, correct:1,
+     ok:'A flat plate cuts on the bandsaw and bends easily, no welding rig needed.', bad:'A 3D weldment needs fixtures and skills most teams do not have.'},
+    {q:'Stock for a structural arm.', a:{i:'📏',t:'Standard 1x1 box tube you stock'}, b:{i:'🛒',t:'A custom-milled thickness'}, correct:0,
+     ok:'Standard stock is on the shelf and easy to replace mid-event.', bad:'Custom stock means ordering, waiting, and no spare when it breaks.'},
+    {q:'Tolerance on a clearance hole for a bolt.', a:{i:'🎯',t:'Ultra-tight, hold to a thousandth'}, b:{i:'👍',t:'Generous, a drill bit is fine'}, correct:1,
+     ok:'A bolt clearance hole does not need precision; a normal drilled hole works.', bad:'Tight tolerance here is wasted effort, slow and hard to hit for no benefit.'}
+  ];
+  var idx=0, score=0, total=0, scored=false;
+  function show(){
+    scored=false;
+    var r=ROUNDS[idx];
+    document.getElementById('pn').textContent='Round '+(idx+1)+' of '+ROUNDS.length;
+    document.getElementById('tag').textContent='round '+(idx+1);
+    document.getElementById('pt').textContent=r.q;
+    document.getElementById('ic0').textContent=r.a.i; document.getElementById('tc0').textContent=r.a.t;
+    document.getElementById('ic1').textContent=r.b.i; document.getElementById('tc1').textContent=r.b.t;
+    document.querySelectorAll('#ab .card').forEach(function(c){ c.classList.remove('correct','wrong','locked'); });
+    var fb=document.getElementById('fb'); fb.className='line'; fb.textContent='Choose the design that is easier to manufacture.';
+    document.getElementById('next').textContent= idx<ROUNDS.length-1?'Next round ▸':'Restart';
+  }
+  document.querySelectorAll('#ab .card').forEach(function(card){
+    card.addEventListener('click',function(){
+      if(scored)return; scored=true;
+      var r=ROUNDS[idx], pick=+card.getAttribute('data-i'), ok=pick===r.correct;
+      document.querySelectorAll('#ab .card').forEach(function(c){ c.classList.add('locked'); });
+      document.querySelector('#ab .card[data-i="'+r.correct+'"]').classList.add('correct');
+      if(!ok) card.classList.add('wrong');
+      var fb=document.getElementById('fb'); fb.className='line '+(ok?'ok':'bad'); fb.innerHTML='<b>'+(ok?'Right.':'Not quite.')+'</b> '+(ok?r.ok:r.bad);
+      total++; if(ok)score++; document.getElementById('score').textContent=score+' / '+total;
+    });
+  });
+  document.getElementById('next').addEventListener('click',function(){ if(idx<ROUNDS.length-1){ idx++; show(); } else { idx=0; score=0; total=0; document.getElementById('score').textContent='0 / 0'; show(); } });
+  show();
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="build:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

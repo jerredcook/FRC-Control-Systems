@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fabricate · Part 8.5 - Competition-Ready</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .gates{padding:14px 16px;display:grid;gap:9px} @media(min-width:560px){.gates{grid-template-columns:1fr 1fr}}
+  .gate{display:flex;align-items:center;gap:11px;border:1px solid var(--line-2);background:var(--panel-2);border-radius:10px;padding:12px 13px;cursor:pointer;transition:.12s;position:relative;overflow:hidden}
+  .gate:hover{border-color:var(--muted)}
+  .gate .gi{font-size:20px;flex:0 0 auto}
+  .gate .gt{font-size:14px;color:var(--text)} .gate .gt small{display:block;color:var(--muted);font-size:12px}
+  .gate .stamp{position:absolute;right:10px;top:50%;transform:translateY(-50%) rotate(-12deg);font-family:var(--mono);font-size:13px;font-weight:800;letter-spacing:.1em;color:var(--green);border:2px solid var(--green);border-radius:5px;padding:1px 6px;opacity:0;transition:.18s}
+  .gate.pass{border-color:var(--green);background:rgba(67,214,126,.08)} .gate.pass .stamp{opacity:1}
+  .result{margin:0 16px 16px;border-radius:11px;border:1px dashed var(--line-2);padding:16px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:13px}
+  .result.cleared{border:1px solid var(--green);background:rgba(67,214,126,.1);color:var(--green)}
+  .result .big{font-size:20px;font-weight:800;letter-spacing:.06em;margin-bottom:4px}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(255,138,76,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .rules{display:grid;gap:10px;margin:18px 0} @media(min-width:560px){.rules{grid-template-columns:1fr 1fr}}
+  .rule{display:flex;gap:11px;border:1px solid var(--line);border-radius:11px;padding:13px 14px;background:var(--panel)}
+  .rule .ri{font-size:20px;flex:0 0 auto}
+  .rule b{display:block;font-size:14.5px;color:var(--text);margin-bottom:2px}
+  .rule span{font-size:13.5px;color:var(--muted)}
+
+  .finale{border:1px solid var(--line);border-radius:16px;background:radial-gradient(700px 300px at 50% -10%,rgba(255,138,76,.16),transparent 70%),linear-gradient(180deg,var(--panel),#11192B);padding:28px 22px;text-align:center;margin:22px 0}
+  .finale .crown{font-size:34px}
+  .finale h3{font-size:clamp(1.5rem,4vw,2rem);margin:8px 0 6px;letter-spacing:-.02em}
+  .finale h3 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .finale p{max-width:54ch;margin:0 auto 18px;color:var(--muted);font-size:15.5px}
+  .courses{display:grid;gap:10px;margin-top:8px} @media(min-width:560px){.courses{grid-template-columns:repeat(3,1fr)}}
+  .ccard{display:block;text-decoration:none;border:1px solid var(--line-2);border-radius:11px;padding:14px 12px;background:var(--panel-2);transition:.14s}
+  .ccard:hover{transform:translateY(-2px)}
+  .ccard .cc-k{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;margin-bottom:4px}
+  .ccard .cc-n{font-size:15px;color:var(--text);font-weight:700} .ccard .cc-d{font-size:12px;color:var(--muted);margin-top:2px}
+  .ccard.ctrl{border-color:rgba(52,215,197,.4)} .ccard.ctrl .cc-k{color:var(--teal)}
+  .ccard.code{border-color:rgba(124,131,253,.45)} .ccard.code .cc-k{color:#8b8bfd}
+  .ccard.build{border-color:rgba(255,138,76,.5)} .ccard.build .cc-k{color:var(--indigo)}
+  .home{display:inline-block;margin-top:18px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);text-decoration:none;border:1px solid rgba(255,176,32,.4);border-radius:9px;padding:11px 18px;transition:.14s}
+  .home:hover{background:rgba(255,176,32,.1)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:108px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)} .coursenav a.next-link{color:var(--amber);border-color:rgba(255,176,32,.4)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="build.html"><span class="dot"></span><span class="name">Fabricate</span></a>
+    <div class="top-meta">Part 8 · 05 / 05 · Finale</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 8 · 05</b> Build Season · Course Finale</div>
+    <div class="eyebrow">Competition-Ready</div>
+    <h1>Cleared to<br><span class="accent">compete</span>.</h1>
+    <p class="dek">One gate stands between your robot and the field: inspection. An inspector checks that it's legal and safe, the right weight and size, legal bumpers, properly fused wiring, no sharp hazards. Pass, and you play. This is the last lesson of Fabricate, and the last of the whole Academy.</p>
+  </div>
+
+  <section>
+    <p class="lead">Pass the inspection.</p>
+    <p>Inspection is a fixed list of legal and safety requirements, and almost everything you learned in this course shows up here. Click each station to inspect it, and clear the robot to compete.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Robot inspection</span><span class="demo-tag" id="tag">0 / 6 passed</span></div>
+      <div class="gates" id="gates"></div>
+      <div class="result" id="result">Inspect each station to clear the robot.</div>
+    </div>
+    <p class="caption">Every station traces back to a lesson: weight and size from the frame, legal bumpers, fused wiring, clean edges and safety. Build it right all season and inspection is a formality, not a scramble.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In the shop</div>
+    <h2>What inspection checks</h2>
+    <p>Inspectors are on your side, they want every robot safe and legal so the matches are fair:</p>
+    <div class="rules">
+      <div class="rule"><div class="ri">⚖️</div><div><b>Weight &amp; size</b><span>Under the limit and inside the starting volume.</span></div></div>
+      <div class="rule"><div class="ri">🟥</div><div><b>Bumpers</b><span>Legal height, construction, and both alliance colors.</span></div></div>
+      <div class="rule"><div class="ri">⚡</div><div><b>Electrical</b><span>Properly fused branches, secure connections, a working off switch.</span></div></div>
+      <div class="rule"><div class="ri">✋</div><div><b>Safety</b><span>No sharp edges, no exposed hazards, nothing that can hurt anyone.</span></div></div>
+    </div>
+    <div class="note indigo">
+      <div class="nh">You now know how to build a robot</div>
+      <p>Look back at what you can do. You can read a game and choose a design, turn it into CAD, prototype it cheaply, and machine it safely. You understand structure, power transmission, mechanisms, and drivetrains; you can wire the electrical and plumb the pneumatics; and you can plan a season, assemble the robot, and keep it running through a competition. That's the entire craft of <strong>building</strong> an FRC robot, from raw stock to the inspection table.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="finale">
+      <div class="crown">🏆</div>
+      <h3>You've finished the <span class="accent">FRC Academy</span></h3>
+      <p>Three courses, one complete robotics education. You can now control a mechanism, write the code that commands it, and build the machine it all runs on, the full path from an idea to a robot on the field.</p>
+      <div class="courses">
+        <a class="ccard ctrl" href="closing-the-loop.html"><div class="cc-k">Control</div><div class="cc-n">Closing the Loop</div><div class="cc-d">Make it move precisely</div></a>
+        <a class="ccard code" href="code.html"><div class="cc-k">Code</div><div class="cc-n">Deploy</div><div class="cc-d">Program the robot</div></a>
+        <a class="ccard build" href="build.html"><div class="cc-k">Build</div><div class="cc-n">Fabricate</div><div class="cc-d">Build the machine</div></a>
+      </div>
+      <a class="home" href="index.html">↩ Back to the Academy</a>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">What does inspection check?</div>
+        <div class="opts">
+          <button class="opt">How fast the robot is</button>
+          <button class="opt">That the robot is legal and safe - weight, size, bumpers, fusing, no hazards</button>
+          <button class="opt">The team's logo</button>
+        </div>
+        <div class="explain">Inspection verifies the robot meets the legal and safety rules so every match is fair and no one gets hurt. Pass it and you can compete.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">How do you make inspection easy?</div>
+        <div class="opts">
+          <button class="opt">Rush everything the night before</button>
+          <button class="opt">Skip the rules and hope</button>
+          <button class="opt">Build to the rules all season - then inspection is just a formality</button>
+        </div>
+        <div class="explain">If you respect the weight, bumper, and electrical rules throughout the build, inspection confirms what you already know instead of becoming a panic.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">Put the three FRC Academy courses together, what can you now do?</div>
+        <div class="opts">
+          <button class="opt">Build a robot, program it, and control it precisely - the whole craft</button>
+          <button class="opt">Only drive it</button>
+          <button class="opt">Nothing yet</button>
+        </div>
+        <div class="explain">Fabricate builds the machine, Deploy programs it, and Closing the Loop makes it move precisely. Together they're a complete path from idea to a robot on the field.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 8 · 05 · Recap · Part 8 ★ · Fabricate ★ · Academy ★</h3>
+      <div class="glossary">
+        <div class="gl"><b>Inspection</b><span>The legal &amp; safety gate.</span></div>
+        <div class="gl"><b>Weight &amp; size</b><span>Under the limit, in the volume.</span></div>
+        <div class="gl"><b>Bumpers</b><span>Legal and both colors.</span></div>
+        <div class="gl"><b>Electrical</b><span>Fused, secure, off switch.</span></div>
+        <div class="gl"><b>Safety</b><span>No sharp edges or hazards.</span></div>
+        <div class="gl"><b>The full craft</b><span>Build, code, and control.</span></div>
+      </div>
+      <a class="next-link" href="index.html" style="display:block;margin-top:18px;border:1px solid rgba(255,176,32,.4);border-radius:12px;padding:18px 20px;text-decoration:none;background:radial-gradient(600px 200px at 0% 0%,rgba(255,176,32,0.14),transparent 70%)">
+        <div style="font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--amber)">Academy complete</div>
+        <h3 style="margin:6px 0 8px;font-size:20px;color:var(--text)">Return to the FRC Academy →</h3>
+        <p style="margin:0;color:var(--muted);font-size:15.5px">Revisit any course, or start building for real. You have the whole toolkit now.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="build-lesson-39.html">← Part 8 · 04 · Maintenance &amp; Spares</a>
+    <a class="map" href="build.html">Course map</a>
+    <a class="next-link" href="index.html">The Academy ★ →</a>
+  </nav>
+
+</div>
+
+<footer>Fabricate · Building an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var GATES=[
+    {i:'⚖️', t:'Weight under the limit', s:'and inside the starting volume'},
+    {i:'🟥', t:'Bumpers legal', s:'height, build, both colors'},
+    {i:'⚡', t:'Wiring fused &amp; secure', s:'every branch protected'},
+    {i:'🔌', t:'Main breaker &amp; off switch', s:'reachable and working'},
+    {i:'✋', t:'No sharp edges or hazards', s:'safe to handle and play'},
+    {i:'📡', t:'Powers on &amp; connects', s:'talks to the driver station'}
+  ];
+  var box=document.getElementById('gates'), n=0;
+  var state=GATES.map(function(){return false;});
+  GATES.forEach(function(g,i){
+    var d=document.createElement('div'); d.className='gate'; d.id='g'+i;
+    d.innerHTML='<span class="gi">'+g.i+'</span><div class="gt">'+g.t+'<small>'+g.s+'</small></div><span class="stamp">PASS</span>';
+    d.addEventListener('click',function(){ if(state[i])return; state[i]=true; d.classList.add('pass'); update(); });
+    box.appendChild(d);
+  });
+  function update(){
+    n=state.filter(Boolean).length;
+    document.getElementById('tag').textContent=n+' / '+GATES.length+' passed';
+    var r=document.getElementById('result');
+    if(n===GATES.length){ r.className='result cleared'; r.innerHTML='<div class="big">★ CLEARED TO COMPETE ★</div>Inspection passed. Your robot is legal, safe, and ready for the field.'; }
+    else { r.className='result'; r.textContent=(GATES.length-n)+' station(s) left to inspect.'; }
+  }
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="build:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

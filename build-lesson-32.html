@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fabricate · Part 7.1 - The Design Process</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .matrix{padding:16px}
+  .res{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+  .bar{display:grid;grid-template-columns:130px 1fr 54px;align-items:center;gap:10px}
+  .bar .nm{font-size:13.5px;color:var(--muted);font-weight:600}
+  .bar .track{height:24px;background:#0B1322;border:1px solid var(--line-2);border-radius:6px;overflow:hidden}
+  .bar .fill{height:100%;background:linear-gradient(90deg,#3a4763,#5E6F8E);transition:width .25s}
+  .bar.win .nm{color:var(--indigo)} .bar.win .fill{background:linear-gradient(90deg,#ffb37e,var(--indigo))}
+  .bar .tot{font-family:var(--mono);font-size:14px;color:var(--text);text-align:right}
+  .bar.win .tot{color:var(--indigo);font-weight:700}
+  .weights{border-top:1px solid var(--line);padding:14px 16px;display:grid;gap:12px}
+  .wrow{display:grid;grid-template-columns:128px 1fr 30px;align-items:center;gap:10px}
+  .wrow label{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+  .wrow .wv{font-family:var(--mono);font-size:13px;color:var(--indigo);text-align:right}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:var(--line-2);outline:none;width:100%}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--indigo);cursor:pointer;box-shadow:0 0 10px -1px var(--indigo)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
+  .winr{padding:11px 16px;border-top:1px solid var(--line);background:#0B1322;font-family:var(--mono);font-size:13px;color:var(--muted)} .winr b{color:var(--indigo)}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(255,138,76,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .rules{display:grid;gap:10px;margin:18px 0} @media(min-width:560px){.rules{grid-template-columns:1fr 1fr}}
+  .rule{display:flex;gap:11px;border:1px solid var(--line);border-radius:11px;padding:13px 14px;background:var(--panel)}
+  .rule .ri{font-size:20px;flex:0 0 auto}
+  .rule b{display:block;font-size:14.5px;color:var(--text);margin-bottom:2px}
+  .rule span{font-size:13.5px;color:var(--muted)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:108px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="build.html"><span class="dot"></span><span class="name">Fabricate</span></a>
+    <div class="top-meta">Part 7 · 01 / 04 · Design</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 7 · 01</b> Design &amp; CAD</div>
+    <div class="eyebrow">The Design Process</div>
+    <h1>Decide on<br><span class="accent">purpose</span>.</h1>
+    <p class="dek">The best robots aren't the cleverest, they're the ones whose team decided clearly what to build and why. Before any metal gets cut, good teams understand the game, list what matters, dream up options, and choose between them on purpose instead of by whoever argued loudest.</p>
+  </div>
+
+  <section>
+    <p class="lead">Score your options, don't just argue.</p>
+    <p>When three concepts are on the table, a <strong>decision matrix</strong> settles it fairly: rate each concept on the things that matter, weight those things by importance, and add it up. Slide the weights below to match what <em>you</em> think wins games, and watch which concept comes out ahead.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Concept decision matrix</span><span class="demo-tag">weighted scoring</span></div>
+      <div class="matrix">
+        <div class="res" id="res"></div>
+      </div>
+      <div class="weights" id="weights"></div>
+      <div class="winr" id="winr">Winner: <b id="winName">-</b></div>
+    </div>
+    <p class="caption">Crank up "reliability" and the sturdy concept wins; crank up "scoring" and the fancy one pulls ahead. There's no single right answer, the matrix just makes your priorities honest and the choice defensible to the whole team.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In the shop</div>
+    <h2>From game manual to a chosen direction</h2>
+    <p>The process is the same every season, and skipping a step is how teams end up rebuilding in week five:</p>
+    <div class="rules">
+      <div class="rule"><div class="ri">📖</div><div><b>Understand the game</b><span>Read the manual closely; know how points are scored and what's hard.</span></div></div>
+      <div class="rule"><div class="ri">📝</div><div><b>List requirements</b><span>What must the robot do? Reach this height, hold this piece, fit this size.</span></div></div>
+      <div class="rule"><div class="ri">💡</div><div><b>Brainstorm concepts</b><span>Many rough ideas, no judging yet; quantity first.</span></div></div>
+      <div class="rule"><div class="ri">⚖️</div><div><b>Evaluate &amp; choose</b><span>Score concepts against weighted criteria, then commit.</span></div></div>
+    </div>
+    <div class="note indigo">
+      <div class="nh">Reliability quietly wins championships</div>
+      <p>A simple robot that scores a little every single match almost always beats a brilliant one that breaks down half the time. That's why "reliability" and "buildability" belong in the matrix right next to "scoring", and why everything you learned about clean wiring and solid joints matters here too. Pick the concept your team can actually finish, debug, and drive well, not the one that looks best on a whiteboard.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="0">
+        <div class="qn">Question 1</div>
+        <div class="qt">What's the first step in designing a robot?</div>
+        <div class="opts">
+          <button class="opt">Understand the game and list what the robot must do</button>
+          <button class="opt">Start cutting metal</button>
+          <button class="opt">Buy the most expensive motor</button>
+        </div>
+        <div class="explain">You can't design for a game you don't understand. Read the manual, learn how points are scored, and write down the requirements before sketching anything.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">What does a decision matrix do?</div>
+        <div class="opts">
+          <button class="opt">Designs the robot for you</button>
+          <button class="opt">Picks the cheapest option</button>
+          <button class="opt">Scores each concept against weighted criteria so the choice is objective</button>
+        </div>
+        <div class="explain">It rates every concept on the things that matter, weighted by importance, and totals them. The choice becomes a defensible number instead of the loudest opinion.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 3</div>
+        <div class="qt">Why include reliability and buildability in the criteria?</div>
+        <div class="opts">
+          <button class="opt">They don't matter, only scoring does</button>
+          <button class="opt">A robot that works every match usually beats a fancy one that breaks</button>
+          <button class="opt">To make the matrix longer</button>
+        </div>
+        <div class="explain">Consistency wins. A robot you can actually finish and that scores every match outperforms a brilliant design that spends half its matches broken in the pit.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 7 · 01 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Understand</b><span>Read the game, know scoring.</span></div>
+        <div class="gl"><b>Requirements</b><span>What the robot must do.</span></div>
+        <div class="gl"><b>Brainstorm</b><span>Many concepts, no judging yet.</span></div>
+        <div class="gl"><b>Decision matrix</b><span>Weighted scores pick the winner.</span></div>
+        <div class="gl"><b>Reliability</b><span>Consistent beats clever.</span></div>
+        <div class="gl"><b>Commit</b><span>Choose, then build with focus.</span></div>
+      </div>
+      <a class="next" href="build-lesson-33.html">
+        <div class="n-eyebrow">Up next · Part 7 · 02</div>
+        <h3>CAD with Onshape</h3>
+        <p>Once you've chosen a direction, you draw it. Turn a flat sketch into a 3D part and see how CAD lets you build the whole robot on a screen first.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="build-lesson-31.html">← Part 6 · 05 · Pneumatics</a>
+    <a class="map" href="build.html">Course map</a>
+    <a href="build-lesson-33.html">Part 7 · 02 · CAD with Onshape →</a>
+  </nav>
+
+</div>
+
+<footer>Fabricate · Building an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var CRIT=[
+    {key:'Scoring', w:3},
+    {key:'Speed', w:3},
+    {key:'Reliability', w:3},
+    {key:'Buildability', w:3}
+  ];
+  var CONCEPTS=[
+    {nm:'Simple &amp; Sturdy', s:[3,2,5,5]},
+    {nm:'Fast &amp; Fancy', s:[5,5,2,2]},
+    {nm:'Balanced', s:[4,3,4,3]}
+  ];
+  var resEl=document.getElementById('res'), wEl=document.getElementById('weights');
+  CONCEPTS.forEach(function(c,i){
+    var row=document.createElement('div'); row.className='bar'; row.id='bar'+i;
+    row.innerHTML='<div class="nm">'+c.nm+'</div><div class="track"><div class="fill" id="fill'+i+'"></div></div><div class="tot" id="tot'+i+'">0</div>';
+    resEl.appendChild(row);
+  });
+  CRIT.forEach(function(cr,i){
+    var row=document.createElement('div'); row.className='wrow';
+    row.innerHTML='<label>'+cr.key+'</label><input type="range" min="0" max="5" value="'+cr.w+'" id="w'+i+'"><div class="wv" id="wv'+i+'">'+cr.w+'</div>';
+    wEl.appendChild(row);
+    row.querySelector('input').addEventListener('input',function(e){ CRIT[i].w=+e.target.value; document.getElementById('wv'+i).textContent=e.target.value; recompute(); });
+  });
+  function recompute(){
+    var totals=CONCEPTS.map(function(c){ var t=0; for(var j=0;j<CRIT.length;j++) t+=c.s[j]*CRIT[j].w; return t; });
+    var max=Math.max.apply(null, totals), best=totals.indexOf(max);
+    var maxPossible=5*CRIT.reduce(function(a,c){return a+c.w;},0)||1;
+    totals.forEach(function(t,i){
+      document.getElementById('fill'+i).style.width=(100*t/Math.max(maxPossible,1))+'%';
+      document.getElementById('tot'+i).textContent=t;
+      document.getElementById('bar'+i).classList.toggle('win', i===best && max>0);
+    });
+    document.getElementById('winName').innerHTML = max>0 ? CONCEPTS[best].nm : '-';
+  }
+  recompute();
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="build:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

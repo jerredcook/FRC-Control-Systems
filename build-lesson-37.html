@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fabricate · Part 8.2 - Manufacturing Methods</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .prompt{padding:18px 16px 8px;text-align:center}
+  .prompt .pn{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-bottom:6px}
+  .prompt .pt{font-size:18px;color:var(--text)} .prompt .pi{font-size:34px;margin-bottom:4px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 16px}
+  @media(min-width:560px){.grid{grid-template-columns:repeat(3,1fr)}}
+  .tool{border:1px solid var(--line-2);background:var(--panel-2);border-radius:10px;padding:12px 8px;text-align:center;cursor:pointer;transition:.12s}
+  .tool:hover{border-color:var(--muted)}
+  .tool .ti{font-size:24px;line-height:1} .tool .tn{font-size:12.5px;color:var(--text);margin-top:5px;font-family:var(--mono)}
+  .tool.correct{border-color:var(--green);background:rgba(67,214,126,.12)}
+  .tool.wrong{border-color:var(--red);background:rgba(255,107,107,.1)}
+  .tool.locked{cursor:default}
+  .fb{padding:4px 16px 12px;min-height:40px}
+  .fb .line{border-left:2px solid var(--indigo);padding:6px 0 6px 12px;font-size:14.5px;color:var(--muted)} .fb .line b{color:var(--text)}
+  .fb .line.ok{border-color:var(--green)} .fb .line.ok b{color:var(--green)}
+  .fb .line.bad{border-color:var(--red)} .fb .line.bad b{color:var(--red)}
+  .controls{padding:12px 16px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn.primary{background:linear-gradient(180deg,#ffb37e,var(--indigo));color:#2a1503;font-weight:700;border:none}
+  .btn:hover{filter:brightness(1.08)}
+  .score{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--indigo)}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(255,138,76,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .rules{display:grid;gap:10px;margin:18px 0} @media(min-width:560px){.rules{grid-template-columns:1fr 1fr}}
+  .rule{display:flex;gap:11px;border:1px solid var(--line);border-radius:11px;padding:13px 14px;background:var(--panel)}
+  .rule .ri{font-size:20px;flex:0 0 auto}
+  .rule b{display:block;font-size:14.5px;color:var(--text);margin-bottom:2px}
+  .rule span{font-size:13.5px;color:var(--muted)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:108px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="build.html"><span class="dot"></span><span class="name">Fabricate</span></a>
+    <div class="top-meta">Part 8 · 02 / 05 · Build Season</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 8 · 02</b> Build Season</div>
+    <div class="eyebrow">Manufacturing Methods</div>
+    <h1>The right<br><span class="accent">machine</span>.</h1>
+    <p class="dek">A workshop is a set of specialized tools, each good at one kind of cut. Knowing which machine makes which part, and which one is the safe, fast choice, is what turns a CAD model into real aluminum. Pick the right tool and the part takes minutes; pick wrong and you fight it for an hour.</p>
+  </div>
+
+  <section>
+    <p class="lead">What makes this part?</p>
+    <p>Each job below has a best tool. Read the part, then pick the machine that's built for it, the goal is matching the cut to the tool that does it cleanly and safely.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Match the part to the machine</span><span class="demo-tag" id="tag">job 1</span></div>
+      <div class="prompt"><div class="pn" id="pn">Job 1 of 5</div><div class="pi" id="pi"></div><div class="pt" id="pt"></div></div>
+      <div class="grid" id="grid"></div>
+      <div class="fb"><div class="line" id="fb">Pick the machine for the job.</div></div>
+      <div class="controls">
+        <button class="btn primary" id="next">Next job ▸</button>
+        <span class="score" id="score">0 / 0</span>
+      </div>
+    </div>
+    <p class="caption">Most FRC parts come off just a few machines, and the bandsaw, drill press, and a chop saw will make the vast majority of a robot. The fancy tools are for the few parts that truly need them.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In the shop</div>
+    <h2>The core machines</h2>
+    <p>You don't need a huge shop, just these, used well and safely:</p>
+    <div class="rules">
+      <div class="rule"><div class="ri">🪚</div><div><b>Bandsaw / chop saw</b><span>Cutting tube and plate to length; the workhorse of the shop.</span></div></div>
+      <div class="rule"><div class="ri">🛠️</div><div><b>Drill press</b><span>Clean, square holes, far better than a hand drill.</span></div></div>
+      <div class="rule"><div class="ri">⚙️</div><div><b>Mill</b><span>Precise pockets, slots, and flat faces in metal.</span></div></div>
+      <div class="rule"><div class="ri">🔄</div><div><b>Lathe</b><span>Round parts: shafts, spacers, anything turned about an axis.</span></div></div>
+    </div>
+    <div class="note indigo">
+      <div class="nh">Safety is the first manufacturing skill</div>
+      <p>Every one of these machines can hurt you in an instant: safety glasses always, no gloves or loose sleeves near spinning tools, hair tied back, and never walk away from a running machine. A part can be remade; a finger can't. The best shops are the ones where safety is automatic, and that discipline, like clean wiring, is a habit you build from day one. 3D printers and CNC routers extend what you can make, but the same rule holds: learn the tool, respect it, and ask before using one you haven't been trained on.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">What's the workhorse for cutting tube and plate to length?</div>
+        <div class="opts">
+          <button class="opt">The lathe</button>
+          <button class="opt">The bandsaw or chop saw</button>
+          <button class="opt">The 3D printer</button>
+        </div>
+        <div class="explain">Saws cut stock to length, and they make most of the cuts on a robot. The lathe and mill are for special shapes.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">What's the lathe best at?</div>
+        <div class="opts">
+          <button class="opt">Flat plates</button>
+          <button class="opt">Drilling grids of holes</button>
+          <button class="opt">Round parts like shafts and spacers</button>
+        </div>
+        <div class="explain">A lathe spins the part against a cutter, perfect for anything round and turned about an axis.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">What's the first manufacturing skill to learn?</div>
+        <div class="opts">
+          <button class="opt">Safety - glasses on, no loose clothing, respect every machine</button>
+          <button class="opt">Speed</button>
+          <button class="opt">Making the part look pretty</button>
+        </div>
+        <div class="explain">Shop safety comes before any cut. Parts are replaceable; you are not. Safe habits are the foundation of every good shop.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 8 · 02 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Bandsaw</b><span>Cut stock to length.</span></div>
+        <div class="gl"><b>Drill press</b><span>Clean, square holes.</span></div>
+        <div class="gl"><b>Mill</b><span>Pockets, slots, flat faces.</span></div>
+        <div class="gl"><b>Lathe</b><span>Round, turned parts.</span></div>
+        <div class="gl"><b>3D printer</b><span>Complex plastic shapes.</span></div>
+        <div class="gl"><b>Safety first</b><span>The skill before all others.</span></div>
+      </div>
+      <a class="next" href="build-lesson-38.html">
+        <div class="n-eyebrow">Up next · Part 8 · 03</div>
+        <h3>Assembling the Robot</h3>
+        <p>Parts and subsystems become one machine, but only in the right order. Stack the build so you can still reach everything you need to.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="build-lesson-36.html">← Part 8 · 01 · Planning the Season</a>
+    <a class="map" href="build.html">Course map</a>
+    <a href="build-lesson-38.html">Part 8 · 03 · Assembling the Robot →</a>
+  </nav>
+
+</div>
+
+<footer>Fabricate · Building an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var TOOLS=[
+    {k:'saw', i:'🪚', n:'Bandsaw'},
+    {k:'drill', i:'🛠️', n:'Drill press'},
+    {k:'mill', i:'⚙️', n:'Mill'},
+    {k:'lathe', i:'🔄', n:'Lathe'},
+    {k:'printer', i:'🖨️', n:'3D printer'},
+    {k:'chop', i:'✂️', n:'Chop saw'}
+  ];
+  var JOBS=[
+    {i:'📏', t:'Cut a 24-inch length of box tube.', k:'saw', ok:'The bandsaw cuts stock to length cleanly, the most common shop job.', bad:'That cut belongs on a saw, not a shaping tool.'},
+    {i:'🕳️', t:'Drill four square, accurate bolt holes in a plate.', k:'drill', ok:'The drill press makes clean, perpendicular holes a hand drill can not match.', bad:'For accurate holes you want the drill press.'},
+    {i:'🔩', t:'Turn a custom aluminum shaft, round and to diameter.', k:'lathe', ok:'The lathe spins the stock against a cutter, made for round parts.', bad:'Round, turned parts are the lathe\'s specialty.'},
+    {i:'🟦', t:'Cut a precise pocket and flat face into a block.', k:'mill', ok:'The mill removes material precisely for pockets, slots, and flats.', bad:'Precise pockets and flats are a mill job.'},
+    {i:'🧩', t:'Make a complex plastic bracket with an odd shape.', k:'printer', ok:'A 3D printer builds complex plastic shapes a saw or mill can not.', bad:'Complex one-off plastic shapes suit a 3D printer.'}
+  ];
+  var idx=0, score=0, total=0, scored=false;
+  var grid=document.getElementById('grid');
+  TOOLS.forEach(function(t,i){ var d=document.createElement('div'); d.className='tool'; d.setAttribute('data-k',t.k); d.innerHTML='<div class="ti">'+t.i+'</div><div class="tn">'+t.n+'</div>'; grid.appendChild(d); });
+  function show(){
+    scored=false; var j=JOBS[idx];
+    document.getElementById('pn').textContent='Job '+(idx+1)+' of '+JOBS.length;
+    document.getElementById('tag').textContent='job '+(idx+1);
+    document.getElementById('pi').textContent=j.i; document.getElementById('pt').textContent=j.t;
+    document.querySelectorAll('#grid .tool').forEach(function(c){ c.classList.remove('correct','wrong','locked'); });
+    var fb=document.getElementById('fb'); fb.className='line'; fb.textContent='Pick the machine for the job.';
+    document.getElementById('next').textContent= idx<JOBS.length-1?'Next job ▸':'Restart';
+  }
+  document.querySelectorAll('#grid .tool').forEach(function(card){
+    card.addEventListener('click',function(){
+      if(scored)return; scored=true; var j=JOBS[idx], pickK=card.getAttribute('data-k'), ok=pickK===j.k;
+      document.querySelectorAll('#grid .tool').forEach(function(c){ c.classList.add('locked'); });
+      document.querySelector('#grid .tool[data-k="'+j.k+'"]').classList.add('correct');
+      if(!ok) card.classList.add('wrong');
+      var fb=document.getElementById('fb'); fb.className='line '+(ok?'ok':'bad'); fb.innerHTML='<b>'+(ok?'Right.':'Not quite.')+'</b> '+(ok?j.ok:j.bad);
+      total++; if(ok)score++; document.getElementById('score').textContent=score+' / '+total;
+    });
+  });
+  document.getElementById('next').addEventListener('click',function(){ if(idx<JOBS.length-1){ idx++; show(); } else { idx=0; score=0; total=0; document.getElementById('score').textContent='0 / 0'; show(); } });
+  show();
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="build:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>
