@@ -150,10 +150,10 @@
     {code:"2", title:"Materials & Stock", sub:"What robots are made of",
      blurb:"An FRC robot is mostly aluminum extrusion, plate, and polycarbonate, joined by brackets. Know your stock and when to buy a part versus make one.",
      lessons:[
-       {n:1, title:"Aluminum Extrusion", desc:"The structural backbone: tube, channel, and the box pattern.", file:null},
-       {n:2, title:"Plate, Sheet & Polycarbonate", desc:"Flat stock for plates, panels, and clear guards.", file:null},
-       {n:3, title:"COTS vs Custom", desc:"The kit of parts, vendors, and when to buy not build.", file:null},
-       {n:4, title:"Brackets, Gussets & Joining", desc:"How pieces actually bolt together into a frame.", file:null}
+       {n:1, title:"Aluminum Extrusion", desc:"The structural backbone: tube, channel, and the box pattern.", file:"build-lesson-6.html"},
+       {n:2, title:"Plate, Sheet & Polycarbonate", desc:"Flat stock for plates, panels, and clear guards.", file:"build-lesson-7.html"},
+       {n:3, title:"COTS vs Custom", desc:"The kit of parts, vendors, and when to buy not build.", file:"build-lesson-8.html"},
+       {n:4, title:"Brackets, Gussets & Joining", desc:"How pieces actually bolt together into a frame.", file:"build-lesson-9.html"}
      ]},
     {code:"3", title:"Power Transmission", sub:"Moving power around",
      blurb:"A motor spins fast and weak. Gears, chain, and belts trade that speed for the torque a mechanism needs, carried on shafts and bearings.",
@@ -212,7 +212,7 @@
      ]}
   ];
 
-  var NEXT_ID="2-1";
+  var NEXT_ID="3-1";
   var STORE_KEY="build:done";
   function loadDone(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY))||{}; }catch(e){ return {}; } }
   function saveDone(d){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(d)); }catch(e){} }

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fabricate · Part 2.3 - COTS vs Custom</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .part{padding:20px 16px 8px;text-align:center}
+  .part .pno{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-bottom:10px}
+  .part .pn{font-size:19px;color:var(--text);font-weight:650;max-width:42ch;margin:0 auto}
+  .part .px{font-size:14px;color:var(--muted);margin-top:6px}
+  .choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px 16px}
+  .choice{border:1px solid var(--line-2);background:var(--panel-2);border-radius:11px;padding:16px 12px;cursor:pointer;text-align:center;transition:.12s}
+  .choice:hover{border-color:var(--indigo)} .choice .ci{font-size:22px} .choice .cl{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:6px} .choice .cs{font-size:11.5px;color:var(--faint);margin-top:2px}
+  .choice.correct{border-color:var(--green);background:rgba(67,214,126,.12)} .choice.correct .cl{color:var(--green)}
+  .choice.wrong{border-color:var(--red);background:rgba(255,107,107,.1)} .choice.wrong .cl{color:var(--red)}
+  .choice.locked{cursor:default}
+  .fb{padding:0 16px 14px;min-height:50px}
+  .fb .line{border-left:2px solid var(--indigo);padding:6px 0 6px 12px;font-size:14.5px;color:var(--muted);display:none}
+  .fb .line.show{display:block} .fb .line b{color:var(--text)}
+  .controls{padding:12px 16px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)} .btn:disabled{opacity:.4;cursor:not-allowed}
+  .btn.primary{background:linear-gradient(180deg,#ffb37e,var(--indigo));color:#2a1503;font-weight:700;border:none}
+  .score{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--indigo)}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(255,138,76,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .rules{display:grid;gap:10px;margin:18px 0} @media(min-width:560px){.rules{grid-template-columns:1fr 1fr}}
+  .rule{display:flex;gap:11px;border:1px solid var(--line);border-radius:11px;padding:13px 14px;background:var(--panel)}
+  .rule .ri{font-size:20px;flex:0 0 auto}
+  .rule b{display:block;font-size:14.5px;color:var(--text);margin-bottom:2px}
+  .rule span{font-size:13.5px;color:var(--muted)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:108px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="build.html"><span class="dot"></span><span class="name">Fabricate</span></a>
+    <div class="top-meta">Part 2 · 03 / 04 · Materials</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 2 · 03</b> Materials &amp; Stock</div>
+    <div class="eyebrow">COTS vs Custom</div>
+    <h1>Buy it, or<br><span class="accent">build</span> it?</h1>
+    <p class="dek">You don't fabricate everything from scratch. Vendors sell proven parts off the shelf, and the kit of parts gives you a head start. The skill is knowing which parts to buy and which to make yourself.</p>
+  </div>
+
+  <section>
+    <p class="lead">Buy the hard stuff. Build the unique stuff.</p>
+    <p>A part that's standard, high-stress, or precision is usually better bought, someone has already perfected it. A part that's specific to your robot has to be custom. Decide for each part below: <strong>COTS</strong> (commercial off-the-shelf) or custom-built?</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Buy or build?</span><span class="demo-tag" id="tag">decide</span></div>
+      <div class="part"><div class="pno" id="pno">Part 1 of 6</div><div class="pn" id="pn"></div><div class="px" id="px"></div></div>
+      <div class="choices">
+        <div class="choice" data-c="cots"><div class="ci">🛒</div><div class="cl">Buy (COTS)</div><div class="cs">off the shelf</div></div>
+        <div class="choice" data-c="custom"><div class="ci">🔨</div><div class="cl">Build (custom)</div><div class="cs">make it yourself</div></div>
+      </div>
+      <div class="fb"><div class="line" id="fb"></div></div>
+      <div class="controls">
+        <button class="btn primary" id="next" disabled>Next ▸</button>
+        <span class="score" id="score">0 / 0</span>
+      </div>
+    </div>
+    <p class="caption">There's a clear answer for each, but it's the reasoning that matters. Buy the gearbox you can't afford to have fail; build the bracket no one else will ever need.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In the shop</div>
+    <h2>The kit, the vendors, the tradeoff</h2>
+    <p>Every team starts with the <strong>Kit of Parts</strong> each season and fills in the rest from a handful of vendors. The buy-versus-build call comes down to three things:</p>
+    <div class="rules">
+      <div class="rule"><div class="ri">📦</div><div><b>Kit of Parts</b><span>FIRST provides a starting set: a drivetrain, motors, electronics, and more.</span></div></div>
+      <div class="rule"><div class="ri">🏷️</div><div><b>The vendors</b><span>AndyMark, REV, WCP, VEXpro, TTB, SDS, and others sell tested FRC parts.</span></div></div>
+      <div class="rule"><div class="ri">⏱️</div><div><b>Time</b><span>COTS arrives ready; custom takes design and machine hours you may not have.</span></div></div>
+      <div class="rule"><div class="ri">🎯</div><div><b>Customization</b><span>Only custom gives you the exact geometry your design needs.</span></div></div>
+    </div>
+    <div class="note indigo">
+      <div class="nh">The rookie trap: building everything</div>
+      <p>New teams often try to machine every part to save money, and run out of time before the robot works. The opposite trap is buying so much that nothing fits together. The healthy middle: <strong>buy the proven, high-stress, precision parts</strong> (gearboxes, swerve modules, wheels, bearings) so they just work, and spend your shop time on the <strong>parts unique to your design</strong>. Reliability you can buy is reliability you don't have to debug.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="0">
+        <div class="qn">Question 1</div>
+        <div class="qt">What does COTS stand for?</div>
+        <div class="opts">
+          <button class="opt">Commercial off-the-shelf - a ready-made part you buy</button>
+          <button class="opt">Custom on the spot</button>
+          <button class="opt">Carbon, oxygen, titanium, steel</button>
+        </div>
+        <div class="explain">COTS means commercial off-the-shelf: a part a vendor already makes and sells. You buy it ready to use instead of fabricating it yourself.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 2</div>
+        <div class="qt">Which kind of part is usually best to buy rather than build?</div>
+        <div class="opts">
+          <button class="opt">A bracket unique to your robot's layout</button>
+          <button class="opt">A high-stress, precision part like a gearbox or swerve module</button>
+          <button class="opt">Anything you possibly can</button>
+        </div>
+        <div class="explain">Gearboxes, swerve modules, wheels, and bearings are precision, high-stress parts that vendors have already perfected. Buying them means reliability you don't have to engineer yourself.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 3</div>
+        <div class="qt">When is custom fabrication the right call?</div>
+        <div class="opts">
+          <button class="opt">Never; always buy</button>
+          <button class="opt">Always; building is cheaper</button>
+          <button class="opt">When the part's geometry is unique to your robot or this year's game</button>
+        </div>
+        <div class="explain">If no vendor sells what you need, because it's specific to your design or the game, you build it. Custom is for the parts that make your robot yours.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 2 · 03 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>COTS</b><span>Commercial off-the-shelf part.</span></div>
+        <div class="gl"><b>Custom</b><span>Fabricated for your design.</span></div>
+        <div class="gl"><b>Kit of Parts</b><span>FIRST's starting set each year.</span></div>
+        <div class="gl"><b>Vendors</b><span>AndyMark, REV, WCP, VEXpro, SDS.</span></div>
+        <div class="gl"><b>Buy the hard stuff</b><span>Precision, high-stress parts.</span></div>
+        <div class="gl"><b>Build the unique</b><span>Geometry only you need.</span></div>
+      </div>
+      <a class="next" href="build-lesson-9.html">
+        <div class="n-eyebrow">Up next · Part 2 · 04 · Finale</div>
+        <h3>Brackets, Gussets &amp; Joining</h3>
+        <p>Tubes and plates don't help until they're joined into a frame. Gussets, bolt patterns, and why a strong joint needs more than one bolt.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="build-lesson-7.html">← Part 2 · 02 · Plate &amp; Polycarbonate</a>
+    <a class="map" href="build.html">Course map</a>
+    <a href="build-lesson-9.html">Part 2 · 04 · Brackets &amp; Joining →</a>
+  </nav>
+
+</div>
+
+<footer>Fabricate · Building an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var PARTS=[
+    {pn:'A drivetrain gearbox', px:'high torque, tight tolerances, runs all match', ans:'cots', why:'A gearbox is a precision, high-stress part. <b>Buy</b> a proven one (like a MAXPlanetary) rather than risk a custom one failing mid-match.'},
+    {pn:'A bracket to mount your intake at its own odd angle', px:'one specific shape, light load', ans:'custom', why:'No vendor sells your exact bracket. <b>Build</b> it from plate or a bent tab, made to fit your robot.'},
+    {pn:'Drive wheels and tread', px:'standard sizes, need reliable grip', ans:'cots', why:'Wheels are cheap, standardized, and tested for traction. <b>Buy</b> them; a good wheel is hard to make well.'},
+    {pn:'A swerve module', px:'four motors of complexity in one unit', ans:'cots', why:'Swerve modules (SDS, WCP, REV) are extremely complex and precise. Almost every team <b>buys</b> them.'},
+    {pn:'An elevator carriage shaped to this year\'s game piece', px:'unique to the game and your design', ans:'custom', why:'It\'s specific to your robot and this game. <b>Build</b> it from plate and tube so it fits exactly.'},
+    {pn:'The drive motors', px:'only a handful are legal', ans:'cots', why:'You must use a legal COTS motor (Kraken, NEO, Falcon). There is no building your own.'}
+  ];
+  var idx=0, answered=false, score=0, total=0;
+  var choices=document.querySelectorAll('.choice');
+  function show(){
+    answered=false;
+    document.getElementById('pno').textContent='Part '+(idx+1)+' of '+PARTS.length;
+    document.getElementById('pn').textContent=PARTS[idx].pn;
+    document.getElementById('px').textContent=PARTS[idx].px;
+    choices.forEach(function(c){ c.className='choice'; });
+    var fb=document.getElementById('fb'); fb.className='line'; fb.innerHTML='';
+    document.getElementById('next').disabled=true;
+    document.getElementById('next').textContent= idx<PARTS.length-1?'Next ▸':'Restart';
+  }
+  choices.forEach(function(c){ c.addEventListener('click',function(){ if(answered)return; answered=true; total++;
+    var P=PARTS[idx], pick=c.getAttribute('data-c'), ok=(pick===P.ans);
+    if(ok){ c.classList.add('correct'); score++; }
+    else { c.classList.add('wrong'); choices.forEach(function(x){ if(x.getAttribute('data-c')===P.ans) x.classList.add('correct'); }); }
+    choices.forEach(function(x){ x.classList.add('locked'); });
+    var fb=document.getElementById('fb'); fb.className='line show'; fb.innerHTML=(ok?'<b>Good call.</b> ':'<b>Reconsider.</b> ')+P.why;
+    document.getElementById('next').disabled=false;
+    document.getElementById('score').textContent=score+' / '+total;
+  }); });
+  document.getElementById('next').addEventListener('click',function(){
+    if(idx<PARTS.length-1){ idx++; show(); } else { idx=0; score=0; total=0; document.getElementById('score').textContent='0 / 0'; show(); }
+  });
+  show();
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="build:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

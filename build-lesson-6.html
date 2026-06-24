@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fabricate · Part 2.1 - Aluminum Extrusion</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  canvas.stock{display:block;width:100%;height:240px}
+  .readouts{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  @media(min-width:560px){.readouts{grid-template-columns:repeat(4,1fr)}}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:17px;font-weight:600;margin-top:3px;color:var(--muted)}
+  .ro .v.indigo{color:var(--indigo)} .ro .v.teal{color:var(--teal)} .ro .v.amber{color:var(--amber)}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+  .seg{display:flex;border:1px solid var(--line-2);border-radius:9px;overflow:hidden}
+  .seg button{border:none;background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;padding:9px 11px;cursor:pointer;transition:.12s;border-right:1px solid var(--line-2)}
+  .seg button:last-child{border-right:none}
+  .seg button:hover{color:var(--text)} .seg button.active{background:var(--indigo);color:#2a1503;font-weight:700}
+  .slider-group{flex:1 1 220px;display:flex;flex-direction:column;gap:6px;min-width:190px}
+  .slider-group label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+  .slider-group label .val{color:var(--indigo)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:var(--line-2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--indigo);cursor:pointer;box-shadow:0 0 10px -1px var(--indigo)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(255,138,76,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .rules{display:grid;gap:10px;margin:18px 0} @media(min-width:560px){.rules{grid-template-columns:1fr 1fr}}
+  .rule{display:flex;gap:11px;border:1px solid var(--line);border-radius:11px;padding:13px 14px;background:var(--panel)}
+  .rule .ri{font-size:20px;flex:0 0 auto}
+  .rule b{display:block;font-size:14.5px;color:var(--text);margin-bottom:2px}
+  .rule span{font-size:13.5px;color:var(--muted)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:108px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="build.html"><span class="dot"></span><span class="name">Fabricate</span></a>
+    <div class="top-meta">Part 2 · 01 / 04 · Materials</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 2 · 01</b> Materials &amp; Stock</div>
+    <div class="eyebrow">Aluminum Extrusion</div>
+    <h1>The robot's<br><span class="accent">skeleton</span>.</h1>
+    <p class="dek">Almost every FRC robot is built from aluminum box tube, light, strong, and easy to cut and drill. Pick the right profile and you get a stiff, lightweight frame. Pick wrong and it's heavy or it flexes.</p>
+  </div>
+
+  <section>
+    <p class="lead">Box tube, in a few standard sizes.</p>
+    <p>The structural backbone of a robot is hollow aluminum <strong>tube</strong>, usually with a regular hole pattern down each face so parts can bolt on anywhere. Different profiles trade weight against stiffness. Compare them below, and see how a profile's height drives its stiffness.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Stock profiles</span><span class="demo-tag" id="profTag">1x1 tube</span></div>
+      <canvas class="stock" id="cv"></canvas>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Profile</div><div class="v indigo" id="roProf">1x1 tube</div></div>
+        <div class="ro"><div class="k2">Wall</div><div class="v" id="roWall">0.0625"</div></div>
+        <div class="ro"><div class="k2">Weight</div><div class="v amber" id="roWt">0.6 lb</div></div>
+        <div class="ro"><div class="k2">Bending stiffness</div><div class="v teal" id="roStiff">low</div></div>
+      </div>
+      <div class="controls">
+        <div class="seg" id="profSeg">
+          <button data-p="t11" class="active">1x1 tube</button>
+          <button data-p="t12">1x2 tube</button>
+          <button data-p="t21">2x1 tube</button>
+          <button data-p="cc">C-channel</button>
+        </div>
+        <div class="slider-group"><label>Length <span class="val" id="lenv">2.0 ft</span></label><input type="range" id="len" min="5" max="60" value="20" step="1"></div>
+      </div>
+    </div>
+    <p class="caption">Left is the cross-section; right is the face with its hole pattern. A taller profile (1x2) is dramatically stiffer against bending than a 1x1, because stiffness grows with the cube of the height, for barely more weight.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In the shop</div>
+    <h2>Why aluminum, and the hole pattern</h2>
+    <p>Aluminum hits the sweet spot: about a third the weight of steel, plenty strong for a robot, and soft enough to cut and drill with shop tools. The standard hole pattern is the quiet superpower:</p>
+    <div class="rules">
+      <div class="rule"><div class="ri">🪶</div><div><b>Light and strong</b><span>6061 aluminum is roughly 1/3 the weight of steel at the strength a robot needs.</span></div></div>
+      <div class="rule"><div class="ri">🕳️</div><div><b>Pre-drilled pattern</b><span>A regular grid of holes means parts bolt on anywhere, no new drilling.</span></div></div>
+      <div class="rule"><div class="ri">📏</div><div><b>Taller = stiffer</b><span>Orient a profile so its tall side resists the bending load.</span></div></div>
+      <div class="rule"><div class="ri">🔲</div><div><b>Wall thickness</b><span>1/16" wall is the common default; thicker only where loads are high.</span></div></div>
+    </div>
+    <div class="note indigo">
+      <div class="nh">Orientation is half the battle</div>
+      <p>A 1x2 tube is much stiffer in one direction than the other. Lay it flat and it sags; stand it tall and it barely flexes, same tube, same weight. When you design a frame, point each tube's tall dimension into the load it carries. Getting orientation right often matters more than picking a heavier profile.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">Why is aluminum the default material for FRC structure?</div>
+        <div class="opts">
+          <button class="opt">It's the cheapest metal</button>
+          <button class="opt">It's light, strong enough, and easy to cut and drill</button>
+          <button class="opt">It never bends</button>
+        </div>
+        <div class="explain">Aluminum is about a third the weight of steel while still being strong enough for a robot, and it's soft enough to machine with shop tools. That balance is why nearly every frame is aluminum.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">What's the advantage of the standard hole pattern on the tube?</div>
+        <div class="opts">
+          <button class="opt">It makes the tube lighter</button>
+          <button class="opt">It looks nice</button>
+          <button class="opt">Parts and gussets bolt on anywhere without new drilling</button>
+        </div>
+        <div class="explain">The pre-drilled grid lets you attach brackets, gussets, and mechanisms at regular spots without measuring and drilling each time. It speeds up the build enormously.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">A 1x2 tube will carry a bending load. How should you orient it?</div>
+        <div class="opts">
+          <button class="opt">Tall side facing the load - stiffness grows with height</button>
+          <button class="opt">Flat side facing the load</button>
+          <button class="opt">Orientation doesn't matter</button>
+        </div>
+        <div class="explain">Bending stiffness rises with the cube of the height in the load direction. Standing the 2-inch dimension up makes the same tube far stiffer than laying it flat, for no extra weight.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 2 · 01 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Box tube</b><span>Hollow aluminum structural stock.</span></div>
+        <div class="gl"><b>6061 aluminum</b><span>Light, strong, machinable.</span></div>
+        <div class="gl"><b>Hole pattern</b><span>Bolt parts on anywhere.</span></div>
+        <div class="gl"><b>Profile</b><span>1x1, 1x2, 2x1, C-channel.</span></div>
+        <div class="gl"><b>Stiffness ~ height³</b><span>Taller resists bending far better.</span></div>
+        <div class="gl"><b>Orientation</b><span>Point the tall side at the load.</span></div>
+      </div>
+      <a class="next" href="build-lesson-7.html">
+        <div class="n-eyebrow">Up next · Part 2 · 02</div>
+        <h3>Plate, Sheet &amp; Polycarbonate</h3>
+        <p>Not everything is a tube. Flat stock makes plates, panels, and guards, and choosing polycarbonate over acrylic is the difference between bending and shattering.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="build-lesson-5.html">← Part 1 · 05 · Fasteners</a>
+    <a class="map" href="build.html">Course map</a>
+    <a href="build-lesson-7.html">Part 2 · 02 · Plate &amp; Polycarbonate →</a>
+  </nav>
+
+</div>
+
+<footer>Fabricate · Building an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var cv=document.getElementById('cv'), ctx=cv.getContext('2d'), W=0,H=0,dpr=1;
+  function fit(){ var r=cv.getBoundingClientRect(); if(!r.width)return; dpr=window.devicePixelRatio||1; cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr); ctx.setTransform(dpr,0,0,dpr,0,0); W=r.width; H=r.height; }
+  fit();
+  var PROFS={
+    t11:{label:'1x1 tube', w:1, h:1, wall:0.0625, lbft:0.28, stiff:0.30, open:false, holes:1},
+    t12:{label:'1x2 tube', w:1, h:2, wall:0.0625, lbft:0.46, stiff:0.90, open:false, holes:2},
+    t21:{label:'2x1 tube', w:2, h:1, wall:0.0625, lbft:0.46, stiff:0.30, open:false, holes:1},
+    cc:{label:'C-channel', w:1, h:2, wall:0.0625, lbft:0.34, stiff:0.72, open:true, holes:2}
+  };
+  var prof='t11', len=2.0;
+  function stiffLabel(s){ return s<0.4?'low':s<0.75?'medium':'high'; }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    var P=PROFS[prof];
+    // ===== left: cross-section =====
+    var cx=W*0.26, cy=H*0.46, unit=Math.min(W*0.10, H*0.26);
+    var bw=P.w*unit, bh=P.h*unit;
+    var x0=cx-bw/2, y0=cy-bh/2;
+    ctx.fillStyle='#5E6F8E'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText('CROSS-SECTION', cx, H*0.12);
+    if(!P.open){
+      ctx.fillStyle='#9aa6bc'; ctx.fillRect(x0,y0,bw,bh);
+      var t=P.wall*unit*6; // exaggerate wall for visibility
+      ctx.fillStyle='#0B1322'; ctx.fillRect(x0+t,y0+t,bw-2*t,bh-2*t);
+    } else {
+      // C-channel: left wall + top + bottom flanges (open on the right)
+      var t=P.wall*unit*6;
+      ctx.fillStyle='#9aa6bc';
+      ctx.fillRect(x0,y0,t,bh);          // spine
+      ctx.fillRect(x0,y0,bw,t);          // top flange
+      ctx.fillRect(x0,y0+bh-t,bw,t);     // bottom flange
+    }
+    // dims
+    ctx.strokeStyle='#33415e'; ctx.fillStyle='#92A2BE'; ctx.font='10px ui-monospace,Menlo,monospace';
+    ctx.textAlign='center'; ctx.fillText(P.w+'"', cx, y0+bh+16);
+    ctx.save(); ctx.translate(x0-12, cy); ctx.rotate(-Math.PI/2); ctx.fillText(P.h+'"', 0, 0); ctx.restore();
+    // ===== right: face with hole pattern =====
+    var fx=W*0.50, fw=W*0.44, fy=H*0.30, fh=Math.max(bh, unit*0.9);
+    ctx.fillStyle='#5E6F8E'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText('FACE · HOLE PATTERN', fx+fw/2, H*0.12);
+    ctx.fillStyle='#9aa6bc'; ctx.fillRect(fx,fy,fw,fh); ctx.strokeStyle='#33415e'; ctx.lineWidth=1; ctx.strokeRect(fx,fy,fw,fh);
+    // holes: rows = P.holes, columns along length
+    var cols=10, rows=P.holes;
+    for(var r=0;r<rows;r++){ var hy=fy+fh*(rows===1?0.5:(r===0?0.32:0.68));
+      for(var c=0;c<cols;c++){ var hx=fx+fw*((c+0.5)/cols); ctx.fillStyle='#0B1322'; ctx.beginPath(); ctx.arc(hx,hy,3.4,0,Math.PI*2); ctx.fill(); }
+    }
+    ctx.fillStyle='#5E6F8E'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText('← '+len.toFixed(1)+' ft →', fx+fw/2, fy+fh+16);
+    // stiffness bar
+    var sbx=W*0.50, sby=H*0.74, sbw=W*0.44;
+    ctx.fillStyle='#5E6F8E'; ctx.textAlign='left'; ctx.fillText('BENDING STIFFNESS', sbx, sby-6);
+    ctx.fillStyle='#0B1322'; ctx.fillRect(sbx,sby,sbw,8); ctx.fillStyle='#34D7C5'; ctx.fillRect(sbx,sby,sbw*P.stiff,8);
+  }
+  function refresh(){
+    var P=PROFS[prof];
+    document.getElementById('roProf').textContent=P.label;
+    document.getElementById('roWall').textContent=P.wall.toFixed(4).replace(/0+$/,'')+'"';
+    document.getElementById('roWt').textContent=(P.lbft*len).toFixed(1)+' lb';
+    document.getElementById('roStiff').textContent=stiffLabel(P.stiff);
+  }
+  function loop(){ draw(); requestAnimationFrame(loop); }
+  function setProf(k){ prof=k; document.getElementById('profTag').textContent=PROFS[k].label; document.querySelectorAll('#profSeg button').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-p')===k);}); refresh(); }
+  document.querySelectorAll('#profSeg button').forEach(function(b){ b.addEventListener('click',function(){ setProf(b.getAttribute('data-p')); }); });
+  document.getElementById('len').addEventListener('input',function(e){ len=(+e.target.value)/10; document.getElementById('lenv').textContent=len.toFixed(1)+' ft'; refresh(); });
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
+  refresh(); requestAnimationFrame(loop);
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="build:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

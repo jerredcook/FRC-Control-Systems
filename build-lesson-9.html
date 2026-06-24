@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fabricate · Part 2.4 - Brackets, Gussets &amp; Joining</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  canvas.joint{display:block;width:100%;height:260px;cursor:pointer}
+  .readouts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:17px;font-weight:600;margin-top:3px;color:var(--muted)}
+  .ro .v.indigo{color:var(--indigo)} .ro .v.green{color:var(--green)} .ro .v.amber{color:var(--amber)} .ro .v.red{color:var(--red)}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .btn.primary{background:linear-gradient(180deg,#ffb37e,var(--indigo));color:#2a1503;font-weight:700;border:none}
+  .btn.on{background:var(--amber);border-color:var(--amber);color:#2a1a00;font-weight:700}
+  .hint{font-family:var(--mono);font-size:11px;color:var(--faint)}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(255,138,76,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .rules{display:grid;gap:10px;margin:18px 0} @media(min-width:560px){.rules{grid-template-columns:1fr 1fr}}
+  .rule{display:flex;gap:11px;border:1px solid var(--line);border-radius:11px;padding:13px 14px;background:var(--panel)}
+  .rule .ri{font-size:20px;flex:0 0 auto}
+  .rule b{display:block;font-size:14.5px;color:var(--text);margin-bottom:2px}
+  .rule span{font-size:13.5px;color:var(--muted)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:108px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(255,176,32,0.12),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--amber);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--amber)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)} .coursenav a.next-link{color:var(--amber);border-color:rgba(255,176,32,.4)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="build.html"><span class="dot"></span><span class="name">Fabricate</span></a>
+    <div class="top-meta">Part 2 · 04 / 04 · Finale</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 2 · 04</b> Materials &amp; Stock · Finale</div>
+    <div class="eyebrow">Brackets, Gussets &amp; Joining</div>
+    <h1>One bolt is a<br><span class="accent">hinge</span>.</h1>
+    <p class="dek">Tubes and plates are just parts until they're joined into a rigid frame. A gusset ties two tubes at a corner, but only if it's bolted right. One bolt lets the joint pivot; spread two or more and it locks solid.</p>
+  </div>
+
+  <section>
+    <p class="lead">Bolt the corner, then load it.</p>
+    <p>Here are two tubes meeting at a corner with a <strong>gusset</strong> plate over the joint. Click the holes to add bolts, then press Test load. With too few bolts the joint pivots and sags. Get two or more into each tube and it holds rigid.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Build the joint</span><span class="demo-tag" id="tag">click holes to add bolts</span></div>
+      <canvas class="joint" id="cv"></canvas>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Bolts (each tube)</div><div class="v indigo" id="roBolts">0 / 0</div></div>
+        <div class="ro"><div class="k2">Joint</div><div class="v" id="roRig">add bolts</div></div>
+        <div class="ro"><div class="k2">Under load</div><div class="v" id="roLoad">-</div></div>
+      </div>
+      <div class="controls">
+        <button class="btn primary" id="test">Test load</button>
+        <button class="btn" id="reset">Reset bolts</button>
+        <span class="hint">two bolts per tube makes it rigid</span>
+      </div>
+    </div>
+    <p class="caption">A single bolt in a tube is a hinge, the tube just rotates around it. Two bolts, spread apart, stop the rotation. That's why every real gusset has a pattern of bolts, never just one.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In the shop</div>
+    <h2>How a frame comes together</h2>
+    <p>Tubes are joined with <strong>gussets</strong> and <strong>brackets</strong>, flat plates that span a corner and bolt into both pieces. A few rules make the difference between a rigid robot and a wobbly one:</p>
+    <div class="rules">
+      <div class="rule"><div class="ri">📐</div><div><b>Gusset</b><span>A plate over a joint that ties two tubes together and spreads the load.</span></div></div>
+      <div class="rule"><div class="ri">🔩</div><div><b>Two bolts minimum</b><span>Per tube, spread apart, so the joint can't pivot.</span></div></div>
+      <div class="rule"><div class="ri">🪛</div><div><b>Tapped vs through</b><span>Tap threads into the tube, or run a bolt through to a nut on the back.</span></div></div>
+      <div class="rule"><div class="ri">⚙️</div><div><b>Rivets &amp; nutserts</b><span>For thin walls or when you can't reach the back of the tube.</span></div></div>
+    </div>
+    <div class="note indigo">
+      <div class="nh">Triangles don't move</div>
+      <p>The strongest frames are built from triangles. A four-sided box can rack (lean over into a parallelogram), but add a diagonal and it's locked, because a triangle can't change shape without its sides changing length. When a frame feels flexy, the fix is almost always a gusset or a diagonal that turns a wobbly rectangle into a rigid triangle.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="2">
+        <div class="qn">Question 1</div>
+        <div class="qt">Why does a tube need at least two bolts into a gusset, not one?</div>
+        <div class="opts">
+          <button class="opt">For looks</button>
+          <button class="opt">To make it heavier</button>
+          <button class="opt">One bolt lets the tube pivot like a hinge; two stop the rotation</button>
+        </div>
+        <div class="explain">A single bolt is a pivot point, the tube can swing around it. Two bolts spread apart fix the angle, so the joint stays rigid under load.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 2</div>
+        <div class="qt">What does a gusset do?</div>
+        <div class="opts">
+          <button class="opt">Spans a joint and ties two tubes together, spreading the load</button>
+          <button class="opt">Reduces the robot's weight</button>
+          <button class="opt">Stores electronics</button>
+        </div>
+        <div class="explain">A gusset is a plate bolted across a corner. It connects the two tubes and distributes the load across several bolts so the joint stays stiff.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 3</div>
+        <div class="qt">A square frame leans over into a parallelogram under load. The fix?</div>
+        <div class="opts">
+          <button class="opt">Use thicker bolts</button>
+          <button class="opt">Add a diagonal or gusset to make a triangle</button>
+          <button class="opt">Remove a tube</button>
+        </div>
+        <div class="explain">A rectangle can rack into a parallelogram, but a triangle can't change shape without changing a side's length. A diagonal brace or corner gusset locks the frame.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 2 · 04 · Recap · Part 2 complete ★</h3>
+      <div class="glossary">
+        <div class="gl"><b>Gusset</b><span>Plate that ties a joint together.</span></div>
+        <div class="gl"><b>One bolt = hinge</b><span>The tube pivots around it.</span></div>
+        <div class="gl"><b>Two+ bolts</b><span>Spread apart, locks the angle.</span></div>
+        <div class="gl"><b>Tapped / through</b><span>Threads in the tube, or a nut.</span></div>
+        <div class="gl"><b>Rivets / nutserts</b><span>Thin walls or no back access.</span></div>
+        <div class="gl"><b>Triangles</b><span>Don't rack; rectangles do.</span></div>
+      </div>
+      <a class="next" href="build.html">
+        <div class="n-eyebrow">Part 2 complete · Materials &amp; Stock</div>
+        <h3>On to Part 3 - Power Transmission →</h3>
+        <p>You know the stock and how to join it. Next, how power gets from a fast little motor to a slow strong mechanism: gears, chain, and belts. Continue from the course map.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="build-lesson-8.html">← Part 2 · 03 · COTS vs Custom</a>
+    <a class="map" href="build.html">Course map</a>
+    <a class="next-link" href="build.html">Part 3 · Power Transmission →</a>
+  </nav>
+
+</div>
+
+<footer>Fabricate · Building an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var cv=document.getElementById('cv'), ctx=cv.getContext('2d'), W=0,H=0,dpr=1;
+  function fit(){ var r=cv.getBoundingClientRect(); if(!r.width)return; dpr=window.devicePixelRatio||1; cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr); ctx.setTransform(dpr,0,0,dpr,0,0); W=r.width; H=r.height; }
+  fit();
+  var bolts={}, testing=false, ang=0;
+  function geo(){
+    var cx=W*0.32, cy=H*0.54, T=24, hLen=W*0.46, vLen=H*0.40;
+    var hH=[{id:'H0',x:cx+24,y:cy},{id:'H1',x:cx+48,y:cy},{id:'H2',x:cx+72,y:cy}];
+    var hV=[{id:'V0',x:cx,y:cy-24},{id:'V1',x:cx,y:cy-48},{id:'V2',x:cx,y:cy-72}];
+    return {cx:cx,cy:cy,T:T,hLen:hLen,vLen:vLen,hH:hH,hV:hV};
+  }
+  function counts(){ var bH=0,bV=0; ['H0','H1','H2'].forEach(function(k){if(bolts[k])bH++;}); ['V0','V1','V2'].forEach(function(k){if(bolts[k])bV++;}); return {bH:bH,bV:bV}; }
+  function state(){ var c=counts(); if(c.bH===0||c.bV===0) return 'detached'; if(c.bH<2||c.bV<2) return 'wobbly'; return 'rigid'; }
+  function targetDroop(){ var s=state(); return s==='rigid'?0.03:(s==='wobbly'?0.20:0.5); }
+  function step(){
+    var tgt = testing? targetDroop() : 0;
+    ang += (tgt-ang)*0.12;
+    draw();
+    var c=counts(), s=state();
+    document.getElementById('roBolts').textContent=c.bH+' / '+c.bV;
+    var rr=document.getElementById('roRig');
+    rr.textContent = s==='rigid'?'rigid ✓':(s==='wobbly'?'wobbly':'not joined');
+    rr.className='v '+(s==='rigid'?'green':(s==='wobbly'?'amber':'red'));
+    var rl=document.getElementById('roLoad');
+    if(!testing){ rl.textContent='-'; rl.className='v'; }
+    else { rl.textContent = s==='rigid'?'holds':(s==='wobbly'?'sags':'collapses'); rl.className='v '+(s==='rigid'?'green':(s==='wobbly'?'amber':'red')); }
+    requestAnimationFrame(step);
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    var g=geo();
+    // vertical tube (fixed)
+    ctx.fillStyle='#9aa6bc'; ctx.fillRect(g.cx-g.T/2, g.cy-g.vLen, g.T, g.vLen+g.T/2);
+    ctx.strokeStyle='#33415e'; ctx.lineWidth=1; ctx.strokeRect(g.cx-g.T/2, g.cy-g.vLen, g.T, g.vLen+g.T/2);
+    // gusset (inside corner, fixed)
+    ctx.fillStyle='rgba(255,138,76,0.20)'; ctx.strokeStyle='rgba(255,138,76,0.5)'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(g.cx+g.T/2, g.cy-g.T/2); ctx.lineTo(g.cx+g.T/2+86, g.cy-g.T/2); ctx.lineTo(g.cx+g.T/2, g.cy-g.T/2-86); ctx.closePath(); ctx.fill(); ctx.stroke();
+    // horizontal tube (rotates about corner under load)
+    ctx.save(); ctx.translate(g.cx,g.cy); ctx.rotate(ang); ctx.translate(-g.cx,-g.cy);
+    ctx.fillStyle='#aeb9d1'; ctx.fillRect(g.cx-g.T/2, g.cy-g.T/2, g.hLen, g.T);
+    ctx.strokeStyle='#33415e'; ctx.lineWidth=1; ctx.strokeRect(g.cx-g.T/2, g.cy-g.T/2, g.hLen, g.T);
+    // H holes/bolts (rotate with H tube)
+    g.hH.forEach(function(h){ drawHole(h.x,h.y, !!bolts[h.id]); });
+    // load arrow at end
+    if(testing){ var ex=g.cx-g.T/2+g.hLen, ey=g.cy; ctx.strokeStyle='#FFB020'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(ex,ey+12); ctx.lineTo(ex,ey+40); ctx.stroke(); ctx.fillStyle='#FFB020'; ctx.beginPath(); ctx.moveTo(ex,ey+46); ctx.lineTo(ex-5,ey+38); ctx.lineTo(ex+5,ey+38); ctx.closePath(); ctx.fill(); ctx.fillStyle='#FFB020'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText('load', ex, ey+58); }
+    ctx.restore();
+    // V holes/bolts (fixed)
+    g.hV.forEach(function(h){ drawHole(h.x,h.y, !!bolts[h.id]); });
+    // labels
+    ctx.fillStyle='#5E6F8E'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText('gusset', g.cx+g.T/2+34, g.cy-g.T/2-34);
+  }
+  function drawHole(x,y,filled){
+    ctx.beginPath(); ctx.arc(x,y,6,0,Math.PI*2);
+    if(filled){ ctx.fillStyle='#FFB020'; ctx.fill(); ctx.strokeStyle='#2a1a00'; ctx.lineWidth=1.5; ctx.stroke(); }
+    else { ctx.fillStyle='#0B1322'; ctx.fill(); ctx.strokeStyle='#5E6F8E'; ctx.lineWidth=1.5; ctx.stroke(); }
+  }
+  cv.addEventListener('click',function(e){
+    if(testing) return;
+    var r=cv.getBoundingClientRect(), mx=e.clientX-r.left, my=e.clientY-r.top, g=geo();
+    g.hH.concat(g.hV).forEach(function(h){ if(Math.hypot(mx-h.x,my-h.y)<12){ bolts[h.id]=!bolts[h.id]; } });
+  });
+  document.getElementById('test').addEventListener('click',function(){ testing=!testing; this.classList.toggle('on',testing); this.textContent=testing?'Stop test':'Test load'; document.getElementById('tag').textContent=testing?'under load':'click holes to add bolts'; });
+  document.getElementById('reset').addEventListener('click',function(){ bolts={}; testing=false; document.getElementById('test').classList.remove('on'); document.getElementById('test').textContent='Test load'; document.getElementById('tag').textContent='click holes to add bolts'; });
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
+  requestAnimationFrame(step);
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="build:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>
