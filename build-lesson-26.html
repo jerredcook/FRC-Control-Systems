@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fabricate · Part 5.5 - Bumpers</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  canvas.bz{display:block;width:100%;height:250px}
+  .readouts{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:17px;font-weight:600;margin-top:3px;color:var(--muted)}
+  .ro .v.indigo{color:var(--indigo)} .ro .v.green{color:var(--green)} .ro .v.red{color:var(--red)}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+  .slider-group{flex:1 1 100%;display:flex;flex-direction:column;gap:6px}
+  .slider-group label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+  .slider-group label .val{color:var(--indigo)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:var(--line-2);outline:none;width:100%}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--indigo);cursor:pointer;box-shadow:0 0 10px -1px var(--indigo)}
+  input[type=range]::-moz-range-thumb{width:18px;height:18px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(255,138,76,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .rules{display:grid;gap:10px;margin:18px 0} @media(min-width:560px){.rules{grid-template-columns:1fr 1fr}}
+  .rule{display:flex;gap:11px;border:1px solid var(--line);border-radius:11px;padding:13px 14px;background:var(--panel)}
+  .rule .ri{font-size:20px;flex:0 0 auto}
+  .rule b{display:block;font-size:14.5px;color:var(--text);margin-bottom:2px}
+  .rule span{font-size:13.5px;color:var(--muted)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:108px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(255,176,32,0.12),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--amber);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--amber)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)} .coursenav a.next-link{color:var(--amber);border-color:rgba(255,176,32,.4)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="build.html"><span class="dot"></span><span class="name">Fabricate</span></a>
+    <div class="top-meta">Part 5 · 05 / 05 · Finale</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 5 · 05</b> The Drivetrain · Finale</div>
+    <div class="eyebrow">Bumpers</div>
+    <h1>Wrap it in<br><span class="accent">foam</span>.</h1>
+    <p class="dek">Bumpers are the least glamorous part of the robot and one of the few the rules absolutely require. They protect your robot and everyone else's in a contact sport, and they have to be built a specific way and sit in a specific height zone, or you fail inspection.</p>
+  </div>
+
+  <section>
+    <p class="lead">The bumper has to live in a legal zone.</p>
+    <p>The rules define a height range, the <strong>bumper zone</strong>, that your bumpers must sit within so robots hit each other consistently and safely. Slide the bumper up and down and find the legal band.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Bumper height check</span><span class="demo-tag" id="legTag">legal</span></div>
+      <canvas class="bz" id="cv"></canvas>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Bumper height</div><div class="v indigo" id="roH">mid</div></div>
+        <div class="ro"><div class="k2">Inspection</div><div class="v" id="roLeg">legal</div></div>
+      </div>
+      <div class="controls">
+        <div class="slider-group"><label>Bumper position <span class="val" id="hv">50%</span></label><input type="range" id="h" min="0" max="100" value="50"></div>
+      </div>
+    </div>
+    <p class="caption">Inside the green zone the bumper passes; mounted too high or too low it fails inspection, even if everything else is built right. Robots have to bump in the same band, so the rule is strict.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In the shop</div>
+    <h2>Building legal bumpers</h2>
+    <p>A bumper is simple to make but every detail is governed by the rules. The standard build is the same across nearly every team:</p>
+    <div class="rules">
+      <div class="rule"><div class="ri">🪵</div><div><b>Wood backing</b><span>A plywood board bolted hard to the frame, the bumper's structure.</span></div></div>
+      <div class="rule"><div class="ri">🌭</div><div><b>Pool noodles</b><span>Two stacked round noodles, the soft part that absorbs hits.</span></div></div>
+      <div class="rule"><div class="ri">🧵</div><div><b>Fabric cover</b><span>Tight red or blue cloth, swappable for whichever alliance you're on.</span></div></div>
+      <div class="rule"><div class="ri">🔢</div><div><b>Team numbers</b><span>Your number on each side, sized and colored to the rules.</span></div></div>
+    </div>
+    <div class="note indigo">
+      <div class="nh">Bumpers are an inspection gate, build them early</div>
+      <p>You can't compete until an inspector signs off on your bumpers: right height, right construction, hard mounting, covering the whole frame perimeter, and a clean red and blue set. Teams that leave bumpers for the last night regret it, a failed bumper keeps the whole robot off the field. Build them early, make both colors, and mount them so they swap in seconds between matches. It's the unglamorous detail that quietly decides whether you get to play.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">Why does FRC require bumpers?</div>
+        <div class="opts">
+          <button class="opt">For decoration</button>
+          <button class="opt">To protect your robot and others in a contact sport, consistently and safely</button>
+          <button class="opt">To add weight</button>
+        </div>
+        <div class="explain">Robots collide constantly, so bumpers cushion the hits and keep frames from damaging each other. The rules standardize them so contact is fair and safe.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">A bumper is built perfectly but mounted too high. What happens at inspection?</div>
+        <div class="opts">
+          <button class="opt">It passes anyway</button>
+          <button class="opt">Only half-passes</button>
+          <button class="opt">It fails - bumpers must sit within the legal height zone</button>
+        </div>
+        <div class="explain">Height is a hard rule. Even a well-built bumper outside the legal zone fails inspection, and the robot can't play until it's fixed.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">What's the standard bumper construction?</div>
+        <div class="opts">
+          <button class="opt">Plywood backing, pool noodles, a fabric cover, and team numbers</button>
+          <button class="opt">Just a strip of metal</button>
+          <button class="opt">Bare aluminum tube</button>
+        </div>
+        <div class="explain">Wood backing for structure, stacked pool noodles for cushioning, a tight red or blue fabric cover, and your team number, the rules-defined recipe nearly every team follows.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 5 · 05 · Recap · Part 5 complete ★</h3>
+      <div class="glossary">
+        <div class="gl"><b>Bumper</b><span>Required, protects the robots.</span></div>
+        <div class="gl"><b>Bumper zone</b><span>Legal height range.</span></div>
+        <div class="gl"><b>Wood backing</b><span>Structure, bolted to the frame.</span></div>
+        <div class="gl"><b>Pool noodles</b><span>The soft cushioning.</span></div>
+        <div class="gl"><b>Red / blue</b><span>Swappable per alliance.</span></div>
+        <div class="gl"><b>Inspection gate</b><span>No legal bumpers, no playing.</span></div>
+      </div>
+      <a class="next" href="build.html">
+        <div class="n-eyebrow">Part 5 complete · The Drivetrain</div>
+        <h3>On to Part 6 - Electrical &amp; Pneumatics →</h3>
+        <p>The robot rolls and the mechanisms are built. Now power them: battery, breaker, wiring, and the air system. Continue from the course map.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="build-lesson-25.html">← Part 5 · 04 · Swerve Modules</a>
+    <a class="map" href="build.html">Course map</a>
+    <a class="next-link" href="build.html">Part 6 · Electrical &amp; Pneumatics →</a>
+  </nav>
+
+</div>
+
+<footer>Fabricate · Building an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var cv=document.getElementById('cv'), ctx=cv.getContext('2d'), W=0,H=0,dpr=1;
+  function fit(){ var r=cv.getBoundingClientRect(); if(!r.width)return; dpr=window.devicePixelRatio||1; cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr); ctx.setTransform(dpr,0,0,dpr,0,0); W=r.width; H=r.height; }
+  fit();
+  var hPct=50;
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    var floorY=H*0.88, maxUp=H*0.62;
+    // legal zone band (off the floor)
+    var zoneLo=floorY-0.55*maxUp, zoneHi=floorY-0.85*maxUp; // band where bumper center should be
+    ctx.fillStyle='rgba(67,214,126,0.12)'; ctx.fillRect(W*0.10, zoneHi, W*0.80, zoneLo-zoneHi);
+    ctx.strokeStyle='rgba(67,214,126,0.5)'; ctx.lineWidth=1; ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(W*0.10,zoneLo); ctx.lineTo(W*0.90,zoneLo); ctx.moveTo(W*0.10,zoneHi); ctx.lineTo(W*0.90,zoneHi); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle='#43D67E'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='left'; ctx.fillText('legal bumper zone', W*0.12, zoneHi-6);
+    // ground
+    ctx.strokeStyle='#5E6F8E'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(0,floorY); ctx.lineTo(W,floorY); ctx.stroke();
+    // robot
+    var rx=W*0.34, rw=W*0.32, rh=H*0.42;
+    ctx.fillStyle='#1B2540'; ctx.strokeStyle='#33415e'; ctx.lineWidth=2; ctx.fillRect(rx, floorY-rh, rw, rh); ctx.strokeRect(rx, floorY-rh, rw, rh);
+    // wheels
+    [rx+18, rx+rw-18].forEach(function(wx){ ctx.beginPath(); ctx.arc(wx, floorY, 10,0,Math.PI*2); ctx.fillStyle='#0B1322'; ctx.fill(); ctx.strokeStyle='#92A2BE'; ctx.lineWidth=2; ctx.stroke(); });
+    // bumper center height from slider
+    var bcy = floorY - (0.30 + hPct/100*0.62)*maxUp;
+    var legal = (bcy<=zoneLo && bcy>=zoneHi);
+    var bh=22;
+    ctx.fillStyle=legal?'#43D67E':'#FF6B6B'; ctx.fillRect(rx-8, bcy-bh/2, rw+16, bh);
+    ctx.fillStyle='#0E1525'; ctx.font='700 11px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText('BUMPER', rx+rw/2, bcy+4);
+    // noodle hint (two circles on the end)
+    ctx.fillStyle=legal?'rgba(67,214,126,0.5)':'rgba(255,107,107,0.5)'; ctx.beginPath(); ctx.arc(rx-8, bcy-5,5,0,Math.PI*2); ctx.arc(rx-8, bcy+5,5,0,Math.PI*2); ctx.fill();
+    // status text
+    ctx.fillStyle=legal?'#43D67E':'#FF6B6B'; ctx.font='700 13px ui-monospace,Menlo,monospace'; ctx.textAlign='center';
+    ctx.fillText(legal?'IN ZONE ✓':(bcy<zoneHi?'too high':'too low'), rx+rw/2, floorY-rh-14);
+    refresh(legal, bcy<zoneHi);
+  }
+  function refresh(legal, tooHigh){
+    document.getElementById('roH').textContent=hPct<35?'low':hPct<70?'mid':'high';
+    var rl=document.getElementById('roLeg'); rl.textContent=legal?'legal ✓':(tooHigh?'too high':'too low'); rl.className='v '+(legal?'green':'red');
+    document.getElementById('legTag').textContent=legal?'legal':'illegal';
+  }
+  function loop(){ draw(); requestAnimationFrame(loop); }
+  document.getElementById('h').addEventListener('input',function(e){ hPct=+e.target.value; document.getElementById('hv').textContent=hPct+'%'; });
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
+  requestAnimationFrame(loop);
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="build:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

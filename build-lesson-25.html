@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fabricate · Part 5.4 - Swerve Modules</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  canvas.mod{display:block;width:100%;height:260px}
+  .readouts{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:17px;font-weight:600;margin-top:3px;color:var(--muted)}
+  .ro .v.indigo{color:var(--indigo)} .ro .v.teal{color:var(--teal)}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+  .slider-group{flex:1 1 220px;display:flex;flex-direction:column;gap:6px;min-width:190px}
+  .slider-group label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+  .slider-group label .val{color:var(--indigo)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:var(--line-2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--indigo);cursor:pointer;box-shadow:0 0 10px -1px var(--indigo)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(255,138,76,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .rules{display:grid;gap:10px;margin:18px 0} @media(min-width:560px){.rules{grid-template-columns:1fr 1fr}}
+  .rule{display:flex;gap:11px;border:1px solid var(--line);border-radius:11px;padding:13px 14px;background:var(--panel)}
+  .rule .ri{font-size:20px;flex:0 0 auto}
+  .rule b{display:block;font-size:14.5px;color:var(--text);margin-bottom:2px}
+  .rule span{font-size:13.5px;color:var(--muted)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:108px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="build.html"><span class="dot"></span><span class="name">Fabricate</span></a>
+    <div class="top-meta">Part 5 · 04 / 05 · Drivetrain</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 5 · 04</b> The Drivetrain</div>
+    <div class="eyebrow">Swerve Modules</div>
+    <h1>Two motors<br>per <span class="accent">wheel</span>.</h1>
+    <p class="dek">Swerve is the most capable drivetrain in FRC, and it works by giving every wheel two motors: one to drive it and one to steer it. Each wheel can point any direction and spin any speed, so the robot can move sideways, diagonally, and spin all at once.</p>
+  </div>
+
+  <section>
+    <p class="lead">One module: a wheel that points and drives.</p>
+    <p>A swerve module is a single wheel with a <strong>steer motor</strong> that rotates the whole assembly to any heading, and a <strong>drive motor</strong> that spins the wheel. Set the steering angle and drive speed below and watch one module respond.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">One swerve module (top view)</span><span class="demo-tag">steer + drive</span></div>
+      <canvas class="mod" id="cv"></canvas>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Steering angle</div><div class="v indigo" id="roAng">0°</div></div>
+        <div class="ro"><div class="k2">Drive speed</div><div class="v teal" id="roSpd">50%</div></div>
+      </div>
+      <div class="controls">
+        <div class="slider-group"><label>Steer angle <span class="val" id="angv">0°</span></label><input type="range" id="ang" min="-180" max="180" value="0"></div>
+        <div class="slider-group"><label>Drive speed <span class="val" id="spdv">50%</span></label><input type="range" id="spd" min="0" max="100" value="50"></div>
+      </div>
+    </div>
+    <p class="caption">The steer motor swings the module to whatever heading you set; the drive motor spins the wheel at whatever speed you ask. Four of these on a robot, each pointing where it needs to, is what lets swerve glide in any direction while it spins.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In the shop</div>
+    <h2>The most capable, and the most complex</h2>
+    <p>Swerve gives unmatched agility, but a module packs two motors, two gearboxes, and a sensor into a tight space. That's why almost no one builds them from scratch:</p>
+    <div class="rules">
+      <div class="rule"><div class="ri">🧭</div><div><b>Steer motor</b><span>Rotates the module to any heading, with a sensor to know the angle.</span></div></div>
+      <div class="rule"><div class="ri">⚙️</div><div><b>Drive motor</b><span>Spins the wheel for speed, through its own gearbox.</span></div></div>
+      <div class="rule"><div class="ri">🛒</div><div><b>Buy the module</b><span>SDS MK4, WCP, REV MAXSwerve, precision parts you don't fabricate.</span></div></div>
+      <div class="rule"><div class="ri">🔀</div><div><b>Holonomic</b><span>Four modules together can move any direction and rotate at once.</span></div></div>
+    </div>
+    <div class="note indigo">
+      <div class="nh">This is where build hands off to code</div>
+      <p>The module is the hardware; figuring out what angle and speed each of the four should be at is the software. That's exactly the <strong>swerve kinematics</strong> from the Deploy course (Lesson 6.2): you tell the code "drive this direction and spin this fast," and it computes the four module states. Mechanically you buy and bolt on proven modules (the buy-not-build call from Lesson 2.3); in code you command them. Swerve is the clearest place the two halves of this academy meet.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">What two motors does a swerve module have?</div>
+        <div class="opts">
+          <button class="opt">Two drive motors</button>
+          <button class="opt">A drive motor to spin the wheel and a steer motor to point it</button>
+          <button class="opt">A motor and a battery</button>
+        </div>
+        <div class="explain">Each module has a drive motor (wheel speed) and a steer motor (heading). Together they let one wheel point any direction and drive any speed.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">What does a four-module swerve let a robot do?</div>
+        <div class="opts">
+          <button class="opt">Only drive straight</button>
+          <button class="opt">Turn like a car</button>
+          <button class="opt">Move any direction and rotate at the same time (holonomic)</button>
+        </div>
+        <div class="explain">With every wheel independently steered, the robot is holonomic: it can translate any direction and spin simultaneously, far more agile than a tank drive.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">Should you build swerve modules from scratch or buy them?</div>
+        <div class="opts">
+          <button class="opt">Buy them - they're precision, high-stress parts (the buy-not-build call)</button>
+          <button class="opt">Always build them to save money</button>
+          <button class="opt">It doesn't matter</button>
+        </div>
+        <div class="explain">Modules are complex and precise, so nearly every team buys proven COTS modules. The code (swerve kinematics) is what you write to control them.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 5 · 04 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Swerve module</b><span>One wheel, two motors.</span></div>
+        <div class="gl"><b>Steer motor</b><span>Points the module any heading.</span></div>
+        <div class="gl"><b>Drive motor</b><span>Spins the wheel for speed.</span></div>
+        <div class="gl"><b>Holonomic</b><span>Move any direction + rotate.</span></div>
+        <div class="gl"><b>Buy it</b><span>SDS, WCP, MAXSwerve.</span></div>
+        <div class="gl"><b>Kinematics in code</b><span>Deploy 6.2 computes the states.</span></div>
+      </div>
+      <a class="next" href="build-lesson-26.html">
+        <div class="n-eyebrow">Up next · Part 5 · 05 · Finale</div>
+        <h3>Bumpers</h3>
+        <p>The unglamorous part the rules require. Build legal bumpers that protect the robot, and get them in the right height zone.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="build-lesson-24.html">← Part 5 · 03 · Wheels &amp; Traction</a>
+    <a class="map" href="build.html">Course map</a>
+    <a href="build-lesson-26.html">Part 5 · 05 · Bumpers →</a>
+  </nav>
+
+</div>
+
+<footer>Fabricate · Building an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var cv=document.getElementById('cv'), ctx=cv.getContext('2d'), W=0,H=0,dpr=1;
+  function fit(){ var r=cv.getBoundingClientRect(); if(!r.width)return; dpr=window.devicePixelRatio||1; cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr); ctx.setTransform(dpr,0,0,dpr,0,0); W=r.width; H=r.height; }
+  fit();
+  var angDeg=0, spd=50, tread=0;
+  function step(){
+    tread += spd/100*0.5;
+    draw();
+    requestAnimationFrame(step);
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    var cx=W*0.36, cy=H*0.5, R=Math.min(W*0.16,H*0.34), th=angDeg*Math.PI/180;
+    // azimuth ring
+    ctx.strokeStyle='#26324A'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(cx,cy,R+6,0,Math.PI*2); ctx.stroke();
+    // steer-rotation hint arc
+    ctx.strokeStyle='rgba(255,138,76,0.4)'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(cx,cy,R+6, -0.4, 0.9); ctx.stroke();
+    // module assembly rotates to steer angle
+    ctx.save(); ctx.translate(cx,cy); ctx.rotate(th + Math.PI/2);
+    // wheel (rectangle pointing along its rolling direction = up in local frame)
+    var ww=18, wl=R*1.5;
+    ctx.fillStyle='#1B2540'; ctx.strokeStyle='#FF8A4C'; ctx.lineWidth=2;
+    roundRect(-ww/2, -wl/2, ww, wl, 6); ctx.fill(); ctx.stroke();
+    // tread marks moving
+    ctx.strokeStyle='#5b6a86'; ctx.lineWidth=2;
+    for(var i=0;i<6;i++){ var y=(-wl/2) + ((i*wl/6 + (tread%(wl/6)))% wl); ctx.beginPath(); ctx.moveTo(-ww/2+2,y); ctx.lineTo(ww/2-2,y); ctx.stroke(); }
+    // drive velocity arrow (forward = up local)
+    var len = spd/100 * R*1.3;
+    if(len>3){ ctx.strokeStyle='#34D7C5'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,-len); ctx.stroke(); ctx.fillStyle='#34D7C5'; ctx.beginPath(); ctx.moveTo(0,-len-6); ctx.lineTo(-5,-len+2); ctx.lineTo(5,-len+2); ctx.closePath(); ctx.fill(); }
+    ctx.restore();
+    // center pivot
+    ctx.beginPath(); ctx.arc(cx,cy,4,0,Math.PI*2); ctx.fillStyle='#E7ECF6'; ctx.fill();
+    // labels
+    ctx.fillStyle='#FF8A4C'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='left'; ctx.fillText('↻ steer motor', cx+R+14, cy-R);
+    ctx.fillStyle='#34D7C5'; ctx.fillText('→ drive motor', cx+R+14, cy-R+16);
+    // mini 4-module robot (top-right)
+    var bx=W*0.78, by=H*0.30, bs=W*0.06;
+    ctx.strokeStyle='#33415e'; ctx.lineWidth=1.5; ctx.strokeRect(bx-bs, by-bs, bs*2, bs*2);
+    [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(function(c){ ctx.save(); ctx.translate(bx+c[0]*bs*0.7, by+c[1]*bs*0.7); ctx.rotate(th); ctx.fillStyle='#FF8A4C'; ctx.fillRect(-2,-6,4,12); ctx.restore(); });
+    ctx.fillStyle='#5E6F8E'; ctx.font='8px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText('4 modules = a robot', bx, by+bs+14);
+  }
+  function roundRect(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+  document.getElementById('ang').addEventListener('input',function(e){ angDeg=+e.target.value; document.getElementById('angv').textContent=angDeg+'°'; document.getElementById('roAng').textContent=angDeg+'°'; });
+  document.getElementById('spd').addEventListener('input',function(e){ spd=+e.target.value; document.getElementById('spdv').textContent=spd+'%'; document.getElementById('roSpd').textContent=spd+'%'; });
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
+  requestAnimationFrame(step);
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="build:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

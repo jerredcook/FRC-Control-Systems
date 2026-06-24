@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fabricate · Part 5.1 - The Frame / Chassis</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  canvas.tip{display:block;width:100%;height:250px}
+  .readouts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:17px;font-weight:600;margin-top:3px;color:var(--muted)}
+  .ro .v.indigo{color:var(--indigo)} .ro .v.green{color:var(--green)} .ro .v.amber{color:var(--amber)} .ro .v.red{color:var(--red)}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+  .slider-group{flex:1 1 200px;display:flex;flex-direction:column;gap:6px;min-width:170px}
+  .slider-group label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+  .slider-group label .val{color:var(--indigo)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:var(--line-2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--indigo);cursor:pointer;box-shadow:0 0 10px -1px var(--indigo)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(255,138,76,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .rules{display:grid;gap:10px;margin:18px 0} @media(min-width:560px){.rules{grid-template-columns:1fr 1fr}}
+  .rule{display:flex;gap:11px;border:1px solid var(--line);border-radius:11px;padding:13px 14px;background:var(--panel)}
+  .rule .ri{font-size:20px;flex:0 0 auto}
+  .rule b{display:block;font-size:14.5px;color:var(--text);margin-bottom:2px}
+  .rule span{font-size:13.5px;color:var(--muted)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:108px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="build.html"><span class="dot"></span><span class="name">Fabricate</span></a>
+    <div class="top-meta">Part 5 · 01 / 05 · Drivetrain</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 5 · 01</b> The Drivetrain</div>
+    <div class="eyebrow">The Frame / Chassis</div>
+    <h1>The box it all<br>bolts <span class="accent">to</span>.</h1>
+    <p class="dek">The frame is the foundation every mechanism mounts to. It has to be rigid, the right size, and stable. The big trap is height: pile a heavy mechanism up high and the robot tips over the first time it stops fast.</p>
+  </div>
+
+  <section>
+    <p class="lead">Keep the weight low and the base wide.</p>
+    <p>A robot tips when its <strong>center of mass</strong> swings out past a wheel. Accelerate or stop hard and inertia tries to topple it. The defenses are simple: a <strong>low</strong> center of mass and a <strong>wide</strong> wheelbase. Push the sliders and try to keep this robot on its wheels.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Tipping stability</span><span class="demo-tag" id="stTag">stable</span></div>
+      <canvas class="tip" id="cv"></canvas>
+      <div class="readouts">
+        <div class="ro"><div class="k2">CoM height</div><div class="v indigo" id="roH">mid</div></div>
+        <div class="ro"><div class="k2">Wheelbase</div><div class="v" id="roB">mid</div></div>
+        <div class="ro"><div class="k2">Stability</div><div class="v" id="roSt">ok</div></div>
+      </div>
+      <div class="controls">
+        <div class="slider-group"><label>CoM height <span class="val" id="hv">50%</span></label><input type="range" id="h" min="15" max="100" value="50"></div>
+        <div class="slider-group"><label>Wheelbase width <span class="val" id="bv">50%</span></label><input type="range" id="b" min="25" max="100" value="50"></div>
+        <div class="slider-group"><label>Hard stop / acceleration <span class="val" id="av">0.4 g</span></label><input type="range" id="a" min="0" max="120" value="40"></div>
+      </div>
+    </div>
+    <p class="caption">The amber dot is the center of mass; the red arrow is the inertia from accelerating or stopping. When that combined pull leans past the front wheel, over it goes. A tall, narrow robot tips with a gentle nudge; a low, wide one shrugs it off.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In the shop</div>
+    <h2>Designing a good frame</h2>
+    <p>Beyond stability, the frame has to be stiff and the right size. A few principles guide nearly every chassis:</p>
+    <div class="rules">
+      <div class="rule"><div class="ri">⬇️</div><div><b>Low center of mass</b><span>Put heavy things (battery, motors) down low to resist tipping.</span></div></div>
+      <div class="rule"><div class="ri">↔️</div><div><b>Wide wheelbase</b><span>A bigger footprint means the CoM has farther to travel before it tips.</span></div></div>
+      <div class="rule"><div class="ri">🔺</div><div><b>Rigid &amp; triangulated</b><span>Gussets and cross-braces keep the frame from racking (Part 2.4).</span></div></div>
+      <div class="rule"><div class="ri">📐</div><div><b>Frame perimeter</b><span>The footprint that bumpers wrap and that the rules size limits apply to.</span></div></div>
+    </div>
+    <div class="note indigo">
+      <div class="nh">The battery is your friend down low</div>
+      <p>The single heaviest thing on the robot is usually the battery, so where you put it matters a lot. Mount it low and centered and it pulls the center of mass right down where you want it. Teams that stack a tall arm or elevator pay for it by widening the base or weighting the bottom. There's always a tradeoff between reach (tall) and stability (low and wide), and the frame is where you make that call.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="2">
+        <div class="qn">Question 1</div>
+        <div class="qt">What causes a robot to tip over?</div>
+        <div class="opts">
+          <button class="opt">A weak battery</button>
+          <button class="opt">Too many wheels</button>
+          <button class="opt">Its center of mass swinging out past a wheel, usually from hard acceleration or stopping</button>
+        </div>
+        <div class="explain">Tipping happens when the center of mass moves outside the wheelbase. Accelerating or stopping fast adds inertia that pulls the CoM toward the edge, and past a wheel it topples.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 2</div>
+        <div class="qt">Which two changes make a robot harder to tip?</div>
+        <div class="opts">
+          <button class="opt">Lower the center of mass and widen the wheelbase</button>
+          <button class="opt">Raise the CoM and narrow the base</button>
+          <button class="opt">Add more weight up high</button>
+        </div>
+        <div class="explain">A low CoM and a wide base both increase how far the center of mass has to travel before it passes a wheel. Tall and narrow is exactly the recipe for tipping.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 3</div>
+        <div class="qt">Where should the heavy battery usually go?</div>
+        <div class="opts">
+          <button class="opt">As high as possible</button>
+          <button class="opt">Low and centered, to pull the center of mass down</button>
+          <button class="opt">It doesn't matter</button>
+        </div>
+        <div class="explain">The battery is often the heaviest part, so mounting it low and centered drops the overall center of mass, making the robot much more stable.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 5 · 01 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Frame</b><span>The structural base for everything.</span></div>
+        <div class="gl"><b>Center of mass</b><span>Where the weight balances.</span></div>
+        <div class="gl"><b>Tipping</b><span>CoM passes outside the wheels.</span></div>
+        <div class="gl"><b>Low CoM</b><span>Heavy parts down low.</span></div>
+        <div class="gl"><b>Wide base</b><span>Bigger footprint, more stable.</span></div>
+        <div class="gl"><b>Frame perimeter</b><span>Footprint the rules limit.</span></div>
+      </div>
+      <a class="next" href="build-lesson-23.html">
+        <div class="n-eyebrow">Up next · Part 5 · 02</div>
+        <h3>COTS Drivetrains</h3>
+        <p>Most teams don't design a drivetrain from scratch. Kit chassis and west-coast drives get you rolling fast, and a clever trick called drop center makes them turn.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="build-lesson-21.html">← Part 4 · 06 · Shooters</a>
+    <a class="map" href="build.html">Course map</a>
+    <a href="build-lesson-23.html">Part 5 · 02 · COTS Drivetrains →</a>
+  </nav>
+
+</div>
+
+<footer>Fabricate · Building an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var cv=document.getElementById('cv'), ctx=cv.getContext('2d'), W=0,H=0,dpr=1;
+  function fit(){ var r=cv.getBoundingClientRect(); if(!r.width)return; dpr=window.devicePixelRatio||1; cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr); ctx.setTransform(dpr,0,0,dpr,0,0); W=r.width; H=r.height; }
+  fit();
+  var hPct=50, bPct=50, aPct=40, lean=0;
+  function step(){
+    var groundY=H*0.82;
+    var halfBase = (40 + bPct/100*70); // px
+    var comH = (24 + hPct/100*110);    // px
+    var ag = aPct/100;                 // a/g
+    var margin = halfBase/comH;        // max a/g before tipping
+    var target;
+    if(ag < margin){ target = (ag/margin)*0.20; } // small lean
+    else { target = 1.1; } // tip over
+    lean += (target-lean)*0.12;
+    draw(groundY, halfBase, comH, ag, margin);
+    var st = ag<margin*0.7?'stable':(ag<margin?'wobbling':'TIPPING');
+    var rs=document.getElementById('roSt'); rs.textContent=st; rs.className='v '+(st==='stable'?'green':(st==='wobbling'?'amber':'red'));
+    document.getElementById('stTag').textContent=st;
+    requestAnimationFrame(step);
+  }
+  function draw(groundY, halfBase, comH, ag, margin){
+    ctx.clearRect(0,0,W,H);
+    var cx=W*0.42;
+    // ground
+    ctx.strokeStyle='#5E6F8E'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(0,groundY); ctx.lineTo(W,groundY); ctx.stroke();
+    // pivot = front wheel (right contact) when tipping forward
+    var pivotX=cx+halfBase, pivotY=groundY;
+    ctx.save(); ctx.translate(pivotX,pivotY); ctx.rotate(-lean); ctx.translate(-pivotX,-pivotY);
+    // body
+    var bodyH=comH+18;
+    ctx.fillStyle='#1B2540'; ctx.strokeStyle='#33415e'; ctx.lineWidth=2;
+    ctx.fillRect(cx-halfBase, groundY-bodyH, halfBase*2, bodyH); ctx.strokeRect(cx-halfBase, groundY-bodyH, halfBase*2, bodyH);
+    // wheels
+    [cx-halfBase, cx+halfBase].forEach(function(wx){ ctx.beginPath(); ctx.arc(wx, groundY, 9, 0, Math.PI*2); ctx.fillStyle='#0B1322'; ctx.fill(); ctx.strokeStyle='#92A2BE'; ctx.lineWidth=2; ctx.stroke(); });
+    // CoM
+    var comX=cx, comY=groundY-comH;
+    ctx.beginPath(); ctx.arc(comX,comY,8,0,Math.PI*2); ctx.fillStyle='#FFB020'; ctx.fill(); ctx.strokeStyle='#2a1a00'; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.fillStyle='#FFB020'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText('CoM', comX, comY-12);
+    // effective weight vector (gravity down + inertia right)
+    var vx=ag*60, vy=60;
+    ctx.strokeStyle='#FF6B6B'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(comX,comY); ctx.lineTo(comX+vx, comY+vy); ctx.stroke();
+    ctx.fillStyle='#FF6B6B'; var a=Math.atan2(vy,vx); ctx.beginPath(); ctx.moveTo(comX+vx,comY+vy); ctx.lineTo(comX+vx-Math.cos(a-0.4)*8, comY+vy-Math.sin(a-0.4)*8); ctx.lineTo(comX+vx-Math.cos(a+0.4)*8, comY+vy-Math.sin(a+0.4)*8); ctx.closePath(); ctx.fill();
+    ctx.restore();
+    ctx.fillStyle='#5E6F8E'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText('inertia + gravity', cx, groundY+18);
+  }
+  document.getElementById('h').addEventListener('input',function(e){ hPct=+e.target.value; document.getElementById('hv').textContent=hPct+'%'; document.getElementById('roH').textContent=hPct<40?'low':hPct<70?'mid':'high'; });
+  document.getElementById('b').addEventListener('input',function(e){ bPct=+e.target.value; document.getElementById('bv').textContent=bPct+'%'; document.getElementById('roB').textContent=bPct<45?'narrow':bPct<75?'mid':'wide'; });
+  document.getElementById('a').addEventListener('input',function(e){ aPct=+e.target.value; document.getElementById('av').textContent=(aPct/100).toFixed(1)+' g'; });
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
+  requestAnimationFrame(step);
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="build:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

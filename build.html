@@ -178,11 +178,11 @@
     {code:"5", title:"The Drivetrain", sub:"The base that moves",
      blurb:"The drivetrain is the foundation everything bolts to. Frames, kit drivetrains, wheels and traction, swerve modules, and the bumpers the rules demand.",
      lessons:[
-       {n:1, title:"The Frame / Chassis", desc:"The structural box every mechanism mounts to.", file:null},
-       {n:2, title:"COTS Drivetrains", desc:"Kit chassis, tank, and west-coast drive.", file:null},
-       {n:3, title:"Wheels & Traction", desc:"Tread, durometer, and pushing power.", file:null},
-       {n:4, title:"Swerve Modules", desc:"The mechanical side of the modern drivetrain.", file:null},
-       {n:5, title:"Bumpers", desc:"Building the rules-legal bumpers that protect the robot.", file:null}
+       {n:1, title:"The Frame / Chassis", desc:"The structural box every mechanism mounts to.", file:"build-lesson-22.html"},
+       {n:2, title:"COTS Drivetrains", desc:"Kit chassis, tank, and west-coast drive.", file:"build-lesson-23.html"},
+       {n:3, title:"Wheels & Traction", desc:"Tread, durometer, and pushing power.", file:"build-lesson-24.html"},
+       {n:4, title:"Swerve Modules", desc:"The mechanical side of the modern drivetrain.", file:"build-lesson-25.html"},
+       {n:5, title:"Bumpers", desc:"Building the rules-legal bumpers that protect the robot.", file:"build-lesson-26.html"}
      ]},
     {code:"6", title:"Electrical & Pneumatics", sub:"Powering the machine",
      blurb:"A wired robot is a powered robot. The battery, breaker, and power distribution feed the motors; pneumatics add fast, simple, on-off motion with air.",
@@ -212,7 +212,7 @@
      ]}
   ];
 
-  var NEXT_ID="5-1";
+  var NEXT_ID="6-1";
   var STORE_KEY="build:done";
   function loadDone(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY))||{}; }catch(e){ return {}; } }
   function saveDone(d){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(d)); }catch(e){} }
