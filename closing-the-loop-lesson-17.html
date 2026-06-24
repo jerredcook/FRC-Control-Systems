@@ -253,6 +253,10 @@ motor.<span class="fn">setControl</span>(request.<span class="fn">withPosition</
   </section>
 
   <section>
+    <div class="note teal">
+      <div class="nh">Going further &middot; optional</div>
+      <p>Plain Motion Magic asks you to guess a cruise velocity, but a heavy mechanism can never actually reach the speed you picked, so it spends the whole move accelerating and the profile is a fib. Motion Magic Expo skips the guess: from kV and kA it predicts the real speed-vs-time curve, the way a loaded bike trailer eases toward its own top speed instead of a number you wrote down. Try this thought experiment: if you doubled the load on the carriage, which one would need you to re-pick the cruise velocity, and which would adjust on its own?</p>
+    </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>
     <p>Pick an answer to see why.</p>

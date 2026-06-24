@@ -195,6 +195,10 @@
   </section>
 
   <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>One test that passes proves almost nothing; the trick is choosing inputs that would actually catch a mistake. For the gear math, try adding tests for the tricky edges: zero rotations, a negative direction, a ratio that is not a whole number. A real gotcha lives in that tolerance argument too: assertEquals on doubles needs a small wiggle room (here 1e-6) because <span class="k">0.1 + 0.2</span> is not exactly <span class="k">0.3</span> in floating point. What happens to your test if you make that tolerance far too loose?</p>
+    </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>
     <p>Pick an answer to see why.</p>

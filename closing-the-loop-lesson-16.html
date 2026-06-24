@@ -262,6 +262,10 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(cf
   </section>
 
   <section>
+    <div class="note teal">
+      <div class="nh">Going further &middot; optional</div>
+      <p>The device holds more than one gain set: there is a Slot0, Slot1, and Slot2, and a control request can name which to use with <span class="k">withSlot</span>. That lets one mechanism switch gains on the fly, like shifting a bike into a different gear, say gentle gains for holding a game piece and aggressive ones for a fast empty move. Worth chewing on: the <span class="k">PositionVoltage</span> request also carries its own feedforward field you can add per command. When would you want a feedforward that changes move to move instead of one baked into Slot0?</p>
+    </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>
     <p>Pick an answer to see why.</p>

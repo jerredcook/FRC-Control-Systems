@@ -324,6 +324,10 @@ motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="output" 
   </section>
 
   <section>
+    <div class="note teal">
+      <div class="nh">Going further &middot; optional</div>
+      <p>The lesson fixes noisy-derivative pain by keeping kD modest and filtering, but there is a sharper way to think about it. A raw derivative trusts the very newest sensor reading the most, which is also the jitteriest, so a common trick is to blend in older readings with a low-pass filter on the D term. That smoothing buys you calm at a price: it adds a little lag, so the brake reacts a beat late. Try sketching why every filter that quiets noise also slows your reaction - that tradeoff between smoothness and responsiveness shows up everywhere in control.</p>
+    </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>
     <p>Pick an answer to see why.</p>

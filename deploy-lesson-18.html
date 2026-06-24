@@ -196,6 +196,10 @@ motor.<span class="fn">setPosition</span>(<span class="num">0</span>);</pre>
   </section>
 
   <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>A motor's built-in encoder counts turns of the <em>motor</em>, so it only knows the mechanism's position if the gearbox never slips and you tell it where zero is at startup. That is why arms often add a second sensor, an absolute encoder on the mechanism itself, that reports the true angle even right after a power cycle. Question to sit with: if you call <span class="k">setPosition(0)</span> at boot but the arm was resting at 30 degrees, what does your code now believe, and how could an absolute encoder seed the right starting value instead?</p>
+    </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>
     <p>Pick an answer to see why.</p>

@@ -200,6 +200,10 @@
   </section>
 
   <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>Here is a gotcha that bites teams: an inline factory like <span class="k">runOnce(...)</span> or <span class="k">run(...)</span> built directly on a subsystem usually adds that subsystem as a requirement for you, but a bare <span class="k">Commands.run(() -&gt; ...)</span> with no subsystem requires nothing, so two of them can quietly fight over the same motor. Try writing the same simple action two ways and ask: which one did the scheduler protect, and how would you confirm a command's requirements before trusting it?</p>
+    </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>
     <p>Pick an answer to see why.</p>

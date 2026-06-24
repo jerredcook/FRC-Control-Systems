@@ -180,6 +180,10 @@ driver.<span class="fn">rightBumper</span>().<span class="fn">whileTrue</span>(d
   </section>
 
   <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>Because a Trigger is any boolean, you can combine them with <span class="k">and</span>, <span class="k">or</span>, and <span class="k">negate</span>, the same way you join two conditions in an if-statement. Try binding an action to "X is held <em>and</em> the intake is loaded": <span class="k">driver.x().and(intake::hasGamePiece).onTrue(score())</span>. Question to chew on: a press-and-release happens in an instant, so how does the scheduler notice the exact loop a Trigger flips from false to true, and what would <span class="k">whileTrue</span> do if the condition never goes false?</p>
+    </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>
     <p>Pick an answer to see why.</p>

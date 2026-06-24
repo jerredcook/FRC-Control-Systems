@@ -336,6 +336,10 @@ controller.<span class="fn">setPID</span>(<input class="blank" data-ans="kp" ari
   </section>
 
   <section>
+    <div class="note teal">
+      <div class="nh">Going further &middot; optional</div>
+      <p>The hand-tuning order here is reliable, but there is a classic recipe worth knowing called the Ziegler-Nichols method: you raise kP alone until the mechanism oscillates steadily and never dies down, then read off that critical gain and the period of the swing, and plug both into a table that suggests starting kI and kD. It is rarely the final tune on a robot because deliberately driving a real mechanism to the edge of instability is rough on hardware, but it is a great way to feel where the limits are. The deeper idea: the gain and frequency at which a system rings tell you a lot about how fast you can safely push it.</p>
+    </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>
     <p>Pick an answer to see why.</p>

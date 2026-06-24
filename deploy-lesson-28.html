@@ -189,6 +189,10 @@
   </section>
 
   <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>The best target is whichever tag is most centered, but that is not always the one you want. If two tags are in view and you only trust tag 7, filter the results yourself: loop over <span class="k">result.getTargets()</span> and pick the one whose <span class="k">getFiducialId()</span> matches, instead of taking <span class="k">getBestTarget()</span> blindly. Here is a question to chew on: what should your code do for the split second when the camera sees no tag at all, hold the last reading, or treat it as "no answer"?</p>
+    </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>
     <p>Pick an answer to see why.</p>

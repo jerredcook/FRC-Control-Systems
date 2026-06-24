@@ -188,6 +188,10 @@ elevator.<input class="blank" data-ans="setposition" aria-label="blank" autocomp
   </section>
 
   <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>Reading get() once per loop can miss a switch that flips for only a few milliseconds, like a fast game piece zipping past a beam break. WPILib's Counter and asynchronous interrupts catch those quick edges in hardware so nothing slips through between loops. Here is one to chew on: if your robot loop runs 50 times a second, how long could a game piece block the beam and still never be seen by a plain get() check?</p>
+    </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>
     <p>Pick an answer to see why.</p>

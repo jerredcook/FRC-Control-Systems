@@ -201,6 +201,10 @@ neo.<span class="fn">setVoltage</span>(<span class="num">6.0</span>);</pre>
   </section>
 
   <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>There is a ceiling on <span class="k">setVoltage</span>: you can ask for 6 volts all match, but only while the battery can actually supply it. Late in a match a sagging battery may sit near 10 volts under load, so a command for 11 saturates and you silently lose authority right when you need it. Worth pondering: how would you detect that you are commanding more than the battery can give, and why does that make a current limit on each motor part of keeping the whole robot's voltage healthy?</p>
+    </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>
     <p>Pick an answer to see why.</p>

@@ -171,6 +171,10 @@
   </section>
 
   <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>Try adding a method like <span class="k">atGoal()</span> to your subsystem that returns a boolean (true when the sensor reading is within a small tolerance of the goal). A command can then call it from <span class="k">isFinished()</span>, and a Trigger can watch it. Question to sit with: if <span class="k">periodic()</span> both reads the sensor and drives the motor, what is the right order to do those two steps in, and does it matter?</p>
+    </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>
     <p>Pick an answer to see why.</p>

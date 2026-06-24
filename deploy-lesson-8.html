@@ -193,6 +193,10 @@
   </section>
 
   <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>Here is a gotcha that bites teams: an object variable does not hold the object itself, it holds a reference to it, like a luggage tag pointing at one bag. So if you write <span class="k">Motor b = a;</span>, both names tag the <em>same</em> Motor, and changing <span class="k">b.canId</span> also changes <span class="k">a.canId</span>. Try it in the demo logic in your head, then look up "reference vs value" and "null pointer" to see why an untouched object reference starts out pointing at nothing.</p>
+    </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>
     <p>Pick an answer to see why.</p>

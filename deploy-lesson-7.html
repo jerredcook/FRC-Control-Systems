@@ -177,6 +177,10 @@
   </section>
 
   <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>If you already code, try writing the deadband as a single line with the <strong>ternary</strong> operator: <span class="k">return Math.abs(x) &lt; tol ? 0.0 : x;</span>. Then chew on this: a hard cutoff makes the output jump from 0 straight to whatever x is, so the robot lurches the instant you cross the edge. How might you reshape the math so the output eases in smoothly from the deadband instead of snapping? Search "scaled deadband" to compare your idea.</p>
+    </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>
     <p>Pick an answer to see why.</p>

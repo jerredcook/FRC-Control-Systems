@@ -192,6 +192,10 @@
   </section>
 
   <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>The switch above mixes two jobs: deciding what each state does, and deciding when to change state. A cleaner pattern gives every state its own onEnter, run, and the transition rules, so adding a new state does not mean editing one giant switch. Here is a what-if to chew on: real robots need an escape hatch from any state, for example a driver eject button that forces you back to IDLE from anywhere. Where would that fit, and how do you keep it from quietly hiding a real bug?</p>
+    </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>
     <p>Pick an answer to see why.</p>

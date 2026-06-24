@@ -284,6 +284,10 @@
   </section>
 
   <section>
+    <div class="note teal">
+      <div class="nh">Going further &middot; optional</div>
+      <p>Here is a question to chew on: what happens if your periodic() takes longer than 20 ms to finish, the way a bike chain that skips means you miss a pedal stroke? The roboRIO cannot start the next beat until this one ends, so a slow loop quietly falls behind and your control gets choppy. This is called a loop overrun, and real teams watch for the warning it prints. Try to picture which line in a periodic() would be the slowest, and you have found the first thing to optimize.</p>
+    </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>
     <p>Pick an answer to see why.</p>

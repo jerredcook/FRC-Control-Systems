@@ -187,6 +187,10 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(cf
   </section>
 
   <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>There are two current limits worth knowing apart: the supply limit (amps pulled from the battery, what protects against brownout) and the stator limit (amps through the motor itself, what protects against burning it up when a mechanism stalls). Try reasoning about why a jammed intake can be fine on the battery yet still cook a motor. And here is the deeper habit: a brownout is not a freak event, it is a budget problem. Could you add up the worst-case draw of every mechanism running at once and check it fits the battery before you ever drive?</p>
+    </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>
     <p>Pick an answer to see why.</p>

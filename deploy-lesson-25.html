@@ -186,6 +186,10 @@ odometry.<span class="fn">resetPosition</span>(gyro.<span class="fn">getRotation
   </section>
 
   <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>Notice the demo's estimate drifts even though the gyro is "perfect" here; in real life wheel slip during a hard collision is a big culprit, since a spinning-but-not-gripping wheel reports distance the robot never traveled. That is why pose estimators trust the gyro for heading far more than they trust the wheels, and why a SwerveDrivePoseEstimator lets you weight each measurement by how much you believe it. Here is a question to sit with: if a defender slams your robot and a wheel skids, would your X-Y position or your heading drift more, and why?</p>
+    </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>
     <p>Pick an answer to see why.</p>

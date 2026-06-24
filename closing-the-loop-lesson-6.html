@@ -319,6 +319,10 @@ motor.<span class="fn">setVoltage</span>(feedforward + <input class="blank" data
   </section>
 
   <section>
+    <div class="note teal">
+      <div class="nh">Going further &middot; optional</div>
+      <p>Gravity feedforward for an elevator is one constant kG, but think about an arm instead of an elevator: an arm hanging straight down needs almost no holding voltage, while an arm held straight out sideways needs the most, and at any angle in between it needs something proportional to how far it is tipped over. So an arm's gravity term is not a constant - it scales with the cosine of the arm angle, which is exactly why WPILib has a separate ArmFeedforward whose kG gets multiplied by cos(angle). Here is the question to sit with: why does a leaning bookshelf push hardest against your hand when it is halfway to falling, not when it has barely started to tip?</p>
+    </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>
     <p>Pick an answer to see why.</p>

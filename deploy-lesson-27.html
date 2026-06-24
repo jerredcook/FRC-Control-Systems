@@ -193,6 +193,10 @@ chooser.<span class="fn">addOption</span>(<span class="st">"Four Piece"</span>, 
   </section>
 
   <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>The very first step of an auto is the easiest to forget: you have to tell odometry where the robot physically starts, or every path will be offset by however far off your assumed start was. PathPlanner can seed the starting pose from the path's first point for you, and a vision fix off an AprilTag can correct it the instant a camera sees a tag. Try this thought experiment: if you place the robot 30 centimeters left of where the code thinks it starts, where does it end up after a flawless three-piece auto, and which single line of code would have fixed it?</p>
+    </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>
     <p>Pick an answer to see why.</p>

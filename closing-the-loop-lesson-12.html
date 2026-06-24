@@ -257,6 +257,10 @@ motor.<span class="fn">setVoltage</span>( <input class="blank" data-ans="ffvolts
   </section>
 
   <section>
+    <div class="note teal">
+      <div class="nh">Going further &middot; optional</div>
+      <p>The kS term is the voltage needed to break static friction, like the extra shove a bike needs to start rolling from a dead stop. Feedforward adds it in the direction you are moving, which is why kS depends on the sign of velocity, not its size. Here is the tricky part: at a perfect standstill, which way should kS point? Strong feedforward with light PID is what lets a competition arm slam to a new angle and stop dead, instead of crawling in while the error slowly shrinks.</p>
+    </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>
     <p>Pick an answer to see why.</p>

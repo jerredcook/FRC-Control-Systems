@@ -241,6 +241,10 @@ drive.<span class="fn">drive</span>(<span class="num">0</span>, <span class="num
   </section>
 
   <section>
+    <div class="note teal">
+      <div class="nh">Going further &middot; optional</div>
+      <p>Pure proportional auto-aim hides a flaw that only shows up against a moving target: because the turn rate is only kP times the current offset, the robot is always chasing where the target was a frame ago, not where it is now, so it forever lags a hair behind. The camera's tens-of-milliseconds delay makes that lag worse. One fix is to aim at where the target is heading rather than where it sits, the way you lead a thrown ball with your glove instead of reaching for where it already passed. Worth chewing on: against a target drifting sideways at a steady speed, would a plain P loop ever truly settle on zero offset, or hold a small steady miss?</p>
+    </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>
     <p>Pick an answer to see why.</p>

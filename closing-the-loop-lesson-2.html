@@ -312,6 +312,10 @@ motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="output" 
   </section>
 
   <section>
+    <div class="note teal">
+      <div class="nh">Going further &middot; optional</div>
+      <p>The lesson says droop equals g / kP, but notice that depends on gravity being a constant pull. Try this thought experiment: what is the steady-state error of a pure-P controller driving a flywheel up to a target speed with no gravity and only friction? The answer is not zero, because friction still demands some voltage to hold speed, so P still needs leftover error to make it. The deeper rule is that pure proportional control leaves an offset whenever the system needs a nonzero output to sit still, which control theory calls a type-0 system.</p>
+    </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>
     <p>Pick an answer to see why.</p>

@@ -188,6 +188,10 @@
   </section>
 
   <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>Try this: add <span class="k">aim.setTolerance(1.0)</span> when you build the controller, then let <span class="k">isFinished()</span> return <span class="k">aim.atSetpoint()</span> instead of comparing tx yourself, so the lock test and the controller share one number. Then think about the harder case: if the tag is to your right but a wall is in the way, a pure aim loop spins forever. How would you give up gracefully, for example a timeout, so the robot is never stuck mid-match?</p>
+    </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>
     <p>Pick an answer to see why.</p>

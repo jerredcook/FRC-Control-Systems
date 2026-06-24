@@ -178,6 +178,10 @@ autos.<span class="fn">add</span>(scoreThenLeave);              <span class="cm"
   </section>
 
   <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>A plain enum can carry data too. Try giving your <span class="k">State</span> a constructor field, like a target shooter RPM for each state (<span class="k">SHOOTING(60)</span>, <span class="k">IDLE(0)</span>), so <span class="k">state.rpm</span> reads the number instead of a switch. Question to chew on: once states hold their own values, what work is left for the switch to do, and could a Map from state to action replace it entirely?</p>
+    </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>
     <p>Pick an answer to see why.</p>

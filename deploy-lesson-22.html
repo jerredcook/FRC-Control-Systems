@@ -230,6 +230,10 @@ rpmPub.<span class="fn">set</span>(shooter.<span class="fn">getRPM</span>());</p
   </section>
 
   <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>A common trap: a value you putNumber() every loop can NOT be tuned from the dashboard, because your code overwrites whatever you typed on the very next loop. For a live-tunable number, publish it once with a default and only read it back, or use WPILib's Preferences, which remembers the value across reboots. Try wiring up a tunable kP that survives a power cycle. Why would a number that resets to its default every time you restart the robot be a headache on competition day?</p>
+    </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>
     <p>Pick an answer to see why.</p>

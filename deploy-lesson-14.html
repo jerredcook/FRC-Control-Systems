@@ -179,6 +179,10 @@ drive.<span class="fn">withTimeout</span>(<span class="num">3</span>);   <span c
   </section>
 
   <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>Compositions follow the same one-owner rule as single commands: the group inherits the requirements of everything inside it. That means you cannot put two commands that both need the <em>same</em> subsystem inside one <span class="k">parallel</span>, WPILib will throw an error when you build it, because they would fight over that mechanism. Try to picture a routine where this rule saves you, and ask: how would you run "drive while also driving slowly" if both truly need the drivetrain?</p>
+    </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>
     <p>Pick an answer to see why.</p>

@@ -184,6 +184,10 @@
   </section>
 
   <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>The scheduler runs on the same 20 ms heartbeat as a bike wheel ticking past a sensor: steady, but not free. If one command's <span class="k">execute()</span> does something slow (a long loop, a blocking call), it eats into that 20 ms and the whole robot stutters, a real bug FRC teams hit called loop overrun. Worth pondering: how would you measure where the time goes, and why does that make heavy work like vision belong off the main thread?</p>
+    </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>
     <p>Pick an answer to see why.</p>

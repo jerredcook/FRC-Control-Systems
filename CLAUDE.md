@@ -33,11 +33,11 @@ The course *name* and its *file prefix* don't always match. Keep this map handy:
 
 ### Companions (Control course)
 
-- `glossary.html` — terms reference
-- `certificate.html` — completion certificate
-- `worksheet.html` — interactive tuning worksheet: enter a mechanism's numbers → paste-ready Phoenix 6 Java + a printable gains record
-- `closing-the-loop-troubleshooting.html` — troubleshooting field guide
-- `templates/` — complete, paste-ready WPILib + CTRE Phoenix 6 Java subsystems (`Elevator.java`, `Arm.java`, `Flywheel.java`, `Constants.java`) with `// TODO` markers, capstone code from Part IV
+- `glossary.html` - terms reference
+- `certificate.html` - completion certificate
+- `worksheet.html` - interactive tuning worksheet: enter a mechanism's numbers → paste-ready Phoenix 6 Java + a printable gains record
+- `closing-the-loop-troubleshooting.html` - troubleshooting field guide
+- `templates/` - complete, paste-ready WPILib + CTRE Phoenix 6 Java subsystems (`Elevator.java`, `Arm.java`, `Flywheel.java`, `Constants.java`) with `// TODO` markers, capstone code from Part IV
 
 ## Architecture & conventions
 
@@ -57,8 +57,8 @@ Lesson entries look like:
 - omit `file` → renders as a "Planned" card (greyed out).
 - `link:` instead of `file:` → a cross-course card (e.g. Deploy Part 5 → Closing the Loop), set `control:true` on the part.
 
-Part codes differ by course: Control uses Roman numerals (`I`–`V`); Deploy and
-Fabricate use numbers (`1`–`8`).
+Part codes differ by course: Control uses Roman numerals (`I` to `V`); Deploy and
+Fabricate use numbers (`1` to `8`).
 
 ### Progress persistence
 
@@ -77,7 +77,12 @@ Each lesson is one standalone HTML file:
 - Shared design system via CSS `:root` variables (`--bg`, `--panel`, `--teal`,
   `--amber`, `--indigo`, `--ink`, mono + sans font stacks). Per-course accent color.
 - Hand-written `<canvas>` physics simulations (elevator, arm, flywheel, swerve,
-  vision, etc.) — no libraries.
+  vision, etc.), no libraries.
+- A **"Going further · optional"** `.note` box before the quiz, holding stretch
+  content for advanced students. Every lesson has one; it reuses the course-accent
+  `.note` variant (`teal` for Control, `indigo` for Code/Build). This is how the
+  site serves all ability levels: recaps/glossary for strugglers, this box for the
+  advanced.
 - A quiz block (`#quiz` with `.q` / `.opt` / `data-correct` / `.explain`).
 - An "Up next" card linking the following lesson, and a `.coursenav` footer linking
   back to the hub ("map").
@@ -92,7 +97,7 @@ Motion Magic → validate.** Feedforward before feedback, always.
 ## Writing style (important)
 
 - **No em dashes anywhere.** Use a hyphen with spaces, a comma, or a period instead.
-- **Don't rely on double spaces between sentences** in HTML — they collapse. Single space.
+- **Don't rely on double spaces between sentences** in HTML, they collapse. Single space.
 - **Audience is kids who don't drive yet.** Prefer bike and everyday analogies over
   car/driving analogies.
 

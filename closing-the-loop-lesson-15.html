@@ -271,6 +271,10 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(<i
   </section>
 
   <section>
+    <div class="note teal">
+      <div class="nh">Going further &middot; optional</div>
+      <p>The stator limit caps current right at the windings, but it also caps torque, since torque rises with current, like how hard you can push the pedals sets how fast you can climb a hill. Set it too low and your arm cannot lift its own weight; too high and you cook the motor or pop a breaker. A real edge case competitive teams hit: apply() returns a status code, and if a device is missing or miswired the config silently never lands. The careful move is to check that code, or call apply() in a small retry loop. What would a robot do if its current limits never actually applied?</p>
+    </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>
     <p>Pick an answer to see why.</p>
