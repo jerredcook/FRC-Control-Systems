@@ -7,13 +7,13 @@ with no install.
 
 ### 🌐 Live: https://jerredcook.github.io/FRC-Control-Systems/
 
-Three courses - three pillars:
+Three courses - three pillars - **100 interactive lessons, all complete:**
 
 | | Course | Covers | Status |
 |---|--------|--------|--------|
 | 🎯 **Control** | **Closing the Loop** | Feedback, PID, feedforward, CTRE Phoenix 6, tuning, swerve, vision, state-space | ✅ **Complete - 24 lessons** + glossary, certificate, worksheet, field guide |
-| 🎮 **Code** | **Deploy** | Toolchain, Java, command-based robots, hardware, autonomous, vision, pro practices | 🚧 **In progress** - full curriculum mapped (8 parts) |
-| 🔧 **Build** | **Fabricate** | CAD, motors & gearboxes, drivetrains, mechanisms, electrical, pneumatics, manufacturing | 📋 Planned |
+| 🎮 **Code** | **Deploy** | Toolchain, Java, command-based robots, hardware, autonomous, vision, pro practices | ✅ **Complete - 36 lessons** across 8 parts |
+| 🔧 **Build** | **Fabricate** | CAD, motors & gearboxes, drivetrains, mechanisms, electrical, pneumatics, manufacturing | ✅ **Complete - 40 lessons** across 8 parts |
 
 The pillars connect: **Deploy**'s "Make It Move" unit *is* the **Closing the Loop**
 course, so the control material is shared rather than rebuilt.
@@ -23,8 +23,9 @@ course, so the control material is shared rather than rebuilt.
 Open **`index.html`** (the academy landing) in any browser, or visit the live
 site. Pick a course:
 
-- **`closing-the-loop.html`** - the Control course hub (complete).
-- **`code.html`** - the Code course hub (curriculum mapped; lessons in progress).
+- **`code.html`** - the Code course hub: **Deploy** (36 lessons).
+- **`build.html`** - the Build course hub: **Fabricate** (40 lessons).
+- **`closing-the-loop.html`** - the Control course hub: **Closing the Loop** (24 lessons).
 
 No install, no build step, no internet required. Progress is saved per-course in
 your browser; finishing a lesson's quiz marks it done automatically.

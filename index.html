@@ -105,7 +105,8 @@
       <h3>Deploy</h3>
       <div class="sub">Programming an FRC robot</div>
       <div class="desc">From your first line of Java to a full command-based robot - the toolchain, hardware, autonomous, vision, and the pro practices that win.</div>
-      <div class="foot"><span class="pill now" id="codePill">Building now</span><span class="go">Enter →</span></div>
+      <div class="foot"><span class="pill done" id="codePill">36 lessons · Complete</span><span class="go">Enter →</span></div>
+      <div class="bar"><i id="codeBar"></i></div>
     </a>
 
     <a class="course live" id="cBuild" href="build.html" style="--accent:var(--amber)">
@@ -114,7 +115,8 @@
       <h3>Fabricate</h3>
       <div class="sub">Building an FRC robot</div>
       <div class="desc">The shop, materials, gears and mechanisms, the drivetrain, electrical, pneumatics, CAD, and the build season - the physical machine, end to end.</div>
-      <div class="foot"><span class="pill now" id="bldPill">Building now</span><span class="go">Enter →</span></div>
+      <div class="foot"><span class="pill done" id="bldPill">40 lessons · Complete</span><span class="go">Enter →</span></div>
+      <div class="bar"><i id="bldBar"></i></div>
     </a>
 
     <a class="course live" id="cControl" href="closing-the-loop.html" style="--accent:var(--teal)">
@@ -146,14 +148,22 @@
 <script>
 (function(){
   "use strict";
-  // reflect Closing the Loop progress on its card
-  try{
-    var d=JSON.parse(localStorage.getItem("closing-the-loop:done"))||{};
-    var done=Object.keys(d).filter(function(k){return !!d[k];}).length, total=24;
-    var bar=document.getElementById("ctlBar"); if(bar) bar.style.width=Math.min(100,Math.round(done/total*100))+"%";
-    if(done>0 && done<total){ document.getElementById("ctlPill").textContent=done+" / "+total+" done"; document.getElementById("ctlPill").className="pill now"; }
-    else if(done>=total){ document.getElementById("ctlPill").textContent="✓ Complete · 24 lessons"; }
-  }catch(e){}
+  // reflect each course's saved progress on its card
+  function reflect(key, total, pillId, barId){
+    try{
+      var d=JSON.parse(localStorage.getItem(key))||{};
+      var done=Object.keys(d).filter(function(k){return !!d[k];}).length;
+      var pct=Math.min(100,Math.round(done/total*100));
+      var bar=document.getElementById(barId); if(bar) bar.style.width=pct+"%";
+      var pill=document.getElementById(pillId); if(!pill) return;
+      if(done>0 && done<total){ pill.textContent=done+" / "+total+" done"; pill.className="pill now"; }
+      else if(done>=total){ pill.textContent="✓ Complete · "+total+" lessons"; pill.className="pill done"; }
+      // done===0 keeps the default "N lessons · Complete" label
+    }catch(e){}
+  }
+  reflect("deploy:done", 36, "codePill", "codeBar");
+  reflect("build:done", 40, "bldPill", "bldBar");
+  reflect("closing-the-loop:done", 24, "ctlPill", "ctlBar");
 })();
 </script>
 </body>
