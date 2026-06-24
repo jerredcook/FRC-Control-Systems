@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fabricate · Part 6.4 - Wiring Best Practices</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  canvas.pull{display:block;width:100%;height:220px}
+  .readouts{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:17px;font-weight:600;margin-top:3px;color:var(--muted)}
+  .ro .v.green{color:var(--green)} .ro .v.red{color:var(--red)}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .toggle{display:flex;border:1px solid var(--line-2);border-radius:9px;overflow:hidden}
+  .toggle button{border:none;background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11px;padding:9px 12px;cursor:pointer;transition:.12s;border-right:1px solid var(--line-2)}
+  .toggle button:last-child{border-right:none}
+  .toggle button.active{background:var(--indigo);color:#2a1503;font-weight:700}
+  .tl{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);align-self:center;margin-right:2px}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;padding:10px 16px;border-radius:8px;cursor:pointer;transition:.12s;margin-left:auto}
+  .btn.primary{background:linear-gradient(180deg,#ffb37e,var(--indigo));color:#2a1503;font-weight:700;border:none}
+  .btn:hover{filter:brightness(1.08)}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(255,138,76,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .rules{display:grid;gap:10px;margin:18px 0} @media(min-width:560px){.rules{grid-template-columns:1fr 1fr}}
+  .rule{display:flex;gap:11px;border:1px solid var(--line);border-radius:11px;padding:13px 14px;background:var(--panel)}
+  .rule .ri{font-size:20px;flex:0 0 auto}
+  .rule b{display:block;font-size:14.5px;color:var(--text);margin-bottom:2px}
+  .rule span{font-size:13.5px;color:var(--muted)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:108px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="build.html"><span class="dot"></span><span class="name">Fabricate</span></a>
+    <div class="top-meta">Part 6 · 04 / 05 · Electrical</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 6 · 04</b> Electrical &amp; Pneumatics</div>
+    <div class="eyebrow">Wiring Best Practices</div>
+    <h1>Wiring is a<br><span class="accent">craft</span>.</h1>
+    <p class="dek">A robot takes thousands of jolts in a match. The difference between one that runs all season and one that mysteriously dies mid-match is rarely the design, it's the wiring. A solid crimp and a little strain relief are what keep a connection alive when the robot gets slammed.</p>
+  </div>
+
+  <section>
+    <p class="lead">Tug on it. Does it hold?</p>
+    <p>The real test of a connection is the <strong>pull test</strong>: give the wire a firm tug. A proper <strong>crimp</strong> grips the copper tightly, and <strong>strain relief</strong> (securing the wire so a yank pulls on the anchor, not the joint) keeps the force off the connection. Set the connection quality below and pull.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Connection pull test</span><span class="demo-tag" id="tag">ready</span></div>
+      <canvas class="pull" id="cv"></canvas>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Connection</div><div class="v" id="roConn">twisted, loose</div></div>
+        <div class="ro"><div class="k2">Pull test</div><div class="v" id="roRes">not tested</div></div>
+      </div>
+      <div class="controls">
+        <span class="tl">Joint</span>
+        <div class="toggle" id="crimp"><button data-v="0" class="active">Twisted</button><button data-v="1">Crimped</button></div>
+        <span class="tl">Relief</span>
+        <div class="toggle" id="relief"><button data-v="0" class="active">None</button><button data-v="1">Zip-tied</button></div>
+        <button class="btn primary" id="tug">Tug it ▸</button>
+      </div>
+    </div>
+    <p class="caption">Twisted and unsecured, the wire pulls right out. Crimped and zip-tied, the tug lands on the anchor and the joint holds. Inspectors and good drivers both do this test, because a connection that survives a tug survives a match.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In the shop</div>
+    <h2>The habits that hold up</h2>
+    <p>None of these are hard, they're just discipline applied to every connection on the robot:</p>
+    <div class="rules">
+      <div class="rule"><div class="ri">🔧</div><div><b>Crimp, don't twist</b><span>A proper crimp tool makes a gas-tight grip; twisted wire works loose.</span></div></div>
+      <div class="rule"><div class="ri">🪢</div><div><b>Strain relief</b><span>Anchor wires so a yank pulls on the zip tie, not the connector.</span></div></div>
+      <div class="rule"><div class="ri">🏷️</div><div><b>Label &amp; color</b><span>Red positive, black negative, labels so you can trace a fault fast.</span></div></div>
+      <div class="rule"><div class="ri">✂️</div><div><b>Tidy runs</b><span>Routed, bundled, and short; no loose loops to snag or chafe.</span></div></div>
+    </div>
+    <div class="note indigo">
+      <div class="nh">The pull test is your best friend</div>
+      <p>After every connection, give it a tug. If it moves, fix it now, on the bench, with good light and the battery unplugged, not in the pits ten minutes before a match. This single habit prevents the most common robot failures: a power lead that backs out, a CAN connector that wiggles loose, a sensor that drops out over a bump. Reliable robots aren't the ones that never get hit, they're the ones whose wiring shrugs off the hit.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">Why crimp a connection instead of just twisting the wires?</div>
+        <div class="opts">
+          <button class="opt">Twisting is always fine</button>
+          <button class="opt">A crimp makes a tight, lasting grip; twisted wire works loose under vibration</button>
+          <button class="opt">Crimping is faster</button>
+        </div>
+        <div class="explain">A proper crimp squeezes the copper into a solid, gas-tight joint that survives vibration and tugs. Twisted wire loosens and eventually drops the connection.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">What does strain relief do?</div>
+        <div class="opts">
+          <button class="opt">Makes wires shorter</button>
+          <button class="opt">Adds resistance</button>
+          <button class="opt">Anchors the wire so a pull lands on the anchor, not the connection</button>
+        </div>
+        <div class="explain">Strain relief secures the wire nearby so any yank pulls on the zip tie or clamp instead of stressing the actual joint, keeping the connection intact.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">What's the simplest way to check a connection?</div>
+        <div class="opts">
+          <button class="opt">Give it a firm tug - the pull test</button>
+          <button class="opt">Hope it's fine</button>
+          <button class="opt">Paint it</button>
+        </div>
+        <div class="explain">The pull test: a firm tug on every connection. If it moves, fix it on the bench now. It's the single best habit for a reliable robot.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 6 · 04 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Crimp</b><span>Tight, lasting joint; beats twisting.</span></div>
+        <div class="gl"><b>Strain relief</b><span>Anchor so pulls miss the joint.</span></div>
+        <div class="gl"><b>Pull test</b><span>Tug every connection to check it.</span></div>
+        <div class="gl"><b>Label &amp; color</b><span>Trace faults fast; red +, black -.</span></div>
+        <div class="gl"><b>Tidy runs</b><span>Routed, bundled, short.</span></div>
+        <div class="gl"><b>Fix on the bench</b><span>Not in the pits before a match.</span></div>
+      </div>
+      <a class="next" href="build-lesson-31.html">
+        <div class="n-eyebrow">Up next · Part 6 · 05 · Finale</div>
+        <h3>Pneumatics</h3>
+        <p>Air power. A compressor, a tank, and a cylinder give you fast, strong on-off motion with no holding current. Fire a piston and watch the pressure.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="build-lesson-29.html">← Part 6 · 03 · The Control System</a>
+    <a class="map" href="build.html">Course map</a>
+    <a href="build-lesson-31.html">Part 6 · 05 · Pneumatics →</a>
+  </nav>
+
+</div>
+
+<footer>Fabricate · Building an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var cv=document.getElementById('cv'), ctx=cv.getContext('2d'), W=0,H=0,dpr=1;
+  function fit(){ var r=cv.getBoundingClientRect(); if(!r.width)return; dpr=window.devicePixelRatio||1; cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr); ctx.setTransform(dpr,0,0,dpr,0,0); W=r.width; H=r.height; }
+  fit();
+  var crimped=false, relief=false, pull=0, pulling=false, failed=false, anim=0;
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    var cy=H*0.5;
+    var holds = crimped && relief;
+    // connector block (right side, fixed)
+    var conX=W*0.66;
+    ctx.fillStyle='#1B2540'; ctx.strokeStyle='#33415e'; ctx.lineWidth=2; roundRect(conX, cy-26, W*0.20, 52, 7); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#92A2BE'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText('CONNECTOR', conX+W*0.10, cy-32);
+    // terminal where wire enters
+    var termX=conX+8;
+    // wire base position (left), pulled left as you tug
+    var slack = pulling? pull*40 : 0;
+    var detach = (failed)? Math.min(anim*3, 120) : 0;
+    var wireEndX = termX - detach; // if failed, wire end retreats left
+    var baseX = W*0.06 - slack;
+    // strain relief anchor (zip tie) at mid
+    var anchorX=W*0.40;
+    if(relief){ ctx.strokeStyle='#34D7C5'; ctx.lineWidth=3; ctx.beginPath(); ctx.ellipse(anchorX, cy, 9, 14, 0, 0, Math.PI*2); ctx.stroke(); ctx.fillStyle='#34D7C5'; ctx.font='8px ui-monospace,Menlo,monospace'; ctx.fillText('zip tie', anchorX, cy+30); }
+    // wire (red), from baseX to wireEndX, bending through anchor
+    ctx.strokeStyle='#FF6B6B'; ctx.lineWidth=6; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(baseX, cy);
+    if(relief && !failed){ ctx.lineTo(anchorX, cy); ctx.lineTo(termX, cy); }
+    else { ctx.lineTo(wireEndX, cy); }
+    ctx.stroke(); ctx.lineCap='butt';
+    // copper tip if detached
+    if(failed){ ctx.strokeStyle='#FFD79A'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(wireEndX, cy); ctx.lineTo(wireEndX+10, cy); ctx.stroke(); }
+    // crimp ferrule near connector
+    if(!failed){ ctx.fillStyle=crimped?'#FFB020':'#5E6F8E'; roundRect(termX-14, cy-7, 16, 14, 3); ctx.fill(); }
+    // hand / pull arrow on the left
+    ctx.fillStyle='#92A2BE'; ctx.font='20px sans-serif'; ctx.textAlign='center'; ctx.fillText('✊', baseX-2, cy+7);
+    if(pulling || failed){ ctx.strokeStyle='#92A2BE'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(baseX-18, cy); ctx.lineTo(baseX-40, cy); ctx.stroke(); ctx.beginPath(); ctx.moveTo(baseX-40,cy); ctx.lineTo(baseX-32,cy-5); ctx.lineTo(baseX-32,cy+5); ctx.closePath(); ctx.fillStyle='#92A2BE'; ctx.fill(); }
+    // verdict
+    if(failed){ ctx.fillStyle='#FF6B6B'; ctx.font='700 14px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText('PULLED OUT', W*0.5, H*0.16); }
+    else if(pulling && holds){ ctx.fillStyle='#43D67E'; ctx.font='700 14px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText('HOLDS ✓', W*0.5, H*0.16); }
+  }
+  function roundRect(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+  function loop(){
+    if(pulling){ pull=Math.min(1, pull+0.06); if(pull>=1 && !(crimped&&relief)){ failed=true; } }
+    if(failed){ anim+=0.6; }
+    draw(); requestAnimationFrame(loop);
+  }
+  function setConn(){
+    document.getElementById('roConn').textContent = (crimped?'crimped':'twisted')+', '+(relief?'zip-tied':'loose');
+  }
+  function reset(){ pull=0; pulling=false; failed=false; anim=0; document.getElementById('roRes').textContent='not tested'; document.getElementById('roRes').className='v'; document.getElementById('tag').textContent='ready'; }
+  document.querySelectorAll('#crimp button').forEach(function(b){ b.addEventListener('click',function(){ crimped=b.getAttribute('data-v')==='1'; document.querySelectorAll('#crimp button').forEach(function(x){x.classList.toggle('active',x===b);}); setConn(); reset(); }); });
+  document.querySelectorAll('#relief button').forEach(function(b){ b.addEventListener('click',function(){ relief=b.getAttribute('data-v')==='1'; document.querySelectorAll('#relief button').forEach(function(x){x.classList.toggle('active',x===b);}); setConn(); reset(); }); });
+  document.getElementById('tug').addEventListener('click',function(){
+    if(pulling||failed){ reset(); return; }
+    pulling=true; document.getElementById('tag').textContent='pulling';
+    setTimeout(function(){
+      var holds=crimped&&relief;
+      var rr=document.getElementById('roRes'); rr.textContent=holds?'HOLDS':'pulled out'; rr.className='v '+(holds?'green':'red');
+      document.getElementById('tag').textContent=holds?'holds':'failed';
+    }, 380);
+  });
+  setConn(); reset(); requestAnimationFrame(loop);
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="build:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

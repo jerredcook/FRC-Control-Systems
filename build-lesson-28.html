@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fabricate · Part 6.2 - Wiring Motors &amp; Controllers</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .scn{padding:18px 16px 8px;text-align:center}
+  .scn .sn{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-bottom:8px}
+  .scn .nm{font-size:18px;color:var(--text);font-weight:650}
+  .scn .dr{font-size:14px;color:var(--muted);margin-top:4px} .scn .dr b{color:var(--amber);font-family:var(--mono)}
+  .diag{display:flex;align-items:center;justify-content:center;gap:0;padding:8px 16px;flex-wrap:wrap}
+  .dbox{font-family:var(--mono);font-size:11px;border:1px solid var(--line-2);border-radius:7px;padding:8px 10px;color:var(--muted);text-align:center}
+  .dbox.brk{border-color:var(--amber);color:var(--amber)} .dbox.mot{border-color:var(--indigo);color:var(--indigo)}
+  .dwire{height:4px;width:46px;background:var(--line-2);border-radius:3px;position:relative}
+  .dwire.thin{height:2px} .dwire.thick{height:7px}
+  .dwire b{position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:9px;color:var(--faint);white-space:nowrap}
+  .picks{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 16px}
+  .pick .pl{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-bottom:6px;text-align:center}
+  .seg{display:flex;border:1px solid var(--line-2);border-radius:9px;overflow:hidden}
+  .seg button{flex:1;border:none;background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11px;padding:9px 4px;cursor:pointer;transition:.12s;border-right:1px solid var(--line-2)}
+  .seg button:last-child{border-right:none}
+  .seg button:hover{color:var(--text)} .seg button.active{background:var(--indigo);color:#2a1503;font-weight:700}
+  .fb{padding:6px 16px 12px;min-height:42px}
+  .fb .line{border-left:2px solid var(--indigo);padding:6px 0 6px 12px;font-size:14.5px;color:var(--muted)} .fb .line b{color:var(--text)}
+  .fb .line.ok{border-color:var(--green)} .fb .line.ok b{color:var(--green)}
+  .fb .line.bad{border-color:var(--red)} .fb .line.bad b{color:var(--red)}
+  .controls{padding:12px 16px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .btn.primary{background:linear-gradient(180deg,#ffb37e,var(--indigo));color:#2a1503;font-weight:700;border:none}
+  .score{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--indigo)}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(255,138,76,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .ref{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:18px 0;background:var(--line)}
+  .ref .rh,.ref .rr{display:grid;grid-template-columns:1fr 1.2fr 1.8fr;gap:1px}
+  .ref .rh>div,.ref .rr>div{background:#0B1322;padding:10px 12px;font-size:13.5px;color:var(--text)}
+  .ref .rh>div{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);background:#0E1525}
+  .ref .rr>div:first-child{font-family:var(--mono);color:var(--indigo);font-weight:600}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:108px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="build.html"><span class="dot"></span><span class="name">Fabricate</span></a>
+    <div class="top-meta">Part 6 · 02 / 05 · Electrical</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 6 · 02</b> Electrical &amp; Pneumatics</div>
+    <div class="eyebrow">Wiring Motors &amp; Controllers</div>
+    <h1>Right wire,<br>right <span class="accent">fuse</span>.</h1>
+    <p class="dek">Each motor runs through its own controller on a fused branch off the PDH. The wire has to be thick enough to carry the current without overheating, and the breaker has to protect that wire while still letting the motor pull its normal load.</p>
+  </div>
+
+  <section>
+    <p class="lead">Match the wire and the breaker to the current.</p>
+    <p>A bigger motor pulls more amps, so it needs <strong>thicker wire</strong> (a lower AWG number) and a <strong>bigger breaker</strong>. Too thin and the wire overheats; too small a breaker and it trips every time the motor works hard; too big and it won't protect the wire. Size both for each motor below.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Wire this motor</span><span class="demo-tag" id="tag">size it</span></div>
+      <div class="scn"><div class="sn" id="sno">Motor 1 of 3</div><div class="nm" id="nm"></div><div class="dr" id="dr"></div></div>
+      <div class="diag">
+        <div class="dbox">PDH</div>
+        <div class="dwire" id="w1"><b>breaker</b></div>
+        <div class="dbox brk" id="brkLabel">- A</div>
+        <div class="dwire" id="w2" style="width:60px"><b id="gLabel">- AWG</b></div>
+        <div class="dbox mot">MOTOR</div>
+      </div>
+      <div class="picks">
+        <div class="pick"><div class="pl">Wire gauge</div><div class="seg" id="gSeg"><button data-g="18">18 AWG</button><button data-g="12">12 AWG</button><button data-g="10">10 AWG</button></div></div>
+        <div class="pick"><div class="pl">Branch breaker</div><div class="seg" id="bSeg"><button data-b="20">20 A</button><button data-b="40">40 A</button><button data-b="60">60 A</button></div></div>
+      </div>
+      <div class="fb"><div class="line" id="fb">Pick a gauge and a breaker.</div></div>
+      <div class="controls">
+        <button class="btn primary" id="next">Next motor ▸</button>
+        <span class="score" id="score">0 / 0</span>
+      </div>
+    </div>
+    <p class="caption">A thin wire (18 AWG) is fine for a little motor but melts under a drive motor's current. The breaker should sit just above the motor's normal draw and at or below what the wire can handle, that's the sweet spot.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In the shop</div>
+    <h2>Gauge, breaker, and the data wire</h2>
+    <p>Every powered device follows the same pattern off the PDH. A rough guide for picking wire:</p>
+    <div class="ref">
+      <div class="rh"><div>Wire</div><div>Carries up to</div><div>Typical use</div></div>
+      <div class="rr"><div>18 AWG</div><div>~ 20 A</div><div>Small motors, the roboRIO and electronics</div></div>
+      <div class="rr"><div>12 AWG</div><div>~ 40 A</div><div>Most FRC motors (Kraken, NEO, Falcon)</div></div>
+      <div class="rr"><div>10 AWG</div><div>~ 55 A</div><div>The biggest motors and main power runs</div></div>
+    </div>
+    <div class="note indigo">
+      <div class="nh">Power is only half the wiring</div>
+      <p>Two heavy wires carry power to each motor controller, but a third, lighter wire carries <em>data</em>: the CAN bus that tells the controller what to do (that's the next lesson). And mind polarity, swapping the two power wires just makes the motor spin backward, which you can fix in code, but a reversed battery connection can destroy electronics. Color-code red for positive, black for negative, and check before you connect the battery.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">A motor pulls more current than your wire can carry. What happens?</div>
+        <div class="opts">
+          <button class="opt">It runs faster</button>
+          <button class="opt">The wire overheats - you need a thicker gauge</button>
+          <button class="opt">Nothing</button>
+        </div>
+        <div class="explain">Too much current in too thin a wire turns into heat, which can melt insulation or start a fire. A bigger motor needs a thicker wire (lower AWG number).</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">How should you size the branch breaker?</div>
+        <div class="opts">
+          <button class="opt">Way below the motor's draw</button>
+          <button class="opt">As large as possible</button>
+          <button class="opt">Just above the motor's normal draw, and no larger than the wire can handle</button>
+        </div>
+        <div class="explain">The breaker should let the motor pull its normal current without nuisance-tripping, but still trip to protect the wire from a fault. Too small trips constantly; too big leaves the wire unprotected.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">Which wire is thicker and carries more current?</div>
+        <div class="opts">
+          <button class="opt">10 AWG - a lower number means a thicker wire</button>
+          <button class="opt">18 AWG</button>
+          <button class="opt">They're the same</button>
+        </div>
+        <div class="explain">Wire gauge runs backward: the smaller the AWG number, the thicker the wire and the more current it carries. 10 AWG is much thicker than 18 AWG.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 6 · 02 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Wire gauge</b><span>Thickness; lower AWG = thicker.</span></div>
+        <div class="gl"><b>Size to current</b><span>Bigger motor, thicker wire.</span></div>
+        <div class="gl"><b>Branch breaker</b><span>Above draw, at/below wire limit.</span></div>
+        <div class="gl"><b>Too thin</b><span>Wire overheats.</span></div>
+        <div class="gl"><b>Data wire</b><span>CAN tells the controller what to do.</span></div>
+        <div class="gl"><b>Polarity</b><span>Red +, black -; check it.</span></div>
+      </div>
+      <a class="next" href="build-lesson-29.html">
+        <div class="n-eyebrow">Up next · Part 6 · 03</div>
+        <h3>The Control System</h3>
+        <p>That data wire is the CAN bus. See how the roboRIO, radio, and every controller daisy-chain together, and why one loose CAN wire can knock out half the robot.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="build-lesson-27.html">← Part 6 · 01 · The Power System</a>
+    <a class="map" href="build.html">Course map</a>
+    <a href="build-lesson-29.html">Part 6 · 03 · The Control System →</a>
+  </nav>
+
+</div>
+
+<footer>Fabricate · Building an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var WMAX={18:20, 12:40, 10:55};
+  var MOTORS=[
+    {nm:'Small mechanism motor', draw:14},
+    {nm:'Drive motor (Kraken)', draw:38},
+    {nm:'Heavy lift motor', draw:52}
+  ];
+  var idx=0, g=null, b=null, score=0, total=0, scored=false;
+  function evalPick(){
+    if(g===null||b===null) return null;
+    var draw=MOTORS[idx].draw, wmax=WMAX[g];
+    if(draw>wmax) return {ok:false, msg:'<b>Wire overheats.</b> '+draw+' A is too much for '+g+' AWG (~'+wmax+' A). Go thicker.'};
+    if(b<=draw) return {ok:false, msg:'<b>Breaker nuisance-trips.</b> A '+b+' A breaker pops under a '+draw+' A motor. Go bigger.'};
+    if(b>wmax) return {ok:false, msg:'<b>Wire unprotected.</b> A '+b+' A breaker is too big for '+g+' AWG. Lower it.'};
+    return {ok:true, msg:'<b>Good wiring.</b> '+g+' AWG carries '+draw+' A, and the '+b+' A breaker protects it.'};
+  }
+  function show(){
+    g=null; b=null; scored=false;
+    document.getElementById('sno').textContent='Motor '+(idx+1)+' of '+MOTORS.length;
+    document.getElementById('nm').textContent=MOTORS[idx].nm;
+    document.getElementById('dr').innerHTML='draws about <b>'+MOTORS[idx].draw+' A</b>';
+    document.querySelectorAll('#gSeg button,#bSeg button').forEach(function(x){x.classList.remove('active');});
+    document.getElementById('gLabel').textContent='- AWG'; document.getElementById('brkLabel').textContent='- A';
+    document.getElementById('w2').className='dwire'; document.getElementById('w2').style.width='60px';
+    var fb=document.getElementById('fb'); fb.className='line'; fb.textContent='Pick a gauge and a breaker.';
+    document.getElementById('next').textContent= idx<MOTORS.length-1?'Next motor ▸':'Restart';
+  }
+  function update(){
+    if(g!==null){ document.getElementById('gLabel').textContent=g+' AWG'; document.getElementById('w2').className='dwire '+(g==18?'thin':g==10?'thick':''); }
+    if(b!==null){ document.getElementById('brkLabel').textContent=b+' A'; }
+    var r=evalPick(); var fb=document.getElementById('fb');
+    if(!r){ fb.className='line'; fb.textContent='Pick a gauge and a breaker.'; return; }
+    fb.className='line '+(r.ok?'ok':'bad'); fb.innerHTML=r.msg;
+    if(!scored){ scored=true; total++; if(r.ok)score++; document.getElementById('score').textContent=score+' / '+total; }
+  }
+  document.querySelectorAll('#gSeg button').forEach(function(x){ x.addEventListener('click',function(){ g=+x.getAttribute('data-g'); document.querySelectorAll('#gSeg button').forEach(function(y){y.classList.toggle('active',y===x);}); update(); }); });
+  document.querySelectorAll('#bSeg button').forEach(function(x){ x.addEventListener('click',function(){ b=+x.getAttribute('data-b'); document.querySelectorAll('#bSeg button').forEach(function(y){y.classList.toggle('active',y===x);}); update(); }); });
+  document.getElementById('next').addEventListener('click',function(){ if(idx<MOTORS.length-1){ idx++; show(); } else { idx=0; score=0; total=0; document.getElementById('score').textContent='0 / 0'; show(); } });
+  show();
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="build:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

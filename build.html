@@ -187,11 +187,11 @@
     {code:"6", title:"Electrical & Pneumatics", sub:"Powering the machine",
      blurb:"A wired robot is a powered robot. The battery, breaker, and power distribution feed the motors; pneumatics add fast, simple, on-off motion with air.",
      lessons:[
-       {n:1, title:"The Power System", desc:"Battery, main breaker, and the PDH.", file:null},
-       {n:2, title:"Wiring Motors & Controllers", desc:"From the PDH to every motor, fused and safe.", file:null},
-       {n:3, title:"The Control System", desc:"roboRIO, radio, and the CAN bus that ties it together.", file:null},
-       {n:4, title:"Wiring Best Practices", desc:"Gauge, crimps, strain relief, and labels.", file:null},
-       {n:5, title:"Pneumatics", desc:"Compressor, tank, cylinders, and solenoids.", file:null}
+       {n:1, title:"The Power System", desc:"Battery, main breaker, and the PDH.", file:"build-lesson-27.html"},
+       {n:2, title:"Wiring Motors & Controllers", desc:"From the PDH to every motor, fused and safe.", file:"build-lesson-28.html"},
+       {n:3, title:"The Control System", desc:"roboRIO, radio, and the CAN bus that ties it together.", file:"build-lesson-29.html"},
+       {n:4, title:"Wiring Best Practices", desc:"Gauge, crimps, strain relief, and labels.", file:"build-lesson-30.html"},
+       {n:5, title:"Pneumatics", desc:"Compressor, tank, cylinders, and solenoids.", file:"build-lesson-31.html"}
      ]},
     {code:"7", title:"Design & CAD", sub:"Designing before you cut",
      blurb:"Great robots are designed, not improvised. A repeatable design process and CAD (Onshape) let you catch problems on a screen instead of in aluminum.",
@@ -212,7 +212,7 @@
      ]}
   ];
 
-  var NEXT_ID="6-1";
+  var NEXT_ID="7-1";
   var STORE_KEY="build:done";
   function loadDone(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY))||{}; }catch(e){ return {}; } }
   function saveDone(d){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(d)); }catch(e){} }
