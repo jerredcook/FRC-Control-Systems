@@ -171,7 +171,7 @@
     </div>
     <div class="note indigo">
       <div class="nh">Trust weights decide who wins</div>
-      <p>The estimator doesn't blindly jump to the camera; it blends, weighted by how much you trust each source (their standard deviations). Trust vision too much and the pose twitches on every noisy frame; too little and drift creeps back. Tuned well, you get odometry's smoothness between sightings and vision's accuracy at each one. This is the fix for the drift you watched accumulate in Lesson 6.3.</p>
+      <p>The estimator doesn't blindly jump to the camera; it blends, weighted by how much you trust each source. You give each one a "trust dial" (in code these are called standard deviations, where a smaller number means "trust this more"). Trust vision too much and the pose twitches on every noisy frame; too little and drift creeps back. Tuned well, you get odometry's smoothness between sightings and vision's accuracy at each one. This is the fix for the drift you watched accumulate in Lesson 6.3.</p>
     </div>
 
     <div class="code-ex">

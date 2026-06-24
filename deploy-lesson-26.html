@@ -157,7 +157,7 @@
     </div>
     <div class="note indigo">
       <div class="nh">The follower is a control loop on your pose</div>
-      <p>Following isn't dead reckoning. Each loop the follower asks "where should I be on this path right now?" and "where does odometry say I am?", then applies feedback, the PID and feedforward from the Control course, to close the gap. That's why accurate odometry matters so much: the better the robot knows its pose, the tighter it hugs the planned line.</p>
+      <p>Following isn't dead reckoning (blindly running a fixed set of moves and hoping it lines up). Each loop the follower asks "where should I be on this path right now?" and "where does odometry say I am?", then applies feedback (the PID and feedforward from the Control course, Part 5) to close the gap. That's why accurate odometry matters so much: the better the robot knows its pose, the tighter it hugs the planned line.</p>
     </div>
 
     <div class="code-ex">

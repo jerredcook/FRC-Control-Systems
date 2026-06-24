@@ -211,7 +211,7 @@
 <pre class="code"><span class="ty">var</span> result = camera.<span class="fn">getLatestResult</span>();
 <span class="kw">if</span> (result.<span class="fn">hasTargets</span>()) {
   <span class="ty">double</span> tx = result.<span class="fn">getBestTarget</span>().<span class="fn">getYaw</span>();   <span class="cm">// degrees off bore-sight</span>
-  <span class="ty">double</span> omega = -kP * tx;                          <span class="cm">// turn to drive tx → 0</span>
+  <span class="ty">double</span> omega = -kP * tx;                          <span class="cm">// omega = turn rate; drive tx → 0</span>
   drive.<span class="fn">drive</span>(<span class="num">0</span>, <span class="num">0</span>, omega);                       <span class="cm">// rotate in place (swerve!)</span>
 }</pre>
     </div>

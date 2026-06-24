@@ -197,12 +197,12 @@
   <section>
     <p class="lead">Every controller so far has been reactive.</p>
     <p>PID waits for an error, then responds. That's powerful, but it's always a step behind - it can only correct a mistake after the mistake happens. <strong>Feedforward</strong> flips it around: if you know the physics of your mechanism, you can compute most of the voltage a move needs <em>in advance</em>, before any error shows up.</p>
-    <p>Take gravity. Your elevator needs the same voltage just to hang in place, every time. Why make the controller rediscover that through accumulated error on every move, when you can simply <em>tell</em> it?</p>
+    <p>Take gravity. Your elevator needs the same voltage just to hang in place, every time. Why make the controller rediscover that through accumulated error on every move, when you can <em>tell</em> it the answer up front?</p>
     <div class="formula">
       voltage = kS·sign(v) + <b>kG</b> + kV·v + kA·a
       <span class="small">a model of exactly what voltage each part of a move requires</span>
     </div>
-    <p>Four terms, each a piece of physics: <span class="k">kS</span> the static friction to break free and start moving, <span class="k">kG</span> the constant pull of gravity, <span class="k">kV</span> the voltage to sustain a given speed, and <span class="k">kA</span> the extra to accelerate the mass. Feedforward computes this predicted voltage from where you <em>want</em> to go, and leaves PID to mop up only the small leftover - disturbances, a sagging battery, a game piece you didn't model.</p>
+    <p>Four terms, each a piece of physics: <span class="k">kS</span> the static friction to break free and start moving (the <span class="k">sign(v)</span> beside it just means +1 when moving one way and −1 the other, since friction always pushes back against whichever way you're going), <span class="k">kG</span> the constant pull of gravity, <span class="k">kV</span> the voltage to sustain a given speed, and <span class="k">kA</span> the extra to accelerate the mass. Feedforward computes this predicted voltage from where you <em>want</em> to go, and leaves PID to mop up only the small leftover - disturbances, a sagging battery, a game piece you didn't model.</p>
   </section>
 
   <section>

@@ -237,7 +237,7 @@
     </div>
     <div class="note teal">
       <div class="nh">An arm is almost the same - with one twist</div>
-      <p>An arm uses <span class="k">ArmFeedforward</span> instead. Gravity's pull on an arm depends on its angle (full at horizontal, zero straight up), so you pass the angle too: <span class="k">armFF.calculate(angleRadians, velocity)</span>. It scales kG by <span class="k">cos(angle)</span> for you. An elevator's gravity is constant, so it needs no angle. Same idea, one extra input.</p>
+      <p>An arm uses <span class="k">ArmFeedforward</span> instead. Gravity's pull on an arm depends on its angle (full at horizontal, zero straight up), so you pass the angle too: <span class="k">armFF.calculate(angleRadians, velocity)</span>. It scales kG by <span class="k">cos(angle)</span> for you (cosine is just the math name for that fade from full pull to none; Lesson IV.2 shows it in action). An elevator's gravity is constant, so it needs no angle. Same idea, one extra input.</p>
     </div>
   </section>
 

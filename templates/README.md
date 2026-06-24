@@ -13,6 +13,10 @@ project and fill in. They turn "I understand it" into "it's on our robot."
 
 ## How to use them
 
+> **Before you start:** this assumes you already have a WPILib robot project and
+> have seen command-based basics (Deploy Part 3, or Closing the Loop II.1). New to
+> that? Start there first, then come back.
+
 1. **Copy** the subsystem(s) you need into `src/main/java/frc/robot/subsystems/`
    (and `Constants.java` into `src/main/java/frc/robot/`).
 2. **Search for `// TODO`** and replace every value with your robot's own:

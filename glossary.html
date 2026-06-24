@@ -114,6 +114,11 @@
     {c:"Concepts",t:"Oscillation",d:"Hunting back and forth around the target instead of settling.",r:"I.5"},
     {c:"Concepts",t:"Disturbance",d:"An unmodeled push or load the controller didn't plan for.",r:"I.1"},
     {c:"Concepts",t:"Tolerance",d:"How close to the setpoint counts as 'there' (setTolerance / atSetpoint).",r:"II.3"},
+    {c:"Concepts",t:"PID",d:"Proportional-Integral-Derivative, the three-part feedback controller this course is built on: kP reacts to the error now, kI to leftover error that lingers, kD to how fast the error is changing.",r:"I.2"},
+    {c:"Concepts",t:"Encoder",d:"A sensor that counts rotation, so the code always knows where a motor or mechanism is.",r:"III.1"},
+    {c:"Concepts",t:"Voltage",d:"What the controller actually commands a motor, measured in volts. Every gain in this course (kS, kG, kV, kP...) is expressed in volts.",r:"I.6"},
+    {c:"Concepts",t:"Gear ratio",d:"How many motor turns make one output turn, trading speed for torque.",r:"III.2"},
+    {c:"Phoenix 6 / CTRE",t:"CAN bus",d:"The single wire chain every motor controller and sensor shares to talk to the roboRIO.",r:"III.1"},
 
     // ---- Gains ----
     {c:"Gains",t:"kP - proportional",d:"Output per unit of error. Push harder the further you're off.",r:"I.2"},

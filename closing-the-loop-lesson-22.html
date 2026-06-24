@@ -196,7 +196,7 @@
     <h2>Three numbers in, eight out</h2>
     <p>The whole pipeline is three steps, and you've built two of them already:</p>
     <div class="terms">
-      <div class="term" style="--accent:var(--amber)"><h4>1 · Chassis speeds</h4><p>The driver's wish becomes <span class="k">ChassisSpeeds</span>: vx, vy, and omega. Field-oriented control rotates the stick direction by the gyro angle so "forward" stays forward.</p></div>
+      <div class="term" style="--accent:var(--amber)"><h4>1 · Chassis speeds</h4><p>The driver's wish becomes <span class="k">ChassisSpeeds</span>: vx and vy (forward and sideways speed) and omega (the turn rate). Field-oriented control rotates the stick direction by the gyro angle so "forward" stays forward.</p></div>
       <div class="term" style="--accent:var(--teal)"><h4>2 · Kinematics</h4><p><span class="k">SwerveDriveKinematics</span> turns those three numbers into four <span class="k">SwerveModuleState</span>s - an angle and a speed for each corner.</p></div>
       <div class="term" style="--accent:var(--indigo)"><h4>3 · Two loops per module</h4><p>Each module runs a steer loop (position, like the arm) and a drive loop (velocity, like the flywheel) - the Part IV mechanisms, on the motors.</p></div>
       <div class="term" style="--accent:var(--green)"><h4>+ · Odometry</h4><p>Reading the modules <em>backwards</em>, the robot integrates how far each wheel went to track its <span class="k">pose</span> on the field - where it is and which way it faces.</p></div>

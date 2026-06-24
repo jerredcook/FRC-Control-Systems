@@ -172,7 +172,7 @@
 
   <section>
     <p class="lead">The elevator had it easy.</p>
-    <p>Straight up and down, gravity is constant, so a single <span class="k">kG</span> holds it anywhere. An arm is different: held out horizontal it strains against its full weight, but pointed straight up it barely needs anything. The gravity load follows the <strong>cosine</strong> of the angle:</p>
+    <p>Straight up and down, gravity is constant, so a single <span class="k">kG</span> holds it anywhere. An arm is different: held out horizontal it strains against its full weight, but pointed straight up it barely needs anything. The gravity load follows the <strong>cosine</strong> of the angle. Cosine is just the math name for that smooth fade: picture a dial that reads 1 (full pull) when the arm is flat, slides down as the arm rises, and reaches 0 (no pull) when it points straight up. You never work it out by hand, Phoenix and WPILib compute it for you:</p>
     <div class="formula">
       hold voltage = <b>kG</b> · cos(angle)
       <span class="small">angle measured from horizontal · cos(0°) = 1 (full) · cos(90°) = 0 (none)</span>

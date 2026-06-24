@@ -184,7 +184,7 @@
     <p>So far, control meant "react to the error." State-space zooms out. It describes a system by its <strong>state</strong> - the few numbers that capture everything about it right now. For our elevator, that's just two: <span class="k">position</span> and <span class="k">velocity</span>. The physics of how the state changes when you apply a voltage is written compactly:</p>
     <div class="formula">
       ẋ = <b>A</b>·x + <b>B</b>·u
-      <span class="small">x = state [position, velocity] · u = voltage · A, B = the mechanism's physics</span>
+      <span class="small">ẋ (read "x-dot") = how fast the state is changing · x = state [position, velocity] · u = voltage · A, B = number tables from the mechanism's physics</span>
     </div>
     <p>The controller is just as compact: pick a gain for each state and push back. <span class="k">u = K·(reference − x)</span>. That's <strong>state feedback</strong> - and here's the secret it's been hiding.</p>
   </section>
