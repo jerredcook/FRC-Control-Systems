@@ -187,11 +187,11 @@
     {code:"6", title:"Driving & Autonomous", sub:"Drivetrains, odometry, paths",
      blurb:"Make the whole robot move - first by joystick, then on its own. Drivetrains, knowing where you are on the field, and following a planned path.",
      lessons:[
-       {n:1, title:"The Drivetrain", desc:"Tank and arcade drive from controller input.", file:null},
-       {n:2, title:"Swerve Drive in Code", desc:"Modules and kinematics; the modern FRC drivetrain.", file:null},
-       {n:3, title:"Odometry", desc:"Tracking the robot's pose on the field.", file:null},
-       {n:4, title:"Trajectories & PathPlanner", desc:"Follow a smooth, planned path with PathPlanner/Choreo.", file:null},
-       {n:5, title:"Building an Autonomous", desc:"Command groups that score on their own.", file:null}
+       {n:1, title:"The Drivetrain", desc:"Tank and arcade drive from controller input.", file:"deploy-lesson-23.html"},
+       {n:2, title:"Swerve Drive in Code", desc:"Modules and kinematics; the modern FRC drivetrain.", file:"deploy-lesson-24.html"},
+       {n:3, title:"Odometry", desc:"Tracking the robot's pose on the field.", file:"deploy-lesson-25.html"},
+       {n:4, title:"Trajectories & PathPlanner", desc:"Follow a smooth, planned path with PathPlanner/Choreo.", file:"deploy-lesson-26.html"},
+       {n:5, title:"Building an Autonomous", desc:"Command groups that score on their own.", file:"deploy-lesson-27.html"}
      ]},
     {code:"7", title:"Seeing & Thinking", sub:"Vision, pose, state machines",
      blurb:"Give the robot eyes and a brain: read a camera, know exactly where it is, and coordinate a whole superstructure of mechanisms.",
@@ -212,7 +212,7 @@
      ]}
   ];
 
-  var NEXT_ID="5-1";
+  var NEXT_ID="7-1";
   var STORE_KEY="deploy:done";
   function loadDone(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY))||{}; }catch(e){ return {}; } }
   function saveDone(d){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(d)); }catch(e){} }

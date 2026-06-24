@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deploy · Part 6.1 - The Drivetrain</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(138,140,248,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  canvas.field{display:block;width:100%;height:300px;touch-action:none;cursor:grab}
+  canvas.field:active{cursor:grabbing}
+  .readouts{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  @media(min-width:560px){.readouts{grid-template-columns:repeat(4,1fr)}}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:18px;font-weight:600;margin-top:3px}
+  .ro .v.teal{color:var(--teal)} .ro .v.indigo{color:var(--indigo)} .ro .v.amber{color:var(--amber)}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .seg{display:flex;border:1px solid var(--line-2);border-radius:9px;overflow:hidden}
+  .seg button{border:none;background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:9px 12px;cursor:pointer;transition:.12s;border-right:1px solid var(--line-2)}
+  .seg button:last-child{border-right:none}
+  .seg button:hover{color:var(--text)} .seg button.active{background:var(--indigo);color:#0a0f24;font-weight:700}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:9px 12px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .hint{font-family:var(--mono);font-size:11px;color:var(--faint)}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--indigo);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:13px;line-height:1.85;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic} .code .kw{color:#ff9bbf} .code .ty{color:var(--teal)} .code .fn{color:var(--indigo)} .code .num{color:var(--amber)}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(138,140,248,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .code-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .code-ex .chead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .code-ex .chead .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,176,32,.14);display:grid;place-items:center;color:var(--amber);font-size:13px}
+  .code-ex .ctask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .code-ex pre.code{margin:0 0 14px}
+  .blank{font-family:var(--mono);font-size:13px;width:13ch;text-align:center;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:2px 4px;outline:none}
+  .blank:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
+  .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:110px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="code.html"><span class="dot"></span><span class="name">Deploy</span></a>
+    <div class="top-meta">Part 6 · 01 / 05 · Drivetrains</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 6 · 01</b> Driving &amp; Autonomous</div>
+    <div class="eyebrow">The Drivetrain</div>
+    <h1>Make the whole<br><span class="accent">robot</span> move.</h1>
+    <p class="dek">A tank drivetrain has just two controls: how fast the left wheels spin and how fast the right ones do. Everything a driver feels, straight, turning, spinning, comes from mixing those two numbers.</p>
+  </div>
+
+  <section>
+    <p class="lead">Two wheel groups, two numbers.</p>
+    <p>A <strong>differential</strong> (tank) drive splits the wheels into a left side and a right side. Spin both forward and you go straight; spin one faster and you curve; spin them opposite and you turn in place. <strong>Tank drive</strong> sets each side from its own stick. <strong>Arcade drive</strong> takes one stick (forward and turn) and <em>mixes</em> it into the same two wheel commands. Drive it.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Drive the robot</span><span class="demo-tag" id="modeTag">arcade</span></div>
+      <canvas class="field" id="cv"></canvas>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Left wheels</div><div class="v teal" id="roL">0.00</div></div>
+        <div class="ro"><div class="k2">Right wheels</div><div class="v teal" id="roR">0.00</div></div>
+        <div class="ro"><div class="k2">Forward</div><div class="v indigo" id="roF">0.00</div></div>
+        <div class="ro"><div class="k2">Turn</div><div class="v amber" id="roT">0.00</div></div>
+      </div>
+      <div class="controls">
+        <div class="seg" id="modeSeg">
+          <button data-m="arcade" class="active">Arcade</button>
+          <button data-m="tank">Tank</button>
+        </div>
+        <span class="hint" id="hint">drag the joystick · release to stop</span>
+        <button class="btn" id="reset" style="margin-left:auto">Reset robot</button>
+      </div>
+    </div>
+    <p class="caption">In arcade mode the two wheel bars light up from one stick, that is the mixing at work: left = forward + turn, right = forward - turn. Switch to tank and you command each side directly.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In code</div>
+    <h2>WPILib does the mixing</h2>
+    <p>You read the sticks, then hand them to <span class="k">DifferentialDrive</span>. <span class="k">arcadeDrive</span> mixes forward and turn for you; <span class="k">tankDrive</span> takes the two sides straight:</p>
+    <div class="codewrap">
+      <div class="clabel">DriveSubsystem <span class="badge">Java · WPILib</span></div>
+<pre class="code"><span class="ty">DifferentialDrive</span> drive = <span class="kw">new</span> <span class="ty">DifferentialDrive</span>(leftGroup, rightGroup);
+
+<span class="cm">// arcade: one stick, mixed into left/right under the hood</span>
+<span class="kw">public</span> <span class="kw">void</span> <span class="fn">arcade</span>(<span class="ty">double</span> fwd, <span class="ty">double</span> turn) {
+  drive.<span class="fn">arcadeDrive</span>(fwd, turn);
+}
+
+<span class="cm">// tank: each side gets its own command</span>
+<span class="kw">public</span> <span class="kw">void</span> <span class="fn">tank</span>(<span class="ty">double</span> left, <span class="ty">double</span> right) {
+  drive.<span class="fn">tankDrive</span>(left, right);
+}
+
+<span class="cm">// the mixing arcadeDrive does for you:</span>
+<span class="cm">//   left  = fwd + turn</span>
+<span class="cm">//   right = fwd - turn</span></pre>
+    </div>
+    <div class="note indigo">
+      <div class="nh">Arcade and tank are the same drivetrain</div>
+      <p>The hardware never changes, only how you turn driver input into the two wheel commands. Most teams default to arcade because one stick for "go and steer" feels natural, but tank shines for precise pivots. Either way it bottoms out at two numbers: left wheel speed and right wheel speed.</p>
+    </div>
+
+    <div class="code-ex">
+      <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
+      <div class="ctask">Drive with one stick: forward/back and turn, mixed automatically. Fill in the method.</div>
+<pre class="code">drive.<input class="blank" data-ans="arcadedrive" aria-label="blank" autocomplete="off" spellcheck="false">(fwd, turn);</pre>
+      <div class="code-actions">
+        <button class="btn" id="check">Check</button>
+        <button class="btn" id="reveal">Reveal</button>
+        <span class="code-result" id="cres"></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">On a tank drivetrain, how do you turn the robot in place?</div>
+        <div class="opts">
+          <button class="opt">Spin both sides forward at full speed</button>
+          <button class="opt">Spin one side forward and the other backward</button>
+          <button class="opt">Turn off both sides</button>
+        </div>
+        <div class="explain">Opposite wheel directions rotate the robot around its center with no forward motion. Equal-and-same spins it straight; unequal-and-same curves it.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 2</div>
+        <div class="qt">What does arcadeDrive do that tankDrive doesn't?</div>
+        <div class="opts">
+          <button class="opt">It mixes one stick's forward and turn into left/right commands</button>
+          <button class="opt">It uses a completely different drivetrain</button>
+          <button class="opt">It drives faster</button>
+        </div>
+        <div class="explain">arcadeDrive takes forward and turn from a single stick and computes left = fwd + turn, right = fwd - turn. tankDrive skips the mixing and takes each side directly.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 3</div>
+        <div class="qt">In arcade mixing, a pure turn-right command (turn > 0, fwd = 0) produces…</div>
+        <div class="opts">
+          <button class="opt">Both sides forward</button>
+          <button class="opt">Both sides backward</button>
+          <button class="opt">Left side forward, right side backward - a pivot</button>
+        </div>
+        <div class="explain">With fwd = 0: left = 0 + turn (forward), right = 0 - turn (backward). The robot pivots in place toward the right. The mixing handles it automatically.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 6 · 01 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Differential</b><span>Left side and right side wheels.</span></div>
+        <div class="gl"><b>Tank drive</b><span>Each stick controls one side.</span></div>
+        <div class="gl"><b>Arcade drive</b><span>One stick: forward and turn.</span></div>
+        <div class="gl"><b>The mixing</b><span>left=fwd+turn, right=fwd-turn.</span></div>
+        <div class="gl"><b>DifferentialDrive</b><span>WPILib's helper class.</span></div>
+        <div class="gl"><b>Pivot</b><span>Opposite sides turn in place.</span></div>
+      </div>
+      <a class="next" href="deploy-lesson-24.html">
+        <div class="n-eyebrow">Up next · Part 6 · 02</div>
+        <h3>Swerve Drive in Code</h3>
+        <p>Tank can only go where it points. Swerve points each wheel independently, so the robot can slide any direction while spinning. See the kinematics that make it work.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="closing-the-loop.html">← Part 5 · Make It Move</a>
+    <a class="map" href="code.html">Course map</a>
+    <a href="deploy-lesson-24.html">Part 6 · 02 · Swerve Drive →</a>
+  </nav>
+
+</div>
+
+<footer>Deploy · Programming an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var cv=document.getElementById('cv'), ctx=cv.getContext('2d'), W=0,H=0,dpr=1;
+  function fit(){ var r=cv.getBoundingClientRect(); if(!r.width)return; dpr=window.devicePixelRatio||1; cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr); ctx.setTransform(dpr,0,0,dpr,0,0); W=r.width; H=r.height; }
+  fit();
+  var mode='arcade';
+  // robot pose
+  var rob={x:0,y:0,th:-Math.PI/2}, trail=[];
+  // controls
+  var joy={x:0,y:0}, tank={l:0,r:0};
+  var active=null; // {type, id}
+  function fieldRect(){ return {x:10, y:10, w:W*0.56-20, h:H-20}; }
+  function ctrlRect(){ return {x:W*0.58, y:14, w:W*0.42-14, h:H-28}; }
+  function resetRobot(){ var f=fieldRect(); rob.x=f.x+f.w/2; rob.y=f.y+f.h/2; rob.th=-Math.PI/2; trail=[]; }
+  resetRobot();
+
+  function wheels(){
+    if(mode==='arcade'){ var fwd=joy.y, turn=joy.x; return {l:clamp(fwd+turn), r:clamp(fwd-turn), fwd:fwd, turn:turn}; }
+    else { var l=tank.l, r=tank.r; return {l:l, r:r, fwd:(l+r)/2, turn:(l-r)/2}; }
+  }
+  function clamp(v){ return Math.max(-1,Math.min(1,v)); }
+
+  function step(){
+    // decay controls not being dragged
+    if(!(active&&active.type==='joy')){ joy.x*=0.6; joy.y*=0.6; if(Math.abs(joy.x)<0.005)joy.x=0; if(Math.abs(joy.y)<0.005)joy.y=0; }
+    if(!(active&&active.type==='tL')){ tank.l*=0.6; if(Math.abs(tank.l)<0.005)tank.l=0; }
+    if(!(active&&active.type==='tR')){ tank.r*=0.6; if(Math.abs(tank.r)<0.005)tank.r=0; }
+    var w=wheels();
+    var v=(w.l+w.r)/2, om=(w.l-w.r);
+    rob.th += om*0.045;
+    rob.x += Math.cos(rob.th)*v*2.4; rob.y += Math.sin(rob.th)*v*2.4;
+    var f=fieldRect();
+    rob.x=Math.max(f.x+14,Math.min(f.x+f.w-14,rob.x)); rob.y=Math.max(f.y+14,Math.min(f.y+f.h-14,rob.y));
+    if(Math.abs(v)>0.02){ trail.push({x:rob.x,y:rob.y}); if(trail.length>90)trail.shift(); }
+    draw(w);
+    document.getElementById('roL').textContent=w.l.toFixed(2);
+    document.getElementById('roR').textContent=w.r.toFixed(2);
+    document.getElementById('roF').textContent=w.fwd.toFixed(2);
+    document.getElementById('roT').textContent=w.turn.toFixed(2);
+    requestAnimationFrame(step);
+  }
+
+  function draw(w){
+    ctx.clearRect(0,0,W,H);
+    var f=fieldRect();
+    // field
+    ctx.fillStyle='#0B1322'; ctx.fillRect(f.x,f.y,f.w,f.h);
+    ctx.strokeStyle='#26324A'; ctx.lineWidth=2; ctx.strokeRect(f.x,f.y,f.w,f.h);
+    ctx.strokeStyle='rgba(120,140,180,0.06)'; ctx.lineWidth=1;
+    for(var gx=f.x; gx<f.x+f.w; gx+=34){ ctx.beginPath(); ctx.moveTo(gx,f.y); ctx.lineTo(gx,f.y+f.h); ctx.stroke(); }
+    for(var gy=f.y; gy<f.y+f.h; gy+=34){ ctx.beginPath(); ctx.moveTo(f.x,gy); ctx.lineTo(f.x+f.w,gy); ctx.stroke(); }
+    // trail
+    for(var i=0;i<trail.length;i++){ ctx.fillStyle='rgba(52,215,197,'+(i/trail.length*0.5)+')'; ctx.beginPath(); ctx.arc(trail[i].x,trail[i].y,2,0,Math.PI*2); ctx.fill(); }
+    // robot
+    ctx.save(); ctx.translate(rob.x,rob.y); ctx.rotate(rob.th);
+    ctx.fillStyle='#1B2540'; ctx.strokeStyle='#8E8CF8'; ctx.lineWidth=2;
+    ctx.fillRect(-15,-13,30,26); ctx.strokeRect(-15,-13,30,26);
+    // wheels colored by command
+    function wheelCol(c){ return c>0.02?'#34D7C5':(c<-0.02?'#FF6B6B':'#33415e'); }
+    ctx.fillStyle=wheelCol(w.l); ctx.fillRect(-17,-13,4,26);
+    ctx.fillStyle=wheelCol(w.r); ctx.fillRect(13,-13,4,26);
+    // nose
+    ctx.fillStyle='#FFB020'; ctx.beginPath(); ctx.moveTo(18,0); ctx.lineTo(8,-6); ctx.lineTo(8,6); ctx.closePath(); ctx.fill();
+    ctx.restore();
+    // ===== control area =====
+    var c=ctrlRect();
+    if(mode==='arcade'){
+      var cx=c.x+c.w/2, cy=c.y+c.h/2, R=Math.min(c.w,c.h)/2-8;
+      ctx.strokeStyle='#26324A'; ctx.lineWidth=2; ctx.strokeRect(c.x+ (c.w/2-R), cy-R, R*2, R*2);
+      ctx.strokeStyle='#1B2540'; ctx.beginPath(); ctx.moveTo(cx-R,cy); ctx.lineTo(cx+R,cy); ctx.moveTo(cx,cy-R); ctx.lineTo(cx,cy+R); ctx.stroke();
+      var kx=cx+joy.x*R, ky=cy-joy.y*R;
+      ctx.strokeStyle='#33415e'; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(kx,ky); ctx.stroke();
+      ctx.fillStyle='#8E8CF8'; ctx.beginPath(); ctx.arc(kx,ky,12,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#5E6F8E'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText('fwd / turn', cx, cy+R+14);
+    } else {
+      var bw=22, gap=c.w*0.34, lx=c.x+c.w/2-gap/2, rx=c.x+c.w/2+gap/2, top=c.y+12, bh=c.h-40, mid=top+bh/2;
+      [['L',lx,tank.l],['R',rx,tank.r]].forEach(function(t){
+        ctx.strokeStyle='#26324A'; ctx.lineWidth=2; ctx.strokeRect(t[1]-bw/2, top, bw, bh);
+        ctx.strokeStyle='#1B2540'; ctx.beginPath(); ctx.moveTo(t[1]-bw/2,mid); ctx.lineTo(t[1]+bw/2,mid); ctx.stroke();
+        var ky=mid - t[2]*(bh/2-10);
+        ctx.fillStyle=t[2]>0?'#34D7C5':(t[2]<0?'#FF6B6B':'#8E8CF8'); ctx.fillRect(t[1]-bw/2, Math.min(mid,ky), bw, Math.abs(mid-ky));
+        ctx.fillStyle='#8E8CF8'; ctx.beginPath(); ctx.arc(t[1],ky,9,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle='#5E6F8E'; ctx.font='10px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText(t[0], t[1], top+bh+16);
+      });
+    }
+  }
+
+  function pos(e){ var r=cv.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; }
+  cv.addEventListener('pointerdown',function(e){
+    var p=pos(e), c=ctrlRect();
+    if(p.x < c.x-4) return; // only the control area drives
+    cv.setPointerCapture(e.pointerId);
+    if(mode==='arcade'){ active={type:'joy',id:e.pointerId}; setJoy(p); }
+    else { var midX=c.x+c.w/2; active={type:(p.x<midX?'tL':'tR'),id:e.pointerId}; setTank(p); }
+  });
+  cv.addEventListener('pointermove',function(e){ if(!active)return; var p=pos(e); if(active.type==='joy')setJoy(p); else setTank(p); });
+  function release(){ active=null; } cv.addEventListener('pointerup',release); cv.addEventListener('pointercancel',release);
+  function setJoy(p){ var c=ctrlRect(), cx=c.x+c.w/2, cy=c.y+c.h/2, R=Math.min(c.w,c.h)/2-8; joy.x=clamp((p.x-cx)/R); joy.y=clamp(-(p.y-cy)/R); }
+  function setTank(p){ var c=ctrlRect(), top=c.y+12, bh=c.h-40, mid=top+bh/2; var v=clamp(-(p.y-mid)/(bh/2-10)); if(active.type==='tL')tank.l=v; else tank.r=v; }
+
+  document.querySelectorAll('#modeSeg button').forEach(function(b){ b.addEventListener('click',function(){ mode=b.getAttribute('data-m'); document.getElementById('modeTag').textContent=mode; document.getElementById('hint').textContent=(mode==='arcade'?'drag the joystick · release to stop':'drag each throttle · release to stop'); joy.x=joy.y=0; tank.l=tank.r=0; active=null; document.querySelectorAll('#modeSeg button').forEach(function(x){x.classList.toggle('active',x===b);}); }); });
+  document.getElementById('reset').addEventListener('click',resetRobot);
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();resetRobot();},120);});
+  requestAnimationFrame(step);
+
+  var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
+  function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'').replace(/\(\)$/,'');}
+  document.getElementById('check').addEventListener('click',function(){
+    var all=true;
+    blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - arcadeDrive'; res.className='code-result '+(all?'ok':'no');
+  });
+  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='arcadeDrive';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(idx===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="deploy:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

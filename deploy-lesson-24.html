@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deploy · Part 6.2 - Swerve Drive in Code</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(138,140,248,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  canvas.swerve{display:block;width:100%;height:300px;touch-action:none;cursor:grab}
+  canvas.swerve:active{cursor:grabbing}
+  .readouts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:18px;font-weight:600;margin-top:3px}
+  .ro .v.teal{color:var(--teal)} .ro .v.indigo{color:var(--indigo)} .ro .v.amber{color:var(--amber)}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+  .slider-group{flex:1 1 240px;display:flex;flex-direction:column;gap:6px;min-width:200px}
+  .slider-group label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+  .slider-group label .val{color:var(--amber)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:var(--line-2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--amber);cursor:pointer;box-shadow:0 0 10px -1px var(--amber)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--amber);cursor:pointer}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:9px 12px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--indigo);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:12.5px;line-height:1.8;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic} .code .kw{color:#ff9bbf} .code .ty{color:var(--teal)} .code .fn{color:var(--indigo)} .code .num{color:var(--amber)}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(138,140,248,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .code-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .code-ex .chead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .code-ex .chead .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,176,32,.14);display:grid;place-items:center;color:var(--amber);font-size:13px}
+  .code-ex .ctask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .code-ex pre.code{margin:0 0 14px}
+  .blank{font-family:var(--mono);font-size:13px;width:22ch;text-align:center;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:2px 4px;outline:none}
+  .blank:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
+  .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:120px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="code.html"><span class="dot"></span><span class="name">Deploy</span></a>
+    <div class="top-meta">Part 6 · 02 / 05 · Drivetrains</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 6 · 02</b> Driving &amp; Autonomous</div>
+    <div class="eyebrow">Swerve Drive in Code</div>
+    <h1>Every wheel<br><span class="accent">steers</span>.</h1>
+    <p class="dek">Swerve gives each of four wheels its own steering motor. Point them together and the robot slides any direction; point them in a pinwheel and it spins. The math that aims them is swerve kinematics.</p>
+  </div>
+
+  <section>
+    <p class="lead">Four modules, each pointing wherever it needs to.</p>
+    <p>A swerve module is a drive wheel plus a steering motor, so it can face any angle and roll at any speed. With four of them the robot is <strong>holonomic</strong>: it can translate any direction <em>and</em> rotate at the same time. The trick is figuring out each module's angle and speed from one chassis command. Drag the translation pad and turn the rotation, and watch the four arrows.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Swerve module states</span><span class="demo-tag" id="mTag">translating</span></div>
+      <canvas class="swerve" id="cv"></canvas>
+      <div class="readouts">
+        <div class="ro"><div class="k2">vx · vy (translate)</div><div class="v teal" id="roT">0.0, 0.0</div></div>
+        <div class="ro"><div class="k2">omega (rotate)</div><div class="v amber" id="roO">0.0</div></div>
+        <div class="ro"><div class="k2">fastest module</div><div class="v indigo" id="roM">0%</div></div>
+      </div>
+      <div class="controls">
+        <div class="slider-group"><label>Rotation omega <span class="val" id="omv">0.0</span></label><input type="range" id="om" min="-100" max="100" value="0"></div>
+        <button class="btn" id="center">Center</button>
+      </div>
+    </div>
+    <p class="caption">Drag inside the robot to set translation; the rotation slider spins it. Pure translation points all four wheels the same way. Pure rotation aims them in a pinwheel. Together, each module solves for its own angle and speed.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In code</div>
+    <h2>Kinematics does the trig</h2>
+    <p>You tell WPILib where the modules sit, then hand it a chassis command. <span class="k">toSwerveModuleStates</span> returns one target angle and speed per module:</p>
+    <div class="codewrap">
+      <div class="clabel">SwerveSubsystem <span class="badge">Java · WPILib</span></div>
+<pre class="code"><span class="cm">// where each module sits relative to robot center (meters)</span>
+<span class="ty">SwerveDriveKinematics</span> kinematics = <span class="kw">new</span> <span class="ty">SwerveDriveKinematics</span>(
+    flLocation, frLocation, blLocation, brLocation);
+
+<span class="cm">// the chassis motion you want (field-relative uses the gyro from 4.3)</span>
+<span class="ty">ChassisSpeeds</span> speeds = <span class="ty">ChassisSpeeds</span>.<span class="fn">fromFieldRelativeSpeeds</span>(
+    vx, vy, omega, gyro.<span class="fn">getRotation2d</span>());
+
+<span class="cm">// one angle + speed per module</span>
+<span class="ty">SwerveModuleState</span>[] states = kinematics.<span class="fn">toSwerveModuleStates</span>(speeds);
+<span class="ty">SwerveDriveKinematics</span>.<span class="fn">desaturateWheelSpeeds</span>(states, MAX_SPEED);
+
+<span class="kw">for</span> (<span class="ty">int</span> i = <span class="num">0</span>; i &lt; <span class="num">4</span>; i++) modules[i].<span class="fn">setDesiredState</span>(states[i]);</pre>
+    </div>
+    <div class="note indigo">
+      <div class="nh">Field-relative is the swerve superpower</div>
+      <p>Because each wheel steers, swerve can drive "north" while the robot body points any direction. <span class="k">fromFieldRelativeSpeeds</span> rotates your stick command by the gyro heading, so push-away always means down-field, just like Lesson 4.3 promised. <span class="k">desaturateWheelSpeeds</span> then scales every module down together if one would exceed the max, so the robot keeps its commanded direction instead of veering.</p>
+    </div>
+
+    <div class="code-ex">
+      <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
+      <div class="ctask">Turn the chassis command into one angle-and-speed target per module. Fill in the method.</div>
+<pre class="code"><span class="ty">SwerveModuleState</span>[] states = kinematics.<input class="blank" data-ans="toswervemodulestates" aria-label="blank" autocomplete="off" spellcheck="false">(speeds);</pre>
+      <div class="code-actions">
+        <button class="btn" id="check">Check</button>
+        <button class="btn" id="reveal">Reveal</button>
+        <span class="code-result" id="cres"></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="2">
+        <div class="qn">Question 1</div>
+        <div class="qt">What can a swerve drive do that a tank drive can't?</div>
+        <div class="opts">
+          <button class="opt">Go faster in a straight line</button>
+          <button class="opt">Use fewer motors</button>
+          <button class="opt">Translate any direction while rotating, because each wheel steers</button>
+        </div>
+        <div class="explain">Independent steering on every module makes swerve holonomic: it can slide sideways, drive diagonally, and spin all at once. Tank can only move along the direction it's pointing.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 2</div>
+        <div class="qt">You command pure rotation (omega only, no translation). How do the modules point?</div>
+        <div class="opts">
+          <button class="opt">All parallel, facing forward</button>
+          <button class="opt">In a pinwheel - each tangent to the turn, so the robot spins in place</button>
+          <button class="opt">They stop</button>
+        </div>
+        <div class="explain">For rotation, each module must push perpendicular to its line from the center, forming a pinwheel. That's exactly what the kinematics computes from omega.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">What does kinematics.toSwerveModuleStates(speeds) return?</div>
+        <div class="opts">
+          <button class="opt">An angle and speed for each of the four modules</button>
+          <button class="opt">The battery voltage</button>
+          <button class="opt">A single number for the whole robot</button>
+        </div>
+        <div class="explain">It converts one chassis command (vx, vy, omega) into four SwerveModuleStates, each carrying the angle to steer to and the speed to drive. The module controllers then chase those targets.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 6 · 02 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Swerve module</b><span>Drive wheel + steering motor.</span></div>
+        <div class="gl"><b>Holonomic</b><span>Translate any direction + rotate.</span></div>
+        <div class="gl"><b>ChassisSpeeds</b><span>vx, vy, omega you want.</span></div>
+        <div class="gl"><b>Kinematics</b><span>Chassis command → module states.</span></div>
+        <div class="gl"><b>Module state</b><span>One angle + speed per wheel.</span></div>
+        <div class="gl"><b>desaturate</b><span>Scale down if one exceeds max.</span></div>
+      </div>
+      <a class="next" href="deploy-lesson-25.html">
+        <div class="n-eyebrow">Up next · Part 6 · 03</div>
+        <h3>Odometry</h3>
+        <p>The robot can move any direction. But where is it on the field? Combine the wheels and the gyro to track the robot's pose, loop after loop.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="deploy-lesson-23.html">← Part 6 · 01 · The Drivetrain</a>
+    <a class="map" href="code.html">Course map</a>
+    <a href="deploy-lesson-25.html">Part 6 · 03 · Odometry →</a>
+  </nav>
+
+</div>
+
+<footer>Deploy · Programming an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var cv=document.getElementById('cv'), ctx=cv.getContext('2d'), W=0,H=0,dpr=1;
+  function fit(){ var r=cv.getBoundingClientRect(); if(!r.width)return; dpr=window.devicePixelRatio||1; cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr); ctx.setTransform(dpr,0,0,dpr,0,0); W=r.width; H=r.height; }
+  fit();
+  var vx=0, vy=0, omega=0, dragging=false;
+  // module positions in math frame (x right, y up), unit half-extent
+  var MODS=[{rx:-1,ry:1,n:'FL'},{rx:1,ry:1,n:'FR'},{rx:-1,ry:-1,n:'BL'},{rx:1,ry:-1,n:'BR'}];
+  function center(){ return {cx:W*0.30, cy:H*0.5, S:Math.min(W*0.30,H*0.34)*0.5}; }
+  function states(){
+    var arr=MODS.map(function(m){ var mvx=vx - omega*m.ry, mvy=vy + omega*m.rx; return {sp:Math.hypot(mvx,mvy), ang:Math.atan2(mvy,mvx), m:m}; });
+    var mx=Math.max.apply(null, arr.map(function(s){return s.sp;}).concat([1e-6]));
+    var scale = mx>1 ? 1/mx : 1;
+    return {arr:arr, scale:scale, max:mx};
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    var C=center(), S=C.S, st=states();
+    // robot body
+    ctx.save(); ctx.translate(C.cx,C.cy);
+    ctx.fillStyle='#0B1322'; ctx.strokeStyle='#8E8CF8'; ctx.lineWidth=2;
+    ctx.fillRect(-S,-S,S*2,S*2); ctx.strokeRect(-S,-S,S*2,S*2);
+    // front indicator (up = +y math = -y screen)
+    ctx.fillStyle='#FFB020'; ctx.beginPath(); ctx.moveTo(0,-S-10); ctx.lineTo(-7,-S+2); ctx.lineTo(7,-S+2); ctx.closePath(); ctx.fill();
+    // chassis translation arrow
+    if(Math.hypot(vx,vy)>0.02){ arrow(0,0, vx*S*0.9, -vy*S*0.9, '#34D7C5', 2.5); }
+    // modules
+    st.arr.forEach(function(s){
+      var mx=s.m.rx*S, my=-s.m.ry*S; // screen
+      ctx.fillStyle='#1B2540'; ctx.strokeStyle='#33415e'; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.arc(mx,my,8,0,Math.PI*2); ctx.fill(); ctx.stroke();
+      var len=(s.sp*st.scale)*S*0.95;
+      var ax=Math.cos(s.ang)*len, ay=-Math.sin(s.ang)*len;
+      arrow(mx,my, ax, ay, '#FFB020', 3);
+    });
+    ctx.restore();
+    // right: hint dial for rotation visual
+    var rx=W*0.74, ry=H*0.5, rr=Math.min(W*0.18,H*0.28);
+    ctx.strokeStyle='#26324A'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(rx,ry,rr,0,Math.PI*2); ctx.stroke();
+    ctx.fillStyle='#5E6F8E'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText('ROTATION', rx, ry-rr-8);
+    if(Math.abs(omega)>0.02){
+      var a0=-Math.PI/2, a1=a0 + omega*2.2;
+      ctx.strokeStyle='#FFB020'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(rx,ry,rr*0.7, a0, a1, omega<0); ctx.stroke();
+      var ex=rx+Math.cos(a1)*rr*0.7, ey=ry+Math.sin(a1)*rr*0.7;
+      ctx.fillStyle='#FFB020'; ctx.beginPath(); ctx.arc(ex,ey,4,0,Math.PI*2); ctx.fill();
+    } else { ctx.fillStyle='#5E6F8E'; ctx.font='10px ui-monospace,Menlo,monospace'; ctx.fillText('0', rx, ry+4); }
+    // readouts
+    document.getElementById('roT').textContent=vx.toFixed(1)+', '+vy.toFixed(1);
+    document.getElementById('roO').textContent=omega.toFixed(1);
+    document.getElementById('roM').textContent=Math.round(Math.min(1,st.max)*100)+'%';
+    document.getElementById('mTag').textContent = Math.abs(omega)>0.05 && Math.hypot(vx,vy)>0.05 ? 'translating + rotating' : (Math.abs(omega)>0.05 ? 'rotating' : (Math.hypot(vx,vy)>0.05?'translating':'idle'));
+  }
+  function arrow(x,y,dx,dy,col,w){
+    var len=Math.hypot(dx,dy); if(len<1) return;
+    ctx.strokeStyle=col; ctx.fillStyle=col; ctx.lineWidth=w; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+dx,y+dy); ctx.stroke();
+    var a=Math.atan2(dy,dx), h=6+w;
+    ctx.beginPath(); ctx.moveTo(x+dx,y+dy); ctx.lineTo(x+dx-Math.cos(a-0.4)*h, y+dy-Math.sin(a-0.4)*h); ctx.lineTo(x+dx-Math.cos(a+0.4)*h, y+dy-Math.sin(a+0.4)*h); ctx.closePath(); ctx.fill();
+  }
+  function loop(){ draw(); requestAnimationFrame(loop); }
+  function pos(e){ var r=cv.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; }
+  function setTrans(p){ var C=center(); vx=Math.max(-1,Math.min(1,(p.x-C.cx)/(C.S))); vy=Math.max(-1,Math.min(1,-(p.y-C.cy)/(C.S))); }
+  cv.addEventListener('pointerdown',function(e){ var p=pos(e), C=center(); if(Math.abs(p.x-C.cx)<C.S*1.4 && Math.abs(p.y-C.cy)<C.S*1.4){ dragging=true; cv.setPointerCapture(e.pointerId); setTrans(p); } });
+  cv.addEventListener('pointermove',function(e){ if(dragging) setTrans(pos(e)); });
+  cv.addEventListener('pointerup',function(){ dragging=false; }); cv.addEventListener('pointercancel',function(){ dragging=false; });
+  document.getElementById('om').addEventListener('input',function(e){ omega=(+e.target.value)/100; document.getElementById('omv').textContent=omega.toFixed(1); });
+  document.getElementById('center').addEventListener('click',function(){ vx=0; vy=0; omega=0; document.getElementById('om').value=0; document.getElementById('omv').textContent='0.0'; });
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
+  requestAnimationFrame(loop);
+
+  var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
+  function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'').replace(/\(\)$/,'');}
+  document.getElementById('check').addEventListener('click',function(){
+    var all=true;
+    blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - toSwerveModuleStates'; res.className='code-result '+(all?'ok':'no');
+  });
+  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='toSwerveModuleStates';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(idx===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="deploy:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>
