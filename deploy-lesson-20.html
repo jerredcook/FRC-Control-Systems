@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deploy · Part 4.4 - Switches &amp; Digital Sensors</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(138,140,248,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  canvas.dig{display:block;width:100%;height:260px}
+  .readouts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:17px;font-weight:600;margin-top:3px;color:var(--muted)}
+  .ro .v.on{color:var(--green)} .ro .v.off{color:var(--faint)} .ro .v.amber{color:var(--amber)} .ro .v.red{color:var(--red)}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;padding:11px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .btn.primary{background:linear-gradient(180deg,#a7adff,var(--indigo));color:#0a0f24;font-weight:700;border:none}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--indigo);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:13px;line-height:1.85;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic} .code .kw{color:#ff9bbf} .code .ty{color:var(--teal)} .code .fn{color:var(--indigo)} .code .num{color:var(--amber)} .code .bl{color:#ff9bbf}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(138,140,248,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .code-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .code-ex .chead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .code-ex .chead .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,176,32,.14);display:grid;place-items:center;color:var(--amber);font-size:13px}
+  .code-ex .ctask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .code-ex pre.code{margin:0 0 14px}
+  .blank{font-family:var(--mono);font-size:13px;width:12ch;text-align:center;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:2px 4px;outline:none}
+  .blank:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
+  .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:110px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="code.html"><span class="dot"></span><span class="name">Deploy</span></a>
+    <div class="top-meta">Part 4 · 04 / 06 · Hardware</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 4 · 04</b> Talking to Hardware</div>
+    <div class="eyebrow">Switches &amp; Digital Sensors</div>
+    <h1>Yes or<br><span class="accent">no</span>.</h1>
+    <p class="dek">Some sensors don't give a number, just a true or a false. That one bit is exactly what you need to find a known zero and to tell when a game piece has arrived.</p>
+  </div>
+
+  <section>
+    <p class="lead">A digital input answers a single yes-or-no question.</p>
+    <p>A <strong>limit switch</strong> is pressed or it isn't. A <strong>beam break</strong> is blocked or it's clear. <span class="k">DigitalInput.get()</span> hands you a boolean, and two jobs lean on it constantly. <strong>Homing</strong> drives a mechanism slowly until a switch trips, giving it a known zero. <strong>Detection</strong> watches a beam to know a game piece is in the robot. Run both below.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Homing &amp; beam break</span><span class="demo-tag" id="stateTag">idle</span></div>
+      <canvas class="dig" id="cv"></canvas>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Bottom limit switch</div><div class="v off" id="roLim">OPEN (false)</div></div>
+        <div class="ro"><div class="k2">Elevator zero</div><div class="v" id="roZero">not set</div></div>
+        <div class="ro"><div class="k2">Beam break</div><div class="v off" id="roBeam">CLEAR (false)</div></div>
+      </div>
+      <div class="controls">
+        <button class="btn primary" id="home">Run homing</button>
+        <button class="btn" id="raise">Raise</button>
+        <button class="btn" id="feed">Pass a game piece</button>
+      </div>
+    </div>
+    <p class="caption">Homing creeps the elevator down until the switch reads true, then defines that spot as position 0. The beam break flips to BROKEN the instant a game piece crosses it, which is how the robot knows to stop the intake.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In code</div>
+    <h2>One bit, two jobs</h2>
+    <p>A <span class="k">DigitalInput</span> is wired to a DIO port on the roboRIO. You read <span class="k">get()</span>, invert it if the wiring is normally-closed, and build logic on the boolean:</p>
+    <div class="codewrap">
+      <div class="clabel">Homing and detection <span class="badge">Java · WPILib</span></div>
+<pre class="code"><span class="ty">DigitalInput</span> bottomLimit = <span class="kw">new</span> <span class="ty">DigitalInput</span>(<span class="num">0</span>);   <span class="cm">// DIO port 0</span>
+<span class="ty">DigitalInput</span> beamBreak   = <span class="kw">new</span> <span class="ty">DigitalInput</span>(<span class="num">1</span>);
+
+<span class="cm">// invert with ! so "true" always means the active state</span>
+<span class="bl">boolean</span> <span class="fn">atBottom</span>()       { <span class="kw">return</span> !bottomLimit.<span class="fn">get</span>(); }
+<span class="bl">boolean</span> <span class="fn">hasGamePiece</span>()   { <span class="kw">return</span> !beamBreak.<span class="fn">get</span>(); }
+
+<span class="cm">// homing: creep down until the switch trips, then define zero</span>
+<span class="kw">public</span> <span class="kw">void</span> <span class="fn">homingPeriodic</span>() {
+  <span class="kw">if</span> (!<span class="fn">atBottom</span>()) {
+    elevator.<span class="fn">setVoltage</span>(<span class="num">-1.0</span>);     <span class="cm">// slow, gentle</span>
+  } <span class="kw">else</span> {
+    elevator.<span class="fn">setVoltage</span>(<span class="num">0</span>);
+    elevator.<span class="fn">setPosition</span>(<span class="num">0</span>);      <span class="cm">// this spot is now "zero"</span>
+  }
+}</pre>
+    </div>
+    <div class="note indigo">
+      <div class="nh">Why home at all? Relative encoders forget</div>
+      <p>The encoder from Lesson 4.2 only counts <em>change</em>, so when the robot powers on it calls wherever it happens to be "zero." Homing against a physical switch gives an <strong>absolute</strong> reference every boot, so "go to 20 inches" means the same height every match. Watch the sign on a switch too: many read <span class="k">true</span> when open, so you invert with <span class="k">!</span> to make true mean "pressed."</p>
+    </div>
+
+    <div class="code-ex">
+      <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
+      <div class="ctask">The elevator just reached the bottom switch. Define this spot as zero so every later move is measured from here. Fill the method.</div>
+<pre class="code">elevator.<span class="fn">setVoltage</span>(<span class="num">0</span>);
+elevator.<input class="blank" data-ans="setposition" aria-label="blank" autocomplete="off" spellcheck="false">(<span class="num">0</span>);</pre>
+      <div class="code-actions">
+        <button class="btn" id="check">Check</button>
+        <button class="btn" id="reveal">Reveal</button>
+        <span class="code-result" id="cres"></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="2">
+        <div class="qn">Question 1</div>
+        <div class="qt">What does a digital input like a limit switch give your code?</div>
+        <div class="opts">
+          <button class="opt">A distance in inches</button>
+          <button class="opt">A voltage from 0 to 12</button>
+          <button class="opt">A boolean - true or false, like pressed or not</button>
+        </div>
+        <div class="explain">Digital inputs are one bit: on or off. A limit switch is pressed or not; a beam break is blocked or clear. That single boolean is all you read with get().</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 2</div>
+        <div class="qt">Why do teams "home" a mechanism against a limit switch?</div>
+        <div class="opts">
+          <button class="opt">To get a known, absolute zero - a relative encoder forgets where it is on every boot</button>
+          <button class="opt">To charge the battery</button>
+          <button class="opt">To make the motor spin faster</button>
+        </div>
+        <div class="explain">A relative encoder only counts change, so it can't know its true position at power-on. Driving to a physical switch gives an absolute reference, so "20 inches" is the same height every time.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 3</div>
+        <div class="qt">A switch reads true when it's NOT pressed. How do you make your code's "atBottom" true mean pressed?</div>
+        <div class="opts">
+          <button class="opt">Buy a new switch</button>
+          <button class="opt">Invert it: return !bottomLimit.get()</button>
+          <button class="opt">You can't, it's broken</button>
+        </div>
+        <div class="explain">Normally-open vs normally-closed wiring flips the sense of get(). A simple ! makes your boolean read the way you think, so true always means "active." Test it on the real robot and invert as needed.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 4 · 04 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Digital input</b><span>A single boolean: on or off.</span></div>
+        <div class="gl"><b>Limit switch</b><span>Pressed or not.</span></div>
+        <div class="gl"><b>Beam break</b><span>Blocked or clear; piece present.</span></div>
+        <div class="gl"><b>get()</b><span>Reads the boolean from a DIO port.</span></div>
+        <div class="gl"><b>Homing</b><span>Drive to a switch for absolute zero.</span></div>
+        <div class="gl"><b>Invert with !</b><span>Make true mean "active."</span></div>
+      </div>
+      <a class="next" href="deploy-lesson-21.html">
+        <div class="n-eyebrow">Up next · Part 4 · 05</div>
+        <h3>The Gamepad</h3>
+        <p>You've read the robot's sensors. Now read the driver. Joystick axes, the deadband that ignores a resting thumb, and the curve that makes fine control feel right.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="deploy-lesson-19.html">← Part 4 · 03 · Gyros &amp; the IMU</a>
+    <a class="map" href="code.html">Course map</a>
+    <a href="deploy-lesson-21.html">Part 4 · 05 · The Gamepad →</a>
+  </nav>
+
+</div>
+
+<footer>Deploy · Programming an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var cv=document.getElementById('cv'), ctx=cv.getContext('2d'), W=0,H=0,dpr=1;
+  function fit(){ var r=cv.getBoundingClientRect(); if(!r.width)return; dpr=window.devicePixelRatio||1; cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr); ctx.setTransform(dpr,0,0,dpr,0,0); W=r.width; H=r.height; }
+  fit();
+  var f=0.05;            // elevator position 0(top)..1(bottom)
+  var state='idle';      // idle | homing | homed | raising
+  var zeroSet=false;
+  var beamPiece=-1;      // -1 = none; otherwise 0..1.2 across throat
+  function limit(){ return state==='homed'; }   // switch true at bottom
+  function beam(){ return beamPiece>=0.42 && beamPiece<=0.58; }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    // ===== LEFT: homing column =====
+    var tx=W*0.16, tw=30, ty=H*0.12, th=H*0.74;
+    ctx.fillStyle='#5E6F8E'; ctx.font='10px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.textBaseline='alphabetic';
+    ctx.fillText('ELEVATOR', tx+tw/2, ty-10);
+    ctx.strokeStyle='#33415e'; ctx.lineWidth=2; ctx.strokeRect(tx,ty,tw,th);
+    // carriage
+    var carH=24, cy=ty + f*(th-carH);
+    ctx.fillStyle='#FFB020'; ctx.fillRect(tx-6,cy,tw+12,carH);
+    // limit switch box at bottom
+    var sw=limit();
+    ctx.fillStyle=sw?'#43D67E':'#1B2540'; ctx.strokeStyle=sw?'#43D67E':'#33415e'; ctx.lineWidth=2;
+    ctx.fillRect(tx-6, ty+th+2, tw+12, 12); ctx.strokeRect(tx-6, ty+th+2, tw+12, 12);
+    ctx.fillStyle=sw?'#0E1525':'#5E6F8E'; ctx.font='8px ui-monospace,Menlo,monospace'; ctx.fillText(sw?'PRESSED':'switch', tx+tw/2, ty+th+11);
+    // ===== RIGHT: intake throat with beam break =====
+    var ix=W*0.46, iw=W*0.46, iy=H*0.34, ih=H*0.30;
+    ctx.fillStyle='#5E6F8E'; ctx.font='10px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText('INTAKE THROAT', ix+iw/2, iy-12);
+    // rollers
+    ctx.fillStyle='#1B2540'; ctx.strokeStyle='#33415e'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.arc(ix+10, iy+ih/2, 14, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.arc(ix+iw-10, iy+ih/2, 14, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+    // throat walls
+    ctx.strokeStyle='#26324A'; ctx.beginPath(); ctx.moveTo(ix,iy); ctx.lineTo(ix+iw,iy); ctx.moveTo(ix,iy+ih); ctx.lineTo(ix+iw,iy+ih); ctx.stroke();
+    // beam line
+    var bx=ix+iw*0.5, br=beam();
+    ctx.strokeStyle=br?'#FF6B6B':'#34D7C5'; ctx.lineWidth=2; ctx.setLineDash(br?[]:[4,4]);
+    ctx.beginPath(); ctx.moveTo(bx,iy-6); ctx.lineTo(bx,iy+ih+6); ctx.stroke(); ctx.setLineDash([]);
+    // emitter/receiver dots
+    ctx.fillStyle=br?'#FF6B6B':'#34D7C5'; ctx.beginPath(); ctx.arc(bx,iy-6,3,0,Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(bx,iy+ih+6,3,0,Math.PI*2); ctx.fill();
+    // game piece
+    if(beamPiece>=0){
+      var px=ix + beamPiece*iw, py=iy+ih/2;
+      ctx.fillStyle='#FFB020'; ctx.beginPath(); ctx.arc(px,py,13,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle='#2a1a00'; ctx.lineWidth=2; ctx.stroke();
+    }
+    if(br){ ctx.fillStyle='#FF6B6B'; ctx.font='10px ui-monospace,Menlo,monospace'; ctx.fillText('NOTE DETECTED', ix+iw/2, iy+ih+22); }
+  }
+  function refresh(){
+    var l=document.getElementById('roLim'); l.textContent=limit()?'PRESSED (true)':'OPEN (false)'; l.className='v '+(limit()?'on':'off');
+    var z=document.getElementById('roZero'); z.textContent=zeroSet?'set · 0.00':'not set'; z.className='v '+(zeroSet?'amber':'');
+    var b=document.getElementById('roBeam'); b.textContent=beam()?'BROKEN (true)':'CLEAR (false)'; b.className='v '+(beam()?'red':'off');
+    document.getElementById('stateTag').textContent=state;
+  }
+  var prevBeam=false;
+  function loop(){
+    if(state==='homing'){ if(f<1){ f=Math.min(1, f+0.010); } else { state='homed'; zeroSet=true; } }
+    else if(state==='raising'){ if(f>0.05){ f=Math.max(0.05, f-0.018); } else { state='idle'; } }
+    if(beamPiece>=0){ beamPiece+=0.014; if(beamPiece>1.2) beamPiece=-1; }
+    draw(); refresh();
+    requestAnimationFrame(loop);
+  }
+  document.getElementById('home').addEventListener('click',function(){ if(state!=='homing'){ state='homing'; } });
+  document.getElementById('raise').addEventListener('click',function(){ if(state!=='raising'){ state='raising'; zeroSet=false; } });
+  document.getElementById('feed').addEventListener('click',function(){ if(beamPiece<0) beamPiece=-0.18; });
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
+  refresh(); requestAnimationFrame(loop);
+
+  var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
+  function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'').replace(/\(\)$/,'');}
+  document.getElementById('check').addEventListener('click',function(){
+    var all=true;
+    blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - it\'s setPosition'; res.className='code-result '+(all?'ok':'no');
+  });
+  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='setPosition';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(idx===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="deploy:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

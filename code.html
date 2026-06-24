@@ -172,12 +172,12 @@
     {code:"4", title:"Talking to Hardware", sub:"Motors, sensors, the gamepad",
      blurb:"A robot is only as good as what it can sense and move. Here's how your code reads every sensor and commands every motor.",
      lessons:[
-       {n:1, title:"Motors & Controllers", desc:"TalonFX and SparkMax: set, setVoltage, and configuration.", file:null},
-       {n:2, title:"Encoders & Position", desc:"Measuring rotation and converting to real-world units.", file:null},
-       {n:3, title:"Gyros & the IMU", desc:"Heading and rotation with a Pigeon or navX.", file:null},
-       {n:4, title:"Switches & Digital Sensors", desc:"Limit switches, beam breaks, and homing.", file:null},
-       {n:5, title:"The Gamepad", desc:"Joysticks, deadbands, and the operator interface.", file:null},
-       {n:6, title:"NetworkTables & Dashboards", desc:"Send data out to Elastic, Shuffleboard, AdvantageScope.", file:null}
+       {n:1, title:"Motors & Controllers", desc:"TalonFX and SparkMax: set, setVoltage, and configuration.", file:"deploy-lesson-17.html"},
+       {n:2, title:"Encoders & Position", desc:"Measuring rotation and converting to real-world units.", file:"deploy-lesson-18.html"},
+       {n:3, title:"Gyros & the IMU", desc:"Heading and rotation with a Pigeon or navX.", file:"deploy-lesson-19.html"},
+       {n:4, title:"Switches & Digital Sensors", desc:"Limit switches, beam breaks, and homing.", file:"deploy-lesson-20.html"},
+       {n:5, title:"The Gamepad", desc:"Joysticks, deadbands, and the operator interface.", file:"deploy-lesson-21.html"},
+       {n:6, title:"NetworkTables & Dashboards", desc:"Send data out to Elastic, Shuffleboard, AdvantageScope.", file:"deploy-lesson-22.html"}
      ]},
     {code:"5", title:"Make It Move", sub:"Control systems", control:true,
      blurb:"Once your code can read sensors and drive motors, the question becomes how to make a mechanism go exactly where you tell it. That's an entire course of its own - and it's already built.",
@@ -212,7 +212,7 @@
      ]}
   ];
 
-  var NEXT_ID="4-1";
+  var NEXT_ID="5-1";
   var STORE_KEY="deploy:done";
   function loadDone(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY))||{}; }catch(e){ return {}; } }
   function saveDone(d){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(d)); }catch(e){} }

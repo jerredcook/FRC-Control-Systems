@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash"
+      "Bash",
+      "Bash(open /Users/jerredcook/dev/FRC-Control-Systems/closing-the-loop-lesson-1.html /Users/jerredcook/dev/FRC-Control-Systems/closing-the-loop-lesson-21.html)",
+      "Bash(sort -t- -k3 -n)",
+      "Bash(awk '/<script>/{flag=1;next}/<\\\\/script>/{flag=0}flag' /Users/jerredcook/dev/FRC-Control-Systems/deploy-lesson-17.html)",
+      "Bash(node --check /tmp/d17.js)"
     ]
   }
 }
