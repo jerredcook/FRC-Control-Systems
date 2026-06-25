@@ -6,7 +6,8 @@
       "Bash(sort -t- -k3 -n)",
       "Bash(awk '/<script>/{flag=1;next}/<\\\\/script>/{flag=0}flag' /Users/jerredcook/dev/FRC-Control-Systems/deploy-lesson-17.html)",
       "Bash(node --check /tmp/d17.js)",
-      "WebFetch(domain:wpilib.org)"
+      "WebFetch(domain:wpilib.org)",
+      "WebFetch(domain:community.firstinspires.org)"
     ]
   }
 }

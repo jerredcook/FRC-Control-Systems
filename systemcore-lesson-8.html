@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SystemCore · Part 3.2 - Deploying to SystemCore</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  canvas.pn{display:block;width:100%;height:250px}
+  .readouts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:17px;font-weight:600;margin-top:3px;color:var(--muted)}
+  .ro .v.teal{color:var(--teal)} .ro .v.green{color:var(--green)} .ro .v.amber{color:var(--amber)} .ro .v.indigo{color:var(--indigo)}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)} .btn.on{background:var(--indigo);border-color:var(--indigo);color:#2a1503;font-weight:700}
+  .btn.comp.on{background:var(--green);border-color:var(--green);color:#06210f}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(255,138,76,.07)} .note.indigo .nh{color:var(--indigo)}
+  .note.red{border-color:var(--red);background:rgba(255,107,107,.08)} .note.red .nh{color:var(--red)}
+
+  .rules{display:grid;gap:10px;margin:18px 0} @media(min-width:560px){.rules{grid-template-columns:1fr 1fr}}
+  .rule{display:flex;gap:11px;border:1px solid var(--line);border-radius:11px;padding:13px 14px;background:var(--panel)}
+  .rule .ri{font-size:20px;flex:0 0 auto}
+  .rule b{display:block;font-size:14.5px;color:var(--text);margin-bottom:2px}
+  .rule span{font-size:13.5px;color:var(--muted)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:108px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(255,176,32,0.12),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--amber);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--amber)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)} .coursenav a.next-link{color:var(--amber);border-color:rgba(255,176,32,.4)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="systemcore.html"><span class="dot"></span><span class="name">SystemCore &middot; Alpha</span></a>
+    <div class="top-meta">Part 3 &middot; 02 / 03 &middot; Software &amp; Getting Ready</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 3 &middot; 02</b> Software &amp; Getting Ready</div>
+    <div class="eyebrow">Deploying to SystemCore</div>
+    <h1>Image first,<br><span class="accent">then deploy</span>.</h1>
+    <p class="dek">SystemCore runs real-time Linux, so getting code onto it works in two stages: first you "image" the board to set up its operating system, then you send your robot code. If you have ever set up a Raspberry Pi, this will feel familiar.</p>
+  </div>
+
+  <div class="note red">
+    <div class="nh">Alpha preview &middot; this will change</div>
+    <p>SystemCore is still in alpha and beta testing. The details here are based on what FIRST and WPILib have shared so far and they are not final, so confirm anything important against the official sources on the course page before you rely on it.</p>
+  </div>
+
+  <section>
+    <p class="lead">Imaging sets up the operating system. Deploying loads your code on top.</p>
+    <p>Picture a brand-new computer fresh out of the box. Before you can run any of your own programs, the computer needs an operating system installed. <strong>Imaging</strong> is exactly that step for SystemCore: you flash its Linux operating system onto the board, the same way you write an operating system onto a Raspberry Pi's memory card. Once the board has its operating system, you <strong>deploy</strong> your robot code on top of it.</p>
+
+    <div class="rules">
+      <div class="rule"><div class="ri">💿</div><div><b>Image the board</b><span>Flash the real-time Linux operating system onto SystemCore, like setting up a Raspberry Pi.</span></div></div>
+      <div class="rule"><div class="ri">📦</div><div><b>Deploy your code</b><span>Send your robot program to the board so it runs your subsystems and commands.</span></div></div>
+      <div class="rule"><div class="ri">🌐</div><div><b>Web interface</b><span>Open the board's built-in dashboard in a browser to configure and monitor it.</span></div></div>
+      <div class="rule"><div class="ri">🧰</div><div><b>vendordeps</b><span>Still declare your motor and sensor libraries, the same idea as today.</span></div></div>
+    </div>
+
+    <div class="note indigo">
+      <div class="nh">The two-stage idea in one picture</div>
+      <p>Imaging is like putting the operating system on a new laptop before you load your own apps. You do it once to get the machine ready. Deploying is loading your apps, the part you repeat every time you change your code. On a robot you image the board when you set it up, then deploy over and over as you tune and fix things.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">How it differs</div>
+    <h2>Not the roboRIO workflow</h2>
+    <p>If you have deployed to a roboRIO, you used a Gradle command, something like <span class="k">./gradlew deploy</span>, plus a separate imaging tool to set the board up. SystemCore changes this. Because it is a Linux board you image, the setup and deploy steps are new. The exact 2027 commands and tools are still being finalized, so the headline to remember is the shape of the process, not the specific keystrokes.</p>
+
+    <div class="rules">
+      <div class="rule"><div class="ri">🟧</div><div><b>roboRIO</b><span>Imaging tool to set up, then a Gradle deploy like ./gradlew deploy.</span></div></div>
+      <div class="rule"><div class="ri">🟦</div><div><b>SystemCore</b><span>Flash a Linux image like a Raspberry Pi, then deploy your code to it.</span></div></div>
+      <div class="rule"><div class="ri">🌐</div><div><b>On-device tools</b><span>The board serves its own web interface for setup and monitoring.</span></div></div>
+      <div class="rule"><div class="ri">🧰</div><div><b>vendordeps unchanged</b><span>You still list the vendor libraries your robot uses.</span></div></div>
+    </div>
+
+    <div class="note red">
+      <div class="nh">The exact steps are not final</div>
+      <p>The 2027 imaging and deploy process is new and still being finalized. Do not memorize a command from a forum post or an old video and assume it is correct. When it is time to set up a real SystemCore, follow the official WPILib and FIRST documentation, because the steps you find there will be the current ones.</p>
+    </div>
+
+    <div class="note indigo">
+      <div class="nh">What stays the same</div>
+      <p>Your vendordeps still declare what your robot uses, the same idea as today: the Kraken or TalonFX, your REV gear, your sensors. The board changes and the setup steps change, but the way you tell your project which libraries to pull in is the familiar one.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>On a Raspberry Pi you image the memory card once and then reuse that operating system for many different programs. A robot is similar: imaging is the rare setup step, while deploying is the everyday loop you run dozens of times during a build session. Here is one to think through with a mentor: if imaging is the slow, occasional step and deploying is the fast, frequent one, how would you organize a competition day so a sudden code fix takes seconds, not a full reset of the board?</p>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">What does "imaging" SystemCore mean?</div>
+        <div class="opts">
+          <button class="opt">Taking a photo of the board for your notebook</button>
+          <button class="opt">Flashing the board's Linux operating system, like setting up a Raspberry Pi</button>
+          <button class="opt">Sending your finished robot code to run a match</button>
+        </div>
+        <div class="explain">Imaging flashes the operating system onto the board, much like installing the operating system on a new computer or a Raspberry Pi. You do it to get the board ready, before you deploy your code.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">How does deploying to SystemCore differ from the roboRIO?</div>
+        <div class="opts">
+          <button class="opt">It is identical; you run the same Gradle command</button>
+          <button class="opt">SystemCore needs no operating system at all</button>
+          <button class="opt">SystemCore is a Linux board you image first, so its setup and deploy steps are new</button>
+        </div>
+        <div class="explain">The roboRIO used a separate imaging tool and a Gradle deploy like ./gradlew deploy. SystemCore is a Linux board you image like a Raspberry Pi, so the setup and deploy steps are new and being finalized.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">What should you remember about the exact 2027 deploy steps?</div>
+        <div class="opts">
+          <button class="opt">They are new and being finalized, so follow the official docs</button>
+          <button class="opt">They are locked in and will never change</button>
+          <button class="opt">vendordeps are going away entirely</button>
+        </div>
+        <div class="explain">The exact 2027 imaging and deploy steps are new and still being finalized, so use the official WPILib and FIRST documentation. vendordeps stay; they still declare your robot's libraries.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 3 &middot; 02 &middot; Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Imaging</b><span>Flash the board's Linux operating system.</span></div>
+        <div class="gl"><b>Deploying</b><span>Load your robot code on top.</span></div>
+        <div class="gl"><b>Like a Pi</b><span>Set up the operating system, then load programs.</span></div>
+        <div class="gl"><b>Not roboRIO</b><span>No old imaging tool or Gradle deploy.</span></div>
+        <div class="gl"><b>Web interface</b><span>Configure and monitor from a browser.</span></div>
+        <div class="gl"><b>vendordeps</b><span>Still declare your libraries.</span></div>
+      </div>
+      <a class="next" href="systemcore-lesson-9.html">
+        <div class="n-eyebrow">Up next &middot; Part 3 &middot; 03</div>
+        <h3>What Carries Over &amp; Getting Ready &rarr;</h3>
+        <p>The course finale: a clear map of what stays the same versus what changes for 2027, the honest open questions, and exactly how to get ready now.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="systemcore-lesson-7.html">&larr; Part 3 &middot; 01 · WPILib 2027 &amp; the New Driver Station</a>
+    <a class="map" href="systemcore.html">Course map</a>
+    <a class="next-link" href="systemcore-lesson-9.html">Part 3 &middot; 03 · What Carries Over &rarr;</a>
+  </nav>
+
+</div>
+
+<footer>SystemCore &middot; The 2027 control system (alpha preview)</footer>
+
+<script>
+(function(){
+  "use strict";
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="systemcore:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

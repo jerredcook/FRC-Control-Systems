@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SystemCore · Part 3.1 - WPILib 2027 &amp; the New Driver Station</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  canvas.pn{display:block;width:100%;height:250px}
+  .readouts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:17px;font-weight:600;margin-top:3px;color:var(--muted)}
+  .ro .v.teal{color:var(--teal)} .ro .v.green{color:var(--green)} .ro .v.amber{color:var(--amber)} .ro .v.indigo{color:var(--indigo)}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)} .btn.on{background:var(--indigo);border-color:var(--indigo);color:#2a1503;font-weight:700}
+  .btn.comp.on{background:var(--green);border-color:var(--green);color:#06210f}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(255,138,76,.07)} .note.indigo .nh{color:var(--indigo)}
+  .note.red{border-color:var(--red);background:rgba(255,107,107,.08)} .note.red .nh{color:var(--red)}
+
+  .rules{display:grid;gap:10px;margin:18px 0} @media(min-width:560px){.rules{grid-template-columns:1fr 1fr}}
+  .rule{display:flex;gap:11px;border:1px solid var(--line);border-radius:11px;padding:13px 14px;background:var(--panel)}
+  .rule .ri{font-size:20px;flex:0 0 auto}
+  .rule b{display:block;font-size:14.5px;color:var(--text);margin-bottom:2px}
+  .rule span{font-size:13.5px;color:var(--muted)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:108px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(255,176,32,0.12),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--amber);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--amber)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)} .coursenav a.next-link{color:var(--amber);border-color:rgba(255,176,32,.4)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="systemcore.html"><span class="dot"></span><span class="name">SystemCore &middot; Alpha</span></a>
+    <div class="top-meta">Part 3 &middot; 01 / 03 &middot; Software &amp; Getting Ready</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 3 &middot; 01</b> Software &amp; Getting Ready</div>
+    <div class="eyebrow">WPILib 2027</div>
+    <h1>New software,<br><span class="accent">same toolbox</span>.</h1>
+    <p class="dek">SystemCore is a new board, but the way you write robot code barely changes. WPILib 2027 is one unified software experience, your familiar languages still work, and there is a brand-new Driver Station that finally runs on every kind of computer.</p>
+  </div>
+
+  <div class="note red">
+    <div class="nh">Alpha preview &middot; this will change</div>
+    <p>SystemCore is still in alpha and beta testing. The details here are based on what FIRST and WPILib have shared so far and they are not final, so confirm anything important against the official sources on the course page before you rely on it.</p>
+  </div>
+
+  <section>
+    <p class="lead">One library, two programs, the same code structure you already know.</p>
+    <p>Think of WPILib like the toolbox you carry to every build. For 2027 the toolbox gets reorganized into one <strong>unified</strong> experience that covers both FRC and FTC, but the tools inside are the ones you already use. You still write <strong>command-based</strong> code, you still describe your robot in subsystems and commands, and you still target the same vendor motor controllers. The big difference is which board you deploy to.</p>
+
+    <div class="rules">
+      <div class="rule"><div class="ri">☕</div><div><b>Java, C++, Python</b><span>The three supported text languages, all run on SystemCore. Python comes through RobotPy.</span></div></div>
+      <div class="rule"><div class="ri">🧩</div><div><b>Blockly</b><span>Block-based coding for newer programmers, snap pieces together instead of typing.</span></div></div>
+      <div class="rule"><div class="ri">🖥️</div><div><b>Full IDE support</b><span>Write, edit, and debug in a real code editor, the same way you do today.</span></div></div>
+      <div class="rule"><div class="ri">🌐</div><div><b>Web interface</b><span>The board serves a dashboard you open in a browser, no extra install.</span></div></div>
+    </div>
+
+    <div class="note indigo">
+      <div class="nh">Why "unified" matters</div>
+      <p>Today FRC and FTC use different software worlds, so a programmer moving between them has to relearn the tools. WPILib 2027 brings both under one roof. It is like learning to ride one bike and finding that the brakes and gears work the same on every other bike in the shed. What you learn on one program carries straight to the other.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">The control room</div>
+    <h2>A Driver Station for every computer</h2>
+    <p>The Driver Station is the program your drive team runs on a laptop at the field. It reads your gamepads, talks to the robot, and shows you what is happening. The old one had a catch: it ran on Windows only. The new Driver Station, built specifically for SystemCore, runs on <strong>Windows, macOS, and Linux</strong>. The roboRIO keeps using the old one, so only SystemCore teams get the new app.</p>
+
+    <div class="rules">
+      <div class="rule"><div class="ri">🎚️</div><div><b>16-bit axes</b><span>Joystick movement is read far more finely, up from 8-bit, so steering feels smoother.</span></div></div>
+      <div class="rule"><div class="ri">🔘</div><div><b>Up to 64 buttons</b><span>Plus 8 POVs (the d-pad hats), so big custom control boards are no problem.</span></div></div>
+      <div class="rule"><div class="ri">📳</div><div><b>Rumble + LED</b><span>The app can buzz a controller or light its LEDs to signal the driver.</span></div></div>
+      <div class="rule"><div class="ri">📐</div><div><b>Familiar layout</b><span>Still the docked strip about 200 pixels tall, so it looks like home.</span></div></div>
+    </div>
+
+    <div class="note">
+      <div class="nh">Still in development</div>
+      <p>The new Driver Station is not finished. It is currently closed-source, and competition-field support (the FMS link that runs official matches) is still being added. Popular dashboards like Elastic are being updated to connect to it. Expect the look and the feature list to keep shifting until it is final.</p>
+    </div>
+
+    <div class="note indigo">
+      <div class="nh">Your code structure does not change</div>
+      <p>This is the part to relax about. The way you organize a robot project, subsystems, commands, the main robot class, is the same as what this academy already teaches. You point the same code at SystemCore instead of the roboRIO. The skills transfer.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>16-bit axis resolution means each joystick reading lands in one of roughly 65,000 steps instead of 256. For a slow, precise approach to a game piece, that finer reading lets your code tell tiny stick nudges apart that the old 8-bit reading would have lumped together. Here is one to think through with a mentor: where on your robot would smoother, finer joystick control actually change how the driver plays, and where would it make no difference at all?</p>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="2">
+        <div class="qn">Question 1</div>
+        <div class="qt">What is new about the SystemCore Driver Station compared to the old one?</div>
+        <div class="opts">
+          <button class="opt">It only runs on Windows, same as before</button>
+          <button class="opt">It replaces the Driver Station on the roboRIO too</button>
+          <button class="opt">It runs on Windows, macOS, and Linux</button>
+        </div>
+        <div class="explain">The old Driver Station was Windows-only. The new one, built for SystemCore, runs on Windows, macOS, and Linux. The roboRIO keeps the existing Driver Station, so only SystemCore uses the new app.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 2</div>
+        <div class="qt">Which text languages does WPILib 2027 officially support on SystemCore?</div>
+        <div class="opts">
+          <button class="opt">Only Java</button>
+          <button class="opt">Java, C++, and Python</button>
+          <button class="opt">JavaScript and Rust</button>
+        </div>
+        <div class="explain">The three officially supported text languages are Java, C++, and Python (Python via RobotPy), and all of them run on SystemCore. There is also Blockly for block-based coding.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">Which of these is a real new feature of the SystemCore Driver Station?</div>
+        <div class="opts">
+          <button class="opt">Controller rumble and LED output</button>
+          <button class="opt">A tank that stores compressed air</button>
+          <button class="opt">It removes support for gamepad buttons</button>
+        </div>
+        <div class="explain">The new Driver Station adds rumble and LED output, 16-bit axes, and support for up to 64 buttons and 8 POVs. It keeps full gamepad support, with much more of it.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 3 &middot; 01 &middot; Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>WPILib 2027</b><span>One unified library for FRC and FTC.</span></div>
+        <div class="gl"><b>Languages</b><span>Java, C++, Python, plus Blockly.</span></div>
+        <div class="gl"><b>Web interface</b><span>Dashboard the board serves itself.</span></div>
+        <div class="gl"><b>New Driver Station</b><span>Windows, macOS, and Linux.</span></div>
+        <div class="gl"><b>Better input</b><span>16-bit axes, 64 buttons, rumble, LEDs.</span></div>
+        <div class="gl"><b>Same structure</b><span>Command-based code carries over.</span></div>
+      </div>
+      <a class="next" href="systemcore-lesson-8.html">
+        <div class="n-eyebrow">Up next &middot; Part 3 &middot; 02</div>
+        <h3>Deploying to SystemCore &rarr;</h3>
+        <p>You know the software. Next: how your code actually gets onto the board, why you "image" it like a Raspberry Pi, and how that differs from the roboRIO.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="systemcore-lesson-6.html">&larr; Part 2 &middot; 06 · Previous lesson</a>
+    <a class="map" href="systemcore.html">Course map</a>
+    <a class="next-link" href="systemcore-lesson-8.html">Part 3 &middot; 02 · Deploying to SystemCore &rarr;</a>
+  </nav>
+
+</div>
+
+<footer>SystemCore &middot; The 2027 control system (alpha preview)</footer>
+
+<script>
+(function(){
+  "use strict";
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="systemcore:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

@@ -14,6 +14,7 @@ Three courses - three pillars - **103 interactive lessons, all complete:**
 | 🎯 **Control** | **Closing the Loop** | Feedback, PID, feedforward, CTRE Phoenix 6, tuning, swerve, vision, state-space | ✅ **Complete - 24 lessons** + glossary, certificate, worksheet, field guide |
 | 🎮 **Code** | **Deploy** | Toolchain, Java, command-based robots, hardware, autonomous, vision, pro practices | ✅ **Complete - 36 lessons** across 8 parts |
 | 🔧 **Build** | **Fabricate** | CAD, motors & gearboxes, drivetrains, mechanisms, electrical, pneumatics, battery & power, manufacturing | ✅ **Complete - 43 lessons** across 8 parts |
+| 🆕 *Preview* | **SystemCore** | The 2027 control system (replaces the roboRIO): hardware, MotionCore, WPILib 2027, the new Driver Station | ⚠️ **Alpha - 9 lessons.** Provisional, based on alpha/beta info; *will change* |
 
 The pillars connect: **Deploy**'s "Make It Move" unit *is* the **Closing the Loop**
 course, so the control material is shared rather than rebuilt.

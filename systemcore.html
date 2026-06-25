@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SystemCore · The 2027 Control System (Alpha)</title>
+<style>
+  :root{
+    --bg:#090d15; --bg-grad:#0b1019;
+    --panel:#0f1626; --panel-2:#131c30;
+    --line:#1e2840; --line-bright:#2c3c5e;
+    --ink:#e8edf7; --ink-dim:#aeb9d1; --muted:#75829e;
+    --amber:#ffb454; --teal:#34d6c0; --indigo:#8a93ff;
+    --good:#46d6a0; --bad:#ff6f6f; --coral:#ff7a7a;
+    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono","Cascadia Code",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 70% -10%, #2a1014 0%, transparent 60%),
+      linear-gradient(180deg,var(--bg-grad),var(--bg));
+    color:var(--ink);font-family:var(--sans);line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;
+  }
+  .wrap{max-width:940px;margin:0 auto;padding:0 22px}
+
+  header.top{border-bottom:1px solid var(--line);background:rgba(9,13,21,0.6);backdrop-filter:blur(6px);position:sticky;top:0;z-index:20}
+  .top-inner{max-width:940px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--coral);box-shadow:0 0 12px var(--coral)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--ink-dim)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;text-decoration:none}
+  a.top-meta:hover{color:var(--ink)}
+
+  .hero{padding:64px 0 18px}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.32em;text-transform:uppercase;color:var(--coral)}
+  h1{font-size:clamp(40px,7vw,66px);line-height:1.0;margin:12px 0 12px;letter-spacing:-0.025em;font-weight:800}
+  h1 .accent{background:linear-gradient(90deg,var(--coral),var(--indigo));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,21px);color:var(--ink-dim);max-width:58ch;margin-top:6px}
+  .dek b{color:var(--ink);font-weight:650}
+
+  .alpha{margin:24px 0 6px;border:1px solid var(--coral);border-radius:14px;background:rgba(255,122,122,.08);padding:18px 20px}
+  .alpha .ah{font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--coral);margin-bottom:7px;font-weight:700}
+  .alpha p{margin:0;color:var(--ink-dim);font-size:15px}
+  .alpha p + p{margin-top:8px}
+
+  .progress-card{margin:18px 0 8px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#0c1320);padding:18px 20px;display:flex;flex-wrap:wrap;gap:18px;align-items:center;justify-content:space-between}
+  .pc-stats{display:flex;gap:26px;flex-wrap:wrap}
+  .pc-stat .k{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+  .pc-stat .v{font-family:var(--mono);font-size:26px;font-weight:700;margin-top:2px}
+  .pc-stat .v small{font-size:14px;color:var(--muted);font-weight:500}
+  .pc-stat .v.coral{color:var(--coral)} .pc-stat .v.teal{color:var(--teal)} .pc-stat .v.indigo{color:var(--indigo)}
+  .pc-bar-wrap{flex:1 1 220px;min-width:200px}
+  .pc-bar-label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+  .pc-bar{height:8px;border-radius:6px;background:var(--line-bright);overflow:hidden}
+  .pc-bar i{display:block;height:100%;width:0;border-radius:6px;background:linear-gradient(90deg,var(--coral),var(--indigo));transition:width .5s ease}
+  .reset-btn{border:1px solid var(--line-bright);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;padding:8px 12px;border-radius:8px;cursor:pointer;transition:.12s}
+  .reset-btn:hover{border-color:var(--bad);color:var(--bad)}
+  .howto{font-size:14.5px;color:var(--muted);margin:14px 0 0;font-style:italic}
+
+  .part{padding:34px 0 6px}
+  .part-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+  .part-tag{font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--coral);border:1px solid var(--line-bright);border-radius:6px;padding:4px 9px}
+  .part h2{font-size:clamp(23px,3.4vw,30px);line-height:1.15;letter-spacing:-0.01em;margin:0;font-weight:750}
+  .part-sub{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .part-blurb{color:var(--ink-dim);font-size:16px;margin:8px 0 18px;max-width:64ch}
+
+  .lessons{display:grid;gap:12px}
+  @media(min-width:640px){.lessons{grid-template-columns:1fr 1fr}}
+  .card{position:relative;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:16px 16px 14px;display:flex;gap:14px;transition:.14s;overflow:hidden;border-left:3px solid var(--line-bright)}
+  .card.available{cursor:pointer;border-left-color:var(--coral)}
+  .card.available:hover{border-color:var(--line-bright);transform:translateY(-2px);box-shadow:0 18px 40px -26px rgba(0,0,0,0.9)}
+  .card.planned{opacity:.62}
+  .card.next{border-left-color:var(--teal)}
+  .card.done{border-left-color:var(--good)}
+  .card-num{flex:0 0 auto;width:38px;height:38px;border-radius:9px;background:var(--panel-2);border:1px solid var(--line-bright);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:700;color:var(--ink-dim)}
+  .card.done .card-num{background:rgba(70,214,160,0.14);border-color:var(--good);color:var(--good)}
+  .card.next .card-num{background:rgba(52,214,192,0.14);border-color:var(--teal);color:var(--teal)}
+  .card-body{flex:1 1 auto;min-width:0}
+  .card-title{font-size:16.5px;font-weight:650;color:var(--ink);margin:1px 0 4px}
+  .card-desc{font-size:13.5px;color:var(--ink-dim);line-height:1.45;margin:0}
+  .card-foot{display:flex;align-items:center;justify-content:space-between;margin-top:11px;gap:10px}
+  .pill{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;padding:3px 8px;border-radius:20px;border:1px solid var(--line-bright);color:var(--muted)}
+  .pill.open{color:var(--coral);border-color:rgba(255,122,122,0.4);background:rgba(255,122,122,0.08)}
+  .pill.next{color:var(--teal);border-color:rgba(52,214,192,0.4);background:rgba(52,214,192,0.08)}
+  .open-link{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--coral);display:inline-flex;gap:5px;align-items:center}
+  .card.planned .open-link{color:var(--muted)}
+  .done-toggle{position:absolute;top:12px;right:12px;width:24px;height:24px;border-radius:50%;border:1px solid var(--line-bright);background:var(--panel-2);cursor:pointer;display:flex;align-items:center;justify-content:center;color:transparent;font-size:13px;transition:.12s;z-index:3}
+  .done-toggle:hover{border-color:var(--good)}
+  .card.done .done-toggle{background:var(--good);border-color:var(--good);color:#06121f}
+  .card.planned .done-toggle{display:none}
+  .card.available{padding-right:44px}
+
+  .sources{margin:36px 0 0;border-top:1px solid var(--line);padding-top:20px}
+  .sources h4{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin:0 0 4px}
+  .sources p{font-size:13.5px;color:var(--muted);margin:0 0 12px}
+  .sources a{display:block;color:var(--ink-dim);font-size:13.5px;margin:6px 0;text-decoration:none}
+  .sources a:hover{color:var(--coral)}
+
+  footer{padding:48px 0 64px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  footer .small{display:block;margin-top:8px;letter-spacing:.06em;text-transform:none;font-size:11px}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand"><span class="dot"></span><span class="name">SystemCore · Alpha</span></div>
+    <a class="top-meta" href="index.html">← FRC Academy</a>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Looking ahead · 2027 · Alpha</div>
+    <h1>The 2027<br><span class="accent">control system</span>.</h1>
+    <p class="dek">Starting in 2027, the <b>roboRIO and the radio retire</b> and a single new board, <b>SystemCore</b>, takes over. This short course gathers what is known so far: the hardware, the new software, and how to get your team ready.</p>
+
+    <div class="alpha">
+      <div class="ah">⚠ Alpha preview · this will change</div>
+      <p>SystemCore is still in alpha and beta testing as of 2026. Specs, wiring, software, and even some of the facts below are <b>not final and will change</b> before the 2027 kickoff. Treat this course as a living preview, not a build guide, and always confirm details against the official sources linked at the bottom.</p>
+      <p>We built it anyway so your team can start learning the shape of the change early. We will update it as the real thing firms up.</p>
+    </div>
+
+    <div class="progress-card">
+      <div class="pc-stats">
+        <div class="pc-stat"><div class="k">Read</div><div class="v coral" id="statDone">0 <small>/ 0</small></div></div>
+        <div class="pc-stat"><div class="k">Available now</div><div class="v teal" id="statOpen">0</div></div>
+        <div class="pc-stat"><div class="k">On the map</div><div class="v indigo" id="statTotal">0</div></div>
+      </div>
+      <div class="pc-bar-wrap">
+        <div class="pc-bar-label"><span>Your progress</span><span id="pcPct">0%</span></div>
+        <div class="pc-bar"><i id="pcBar"></i></div>
+      </div>
+      <button class="reset-btn" id="resetBtn" title="Clear saved progress on this device">Reset</button>
+    </div>
+    <p class="howto">A short, evolving course. Finish a lesson's quiz and it marks itself done - progress is saved in this browser.</p>
+  </div>
+
+  <main id="course"></main>
+
+  <div class="wrap" style="padding:0">
+    <div class="sources">
+      <h4>Where this comes from</h4>
+      <p>Official, primary sources. When in doubt, trust these over this course.</p>
+      <a href="https://docs.wpilib.org/en/latest/docs/software/systemcore-info/index.html" target="_blank" rel="noopener">WPILib · SystemCore documentation →</a>
+      <a href="https://community.firstinspires.org/introducing-the-future-mobile-robot-controller" target="_blank" rel="noopener">FIRST · Introducing the Future Robot Controller →</a>
+      <a href="https://community.firstinspires.org/march-updates-on-the-future-robot-controller" target="_blank" rel="noopener">FIRST · Updates on the Future Robot Controller →</a>
+      <a href="https://community.firstinspires.org/2025-control-system-testing-reminder-for-2027" target="_blank" rel="noopener">FIRST · 2027 Control System Testing Reminder →</a>
+      <a href="https://wpilib.org/blog/the-2027-first-driver-station" target="_blank" rel="noopener">WPILib · The 2027 FIRST Driver Station →</a>
+      <a href="https://github.com/wpilibsuite/SystemcoreTesting" target="_blank" rel="noopener">GitHub · wpilibsuite/SystemcoreTesting (alpha/beta) →</a>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  SystemCore · The 2027 control system (alpha preview) · part of <a href="index.html" style="color:var(--muted)">FRC Academy</a>
+  <span class="small">Provisional. Verify everything against official sources.</span>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  var COURSE=[
+    {code:"1", title:"The Big Picture", sub:"The 2027 change",
+     blurb:"The biggest control-system change since 2015. Starting in 2027, the roboRIO and the radio give way to a single new board called SystemCore. Here is what is changing, and why.",
+     lessons:[
+       {n:1, title:"The roboRIO Retires", desc:"Why FIRST is replacing it, the hard 2027 cutover, and the timeline.", file:"systemcore-lesson-1.html"},
+       {n:2, title:"Meet SystemCore", desc:"A phone-sized Linux brain with vision, a radio, and an IMU built in.", file:"systemcore-lesson-2.html"},
+       {n:3, title:"SystemCore vs roboRIO", desc:"Side by side: what stays the same, and what is genuinely new.", file:"systemcore-lesson-3.html"}
+     ]},
+    {code:"2", title:"The Hardware", sub:"What's in the box",
+     blurb:"SystemCore is a small Linux computer with robot I/O built in, paired with a companion called MotionCore for power and CAN. A tour of the parts, in plain words, with the open questions called out.",
+     lessons:[
+       {n:1, title:"The Brain & Smart I/O", desc:"The CM5 computer, the RP2350 I/O chip, and reconfigurable ports.", file:"systemcore-lesson-4.html"},
+       {n:2, title:"Vision, IMU & Radio, Built In", desc:"Plug in a camera for vision; the separate radio box is gone.", file:"systemcore-lesson-5.html"},
+       {n:3, title:"Power, MotionCore & CAN", desc:"MotionCore distributes power and CAN FD. What is known, and what is not yet.", file:"systemcore-lesson-6.html"}
+     ]},
+    {code:"3", title:"Software & Getting Ready", sub:"Code and the road to 2027",
+     blurb:"Your code, a brand-new Driver Station, and the path from today's robot to a 2027-ready one. The good news: most of what you already know still applies.",
+     lessons:[
+       {n:1, title:"WPILib 2027 & the New Driver Station", desc:"A cross-platform Driver Station; Java, C++, and Python all supported.", file:"systemcore-lesson-7.html"},
+       {n:2, title:"Deploying to SystemCore", desc:"Imaging the board and pushing code, and how that differs from the roboRIO.", file:"systemcore-lesson-8.html"},
+       {n:3, title:"What Carries Over & Getting Ready", desc:"The skills that still apply, the open questions, and how to follow along.", file:"systemcore-lesson-9.html"}
+     ]}
+  ];
+
+  var NEXT_ID="";
+  var STORE_KEY="systemcore:done";
+  function loadDone(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY))||{}; }catch(e){ return {}; } }
+  function saveDone(d){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(d)); }catch(e){} }
+  var done=loadDone();
+  function lid(c,n){ return c+"-"+n; }
+
+  var courseEl=document.getElementById("course");
+
+  function render(){
+    courseEl.innerHTML="";
+    COURSE.forEach(function(part){
+      var sec=document.createElement("section"); sec.className="part";
+      var head=document.createElement("div"); head.className="part-head";
+      head.innerHTML='<span class="part-tag">Part '+part.code+'</span><h2>'+part.title+'</h2><span class="part-sub">'+part.sub+'</span>';
+      sec.appendChild(head);
+      var blurb=document.createElement("p"); blurb.className="part-blurb"; blurb.textContent=part.blurb; sec.appendChild(blurb);
+      var grid=document.createElement("div"); grid.className="lessons";
+
+      part.lessons.forEach(function(L){
+        var id=lid(part.code,L.n);
+        var available=!!L.file, isDone=!!done[L.file], isNext=(id===NEXT_ID);
+        var card=document.createElement("div");
+        card.className="card "+(available?"available":"planned")+(isDone?" done":"")+(isNext?" next":"");
+        card.setAttribute("data-id",id);
+        if(available) card.setAttribute("data-file",L.file);
+
+        var pill, link, toggle="";
+        if(available){ pill='<span class="pill open">Open</span>'; link='<span class="open-link">Read →</span>'; toggle='<button class="done-toggle" title="Mark read">✓</button>'; }
+        else { pill=isNext?'<span class="pill next">Up next</span>':'<span class="pill">Planned</span>'; link='<span class="open-link">'+(isNext?"Coming soon":"Planned")+'</span>'; }
+
+        card.innerHTML=toggle+
+          '<div class="card-num">'+(part.code+'.'+L.n)+'</div>'+
+          '<div class="card-body"><div class="card-title">'+L.title+'</div><p class="card-desc">'+L.desc+'</p>'+
+          '<div class="card-foot">'+pill+link+'</div></div>';
+        grid.appendChild(card);
+      });
+      sec.appendChild(grid);
+      courseEl.appendChild(sec);
+    });
+    updateStats();
+  }
+
+  function updateStats(){
+    var total=0, open=0, doneCount=0;
+    COURSE.forEach(function(part){ part.lessons.forEach(function(L){
+      total++; if(L.file){ open++; } if(done[L.file]){ doneCount++; }
+    });});
+    document.getElementById("statDone").innerHTML=doneCount+' <small>/ '+total+'</small>';
+    document.getElementById("statOpen").textContent=open;
+    document.getElementById("statTotal").textContent=total;
+    var pct=total?Math.round(doneCount/total*100):0;
+    document.getElementById("pcPct").textContent=pct+"%";
+    document.getElementById("pcBar").style.width=pct+"%";
+  }
+
+  courseEl.addEventListener("click",function(e){
+    var toggle=e.target.closest(".done-toggle");
+    var card=e.target.closest(".card"); if(!card) return;
+    var file=card.getAttribute("data-file");
+    if(toggle){
+      e.stopPropagation();
+      if(!file) return;
+      if(done[file]){ delete done[file]; } else { done[file]=true; }
+      saveDone(done); card.classList.toggle("done", !!done[file]); updateStats(); return;
+    }
+    if(file){ window.location.href=file; }
+  });
+
+  document.getElementById("resetBtn").addEventListener("click",function(){
+    if(confirm("Clear your saved progress for this course?")){ done={}; saveDone(done); render(); }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

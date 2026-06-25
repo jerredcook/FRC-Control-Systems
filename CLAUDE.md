@@ -19,6 +19,15 @@ required.** Every file opens directly in a browser.
 
 `index.html` is the academy landing page that links to all three hubs.
 
+**Plus an alpha preview course:** **SystemCore** (`systemcore.html` hub +
+`systemcore-lesson-1..9.html`, key `systemcore:done`, coral accent) covers the 2027
+control system that replaces the roboRIO. It is deliberately framed as **provisional
+and subject to change** (every lesson opens with a red "Alpha preview" banner; the
+hub has a standing alpha notice and a sources list). It is researched from official
+FIRST/WPILib sources, not authoritative, so re-verify facts before relying on them.
+`systemcore-2027.html` is a redirect stub to `systemcore.html` (the old single-page
+preview that the course replaced).
+
 **The pillars connect:** Deploy's Part 5 ("Make It Move") is a single card that
 links straight into the Closing the Loop course rather than re-teaching control. So
 the control material is shared, not duplicated.
