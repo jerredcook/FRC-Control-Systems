@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Closing the Loop · Part II.2 - Units, Gears & Conversions (Python)</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ink); color:var(--text);
+    font-family:var(--sans); font-size:17px; line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(900px 500px at 80% -10%, rgba(255,176,32,.06), transparent 60%),
+      radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--teal);box-shadow:0 0 12px var(--teal)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--teal),var(--indigo));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:50ch;margin-top:6px}
+
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--teal);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  p .sub,.sub{color:var(--muted)}
+  .lead{font-size:19px}
+  em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .formula{font-family:var(--mono);background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:18px 20px;margin:20px 0;font-size:17px;overflow-x:auto;color:#cfe;text-align:center}
+  .formula .small{display:block;font-size:13px;color:var(--muted);margin-top:8px}
+  .formula b{color:var(--amber)} .formula .t{color:var(--teal)} .formula .i{color:var(--indigo)}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  canvas.world{display:block;width:100%;height:330px}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+  .slider-group{flex:1 1 200px;display:flex;flex-direction:column;gap:6px;min-width:170px}
+  .slider-group label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+  .slider-group label .val{color:var(--amber)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:var(--line-2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--amber);cursor:pointer;box-shadow:0 0 10px -1px var(--amber)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--amber);cursor:pointer}
+
+  .chain{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  @media(min-width:560px){.chain{grid-template-columns:repeat(3,1fr)}}
+  .ch{background:#0B1322;padding:12px 14px;text-align:center}
+  .ch .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ch .v{font-family:var(--mono);font-size:19px;font-weight:600;margin-top:4px}
+  .ch .op{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:3px}
+  .ch .v.teal{color:var(--teal)} .ch .v.indigo{color:var(--indigo)} .ch .v.amber{color:var(--amber)}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.teal{border-color:var(--teal);background:rgba(52,215,197,.06)} .note.teal .nh{color:var(--teal)}
+  .note.red{border-color:var(--red);background:rgba(255,107,107,.07)} .note.red .nh{color:var(--red)}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--teal);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:13.5px;line-height:1.85;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic}
+  .code .kw{color:#ff9bbf}
+  .code .ty{color:var(--teal)}
+  .code .fn{color:var(--indigo)}
+  .code .num{color:var(--amber)}
+
+  .code-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .code-ex .chead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .code-ex .chead .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,176,32,.14);display:grid;place-items:center;color:var(--amber);font-size:13px}
+  .code-ex .ctask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .code-ex pre.code{margin:0 0 14px}
+  .blank{font-family:var(--mono);font-size:13px;width:18ch;text-align:center;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:2px 4px;outline:none}
+  .blank:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
+  .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)}
+  .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7}
+  .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--teal);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px}
+  @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px}
+  .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--teal);min-width:140px;text-transform:uppercase}
+  .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(142,140,248,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--indigo);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--indigo)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)}
+  .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--teal);color:var(--text)}
+  .coursenav a.map{border-color:transparent;color:var(--indigo)}
+
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="closing-the-loop.html"><span class="dot"></span><span class="name">Closing the Loop</span></a>
+    <div class="top-meta">Part II · 02 / 05 · From Math to Code</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part II · 02</b> From Math to Code</div>
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:-6px 0 14px">Code shown in <b style="color:var(--teal)">Python</b> &middot; <a href="closing-the-loop-lesson-10.html" style="color:var(--muted)">switch to Java</a></div>
+    <div class="eyebrow">Units, Gears &amp; Conversions</div>
+    <h1>Rotations in,<br><span class="accent">meters</span> out.</h1>
+    <p class="dek">Your motor counts in turns. Your elevator moves in meters. The gearbox sits in between - and getting this conversion wrong is the single most common real-robot bug.</p>
+  </div>
+
+  <section>
+    <p class="lead">A motor doesn't know what a meter is.</p>
+    <p>A TalonFX reports one thing: how many times its shaft has spun - <strong>rotations</strong>. But you think in meters (elevator height) or degrees (arm angle). Two things stand between the motor and the mechanism, and you have to account for both:</p>
+    <div class="formula">
+      <b>gear ratio</b> - the gearbox spins the motor many times per one output turn<br>
+      <span class="t">circumference</span> - one output turn pays out one drum's worth of cable
+    </div>
+    <p>Miss either one and your robot will think it's at 2 meters when it's at 20 centimeters. Let's make the conversion something you can see.</p>
+  </section>
+
+  <section>
+    <div class="kicker">See it</div>
+    <h2>From motor turns to height</h2>
+    <p>Drag <strong>motor rotations</strong> and watch the chain: the gearbox divides the turns down, the drum turns those into cable, and the carriage rises. Then change the <strong>gear ratio</strong> and the <strong>drum size</strong> and watch how many motor turns one meter now costs.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head">
+        <span class="demo-title">Motor → gearbox → drum → carriage</span>
+        <span class="demo-tag">Conversion bench</span>
+      </div>
+      <canvas class="world" id="world"></canvas>
+      <div class="controls">
+        <div class="slider-group">
+          <label>Motor rotations <span class="val" id="rotVal">0.0</span></label>
+          <input type="range" id="rot" min="0" max="90" step="0.5" value="0" />
+        </div>
+        <div class="slider-group">
+          <label>Gear ratio (motor : output) <span class="val" id="gearVal">9.0 : 1</span></label>
+          <input type="range" id="gear" min="3" max="20" step="0.5" value="9" />
+        </div>
+        <div class="slider-group">
+          <label>Drum diameter <span class="val" id="diaVal">2.0 in</span></label>
+          <input type="range" id="dia" min="1" max="3" step="0.1" value="2" />
+        </div>
+      </div>
+      <div class="chain">
+        <div class="ch"><div class="k2">Motor rotations</div><div class="v indigo" id="cMotor">0.00</div><div class="op">÷ gear ratio</div></div>
+        <div class="ch"><div class="k2">Output rotations</div><div class="v teal" id="cMech">0.00</div><div class="op">× circumference</div></div>
+        <div class="ch"><div class="k2">Height</div><div class="v amber" id="cHeight">0.00 m</div><div class="op">= the answer</div></div>
+      </div>
+    </div>
+    <p class="caption">A bigger gear ratio means more motor turns per meter - finer control, but a slower mechanism. This trade-off is yours to choose when you design the robot.</p>
+  </section>
+
+  <section>
+    <div class="kicker">The math, once</div>
+    <h2>The conversion chain</h2>
+    <p>Every position conversion is the same two steps. Motor rotations divide by the gear ratio to get <strong>output</strong> rotations; output rotations multiply by the drum's circumference to get distance:</p>
+    <div class="formula">
+      meters = ( motor_rotations ÷ <b>G</b> ) × <span class="t">π · diameter</span>
+      <span class="small">G = gear ratio &nbsp;·&nbsp; circumference = π · diameter (use meters!)</span>
+    </div>
+    <p>To go the <em>other</em> way - turning a target height into the motor rotations to command - you just run it backwards: multiply by G, divide by circumference. An arm is even simpler: there's no drum, so output rotations convert straight to degrees (× 360).</p>
+    <div class="note red">
+      <div class="nh">The classic bug</div>
+      <p>Mixing units. A drum diameter in <em>inches</em> with a height in <em>meters</em>, or radians where the code wants rotations. Pick one unit system, convert everything to it once at the boundary, and never mix. Inches → meters: multiply by 0.0254.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">In Phoenix 6</div>
+    <h2>Let the motor do the conversion</h2>
+    <p>You could scatter <span class="k">/ G * circumference</span> math all over your code - or you can tell the TalonFX the ratio <em>once</em>, and then ask it for position in mechanism units directly. Phoenix 6 has a config field for exactly this:</p>
+    <div class="codewrap">
+      <div class="clabel">Configure the ratio once <span class="badge">Python · Phoenix 6</span></div>
+<pre class="code">cfg = <span class="ty">TalonFXConfiguration</span>()
+cfg.feedback.sensor_to_mechanism_ratio = <span class="num">9.0</span>   <span class="cm"># gear ratio: 9 motor turns per output turn</span>
+motor.configurator.<span class="fn">apply</span>(cfg)
+
+<span class="cm"># now get_position() returns OUTPUT rotations, gearbox already removed:</span>
+output_rotations = motor.<span class="fn">get_position</span>().value
+meters = output_rotations * (math.pi * drum_diameter_meters)</pre>
+    </div>
+    <p>With the ratio configured, the gearbox disappears from your day-to-day code - the motor reports output turns, and you only have the drum left to handle. One source of bugs, gone.</p>
+
+    <div class="code-ex">
+      <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
+      <div class="ctask">Finish the conversion. The motor reports raw motor rotations; turn that into meters using the gear ratio <span class="k">G</span> and <span class="k">circumference</span> (already in meters). Fill the blanks, then Check.</div>
+<pre class="code">motor_rot = motor.<span class="fn">get_position</span>().value
+output_rot = motor_rot / <input class="blank" data-ans="g|gear_ratio|gearratio" aria-label="blank 1" autocomplete="off" spellcheck="false">
+meters = output_rot * <input class="blank" data-ans="circumference|circ" aria-label="blank 2" autocomplete="off" spellcheck="false"></pre>
+      <div class="code-actions">
+        <button class="btn" id="check" style="border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer">Check</button>
+        <button class="btn" id="reveal" style="border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer">Reveal</button>
+        <span class="code-result" id="cres"></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="note teal">
+      <div class="nh">Going further &middot; optional</div>
+      <p>A real edge case: a winch that wraps cable in layers, like wrapping string around a pencil until it gets fatter. As cable piles up on the drum, the effective diameter grows, so one turn pays out more cable near the top than at the bottom and a single fixed circumference is slightly wrong. Most teams accept the small error, but some model the changing radius. Can you reason out whether this makes the elevator read a bit high or a bit low as it climbs?</p>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">The motor reports 36 rotations through a 12 : 1 gearbox. How many <em>output</em> rotations is that?</div>
+        <div class="opts">
+          <button class="opt">432 rotations</button>
+          <button class="opt">3 rotations</button>
+          <button class="opt">36 rotations</button>
+        </div>
+        <div class="explain">3. The gearbox spins the motor 12 times for every 1 output turn, so you divide: 36 ÷ 12 = 3 output rotations.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 2</div>
+        <div class="qt">To turn output rotations into a linear distance, you multiply by…</div>
+        <div class="opts">
+          <button class="opt">The drum's circumference (π × diameter)</button>
+          <button class="opt">The gear ratio again</button>
+          <button class="opt">The motor's voltage</button>
+        </div>
+        <div class="explain">One full output turn pays out exactly one circumference of cable, so distance = output rotations × (π × diameter). Just keep the diameter in the same units you want the distance in.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 3</div>
+        <div class="qt">What does <code style="font-family:var(--mono);color:var(--teal)">sensor_to_mechanism_ratio</code> do in Phoenix 6?</div>
+        <div class="opts">
+          <button class="opt">Sets the motor's maximum speed</button>
+          <button class="opt">Changes the PID gains automatically</button>
+          <button class="opt">Makes get_position() report output rotations, with the gear ratio already removed</button>
+        </div>
+        <div class="explain">You give the TalonFX the gear ratio once, and from then on its position and velocity come back in mechanism (output) units - so you don't divide by the gear ratio by hand all over your code.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part II · 02 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Rotations</b><span>What the motor actually measures.</span></div>
+        <div class="gl"><b>Gear ratio (G)</b><span>Motor turns per one output turn - divide by it.</span></div>
+        <div class="gl"><b>Circumference</b><span>π × diameter - output turns × this = distance.</span></div>
+        <div class="gl"><b>Inches → meters</b><span>Multiply by 0.0254; never mix unit systems.</span></div>
+        <div class="gl"><b>sensor_to_mechanism_ratio</b><span>Phoenix 6 config to report output units directly.</span></div>
+        <div class="gl"><b>Arm vs elevator</b><span>Arm: output turns × 360 = degrees (no drum).</span></div>
+      </div>
+      <a class="next" href="closing-the-loop-lesson-11-py.html">
+        <div class="n-eyebrow">Up next · Part II · 03</div>
+        <h3>Your First Closed Loop in Code</h3>
+        <p>You can read a real position now. Time to act on it: wire a WPILib PIDController to the sensor, write the periodic() loop, and watch code you completed drive the elevator.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="closing-the-loop-lesson-9-py.html">← Part II · 01 · Robot Code Anatomy</a>
+    <a class="map" href="closing-the-loop.html">Course map</a>
+    <a href="closing-the-loop-lesson-11-py.html">Part II · 03 · First Closed Loop →</a>
+  </nav>
+
+</div>
+
+<footer>Closing the Loop · A control systems course for FRC</footer>
+
+<script>
+(function(){
+  "use strict";
+  var clamp=function(x,a,b){return x<a?a:(x>b?b:x);};
+  var TAU=Math.PI*2;
+
+  function makeCanvas(cv){
+    var ctx=cv.getContext('2d'); var o={cv:cv,ctx:ctx,w:0,h:0};
+    function fit(){
+      var r=cv.getBoundingClientRect(); if(!r.width)return;
+      var dpr=window.devicePixelRatio||1;
+      cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr);
+      ctx.setTransform(dpr,0,0,dpr,0,0); o.w=r.width; o.h=r.height;
+    }
+    o.fit=fit; fit(); return o;
+  }
+  function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+
+  function gear(ctx,cx,cy,R,teeth,ang,col){
+    ctx.save();
+    ctx.translate(cx,cy); ctx.rotate(ang);
+    ctx.strokeStyle=col; ctx.fillStyle='#11192B'; ctx.lineWidth=2;
+    ctx.beginPath();
+    for(var i=0;i<teeth;i++){
+      var a0=(i/teeth)*TAU, a1=((i+0.5)/teeth)*TAU;
+      ctx.lineTo(Math.cos(a0)*R, Math.sin(a0)*R);
+      ctx.lineTo(Math.cos(a0+0.04)*(R*1.12), Math.sin(a0+0.04)*(R*1.12));
+      ctx.lineTo(Math.cos(a1-0.04)*(R*1.12), Math.sin(a1-0.04)*(R*1.12));
+      ctx.lineTo(Math.cos(a1)*R, Math.sin(a1)*R);
+    }
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    // hub + index spoke
+    ctx.beginPath(); ctx.arc(0,0,R*0.30,0,TAU); ctx.fillStyle='#0E1525'; ctx.fill(); ctx.stroke();
+    ctx.strokeStyle=col; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(R*0.85,0); ctx.stroke();
+    ctx.restore();
+  }
+
+  var W=makeCanvas(document.getElementById('world'));
+  var rot=document.getElementById('rot'), gearS=document.getElementById('gear'), dia=document.getElementById('dia');
+  var rotVal=document.getElementById('rotVal'), gearVal=document.getElementById('gearVal'), diaVal=document.getElementById('diaVal');
+  var cMotor=document.getElementById('cMotor'), cMech=document.getElementById('cMech'), cHeight=document.getElementById('cHeight');
+
+  var S={motorRot:0, G:9, diaIn:2};
+  rot.addEventListener('input',function(){S.motorRot=parseFloat(rot.value);rotVal.textContent=S.motorRot.toFixed(1);});
+  gearS.addEventListener('input',function(){S.G=parseFloat(gearS.value);gearVal.textContent=S.G.toFixed(1)+' : 1';});
+  dia.addEventListener('input',function(){S.diaIn=parseFloat(dia.value);diaVal.textContent=S.diaIn.toFixed(1)+' in';});
+
+  var TRACK_M=1.6;  // visible track height in meters
+
+  function draw(){
+    var ctx=W.ctx, w=W.w, h=W.h; ctx.clearRect(0,0,w,h);
+    var diaM=S.diaIn*0.0254, circ=Math.PI*diaM;
+    var outRot=S.motorRot/S.G;
+    var height=outRot*circ;
+
+    // --- left: gear train ---
+    var mAng=S.motorRot*TAU;        // motor angle
+    var oAng=-(outRot)*TAU;         // output/drum angle (meshed → opposite sense)
+    var mx=w*0.20, my=h*0.40, rm=26;
+    var ox=mx+rm+0.12*w*0 + 64, oy=my, ro=46;
+    gear(ctx, mx, my, rm, 9, mAng, '#8E8CF8');
+    gear(ctx, ox, oy, ro, 16, oAng, '#34D7C5');
+    ctx.fillStyle='#5E6F8E'; ctx.font='10px ui-monospace,Menlo,monospace'; ctx.textAlign='center';
+    ctx.fillText('MOTOR', mx, my+rm+24);
+    ctx.fillText('GEARBOX', ox, oy+ro+22);
+
+    // --- drum below output gear ---
+    var dx=ox, dy=oy+ro+62, rdrum=20;
+    ctx.save(); ctx.translate(dx,dy); ctx.rotate(oAng);
+    ctx.fillStyle='#1B2540'; ctx.strokeStyle='#33415e'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.arc(0,0,rdrum,0,TAU); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle='#FFB020'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(rdrum,0); ctx.stroke();
+    ctx.restore();
+    ctx.fillStyle='#5E6F8E'; ctx.fillText('DRUM', dx, dy+rdrum+18);
+
+    // --- right: rails + carriage ---
+    var railX=w*0.78, top=28, bot=h-28, span=bot-top;
+    ctx.strokeStyle='#2B3A57'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(railX-22,top); ctx.lineTo(railX-22,bot); ctx.moveTo(railX+22,top); ctx.lineTo(railX+22,bot); ctx.stroke();
+    // ticks every 0.2 m
+    ctx.strokeStyle='rgba(120,140,180,0.18)'; ctx.fillStyle='#5E6F8E'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='right';
+    for(var m=0;m<=TRACK_M+0.001;m+=0.4){
+      var ty=bot-(m/TRACK_M)*span;
+      ctx.beginPath(); ctx.moveTo(railX-30,ty); ctx.lineTo(railX-22,ty); ctx.stroke();
+      ctx.fillText(m.toFixed(1), railX-34, ty+3);
+    }
+    var frac=clamp(height/TRACK_M,0,1);
+    var cy2=bot-frac*span;
+    // cable from drum to carriage
+    ctx.strokeStyle='#475679'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(dx, dy); ctx.lineTo(railX, cy2); ctx.stroke();
+    // carriage
+    ctx.shadowColor='#34D7C5'; ctx.shadowBlur=16;
+    ctx.fillStyle='#0e2b2a'; ctx.strokeStyle='#34D7C5'; ctx.lineWidth=2;
+    roundRect(ctx, railX-20, cy2-10, 40, 20, 5); ctx.fill(); ctx.stroke();
+    ctx.shadowBlur=0;
+
+    // readouts
+    rotVal.textContent=S.motorRot.toFixed(1);
+    cMotor.textContent=S.motorRot.toFixed(2);
+    cMech.textContent=outRot.toFixed(2);
+    cHeight.textContent=height.toFixed(2)+' m';
+  }
+  function loop(){ draw(); requestAnimationFrame(loop); }
+  requestAnimationFrame(loop);
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){W.fit();},120);});
+
+  // code exercise
+  var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
+  function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'');}
+  document.getElementById('check').addEventListener('click',function(){
+    var all=true;
+    blanks.forEach(function(b){
+      var ans=(b.getAttribute('data-ans')||'').split('|');
+      var ok=ans.indexOf(norm(b.value))!==-1;
+      b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad');
+      if(!ok)all=false;
+    });
+    var res=document.getElementById('cres');
+    res.textContent=all?'All correct ✓':'Not quite - divide by G, multiply by circumference';
+    res.className='code-result '+(all?'ok':'no');
+  });
+  document.getElementById('reveal').addEventListener('click',function(){
+    blanks.forEach(function(b){b.value=(b.getAttribute('data-ans')||'').split('|')[0];b.classList.remove('bad');b.classList.add('ok');});
+    var res=document.getElementById('cres');res.textContent='Revealed';res.className='code-result ok';
+  });
+
+  // quiz
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){
+      opt.addEventListener('click',function(){
+        if(done)return;done=true;
+        opts.forEach(function(o){o.classList.add('locked');});
+        if(idx===correct){opt.classList.add('correct');}
+        else{opt.classList.add('wrong');opts[correct].classList.add('correct');}
+        explain.classList.add('show');
+      });
+    });
+  });
+})();
+</script>
+<script>
+(function(){
+  // auto-mark this lesson complete in the hub once its quiz is finished
+  var KEY="closing-the-loop:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

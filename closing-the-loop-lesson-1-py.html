@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Closing the Loop · Lesson 1 - Feedback &amp; Control (Python)</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020;   /* setpoint / target / brand */
+    --teal:#34D7C5;    /* measured position */
+    --indigo:#8E8CF8;  /* voltage / velocity / disturbance */
+    --red:#FF6B6B;     /* error / overshoot */
+    --green:#43D67E;   /* correct */
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+    --maxw:1160px;
+    --grid:rgba(120,140,180,0.05);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ink); color:var(--text);
+    font-family:var(--sans); font-size:17px; line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(900px 500px at 80% -10%, rgba(255,176,32,.06), transparent 60%),
+      radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+  /* ---------- header ---------- */
+  header.top{
+    border-bottom:1px solid var(--line);
+    background:rgba(9,13,21,0.6);
+    backdrop-filter:blur(6px);
+  }
+  .top-inner{
+    max-width:880px;margin:0 auto;padding:14px 22px;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+  }
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--teal);box-shadow:0 0 12px var(--teal)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase}
+
+  /* ---------- hero ---------- */
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{
+    display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;
+    font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);
+  }
+  .lesson-no b{
+    color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);
+    padding:3px 9px;border-radius:5px;letter-spacing:.1em;
+  }
+  h1{
+    font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;
+    letter-spacing:-.035em;font-weight:850;
+  }
+  h1 .accent{
+    background:linear-gradient(90deg,var(--teal),var(--indigo));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:42ch;margin-top:6px}
+
+  /* ---------- prose ---------- */
+  section{padding:30px 0}
+  .kicker{
+    font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;
+    color:var(--teal);margin-bottom:14px;display:flex;align-items:center;gap:12px;
+  }
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  p strong{color:var(--text);font-weight:650}
+  .lead{font-size:19px;color:var(--text)}
+
+  /* term chips */
+  .terms{display:grid;gap:12px;margin:22px 0 6px}
+  @media(min-width:560px){.terms{grid-template-columns:repeat(3,1fr)}}
+  .term{
+    border:1px solid var(--line);border-radius:10px;padding:14px 15px;background:var(--panel);
+    border-top:2px solid var(--accent,var(--teal));
+  }
+  .term h4{margin:0 0 4px;font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent,var(--teal))}
+  .term p{margin:0;font-size:14.5px;color:var(--text);line-height:1.45}
+
+  /* ---------- interactive panels ---------- */
+  .demo{
+    border:1px solid var(--line);border-radius:14px;overflow:hidden;
+    background:linear-gradient(180deg,var(--panel),#0E1525);
+    box-shadow:0 24px 60px -30px rgba(0,0,0,0.8);
+  }
+  .demo-head{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:12px 16px;border-bottom:1px solid var(--line);
+    background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px);
+  }
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--text)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);display:flex;gap:6px;align-items:center}
+  .demo-tag .live{width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 8px var(--red)}
+  .demo-tag .live.on{background:var(--green);box-shadow:0 0 8px var(--green)}
+  .demo-stage{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line)}
+  @media(min-width:600px){.demo-stage{grid-template-columns:minmax(150px,0.78fr) 1.5fr}}
+  .stage-cell{background:#0E1525;position:relative}
+  .stage-cell .cell-label{
+    position:absolute;top:8px;left:10px;z-index:2;
+    font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);
+    pointer-events:none;
+  }
+  canvas.world{display:block;width:100%;height:300px}
+  canvas.scope{display:block;width:100%;height:300px}
+
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .thrust-btn{
+    flex:1 1 180px;min-height:58px;border:none;border-radius:10px;cursor:pointer;
+    font-family:var(--mono);font-size:14px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;
+    color:#06121f;background:linear-gradient(180deg,#6ff0dd,var(--teal));
+    box-shadow:0 0 0 1px rgba(52,214,192,0.4),0 10px 24px -12px var(--teal);
+    transition:transform .06s ease,filter .1s ease;user-select:none;touch-action:none;
+  }
+  .thrust-btn:active,.thrust-btn.held{transform:translateY(1px);filter:brightness(1.12) saturate(1.1)}
+  .thrust-btn .hint{display:block;font-size:9.5px;letter-spacing:.14em;color:rgba(6,18,31,0.7);margin-top:3px}
+
+  .btn{
+    border:1px solid var(--line-2);background:var(--panel-2);color:var(--text);
+    font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;
+    padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s;
+  }
+  .btn:hover{border-color:var(--teal);color:var(--text)}
+  .btn.active{background:var(--teal);border-color:var(--teal);color:#06121f;font-weight:700}
+  .btn.ghost.active{background:var(--indigo);border-color:var(--indigo)}
+
+  .slider-group{flex:1 1 220px;display:flex;flex-direction:column;gap:6px;min-width:180px}
+  .slider-group label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between}
+  .slider-group label .val{color:var(--indigo)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:var(--line-2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--indigo);cursor:pointer;box-shadow:0 0 10px -1px var(--indigo)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
+
+  .readouts{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  @media(min-width:560px){.readouts{grid-template-columns:repeat(4,1fr)}}
+  .ro{background:#0E1525;padding:11px 14px}
+  .ro .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  .ro .v{font-family:var(--mono);font-size:20px;font-weight:600;margin-top:3px}
+  .ro .v.amber{color:var(--amber)} .ro .v.teal{color:var(--teal)} .ro .v.indigo{color:var(--indigo)} .ro .v.ink{color:var(--text)}
+
+  .legend{display:flex;flex-wrap:wrap;gap:16px;padding:11px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .legend i{width:16px;height:2px;border-radius:2px;display:inline-block}
+
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  /* shared callout pattern (matches Closing the Loop) */
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.teal{border-color:var(--teal);background:rgba(52,215,197,.06)} .note.teal .nh{color:var(--teal)}
+
+  /* control-loop diagram */
+  .diagram{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:8px;margin:8px 0}
+  .diagram svg{width:100%;height:auto;display:block}
+
+  /* elevator illo */
+  .elev-row{display:grid;gap:24px;align-items:center;grid-template-columns:1fr}
+  @media(min-width:600px){.elev-row{grid-template-columns:140px 1fr}}
+  .elev-illo{border:1px solid var(--line);border-radius:12px;background:#0E1525;padding:10px}
+  .elev-illo svg{width:100%;height:auto;display:block}
+
+  /* knowledge check */
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)}
+  .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{
+    text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--text);
+    padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s;
+  }
+  .opt:hover{border-color:var(--text)}
+  .opt.correct{border-color:var(--green);background:rgba(70,214,160,0.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,111,111,0.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7}
+  .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--text);border-left:2px solid var(--teal);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  /* recap */
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#0E1525);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--text)}
+  .glossary{display:grid;gap:10px}
+  @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px}
+  .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--teal);min-width:108px;text-transform:uppercase}
+  .gl span{color:var(--text)}
+
+  .next{
+    margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;
+    background:radial-gradient(600px 200px at 0% 0%,rgba(138,147,255,0.1),transparent 70%);
+  }
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--indigo)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)}
+  .next code{font-family:var(--mono);background:var(--panel-2);border:1px solid var(--line-2);padding:2px 8px;border-radius:5px;color:var(--teal);font-size:14px}
+
+  footer{padding:40px 0 60px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none!important}
+    html{scroll-behavior:auto}
+  }
+  /* lesson navigation */
+  .brand{text-decoration:none}
+  .brand .name{transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--teal);color:var(--text)}
+  .coursenav a.map{border-color:transparent;color:var(--indigo)}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="closing-the-loop.html"><span class="dot"></span><span class="name">Closing the Loop</span></a>
+    <div class="top-meta">Lesson 01 / 08 · Foundations</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="lesson-no"><b>Lesson 01</b> Foundations</div>
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:-6px 0 14px">Code shown in <b style="color:var(--teal)">Python</b> &middot; <a href="closing-the-loop-lesson-1.html" style="color:var(--muted)">switch to Java</a></div>
+    <div class="eyebrow">Feedback &amp; Control</div>
+    <h1>The one idea<br>everything is <span class="accent">built on</span>.</h1>
+    <p class="dek">Before any code. Before any math. Just the loop you've been running your whole life - made deliberate.</p>
+  </div>
+
+  <!-- INTRO -->
+  <section>
+    <p class="lead">You already know how to do this.</p>
+    <p>Every time you lean your bike back upright when it starts to tip, nudge the shower knob because the water's too cold, or ease off as your cup fills near the top, you're running a <strong>control loop</strong>.  You look at where things are, compare it to where you want them, and adjust.  Then you do it again.  And again.  Without ever thinking about it.</p>
+    <p>This whole course is about teaching a robot to do that same thing - on purpose, precisely, in code. But the idea underneath it is something you've done since you learned to walk. So let's not start with code. Let's start by <strong>feeling it</strong>.</p>
+  </section>
+
+  <!-- INTERACTIVE A -->
+  <section>
+    <div class="kicker">Try it</div>
+    <h2>You are the controller</h2>
+    <p>Below is a thruster fighting gravity. <strong>Hold the THRUST button</strong> (or press <strong>Space</strong>) to push it up; let go and it falls. Your job: keep the marker on the dashed line. Give it a few seconds - it's harder than it looks.</p>
+
+    <div class="demo" id="demoA">
+      <div class="demo-head">
+        <span class="demo-title">Manual Hover · Operator in the loop</span>
+        <span class="demo-tag"><span class="live" id="aLive"></span> <span id="aStatus">Standby</span></span>
+      </div>
+      <div class="demo-stage">
+        <div class="stage-cell"><span class="cell-label">Altitude</span><canvas class="world" id="aWorld"></canvas></div>
+        <div class="stage-cell"><span class="cell-label">Scope · signal vs time</span><canvas class="scope" id="aScope"></canvas></div>
+      </div>
+      <div class="legend">
+        <span><i style="background:var(--amber)"></i> Setpoint (target)</span>
+        <span><i style="background:var(--teal)"></i> Measurement (actual)</span>
+      </div>
+      <div class="controls">
+        <button class="thrust-btn" id="aBtn">Thrust <span class="hint">hold / press space</span></button>
+      </div>
+      <div class="readouts">
+        <div class="ro"><div class="k">Setpoint</div><div class="v amber" id="aSp">0.50</div></div>
+        <div class="ro"><div class="k">Measurement</div><div class="v teal" id="aMeas">0.50</div></div>
+        <div class="ro"><div class="k">Error</div><div class="v ink" id="aErr">0.00</div></div>
+        <div class="ro"><div class="k">On target</div><div class="v indigo" id="aHold">0.0s</div></div>
+      </div>
+    </div>
+    <p class="caption">Notice your eyes never leave the gap between the marker and the line. That gap is doing all the work.</p>
+  </section>
+
+  <!-- REVEAL -->
+  <section>
+    <div class="kicker">What just happened</div>
+    <h2>That was feedback control</h2>
+    <p>You watched the gap between where the marker <em>was</em> and where you <em>wanted</em> it (the line). You thrust harder when it sank, eased off when it rose. Pull that apart and you get the three words this entire field is built on:</p>
+    <div class="terms">
+      <div class="term" style="--accent:var(--amber)"><h4>Setpoint</h4><p>Where you want to be. The dashed line - your goal.</p></div>
+      <div class="term" style="--accent:var(--teal)"><h4>Measurement</h4><p>Where you actually are. The marker - what's really happening.</p></div>
+      <div class="term" style="--accent:var(--indigo)"><h4>Error</h4><p>The gap between them. Setpoint minus measurement.</p></div>
+    </div>
+    <p style="margin-top:20px">A <strong>controller</strong> is the thing that looks at the error and decides what to do about it - over and over. You were the controller just now. For the rest of the course, we hand that job to the robot.</p>
+  </section>
+
+  <!-- OPEN VS CLOSED -->
+  <section>
+    <div class="kicker">The big distinction</div>
+    <h2>Two ways to control anything</h2>
+    <p><strong>Open loop</strong> is "set it and hope." You pick an action up front, commit to it, and never check the result. Like microwaving popcorn for exactly 3:00 and walking away - if your microwave runs hot, you burn it, because nothing is watching.</p>
+    <p><strong>Closed loop</strong> is "watch and correct." You keep measuring the result and adjust as you go. That feedback - the loop running from measurement back to action - is what makes control survive surprises.</p>
+    <p>Same thruster below, run both ways. It's tuned <em>perfectly</em> for dead-calm air. Now drag the <strong>disturbance</strong> slider to add a gust, and watch what each one does.</p>
+
+    <div class="demo" id="demoB">
+      <div class="demo-head">
+        <span class="demo-title">Open vs Closed · Auto control</span>
+        <span class="demo-tag"><span class="live" id="bLive"></span> <span id="bStatus">Paused</span></span>
+      </div>
+      <div class="demo-stage">
+        <div class="stage-cell"><span class="cell-label">Altitude</span><canvas class="world" id="bWorld"></canvas></div>
+        <div class="stage-cell"><span class="cell-label">Scope · signal vs time</span><canvas class="scope" id="bScope"></canvas></div>
+      </div>
+      <div class="legend">
+        <span><i style="background:var(--amber)"></i> Setpoint</span>
+        <span><i style="background:var(--teal)"></i> Measurement</span>
+        <span><i style="background:var(--indigo)"></i> Disturbance (the gust)</span>
+      </div>
+      <div class="controls">
+        <button class="btn active" id="bOpen">Open loop</button>
+        <button class="btn" id="bClosed">Closed loop</button>
+        <button class="btn" id="bRun">▶ Run</button>
+        <button class="btn" id="bReset">Reset</button>
+        <div class="slider-group">
+          <label>Disturbance <span class="val" id="bDistVal">0.00</span></label>
+          <input type="range" id="bDist" min="0" max="0.6" step="0.01" value="0" />
+        </div>
+      </div>
+      <div class="readouts">
+        <div class="ro"><div class="k">Mode</div><div class="v ink" id="bMode">Open</div></div>
+        <div class="ro"><div class="k">Setpoint</div><div class="v amber">0.50</div></div>
+        <div class="ro"><div class="k">Measurement</div><div class="v teal" id="bMeas">0.50</div></div>
+        <div class="ro"><div class="k">Error</div><div class="v indigo" id="bErr">0.00</div></div>
+      </div>
+    </div>
+    <p style="margin-top:18px">Open loop was flawless in calm air - and the instant the world changed, it drifted off and <strong>never recovered</strong>. It has no idea it's failing, because it never looks. Closed loop measures the error and keeps correcting, so it rides out the gust and holds the line.</p>
+    <div class="note teal">
+      <div class="nh">File this away</div>
+      <p>The closed-loop controller pushes <strong>harder when the gap is bigger</strong>. That little phrase - "how hard, exactly?" - is the whole subject of Lesson 2.</p>
+    </div>
+  </section>
+
+  <!-- CONTROL LOOP DIAGRAM -->
+  <section>
+    <div class="kicker">The shape of it</div>
+    <h2>The control loop</h2>
+    <p>Every controller in this course - from the one line you'll write next lesson to the state-space math at the end - is this same loop, running about 50 times a second:</p>
+    <div class="diagram">
+      <svg viewBox="0 0 780 250" xmlns="http://www.w3.org/2000/svg" font-family="ui-monospace,Menlo,Consolas,monospace">
+        <defs>
+          <marker id="arr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+            <path d="M0,0 L7,3 L0,6 Z" fill="#92A2BE"/>
+          </marker>
+        </defs>
+        <!-- setpoint -->
+        <g>
+          <rect x="20" y="92" width="120" height="46" rx="7" fill="#1B2540" stroke="#33415e"/>
+          <text x="80" y="112" fill="#FFB020" font-size="11" letter-spacing="1.5" text-anchor="middle">SETPOINT</text>
+          <text x="80" y="128" fill="#92A2BE" font-size="10.5" text-anchor="middle">goal height</text>
+        </g>
+        <!-- sum -->
+        <circle cx="205" cy="115" r="22" fill="#161E30" stroke="#8E8CF8" stroke-width="1.5"/>
+        <text x="205" y="120" fill="#8E8CF8" font-size="18" text-anchor="middle">Σ</text>
+        <text x="197" y="100" fill="#43D67E" font-size="13" text-anchor="middle">+</text>
+        <text x="205" y="150" fill="#FF6B6B" font-size="13" text-anchor="middle">−</text>
+        <!-- controller -->
+        <rect x="290" y="92" width="130" height="46" rx="7" fill="#1B2540" stroke="#34D7C5"/>
+        <text x="355" y="112" fill="#34D7C5" font-size="11" letter-spacing="1.5" text-anchor="middle">CONTROLLER</text>
+        <text x="355" y="128" fill="#92A2BE" font-size="10.5" text-anchor="middle">decide action</text>
+        <!-- plant -->
+        <rect x="470" y="92" width="130" height="46" rx="7" fill="#1B2540" stroke="#33415e"/>
+        <text x="535" y="112" fill="#E7ECF6" font-size="11" letter-spacing="1.5" text-anchor="middle">SYSTEM</text>
+        <text x="535" y="128" fill="#92A2BE" font-size="10.5" text-anchor="middle">the elevator</text>
+        <!-- output node -->
+        <circle cx="690" cy="115" r="5" fill="#34D7C5"/>
+        <!-- arrows top path -->
+        <line x1="140" y1="115" x2="181" y2="115" stroke="#92A2BE" stroke-width="1.5" marker-end="url(#arr)"/>
+        <line x1="227" y1="115" x2="288" y2="115" stroke="#92A2BE" stroke-width="1.5" marker-end="url(#arr)"/>
+        <text x="258" y="106" fill="#FF6B6B" font-size="10.5" text-anchor="middle">error</text>
+        <line x1="420" y1="115" x2="468" y2="115" stroke="#92A2BE" stroke-width="1.5" marker-end="url(#arr)"/>
+        <text x="444" y="106" fill="#92A2BE" font-size="10.5" text-anchor="middle">voltage</text>
+        <line x1="600" y1="115" x2="688" y2="115" stroke="#92A2BE" stroke-width="1.5"/>
+        <!-- feedback path -->
+        <line x1="690" y1="115" x2="690" y2="205" stroke="#34D7C5" stroke-width="1.5"/>
+        <line x1="690" y1="205" x2="205" y2="205" stroke="#34D7C5" stroke-width="1.5"/>
+        <line x1="205" y1="205" x2="205" y2="139" stroke="#34D7C5" stroke-width="1.5" marker-end="url(#arr)"/>
+        <text x="447" y="222" fill="#34D7C5" font-size="10.5" text-anchor="middle">measurement - what a sensor actually reads</text>
+      </svg>
+    </div>
+    <p style="margin-top:6px"><strong>Measure. Compare to the setpoint. Compute the error. Act. Repeat.</strong> Master this shape and everything else is just choosing a smarter box in the middle.</p>
+  </section>
+
+  <!-- MEET THE ELEVATOR -->
+  <section>
+    <div class="kicker">Your test bench</div>
+    <h2>Meet the elevator</h2>
+    <div class="elev-row">
+      <div class="elev-illo">
+        <svg viewBox="0 0 120 200" xmlns="http://www.w3.org/2000/svg">
+          <line x1="34" y1="14" x2="34" y2="186" stroke="#33415e" stroke-width="2"/>
+          <line x1="86" y1="14" x2="86" y2="186" stroke="#33415e" stroke-width="2"/>
+          <circle cx="60" cy="16" r="8" fill="#161E30" stroke="#34D7C5" stroke-width="2"/>
+          <line x1="60" y1="24" x2="60" y2="70" stroke="#34D7C5" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <rect x="38" y="70" width="44" height="40" rx="5" fill="#1B2540" stroke="#34D7C5" stroke-width="1.5"/>
+          <rect x="46" y="80" width="28" height="6" rx="2" fill="#34D7C5" opacity="0.5"/>
+          <circle cx="60" cy="98" r="4" fill="#34D7C5"/>
+          <line x1="22" y1="150" x2="98" y2="150" stroke="#FFB020" stroke-width="1.4" stroke-dasharray="5 4"/>
+          <text x="103" y="153" fill="#FFB020" font-size="8" font-family="ui-monospace,monospace">SP</text>
+          <path d="M60 118 l-7 14 h14 z" fill="#92A2BE" opacity="0.6"/>
+          <text x="60" y="178" fill="#92A2BE" font-size="8" text-anchor="middle" font-family="ui-monospace,monospace">gravity ↓</text>
+        </svg>
+      </div>
+      <div>
+        <p>For the rest of the course we control <strong>one machine</strong>: a robot elevator - a carriage that rides up and down on rails, lifted by a motor. It's the perfect teacher because it has every ingredient that makes control interesting:</p>
+        <p style="margin:0"><strong>Gravity</strong> always pulling it down. <strong>Weight</strong> that resists speeding up and slowing down. And a crisp, testable job: <em>go to a height, then hold it</em>. Everything you just felt with the thruster applies directly - from here on, we get precise about it.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- KNOWLEDGE CHECK -->
+  <section>
+    <div class="note teal">
+      <div class="nh">Going further &middot; optional</div>
+      <p>Closed loop survives surprises, but there is a catch: every loop only acts on what the sensor read a moment ago, so there is always a tiny delay between the gust hitting and the correction arriving. Think about riding a bike with your eyes closed for half a second at a time. What happens to a closed loop if that delay gets long, or if the sensor lies to it? Hold onto that question - it is exactly where overshoot, oscillation, and the hardest tuning problems come from later in this course.</p>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>No math - just the ideas. Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="0">
+        <div class="qn">Question 1</div>
+        <div class="qt">A microwave that heats for a fixed time no matter what's inside is an example of…</div>
+        <div class="opts">
+          <button class="opt">Open loop control</button>
+          <button class="opt">Closed loop control</button>
+        </div>
+        <div class="explain">Open loop. It commits to an action (3:00 of heating) and never measures the result, so it can't tell whether the food is cold, hot, or on fire.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 2</div>
+        <div class="qt">In control terms, the gap between where you want to be and where you actually are is called the…</div>
+        <div class="opts">
+          <button class="opt">Setpoint</button>
+          <button class="opt">Error</button>
+          <button class="opt">Measurement</button>
+        </div>
+        <div class="explain">Error - it's the setpoint minus the measurement. Almost everything a controller does is a reaction to this single number.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 3</div>
+        <div class="qt">Why does a closed-loop controller handle surprises (like a gust of wind) better than an open-loop one?</div>
+        <div class="opts">
+          <button class="opt">It uses a more powerful motor</button>
+          <button class="opt">It plans the whole motion before starting</button>
+          <button class="opt">It keeps measuring and corrects based on the error</button>
+        </div>
+        <div class="explain">It keeps measuring. Because it's constantly comparing where it is to where it wants to be, an unexpected push just shows up as error - and it corrects. Open loop never looks back, so it can't react to anything it didn't expect.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RECAP -->
+  <section>
+    <div class="recap">
+      <h3>Lesson 01 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Setpoint</b><span>Where you want the system to be.</span></div>
+        <div class="gl"><b>Measurement</b><span>Where the system actually is, per a sensor.</span></div>
+        <div class="gl"><b>Error</b><span>Setpoint minus measurement - the gap.</span></div>
+        <div class="gl"><b>Open loop</b><span>Act without checking the result.</span></div>
+        <div class="gl"><b>Closed loop</b><span>Measure, compare, correct - repeatedly.</span></div>
+        <div class="gl"><b>Control loop</b><span>Measure → compare → act → repeat.</span></div>
+      </div>
+      <div class="next">
+        <div class="n-eyebrow">Up next · Lesson 02</div>
+        <h3>Proportional control</h3>
+        <p style="margin-bottom:0">We said a controller "pushes harder when the gap is bigger." Next, we turn that sentence into the simplest possible controller - and you'll meet your first real line of code: <code>output = kP × error</code>.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<nav class="coursenav">
+  <a class="map" href="closing-the-loop.html">Course map</a>
+  <a href="closing-the-loop-lesson-2-py.html">Lesson 02 · Proportional Control →</a>
+</nav>
+
+<footer>Closing the Loop · A control systems course for FRC</footer>
+
+<script>
+(function(){
+  "use strict";
+  var clamp = function(x,a,b){ return x<a?a:(x>b?b:x); };
+
+  // ---- canvas helper with DPR ----
+  function makeCanvas(cv){
+    var ctx = cv.getContext('2d');
+    var o = {cv:cv, ctx:ctx, w:0, h:0};
+    function fit(){
+      var r = cv.getBoundingClientRect();
+      if(!r.width){ return; }
+      var dpr = window.devicePixelRatio || 1;
+      cv.width = Math.round(r.width*dpr);
+      cv.height = Math.round(r.height*dpr);
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+      o.w = r.width; o.h = r.height;
+    }
+    o.fit = fit; fit();
+    return o;
+  }
+
+  // ---- world (vertical altitude gauge) ----
+  function drawWorld(o, y, sp, tol, thrust){
+    var ctx=o.ctx, W=o.w, H=o.h;
+    ctx.clearRect(0,0,W,H);
+    var pad=22, top=pad, bot=H-pad, span=bot-top;
+    var cx=W*0.5;
+    function py(v){ return bot - clamp(v,0,1)*span; }
+    // rails
+    ctx.strokeStyle='#33415e'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(cx-26,top); ctx.lineTo(cx-26,bot);
+    ctx.moveTo(cx+26,top); ctx.lineTo(cx+26,bot); ctx.stroke();
+    // ticks
+    ctx.strokeStyle='rgba(120,140,180,0.18)'; ctx.lineWidth=1;
+    for(var i=0;i<=10;i++){
+      var ty=top+span*(i/10);
+      ctx.beginPath(); ctx.moveTo(cx-34,ty); ctx.lineTo(cx-30,ty); ctx.stroke();
+    }
+    // tolerance band
+    if(tol>0){
+      ctx.fillStyle='rgba(255,180,84,0.08)';
+      ctx.fillRect(cx-26, py(sp+tol), 52, py(sp-tol)-py(sp+tol));
+    }
+    // setpoint line
+    ctx.strokeStyle='#FFB020'; ctx.lineWidth=1.5; ctx.setLineDash([6,5]);
+    ctx.beginPath(); ctx.moveTo(cx-40,py(sp)); ctx.lineTo(cx+40,py(sp)); ctx.stroke();
+    ctx.setLineDash([]);
+    // thrust flame
+    if(thrust>0.01){
+      var fy=py(y)+13, fl=10+thrust*26;
+      var g=ctx.createLinearGradient(0,fy,0,fy+fl);
+      g.addColorStop(0,'rgba(255,180,84,0.9)'); g.addColorStop(1,'rgba(255,111,111,0)');
+      ctx.fillStyle=g;
+      ctx.beginPath();
+      ctx.moveTo(cx-8,fy); ctx.lineTo(cx+8,fy); ctx.lineTo(cx,fy+fl); ctx.closePath(); ctx.fill();
+    }
+    // marker (carriage)
+    var my=py(y);
+    ctx.shadowColor='#34D7C5'; ctx.shadowBlur=16;
+    ctx.fillStyle='#0e2b2a'; ctx.strokeStyle='#34D7C5'; ctx.lineWidth=2;
+    roundRect(ctx, cx-22, my-9, 44, 18, 5); ctx.fill(); ctx.stroke();
+    ctx.shadowBlur=0;
+    ctx.fillStyle='#34D7C5';
+    ctx.beginPath(); ctx.arc(cx,my,3,0,7); ctx.fill();
+  }
+  function roundRect(ctx,x,y,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
+  }
+
+  // ---- scope ----
+  function Scope(o, signals, len){
+    this.o=o; this.signals=signals; this.len=len||260; this.buf=[];
+  }
+  Scope.prototype.push=function(sample){
+    this.buf.push(sample);
+    if(this.buf.length>this.len) this.buf.shift();
+  };
+  Scope.prototype.clear=function(){ this.buf=[]; };
+  Scope.prototype.draw=function(){
+    var o=this.o, ctx=o.ctx, W=o.w, H=o.h;
+    ctx.clearRect(0,0,W,H);
+    var pad=14, top=pad, bot=H-pad, left=8, right=W-8, span=bot-top, wspan=right-left;
+    // grid
+    ctx.strokeStyle='rgba(120,140,180,0.07)'; ctx.lineWidth=1;
+    for(var gy=0;gy<=4;gy++){ var yy=top+span*(gy/4); ctx.beginPath(); ctx.moveTo(left,yy); ctx.lineTo(right,yy); ctx.stroke(); }
+    for(var gx=0;gx<=8;gx++){ var xx=left+wspan*(gx/8); ctx.beginPath(); ctx.moveTo(xx,top); ctx.lineTo(xx,bot); ctx.stroke(); }
+    var n=this.buf.length; if(n<2){ return; }
+    function px(i){ return left + wspan*(i/(this.len-1)); }
+    var self=this;
+    function pyv(v){ return bot - clamp(v,0,1)*span; }
+    for(var s=0;s<this.signals.length;s++){
+      var sig=this.signals[s];
+      ctx.strokeStyle=sig.color; ctx.lineWidth=sig.w||2;
+      if(sig.dash) ctx.setLineDash(sig.dash); else ctx.setLineDash([]);
+      ctx.shadowColor=sig.color; ctx.shadowBlur=sig.glow?7:0;
+      ctx.beginPath();
+      for(var i=0;i<n;i++){
+        var v=self.buf[i][sig.key];
+        var X=left + wspan*((i+(self.len-n))/(self.len-1));
+        var Y=pyv(v);
+        if(i===0) ctx.moveTo(X,Y); else ctx.lineTo(X,Y);
+      }
+      ctx.stroke();
+    }
+    ctx.setLineDash([]); ctx.shadowBlur=0;
+  };
+
+  // =================== DEMO A : manual hover ===================
+  var A = {
+    world:null, scope:null, y:0.5, v:0, sp:0.5, tol:0.08,
+    g:1.1, thrust:2.4, drag:2.4, hold:false, started:false, onTarget:0, ctrl:0
+  };
+  A.world = makeCanvas(document.getElementById('aWorld'));
+  A.scope = makeCanvas(document.getElementById('aScope'));
+  A.scopeObj = new Scope(A.scope, [
+    {key:'sp', color:'#FFB020', w:1.5, dash:[5,4]},
+    {key:'meas', color:'#34D7C5', w:2, glow:true}
+  ]);
+  var aBtn=document.getElementById('aBtn'), aLive=document.getElementById('aLive'), aStatus=document.getElementById('aStatus');
+  var aSp=document.getElementById('aSp'), aMeas=document.getElementById('aMeas'), aErr=document.getElementById('aErr'), aHold=document.getElementById('aHold');
+
+  function aHoldOn(e){ if(e){ e.preventDefault(); } A.hold=true; A.started=true; aBtn.classList.add('held'); aLive.classList.add('on'); aStatus.textContent='Live'; }
+  function aHoldOff(){ A.hold=false; aBtn.classList.remove('held'); }
+  aBtn.addEventListener('pointerdown', aHoldOn);
+  window.addEventListener('pointerup', aHoldOff);
+  aBtn.addEventListener('touchstart', aHoldOn, {passive:false});
+  window.addEventListener('touchend', aHoldOff);
+  window.addEventListener('keydown', function(e){ if(e.code==='Space' || e.key===' '){ if(e.target.tagName!=='INPUT'){ aHoldOn(e); } } });
+  window.addEventListener('keyup', function(e){ if(e.code==='Space' || e.key===' '){ aHoldOff(); } });
+
+  function stepA(dt, t){
+    A.ctrl = A.hold ? A.thrust : 0;
+    if(A.started){
+      var dist = 0.10*Math.sin(t*0.6); // gentle ambient drift
+      var a = A.ctrl - A.g + dist - A.drag*A.v;
+      A.v += a*dt; A.y += A.v*dt;
+      if(A.y<0){A.y=0; if(A.v<0)A.v=0;} if(A.y>1){A.y=1; if(A.v>0)A.v=0;}
+      var err=Math.abs(A.sp-A.y);
+      if(err<A.tol) A.onTarget+=dt; else A.onTarget=0;
+    }
+    A.scopeObj.push({sp:A.sp, meas:A.y});
+    drawWorld(A.world, A.y, A.sp, A.tol, A.ctrl>0?1:0);
+    A.scopeObj.draw();
+    aMeas.textContent=A.y.toFixed(2);
+    aErr.textContent=(A.sp-A.y).toFixed(2);
+    aHold.textContent=A.onTarget.toFixed(1)+'s';
+  }
+
+  // =================== DEMO B : open vs closed ===================
+  var B = {
+    world:null, scope:null, y:0.5, v:0, sp:0.5,
+    g:1.0, drag:2.6, kP:4.0, mode:'open', dist:0, running:false, distPhase:0, curDist:0
+  };
+  B.world = makeCanvas(document.getElementById('bWorld'));
+  B.scope = makeCanvas(document.getElementById('bScope'));
+  B.scopeObj = new Scope(B.scope, [
+    {key:'dist', color:'#8E8CF8', w:1.5, glow:false},
+    {key:'sp', color:'#FFB020', w:1.5, dash:[5,4]},
+    {key:'meas', color:'#34D7C5', w:2, glow:true}
+  ]);
+  var bOpen=document.getElementById('bOpen'), bClosed=document.getElementById('bClosed'),
+      bRun=document.getElementById('bRun'), bReset=document.getElementById('bReset'),
+      bDist=document.getElementById('bDist'), bDistVal=document.getElementById('bDistVal'),
+      bLive=document.getElementById('bLive'), bStatus=document.getElementById('bStatus'),
+      bMode=document.getElementById('bMode'), bMeas=document.getElementById('bMeas'), bErr=document.getElementById('bErr');
+
+  bOpen.addEventListener('click', function(){ B.mode='open'; bOpen.classList.add('active'); bClosed.classList.remove('active'); bMode.textContent='Open'; });
+  bClosed.addEventListener('click', function(){ B.mode='closed'; bClosed.classList.add('active'); bOpen.classList.remove('active'); bMode.textContent='Closed'; });
+  bRun.addEventListener('click', function(){
+    B.running=!B.running;
+    bRun.textContent = B.running ? '❚❚ Pause' : '▶ Run';
+    bRun.classList.toggle('active', B.running);
+    bLive.classList.toggle('on', B.running);
+    bStatus.textContent = B.running ? 'Live' : 'Paused';
+  });
+  bReset.addEventListener('click', function(){ B.y=0.5; B.v=0; B.distPhase=0; B.scopeObj.clear(); });
+  bDist.addEventListener('input', function(){ B.dist=parseFloat(bDist.value); bDistVal.textContent=B.dist.toFixed(2); });
+
+  function stepB(dt){
+    if(B.running){
+      B.distPhase += dt;
+      B.curDist = B.dist*Math.sin(B.distPhase*0.8) + B.dist*0.5; // slow biased gust
+      var u;
+      if(B.mode==='open') u = B.g;                 // tuned for calm only
+      else u = B.g + B.kP*(B.sp - B.y);            // respond to error
+      var a = u - B.g + B.curDist - B.drag*B.v;
+      B.v += a*dt; B.y += B.v*dt;
+      if(B.y<0){B.y=0; if(B.v<0)B.v=0;} if(B.y>1){B.y=1; if(B.v>0)B.v=0;}
+      B.scopeObj.push({sp:B.sp, meas:B.y, dist:clamp(0.5+B.curDist*0.7,0,1)});
+    }
+    var ctrlForFlame = (B.mode==='open'? B.g : B.g + B.kP*(B.sp-B.y));
+    drawWorld(B.world, B.y, B.sp, 0, clamp((ctrlForFlame-B.g+1)/2.4,0,1));
+    B.scopeObj.draw();
+    bMeas.textContent=B.y.toFixed(2);
+    bErr.textContent=(B.sp-B.y).toFixed(2);
+  }
+
+  // =================== main loop ===================
+  var last=0;
+  function frame(ts){
+    var t=ts/1000;
+    var dt = last? Math.min(0.033, t-last) : 0.016;
+    last=t;
+    stepA(dt, t);
+    stepB(dt);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  // refit on resize
+  var rt;
+  window.addEventListener('resize', function(){
+    clearTimeout(rt);
+    rt=setTimeout(function(){
+      A.world.fit(); A.scope.fit(); B.world.fit(); B.scope.fit();
+    },120);
+  });
+
+  // =================== quiz ===================
+  var qs=document.querySelectorAll('#quiz .q');
+  qs.forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');
+    var explain=q.querySelector('.explain');
+    var done=false;
+    opts.forEach(function(opt,idx){
+      opt.addEventListener('click', function(){
+        if(done) return; done=true;
+        opts.forEach(function(o){ o.classList.add('locked'); });
+        if(idx===correct){ opt.classList.add('correct'); }
+        else { opt.classList.add('wrong'); opts[correct].classList.add('correct'); }
+        explain.classList.add('show');
+      });
+    });
+  });
+})();
+</script>
+<script>
+(function(){
+  // auto-mark this lesson complete in the hub once its quiz is finished
+  var KEY="closing-the-loop:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

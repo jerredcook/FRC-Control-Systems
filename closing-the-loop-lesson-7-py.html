@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Closing the Loop · Lesson 7 - System Identification (Python)</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020;   /* setpoint / target / brand */
+    --teal:#34D7C5;    /* measured position / data */
+    --indigo:#8E8CF8;  /* voltage / velocity / fit line */
+    --red:#FF6B6B;     /* error / overshoot */
+    --green:#43D67E;   /* correct */
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+    --maxw:1160px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ink); color:var(--text);
+    font-family:var(--sans); font-size:17px; line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(900px 500px at 80% -10%, rgba(255,176,32,.06), transparent 60%),
+      radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--teal);box-shadow:0 0 12px var(--teal)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--teal),var(--indigo));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:46ch;margin-top:6px}
+
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--teal);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  p .sub,.sub{color:var(--muted)}
+  .lead{font-size:19px}
+  em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .formula{font-family:var(--mono);background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:18px 20px;margin:20px 0;font-size:18px;overflow-x:auto;color:#cfe;text-align:center}
+  .formula .small{display:block;font-size:13px;color:var(--muted);margin-top:8px}
+  .formula b{color:var(--amber)} .formula .t{color:var(--teal)} .formula .i{color:var(--indigo)}
+
+  .terms{display:grid;gap:12px;margin:22px 0 6px}
+  @media(min-width:560px){.terms{grid-template-columns:repeat(3,1fr)}}
+  .term{border:1px solid var(--line);border-radius:10px;padding:14px 15px;background:var(--panel);border-top:2px solid var(--accent,var(--teal))}
+  .term h4{margin:0 0 4px;font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent,var(--teal))}
+  .term p{margin:0;font-size:14.5px;color:var(--muted);line-height:1.45}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;gap:6px;align-items:center}
+  .demo-tag .live{width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 8px var(--red)}
+  .demo-tag .live.on{background:var(--green);box-shadow:0 0 8px var(--green)}
+  .demo-stage{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line)}
+  @media(min-width:600px){.demo-stage{grid-template-columns:minmax(150px,0.7fr) 1.6fr}}
+  .stage-cell{background:#0B1322;position:relative}
+  .stage-cell .cell-label{position:absolute;top:8px;left:10px;z-index:2;font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);pointer-events:none}
+  canvas.world{display:block;width:100%;height:330px}
+  canvas.plot{display:block;width:100%;height:330px}
+
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--teal);color:var(--text)}
+  .btn.active{background:var(--teal);border-color:var(--teal);color:#06121f;font-weight:700}
+  .btn.primary{background:linear-gradient(180deg,#6FF0DD,var(--teal));color:#06121f;font-weight:700;border:none}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .slider-group{flex:1 1 200px;display:flex;flex-direction:column;gap:6px;min-width:180px}
+  .slider-group label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+  .slider-group label .val{color:var(--indigo)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:var(--line-2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--indigo);cursor:pointer;box-shadow:0 0 10px -1px var(--indigo)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
+
+  .readouts{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  @media(min-width:560px){.readouts{grid-template-columns:repeat(4,1fr)}}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:20px;font-weight:600;margin-top:3px}
+  .ro .v.amber{color:var(--amber)} .ro .v.teal{color:var(--teal)} .ro .v.indigo{color:var(--indigo)} .ro .v.red{color:var(--red)} .ro .v.green{color:var(--green)} .ro .v.ink{color:var(--text)}
+
+  .legend{display:flex;flex-wrap:wrap;gap:16px;padding:11px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .legend i{width:16px;height:2px;border-radius:2px;display:inline-block}
+  .legend i.dot{width:9px;height:9px;border-radius:50%}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.teal{border-color:var(--teal);background:rgba(52,215,197,.06)} .note.teal .nh{color:var(--teal)}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--teal);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:13.5px;line-height:1.85;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic}
+  .code .kw{color:#ff9bbf}
+  .code .ty{color:var(--teal)}
+  .code .fn{color:var(--indigo)}
+  .code .num{color:var(--amber)}
+
+  .code-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .code-ex .chead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .code-ex .chead .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,176,32,.14);display:grid;place-items:center;color:var(--amber);font-size:13px}
+  .code-ex .ctask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .code-ex pre.code{margin:0 0 14px}
+  .blank{font-family:var(--mono);font-size:13px;width:23ch;text-align:center;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:2px 4px;outline:none}
+  .blank:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
+  .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)}
+  .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7}
+  .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--teal);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px}
+  @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px}
+  .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--teal);min-width:140px;text-transform:uppercase}
+  .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(142,140,248,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--indigo);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--indigo)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)}
+  .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .next code{font-family:var(--mono);background:var(--panel-2);border:1px solid var(--line-2);padding:2px 8px;border-radius:5px;color:var(--teal);font-size:14px}
+
+  .coursenav{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);margin-top:34px;padding:24px 0 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--teal);color:var(--text)}
+  .coursenav a.map{border-color:transparent;color:var(--indigo)}
+
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="closing-the-loop.html"><span class="dot"></span><span class="name">Closing the Loop</span></a>
+    <div class="top-meta">Lesson 07 / 08 · Characterization</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Lesson 07</b> Characterization</div>
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:-6px 0 14px">Code shown in <b style="color:var(--teal)">Python</b> &middot; <a href="closing-the-loop-lesson-7.html" style="color:var(--muted)">switch to Java</a></div>
+    <div class="eyebrow">System Identification</div>
+    <h1>Stop guessing.<br><span class="accent">Measure</span> it.</h1>
+    <p class="dek">kS, kG, kV, kA aren't magic numbers. You pull them straight out of your own mechanism with two simple tests.</p>
+  </div>
+
+  <section>
+    <p class="lead">Last lesson, you typed in <span class="k">kG</span> and friends like they fell from the sky.</p>
+    <p>They didn't. Every feedforward gain is a real, measurable property of <em>your</em> mechanism - this motor, this gearbox, this much weight. The process of measuring them is called <strong>system identification</strong> (sysid for short, or "characterization"). It turns a couple of test runs into trustworthy numbers, so your feedforward describes the robot you actually built instead of one you hoped for.</p>
+    <p>Here's the whole trick, hiding in the feedforward equation from Lesson 6:</p>
+    <div class="formula">
+      voltage = <b>kS</b>·sign(v) + <b>kG</b> + <span class="i">kV·v</span> + <span class="t">kA·a</span>
+      <span class="small">four physics terms (sign(v) just flips kS with the direction of travel) - and each one leaves a fingerprint we can read</span>
+    </div>
+    <p>Watch what happens if you move the carriage at a <em>constant</em> speed. Constant speed means acceleration is zero, so the <span class="t">kA·a</span> term vanishes entirely. What's left is a plain straight line:</p>
+    <div class="formula">
+      voltage = (<b>kS + kG</b>) + <span class="i">kV</span>·velocity
+      <span class="small">a line: <b>intercept</b> = kS + kG &nbsp;·&nbsp; <span class="i">slope</span> = kV</span>
+    </div>
+    <p>So if we run the elevator at a bunch of steady speeds and record the voltage each one needs, the data falls on a line - and the line's <strong>slope and intercept hand us the gains</strong>. That's it. That's system identification.</p>
+  </section>
+
+  <section>
+    <div class="kicker">Try it</div>
+    <h2>Run the ramp test</h2>
+    <p>Press <strong>Run ramp test</strong>. The motor voltage rises <em>slowly</em> - slow enough that the carriage is always cruising at its steady speed for that voltage (engineers call this a <strong>quasistatic</strong> test). Each instant we plot a dot: <span style="color:var(--indigo)">velocity</span> across, <span class="sub">voltage</span> up. Watch the cloud of dots line up.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head">
+        <span class="demo-title">Elevator · Characterization bench</span>
+        <span class="demo-tag"><span class="live" id="live"></span> <span id="status">Idle</span></span>
+      </div>
+      <div class="demo-stage">
+        <div class="stage-cell"><span class="cell-label">Mechanism</span><canvas class="world" id="world"></canvas></div>
+        <div class="stage-cell"><span class="cell-label">Data · voltage vs velocity</span><canvas class="plot" id="plot"></canvas></div>
+      </div>
+      <div class="legend">
+        <span><i class="dot" style="background:var(--teal)"></i> Measured data</span>
+        <span><i style="background:var(--indigo)"></i> Your fit line</span>
+        <span><i style="background:var(--amber)"></i> True line (on reveal)</span>
+      </div>
+      <div class="controls">
+        <button class="btn primary" id="runBtn">Run ramp test ▸</button>
+        <button class="btn" id="autofit" disabled>Auto-fit ✓</button>
+        <button class="btn" id="reset">Reset</button>
+        <div class="slider-group">
+          <label>Fit intercept → kS + kG <span class="val" id="bVal">0.30</span></label>
+          <input type="range" id="bSlide" min="0" max="1" step="0.01" value="0.30" />
+        </div>
+        <div class="slider-group">
+          <label>Fit slope → kV <span class="val" id="mVal">1.00</span></label>
+          <input type="range" id="mSlide" min="0" max="3" step="0.02" value="1.00" />
+        </div>
+      </div>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Voltage</div><div class="v ink" id="roU">0.00</div></div>
+        <div class="ro"><div class="k2">Velocity</div><div class="v indigo" id="roV">0.00</div></div>
+        <div class="ro"><div class="k2">Data points</div><div class="v teal" id="roN">0</div></div>
+        <div class="ro"><div class="k2">Fit error (RMS)</div><div class="v amber" id="roErr">-</div></div>
+      </div>
+    </div>
+    <p class="caption">Drag the two sliders until the indigo line lies right through the cloud. When it does, you've measured your gains by hand - then hit Auto-fit to see how close you got.</p>
+  </section>
+
+  <section>
+    <div class="kicker">What the line tells you</div>
+    <h2>Slope is kV, intercept is the rest</h2>
+    <p>Once the line fits, read it off directly. The <span class="i">slope</span> - how much extra voltage each extra unit of speed costs - is <span class="k">kV</span>. The <strong>intercept</strong>, where the line meets zero velocity, is the voltage the mechanism needs just to creep: that's <span class="k">kS</span> (static friction) plus <span class="k">kG</span> (gravity), bundled together.</p>
+    <p>But "bundled together" is a problem - feedforward needs <span class="k">kS</span> and <span class="k">kG</span> <em>separately</em>. One ramp can't split them. The fix is beautifully simple: run the ramp <strong>downward</strong> too.</p>
+    <div class="formula">
+      up&nbsp;&nbsp;: intercept = <b>kG + kS</b><br>
+      down: intercept = <b>kG − kS</b>
+      <span class="small">friction always fights motion, so it flips sign when the direction does</span>
+    </div>
+    <p>Two equations, two unknowns. Add them and the friction cancels; subtract them and gravity cancels:</p>
+    <div class="formula">
+      <b>kG</b> = (up + down) / 2 &nbsp;&nbsp;·&nbsp;&nbsp; <b>kS</b> = (up − down) / 2
+    </div>
+    <div class="note teal">
+      <div class="nh">Why it works</div>
+      <p>Going up, friction and gravity both fight you, so it takes <em>more</em> voltage. Going down, gravity helps while friction still resists, so it takes <em>less</em>. The midpoint of the two intercepts is pure gravity; half the gap between them is pure friction.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">The missing gain</div>
+    <h2>And kA - the step test</h2>
+    <p>Notice the ramp never told us <span class="k">kA</span>. That's on purpose: we kept acceleration near zero so the <span class="t">kA·a</span> term would disappear and leave a clean line. To measure <span class="k">kA</span> we do the opposite - a <strong>dynamic step test</strong>: slam the voltage to a fixed value and watch how <em>hard</em> the carriage accelerates in the first instant, before speed has a chance to build.</p>
+    <p>At that first instant velocity is still ~0, so kV and the line's intercept are already accounted for, and every leftover volt is going into acceleration:</p>
+    <div class="formula">
+      <b>kA</b> = (voltage − intercept) / acceleration
+      <span class="small">extra voltage above the line, divided by the acceleration it produced</span>
+    </div>
+    <p>Two tests, four gains: the <strong>quasistatic ramp</strong> gives you kS, kG, and kV; the <strong>dynamic step</strong> gives you kA. Together they fully describe how your mechanism turns voltage into motion.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In practice</div>
+    <h2>You don't do this by hand</h2>
+    <p>You <em>could</em> run these tests with a stopwatch and graph paper - but you won't. WPILib's <span class="k">SysId</span> tool and CTRE's <span class="k">Tuner X</span> automate the whole thing: a routine drives the ramp and the step for you, logs voltage, position, and velocity at high speed, then fits the line and reports kS, kG, kV, and kA. In RobotPy that routine looks like this:</p>
+    <div class="codewrap">
+      <div class="clabel">A SysId characterization routine <span class="badge">Python</span></div>
+<pre class="code">self.routine = <span class="ty">SysIdRoutine</span>(
+    <span class="ty">SysIdRoutine</span>.<span class="ty">Config</span>(),                       <span class="cm"># default ramp rate &amp; step voltage</span>
+    <span class="ty">SysIdRoutine</span>.<span class="ty">Mechanism</span>(
+        <span class="kw">lambda</span> volts: self.motor.<span class="fn">setVoltage</span>(volts),  <span class="cm"># 1. drive the motor</span>
+        self.log_state,                            <span class="cm"># 2. record what it did</span>
+        self))
+
+<span class="cm"># Bind these to buttons, run all four, then analyze the logs:</span>
+ramp_up   = self.routine.<span class="fn">quasistatic</span>(<span class="ty">SysIdRoutine</span>.<span class="ty">Direction</span>.kForward)
+ramp_down = self.routine.<span class="fn">quasistatic</span>(<span class="ty">SysIdRoutine</span>.<span class="ty">Direction</span>.kReverse)
+step_up   = self.routine.<span class="fn">dynamic</span>(<span class="ty">SysIdRoutine</span>.<span class="ty">Direction</span>.kForward)
+step_down = self.routine.<span class="fn">dynamic</span>(<span class="ty">SysIdRoutine</span>.<span class="ty">Direction</span>.kReverse)</pre>
+    </div>
+    <p>Run those four commands on the real robot, hand the logs to the analyzer, and it spits out the same slope and intercept you just fit by hand - only with hundreds of data points and no eyeballing.</p>
+
+    <div class="code-ex">
+      <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
+      <div class="ctask">The analyzer hands you two intercepts: <span class="k">up_intercept</span> and <span class="k">down_intercept</span>. Recover the two separate gains. Fill the blanks, then Check.</div>
+<pre class="code">kg = <input class="blank" data-ans="(up_intercept+down_intercept)/2|(up_intercept+down_intercept)/2.0|(up+down)/2|(up+down)/2.0" aria-label="blank 1" autocomplete="off" spellcheck="false">   <span class="cm"># gravity: the midpoint</span>
+ks = <input class="blank" data-ans="(up_intercept-down_intercept)/2|(up_intercept-down_intercept)/2.0|(up-down)/2|(up-down)/2.0" aria-label="blank 2" autocomplete="off" spellcheck="false">   <span class="cm"># friction: half the gap</span></pre>
+      <div class="code-actions">
+        <button class="btn" id="check">Check</button>
+        <button class="btn" id="reveal">Reveal</button>
+        <span class="code-result" id="cres"></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="note teal">
+      <div class="nh">Going further &middot; optional</div>
+      <p>Fitting a line by eye works, but the analyzer does it with least squares: it picks the slope and intercept that make the total of all the squared up-and-down distances from the dots to the line as small as possible. Squaring is the clever part - it punishes one wildly-off point far more than several slightly-off ones, which is why a single bad data sample can drag your whole fit. Try this: why would the same tests run on a worn-out chain or a cold battery hand you slightly different gains each time, and what does that tell you about how often a competitive team should re-characterize a mechanism?</p>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">In the ramp test, you plot voltage against velocity and the data forms a line. The <em>slope</em> of that line is…</div>
+        <div class="opts">
+          <button class="opt">kG - the gravity gain</button>
+          <button class="opt">kV - the velocity gain</button>
+          <button class="opt">kA - the acceleration gain</button>
+        </div>
+        <div class="explain">kV. Slope is "extra voltage per extra unit of speed" - exactly what kV means. The intercept holds kS + kG, and kA never appears because acceleration is held near zero.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">Why run the ramp test both up and down?</div>
+        <div class="opts">
+          <button class="opt">To double-check the slope kV</button>
+          <button class="opt">To give the battery time to recover</button>
+          <button class="opt">To separate kS from kG - the two intercepts differ because friction flips sign</button>
+        </div>
+        <div class="explain">A single ramp only gives you kS + kG lumped together. Going the other direction flips friction's sign, so the up-intercept is kG + kS and the down-intercept is kG − kS. Average them for kG, halve their difference for kS.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">The slow ramp test never reveals kA. Why not - and what does?</div>
+        <div class="opts">
+          <button class="opt">The ramp keeps acceleration near zero, so kA·a stays ~0; the dynamic step test reveals it</button>
+          <button class="opt">kA can't be measured at all - you always have to guess it</button>
+          <button class="opt">kA only matters for drivetrains, never elevators</button>
+        </div>
+        <div class="explain">The ramp is deliberately slow so acceleration ≈ 0 and the line stays clean - which means kA never shows up. A dynamic step test creates a big, brief acceleration so kA finally has something to act on, and you read it from how hard the mechanism accelerates.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Lesson 07 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>System ID</b><span>Measuring a mechanism's gains instead of guessing them.</span></div>
+        <div class="gl"><b>Quasistatic ramp</b><span>A slow voltage ramp; data forms a line at steady speed.</span></div>
+        <div class="gl"><b>Slope → kV</b><span>Extra voltage per extra unit of velocity.</span></div>
+        <div class="gl"><b>Intercept → kS + kG</b><span>Voltage at zero velocity - friction plus gravity.</span></div>
+        <div class="gl"><b>Up + down</b><span>Two intercepts split kS from kG.</span></div>
+        <div class="gl"><b>Dynamic step → kA</b><span>A hard, brief push reveals the acceleration gain.</span></div>
+      </div>
+      <a class="next" href="closing-the-loop-lesson-8-py.html">
+        <div class="n-eyebrow">Up next · Lesson 08</div>
+        <h3>The Complete Controller</h3>
+        <p>You can tune feedback (Lessons 2-5) and now <em>measure</em> feedforward (6-7). The finale fuses them into the exact controller real FRC teams ship - and points you toward writing it in real robot code.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="closing-the-loop-lesson-6-py.html">← Lesson 06 · Feedforward</a>
+    <a class="map" href="closing-the-loop.html">Course map</a>
+    <a href="closing-the-loop-lesson-8-py.html">Lesson 08 · The Complete Controller →</a>
+  </nav>
+
+</div>
+
+<footer>Closing the Loop · A control systems course for FRC</footer>
+
+<script>
+(function(){
+  "use strict";
+  var clamp=function(x,a,b){return x<a?a:(x>b?b:x);};
+  var sgn=function(x){return x>1e-4?1:(x<-1e-4?-1:0);};
+
+  function makeCanvas(cv){
+    var ctx=cv.getContext('2d'); var o={cv:cv,ctx:ctx,w:0,h:0};
+    function fit(){
+      var r=cv.getBoundingClientRect(); if(!r.width)return;
+      var dpr=window.devicePixelRatio||1;
+      cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr);
+      ctx.setTransform(dpr,0,0,dpr,0,0); o.w=r.width; o.h=r.height;
+    }
+    o.fit=fit; fit(); return o;
+  }
+  function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+
+  // ---- left cell: the mechanism (no setpoint line) ----
+  function drawRig(o,y,volt){
+    var ctx=o.ctx,W=o.w,H=o.h; ctx.clearRect(0,0,W,H);
+    var pad=24,top=pad,bot=H-pad,span=bot-top,cx=W*0.5;
+    function py(v){return bot-clamp(v,0,1)*span;}
+    ctx.strokeStyle='#2B3A57';ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(cx-26,top-6);ctx.lineTo(cx-26,bot);ctx.moveTo(cx+26,top-6);ctx.lineTo(cx+26,bot);ctx.stroke();
+    ctx.fillStyle='#1B2540';ctx.strokeStyle='#33415e';ctx.lineWidth=1.5;
+    roundRect(ctx,cx-30,top-16,60,12,3);ctx.fill();ctx.stroke();
+    ctx.strokeStyle='rgba(120,140,180,0.16)';ctx.lineWidth=1;
+    for(var i=0;i<=10;i++){var ty=top+span*(i/10);ctx.beginPath();ctx.moveTo(cx-34,ty);ctx.lineTo(cx-30,ty);ctx.stroke();}
+    var my=py(y);
+    ctx.strokeStyle='#475679';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(cx,top-4);ctx.lineTo(cx,my-10);ctx.stroke();
+    var fmag=clamp(Math.abs(volt)*16,0,30);
+    if(fmag>1.5){
+      var up=volt>=0, ay=up?my+12:my-12, dir=up?1:-1, col=up?'#34D7C5':'#FF6B6B';
+      ctx.strokeStyle=col;ctx.globalAlpha=0.7;ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(cx,ay);ctx.lineTo(cx,ay+dir*fmag);
+      ctx.moveTo(cx-4,ay+dir*(fmag-5));ctx.lineTo(cx,ay+dir*fmag);ctx.lineTo(cx+4,ay+dir*(fmag-5));
+      ctx.stroke();ctx.globalAlpha=1;
+    }
+    ctx.shadowColor='#34D7C5';ctx.shadowBlur=16;
+    ctx.fillStyle='#0e2b2a';ctx.strokeStyle='#34D7C5';ctx.lineWidth=2;
+    roundRect(ctx,cx-22,my-11,44,22,5);ctx.fill();ctx.stroke();
+    ctx.shadowBlur=0;
+    ctx.fillStyle='#34D7C5';ctx.fillRect(cx-12,my-3,24,2);
+    ctx.beginPath();ctx.arc(cx,my+3,3,0,7);ctx.fill();
+  }
+
+  // ---- right cell: scatter plot of voltage (y) vs velocity (x) ----
+  var VMAX=0.5, UMAX=1.45;
+  function drawPlot(o, pts, fitB, fitM, showTrue, trueB, trueM){
+    var ctx=o.ctx,W=o.w,H=o.h; ctx.clearRect(0,0,W,H);
+    var left=42, right=W-14, top=16, bot=H-26;
+    var wspan=right-left, span=bot-top;
+    function X(v){return left+clamp(v/VMAX,0,1)*wspan;}
+    function Y(u){return bot-clamp(u/UMAX,0,1)*span;}
+    // grid
+    ctx.strokeStyle='rgba(120,140,180,0.08)';ctx.lineWidth=1;
+    for(var gy=0;gy<=4;gy++){var yy=top+span*(gy/4);ctx.beginPath();ctx.moveTo(left,yy);ctx.lineTo(right,yy);ctx.stroke();}
+    for(var gx=0;gx<=5;gx++){var xx=left+wspan*(gx/5);ctx.beginPath();ctx.moveTo(xx,top);ctx.lineTo(xx,bot);ctx.stroke();}
+    // axis labels
+    ctx.fillStyle='#5E6F8E';ctx.font='9px ui-monospace,Menlo,monospace';
+    ctx.textAlign='center';ctx.fillText('velocity →',(left+right)/2,H-8);
+    ctx.save();ctx.translate(12,(top+bot)/2);ctx.rotate(-Math.PI/2);ctx.fillText('voltage →',0,0);ctx.restore();
+    // true line
+    if(showTrue){
+      ctx.strokeStyle='rgba(255,176,32,0.6)';ctx.lineWidth=1.5;ctx.setLineDash([5,4]);
+      ctx.beginPath();ctx.moveTo(X(0),Y(trueB));ctx.lineTo(X(VMAX),Y(trueB+trueM*VMAX));ctx.stroke();ctx.setLineDash([]);
+    }
+    // data points
+    ctx.fillStyle='#34D7C5';ctx.globalAlpha=0.85;
+    for(var i=0;i<pts.length;i++){ctx.beginPath();ctx.arc(X(pts[i].v),Y(pts[i].u),2.6,0,7);ctx.fill();}
+    ctx.globalAlpha=1;
+    // user fit line
+    ctx.strokeStyle='#8E8CF8';ctx.lineWidth=2;ctx.shadowColor='#8E8CF8';ctx.shadowBlur=6;
+    ctx.beginPath();ctx.moveTo(X(0),Y(fitB));ctx.lineTo(X(VMAX),Y(fitB+fitM*VMAX));ctx.stroke();ctx.shadowBlur=0;
+    ctx.fillStyle='#8E8CF8';ctx.beginPath();ctx.arc(X(0),Y(fitB),3.5,0,7);ctx.fill();
+  }
+
+  // ---- true plant ----
+  var TRUE_G=0.45, TRUE_KS=0.06, TRUE_DRAG=1.8;   // kG, kS, kV(=drag)
+  var TRUE_B=TRUE_G+TRUE_KS, TRUE_M=TRUE_DRAG;     // up-ramp intercept & slope
+
+  var S={
+    y:0.05, v:0, u:0, phase:'idle',  // idle | ramping | done
+    rampT:0, rampDur:7.5, uStart:0.40, uEnd:1.32,
+    pts:[], sampleAcc:0,
+    fitB:0.30, fitM:1.00, showTrue:false
+  };
+
+  var world=makeCanvas(document.getElementById('world'));
+  var plot=makeCanvas(document.getElementById('plot'));
+  var el={
+    live:document.getElementById('live'), status:document.getElementById('status'),
+    runBtn:document.getElementById('runBtn'), autofit:document.getElementById('autofit'), reset:document.getElementById('reset'),
+    bSlide:document.getElementById('bSlide'), bVal:document.getElementById('bVal'),
+    mSlide:document.getElementById('mSlide'), mVal:document.getElementById('mVal'),
+    roU:document.getElementById('roU'), roV:document.getElementById('roV'),
+    roN:document.getElementById('roN'), roErr:document.getElementById('roErr')
+  };
+
+  function setStatus(t,on){el.status.textContent=t;el.live.classList.toggle('on',!!on);}
+  function rmsError(){
+    if(!S.pts.length)return null;
+    var s=0;for(var i=0;i<S.pts.length;i++){var d=S.pts[i].u-(S.fitB+S.fitM*S.pts[i].v);s+=d*d;}
+    return Math.sqrt(s/S.pts.length);
+  }
+  function syncFitUI(){
+    el.bSlide.value=S.fitB; el.bVal.textContent=S.fitB.toFixed(2);
+    el.mSlide.value=S.fitM; el.mVal.textContent=S.fitM.toFixed(2);
+  }
+
+  el.bSlide.addEventListener('input',function(){S.fitB=parseFloat(el.bSlide.value);el.bVal.textContent=S.fitB.toFixed(2);});
+  el.mSlide.addEventListener('input',function(){S.fitM=parseFloat(el.mSlide.value);el.mVal.textContent=S.fitM.toFixed(2);});
+
+  el.runBtn.addEventListener('click',function(){
+    if(S.phase==='ramping')return;
+    S.phase='ramping'; S.rampT=0; S.u=S.uStart; S.y=0.05; S.v=0; S.pts=[]; S.sampleAcc=0; S.showTrue=false;
+    el.runBtn.disabled=true; el.autofit.disabled=true;
+    setStatus('Ramping…',true);
+  });
+  el.autofit.addEventListener('click',function(){
+    var n=S.pts.length; if(n<2)return;
+    var sv=0,su=0,i;
+    for(i=0;i<n;i++){sv+=S.pts[i].v;su+=S.pts[i].u;}
+    var mv=sv/n, mu=su/n, num=0, den=0;
+    for(i=0;i<n;i++){var dv=S.pts[i].v-mv;num+=dv*(S.pts[i].u-mu);den+=dv*dv;}
+    S.fitM=clamp(den?num/den:0,0,3);
+    S.fitB=clamp(mu-S.fitM*mv,0,1);
+    S.showTrue=true; syncFitUI();
+  });
+  el.reset.addEventListener('click',function(){
+    S.phase='idle'; S.pts=[]; S.y=0.05; S.v=0; S.u=0; S.showTrue=false;
+    S.fitB=0.30; S.fitM=1.00; syncFitUI();
+    el.runBtn.disabled=false; el.autofit.disabled=true;
+    setStatus('Idle',false);
+  });
+
+  // pseudo-random noise without Date/Math.random reliance is fine here (browser)
+  function noise(){return (Math.random()-0.5)*0.04;}
+
+  function step(dt){
+    if(S.phase==='ramping'){
+      S.rampT+=dt;
+      var frac=clamp(S.rampT/S.rampDur,0,1);
+      S.u=S.uStart+(S.uEnd-S.uStart)*frac;
+      // plant: a = u - g - drag*v - kS*sign(v), with a static-friction threshold at rest
+      var s=sgn(S.v), a;
+      if(s===0){
+        var net=S.u-TRUE_G;
+        a=(Math.abs(net)<=TRUE_KS)?0:(net-(net>0?1:-1)*TRUE_KS);
+      } else {
+        a=S.u-TRUE_G-TRUE_DRAG*S.v-s*TRUE_KS;
+      }
+      S.v+=a*dt; S.y+=S.v*dt;
+      if(S.y>1){S.y=0.02;}                 // treadmill: keep cruising
+      if(S.y<0){S.y=0; if(S.v<0)S.v=0;}
+      // collect once moving steadily
+      S.sampleAcc+=dt;
+      if(S.rampT>0.8 && S.v>0.012 && S.sampleAcc>0.11){
+        S.pts.push({v:S.v, u:S.u+noise()}); S.sampleAcc=0;
+      }
+      if(frac>=1){
+        S.phase='done'; el.runBtn.disabled=false; el.autofit.disabled=false;
+        setStatus('Test complete · fit the line',false);
+      }
+    }
+    drawRig(world, S.y, S.phase==='ramping'?S.u:0);
+    drawPlot(plot, S.pts, S.fitB, S.fitM, S.showTrue, TRUE_B, TRUE_M);
+    el.roU.textContent=S.u.toFixed(2);
+    el.roV.textContent=Math.max(0,S.v).toFixed(3);
+    el.roN.textContent=String(S.pts.length);
+    var e=rmsError();
+    el.roErr.textContent=(e==null)?'-':e.toFixed(3);
+    el.roErr.className='v '+((e!=null&&e<0.03)?'green':'amber');
+  }
+
+  var last=0;
+  function frame(ts){var t=ts/1000;var dt=last?Math.min(0.033,t-last):0.016;last=t;step(dt);requestAnimationFrame(frame);}
+  requestAnimationFrame(frame);
+
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){world.fit();plot.fit();},120);});
+
+  // ---- code exercise ----
+  var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
+  function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'');}
+  document.getElementById('check').addEventListener('click',function(){
+    var all=true;
+    blanks.forEach(function(b){
+      var ans=(b.getAttribute('data-ans')||'').split('|');
+      var ok=ans.indexOf(norm(b.value))!==-1;
+      b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad');
+      if(!ok)all=false;
+    });
+    var res=document.getElementById('cres');
+    res.textContent=all?'All correct ✓':'Not quite - check the formulas above';
+    res.className='code-result '+(all?'ok':'no');
+  });
+  document.getElementById('reveal').addEventListener('click',function(){
+    blanks.forEach(function(b){b.value=(b.getAttribute('data-ans')||'').split('|')[0];b.classList.remove('bad');b.classList.add('ok');});
+    var res=document.getElementById('cres');res.textContent='Revealed';res.className='code-result ok';
+  });
+
+  // ---- quiz ----
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){
+      opt.addEventListener('click',function(){
+        if(done)return;done=true;
+        opts.forEach(function(o){o.classList.add('locked');});
+        if(idx===correct){opt.classList.add('correct');}
+        else{opt.classList.add('wrong');opts[correct].classList.add('correct');}
+        explain.classList.add('show');
+      });
+    });
+  });
+
+  syncFitUI();
+})();
+</script>
+<script>
+(function(){
+  // auto-mark this lesson complete in the hub once its quiz is finished
+  var KEY="closing-the-loop:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

@@ -18,6 +18,11 @@ Three courses - three pillars - **103 interactive lessons, all complete:**
 The pillars connect: **Deploy**'s "Make It Move" unit *is* the **Closing the Loop**
 course, so the control material is shared rather than rebuilt.
 
+**Java or Python.** Every code lesson in **Deploy** and **Closing the Loop** comes
+in both **Java (WPILib)** and **Python (RobotPy)**. Flip the language switch on the
+course hub and your choice follows you through the whole course (and into the
+[Python starter templates](templates/python/)).
+
 ## ▶ Start here
 
 Open **`index.html`** (the academy landing) in any browser, or visit the live

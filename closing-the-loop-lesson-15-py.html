@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Closing the Loop · Part III.2 - Configuring a TalonFX (Python)</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ink); color:var(--text);
+    font-family:var(--sans); font-size:17px; line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(900px 500px at 80% -10%, rgba(255,176,32,.06), transparent 60%),
+      radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--teal);box-shadow:0 0 12px var(--teal)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--teal),var(--indigo));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:50ch;margin-top:6px}
+
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--teal);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  p .sub,.sub{color:var(--muted)}
+  .lead{font-size:19px}
+  em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  /* config builder */
+  .builder{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .builder-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .builder-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .builder-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .bgrid{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line)}
+  @media(min-width:680px){.bgrid{grid-template-columns:0.92fr 1.08fr}}
+  .bctl{background:#0B1322;padding:16px 16px;display:flex;flex-direction:column;gap:16px}
+  .field label{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between;margin-bottom:7px}
+  .field label .val{color:var(--amber)}
+  .seg{display:flex;gap:0;border:1px solid var(--line-2);border-radius:9px;overflow:hidden}
+  .seg button{flex:1;border:none;background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:9px 6px;cursor:pointer;transition:.12s;border-right:1px solid var(--line-2)}
+  .seg button:last-child{border-right:none}
+  .seg button:hover{color:var(--text)}
+  .seg button.active{background:var(--teal);color:#06121f;font-weight:700}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:5px;border-radius:5px;background:var(--line-2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--amber);cursor:pointer;box-shadow:0 0 10px -1px var(--amber)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--amber);cursor:pointer}
+  .bcode{background:var(--ink);padding:16px 18px;overflow-x:auto}
+  .bcode pre{font-family:var(--mono);font-size:12.5px;line-height:1.8;margin:0;white-space:pre;color:#cdd9ec;tab-size:2}
+
+  .code .cm,.bcode .cm{color:var(--faint);font-style:italic}
+  .code .kw,.bcode .kw{color:#ff9bbf}
+  .code .ty,.bcode .ty{color:var(--teal)}
+  .code .fn,.bcode .fn{color:var(--indigo)}
+  .code .num,.bcode .num{color:var(--amber)}
+  .code .str,.bcode .str{color:#9ad6a0}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .terms{display:grid;gap:12px;margin:22px 0 6px}
+  @media(min-width:560px){.terms{grid-template-columns:repeat(2,1fr)}}
+  .term{border:1px solid var(--line);border-radius:10px;padding:14px 15px;background:var(--panel);border-top:2px solid var(--accent,var(--teal))}
+  .term h4{margin:0 0 4px;font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent,var(--teal))}
+  .term p{margin:0;font-size:14.5px;color:var(--muted);line-height:1.45}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.teal{border-color:var(--teal);background:rgba(52,215,197,.06)} .note.teal .nh{color:var(--teal)}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--teal);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:13.5px;line-height:1.85;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+
+  .code-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .code-ex .chead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .code-ex .chead .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,176,32,.14);display:grid;place-items:center;color:var(--amber);font-size:13px}
+  .code-ex .ctask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .code-ex pre.code{margin:0 0 14px}
+  .blank{font-family:var(--mono);font-size:13px;width:14ch;text-align:center;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:2px 4px;outline:none}
+  .blank:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--teal);color:var(--text)}
+  .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
+  .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)}
+  .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7}
+  .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--teal);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px}
+  @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px}
+  .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--teal);min-width:150px;text-transform:uppercase}
+  .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(142,140,248,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--indigo);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--indigo)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)}
+  .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--teal);color:var(--text)}
+  .coursenav a.map{border-color:transparent;color:var(--indigo)}
+
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="closing-the-loop.html"><span class="dot"></span><span class="name">Closing the Loop</span></a>
+    <div class="top-meta">Part III · 02 / 05 · CTRE Phoenix 6</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part III · 02</b> CTRE Phoenix 6</div>
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:-6px 0 14px">Code shown in <b style="color:var(--teal)">Python</b> &middot; <a href="closing-the-loop-lesson-15.html" style="color:var(--muted)">switch to Java</a></div>
+    <div class="eyebrow">Configuring a TalonFX</div>
+    <h1>Set it up<br><span class="accent">once</span>.</h1>
+    <p class="dek">Current limits, brake mode, sensor ratios - a one-time setup before the motor can safely run your loop. Build one below and watch the Python write itself.</p>
+  </div>
+
+  <section>
+    <p class="lead">Configuration is just a settings object.</p>
+    <p>Every TalonFX setting lives in a <span class="k">TalonFXConfiguration</span> - one object with nested groups: <span class="k">motor_output</span> (brake/coast, direction), <span class="k">current_limits</span> (protect the motor and breakers), <span class="k">feedback</span> (the sensor ratio from Lesson II.2), and later <span class="k">slot0</span> and <span class="k">motion_magic</span>. You fill in the fields, then call <span class="k">apply()</span> once at startup, and the motor remembers.</p>
+    <p>Play with the settings below. The exact Python you'd paste into your subsystem updates as you go.</p>
+  </section>
+
+  <section>
+    <div class="kicker">Build it</div>
+    <h2>The config builder</h2>
+
+    <div class="builder">
+      <div class="builder-head">
+        <span class="builder-title">TalonFXConfiguration</span>
+        <span class="builder-tag">live → Python</span>
+      </div>
+      <div class="bgrid">
+        <div class="bctl">
+          <div class="field">
+            <label>Neutral mode</label>
+            <div class="seg" data-key="neutral">
+              <button data-v="BRAKE" class="active">Brake</button>
+              <button data-v="COAST">Coast</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Direction (Inverted)</label>
+            <div class="seg" data-key="inverted">
+              <button data-v="COUNTER_CLOCKWISE_POSITIVE" class="active">CCW = +</button>
+              <button data-v="CLOCKWISE_POSITIVE">CW = +</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Stator current limit <span class="val" id="statorVal">80 A</span></label>
+            <input type="range" id="stator" min="20" max="120" step="5" value="80" />
+          </div>
+          <div class="field">
+            <label>Supply current limit <span class="val" id="supplyVal">40 A</span></label>
+            <input type="range" id="supply" min="15" max="80" step="5" value="40" />
+          </div>
+          <div class="field">
+            <label>Gear ratio (motor : mechanism) <span class="val" id="ratioVal">9.0</span></label>
+            <input type="range" id="ratio" min="1" max="30" step="0.5" value="9" />
+          </div>
+          <div class="field">
+            <label>Position sensor</label>
+            <div class="seg" data-key="fused">
+              <button data-v="internal" class="active">Internal rotor</button>
+              <button data-v="fused">Fused CANcoder</button>
+            </div>
+          </div>
+        </div>
+        <div class="bcode"><pre id="cfgCode"></pre></div>
+      </div>
+    </div>
+    <p class="caption">This is real, paste-ready Phoenix 6. Notice the feedback block change when you pick a Fused CANcoder - that's how you add an absolute sensor.</p>
+  </section>
+
+  <section>
+    <div class="kicker">What each group does</div>
+    <h2>The settings that matter most</h2>
+    <div class="terms">
+      <div class="term" style="--accent:var(--red)"><h4>Current limits</h4><p>The most important safety setting. A <strong>stator</strong> limit caps torque and protects the motor from burning up; a <strong>supply</strong> limit keeps you from tripping a breaker. Always set them.</p></div>
+      <div class="term" style="--accent:var(--teal)"><h4>Neutral mode</h4><p><strong>Brake</strong> resists motion when idle (an arm holds its spot); <strong>Coast</strong> lets it spin free (a drivetrain rolls). Pick per mechanism.</p></div>
+      <div class="term" style="--accent:var(--indigo)"><h4>sensor_to_mechanism_ratio</h4><p>The Lesson II.2 gear ratio, set once - now get_position() returns mechanism rotations and the onboard loop tunes in mechanism units.</p></div>
+      <div class="term" style="--accent:var(--amber)"><h4>FusedCANcoder</h4><p>Combines an absolute CANcoder (knows its angle at power-on) with the fast internal rotor - best of both. Essential for arms and swerve steering.</p></div>
+    </div>
+    <div class="note teal">
+      <div class="nh">Why "Fused"</div>
+      <p>A bare CANcoder is absolute but updates slowly; the internal rotor is fast but forgets its zero at power-off. <strong>FusedCANcoder</strong> uses the CANcoder for the true angle and the rotor for speed and smoothness - so an arm knows exactly where it is the instant the robot boots, and still runs a crisp 1 kHz loop.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Applying it</div>
+    <h2>One call at startup</h2>
+    <p>In the subsystem constructor, build the config and apply it. <span class="k">apply()</span> sends every setting to the device and waits for confirmation - do it once, not every loop:</p>
+    <div class="codewrap">
+      <div class="clabel">elevator.py - constructor <span class="badge">Python · Phoenix 6</span></div>
+<pre class="code"><span class="kw">def</span> <span class="fn">__init__</span>(self):
+    <span class="kw">super</span>().<span class="fn">__init__</span>()
+    self.motor = <span class="ty">TalonFX</span>(<span class="num">10</span>)
+
+    cfg = <span class="ty">TalonFXConfiguration</span>()
+    cfg.motor_output.neutral_mode = <span class="ty">NeutralModeValue</span>.BRAKE
+    cfg.current_limits.stator_current_limit = <span class="num">80</span>
+    cfg.current_limits.stator_current_limit_enable = <span class="kw">True</span>
+    cfg.feedback.sensor_to_mechanism_ratio = <span class="num">9.0</span>
+    self.motor.configurator.<span class="fn">apply</span>(cfg)     <span class="cm"># once - the device remembers</span></pre>
+    </div>
+
+    <div class="code-ex">
+      <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
+      <div class="ctask">You've filled in the config object. Send it to the motor. Fill the blank, then Check.</div>
+<pre class="code">cfg = <span class="ty">TalonFXConfiguration</span>()
+cfg.current_limits.stator_current_limit = <span class="num">80</span>
+cfg.current_limits.stator_current_limit_enable = <span class="kw">True</span>
+self.motor.configurator.<span class="fn">apply</span>(<input class="blank" data-ans="cfg|config" aria-label="blank" autocomplete="off" spellcheck="false">)</pre>
+      <div class="code-actions">
+        <button class="btn" id="check">Check</button>
+        <button class="btn" id="reveal">Reveal</button>
+        <span class="code-result" id="cres"></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="note teal">
+      <div class="nh">Going further &middot; optional</div>
+      <p>The stator limit caps current right at the windings, but it also caps torque, since torque rises with current, like how hard you can push the pedals sets how fast you can climb a hill. Set it too low and your arm cannot lift its own weight; too high and you cook the motor or pop a breaker. A real edge case competitive teams hit: apply() returns a status code, and if a device is missing or miswired the config silently never lands. The careful move is to check that code, or call apply() in a small retry loop. What would a robot do if its current limits never actually applied?</p>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">Which setting most directly protects your motor from burning up?</div>
+        <div class="opts">
+          <button class="opt">neutral_mode</button>
+          <button class="opt">The stator current limit</button>
+          <button class="opt">The CAN id</button>
+        </div>
+        <div class="explain">The stator current limit caps the current actually flowing through the motor windings - that's what generates heat and torque. A supply limit additionally protects your breaker. Always set both.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">For an arm that must hold its position when the robot is disabled, which neutral mode do you want?</div>
+        <div class="opts">
+          <button class="opt">Coast - let it swing freely</button>
+          <button class="opt">It doesn't matter</button>
+          <button class="opt">Brake - resist motion so it stays put</button>
+        </div>
+        <div class="explain">Brake mode shorts the motor leads when idle, resisting motion, so the arm doesn't flop down. Coast is for things you want to roll free, like a drivetrain you push around the pit.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">What does a FusedCANcoder give you that the internal rotor alone can't?</div>
+        <div class="opts">
+          <button class="opt">An absolute angle that's correct the moment the robot powers on</button>
+          <button class="opt">More torque</button>
+          <button class="opt">A faster CAN bus</button>
+        </div>
+        <div class="explain">The internal rotor is fast but only counts from wherever it booted. A CANcoder is absolute - it knows the true angle immediately. Fusing them gives an arm or swerve module instant, accurate position plus a smooth high-rate loop.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part III · 02 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>TalonFXConfiguration</b><span>One object holding every device setting.</span></div>
+        <div class="gl"><b>current_limits</b><span>Stator (motor) &amp; supply (breaker) protection.</span></div>
+        <div class="gl"><b>neutral_mode</b><span>Brake (holds) vs Coast (rolls free) when idle.</span></div>
+        <div class="gl"><b>sensor_to_mechanism_ratio</b><span>Gear ratio, so get_position() is in mechanism units.</span></div>
+        <div class="gl"><b>FusedCANcoder</b><span>Absolute angle + fast rotor, combined.</span></div>
+        <div class="gl"><b>apply()</b><span>Send the config once, at startup.</span></div>
+      </div>
+      <a class="next" href="closing-the-loop-lesson-16-py.html">
+        <div class="n-eyebrow">Up next · Part III · 03</div>
+        <h3>On-Motor Closed Loop</h3>
+        <p>Now the payoff: put your gains in slot0, send the motor a target with a control request, and let it run the whole PID + feedforward loop on board.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="closing-the-loop-lesson-14-py.html">← Part III · 01 · Meet Phoenix 6</a>
+    <a class="map" href="closing-the-loop.html">Course map</a>
+    <a href="closing-the-loop-lesson-16-py.html">Part III · 03 · On-Motor Closed Loop →</a>
+  </nav>
+
+</div>
+
+<footer>Closing the Loop · A control systems course for FRC</footer>
+
+<script>
+(function(){
+  "use strict";
+  var S={neutral:'BRAKE', inverted:'COUNTER_CLOCKWISE_POSITIVE', stator:80, supply:40, ratio:9, fused:'internal'};
+
+  var segs=document.querySelectorAll('.seg');
+  segs.forEach(function(seg){
+    var key=seg.getAttribute('data-key');
+    seg.querySelectorAll('button').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        seg.querySelectorAll('button').forEach(function(b){b.classList.toggle('active',b===btn);});
+        S[key]=btn.getAttribute('data-v');
+        render();
+      });
+    });
+  });
+  var stator=document.getElementById('stator'), supply=document.getElementById('supply'), ratio=document.getElementById('ratio');
+  var statorVal=document.getElementById('statorVal'), supplyVal=document.getElementById('supplyVal'), ratioVal=document.getElementById('ratioVal');
+  stator.addEventListener('input',function(){S.stator=parseInt(stator.value,10);statorVal.textContent=S.stator+' A';render();});
+  supply.addEventListener('input',function(){S.supply=parseInt(supply.value,10);supplyVal.textContent=S.supply+' A';render();});
+  ratio.addEventListener('input',function(){S.ratio=parseFloat(ratio.value);ratioVal.textContent=S.ratio.toFixed(1);render();});
+
+  function ty(s){return '<span class="ty">'+s+'</span>';}
+  function num(s){return '<span class="num">'+s+'</span>';}
+  function kw(s){return '<span class="kw">'+s+'</span>';}
+  function cm(s){return '<span class="cm">'+s+'</span>';}
+
+  function render(){
+    var L=[];
+    L.push('cfg = '+ty('TalonFXConfiguration')+'()');
+    L.push('');
+    L.push(cm('# motor output'));
+    L.push('cfg.motor_output.neutral_mode = '+ty('NeutralModeValue')+'.'+S.neutral);
+    L.push('cfg.motor_output.inverted     = '+ty('InvertedValue')+'.'+S.inverted);
+    L.push('');
+    L.push(cm('# current limits'));
+    L.push('cfg.current_limits.stator_current_limit        = '+num(S.stator));
+    L.push('cfg.current_limits.stator_current_limit_enable = '+kw('True'));
+    L.push('cfg.current_limits.supply_current_limit        = '+num(S.supply));
+    L.push('cfg.current_limits.supply_current_limit_enable = '+kw('True'));
+    L.push('');
+    L.push(cm('# feedback / sensor'));
+    if(S.fused==='internal'){
+      L.push('cfg.feedback.sensor_to_mechanism_ratio = '+num(S.ratio.toFixed(1))+'  '+cm('# gearbox'));
+    } else {
+      L.push('cfg.feedback.feedback_sensor_source = '+ty('FeedbackSensorSourceValue')+'.FUSED_CANCODER');
+      L.push('cfg.feedback.feedback_remote_sensor_id = cancoder.device_id');
+      L.push('cfg.feedback.rotor_to_sensor_ratio = '+num(S.ratio.toFixed(1))+'  '+cm('# rotor : CANcoder'));
+    }
+    L.push('');
+    L.push('motor.configurator.'+'<span class="fn">apply</span>'+'(cfg)');
+    document.getElementById('cfgCode').innerHTML=L.join('\n');
+  }
+  render();
+
+  // code exercise
+  var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
+  function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'');}
+  document.getElementById('check').addEventListener('click',function(){
+    var all=true;
+    blanks.forEach(function(b){
+      var ans=(b.getAttribute('data-ans')||'').split('|');
+      var ok=ans.indexOf(norm(b.value))!==-1;
+      b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad');
+      if(!ok)all=false;
+    });
+    var res=document.getElementById('cres');
+    res.textContent=all?'All correct ✓':'Not quite - apply the config object';
+    res.className='code-result '+(all?'ok':'no');
+  });
+  document.getElementById('reveal').addEventListener('click',function(){
+    blanks.forEach(function(b){b.value=(b.getAttribute('data-ans')||'').split('|')[0];b.classList.remove('bad');b.classList.add('ok');});
+    var res=document.getElementById('cres');res.textContent='Revealed';res.className='code-result ok';
+  });
+
+  // quiz
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){
+      opt.addEventListener('click',function(){
+        if(done)return;done=true;
+        opts.forEach(function(o){o.classList.add('locked');});
+        if(idx===correct){opt.classList.add('correct');}
+        else{opt.classList.add('wrong');opts[correct].classList.add('correct');}
+        explain.classList.add('show');
+      });
+    });
+  });
+})();
+</script>
+<script>
+(function(){
+  // auto-mark this lesson complete in the hub once its quiz is finished
+  var KEY="closing-the-loop:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

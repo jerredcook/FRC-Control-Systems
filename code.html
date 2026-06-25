@@ -229,7 +229,7 @@
   var done=loadDone();
   function lid(c,n){ return c+"-"+n; }
 
-  var LANG_KEY="code:lang";
+  var LANG_KEY="frc:lang";
   var lang=(localStorage.getItem(LANG_KEY)==="python")?"python":"java";
   function activeFile(L){ return (lang==="python" && L.file) ? L.file.replace(/\.html$/,"-py.html") : L.file; }
   function syncLangUI(){ var j=document.getElementById("langJava"), p=document.getElementById("langPython"); if(j) j.classList.toggle("active", lang==="java"); if(p) p.classList.toggle("active", lang==="python"); }

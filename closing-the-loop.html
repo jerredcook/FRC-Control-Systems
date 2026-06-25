@@ -91,6 +91,11 @@
   .reset-btn:hover{border-color:var(--bad);color:var(--bad)}
 
   .howto{font-size:14.5px;color:var(--muted);margin:14px 0 0;font-style:italic}
+  .langsel{display:flex;align-items:center;gap:10px;margin:16px 0 0;flex-wrap:wrap}
+  .langsel-label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  .langbtn{font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--line-bright);background:var(--panel-2);color:var(--muted);padding:7px 15px;border-radius:8px;cursor:pointer;transition:.12s}
+  .langbtn:hover{border-color:var(--teal);color:var(--ink)}
+  .langbtn.active{background:var(--teal);border-color:var(--teal);color:#06121f;font-weight:700}
 
   /* ---------- parts ---------- */
   .part{padding:34px 0 6px}
@@ -196,6 +201,11 @@
       <button class="reset-btn" id="resetBtn" title="Clear saved progress on this device">Reset</button>
     </div>
     <p class="howto">Work through the lessons in order. Tap the circle on a lesson to mark it done - your progress is saved in this browser.</p>
+    <div class="langsel" role="group" aria-label="Code language">
+      <span class="langsel-label">Code in</span>
+      <button class="langbtn" id="langJava" data-lang="java">Java</button>
+      <button class="langbtn" id="langPython" data-lang="python">Python</button>
+    </div>
   </div>
 
   <!-- COURSE renders here -->
@@ -295,6 +305,12 @@
   }
   var done = loadDone();
 
+  var LANG_KEY = "frc:lang";
+  var lang = (localStorage.getItem(LANG_KEY) === "python") ? "python" : "java";
+  function activeFile(L){ return (lang === "python" && L.file) ? L.file.replace(/\.html$/, "-py.html") : L.file; }
+  function syncLangUI(){ var j=document.getElementById("langJava"), p=document.getElementById("langPython"); if(j) j.classList.toggle("active", lang==="java"); if(p) p.classList.toggle("active", lang==="python"); }
+  function setLang(next){ lang = (next==="python") ? "python" : "java"; try{ localStorage.setItem(LANG_KEY, lang); }catch(e){} syncLangUI(); render(); }
+
   function lid(partCode, n){ return partCode + "-" + n; }
 
   // ----- render -----
@@ -325,13 +341,14 @@
       part.lessons.forEach(function(L){
         var id = lid(part.code, L.n);
         var available = !!L.file;
-        var isDone = !!done[L.file];
+        var af = activeFile(L);
+        var isDone = !!done[af];
         var isNext = (id === NEXT_ID);
 
         var card = document.createElement("div");
         card.className = "card " + (available ? "available" : "planned") + (isDone ? " done" : "") + (isNext ? " next" : "");
         card.setAttribute("data-id", id);
-        if(available) card.setAttribute("data-file", L.file);
+        if(available) card.setAttribute("data-file", af);
 
         var pill = available
           ? '<span class="pill open">Open</span>'
@@ -365,7 +382,7 @@
       part.lessons.forEach(function(L){
         total++;
         if(L.file){ open++; }
-        if(L.file && done[L.file]){ doneCount++; }
+        if(L.file && done[activeFile(L)]){ doneCount++; }
       });
     });
     document.getElementById("statDone").innerHTML = doneCount + ' <small>/ ' + total + '</small>';
@@ -403,6 +420,10 @@
       render();
     }
   });
+
+  document.getElementById("langJava").addEventListener("click", function(){ setLang("java"); });
+  document.getElementById("langPython").addEventListener("click", function(){ setLang("python"); });
+  syncLangUI();
 
   render();
 })();

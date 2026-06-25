@@ -41,6 +41,23 @@ The course *name* and its *file prefix* don't always match. Keep this map handy:
 
 ## Architecture & conventions
 
+### Java / Python parallel track
+
+The **Deploy** and **Closing the Loop** code lessons exist in two languages as
+**separate files**: the Java lesson `deploy-lesson-N.html` has a Python twin
+`deploy-lesson-N-py.html` (same for `closing-the-loop-lesson-N-py.html`). Python =
+**RobotPy + phoenix6 + commands2**; templates in [templates/python/](templates/python/).
+
+- Each course hub (`code.html`, `closing-the-loop.html`) has a **Java/Python toggle**.
+  The chosen language is saved in `localStorage` under the shared key **`frc:lang`**
+  (so it carries across both courses). `render()` computes the active file via
+  `activeFile(L)` = `L.file.replace(/\.html$/,"-py.html")` when Python is selected.
+  Progress is tracked per-language (the `-py` filename is a separate done-key).
+- Every Python lesson has a "switch to Java" link in its hero and threads its nav to
+  `-py` siblings. To add/keep parity: a Java lesson change needs the same change in
+  its `-py` twin.
+- Fabricate (Build) is Java-adjacent only where it shows code; it has no Python track.
+
 ### Course hubs are data-driven
 
 Each hub (`closing-the-loop.html`, `code.html`, `build.html`) has a `COURSE` array
