@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fabricate · Part 6.7 - The Power Budget &amp; Brownout</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  canvas.pn{display:block;width:100%;height:250px}
+  .readouts{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:17px;font-weight:600;margin-top:3px;color:var(--muted)}
+  .ro .v.teal{color:var(--teal)} .ro .v.green{color:var(--green)} .ro .v.amber{color:var(--amber)} .ro .v.indigo{color:var(--indigo)} .ro .v.red{color:var(--red)}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)} .btn.on{background:var(--indigo);border-color:var(--indigo);color:#2a1503;font-weight:700}
+  .btn.comp.on{background:var(--green);border-color:var(--green);color:#06210f}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(255,138,76,.07)} .note.indigo .nh{color:var(--indigo)}
+  .note.red{border-color:var(--red);background:rgba(255,107,107,.07)} .note.red .nh{color:var(--red)}
+
+  .rules{display:grid;gap:10px;margin:18px 0} @media(min-width:560px){.rules{grid-template-columns:1fr 1fr}}
+  .rule{display:flex;gap:11px;border:1px solid var(--line);border-radius:11px;padding:13px 14px;background:var(--panel)}
+  .rule .ri{font-size:20px;flex:0 0 auto}
+  .rule b{display:block;font-size:14.5px;color:var(--text);margin-bottom:2px}
+  .rule span{font-size:13.5px;color:var(--muted)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:108px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(255,176,32,0.12),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--amber);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--amber)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)} .coursenav a.next-link{color:var(--amber);border-color:rgba(255,176,32,.4)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="build.html"><span class="dot"></span><span class="name">Fabricate</span></a>
+    <div class="top-meta">Part 6 · 07 / 08 · Power</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 6 · 07</b> Electrical &amp; Pneumatics</div>
+    <div class="eyebrow">Power Budget &amp; Brownout</div>
+    <h1>Don't run out of<br><span class="accent">volts</span>.</h1>
+    <p class="dek">Every motor pulls amps from the same battery at the same time. Add it up wrong and the robot browns out, going dead for a second at the worst possible moment.</p>
+  </div>
+
+  <section>
+    <p class="lead">One battery, many hungry motors.</p>
+    <p>Picture the water pressure in a house. Turn on one faucet and the water still flows strong. But turn on every faucet, the shower, and the garden hose all at once and the pressure at each tap sags. Your robot's battery works the same way. Every motor draws its current from that one battery through the <strong>main breaker</strong>, and when too many of them pull hard at the same time, the voltage everywhere drops. Push it too far and the robot protects itself by shutting the motors off for a moment. That moment is called a <strong>brownout</strong>, and it loves to strike right when you are shoving an opponent off a scoring spot.</p>
+
+    <div class="note red">
+      <div class="nh">All your current flows through one 120 amp breaker</div>
+      <p>Every amp the robot uses passes through the main breaker, which is rated for 120 amps. It is thermal and time-dependent, meaning it reacts to heat over time, not to an instant number. A brief surge well over 120 amps is tolerated, but the more you exceed it the faster it trips, and a dead short trips it almost instantly. That time delay is on purpose. It lets a motor pull a hard, short burst without nuisance-tripping the whole robot. Treat the 120 amp number as a sustained limit, not a hard ceiling for one quick instant.</p>
+    </div>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Power budget</span><span class="demo-tag" id="tag">idle</span></div>
+      <canvas class="pn" id="cv"></canvas>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Total current</div><div class="v amber" id="roA">0 A</div></div>
+        <div class="ro"><div class="k2">Battery voltage</div><div class="v teal" id="roV">12.8 V</div></div>
+        <div class="ro"><div class="k2">Main breaker</div><div class="v green" id="roB">ok</div></div>
+        <div class="ro"><div class="k2">Status</div><div class="v green" id="roS">OK</div></div>
+      </div>
+      <div class="controls">
+        <button class="btn" data-amps="480" id="m1">Drivetrain pushing <b>+480 A</b></button>
+        <button class="btn" data-amps="120" id="m2">Intake stalled <b>+120 A</b></button>
+        <button class="btn" data-amps="90" id="m3">Arm lifting <b>+90 A</b></button>
+        <button class="btn" data-amps="150" id="m4">Shooter spin-up <b>+150 A</b></button>
+      </div>
+    </div>
+    <p class="caption">Toggle mechanisms on and watch the total current climb and the battery voltage sag. Stack enough of them and the voltage drops past the brownout line and the robot cuts out, the same way the house water pressure drops when every tap is open.</p>
+  </section>
+
+  <section>
+    <div class="kicker">What you are seeing</div>
+    <h2>Why the voltage sags</h2>
+    <p>A single big brushless motor like a Falcon 500, a Kraken, or a NEO sips only an amp or two while spinning free with nothing in its way. But when it is fully stalled, blocked so it cannot turn, it can pull a couple hundred amps trying to muscle past the obstacle. Four to six drive motors all stalling together, like when you ram straight into a wall, is well over a thousand amps for an instant. That is a huge spike, and the battery feels every bit of it.</p>
+    <p>You never actually pull a thousand amps for long. Two things stop it. First, the battery's voltage sags as the current climbs, remember from the last lesson that terminal voltage equals resting voltage minus current times internal resistance, so a giant current pulls the voltage way down. Second, software <strong>current limits</strong> cap how much each motor is allowed to pull. Still, a hard push into a wall, or several mechanisms surging at the same time, sags the battery sharply, and that sag is what trips a brownout.</p>
+
+    <div class="note">
+      <div class="nh">Brownout: the robot's safety valve</div>
+      <p>When battery voltage sags too low, the robot controller protects itself by cutting motor outputs. On the roboRIO this happens around 6.8 volts. When it triggers, the motors briefly stop, the robot "browns out," and then it recovers once the voltage climbs back. Think of it like the safety valve in the house water system that shuts things off before the pressure drops dangerously low. The exact brownout voltage is set by the control board and is changing for the 2027 control system, see the SystemCore preview, but the idea is what matters and that idea does not change.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">In the shop</div>
+    <h2>How to never brown out</h2>
+    <p>A <strong>power budget</strong> means adding up the current your mechanisms can pull at the same time and making sure the battery can live with it. Drivetrain motors dominate the budget, so they get the most attention. Here is how teams keep the robot alive:</p>
+    <div class="rules">
+      <div class="rule"><div class="ri">🔋</div><div><b>Fresh, healthy battery</b><span>Low internal resistance means it sags less under the same load.</span></div></div>
+      <div class="rule"><div class="ri">🛡️</div><div><b>Software current limits</b><span>Cap each motor so they cannot all pull stall current at once.</span></div></div>
+      <div class="rule"><div class="ri">🧱</div><div><b>No long full stalls</b><span>A quick push is fine; grinding into a wall for seconds is not.</span></div></div>
+      <div class="rule"><div class="ri">🔌</div><div><b>Size your wiring and fuses</b><span>Match the wire and branch fuses to the real draw of each device.</span></div></div>
+    </div>
+    <div class="note indigo">
+      <div class="nh">Current limits are a team sport across courses</div>
+      <p>Software current limits are the single biggest fix, and they come in two flavors you will meet in the Code and Control courses: <span class="k">stator</span> limits cap the current right at the motor's windings, and <span class="k">supply</span> limits cap what the motor draws from the battery. Setting them sensibly means each motor promises never to pull more than its share, so even with everything moving at once the total stays under what the battery and the 120 amp breaker can handle. You trade away a tiny bit of brute push for a robot that never goes dark.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>A software current limit trades a little top-end push for never browning out, and the trade is usually worth it. Here is why: a brownout can cascade. The voltage drops, motors cut, the load disappears for a blink so the voltage springs back, the motors fire again, the load slams back on, and the voltage sags right back down. The robot can stutter through several of these cycles in a single second, which feels like the robot is fighting you. A current limit smooths that out by never letting the draw spike high enough to start the cycle in the first place. Here is one to chew on with a mentor: if you lower a motor's current limit, you lose a little pushing force but gain consistency. How would you pick the limit for a drivetrain that has to push a heavy game piece without ever browning out?</p>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">What actually causes a brownout?</div>
+        <div class="opts">
+          <button class="opt">The battery is fully charged and overflows with volts</button>
+          <button class="opt">Battery voltage sags too low under heavy combined draw, so the controller cuts motor outputs</button>
+          <button class="opt">A motor spins too fast and overheats the battery</button>
+        </div>
+        <div class="explain">When many motors pull hard at once, the battery voltage sags. If it drops too low, around 6.8 volts on the roboRIO, the controller protects itself by cutting motor outputs. That cut is the brownout.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">Why does a motor pulling a hard, short burst usually not trip the 120 amp main breaker?</div>
+        <div class="opts">
+          <button class="opt">The breaker only watches the average over the whole match</button>
+          <button class="opt">120 amps is a hard ceiling that can never be crossed even for an instant</button>
+          <button class="opt">The breaker is thermal and time-dependent, so it tolerates a brief surge and only trips faster the longer you exceed the limit</button>
+        </div>
+        <div class="explain">The main breaker reacts to heat over time, not to an instant number. A short surge over 120 amps is tolerated, but the more and longer you exceed it the faster it trips. A dead short trips it almost instantly.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">Your robot keeps browning out when you push into the wall. What is a real fix?</div>
+        <div class="opts">
+          <button class="opt">Set software current limits and use a fresh, healthy battery</button>
+          <button class="opt">Push harder so the motors break through faster</button>
+          <button class="opt">Remove the main breaker so more current can flow</button>
+        </div>
+        <div class="explain">Software current limits keep the motors from all pulling stall current at once, and a fresh battery with low internal resistance sags less under the same load. Both keep the voltage above the brownout line. Removing the breaker is dangerous and does not fix the sag.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 6 · 07 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Power budget</b><span>Adding up the current mechanisms pull at once.</span></div>
+        <div class="gl"><b>Main breaker</b><span>One 120 A, thermal and time-dependent breaker.</span></div>
+        <div class="gl"><b>Stall current</b><span>A blocked motor pulls hundreds of amps.</span></div>
+        <div class="gl"><b>Brownout</b><span>Volts sag past ~6.8 V, controller cuts motors.</span></div>
+        <div class="gl"><b>Current limiting</b><span>Software caps each motor's draw.</span></div>
+        <div class="gl"><b>Fresh battery</b><span>Low internal resistance sags less.</span></div>
+      </div>
+      <a class="next" href="build-lesson-43.html">
+        <div class="n-eyebrow">Next · Part 6 · 08</div>
+        <h3>Battery Management &amp; Competition →</h3>
+        <p>One healthy battery keeps you alive in one match. Now learn to keep a whole fleet of batteries charged, labeled, and ready on event day so every match starts strong.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="build-lesson-41.html">← Part 6 · 06 · Battery Science</a>
+    <a class="map" href="build.html">Course map</a>
+    <a class="next-link" href="build-lesson-43.html">Part 6 · 08 · Battery Management →</a>
+  </nav>
+
+</div>
+
+<footer>Fabricate · Building an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var cv=document.getElementById('cv'), ctx=cv.getContext('2d'), W=0,H=0,dpr=1;
+  function fit(){ var r=cv.getBoundingClientRect(); if(!r.width)return; dpr=window.devicePixelRatio||1; cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr); ctx.setTransform(dpr,0,0,dpr,0,0); W=r.width; H=r.height; }
+  fit(); window.addEventListener('resize',fit);
+
+  // mechanism buttons, each adds a current estimate
+  var btns=[
+    {el:document.getElementById('m1'), amps:480, on:false, label:'DRIVE'},
+    {el:document.getElementById('m2'), amps:120, on:false, label:'INTAKE'},
+    {el:document.getElementById('m3'), amps:90,  on:false, label:'ARM'},
+    {el:document.getElementById('m4'), amps:150, on:false, label:'SHOOTER'}
+  ];
+  var BROWN=6.8, displayV=12.8;
+
+  function total(){ var t=0; for(var i=0;i<btns.length;i++){ if(btns[i].on) t+=btns[i].amps; } return t; }
+  function voltsFor(amps){ var v=12.8 - amps*0.014; return v<0?0:v; }
+
+  function refresh(){
+    var amps=total();
+    var v=voltsFor(amps);
+    document.getElementById('roA').textContent=amps+' A';
+    var rv=document.getElementById('roV'); rv.textContent=v.toFixed(1)+' V';
+    rv.className='v '+(v<=BROWN?'red':(v<9.5?'amber':'teal'));
+    var rb=document.getElementById('roB');
+    if(amps>120){ rb.textContent='surging'; rb.className='v amber'; }
+    else { rb.textContent='ok'; rb.className='v green'; }
+    var rs=document.getElementById('roS');
+    if(v<=BROWN){ rs.textContent='BROWNOUT'; rs.className='v red'; }
+    else { rs.textContent='OK'; rs.className='v green'; }
+    var tag=document.getElementById('tag');
+    if(v<=BROWN) tag.textContent='brownout';
+    else if(amps>120) tag.textContent='surging';
+    else if(amps>0) tag.textContent='under load';
+    else tag.textContent='idle';
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    var amps=total();
+    var v=voltsFor(amps);
+    var brownout=v<=BROWN;
+    // battery on the left, as a vertical voltage gauge
+    var batX=W*0.16, batY0=H*0.5-58, batH=116, batW=54;
+    ctx.fillStyle='#0B1322'; ctx.strokeStyle=brownout?'#FF6B6B':'#34D7C5'; ctx.lineWidth=2; roundRect(batX-batW/2, batY0, batW, batH, 8); ctx.fill(); ctx.stroke();
+    // battery terminal nub
+    ctx.fillStyle=brownout?'#FF6B6B':'#34D7C5'; ctx.fillRect(batX-9, batY0-6, 18, 6);
+    // fill height maps voltage 0..12.8 onto the gauge
+    var frac=Math.max(0,Math.min(1, v/12.8));
+    var fillH=frac*(batH-6);
+    ctx.fillStyle=brownout?'rgba(255,107,107,0.5)':'rgba(52,215,197,'+(0.25+0.45*frac)+')';
+    roundRect(batX-batW/2+3, batY0+batH-3-fillH, batW-6, fillH, 5); ctx.fill();
+    // brownout line on the gauge
+    var brownY=batY0+batH-3-(BROWN/12.8)*(batH-6);
+    ctx.strokeStyle='#FF6B6B'; ctx.lineWidth=1; ctx.setLineDash([4,3]); ctx.beginPath(); ctx.moveTo(batX-batW/2, brownY); ctx.lineTo(batX+batW/2, brownY); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle=brownout?'#FF6B6B':'#34D7C5'; ctx.font='700 12px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText(v.toFixed(1)+'V', batX, H*0.5+5);
+    ctx.fillStyle='#5E6F8E'; ctx.font='8px ui-monospace,Menlo,monospace'; ctx.fillText('BATTERY', batX, batY0-12);
+
+    // main breaker block to the right of battery
+    var brkX=W*0.40, cy=H*0.5;
+    var surging=amps>120;
+    pipe(batX+batW/2, cy, brkX-22, cy, amps>0, brownout);
+    ctx.fillStyle=surging?'#2a1a08':'#0E1525'; ctx.strokeStyle=surging?'#FFB020':'#33415e'; ctx.lineWidth=2; roundRect(brkX-22, cy-20, 44, 40, 6); ctx.fill(); ctx.stroke();
+    ctx.fillStyle=surging?'#FFB020':'#92A2BE'; ctx.font='8px ui-monospace,Menlo,monospace'; ctx.fillText('120A', brkX, cy-1); ctx.fillText(surging?'SURGE':'BRK', brkX, cy+11);
+
+    // bus bar feeding the mechanisms
+    var busX=brkX+22, busEnd=W*0.62;
+    pipe(busX, cy, busEnd, cy, amps>0, brownout);
+
+    // mechanism loads stacked on the right
+    var n=btns.length, topY=H*0.5-72, gap=40, mx=W*0.78;
+    for(var i=0;i<n;i++){
+      var my=topY+i*gap+18;
+      var b=btns[i];
+      pipe(busEnd, cy, mx-30, my, b.on && !brownout, false);
+      ctx.fillStyle=b.on?(brownout?'#2a0d0d':'#2a1a08'):'#0E1525';
+      ctx.strokeStyle=b.on?(brownout?'#FF6B6B':'#FF8A4C'):'#33415e'; ctx.lineWidth=2;
+      roundRect(mx-30, my-13, 84, 26, 6); ctx.fill(); ctx.stroke();
+      ctx.fillStyle=b.on?(brownout?'#FF6B6B':'#FF8A4C'):'#5E6F8E'; ctx.font='8px ui-monospace,Menlo,monospace'; ctx.textAlign='center';
+      ctx.fillText(b.label, mx+12, my-1); ctx.fillText(b.on?('+'+b.amps+'A'):'off', mx+12, my+9);
+    }
+
+    // brownout banner
+    if(brownout){
+      ctx.fillStyle='rgba(255,107,107,0.10)'; ctx.fillRect(0,0,W,H);
+      ctx.fillStyle='#FF6B6B'; ctx.font='700 13px ui-monospace,Menlo,monospace'; ctx.textAlign='center';
+      ctx.fillText('BROWNOUT - motors cut until voltage recovers', W/2, H-14);
+    }
+  }
+  function pipe(x0,y0,x1,y1,active,dead){
+    ctx.strokeStyle=active?(dead?'#FF6B6B':'#34D7C5'):'#33415e'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1,y1); ctx.stroke();
+    if(active && !dead){ var len=Math.hypot(x1-x0,y1-y0), seg=Math.max(1,Math.floor(len/20)); for(var i=0;i<seg;i++){ var t=(flow+i/seg)%1; ctx.fillStyle='#9af0e6'; ctx.beginPath(); ctx.arc(x0+(x1-x0)*t, y0+(y1-y0)*t, 2,0,Math.PI*2); ctx.fill(); } }
+  }
+  function roundRect(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+  var flow=0;
+  function tick(){ flow=(flow+0.03)%1; draw(); requestAnimationFrame(tick); }
+
+  btns.forEach(function(b){
+    b.el.addEventListener('click',function(){
+      b.on=!b.on;
+      this.classList.toggle('on',b.on);
+      refresh();
+    });
+  });
+  refresh();
+  requestAnimationFrame(tick);
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="build:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

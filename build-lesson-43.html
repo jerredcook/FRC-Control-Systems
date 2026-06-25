@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fabricate · Part 6.8 - Battery Management &amp; Competition</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .meter{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line)}
+  .meter .bar{flex:1;height:10px;border-radius:6px;background:var(--line-2);overflow:hidden}
+  .meter .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--indigo),var(--green));transition:width .3s}
+  .meter .pct{font-family:var(--mono);font-size:14px;color:var(--indigo);min-width:48px;text-align:right}
+  .checks{padding:6px 0}
+  .ck{display:flex;align-items:center;gap:13px;padding:11px 16px;border-bottom:1px solid rgba(120,140,180,.06);cursor:pointer;transition:.12s}
+  .ck:last-child{border-bottom:none} .ck:hover{background:rgba(255,255,255,.012)}
+  .ck .box{width:22px;height:22px;border-radius:6px;border:2px solid var(--line-2);flex:0 0 auto;display:grid;place-items:center;color:transparent;font-size:13px;transition:.12s}
+  .ck.on .box{border-color:var(--green);background:var(--green);color:#06210f}
+  .ck .lbl{font-size:15px;color:var(--muted)} .ck.on .lbl{color:var(--text)}
+  .ck .lbl small{display:block;font-size:12.5px;color:var(--faint);margin-top:1px}
+  .banner{margin:0 16px 16px;border:1px solid var(--green);border-radius:10px;padding:14px;text-align:center;background:rgba(67,214,126,.08);display:none}
+  .banner.show{display:block}
+  .banner .bt{font-family:var(--mono);font-size:14px;letter-spacing:.16em;text-transform:uppercase;color:var(--green);font-weight:700}
+  .banner .bs{font-size:14px;color:var(--muted);margin-top:4px}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(255,138,76,.07)} .note.indigo .nh{color:var(--indigo)}
+  .note.red{border-color:var(--red);background:rgba(255,107,107,.07)} .note.red .nh{color:var(--red)}
+
+  .rules{display:grid;gap:10px;margin:18px 0} @media(min-width:560px){.rules{grid-template-columns:1fr 1fr}}
+  .rule{display:flex;gap:11px;border:1px solid var(--line);border-radius:11px;padding:13px 14px;background:var(--panel)}
+  .rule .ri{font-size:20px;flex:0 0 auto}
+  .rule b{display:block;font-size:14.5px;color:var(--text);margin-bottom:2px}
+  .rule span{font-size:13.5px;color:var(--muted)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:108px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(255,176,32,0.12),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--amber);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--amber)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)} .coursenav a.next-link{color:var(--amber);border-color:rgba(255,176,32,.4)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="build.html"><span class="dot"></span><span class="name">Fabricate</span></a>
+    <div class="top-meta">Part 6 · 08 / 08 · Finale</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 6 · 08</b> Electrical &amp; Pneumatics · Finale</div>
+    <div class="eyebrow">Battery Management</div>
+    <h1>Win on<br><span class="accent">fresh cells</span>.</h1>
+    <p class="dek">Matches are won and lost on battery discipline. A team that manages a fleet of healthy batteries has a real edge over one that grabs whatever cell is lying around, and it is mostly habits anyone can learn.</p>
+  </div>
+
+  <section>
+    <p class="lead">Think of your batteries like a relay team.</p>
+    <p>A relay squad never sends the same runner out exhausted twice in a row. They rest, recover, and keep track of who is fresh. Your batteries work the same way. A battery fresh off the robot is warm and partly spent, so it needs to cool and recharge before it races again. Manage a whole fleet of them well and you start every match with a strong leg, while a careless team is sending out a tired runner and wondering why they fade at the end.</p>
+
+    <div class="note red">
+      <div class="nh">Charging is hot, heavy work, treat it with respect</div>
+      <p>FRC batteries are heavy and store a lot of energy, so handling and charging always happen with a mentor watching the charging station. Use a proper smart charger (commonly around 6 amps) and never fast-charge a battery beyond the rating printed on it. A battery fresh off the robot is warm; let it rest and cool first, then charge it fully. Never charge a battery while it is still on the robot, that is against the rules and a real fire and shock hazard. If a battery is hot, swollen, cracked, or leaking, stop and get a mentor.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">In the pit</div>
+    <h2>What healthy looks like</h2>
+    <p>Here is the trap: a tired battery can still read a perfectly normal voltage when nothing is pulling on it. Resting voltage lies, the same lesson from earlier in this unit. The number only tells the truth once the battery is under load, because that is when a weak cell sags. So teams do not trust the resting reading alone.</p>
+    <p>Instead they use a battery analyzer (often called a <strong>Battery Beak</strong>) that briefly loads the battery and reports its <strong>internal resistance</strong> and overall condition. A fresh battery has low internal resistance and holds its voltage under load. As a battery ages, that resistance creeps up and its capacity falls, which is the analyzer's way of telling you the battery is tired. A tired battery is what causes a mid-match brownout, the robot stuttering or rebooting right when you need it. When a battery starts testing poorly, you retire it. One weak cell can lose you a match.</p>
+    <div class="rules">
+      <div class="rule"><div class="ri">🔋</div><div><b>Smart charger</b><span>Around 6 amps; never fast-charge past the rating. Mentor oversees.</span></div></div>
+      <div class="rule"><div class="ri">📟</div><div><b>Battery analyzer</b><span>The Beak loads the cell and reads internal resistance and health.</span></div></div>
+      <div class="rule"><div class="ri">🏷️</div><div><b>Number &amp; log</b><span>Label every battery; record which match each one ran.</span></div></div>
+      <div class="rule"><div class="ri">♻️</div><div><b>Rotate to rest</b><span>Never the same battery two matches back to back; let each cool.</span></div></div>
+    </div>
+    <div class="note indigo">
+      <div class="nh">Rotation and the logbook</div>
+      <p>Label every battery with a number and keep a log of which match each one ran. Then rotate them so each battery gets time to cool and fully recharge before it goes out again. A good rhythm is to never use the same battery two matches in a row. The logbook does two jobs: it forces the cooldown gap so a warm, half-spent battery never gets rushed back into service, and over a season it lets you spot the cell that keeps showing up weak on the analyzer, so you can retire it before it costs you.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">On the robot</div>
+    <h2>Connections and the rules</h2>
+    <p>The battery feeds the robot through a big <strong>Anderson SB connector</strong> and heavy <strong>6 AWG</strong> leads that run to the main breaker. Those fat wires and that chunky connector exist for a reason: a loose or corroded connection adds resistance, which means more voltage sag under load and, worse, a real fire risk as a bad joint heats up. Crimped lugs beat loose ones, and the terminals should be protected and insulated so nothing can short across them.</p>
+    <p>Inspectors check the electrical setup before you compete, and a few ideas stay true every year even as the exact rule numbers change:</p>
+    <div class="rules">
+      <div class="rule"><div class="ri">1️⃣</div><div><b>Exactly one battery</b><span>A single battery powers the robot, no more.</span></div></div>
+      <div class="rule"><div class="ri">🔩</div><div><b>Fastened down</b><span>Secured so it cannot come loose in a hard hit.</span></div></div>
+      <div class="rule"><div class="ri">🔌</div><div><b>Main breaker required</b><span>The one switch that can cut all power.</span></div></div>
+      <div class="rule"><div class="ri">🛡️</div><div><b>Insulated connections</b><span>No bare terminals that can short.</span></div></div>
+    </div>
+    <div class="note indigo">
+      <div class="nh">The competition-day habit</div>
+      <p>It comes down to one routine you repeat every match: a fully charged, rested, healthy battery goes in for every single match. Between matches you swap to a fresh one, and the battery you pulled goes straight to the charger and gets written in the log. That is the whole discipline. A team that runs this loop without thinking about it almost never gets caught by a dead battery, and that reliability quietly wins matches all weekend.</p>
+    </div>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Battery game-day checklist</span><span class="demo-tag" id="rtag">not ready</span></div>
+      <div class="meter"><div class="bar"><i id="meterFill"></i></div><div class="pct" id="pct">0%</div></div>
+      <div class="checks" id="checks"></div>
+      <div class="banner" id="banner"><div class="bt">★ Ready for the match</div><div class="bs">Fresh, rested, tested, logged, tight, and secured. Send out your strongest runner.</div></div>
+    </div>
+    <p class="caption">Run this list before every match, the way you check your bike tires before a ride. Each item is something a team has gotten burned by skipping, from a brownout to a battery sliding loose in a crash.</p>
+  </section>
+
+  <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>Top teams turn the analyzer numbers into a season-long story. If you write down each battery's internal resistance every time you test it, you can watch the trend climb over months and predict when a cell is about to go bad, retiring it on your schedule instead of in the middle of an elimination match. Some teams even let cold batteries warm to room temperature before a match, since a cold battery sags more under load. Here is one to chew on with a mentor: if two batteries read the same resting voltage but one has noticeably higher internal resistance on the Beak, which one would you trust in the finals, and how would you explain that choice to a teammate?</p>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="2">
+        <div class="qn">Question 1</div>
+        <div class="qt">A battery reads a normal resting voltage. Why isn't that enough to trust it?</div>
+        <div class="opts">
+          <button class="opt">Resting voltage is always wrong</button>
+          <button class="opt">Voltage doesn't matter at all</button>
+          <button class="opt">A tired battery can still read fine at rest; you only see weakness under load</button>
+        </div>
+        <div class="explain">Resting voltage lies. A worn battery can show a normal number with nothing pulling on it, then sag badly the moment the robot draws current. A battery analyzer like the Beak loads the cell and reads its internal resistance, which is the honest test.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 2</div>
+        <div class="qt">A battery came off the robot warm and you want it ready again. What's the safe move?</div>
+        <div class="opts">
+          <button class="opt">Let it rest and cool, then charge it on a smart charger with a mentor present</button>
+          <button class="opt">Charge it on the robot to save time</button>
+          <button class="opt">Fast-charge it well past its rating</button>
+        </div>
+        <div class="explain">A battery off the robot is warm and partly spent, so let it cool and rest first, then charge it fully on a proper smart charger. Never charge a battery on the robot (against the rules and unsafe), never fast-charge beyond its rating, and always have a mentor overseeing the charging station.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 3</div>
+        <div class="qt">Why bother labeling, logging, and rotating your batteries?</div>
+        <div class="opts">
+          <button class="opt">It looks organized for judges</button>
+          <button class="opt">It forces each battery to cool and fully recharge, and reveals which cells keep testing weak</button>
+          <button class="opt">It lets you reuse one battery all day</button>
+        </div>
+        <div class="explain">Rotation gives every battery a cooldown and a full recharge between matches, so you never send out a warm, half-spent cell. The log also exposes the battery that keeps showing up weak on the analyzer, so you can retire it before it causes a mid-match brownout.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 6 · 08 · Recap · Part 6 complete ★</h3>
+      <div class="glossary">
+        <div class="gl"><b>Smart charger</b><span>Around 6 amps; never fast-charge past the rating.</span></div>
+        <div class="gl"><b>Battery analyzer (Beak)</b><span>Loads the cell to read its true health.</span></div>
+        <div class="gl"><b>Internal resistance</b><span>Rises as a battery tires; means more sag.</span></div>
+        <div class="gl"><b>Rotation &amp; log</b><span>Cool, recharge, and track every cell.</span></div>
+        <div class="gl"><b>Anderson SB / 6 AWG</b><span>Heavy connector and leads to the main breaker.</span></div>
+        <div class="gl"><b>Secure &amp; insulate</b><span>Fastened down, terminals covered, one battery.</span></div>
+      </div>
+      <a class="next" href="build.html">
+        <div class="n-eyebrow">Part 6 complete · Electrical &amp; Pneumatics</div>
+        <h3>On to Part 7 - Design &amp; CAD →</h3>
+        <p>Your robot can move, manipulate, and power itself reliably. Now learn to design it on purpose: the design process, CAD, and prototyping. Continue from the course map.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="build-lesson-42.html">← Part 6 · 07 · Power Budget</a>
+    <a class="map" href="build.html">Course map</a>
+    <a class="next-link" href="build.html">Part 7 · Design &amp; CAD →</a>
+  </nav>
+
+</div>
+
+<footer>Fabricate · Building an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var ITEMS=[
+    {t:'Battery fully charged and rested', s:'cooled off, then topped up on the smart charger'},
+    {t:'Tested healthy on the analyzer', s:'low internal resistance on the Beak, not only resting voltage'},
+    {t:'Labeled and logged', s:'numbered, and written down for this match'},
+    {t:'Terminals tight and insulated', s:'crimped lugs, no loose or corroded connections'},
+    {t:'Fastened securely to the robot', s:'cannot come loose in a hard hit'},
+    {t:'Old battery on the charger', s:'last match’s cell resting and recharging'}
+  ];
+  var checks=document.getElementById('checks'), state=ITEMS.map(function(){return false;});
+  ITEMS.forEach(function(it,i){ var d=document.createElement('div'); d.className='ck';
+    d.innerHTML='<div class="box">✓</div><div class="lbl">'+it.t+'<small>'+it.s+'</small></div>';
+    d.addEventListener('click',function(){ state[i]=!state[i]; d.classList.toggle('on',state[i]); update(); });
+    checks.appendChild(d);
+  });
+  function update(){
+    var n=state.filter(Boolean).length, pct=Math.round(n/ITEMS.length*100);
+    document.getElementById('meterFill').style.width=pct+'%';
+    document.getElementById('pct').textContent=pct+'%';
+    var ready=n===ITEMS.length;
+    document.getElementById('banner').classList.toggle('show',ready);
+    var rt=document.getElementById('rtag'); rt.textContent=ready?'ready ★':(n+' / '+ITEMS.length+' ready');
+  }
+  update();
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(idx===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="build:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

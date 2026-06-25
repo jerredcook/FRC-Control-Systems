@@ -115,6 +115,11 @@
     <p class="lead">Everything chains off the roboRIO.</p>
     <p>Your code runs on the <strong>roboRIO</strong>. Its commands travel down the <strong>CAN bus</strong>, a single two-wire loop that hops from one device to the next in a daisy chain. Each device taps the same two wires. Click a link below to cut the chain and watch what goes dark.</p>
 
+    <div class="note indigo">
+      <div class="nh">Looking ahead &middot; 2027</div>
+      <p>Starting in the 2027 season, the roboRIO and the separate radio are replaced by one new board called SystemCore. The brain and the wiring change, but the CAN bus and the devices hanging off it carry the same ideas forward, so this lesson still matters. See the <a href="systemcore-2027.html" style="color:var(--indigo)">SystemCore 2027 preview</a> for what is changing.</p>
+    </div>
+
     <div class="demo" id="demo">
       <div class="demo-head"><span class="demo-title">CAN bus · click a link to break it</span><span class="demo-tag" id="stTag">all online</span></div>
       <canvas class="can" id="cv"></canvas>
