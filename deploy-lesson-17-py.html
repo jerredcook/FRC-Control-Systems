@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deploy · Part 4.1 - Motors &amp; Controllers (Python)</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(138,140,248,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  canvas.motor{display:block;width:100%;height:230px}
+  .readouts{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  @media(min-width:560px){.readouts{grid-template-columns:repeat(4,1fr)}}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:19px;font-weight:600;margin-top:3px}
+  .ro .v.amber{color:var(--amber)} .ro .v.teal{color:var(--teal)} .ro .v.indigo{color:var(--indigo)} .ro .v.red{color:var(--red)} .ro .v.green{color:var(--green)} .ro .v.ink{color:var(--text)}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+  .seg{display:flex;border:1px solid var(--line-2);border-radius:9px;overflow:hidden}
+  .seg button{border:none;background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:9px 11px;cursor:pointer;transition:.12s;border-right:1px solid var(--line-2)}
+  .seg button:last-child{border-right:none}
+  .seg button:hover{color:var(--text)} .seg button.active{background:var(--indigo);color:#0a0f24;font-weight:700}
+  .slider-group{flex:1 1 200px;display:flex;flex-direction:column;gap:6px;min-width:170px}
+  .slider-group label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+  .slider-group label .val{color:var(--indigo)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:var(--line-2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--indigo);cursor:pointer;box-shadow:0 0 10px -1px var(--indigo)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--indigo);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:13px;line-height:1.85;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic} .code .kw{color:#ff9bbf} .code .ty{color:var(--teal)} .code .fn{color:var(--indigo)} .code .num{color:var(--amber)}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(138,140,248,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .code-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .code-ex .chead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .code-ex .chead .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,176,32,.14);display:grid;place-items:center;color:var(--amber);font-size:13px}
+  .code-ex .ctask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .code-ex pre.code{margin:0 0 14px}
+  .blank{font-family:var(--mono);font-size:13px;width:14ch;text-align:center;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:2px 4px;outline:none}
+  .blank:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
+  .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:120px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="code.html"><span class="dot"></span><span class="name">Deploy</span></a>
+    <div class="top-meta">Part 4 · 01 / 06 · Hardware</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 4 · 01</b> Talking to Hardware</div>
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:-6px 0 14px">Code shown in <b style="color:var(--indigo)">Python</b> &middot; <a href="deploy-lesson-17.html" style="color:var(--muted)">switch to Java</a></div>
+    <div class="eyebrow">Motors &amp; Controllers</div>
+    <h1>Command a<br><span class="accent">motor</span>.</h1>
+    <p class="dek">Your code never touches a motor directly. It talks to a motor controller, and how you ask, percent or volts, decides whether the robot behaves the same on a full battery and a tired one.</p>
+  </div>
+
+  <section>
+    <p class="lead">Between your code and the motor sits a controller.</p>
+    <p>A <strong>motor controller</strong> (a TalonFX driving a Kraken, or a SPARK MAX driving a NEO) takes the command from your program and delivers that much electrical power to the motor. The simplest command is open-loop: a <span class="k">DutyCycleOut</span> request asks for a fraction of whatever the battery has right now, while a <span class="k">VoltageOut</span> request asks for a specific voltage and holds it as the battery sags. Drag the command up, then drop the battery and watch the difference.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Motor command playground</span><span class="demo-tag" id="modeTag">DutyCycleOut (percent)</span></div>
+      <canvas class="motor" id="cv"></canvas>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Command</div><div class="v indigo" id="roCmd">50%</div></div>
+        <div class="ro"><div class="k2">Battery</div><div class="v ink" id="roBat">12.0 V</div></div>
+        <div class="ro"><div class="k2">Output to motor</div><div class="v amber" id="roOut">6.0 V</div></div>
+        <div class="ro"><div class="k2">Speed</div><div class="v teal" id="roSpd">50%</div></div>
+      </div>
+      <div class="controls">
+        <div class="seg" id="modeSeg">
+          <button data-m="pct" class="active">DutyCycleOut</button>
+          <button data-m="volt">VoltageOut</button>
+        </div>
+        <div class="seg" id="neutralSeg">
+          <button data-n="brake" class="active">Brake</button>
+          <button data-n="coast">Coast</button>
+        </div>
+        <div class="slider-group"><label>Command <span class="val" id="cmdv">50</span></label><input type="range" id="cmd" min="0" max="100" value="50"></div>
+        <div class="slider-group"><label>Battery <span class="val" id="batv">12.0 V</span></label><input type="range" id="bat" min="60" max="130" value="120"></div>
+      </div>
+    </div>
+    <p class="caption">In percent mode the output is your command times the battery, so it sags when the battery drops. In voltage mode it holds the volts you asked for until the battery physically can't supply them. Set the command to 0 to feel Brake (stops hard) versus Coast (spins down freely).</p>
+  </section>
+
+  <section>
+    <div class="kicker">In code</div>
+    <h2>Control requests and config</h2>
+    <p>Both vendor libraries follow the same shape: make the controller, command it, configure it. In Phoenix 6 you command a motor by handing it a control request; the one you reach for most is <span class="k">VoltageOut</span>:</p>
+    <div class="codewrap">
+      <div class="clabel">A motor, two vendors <span class="badge">Python · phoenix6 / rev</span></div>
+<pre class="code"><span class="kw">from</span> phoenix6.hardware <span class="kw">import</span> TalonFX
+<span class="kw">from</span> phoenix6.controls <span class="kw">import</span> DutyCycleOut, VoltageOut
+<span class="kw">from</span> phoenix6.configs <span class="kw">import</span> TalonFXConfiguration
+<span class="kw">from</span> phoenix6.signals <span class="kw">import</span> NeutralModeValue, InvertedValue
+
+<span class="cm"># CTRE TalonFX driving a Kraken or Falcon</span>
+motor = <span class="ty">TalonFX</span>(<span class="num">10</span>)
+motor.<span class="fn">set_control</span>(<span class="ty">DutyCycleOut</span>(<span class="num">0.5</span>))   <span class="cm"># open-loop: 50% of whatever the battery has</span>
+motor.<span class="fn">set_control</span>(<span class="ty">VoltageOut</span>(<span class="num">6.0</span>))     <span class="cm"># better: a real 6 volts, sag-compensated</span>
+
+cfg = <span class="ty">TalonFXConfiguration</span>()
+cfg.motor_output.neutral_mode = <span class="ty">NeutralModeValue</span>.BRAKE   <span class="cm"># hold still at 0 output</span>
+cfg.motor_output.inverted = <span class="ty">InvertedValue</span>.CLOCKWISE_POSITIVE
+motor.configurator.<span class="fn">apply</span>(cfg)
+
+<span class="cm"># REV SPARK MAX driving a NEO - the other big family</span>
+<span class="kw">from</span> rev <span class="kw">import</span> SparkMax
+neo = <span class="ty">SparkMax</span>(<span class="num">11</span>, <span class="ty">SparkMax</span>.MotorType.kBrushless)
+neo.<span class="fn">setVoltage</span>(<span class="num">6.0</span>)</pre>
+    </div>
+    <div class="note indigo">
+      <div class="nh">Why VoltageOut wins</div>
+      <p>A match drains the battery from about 13 volts to 10 or lower. With <span class="k">DutyCycleOut(0.5)</span> your mechanism is noticeably weaker at the end of the match than the start, because 50% of 10 volts is less push than 50% of 13. <span class="k">VoltageOut(6)</span> delivers 6 volts either way, so the robot feels the same all match. Every closed-loop controller you build later commands volts for exactly this reason.</p>
+    </div>
+
+    <div class="code-ex">
+      <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
+      <div class="ctask">Drive the motor at a real, battery-compensated 6 volts. Fill in the control request.</div>
+<pre class="code">motor.<span class="fn">set_control</span>(<input class="blank" data-ans="voltageout" aria-label="blank" autocomplete="off" spellcheck="false">(<span class="num">6.0</span>))</pre>
+      <div class="code-actions">
+        <button class="btn" id="check">Check</button>
+        <button class="btn" id="reveal">Reveal</button>
+        <span class="code-result" id="cres"></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>There is a ceiling on <span class="k">VoltageOut</span>: you can ask for 6 volts all match, but only while the battery can actually supply it. Late in a match a sagging battery may sit near 10 volts under load, so a command for 11 saturates and you silently lose authority right when you need it. Worth pondering: how would you detect that you are commanding more than the battery can give, and why does that make a current limit on each motor part of keeping the whole robot's voltage healthy?</p>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">Why do teams prefer VoltageOut(6) over DutyCycleOut(0.5)?</div>
+        <div class="opts">
+          <button class="opt">It's shorter to type</button>
+          <button class="opt">It compensates for battery sag, so the robot behaves the same all match</button>
+          <button class="opt">It makes the motor spin faster</button>
+        </div>
+        <div class="explain">DutyCycleOut is a fraction of the live battery voltage, so it weakens as the battery drains. VoltageOut holds the actual volts you asked for, giving repeatable behavior, which is exactly what control loops need.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">A motor is in Brake neutral mode and you command 0 output. What happens?</div>
+        <div class="opts">
+          <button class="opt">It keeps spinning forever</button>
+          <button class="opt">It explodes</button>
+          <button class="opt">It resists motion and stops quickly, holding position</button>
+        </div>
+        <div class="explain">Brake mode shorts the motor leads at zero output, resisting motion so the mechanism stops fast and holds. Coast mode lets it spin down freely, which is what you want for, say, a drivetrain that should roll to a stop.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">What does a motor controller actually do?</div>
+        <div class="opts">
+          <button class="opt">Takes your code's command and delivers that much power to the motor</button>
+          <button class="opt">Replaces the need for a battery</button>
+          <button class="opt">Stores your robot program</button>
+        </div>
+        <div class="explain">The roboRIO runs your code and sends a command over CAN; the motor controller turns that command into the actual voltage and current the motor receives. Your code never wires straight to the motor.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 4 · 01 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Motor controller</b><span>Turns a command into motor power.</span></div>
+        <div class="gl"><b>TalonFX / SPARK MAX</b><span>The two big FRC families.</span></div>
+        <div class="gl"><b>DutyCycleOut</b><span>Fraction of live battery voltage.</span></div>
+        <div class="gl"><b>VoltageOut</b><span>Real volts, sag-compensated.</span></div>
+        <div class="gl"><b>Neutral mode</b><span>Brake holds; coast spins free.</span></div>
+        <div class="gl"><b>Configuration</b><span>Inverted, limits, gains, more.</span></div>
+      </div>
+      <a class="next" href="deploy-lesson-18-py.html">
+        <div class="n-eyebrow">Up next · Part 4 · 02</div>
+        <h3>Encoders &amp; Position</h3>
+        <p>Now that the motor moves, how far did it go? Read the encoder and turn raw rotations into inches and degrees you can actually use.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="deploy-lesson-16-py.html">← Part 3 · 06 · Default Commands</a>
+    <a class="map" href="code.html">Course map</a>
+    <a href="deploy-lesson-18-py.html">Part 4 · 02 · Encoders &amp; Position →</a>
+  </nav>
+
+</div>
+
+<footer>Deploy · Programming an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var cv=document.getElementById('cv'), ctx=cv.getContext('2d'), W=0,H=0,dpr=1;
+  function fit(){ var r=cv.getBoundingClientRect(); if(!r.width)return; dpr=window.devicePixelRatio||1; cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr); ctx.setTransform(dpr,0,0,dpr,0,0); W=r.width; H=r.height; }
+  fit();
+  var mode='pct', neutral='brake', cmd=50, bat=120, angle=0, spin=0;
+  function out(){ var b=bat/10; if(mode==='pct'){ return (cmd/100)*b; } else { return Math.min((cmd/100)*12, b); } }
+  function maxOut(){ return mode==='pct' ? bat/10 : 12; }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    var cx=W*0.30, cy=H/2, R=Math.min(H*0.34, 70);
+    // outer ring
+    ctx.beginPath(); ctx.arc(cx,cy,R+10,0,Math.PI*2); ctx.fillStyle='#11192B'; ctx.fill();
+    ctx.lineWidth=2; ctx.strokeStyle='#33415e'; ctx.stroke();
+    // rotor
+    ctx.save(); ctx.translate(cx,cy); ctx.rotate(angle);
+    ctx.beginPath(); ctx.arc(0,0,R,0,Math.PI*2); ctx.fillStyle='#1B2540'; ctx.fill(); ctx.strokeStyle='#8E8CF8'; ctx.lineWidth=2; ctx.stroke();
+    // spokes
+    for(var i=0;i<6;i++){ ctx.save(); ctx.rotate(i*Math.PI/3); ctx.fillStyle=i===0?'#FFB020':'#34D7C5'; ctx.fillRect(R*0.30,-3,R*0.62,6); ctx.restore(); }
+    ctx.beginPath(); ctx.arc(0,0,6,0,Math.PI*2); ctx.fillStyle='#E7ECF6'; ctx.fill();
+    ctx.restore();
+    // output voltage bar
+    var bx=W*0.62, bw=W*0.30, by=H*0.30, bh=18;
+    ctx.fillStyle='#5E6F8E'; ctx.font='10px ui-monospace,Menlo,monospace'; ctx.textAlign='left';
+    ctx.fillText('OUTPUT VOLTAGE', bx, by-8);
+    ctx.fillStyle='#0B1322'; ctx.strokeStyle='#26324A'; ctx.lineWidth=1; ctx.fillRect(bx,by,bw,bh); ctx.strokeRect(bx,by,bw,bh);
+    var o=out(), frac=Math.max(0,Math.min(1, o/12));
+    ctx.fillStyle='#FFB020'; ctx.fillRect(bx,by,bw*frac,bh);
+    // battery ceiling marker
+    var bf=Math.max(0,Math.min(1,(bat/10)/12)); ctx.strokeStyle='#FF6B6B'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(bx+bw*bf,by-3); ctx.lineTo(bx+bw*bf,by+bh+3); ctx.stroke();
+    ctx.fillStyle='#FF6B6B'; ctx.font='8px ui-monospace,Menlo,monospace'; ctx.fillText('battery max', bx+bw*bf-2, by+bh+13);
+    // speed bar
+    var sy=H*0.62;
+    ctx.fillStyle='#5E6F8E'; ctx.font='10px ui-monospace,Menlo,monospace'; ctx.fillText('SPEED', bx, sy-8);
+    ctx.fillStyle='#0B1322'; ctx.strokeStyle='#26324A'; ctx.fillRect(bx,sy,bw,bh); ctx.strokeRect(bx,sy,bw,bh);
+    var sf=Math.max(0,Math.min(1,Math.abs(spin)/0.42));
+    ctx.fillStyle='#34D7C5'; ctx.fillRect(bx,sy,bw*sf,bh);
+  }
+  function step(){
+    var target = out()*0.035; // rad/frame target speed proportional to volts
+    if(out()>0.05){ spin += (target-spin)*0.08; }
+    else { spin *= (neutral==='brake'?0.80:0.985); }
+    angle += spin;
+    draw();
+    // readouts
+    document.getElementById('roCmd').textContent = (mode==='pct'? cmd+'%' : ((cmd/100*12).toFixed(1)+' V cmd'));
+    document.getElementById('roBat').textContent = (bat/10).toFixed(1)+' V';
+    document.getElementById('roOut').textContent = out().toFixed(1)+' V';
+    var spd=Math.round(Math.abs(spin)/0.42*100); document.getElementById('roSpd').textContent = spd+'%';
+    requestAnimationFrame(step);
+  }
+  function setMode(m){ mode=m; document.getElementById('modeTag').textContent=(m==='pct'?'DutyCycleOut (percent)':'VoltageOut'); document.querySelectorAll('#modeSeg button').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-m')===m);}); }
+  function setNeutral(n){ neutral=n; document.querySelectorAll('#neutralSeg button').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-n')===n);}); }
+  document.querySelectorAll('#modeSeg button').forEach(function(b){ b.addEventListener('click',function(){ setMode(b.getAttribute('data-m')); }); });
+  document.querySelectorAll('#neutralSeg button').forEach(function(b){ b.addEventListener('click',function(){ setNeutral(b.getAttribute('data-n')); }); });
+  document.getElementById('cmd').addEventListener('input',function(e){ cmd=+e.target.value; document.getElementById('cmdv').textContent=cmd; });
+  document.getElementById('bat').addEventListener('input',function(e){ bat=+e.target.value; document.getElementById('batv').textContent=(bat/10).toFixed(1)+' V'; });
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
+  requestAnimationFrame(step);
+
+  var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
+  function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'').replace(/\(\)$/,'');}
+  document.getElementById('check').addEventListener('click',function(){
+    var all=true;
+    blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - it\'s VoltageOut'; res.className='code-result '+(all?'ok':'no');
+  });
+  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='VoltageOut';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(idx===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="deploy:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

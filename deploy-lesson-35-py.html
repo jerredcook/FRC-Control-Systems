@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deploy · Part 8.4 - Debugging &amp; Robust Code (Python)</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(138,140,248,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--green);display:flex;align-items:center;gap:6px}
+  .demo-tag.brown{color:var(--red)} .demo-tag .d{width:7px;height:7px;border-radius:50%;background:var(--green)} .demo-tag.brown .d{background:var(--red)}
+  canvas.batt{display:block;width:100%;height:250px}
+  .readouts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:18px;font-weight:600;margin-top:3px}
+  .ro .v.indigo{color:var(--indigo)} .ro .v.green{color:var(--green)} .ro .v.red{color:var(--red)} .ro .v.amber{color:var(--amber)}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+  .slider-group{flex:1 1 220px;display:flex;flex-direction:column;gap:6px;min-width:190px}
+  .slider-group label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+  .slider-group label .val{color:var(--indigo)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:var(--line-2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--indigo);cursor:pointer;box-shadow:0 0 10px -1px var(--indigo)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:10px 13px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)} .btn.on{background:var(--green);border-color:var(--green);color:#06210f;font-weight:700}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--indigo);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:12.5px;line-height:1.8;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic} .code .kw{color:#ff9bbf} .code .ty{color:var(--teal)} .code .fn{color:var(--indigo)} .code .num{color:var(--amber)} .code .bl{color:#ff9bbf}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(138,140,248,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .code-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .code-ex .chead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .code-ex .chead .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,176,32,.14);display:grid;place-items:center;color:var(--amber);font-size:13px}
+  .code-ex .ctask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .code-ex pre.code{margin:0 0 14px}
+  .blank{font-family:var(--mono);font-size:13px;width:20ch;text-align:center;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:2px 4px;outline:none}
+  .blank:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
+  .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:120px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="code.html"><span class="dot"></span><span class="name">Deploy</span></a>
+    <div class="top-meta">Part 8 · 04 / 05 · Pro Practices</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 8 · 04</b> Pro Practices</div>
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:-6px 0 14px">Code shown in <b style="color:var(--indigo)">Python</b> &middot; <a href="deploy-lesson-35.html" style="color:var(--muted)">switch to Java</a></div>
+    <div class="eyebrow">Debugging &amp; Robust Code</div>
+    <h1>Survive the<br><span class="accent">match</span>.</h1>
+    <p class="dek">Tests catch logic bugs on your laptop. The field throws physics at you instead: a battery that sags, a sensor that drops out, a command that fires at the wrong moment. Robust code expects all of it and keeps running.</p>
+  </div>
+
+  <section>
+    <p class="lead">The classic field killer: the brownout.</p>
+    <p>Push too many mechanisms at once and the battery voltage <strong>sags</strong>. Drop below about 6.8 volts and the roboRIO cuts power to motors to save itself, mid-match, with no warning. <strong>Current limits</strong> cap how much each motor can pull so the bus never crashes. Crank the load up below and watch the battery, then turn limits on and try again.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Battery under load</span><span class="demo-tag" id="stTag"><span class="d"></span>enabled</span></div>
+      <canvas class="batt" id="cv"></canvas>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Current draw</div><div class="v indigo" id="roA">0 A</div></div>
+        <div class="ro"><div class="k2">Battery voltage</div><div class="v green" id="roV">12.6 V</div></div>
+        <div class="ro"><div class="k2">Robot</div><div class="v green" id="roSt">ENABLED</div></div>
+      </div>
+      <div class="controls">
+        <button class="btn" id="limit">Current limits: OFF</button>
+        <div class="slider-group"><label>Load (mechanisms pushing) <span class="val" id="loadv">30%</span></label><input type="range" id="load" min="0" max="100" value="30"></div>
+      </div>
+    </div>
+    <p class="caption">With limits off, max load drags the battery into the red brownout zone and the robot disables itself, exactly what loses matches. Turn limits on and the same load stays safely above the line. The robot keeps driving.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In code</div>
+    <h2>Cap the draw, guard the inputs</h2>
+    <p>Two habits: limit current at the source, and never trust data you haven't checked. A few lines of defense keep the robot alive when the field gets ugly:</p>
+    <div class="codewrap">
+      <div class="clabel">Robust configuration <span class="badge">Python · Phoenix 6</span></div>
+<pre class="code">cfg = <span class="ty">TalonFXConfiguration</span>()
+cfg.current_limits.supply_current_limit = <span class="num">40</span>            <span class="cm"># amps pulled from the battery</span>
+cfg.current_limits.supply_current_limit_enable = <span class="bl">True</span>
+motor.<span class="fn">configurator</span>.<span class="fn">apply</span>(cfg)
+
+<span class="cm"># guard inputs instead of crashing on bad data</span>
+<span class="kw">if</span> camera.<span class="fn">has_target</span>():
+    <span class="fn">aim</span>(camera.<span class="fn">get_yaw</span>())                            <span class="cm"># don't read a target that isn't there</span>
+
+<span class="cm"># shed load if the battery is getting dangerously low</span>
+<span class="kw">if</span> <span class="ty">RobotController</span>.<span class="fn">getBatteryVoltage</span>() &lt; <span class="num">7.0</span>:
+    non_essential.<span class="fn">stop</span>()                              <span class="cm"># keep the drivetrain alive</span></pre>
+    </div>
+    <div class="note indigo">
+      <div class="nh">Defensive code expects the worst</div>
+      <p>Beyond current limits: a <span class="k">SlewRateLimiter</span> stops instant full-throttle spikes that yank the voltage down; checking <span class="k">has_target()</span> before reading a camera avoids acting on stale data; and giving every command a safe default means a dropped sensor coasts to a stop instead of running away. The bench is forgiving. The field, with a tired battery and a real opponent, is not, so assume every input can go wrong and handle it.</p>
+    </div>
+
+    <div class="code-ex">
+      <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
+      <div class="ctask">Cap how many amps this motor can pull from the battery so heavy load can't brown out the robot. Fill in the field.</div>
+<pre class="code">cfg.current_limits.<input class="blank" data-ans="supply_current_limit" aria-label="blank" autocomplete="off" spellcheck="false"> = <span class="num">40</span></pre>
+      <div class="code-actions">
+        <button class="btn" id="check">Check</button>
+        <button class="btn" id="reveal">Reveal</button>
+        <span class="code-result" id="cres"></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>There are two current limits worth knowing apart: the supply limit (amps pulled from the battery, what protects against brownout) and the stator limit (amps through the motor itself, what protects against burning it up when a mechanism stalls). Try reasoning about why a jammed intake can be fine on the battery yet still cook a motor. And here is the deeper habit: a brownout is not a freak event, it is a budget problem. Could you add up the worst-case draw of every mechanism running at once and check it fits the battery before you ever drive?</p>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="2">
+        <div class="qn">Question 1</div>
+        <div class="qt">What is a brownout?</div>
+        <div class="opts">
+          <button class="opt">A failed unit test</button>
+          <button class="opt">A vision target that disappears</button>
+          <button class="opt">The battery sags so low the roboRIO cuts motor power to protect itself</button>
+        </div>
+        <div class="explain">Under heavy load the voltage drops; below about 6.8 V the roboRIO disables motor outputs to keep itself alive. It happens mid-match with no warning, which is why you prevent it.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 2</div>
+        <div class="qt">How do current limits help prevent brownouts?</div>
+        <div class="opts">
+          <button class="opt">They cap how much each motor can pull, so the total draw never crashes the battery</button>
+          <button class="opt">They make the battery bigger</button>
+          <button class="opt">They turn off the gyro</button>
+        </div>
+        <div class="explain">Voltage sag is driven by current. Capping each motor's supply current keeps the combined draw in a safe range, so the bus voltage stays above the brownout threshold even under load.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 3</div>
+        <div class="qt">Which is an example of defensive coding?</div>
+        <div class="opts">
+          <button class="opt">Running the motor at full speed always</button>
+          <button class="opt">Checking camera.has_target() before reading the target</button>
+          <button class="opt">Deleting your unit tests</button>
+        </div>
+        <div class="explain">Guarding inputs, checking has_target() before using get_yaw(), means you never act on data that isn't there. Safe defaults and input checks keep a dropped sensor from turning into a runaway robot.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 8 · 04 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Brownout</b><span>Voltage sag disables the roboRIO.</span></div>
+        <div class="gl"><b>Current limit</b><span>Caps draw so the bus survives.</span></div>
+        <div class="gl"><b>Slew rate limit</b><span>Stops instant throttle spikes.</span></div>
+        <div class="gl"><b>Guard inputs</b><span>Check has_target() before use.</span></div>
+        <div class="gl"><b>Safe defaults</b><span>Dropped sensor coasts to stop.</span></div>
+        <div class="gl"><b>Expect the worst</b><span>The field is harsher than the bench.</span></div>
+      </div>
+      <a class="next" href="deploy-lesson-36-py.html">
+        <div class="n-eyebrow">Up next · Part 8 · 05 · Course finale</div>
+        <h3>Competition-Ready</h3>
+        <p>The last piece isn't code, it's discipline: deploy hygiene, version control, and the pre-match checklist that turns a working robot into a winning one.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="deploy-lesson-34-py.html">← Part 8 · 03 · Unit Testing</a>
+    <a class="map" href="code.html">Course map</a>
+    <a href="deploy-lesson-36-py.html">Part 8 · 05 · Competition-Ready →</a>
+  </nav>
+
+</div>
+
+<footer>Deploy · Programming an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var cv=document.getElementById('cv'), ctx=cv.getContext('2d'), W=0,H=0,dpr=1;
+  function fit(){ var r=cv.getBoundingClientRect(); if(!r.width)return; dpr=window.devicePixelRatio||1; cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr); ctx.setTransform(dpr,0,0,dpr,0,0); W=r.width; H=r.height; }
+  fit();
+  var load=30, limits=false, volt=12.6, BROWN=6.8;
+  function step(){
+    var desired = load/100*300; // amps if unlimited
+    var current = limits ? Math.min(desired, 110) : desired;
+    var target = 12.7 - current*0.022;
+    volt += (target-volt)*0.12;
+    var brown = volt < BROWN;
+    draw(current, brown);
+    document.getElementById('roA').textContent=Math.round(current)+' A';
+    var rv=document.getElementById('roV'); rv.textContent=volt.toFixed(1)+' V'; rv.className='v '+(brown?'red':(volt<8?'amber':'green'));
+    var rs=document.getElementById('roSt'); rs.textContent=brown?'BROWNOUT':'ENABLED'; rs.className='v '+(brown?'red':'green');
+    var tag=document.getElementById('stTag'); tag.className='demo-tag'+(brown?' brown':''); tag.querySelector('.d').nextSibling.textContent=brown?'brownout':'enabled';
+    requestAnimationFrame(step);
+  }
+  function draw(current, brown){
+    ctx.clearRect(0,0,W,H);
+    // voltage gauge (vertical)
+    var gx=W*0.16, gw=70, gy=24, gh=H-58, top=12.8, bot=4;
+    ctx.fillStyle='#5E6F8E'; ctx.font='10px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText('BATTERY', gx+gw/2, 16);
+    // brownout zone
+    function vy(v){ return gy + (1-(v-bot)/(top-bot))*gh; }
+    ctx.fillStyle='rgba(255,107,107,0.10)'; ctx.fillRect(gx, vy(BROWN), gw, gy+gh-vy(BROWN));
+    ctx.strokeStyle='#0B1322'; ctx.lineWidth=1; ctx.strokeRect(gx,gy,gw,gh);
+    ctx.strokeStyle='rgba(255,107,107,0.7)'; ctx.setLineDash([4,3]); ctx.beginPath(); ctx.moveTo(gx,vy(BROWN)); ctx.lineTo(gx+gw,vy(BROWN)); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle='#FF6B6B'; ctx.font='8px ui-monospace,Menlo,monospace'; ctx.textAlign='left'; ctx.fillText('6.8 V brownout', gx+gw+6, vy(BROWN)+3);
+    // fill
+    var fy=vy(volt);
+    ctx.fillStyle=brown?'#FF6B6B':(volt<8?'#FFB020':'#43D67E'); ctx.fillRect(gx, fy, gw, gy+gh-fy);
+    ctx.fillStyle='#E7ECF6'; ctx.font='700 16px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText(volt.toFixed(1)+'V', gx+gw/2, fy-6>gy+12?fy-6:gy+14);
+    // current draw bar (horizontal)
+    var cbx=W*0.46, cbw=W*0.44, cby=H*0.32, cbh=22;
+    ctx.fillStyle='#5E6F8E'; ctx.font='10px ui-monospace,Menlo,monospace'; ctx.textAlign='left'; ctx.fillText('CURRENT DRAW', cbx, cby-8);
+    ctx.fillStyle='#0B1322'; ctx.strokeStyle='#26324A'; ctx.fillRect(cbx,cby,cbw,cbh); ctx.strokeRect(cbx,cby,cbw,cbh);
+    ctx.fillStyle='#8E8CF8'; ctx.fillRect(cbx,cby,cbw*Math.min(1,current/300),cbh);
+    if(limits){ var lf=110/300; ctx.strokeStyle='#43D67E'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(cbx+cbw*lf,cby-3); ctx.lineTo(cbx+cbw*lf,cby+cbh+3); ctx.stroke(); ctx.fillStyle='#43D67E'; ctx.font='8px ui-monospace,Menlo,monospace'; ctx.fillText('limit', cbx+cbw*lf-2, cby+cbh+12); }
+    // robot status
+    var sy=H*0.62;
+    ctx.fillStyle=brown?'#FF6B6B':'#43D67E'; ctx.beginPath(); ctx.arc(cbx+10, sy+6, 8, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle=brown?'#FF6B6B':'#43D67E'; ctx.font='700 14px ui-monospace,Menlo,monospace'; ctx.textAlign='left'; ctx.fillText(brown?'MOTORS DISABLED':'MOTORS LIVE', cbx+26, sy+11);
+    if(brown){ ctx.fillStyle='#92A2BE'; ctx.font='11px ui-monospace,Menlo,monospace'; ctx.fillText('roboRIO cut power to protect itself', cbx, sy+34); }
+  }
+  document.getElementById('load').addEventListener('input',function(e){ load=+e.target.value; document.getElementById('loadv').textContent=load+'%'; });
+  document.getElementById('limit').addEventListener('click',function(){ limits=!limits; this.textContent='Current limits: '+(limits?'ON':'OFF'); this.classList.toggle('on',limits); });
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
+  requestAnimationFrame(step);
+
+  var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
+  function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'');}
+  document.getElementById('check').addEventListener('click',function(){
+    var all=true;
+    blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - supply_current_limit'; res.className='code-result '+(all?'ok':'no');
+  });
+  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='supply_current_limit';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(idx===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="deploy:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

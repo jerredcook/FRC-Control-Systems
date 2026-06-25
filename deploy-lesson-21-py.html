@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deploy · Part 4.5 - The Gamepad (Python)</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(138,140,248,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  canvas.pad{display:block;width:100%;height:260px;touch-action:none;cursor:grab}
+  canvas.pad:active{cursor:grabbing}
+  .readouts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:16px;font-weight:600;margin-top:3px}
+  .ro .v.indigo{color:var(--indigo)} .ro .v.teal{color:var(--teal)} .ro .v.amber{color:var(--amber)}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+  .seg{display:flex;border:1px solid var(--line-2);border-radius:9px;overflow:hidden}
+  .seg button{border:none;background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:9px 11px;cursor:pointer;transition:.12s;border-right:1px solid var(--line-2)}
+  .seg button:last-child{border-right:none}
+  .seg button:hover{color:var(--text)} .seg button.active{background:var(--indigo);color:#0a0f24;font-weight:700}
+  .slider-group{flex:1 1 220px;display:flex;flex-direction:column;gap:6px;min-width:180px}
+  .slider-group label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+  .slider-group label .val{color:var(--indigo)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:var(--line-2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--indigo);cursor:pointer;box-shadow:0 0 10px -1px var(--indigo)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--indigo);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:13px;line-height:1.85;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic} .code .kw{color:#ff9bbf} .code .ty{color:var(--teal)} .code .fn{color:var(--indigo)} .code .num{color:var(--amber)}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(138,140,248,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .code-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .code-ex .chead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .code-ex .chead .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,176,32,.14);display:grid;place-items:center;color:var(--amber);font-size:13px}
+  .code-ex .ctask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .code-ex pre.code{margin:0 0 14px}
+  .blank{font-family:var(--mono);font-size:13px;width:15ch;text-align:center;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:2px 4px;outline:none}
+  .blank:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
+  .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:110px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="code.html"><span class="dot"></span><span class="name">Deploy</span></a>
+    <div class="top-meta">Part 4 · 05 / 06 · Hardware</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 4 · 05</b> Talking to Hardware</div>
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:-6px 0 14px">Code shown in <b style="color:var(--indigo)">Python</b> &middot; <a href="deploy-lesson-21.html" style="color:var(--muted)">switch to Java</a></div>
+    <div class="eyebrow">The Gamepad</div>
+    <h1>Read the<br><span class="accent">driver</span>.</h1>
+    <p class="dek">A joystick axis is just a number from -1 to 1. Two small touches, a deadband and a curve, turn that raw number into a robot that holds still at rest and feels precise in a driver's hands.</p>
+  </div>
+
+  <section>
+    <p class="lead">The stick never truly rests at zero.</p>
+    <p>Let go of a joystick and the axis reads something like 0.03, not 0. Feed that straight to a drivetrain and the robot creeps on its own. A <strong>deadband</strong> treats anything near center as zero, killing the drift. Then a <strong>response curve</strong> (squaring the input) makes small pushes give small outputs for fine control, while a full push still gives full speed. Drag the stick, then let go and watch it wobble.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Joystick → output</span><span class="demo-tag" id="curveTag">squared</span></div>
+      <canvas class="pad" id="cv"></canvas>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Raw stick</div><div class="v indigo" id="roRaw">0.00, 0.00</div></div>
+        <div class="ro"><div class="k2">After deadband + curve</div><div class="v teal" id="roOut">0.00, 0.00</div></div>
+        <div class="ro"><div class="k2">Output speed</div><div class="v amber" id="roSpd">0%</div></div>
+      </div>
+      <div class="controls">
+        <div class="seg" id="curveSeg">
+          <button data-c="1">Linear</button>
+          <button data-c="2" class="active">Squared</button>
+          <button data-c="3">Cubed</button>
+        </div>
+        <div class="slider-group"><label>Deadband <span class="val" id="dbv">8%</span></label><input type="range" id="db" min="0" max="30" value="8"></div>
+      </div>
+    </div>
+    <p class="caption">Set the deadband to 0% and release the stick: the output jitters from the resting wobble. Raise the deadband and it snaps to a clean zero. The graph on the right is the transfer function: flat through the deadband, then curving up to full.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In code</div>
+    <h2>Deadband, then curve</h2>
+    <p>You read the axis, apply a deadband, then shape it. WPILib's <span class="k">wpimath.applyDeadband</span> even rescales the result so there's no jump at the edge of the deadband:</p>
+    <div class="codewrap">
+      <div class="clabel">Reading the driver <span class="badge">Python · RobotPy</span></div>
+<pre class="code"><span class="kw">import</span> math
+<span class="kw">import</span> wpimath
+<span class="kw">from</span> commands2.button <span class="kw">import</span> <span class="ty">CommandXboxController</span>
+
+self.driver = <span class="ty">CommandXboxController</span>(<span class="num">0</span>)
+
+<span class="cm"># stick pushed forward reads NEGATIVE, so flip it: up = +forward</span>
+raw_y = -self.driver.<span class="fn">getLeftY</span>()
+raw_x =  self.driver.<span class="fn">getLeftX</span>()
+
+<span class="cm"># ignore the resting wobble near center</span>
+y = wpimath.<span class="fn">applyDeadband</span>(raw_y, <span class="num">0.08</span>)
+x = wpimath.<span class="fn">applyDeadband</span>(raw_x, <span class="num">0.08</span>)
+
+<span class="cm"># square the magnitude for fine control, keeping the sign</span>
+fwd = math.<span class="fn">copysign</span>(y * y, y)
+rot = math.<span class="fn">copysign</span>(x * x, x)
+
+self.drive.<span class="fn">arcadeDrive</span>(fwd, rot)</pre>
+    </div>
+    <div class="note indigo">
+      <div class="nh">The minus sign on getLeftY trips up everyone</div>
+      <p>Pushing a stick forward returns a <strong>negative</strong> number, an old joystick convention. If your robot drives backward when you push forward, that missing <span class="k">-</span> is almost always why. Squaring with <span class="k">math.copysign(y*y, y)</span> keeps the sign while gentling the center; a driver gets smooth, deliberate control instead of a twitchy all-or-nothing feel.</p>
+    </div>
+
+    <div class="code-ex">
+      <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
+      <div class="ctask">Ignore stick values within 8% of center so the robot doesn't drift at rest. Fill in the method.</div>
+<pre class="code">y = wpimath.<input class="blank" data-ans="applydeadband" aria-label="blank" autocomplete="off" spellcheck="false">(raw_y, <span class="num">0.08</span>)</pre>
+      <div class="code-actions">
+        <button class="btn" id="check">Check</button>
+        <button class="btn" id="reveal">Reveal</button>
+        <span class="code-result" id="cres"></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>Try this in your own code: bind the right trigger to a "slow mode" that scales the whole drive output to maybe 40 percent, so a driver can creep up to a precise scoring spot. A CommandXboxController gives you trigger axes and button bindings like driver.rightBumper().whileTrue(...) to make that clean. Think about it like the low gear on a bike: same pedaling, finer control. Why might a separate slow-mode button feel better to a driver than relying on the squared curve near center alone?</p>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">Why apply a deadband to a joystick axis?</div>
+        <div class="opts">
+          <button class="opt">To make the robot faster</button>
+          <button class="opt">Sticks don't rest at exactly 0, so small values are ignored to stop drift</button>
+          <button class="opt">To save battery</button>
+        </div>
+        <div class="explain">A released stick still reads a little off-center. Without a deadband that becomes a slow creep. Treating anything near zero as zero keeps the robot still when the driver isn't touching it.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">What does squaring the input (keeping its sign) do for the driver?</div>
+        <div class="opts">
+          <button class="opt">Caps the top speed at 50%</button>
+          <button class="opt">Reverses the controls</button>
+          <button class="opt">Fine control near center, while a full push still reaches full speed</button>
+        </div>
+        <div class="explain">Squaring a number between 0 and 1 makes small inputs much smaller but leaves 1.0 at 1.0. So gentle pushes are gentle and precise, and a full push is still full speed.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">You push the left stick forward and the robot drives backward. The likely fix?</div>
+        <div class="opts">
+          <button class="opt">Negate getLeftY() - forward on the stick reads negative</button>
+          <button class="opt">Increase the deadband to 100%</button>
+          <button class="opt">Switch to brake mode</button>
+        </div>
+        <div class="explain">By convention, a forward stick returns a negative axis value. Flipping the sign with a leading minus makes "push forward" mean "drive forward." It's the single most common gamepad bug.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 4 · 05 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Axis</b><span>A number from -1 to 1.</span></div>
+        <div class="gl"><b>Deadband</b><span>Treat near-center as zero.</span></div>
+        <div class="gl"><b>applyDeadband</b><span>Deadbands and rescales cleanly.</span></div>
+        <div class="gl"><b>Response curve</b><span>Square for fine control.</span></div>
+        <div class="gl"><b>copysign</b><span>Keep the sign while curving.</span></div>
+        <div class="gl"><b>getLeftY is flipped</b><span>Forward reads negative.</span></div>
+      </div>
+      <a class="next" href="deploy-lesson-22-py.html">
+        <div class="n-eyebrow">Up next · Part 4 · 06 · Finale</div>
+        <h3>NetworkTables &amp; Dashboards</h3>
+        <p>You can read every sensor and the driver. Last step: send all of it back out, so you can see what the robot sees and tune it live.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="deploy-lesson-20-py.html">← Part 4 · 04 · Switches &amp; Sensors</a>
+    <a class="map" href="code.html">Course map</a>
+    <a href="deploy-lesson-22-py.html">Part 4 · 06 · NetworkTables →</a>
+  </nav>
+
+</div>
+
+<footer>Deploy · Programming an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var cv=document.getElementById('cv'), ctx=cv.getContext('2d'), W=0,H=0,dpr=1;
+  function fit(){ var r=cv.getBoundingClientRect(); if(!r.width)return; dpr=window.devicePixelRatio||1; cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr); ctx.setTransform(dpr,0,0,dpr,0,0); W=r.width; H=r.height; }
+  fit();
+  var rawX=0, rawY=0, dragging=false, db=0.08, expo=2;
+  function pad(){ return {cx:W*0.26, cy:H*0.5, R:Math.min(H*0.40, W*0.20)}; }
+  function curve(s){ return expo===1? s : (expo===2? s*s : s*s*s); }
+  function dbScale(m){ return m<=db ? 0 : (m-db)/(1-db); }
+  function outputs(){
+    var m=Math.hypot(rawX,rawY); if(m<1e-6) return {x:0,y:0,mag:0,rawMag:0};
+    var o=curve(dbScale(Math.min(1,m)));
+    return {x:(rawX/m)*o, y:(rawY/m)*o, mag:o, rawMag:Math.min(1,m)};
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    var P=pad(), o=outputs();
+    // ---- left: joystick pad ----
+    ctx.strokeStyle='#26324A'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(P.cx,P.cy,P.R,0,Math.PI*2); ctx.stroke();
+    // deadband circle
+    ctx.fillStyle='rgba(255,107,107,0.08)'; ctx.strokeStyle='rgba(255,107,107,0.5)'; ctx.lineWidth=1; ctx.setLineDash([3,3]);
+    ctx.beginPath(); ctx.arc(P.cx,P.cy,P.R*db,0,Math.PI*2); ctx.fill(); ctx.stroke(); ctx.setLineDash([]);
+    // crosshair
+    ctx.strokeStyle='#1B2540'; ctx.beginPath(); ctx.moveTo(P.cx-P.R,P.cy); ctx.lineTo(P.cx+P.R,P.cy); ctx.moveTo(P.cx,P.cy-P.R); ctx.lineTo(P.cx,P.cy+P.R); ctx.stroke();
+    // knob (raw)
+    var kx=P.cx+rawX*P.R, ky=P.cy-rawY*P.R;
+    ctx.strokeStyle='#33415e'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(P.cx,P.cy); ctx.lineTo(kx,ky); ctx.stroke();
+    var inDb=Math.hypot(rawX,rawY)<=db;
+    ctx.fillStyle=inDb?'#5E6F8E':'#8E8CF8'; ctx.beginPath(); ctx.arc(kx,ky,11,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#5E6F8E'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText('drag', P.cx, P.cy+P.R+16);
+    // ---- right: transfer function graph (input mag -> output mag) ----
+    var gx=W*0.56, gy=H*0.16, gw=W*0.36, gh=H*0.66;
+    ctx.strokeStyle='#26324A'; ctx.lineWidth=1; ctx.strokeRect(gx,gy,gw,gh);
+    ctx.fillStyle='#5E6F8E'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='left'; ctx.fillText('OUT', gx+3, gy+10); ctx.textAlign='right'; ctx.fillText('IN', gx+gw-3, gy+gh-4);
+    // ideal y=x reference
+    ctx.strokeStyle='#1B2540'; ctx.beginPath(); ctx.moveTo(gx,gy+gh); ctx.lineTo(gx+gw,gy); ctx.stroke();
+    // transfer curve
+    ctx.strokeStyle='#34D7C5'; ctx.lineWidth=2; ctx.beginPath();
+    for(var i=0;i<=60;i++){ var t=i/60; var ot=curve(dbScale(t)); var X=gx+t*gw, Y=gy+gh-ot*gh; if(i===0)ctx.moveTo(X,Y); else ctx.lineTo(X,Y); }
+    ctx.stroke();
+    // current point
+    var t=o.rawMag, ot=o.mag; var px=gx+t*gw, py=gy+gh-ot*gh;
+    ctx.strokeStyle='#FFB020'; ctx.lineWidth=1; ctx.setLineDash([2,2]);
+    ctx.beginPath(); ctx.moveTo(px,gy+gh); ctx.lineTo(px,py); ctx.lineTo(gx,py); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle='#FFB020'; ctx.beginPath(); ctx.arc(px,py,5,0,Math.PI*2); ctx.fill();
+  }
+  function refresh(){
+    document.getElementById('roRaw').textContent=rawX.toFixed(2)+', '+rawY.toFixed(2);
+    var o=outputs();
+    document.getElementById('roOut').textContent=o.x.toFixed(2)+', '+o.y.toFixed(2);
+    document.getElementById('roSpd').textContent=Math.round(o.mag*100)+'%';
+  }
+  function loop(){
+    if(!dragging){ // resting wobble: drift toward 0 with small noise
+      rawX += (0-rawX)*0.12 + (Math.random()-0.5)*0.02;
+      rawY += (0-rawY)*0.12 + (Math.random()-0.5)*0.02;
+      if(Math.abs(rawX)<0.005) rawX=(Math.random()-0.5)*0.05;
+      if(Math.abs(rawY)<0.005) rawY=(Math.random()-0.5)*0.05;
+    }
+    draw(); refresh(); requestAnimationFrame(loop);
+  }
+  function setFromEvent(e){
+    var r=cv.getBoundingClientRect(), P=pad();
+    var x=(e.clientX-r.left - P.cx)/P.R, y=-(e.clientY-r.top - P.cy)/P.R;
+    var m=Math.hypot(x,y); if(m>1){ x/=m; y/=m; }
+    rawX=x; rawY=y;
+  }
+  cv.addEventListener('pointerdown',function(e){ var r=cv.getBoundingClientRect(); if(e.clientX-r.left < W*0.5){ dragging=true; cv.setPointerCapture(e.pointerId); setFromEvent(e); } });
+  cv.addEventListener('pointermove',function(e){ if(dragging) setFromEvent(e); });
+  cv.addEventListener('pointerup',function(){ dragging=false; });
+  cv.addEventListener('pointercancel',function(){ dragging=false; });
+  document.querySelectorAll('#curveSeg button').forEach(function(b){ b.addEventListener('click',function(){ expo=+b.getAttribute('data-c'); document.getElementById('curveTag').textContent=(expo===1?'linear':expo===2?'squared':'cubed'); document.querySelectorAll('#curveSeg button').forEach(function(x){x.classList.toggle('active',x===b);}); }); });
+  document.getElementById('db').addEventListener('input',function(e){ db=(+e.target.value)/100; document.getElementById('dbv').textContent=(+e.target.value)+'%'; });
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
+  refresh(); requestAnimationFrame(loop);
+
+  var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
+  function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'').replace(/\(\)$/,'');}
+  document.getElementById('check').addEventListener('click',function(){
+    var all=true;
+    blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - applyDeadband'; res.className='code-result '+(all?'ok':'no');
+  });
+  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='applyDeadband';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(idx===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="deploy:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

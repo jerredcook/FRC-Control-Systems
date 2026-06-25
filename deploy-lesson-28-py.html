@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deploy · Part 7.1 - Vision &amp; AprilTags (Python)</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(138,140,248,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  canvas.cam{display:block;width:100%;height:270px;touch-action:none;cursor:ew-resize}
+  .readouts{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  @media(min-width:560px){.readouts{grid-template-columns:repeat(4,1fr)}}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:18px;font-weight:600;margin-top:3px;color:var(--muted)}
+  .ro .v.teal{color:var(--teal)} .ro .v.indigo{color:var(--indigo)} .ro .v.amber{color:var(--amber)} .ro .v.green{color:var(--green)}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+  .slider-group{flex:1 1 240px;display:flex;flex-direction:column;gap:6px;min-width:200px}
+  .slider-group label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+  .slider-group label .val{color:var(--indigo)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:var(--line-2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--indigo);cursor:pointer;box-shadow:0 0 10px -1px var(--indigo)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
+  .hint{font-family:var(--mono);font-size:11px;color:var(--faint)}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--indigo);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:13px;line-height:1.8;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic} .code .kw{color:#ff9bbf} .code .ty{color:var(--teal)} .code .fn{color:var(--indigo)} .code .num{color:var(--amber)} .code .st{color:#9ce8b0}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(138,140,248,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .code-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .code-ex .chead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .code-ex .chead .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,176,32,.14);display:grid;place-items:center;color:var(--amber);font-size:13px}
+  .code-ex .ctask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .code-ex pre.code{margin:0 0 14px}
+  .blank{font-family:var(--mono);font-size:13px;width:12ch;text-align:center;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:2px 4px;outline:none}
+  .blank:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
+  .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:110px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="code.html"><span class="dot"></span><span class="name">Deploy</span></a>
+    <div class="top-meta">Part 7 · 01 / 04 · Vision</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 7 · 01</b> Seeing &amp; Thinking</div>
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:-6px 0 14px">Code shown in <b style="color:var(--indigo)">Python</b> &middot; <a href="deploy-lesson-28.html" style="color:var(--muted)">switch to Java</a></div>
+    <div class="eyebrow">Vision &amp; AprilTags</div>
+    <h1>Give the robot<br><span class="accent">eyes</span>.</h1>
+    <p class="dek">A camera spots AprilTags, the printed markers scattered around the field, and hands your code a simple answer: which tag, and how far off-center it is. From that, the robot can aim and even locate itself.</p>
+  </div>
+
+  <section>
+    <p class="lead">The hard part runs on a separate computer.</p>
+    <p>A coprocessor, a Raspberry Pi running <strong>PhotonVision</strong>, or a <strong>Limelight</strong>, does the heavy image processing and publishes the results over NetworkTables. Your roboRIO just reads them: the tag's <strong>ID</strong>, its <strong>yaw</strong> (how far left or right of center, called tx), its pitch, and how big it appears. Pan the camera and watch the numbers.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Camera view · AprilTags</span><span class="demo-tag" id="tvTag">no target</span></div>
+      <canvas class="cam" id="cv"></canvas>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Best target ID</div><div class="v indigo" id="roId">-</div></div>
+        <div class="ro"><div class="k2">tx (yaw)</div><div class="v teal" id="roTx">-</div></div>
+        <div class="ro"><div class="k2">ty (pitch)</div><div class="v teal" id="roTy">-</div></div>
+        <div class="ro"><div class="k2">Target area</div><div class="v amber" id="roA">-</div></div>
+      </div>
+      <div class="controls">
+        <div class="slider-group"><label>Pan camera (yaw) <span class="val" id="panv">0°</span></label><input type="range" id="pan" min="-45" max="45" value="-18"></div>
+        <span class="hint">or drag across the view</span>
+      </div>
+    </div>
+    <p class="caption">The crosshair is the camera's center. tx is the angle from that center to the best target, exactly the error you'll turn to zero next lesson. Center a tag and tx goes to 0.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In code</div>
+    <h2>Read the target off the camera</h2>
+    <p>You ask the camera for its latest result, check whether it sees anything, then pull the numbers off the best target:</p>
+    <div class="codewrap">
+      <div class="clabel">vision_subsystem.py <span class="badge">Python · PhotonVision</span></div>
+<pre class="code"><span class="kw">from</span> photonlibpy.photonCamera <span class="kw">import</span> <span class="ty">PhotonCamera</span>
+
+camera = <span class="ty">PhotonCamera</span>(<span class="st">"frontCam"</span>)
+
+result = camera.<span class="fn">getLatestResult</span>()
+<span class="kw">if</span> result.<span class="fn">hasTargets</span>():
+    target = result.<span class="fn">getBestTarget</span>()
+    tag_id = target.<span class="fn">getFiducialId</span>()   <span class="cm"># which AprilTag</span>
+    tx     = target.<span class="fn">getYaw</span>()          <span class="cm"># degrees left/right of center</span>
+    ty     = target.<span class="fn">getPitch</span>()        <span class="cm"># degrees up/down</span>
+    area   = target.<span class="fn">getArea</span>()         <span class="cm"># how big it looks (closeness)</span>
+
+<span class="cm"># Limelight is the same idea over NetworkTables: tx, ty, tv, tid</span></pre>
+    </div>
+    <div class="note indigo">
+      <div class="nh">An AprilTag is a known address on the field</div>
+      <p>Each tag has a printed ID and a <em>published, fixed location</em> on the field. So seeing tag 7 isn't just "a target over there", it's a survey marker the robot can trust. That's what makes the next two lessons possible: aim at a tag, and use its known spot to correct your pose. The roboRIO never touches a pixel; it just reads tx, ty, and id.</p>
+    </div>
+
+    <div class="code-ex">
+      <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
+      <div class="ctask">Read how far left or right of center the target is, the value you'll aim with. Fill in the method.</div>
+<pre class="code">tx = target.<input class="blank" data-ans="getyaw" aria-label="blank" autocomplete="off" spellcheck="false">()</pre>
+      <div class="code-actions">
+        <button class="btn" id="check">Check</button>
+        <button class="btn" id="reveal">Reveal</button>
+        <span class="code-result" id="cres"></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>The best target is whichever tag is most centered, but that is not always the one you want. If two tags are in view and you only trust tag 7, filter the results yourself: loop over <span class="k">result.getTargets()</span> and pick the one whose <span class="k">getFiducialId()</span> matches, instead of taking <span class="k">getBestTarget()</span> blindly. Here is a question to chew on: what should your code do for the split second when the camera sees no tag at all, hold the last reading, or treat it as "no answer"?</p>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">What is an AprilTag?</div>
+        <div class="opts">
+          <button class="opt">A type of motor</button>
+          <button class="opt">A printed marker with an ID and a known fixed position on the field</button>
+          <button class="opt">A dashboard widget</button>
+        </div>
+        <div class="explain">AprilTags are fiducial markers placed at surveyed spots on the field. Detecting one gives you both its ID and a trusted reference point to aim at or locate from.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">Where does the actual image processing happen?</div>
+        <div class="opts">
+          <button class="opt">On the AprilTag itself</button>
+          <button class="opt">Inside the motor controller</button>
+          <button class="opt">On a coprocessor (PhotonVision on a Pi, or a Limelight) that publishes results</button>
+        </div>
+        <div class="explain">A dedicated coprocessor does the vision work and sends simple numbers (tx, ty, id) over NetworkTables. The roboRIO just reads them, keeping its loop fast.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">What does tx (the target's yaw) represent?</div>
+        <div class="opts">
+          <button class="opt">How far left or right of center the target is - the error you turn to zero</button>
+          <button class="opt">The battery voltage</button>
+          <button class="opt">The robot's top speed</button>
+        </div>
+        <div class="explain">tx is the horizontal angle from the camera's centerline to the target. Drive it to zero and the robot is pointed straight at the tag, which is exactly the next lesson.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 7 · 01 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>AprilTag</b><span>Marker with ID + known position.</span></div>
+        <div class="gl"><b>Coprocessor</b><span>PhotonVision / Limelight does the CV.</span></div>
+        <div class="gl"><b>tx (yaw)</b><span>Horizontal offset to target.</span></div>
+        <div class="gl"><b>ty (pitch)</b><span>Vertical offset to target.</span></div>
+        <div class="gl"><b>Fiducial ID</b><span>Which tag you're looking at.</span></div>
+        <div class="gl"><b>Over NetworkTables</b><span>roboRIO just reads numbers.</span></div>
+      </div>
+      <a class="next" href="deploy-lesson-29-py.html">
+        <div class="n-eyebrow">Up next · Part 7 · 02</div>
+        <h3>Closing the Loop on Vision</h3>
+        <p>You have tx, the error. Feed it to a PID loop and the robot turns itself until it's locked dead-on the target. Vision becomes the feedback.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="deploy-lesson-27-py.html">← Part 6 · 05 · Building an Auto</a>
+    <a class="map" href="code.html">Course map</a>
+    <a href="deploy-lesson-29-py.html">Part 7 · 02 · Closing the Loop on Vision →</a>
+  </nav>
+
+</div>
+
+<footer>Deploy · Programming an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var cv=document.getElementById('cv'), ctx=cv.getContext('2d'), W=0,H=0,dpr=1;
+  function fit(){ var r=cv.getBoundingClientRect(); if(!r.width)return; dpr=window.devicePixelRatio||1; cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr); ctx.setTransform(dpr,0,0,dpr,0,0); W=r.width; H=r.height; }
+  fit();
+  var FOV=32; // half field-of-view degrees
+  var TAGS=[{id:3,bearing:-22,area:1.4,ty:-3},{id:5,bearing:4,area:2.2,ty:1},{id:7,bearing:26,area:1.0,ty:-6}];
+  var pan=-18;
+  function bestTarget(){
+    var best=null;
+    TAGS.forEach(function(t){ var tx=t.bearing-pan; if(Math.abs(tx)<=FOV){ if(!best||Math.abs(tx)<Math.abs(best.tx)) best={t:t,tx:tx}; } });
+    return best;
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    // camera frame
+    ctx.fillStyle='#070C15'; ctx.fillRect(0,0,W,H);
+    var cx=W/2, cy=H/2, pxPerDeg=(W*0.5-20)/FOV;
+    // subtle scanlines
+    ctx.strokeStyle='rgba(120,140,180,0.03)'; for(var y=0;y<H;y+=4){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+    var best=bestTarget();
+    // tags
+    TAGS.forEach(function(t){
+      var tx=t.bearing-pan; if(Math.abs(tx)>FOV+4) return;
+      var x=cx+tx*pxPerDeg, y=cy - t.ty*pxPerDeg*0.5;
+      var sz=22*t.area;
+      var isBest=best && best.t.id===t.id;
+      // tag square
+      ctx.fillStyle='#0E1525'; ctx.strokeStyle=isBest?'#34D7C5':'#5E6F8E'; ctx.lineWidth=isBest?3:2;
+      ctx.fillRect(x-sz/2,y-sz/2,sz,sz); ctx.strokeRect(x-sz/2,y-sz/2,sz,sz);
+      // fiducial pattern
+      ctx.fillStyle=isBest?'#34D7C5':'#33415e';
+      for(var i=0;i<3;i++)for(var j=0;j<3;j++){ if((i+j+t.id)%2===0){ ctx.fillRect(x-sz/2+4+i*(sz-8)/3, y-sz/2+4+j*(sz-8)/3, (sz-8)/3-1,(sz-8)/3-1); } }
+      // id label
+      ctx.fillStyle=isBest?'#34D7C5':'#92A2BE'; ctx.font='10px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText('ID '+t.id, x, y+sz/2+13);
+      if(isBest){ ctx.strokeStyle='#FFB020'; ctx.lineWidth=1; ctx.setLineDash([3,3]); ctx.strokeRect(x-sz/2-5,y-sz/2-5,sz+10,sz+10); ctx.setLineDash([]); }
+    });
+    // crosshair
+    ctx.strokeStyle='rgba(255,176,32,0.7)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(cx,16); ctx.lineTo(cx,H-16); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(20,cy); ctx.lineTo(W-20,cy); ctx.stroke();
+    ctx.strokeStyle='rgba(255,176,32,0.9)'; ctx.beginPath(); ctx.arc(cx,cy,10,0,Math.PI*2); ctx.stroke();
+    // tx line to best
+    if(best){ var bx=cx+best.tx*pxPerDeg; ctx.strokeStyle='#34D7C5'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(bx,cy); ctx.stroke(); }
+    // FOV label
+    ctx.fillStyle='#5E6F8E'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='left'; ctx.fillText('CAM "frontCam"', 10, 16);
+    // readouts
+    var tv=document.getElementById('tvTag');
+    if(best){
+      tv.textContent='target locked';
+      document.getElementById('roId').textContent=best.t.id;
+      document.getElementById('roTx').textContent=best.tx.toFixed(1)+'°';
+      document.getElementById('roTy').textContent=best.t.ty.toFixed(1)+'°';
+      document.getElementById('roA').textContent=(best.t.area*1.8).toFixed(1)+'%';
+    } else {
+      tv.textContent='no target';
+      document.getElementById('roId').textContent='-'; document.getElementById('roTx').textContent='-'; document.getElementById('roTy').textContent='-'; document.getElementById('roA').textContent='-';
+    }
+  }
+  function loop(){ draw(); requestAnimationFrame(loop); }
+  document.getElementById('pan').addEventListener('input',function(e){ pan=+e.target.value; document.getElementById('panv').textContent=pan+'°'; });
+  var dragging=false, lastX=0;
+  cv.addEventListener('pointerdown',function(e){ dragging=true; lastX=e.clientX; cv.setPointerCapture(e.pointerId); });
+  cv.addEventListener('pointermove',function(e){ if(!dragging)return; var dx=e.clientX-lastX; lastX=e.clientX; pan=Math.max(-45,Math.min(45, pan - dx*0.18)); document.getElementById('pan').value=Math.round(pan); document.getElementById('panv').textContent=Math.round(pan)+'°'; });
+  cv.addEventListener('pointerup',function(){ dragging=false; }); cv.addEventListener('pointercancel',function(){ dragging=false; });
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
+  requestAnimationFrame(loop);
+
+  var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
+  function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'').replace(/\(\)$/,'');}
+  document.getElementById('check').addEventListener('click',function(){
+    var all=true;
+    blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - getYaw'; res.className='code-result '+(all?'ok':'no');
+  });
+  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='getYaw';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(idx===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="deploy:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

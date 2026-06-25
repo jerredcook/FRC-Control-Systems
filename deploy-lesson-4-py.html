@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deploy · Part 1.4 - Git &amp; GitHub for Teams (Python)</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ink); color:var(--text);
+    font-family:var(--sans); font-size:17px; line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(900px 500px at 80% -10%, rgba(138,140,248,.07), transparent 60%),
+      radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  p .sub,.sub{color:var(--muted)}
+  .lead{font-size:19px}
+  em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  canvas.graph{display:block;width:100%;height:230px}
+  .stepcard{padding:16px 18px;border-top:1px solid var(--line);background:#0B1322}
+  .stepcard .scmd{font-family:var(--mono);font-size:14px;color:var(--teal);margin-bottom:6px}
+  .stepcard .scmd.plain{color:var(--amber)}
+  .stepcard .sdesc{font-size:14.5px;color:var(--muted);margin:0}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .btn.primary{background:linear-gradient(180deg,#a7adff,var(--indigo));color:#0a0f24;font-weight:700;border:none}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .stepcount{font-family:var(--mono);font-size:11px;color:var(--faint);margin-left:auto}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(138,140,248,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+  pre.code{font-family:var(--mono);font-size:13.5px;line-height:1.9;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic}
+  .code .cmd{color:var(--teal)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)}
+  .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7}
+  .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px}
+  @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px}
+  .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:120px;text-transform:uppercase}
+  .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)}
+  .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)}
+  .coursenav a.map{border-color:transparent;color:var(--teal)}
+
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="code.html"><span class="dot"></span><span class="name">Deploy</span></a>
+    <div class="top-meta">Part 1 · 04 / 05 · The Toolchain</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 1 · 04</b> The Toolchain</div>
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:-6px 0 14px">Code shown in <b style="color:var(--indigo)">Python</b> &middot; <a href="deploy-lesson-4.html" style="color:var(--muted)">switch to Java</a></div>
+    <div class="eyebrow">Git &amp; GitHub for Teams</div>
+    <h1>Many hands,<br>one <span class="accent">robot</span>.</h1>
+    <p class="dek">A robot is written by a whole team. Git is how a dozen people edit the same code without clobbering each other - and how you undo a mistake instead of panicking.</p>
+  </div>
+
+  <section>
+    <p class="lead">Git is a time machine and a merge tool.</p>
+    <p>Every change is saved as a <strong>commit</strong> - a labeled snapshot you can always return to. You do your work on a <strong>branch</strong> (a private copy), so you never break the main code. <strong>GitHub</strong> is the website that holds the team's shared copy. When your branch is ready, you open a <strong>pull request</strong> so teammates review it before it joins <span class="k">main</span>. Step through the whole flow below.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head">
+        <span class="demo-title">A feature branch, start to finish</span>
+        <span class="demo-tag">the team workflow</span>
+      </div>
+      <canvas class="graph" id="graph"></canvas>
+      <div class="stepcard" id="stepcard"></div>
+      <div class="controls">
+        <button class="btn primary" id="nextBtn">Next step ▸</button>
+        <button class="btn" id="resetBtn">Restart</button>
+        <span class="stepcount" id="stepcount"></span>
+      </div>
+    </div>
+    <p class="caption">Small branches, frequent commits, and a pull request for every change - that's how a team ships a robot without chaos on the night before competition.</p>
+  </section>
+
+  <section>
+    <div class="kicker">The commands</div>
+    <h2>The everyday five</h2>
+    <p>You'll type these constantly. Don't memorize - just recognize them; your editor has buttons for all of them too:</p>
+    <div class="codewrap">
+      <div class="clabel">Your daily git</div>
+<pre class="code"><span class="cmd">git checkout -b intake</span>    <span class="cm"># start a branch for your feature</span>
+<span class="cmd">git add .</span>                <span class="cm"># stage the files you changed</span>
+<span class="cmd">git commit -m "..."</span>      <span class="cm"># save a snapshot with a message</span>
+<span class="cmd">git pull</span>                 <span class="cm"># grab teammates' latest first</span>
+<span class="cmd">git push</span>                 <span class="cm"># send your branch up to GitHub</span></pre>
+    </div>
+    <div class="note indigo">
+      <div class="nh">Two habits that save seasons</div>
+      <p><strong>Pull before you push</strong> so you build on the team's latest, not an old copy. And <strong>never commit secrets or huge files</strong> - the generated <span class="k">.gitignore</span> already skips build output, but keep passwords and binaries out of the repo entirely.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>Two people edit the same line of the same file on different branches, then both merge. Git cannot guess who is right, so it stops and hands you a <strong>merge conflict</strong>, marking both versions with <span class="k">&lt;&lt;&lt;&lt;&lt;&lt;&lt;</span> and <span class="k">&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span> for you to resolve by hand. Read up on how to resolve one, and think about why small, frequent commits and short-lived branches make conflicts rarer and easier to untangle.</p>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">What is a commit?</div>
+        <div class="opts">
+          <button class="opt">Sending your code to the robot</button>
+          <button class="opt">A saved, labeled snapshot of your code you can always return to</button>
+          <button class="opt">A type of motor controller</button>
+        </div>
+        <div class="explain">A commit records the state of your files with a message. The full history of commits lets you see what changed, when, and roll back to any point - Git's time-machine superpower.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">Why work on a branch instead of directly on <code style="font-family:var(--mono);color:var(--teal)">main</code>?</div>
+        <div class="opts">
+          <button class="opt">Branches make the code run faster</button>
+          <button class="opt">It's required to deploy</button>
+          <button class="opt">So your in-progress work can't break the team's main code until it's reviewed and ready</button>
+        </div>
+        <div class="explain">A branch is a safe sandbox. You commit freely without touching main; when it's solid, a pull request merges it in. main stays deployable the whole time.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">What's a pull request for?</div>
+        <div class="opts">
+          <button class="opt">Proposing your branch be merged into main, so teammates can review it first</button>
+          <button class="opt">Downloading the latest code</button>
+          <button class="opt">Restarting the roboRIO</button>
+        </div>
+        <div class="explain">A pull request (PR) on GitHub says "here's my branch - please review and merge." It's where teammates catch bugs and discuss changes before they reach main. (git pull, a different thing, downloads the latest.)</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 1 · 04 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Repository</b><span>The project and its full history.</span></div>
+        <div class="gl"><b>Commit</b><span>A labeled snapshot you can return to.</span></div>
+        <div class="gl"><b>Branch</b><span>A safe parallel line of work.</span></div>
+        <div class="gl"><b>Push / Pull</b><span>Send / receive changes with GitHub.</span></div>
+        <div class="gl"><b>Pull request</b><span>Propose merging a branch, with review.</span></div>
+        <div class="gl"><b>main</b><span>The shared, deployable branch.</span></div>
+      </div>
+      <a class="next" href="deploy-lesson-5-py.html">
+        <div class="n-eyebrow">Up next · Part 1 · 05</div>
+        <h3>Docs &amp; Vendordeps</h3>
+        <p>Last toolchain piece: adding vendor libraries like CTRE Phoenix and REV, and learning to read the official docs so you're never stuck.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="deploy-lesson-3-py.html">← Part 1 · 03 · Build, Deploy, Run</a>
+    <a class="map" href="code.html">Course map</a>
+    <a href="deploy-lesson-5-py.html">Part 1 · 05 · Docs &amp; Vendordeps →</a>
+  </nav>
+
+</div>
+
+<footer>Deploy · Programming an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var TAU=Math.PI*2;
+  function makeCanvas(cv){
+    var ctx=cv.getContext('2d'); var o={cv:cv,ctx:ctx,w:0,h:0};
+    function fit(){ var r=cv.getBoundingClientRect(); if(!r.width)return; var dpr=window.devicePixelRatio||1;
+      cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr); ctx.setTransform(dpr,0,0,dpr,0,0); o.w=r.width; o.h=r.height; }
+    o.fit=fit; fit(); return o;
+  }
+
+  // steps: 0..6
+  var STEPS=[
+    {cmd:'main has the team’s working code', plain:true, desc:'Everyone’s robot builds from main. You start here.'},
+    {cmd:'git checkout -b intake', desc:'Branch off main to work safely on the intake - your own line.'},
+    {cmd:'git commit -m "add intake motor"', desc:'Save a snapshot on your branch. Small, frequent commits beat one giant one.'},
+    {cmd:'git commit -m "tune intake speed"', desc:'Keep committing as you go - each is a point you can return to.'},
+    {cmd:'git push -u origin intake', desc:'Send your branch up to GitHub so the team can see it.'},
+    {cmd:'open a Pull Request', plain:true, desc:'Propose merging into main. Teammates review and catch issues first.'},
+    {cmd:'merge the PR', plain:true, desc:'Your intake joins main. Everyone pulls it and builds on top.'}
+  ];
+  var step=0;
+  var G=makeCanvas(document.getElementById('graph'));
+  var stepcard=document.getElementById('stepcard'), stepcount=document.getElementById('stepcount');
+
+  function node(ctx,x,y,col,label,filled){
+    ctx.beginPath(); ctx.arc(x,y,8,0,TAU);
+    ctx.fillStyle=filled?col:'#0E1525'; ctx.strokeStyle=col; ctx.lineWidth=2; ctx.fill(); ctx.stroke();
+    if(label){ ctx.fillStyle='#92A2BE'; ctx.font='10px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText(label,x,y+22); }
+  }
+  function draw(){
+    var ctx=G.ctx,W=G.w,H=G.h; ctx.clearRect(0,0,W,H);
+    var mainY=H*0.66, featY=H*0.30;
+    var x0=W*0.12, xb=W*0.30, xa=W*0.46, xb2=W*0.62, xm=W*0.84;
+    var mainCol='#34D7C5', featCol='#8E8CF8';
+    // lane labels
+    ctx.fillStyle='#5E6F8E'; ctx.font='10px ui-monospace,Menlo,monospace'; ctx.textAlign='left';
+    ctx.fillText('intake', 12, featY+4); ctx.fillText('main', 12, mainY+4);
+    // main line
+    ctx.strokeStyle=mainCol; ctx.lineWidth=3; ctx.globalAlpha=.85;
+    ctx.beginPath(); ctx.moveTo(x0,mainY); ctx.lineTo(step>=6?xm:W-20,mainY); ctx.stroke(); ctx.globalAlpha=1;
+    node(ctx,x0,mainY,mainCol,'C1',true);
+    // branch
+    if(step>=1){
+      ctx.strokeStyle=featCol; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.moveTo(xb,mainY); ctx.bezierCurveTo(xb,(mainY+featY)/2, xb+10,featY, xb+24,featY); ctx.stroke();
+      // small marker at branch point
+      node(ctx,xb,mainY,mainCol,'',true);
+      // feature lane line
+      var fend = step>=3?xb2 : (step>=2?xa:xb+24);
+      ctx.strokeStyle=featCol; ctx.beginPath(); ctx.moveTo(xb+24,featY); ctx.lineTo(fend,featY); ctx.stroke();
+    }
+    if(step>=2) node(ctx,xa,featY,featCol,'A',true);
+    if(step>=3) node(ctx,xb2,featY,featCol,'B',true);
+    if(step>=4){ // push badge
+      ctx.fillStyle='#5E6F8E'; ctx.font='10px ui-monospace,Menlo,monospace'; ctx.textAlign='center';
+      ctx.fillText('↑ pushed to GitHub', (xa+xb2)/2, featY-20);
+    }
+    if(step>=5){ // PR badge
+      ctx.fillStyle='#FFB020'; ctx.font='700 10px ui-monospace,Menlo,monospace'; ctx.textAlign='center';
+      ctx.fillText('PR →', (xb2+xm)/2, featY-6);
+    }
+    if(step>=6){ // merge down to main
+      ctx.strokeStyle=featCol; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.moveTo(xb2,featY); ctx.bezierCurveTo(xm-20,featY, xm,(mainY+featY)/2, xm,mainY); ctx.stroke();
+      node(ctx,xm,mainY,'#43D67E','merge',true);
+    }
+  }
+  function render(){
+    draw();
+    var s=STEPS[step];
+    stepcard.innerHTML='<div class="scmd'+(s.plain?' plain':'')+'">'+(s.plain?'':'$ ')+s.cmd+'</div><p class="sdesc">'+s.desc+'</p>';
+    stepcount.textContent='Step '+(step+1)+' / '+STEPS.length;
+    document.getElementById('nextBtn').disabled = step>=STEPS.length-1;
+  }
+  document.getElementById('nextBtn').addEventListener('click',function(){ if(step<STEPS.length-1){ step++; render(); } });
+  document.getElementById('resetBtn').addEventListener('click',function(){ step=0; render(); });
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){G.fit();draw();},120);});
+  render();
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){
+      opt.addEventListener('click',function(){
+        if(done)return;done=true;
+        opts.forEach(function(o){o.classList.add('locked');});
+        if(idx===correct){opt.classList.add('correct');}
+        else{opt.classList.add('wrong');opts[correct].classList.add('correct');}
+        explain.classList.add('show');
+      });
+    });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="deploy:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

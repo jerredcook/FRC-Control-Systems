@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deploy · Part 2.3 - Classes &amp; Objects (Python)</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(138,140,248,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--indigo);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:13.5px;line-height:1.85;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic} .code .kw{color:#ff9bbf} .code .ty{color:var(--teal)} .code .fn{color:var(--indigo)} .code .num{color:var(--amber)} .code .str{color:#9ad6a0}
+  .code .tag{color:var(--amber);font-style:normal}
+
+  .play{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .play-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .play-title{font-family:var(--mono);font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+  .play-tag{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .play pre{font-family:var(--mono);font-size:12.5px;line-height:1.8;margin:0;padding:14px 16px;white-space:pre;overflow-x:auto;color:#cdd9ec;background:#080d16}
+  .spawner{padding:13px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+  .fin{display:flex;flex-direction:column;gap:5px}
+  .fin label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+  .fin input{font-family:var(--mono);font-size:13px;background:var(--panel-2);border:1px solid var(--line-2);color:var(--text);border-radius:7px;padding:8px 10px;outline:none;width:130px}
+  .fin input:focus{border-color:var(--indigo)}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .btn.primary{background:linear-gradient(180deg,#a7adff,var(--indigo));color:#0a0f24;font-weight:700;border:none}
+  .objs{padding:6px 16px 16px;display:grid;gap:10px;background:#080d16;border-top:1px solid var(--line)}
+  @media(min-width:560px){.objs{grid-template-columns:1fr 1fr}}
+  .obj{border:1px solid var(--line-2);border-radius:10px;background:var(--panel-2);padding:11px 13px;border-left:3px solid var(--teal)}
+  .obj .on{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--teal);margin-bottom:6px}
+  .obj .row{font-family:var(--mono);font-size:12.5px;color:#cdd9ec;display:flex;justify-content:space-between;gap:10px;padding:1px 0}
+  .obj .row .f{color:var(--muted)}
+  .emptyobjs{font-family:var(--mono);font-size:12px;color:var(--faint);grid-column:1/-1;padding:6px 0}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(138,140,248,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .code-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .code-ex .chead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .code-ex .chead .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,176,32,.14);display:grid;place-items:center;color:var(--amber);font-size:13px}
+  .code-ex .ctask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .code-ex pre.code{margin:0 0 14px}
+  .blank{font-family:var(--mono);font-size:13px;width:9ch;text-align:center;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:2px 4px;outline:none}
+  .blank:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
+  .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:110px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="code.html"><span class="dot"></span><span class="name">Deploy</span></a>
+    <div class="top-meta">Part 2 · 03 / 05 · Just-Enough Python</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 2 · 03</b> Just-Enough Python</div>
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:-6px 0 14px">Code shown in <b style="color:var(--indigo)">Python</b> &middot; <a href="deploy-lesson-8.html" style="color:var(--muted)">switch to Java</a></div>
+    <div class="eyebrow">Classes &amp; Objects</div>
+    <h1>Blueprints<br>and <span class="accent">things</span>.</h1>
+    <p class="dek">A class is a blueprint. An object is a real thing you stamp out from it. This is how your code models a motor, an arm, a whole robot.</p>
+  </div>
+
+  <section>
+    <p class="lead">A class describes a kind of thing.</p>
+    <p>It bundles <strong>data</strong> (attributes) and <strong>actions</strong> (methods) together, plus a <strong>constructor</strong> - the recipe for building one, written as <span class="k">__init__</span>. From a single class you can make as many <strong>objects</strong> as you want, each with its own data. Here's a tiny <span class="k">Motor</span> blueprint:</p>
+    <div class="codewrap">
+      <div class="clabel">motor.py - a class <span class="badge">Python</span></div>
+<pre class="code"><span class="kw">class</span> <span class="ty">Motor</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, name: <span class="ty">str</span>, can_id: <span class="ty">int</span>):   <span class="cm"># ◂ constructor: how to build one</span>
+        self.name = name                       <span class="cm"># ◂ attribute: this motor's data</span>
+        self.can_id = can_id
+
+    <span class="kw">def</span> <span class="fn">describe</span>(self):                       <span class="cm"># ◂ method: an action it can do</span>
+        <span class="fn">print</span>(<span class="str">f"{self.name} on CAN {self.can_id}"</span>)</pre>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Try it</div>
+    <h2>One class, many objects</h2>
+    <p>Calling the class like a function - <span class="k">Motor(...)</span> - stamps out an object from it. Make a few <span class="k">Motor</span>s below - give each a name and CAN id, and watch each become its own independent thing with its own data.</p>
+
+    <div class="play">
+      <div class="play-head"><span class="play-title">in robot_container…</span><span class="play-tag">Motor(…)</span></div>
+      <pre id="newCode"><span class="cm"># press "Motor(…)" to create an object</span></pre>
+      <div class="spawner">
+        <div class="fin"><label>name</label><input id="nm" type="text" value="Left" autocomplete="off" /></div>
+        <div class="fin"><label>can_id</label><input id="cid" type="text" value="1" autocomplete="off" inputmode="numeric" /></div>
+        <button class="btn primary" id="mk">+ Motor(…)</button>
+        <button class="btn" id="clr">Clear</button>
+      </div>
+      <div class="objs" id="objs"></div>
+    </div>
+    <p class="caption">Each object is a separate box of data made from the same blueprint. <span class="k">left</span> and <span class="k">right</span> are both Motors, but changing one never touches the other.</p>
+  </section>
+
+  <section>
+    <div class="kicker">Why it matters</div>
+    <h2>Objects model hardware</h2>
+    <p>This is the whole reason robot code is built on classes. A <span class="k">TalonFX</span> object <em>is</em> a real motor - you make one with its CAN id, then call methods on it to read and command the physical motor. An <span class="k">Elevator</span> object holds its motor and its state. The robot, in code, is a collection of objects mirroring the metal.</p>
+    <div class="note indigo">
+      <div class="nh">"self" means "this object"</div>
+      <p>Inside the constructor, <span class="k">self.can_id = can_id</span> means "set <em>this particular object's</em> can_id attribute to the value passed in." It's how each object keeps its own data straight, even though they all ran the same <span class="k">__init__</span> code. Every method takes <span class="k">self</span> as its first parameter so it knows which object it belongs to.</p>
+    </div>
+
+    <div class="code-ex">
+      <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
+      <div class="ctask">Create a Motor object named <code style="font-family:var(--mono);color:var(--teal)">intake</code> on CAN id 5. Fill the blank with the class you call to build an object.</div>
+<pre class="code">intake = <input class="blank" data-ans="motor" aria-label="blank" autocomplete="off" spellcheck="false">(<span class="str">"Intake"</span>, <span class="num">5</span>)</pre>
+      <div class="code-actions">
+        <button class="btn" id="check">Check</button>
+        <button class="btn" id="reveal">Reveal</button>
+        <span class="code-result" id="cres"></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>Here is a gotcha that bites teams: an object variable does not hold the object itself, it holds a reference to it, like a luggage tag pointing at one bag. So if you write <span class="k">b = a</span>, both names tag the <em>same</em> Motor, and changing <span class="k">b.can_id</span> also changes <span class="k">a.can_id</span>. Try it in the demo logic in your head, then look up "reference vs value" and Python's <span class="k">is</span> operator versus <span class="k">==</span> to see how identity and equality differ.</p>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">What's the difference between a class and an object?</div>
+        <div class="opts">
+          <button class="opt">They're the same thing</button>
+          <button class="opt">A class is the blueprint; an object is a specific thing built from it</button>
+          <button class="opt">A class is faster than an object</button>
+        </div>
+        <div class="explain">The class describes the kind of thing (its attributes and methods). Each object is one real instance with its own data - like two Motors built from the same Motor class.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 2</div>
+        <div class="qt">What does a constructor (<code style="font-family:var(--mono);color:var(--teal)">__init__</code>) do?</div>
+        <div class="opts">
+          <button class="opt">Builds a new object and sets up its starting attributes</button>
+          <button class="opt">Deletes an object</button>
+          <button class="opt">Deploys the code</button>
+        </div>
+        <div class="explain">The constructor is the recipe Python runs when you call the class - it runs once per object to initialize that object's attributes (e.g., its name and CAN id).</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 3</div>
+        <div class="qt">If you make two Motor objects and change one's <code style="font-family:var(--mono);color:var(--teal)">can_id</code>, what happens to the other?</div>
+        <div class="opts">
+          <button class="opt">It changes too</button>
+          <button class="opt">The program crashes</button>
+          <button class="opt">Nothing - each object has its own separate attributes</button>
+        </div>
+        <div class="explain">Objects have independent state. left.can_id and right.can_id are different boxes; changing one leaves the other untouched. That independence is why objects model separate pieces of hardware so well.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 2 · 03 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Class</b><span>A blueprint: attributes + methods + __init__.</span></div>
+        <div class="gl"><b>Object</b><span>One instance built from a class.</span></div>
+        <div class="gl"><b>Attribute</b><span>A piece of an object's data.</span></div>
+        <div class="gl"><b>__init__</b><span>The constructor Python runs to build one.</span></div>
+        <div class="gl"><b>Call the class</b><span>Motor(…) stamps out a fresh object.</span></div>
+        <div class="gl"><b>self</b><span>Refers to the current object.</span></div>
+      </div>
+      <a class="next" href="deploy-lesson-9-py.html">
+        <div class="n-eyebrow">Up next · Part 2 · 04</div>
+        <h3>Inheritance &amp; Interfaces</h3>
+        <p>Classes can build on other classes. That's how every WPILib subsystem works - and why you write <code>class Elevator(Subsystem)</code> and override its methods.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="deploy-lesson-7-py.html">← Part 2 · 02 · Methods &amp; Logic</a>
+    <a class="map" href="code.html">Course map</a>
+    <a href="deploy-lesson-9-py.html">Part 2 · 04 · Inheritance &amp; Interfaces →</a>
+  </nav>
+
+</div>
+
+<footer>Deploy · Programming an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var nm=document.getElementById('nm'), cid=document.getElementById('cid');
+  var objsEl=document.getElementById('objs'), newCode=document.getElementById('newCode');
+  var objs=[], varNames=['left','right','intake','arm','shooter','climber','feeder','wrist'];
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function render(){
+    if(!objs.length){ objsEl.innerHTML='<div class="emptyobjs">no objects yet - make one above</div>'; newCode.innerHTML='<span class="cm"># press "Motor(…)" to create an object</span>'; return; }
+    objsEl.innerHTML=objs.map(function(o,i){
+      return '<div class="obj"><div class="on">'+esc(o.v)+' &nbsp;·&nbsp; Motor #'+(i+1)+'</div>'+
+        '<div class="row"><span class="f">name</span><span>"'+esc(o.name)+'"</span></div>'+
+        '<div class="row"><span class="f">can_id</span><span>'+esc(o.canId)+'</span></div></div>';
+    }).join('');
+    newCode.innerHTML=objs.map(function(o){
+      return esc(o.v)+' = <span class="ty">Motor</span>(<span class="str">"'+esc(o.name)+'"</span>, <span class="num">'+esc(o.canId)+'</span>)';
+    }).join('\n');
+  }
+  document.getElementById('mk').addEventListener('click',function(){
+    var name=(nm.value||'Motor').trim(); var canId=(cid.value||'0').trim().replace(/[^0-9-]/g,'')||'0';
+    var v=varNames[objs.length]||('m'+(objs.length+1));
+    objs.push({v:v, name:name, canId:canId}); render();
+  });
+  document.getElementById('clr').addEventListener('click',function(){ objs=[]; render(); });
+  render();
+
+  var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
+  function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'');}
+  document.getElementById('check').addEventListener('click',function(){
+    var all=true;
+    blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - call the class Motor'; res.className='code-result '+(all?'ok':'no');
+  });
+  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='Motor';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(idx===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="deploy:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

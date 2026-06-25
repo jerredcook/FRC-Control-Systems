@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deploy · Part 4.6 - NetworkTables &amp; Dashboards (Python)</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(138,140,248,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;align-items:center;gap:7px}
+  .demo-tag .live{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+  .dash-split{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line)}
+  @media(min-width:620px){.dash-split{grid-template-columns:0.92fr 1.08fr}}
+  .nt{background:#080d16;padding:14px 16px}
+  .panelh{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .panelh .arrow{color:var(--indigo)}
+  .ntrow{display:flex;justify-content:space-between;gap:10px;font-family:var(--mono);font-size:12.5px;padding:6px 0;border-bottom:1px solid rgba(120,140,180,.08)}
+  .ntrow:last-child{border-bottom:none}
+  .ntrow .key{color:var(--muted)} .ntrow .val{color:var(--teal);transition:color .25s}
+  .ntrow.tune .val{color:var(--amber)}
+  .widgets{background:#0B1322;padding:14px 16px;display:grid;gap:12px;grid-template-columns:1fr 1fr}
+  .w{border:1px solid var(--line-2);border-radius:10px;padding:11px 13px;background:#0E1525}
+  .w.wide{grid-column:1 / -1}
+  .w .wl{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-bottom:6px}
+  .w .big{font-family:var(--mono);font-size:24px;font-weight:700;color:var(--text);line-height:1}
+  .w .unit{font-size:12px;color:var(--faint)}
+  .bar{height:8px;border-radius:5px;background:var(--line-2);margin-top:9px;overflow:hidden}
+  .bar i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,var(--teal),var(--indigo));width:0%}
+  .bar.amber i{background:linear-gradient(90deg,#FFC04D,var(--amber))}
+  .light{display:flex;align-items:center;gap:10px}
+  .light .dot2{width:22px;height:22px;border-radius:50%;background:#1B2540;border:2px solid var(--line-2);transition:.15s}
+  .light.on .dot2{background:var(--green);border-color:var(--green);box-shadow:0 0 14px -2px var(--green)}
+  .light .st{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--faint)} .light.on .st{color:var(--green)}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+  .slider-group{flex:1 1 240px;display:flex;flex-direction:column;gap:6px;min-width:200px}
+  .slider-group label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+  .slider-group label .val{color:var(--amber)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:var(--line-2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--amber);cursor:pointer;box-shadow:0 0 10px -1px var(--amber)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--amber);cursor:pointer}
+  .echo{font-family:var(--mono);font-size:12px;color:var(--muted)} .echo b{color:var(--amber)}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--indigo);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:13px;line-height:1.85;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic} .code .kw{color:#ff9bbf} .code .ty{color:var(--teal)} .code .fn{color:var(--indigo)} .code .num{color:var(--amber)} .code .st{color:#9ce8b0}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(138,140,248,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .code-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .code-ex .chead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .code-ex .chead .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,176,32,.14);display:grid;place-items:center;color:var(--amber);font-size:13px}
+  .code-ex .ctask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .code-ex pre.code{margin:0 0 14px}
+  .blank{font-family:var(--mono);font-size:13px;width:12ch;text-align:center;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:2px 4px;outline:none}
+  .blank:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
+  .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .roadmap{display:grid;gap:12px;margin:20px 0}
+  @media(min-width:620px){.roadmap{grid-template-columns:repeat(2,1fr)}}
+  .rm{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:15px 16px;border-left:3px solid var(--accent,var(--indigo))}
+  .rm .pt{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent,var(--indigo));margin-bottom:5px}
+  .rm h4{margin:0 0 4px;font-size:15.5px;color:var(--text)} .rm p{margin:0;font-size:13.5px;color:var(--muted)}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:120px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(255,176,32,0.12),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--amber);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--amber)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)} .coursenav a.next-link{color:var(--amber);border-color:rgba(255,176,32,.4)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="code.html"><span class="dot"></span><span class="name">Deploy</span></a>
+    <div class="top-meta">Part 4 · 06 / 06 · Finale</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 4 · 06</b> Talking to Hardware · Finale</div>
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:-6px 0 14px">Code shown in <b style="color:var(--indigo)">Python</b> &middot; <a href="deploy-lesson-22.html" style="color:var(--muted)">switch to Java</a></div>
+    <div class="eyebrow">NetworkTables &amp; Dashboards</div>
+    <h1>See what the<br><span class="accent">robot</span> sees.</h1>
+    <p class="dek">NetworkTables is a shared notebook both the robot and your laptop can read and write. Publish a number and it appears on a dashboard instantly. Change a number on the dashboard and the robot reads it back.</p>
+  </div>
+
+  <section>
+    <p class="lead">A live, two-way table between robot and driver station.</p>
+    <p>Every loop, your robot writes values into <strong>NetworkTables</strong> by name: <span class="k">"Shooter/RPM"</span>, <span class="k">"Intake/hasNote"</span>. A dashboard like <strong>Elastic</strong>, <strong>Shuffleboard</strong>, or <strong>AdvantageScope</strong> subscribes and draws them. It runs the other way too: the dashboard can write a value, and the robot reads it, which is how you tune a number without redeploying. Watch the robot publish, then drag the tuning slider.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">NetworkTables, live</span><span class="demo-tag"><span class="live"></span>robot publishing</span></div>
+      <div class="dash-split">
+        <div class="nt">
+          <div class="panelh">Raw table <span class="arrow">·</span> key → value</div>
+          <div id="ntrows"></div>
+        </div>
+        <div class="widgets" id="widgets">
+          <div class="w wide">
+            <div class="wl">Shooter / RPM</div>
+            <div><span class="big" id="wRpm">0</span> <span class="unit">rpm</span></div>
+            <div class="bar"><i id="wRpmBar"></i></div>
+          </div>
+          <div class="w">
+            <div class="wl">Arm / angle</div>
+            <div><span class="big" id="wArm">0</span><span class="unit">°</span></div>
+          </div>
+          <div class="w">
+            <div class="wl">Intake / hasNote</div>
+            <div class="light" id="wNote"><span class="dot2"></span><span class="st">FALSE</span></div>
+          </div>
+          <div class="w wide">
+            <div class="wl">PDH / voltage</div>
+            <div><span class="big" id="wVolt">0.0</span> <span class="unit">V</span></div>
+            <div class="bar amber"><i id="wVoltBar"></i></div>
+          </div>
+        </div>
+      </div>
+      <div class="controls">
+        <div class="slider-group"><label>Dashboard tunable: Shooter/kP <span class="val" id="kpv">0.18</span></label><input type="range" id="kp" min="0" max="50" value="18"></div>
+        <div class="echo">robot reads back: kP = <b id="kpEcho">0.18</b></div>
+      </div>
+    </div>
+    <p class="caption">The left side is the raw table the robot writes; the right side is how a dashboard draws those same keys. The kP row glows amber because it flows the other way: you set it on the dashboard, the robot reads it live.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In code</div>
+    <h2>Publish out, read back</h2>
+    <p>The quick way is <span class="k">SmartDashboard</span>: one call per value, per loop. For high-rate logging, publish a typed signal once and set it each loop. Both land in the same NetworkTables:</p>
+    <div class="codewrap">
+      <div class="clabel">Telemetry <span class="badge">Python · RobotPy</span></div>
+<pre class="code"><span class="kw">from</span> wpilib <span class="kw">import</span> <span class="ty">SmartDashboard</span>
+<span class="kw">from</span> ntcore <span class="kw">import</span> <span class="ty">NetworkTableInstance</span>
+
+<span class="cm"># publish telemetry every loop - shows up on the dashboard by name</span>
+<span class="ty">SmartDashboard</span>.<span class="fn">putNumber</span>(<span class="st">"Shooter/RPM"</span>, self.shooter.<span class="fn">get_rpm</span>())
+<span class="ty">SmartDashboard</span>.<span class="fn">putBoolean</span>(<span class="st">"Intake/hasNote"</span>, self.intake.<span class="fn">has_game_piece</span>())
+<span class="ty">SmartDashboard</span>.<span class="fn">putNumber</span>(<span class="st">"Arm/angleDeg"</span>, self.arm.<span class="fn">get_angle</span>())
+
+<span class="cm"># read a value the dashboard sends back - live tuning, no redeploy</span>
+k_p = <span class="ty">SmartDashboard</span>.<span class="fn">getNumber</span>(<span class="st">"Shooter/kP"</span>, <span class="num">0.18</span>)
+
+<span class="cm"># modern, faster: publish a typed signal once, set it each loop</span>
+self.rpm_pub = <span class="ty">NetworkTableInstance</span>.<span class="fn">getDefault</span>() \
+    .<span class="fn">getTable</span>(<span class="st">"Shooter"</span>).<span class="fn">getDoubleTopic</span>(<span class="st">"RPM"</span>).<span class="fn">publish</span>()
+self.rpm_pub.<span class="fn">set</span>(self.shooter.<span class="fn">get_rpm</span>())</pre>
+    </div>
+    <div class="note indigo">
+      <div class="nh">You can't debug what you can't see</div>
+      <p>Robots fail in ways you can't watch from the stands. Logging a few key signals, RPM, angles, whether a sensor sees a game piece, turns "it didn't work" into "the beam break never tripped." The same two-way channel carries your auto chooser and tuning numbers, so a dashboard is both your window into the robot and your tuning knob. Log liberally.</p>
+    </div>
+
+    <div class="code-ex">
+      <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
+      <div class="ctask">Publish the shooter's RPM to the dashboard under the name "Shooter/RPM". Fill in the method.</div>
+<pre class="code"><span class="ty">SmartDashboard</span>.<input class="blank" data-ans="putnumber" aria-label="blank" autocomplete="off" spellcheck="false">(<span class="st">"Shooter/RPM"</span>, self.shooter.<span class="fn">get_rpm</span>())</pre>
+      <div class="code-actions">
+        <button class="btn" id="check">Check</button>
+        <button class="btn" id="reveal">Reveal</button>
+        <span class="code-result" id="cres"></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>A common trap: a value you putNumber() every loop can NOT be tuned from the dashboard, because your code overwrites whatever you typed on the very next loop. For a live-tunable number, publish it once with a default and only read it back, or use WPILib's Preferences, which remembers the value across reboots. Try wiring up a tunable kP that survives a power cycle. Why would a number that resets to its default every time you restart the robot be a headache on competition day?</p>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">What is NetworkTables?</div>
+        <div class="opts">
+          <button class="opt">A type of motor controller</button>
+          <button class="opt">A shared key-value table synced between the robot and the dashboard</button>
+          <button class="opt">A battery</button>
+        </div>
+        <div class="explain">NetworkTables is a live table of named values shared over the network. The robot writes to it, dashboards read from it, and it all stays in sync automatically.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">Is NetworkTables one-way (robot to dashboard only)?</div>
+        <div class="opts">
+          <button class="opt">Yes, the robot can only send</button>
+          <button class="opt">Yes, the dashboard can only send</button>
+          <button class="opt">No - it's two-way; the dashboard can write values the robot reads</button>
+        </div>
+        <div class="explain">It's bidirectional. That's what makes live tuning and auto-mode choosers work: the dashboard writes "Shooter/kP" or "Auto/selected" and the robot reads it back, no code redeploy needed.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">Which tools read NetworkTables to show you the robot's data?</div>
+        <div class="opts">
+          <button class="opt">Elastic, Shuffleboard, AdvantageScope</button>
+          <button class="opt">GitHub and VS Code</button>
+          <button class="opt">The motor controllers</button>
+        </div>
+        <div class="explain">Dashboards like Elastic and Shuffleboard, and the log viewer AdvantageScope, all subscribe to NetworkTables to plot and display what your robot publishes.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">You finished Part 4</div>
+    <h2>Your code can sense and move</h2>
+    <p>Motors, encoders, the gyro, switches, the gamepad, and the dashboard. Your subsystems can now read every input and command every output on the robot. There's one question left, and it's the big one:</p>
+    <div class="roadmap">
+      <div class="rm" style="--accent:var(--amber)"><div class="pt">Part 5 · Next</div><h4>Make It Move</h4><p>You can drive a motor and read an encoder. How do you make a mechanism go <em>exactly</em> where you tell it? That is the Control course.</p></div>
+      <div class="rm" style="--accent:var(--teal)"><div class="pt">Part 6</div><h4>Driving &amp; Autonomous</h4><p>Drivetrains, odometry, and routines that score on their own.</p></div>
+      <div class="rm" style="--accent:var(--indigo)"><div class="pt">Part 7</div><h4>Seeing &amp; Thinking</h4><p>Cameras, AprilTags, pose estimation, and state machines.</p></div>
+      <div class="rm" style="--accent:var(--green)"><div class="pt">Part 8</div><h4>Pro Practices</h4><p>Dashboards, simulation, tests, and competition-day discipline.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 4 · 06 · Recap · Part 4 complete ★</h3>
+      <div class="glossary">
+        <div class="gl"><b>NetworkTables</b><span>Shared key-value table over the net.</span></div>
+        <div class="gl"><b>putNumber</b><span>Publish a value by name.</span></div>
+        <div class="gl"><b>getNumber</b><span>Read a value the dashboard set.</span></div>
+        <div class="gl"><b>Bidirectional</b><span>Tuning and auto choosers flow back.</span></div>
+        <div class="gl"><b>Dashboards</b><span>Elastic, Shuffleboard, AdvantageScope.</span></div>
+        <div class="gl"><b>Log liberally</b><span>Can't debug what you can't see.</span></div>
+      </div>
+      <a class="next" href="closing-the-loop.html">
+        <div class="n-eyebrow">Part 5 · Make It Move · the Control course</div>
+        <h3>On to Closing the Loop →</h3>
+        <p>You can read sensors and drive motors. Now make them precise: feedback, PID, feedforward, and CTRE tuning, 24 interactive lessons that turn raw motion into exact motion.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="deploy-lesson-21-py.html">← Part 4 · 05 · The Gamepad</a>
+    <a class="map" href="code.html">Course map</a>
+    <a class="next-link" href="closing-the-loop.html">Part 5 · Make It Move →</a>
+  </nav>
+
+</div>
+
+<footer>Deploy · Programming an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var kp=0.18;
+  var rowsEl=document.getElementById('ntrows');
+  var KEYS=[
+    {k:'Shooter/RPM', tune:false},
+    {k:'Arm/angleDeg', tune:false},
+    {k:'Intake/hasNote', tune:false},
+    {k:'PDH/voltage', tune:false},
+    {k:'Shooter/kP', tune:true}
+  ];
+  var rowMap={};
+  KEYS.forEach(function(K){
+    var d=document.createElement('div'); d.className='ntrow'+(K.tune?' tune':'');
+    d.innerHTML='<span class="key">'+K.k+'</span><span class="val">-</span>';
+    rowsEl.appendChild(d); rowMap[K.k]=d.querySelector('.val');
+  });
+  var t0=null;
+  function frame(ts){
+    if(t0===null) t0=ts; var t=(ts-t0)/1000;
+    var rpm = t<1.2 ? 2600*(t/1.2) : 2600 + Math.sin(t*0.9)*120 + (Math.random()-0.5)*30;
+    var arm = 45 + Math.sin(t*0.55)*42;
+    var note = (Math.floor(t/3.5)%2)===1;
+    var volt = 12.5 - (t%24)/24*0.7 + (Math.random()-0.5)*0.05;
+    // raw table
+    rowMap['Shooter/RPM'].textContent = rpm.toFixed(0);
+    rowMap['Arm/angleDeg'].textContent = arm.toFixed(1);
+    rowMap['Intake/hasNote'].textContent = note ? 'True' : 'False';
+    rowMap['PDH/voltage'].textContent = volt.toFixed(2);
+    rowMap['Shooter/kP'].textContent = kp.toFixed(2);
+    // widgets
+    document.getElementById('wRpm').textContent = rpm.toFixed(0);
+    document.getElementById('wRpmBar').style.width = Math.max(0,Math.min(100, rpm/3000*100))+'%';
+    document.getElementById('wArm').textContent = arm.toFixed(0);
+    var note2=document.getElementById('wNote'); note2.classList.toggle('on',note); note2.querySelector('.st').textContent = note?'TRUE':'FALSE';
+    document.getElementById('wVolt').textContent = volt.toFixed(1);
+    document.getElementById('wVoltBar').style.width = Math.max(0,Math.min(100,(volt-10)/3*100))+'%';
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  document.getElementById('kp').addEventListener('input',function(e){ kp=(+e.target.value)/100; document.getElementById('kpv').textContent=kp.toFixed(2); document.getElementById('kpEcho').textContent=kp.toFixed(2); });
+
+  var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
+  function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'').replace(/\(\)$/,'');}
+  document.getElementById('check').addEventListener('click',function(){
+    var all=true;
+    blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - putNumber'; res.className='code-result '+(all?'ok':'no');
+  });
+  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='putNumber';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(idx===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="deploy:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

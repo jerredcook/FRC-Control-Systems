@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deploy · Part 3.3 - Commands (Python)</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(138,140,248,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .methods{display:flex;flex-wrap:wrap;gap:8px;padding:16px 16px 4px;align-items:center;justify-content:center}
+  .meth{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line-2);border-radius:9px;padding:9px 13px;transition:.12s;position:relative}
+  .meth .lbl{font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);display:block;margin-bottom:2px}
+  .meth.on{border-color:var(--indigo);background:rgba(138,140,248,.12);color:var(--text);box-shadow:0 0 16px -5px var(--indigo)}
+  .meth.loop{border-style:dashed}
+  .marrow{color:var(--faint);font-size:14px}
+  .loopwrap{display:inline-flex;align-items:center;gap:8px;border:1px dashed var(--line-2);border-radius:11px;padding:6px 8px}
+  .loopwrap .lk{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
+  .log{margin:12px 16px 0;background:#080d16;border:1px solid var(--line-2);border-radius:10px;padding:12px 14px;font-family:var(--mono);font-size:12.5px;line-height:1.7;min-height:120px;max-height:170px;overflow-y:auto}
+  .log .l{color:var(--muted)} .log .l .t{color:var(--faint)} .log .l .no{color:var(--faint)} .log .l .yes{color:var(--green)} .log .l .end{color:var(--amber)}
+  .controls{padding:14px 16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)} .btn:disabled{opacity:.4;cursor:not-allowed}
+  .btn.primary{background:linear-gradient(180deg,#a7adff,var(--indigo));color:#0a0f24;font-weight:700;border:none}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--indigo);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:13px;line-height:1.8;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic} .code .kw{color:#ff9bbf} .code .ty{color:var(--teal)} .code .fn{color:var(--indigo)} .code .num{color:var(--amber)} .code .an{color:var(--amber)} .code .bl{color:#ff9bbf}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(138,140,248,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .code-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .code-ex .chead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .code-ex .chead .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,176,32,.14);display:grid;place-items:center;color:var(--amber);font-size:13px}
+  .code-ex .ctask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .code-ex pre.code{margin:0 0 14px}
+  .blank{font-family:var(--mono);font-size:13px;width:12ch;text-align:center;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:2px 4px;outline:none}
+  .blank:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
+  .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:110px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="code.html"><span class="dot"></span><span class="name">Deploy</span></a>
+    <div class="top-meta">Part 3 · 03 / 06 · Command-Based</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 3 · 03</b> Command-Based Robots</div>
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:-6px 0 14px">Code shown in <b style="color:var(--indigo)">Python</b> &middot; <a href="deploy-lesson-13.html" style="color:var(--muted)">switch to Java</a></div>
+    <div class="eyebrow">Commands</div>
+    <h1>Actions over<br><span class="accent">time</span>.</h1>
+    <p class="dek">A command is a verb that plays out across many loops. Four little methods describe its whole life - start, repeat, finish, clean up.</p>
+  </div>
+
+  <section>
+    <p class="lead">A command has a lifecycle.</p>
+    <p>When the scheduler runs a command, it calls four methods at the right moments: <span class="k">initialize</span> once at the start, <span class="k">execute</span> every loop while it runs, <span class="k">isFinished</span> every loop to ask "done yet?", and <span class="k">end</span> once when it stops. Step a "run intake until we have a game piece" command through its life:</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">RunIntakeUntilLoaded · lifecycle</span><span class="demo-tag">step it</span></div>
+      <div class="methods">
+        <div class="meth" data-m="init"><span class="lbl">once</span>initialize()</div>
+        <div class="marrow">→</div>
+        <div class="loopwrap">
+          <span class="lk">every<br>loop</span>
+          <div class="meth loop" data-m="exec"><span class="lbl">do work</span>execute()</div>
+          <div class="meth loop" data-m="fin"><span class="lbl">done?</span>isFinished()</div>
+        </div>
+        <div class="marrow">→</div>
+        <div class="meth" data-m="end"><span class="lbl">once</span>end()</div>
+      </div>
+      <div class="log" id="log"></div>
+      <div class="controls">
+        <button class="btn primary" id="stepBtn">Step ▸</button>
+        <button class="btn" id="runBtn">Run</button>
+        <button class="btn" id="resetBtn">Reset</button>
+      </div>
+    </div>
+    <p class="caption">execute() and isFinished() repeat every loop until isFinished() returns True - then end() runs once and the command is done.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In code</div>
+    <h2>The four methods - and the easy way</h2>
+    <p>Written out as a full class, those four methods look like this. Notice <span class="k">addRequirements</span> - it tells the scheduler which subsystem this command needs (Lesson 3.6):</p>
+    <div class="codewrap">
+      <div class="clabel">A Command class <span class="badge">Python · RobotPy</span></div>
+<pre class="code"><span class="kw">class</span> <span class="ty">RunIntakeUntilLoaded</span>(commands2.<span class="ty">Command</span>):
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, intake):
+        <span class="kw">super</span>().<span class="fn">__init__</span>()
+        self.intake = intake
+        self.<span class="fn">addRequirements</span>(intake)              <span class="cm"># I need the Intake subsystem</span>
+
+    <span class="kw">def</span> <span class="fn">initialize</span>(self):
+        <span class="kw">pass</span>
+
+    <span class="kw">def</span> <span class="fn">execute</span>(self):
+        self.intake.<span class="fn">run</span>()
+
+    <span class="kw">def</span> <span class="fn">isFinished</span>(self):
+        <span class="kw">return</span> self.intake.<span class="fn">has_game_piece</span>()
+
+    <span class="kw">def</span> <span class="fn">end</span>(self, interrupted):
+        self.intake.<span class="fn">stop</span>()</pre>
+    </div>
+    <p>But you'll rarely write all that. WPILib gives subsystems <strong>command factories</strong> that build the same thing inline - far less code for simple actions:</p>
+    <div class="codewrap">
+      <div class="clabel">The same command, inline <span class="badge">Python · RobotPy</span></div>
+<pre class="code">(intake.<span class="fn">run</span>(<span class="kw">lambda</span>: intake.<span class="fn">run</span>())         <span class="cm"># execute(): run the intake every loop</span>
+       .<span class="fn">until</span>(intake.has_game_piece))    <span class="cm"># isFinished(): stop when loaded</span></pre>
+    </div>
+    <div class="note indigo">
+      <div class="nh">end() always runs - even when interrupted</div>
+      <p>If another command grabs the Intake mid-run, yours is <strong>interrupted</strong>: its <span class="k">end(True)</span> still fires so it can stop the motor cleanly. That guarantee is why you put "shut things off safely" in <span class="k">end()</span> - it can't be skipped.</p>
+    </div>
+
+    <div class="code-ex">
+      <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
+      <div class="ctask">Which method does the scheduler call every loop to ask "is this command done yet?" Fill the blank.</div>
+<pre class="code"><span class="kw">def</span> <input class="blank" data-ans="isfinished" aria-label="blank" autocomplete="off" spellcheck="false">(self):
+    <span class="kw">return</span> self.intake.<span class="fn">has_game_piece</span>()</pre>
+      <div class="code-actions">
+        <button class="btn" id="check">Check</button>
+        <button class="btn" id="reveal">Reveal</button>
+        <span class="code-result" id="cres"></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>Here is a gotcha that bites teams: an inline factory like <span class="k">runOnce(...)</span> or <span class="k">run(...)</span> built directly on a subsystem usually adds that subsystem as a requirement for you, but a bare <span class="k">commands2.cmd.run(lambda: ...)</span> with no subsystem requires nothing, so two of them can quietly fight over the same motor. Try writing the same simple action two ways and ask: which one did the scheduler protect, and how would you confirm a command's requirements before trusting it?</p>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">Which command method runs every single loop while the command is active?</div>
+        <div class="opts">
+          <button class="opt">initialize()</button>
+          <button class="opt">execute() - it's the repeating work</button>
+          <button class="opt">end()</button>
+        </div>
+        <div class="explain">execute() is called every loop while the command runs. initialize() and end() each run exactly once - at the start and the stop.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">What makes a command finish on its own?</div>
+        <div class="opts">
+          <button class="opt">It runs out of memory</button>
+          <button class="opt">end() decides</button>
+          <button class="opt">isFinished() returns True</button>
+        </div>
+        <div class="explain">Every loop the scheduler checks isFinished(). The moment it returns True, the command's end() runs and it's removed. Return False forever and it runs until interrupted.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">A command is interrupted partway through. What happens to end()?</div>
+        <div class="opts">
+          <button class="opt">end(True) still runs, so it can stop motors cleanly</button>
+          <button class="opt">end() is skipped entirely</button>
+          <button class="opt">The robot crashes</button>
+        </div>
+        <div class="explain">end() always runs - with interrupted = True when something cut it short. That's why "turn things off" belongs in end(): it's guaranteed to fire either way.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 3 · 03 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Command</b><span>An action over time (a verb).</span></div>
+        <div class="gl"><b>initialize()</b><span>Once, at the start.</span></div>
+        <div class="gl"><b>execute()</b><span>Every loop while running.</span></div>
+        <div class="gl"><b>isFinished()</b><span>Checked each loop; True → done.</span></div>
+        <div class="gl"><b>end(interrupted)</b><span>Once at the stop - always runs.</span></div>
+        <div class="gl"><b>Factories</b><span>Inline commands; less boilerplate.</span></div>
+      </div>
+      <a class="next" href="deploy-lesson-14-py.html">
+        <div class="n-eyebrow">Up next · Part 3 · 04</div>
+        <h3>Command Compositions</h3>
+        <p>One command is a verb. Glue them into sentences: run in sequence, in parallel, or race to the finish - and watch each play out on a timeline.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="deploy-lesson-12-py.html">← Part 3 · 02 · Subsystems</a>
+    <a class="map" href="code.html">Course map</a>
+    <a href="deploy-lesson-14-py.html">Part 3 · 04 · Command Compositions →</a>
+  </nav>
+
+</div>
+
+<footer>Deploy · Programming an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var STEPS=[
+    {on:['init'], log:'<span class="t">0:</span> <b>initialize()</b> - set up'},
+    {on:['exec','fin'], log:'<span class="t">1:</span> execute() · isFinished()? <span class="no">no</span>'},
+    {on:['exec','fin'], log:'<span class="t">2:</span> execute() · isFinished()? <span class="no">no</span>'},
+    {on:['exec','fin'], log:'<span class="t">3:</span> execute() · isFinished()? <span class="no">no</span>'},
+    {on:['exec','fin'], log:'<span class="t">4:</span> execute() · isFinished()? <span class="yes">YES</span> - game piece in!'},
+    {on:['end'], log:'<span class="t">5:</span> <span class="end">end(False)</span> - stop intake. <span class="yes">done ✓</span>'}
+  ];
+  var step=-1, meths=document.querySelectorAll('.meth'), logEl=document.getElementById('log');
+  function highlight(on){ meths.forEach(function(m){ m.classList.toggle('on', on&&on.indexOf(m.getAttribute('data-m'))>=0); }); }
+  function reset(){ step=-1; logEl.innerHTML='<div class="l" style="color:var(--faint)">- press Step to walk the command through its life -</div>'; highlight(null); document.getElementById('stepBtn').disabled=false; }
+  function advance(){
+    if(step>=STEPS.length-1) return false;
+    step++;
+    if(step===0) logEl.innerHTML='';
+    var s=STEPS[step];
+    var d=document.createElement('div'); d.className='l'; d.innerHTML=s.log; logEl.appendChild(d); logEl.scrollTop=logEl.scrollHeight;
+    highlight(s.on);
+    document.getElementById('stepBtn').disabled=(step>=STEPS.length-1);
+    return step<STEPS.length-1;
+  }
+  document.getElementById('stepBtn').addEventListener('click',advance);
+  document.getElementById('resetBtn').addEventListener('click',reset);
+  document.getElementById('runBtn').addEventListener('click',function(){
+    reset();
+    var iv=setInterval(function(){ if(!advance()) clearInterval(iv); }, 650);
+  });
+  reset();
+
+  var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
+  function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'').replace(/\(\)$/,'');}
+  document.getElementById('check').addEventListener('click',function(){
+    var all=true;
+    blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - it\'s isFinished'; res.className='code-result '+(all?'ok':'no');
+  });
+  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='isFinished';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(idx===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="deploy:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

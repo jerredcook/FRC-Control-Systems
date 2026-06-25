@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deploy · Part 1.3 - Build, Deploy, Run (Python)</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ink); color:var(--text);
+    font-family:var(--sans); font-size:17px; line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(900px 500px at 80% -10%, rgba(138,140,248,.07), transparent 60%),
+      radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  p .sub,.sub{color:var(--muted)}
+  .lead{font-size:19px}
+  em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .stage{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line)}
+  @media(min-width:640px){.stage{grid-template-columns:1.15fr 1fr}}
+  .console{background:#080d16;padding:14px 16px;min-height:230px;font-family:var(--mono);font-size:12.5px;line-height:1.7}
+  .console .cl{color:var(--faint);margin-bottom:4px;white-space:pre-wrap}
+  .console .cl .cmd{color:var(--teal)} .console .cl .ok{color:var(--green)} .console .cl .dim{color:var(--faint)} .console .cl .warn{color:var(--amber)}
+  .ds{background:#0B1322;padding:16px;display:flex;flex-direction:column;gap:12px}
+  .ds-status{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line-2);border-radius:20px;padding:5px 10px;display:flex;align-items:center;gap:6px}
+  .chip i{width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 7px var(--red)}
+  .chip.on i{background:var(--green);box-shadow:0 0 7px var(--green)}
+  .chip.on{color:var(--text);border-color:var(--line-bright,#2c3c5e)}
+  .modes{display:flex;gap:0;border:1px solid var(--line-2);border-radius:9px;overflow:hidden}
+  .modes button{flex:1;border:none;background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:9px 6px;cursor:pointer;transition:.12s;border-right:1px solid var(--line-2)}
+  .modes button:last-child{border-right:none}
+  .modes button:hover{color:var(--text)}
+  .modes button.active{background:var(--indigo);color:#0a0f24;font-weight:700}
+  .state{border:1px solid var(--line-2);border-radius:10px;padding:14px;text-align:center;background:#080d16}
+  .state .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint)}
+  .state .big{font-family:var(--mono);font-size:18px;font-weight:700;margin-top:6px;color:var(--muted);letter-spacing:.04em}
+  .state.enabled{border-color:var(--green);box-shadow:0 0 0 1px rgba(67,214,126,.3)}
+  .state.enabled .big{color:var(--green)}
+  .enbtns{display:flex;gap:8px}
+  .enbtns button{flex:1;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding:11px;border-radius:9px;cursor:pointer;transition:.12s;font-weight:700}
+  .enbtns button.enable.armed{border-color:var(--green);color:var(--green)} .enbtns button.enable.armed:hover{background:rgba(67,214,126,.12)}
+  .enbtns button.disable:hover{border-color:var(--red);color:var(--red)}
+  .enbtns button:disabled{opacity:.4;cursor:not-allowed}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .btn.primary{background:linear-gradient(180deg,#a7adff,var(--indigo));color:#0a0f24;font-weight:700;border:none}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.red{border-color:var(--red);background:rgba(255,107,107,.07)} .note.red .nh{color:var(--red)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)}
+  .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7}
+  .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px}
+  @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px}
+  .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:120px;text-transform:uppercase}
+  .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)}
+  .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)}
+  .coursenav a.map{border-color:transparent;color:var(--teal)}
+
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="code.html"><span class="dot"></span><span class="name">Deploy</span></a>
+    <div class="top-meta">Part 1 · 03 / 05 · The Toolchain</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 1 · 03</b> The Toolchain</div>
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:-6px 0 14px">Code shown in <b style="color:var(--indigo)">Python</b> &middot; <a href="deploy-lesson-3.html" style="color:var(--muted)">switch to Java</a></div>
+    <div class="eyebrow">Build, Deploy, Run</div>
+    <h1>Push it to<br>the <span class="accent">robot</span>.</h1>
+    <p class="dek">Package your project, send it across, and enable it from the Driver Station - closing the loop from Lesson 1 for real.</p>
+  </div>
+
+  <section>
+    <p class="lead">Three verbs turn your folder of files into a moving robot.</p>
+    <p><strong>Build</strong> packages your Python into a program the roboRIO can run. <strong>Deploy</strong> copies that program onto the roboRIO and starts it. Then the <strong>Driver Station</strong> - the app that talks to the robot - <strong>enables</strong> it, so motors are allowed to move. With RobotPy, one command (<span class="k">robotpy deploy</span>) does the build and the deploy together. Try the whole thing below: deploy the code, pick a mode, and enable.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head">
+        <span class="demo-title">Deploy + Driver Station</span>
+        <span class="demo-tag">simulated</span>
+      </div>
+      <div class="stage">
+        <div class="console" id="console"></div>
+        <div class="ds">
+          <div class="ds-status">
+            <span class="chip on" id="chipComms"><i></i> Comms</span>
+            <span class="chip" id="chipCode"><i></i> Robot Code</span>
+            <span class="chip on"><i></i> 12.6 V</span>
+          </div>
+          <div class="modes" id="modes">
+            <button data-mode="Teleoperated" class="active">Teleop</button>
+            <button data-mode="Autonomous">Auto</button>
+            <button data-mode="Test">Test</button>
+          </div>
+          <div class="state" id="state">
+            <div class="lbl">Robot state</div>
+            <div class="big" id="stateBig">DISABLED</div>
+          </div>
+          <div class="enbtns">
+            <button class="enable" id="enableBtn" disabled>Enable</button>
+            <button class="disable" id="disableBtn">Disable</button>
+          </div>
+        </div>
+      </div>
+      <div class="controls">
+        <button class="btn primary" id="deployBtn">Deploy code ▸</button>
+        <button class="btn" id="resetBtn">Reset</button>
+      </div>
+    </div>
+    <p class="caption">You can't enable until code is deployed and the robot reports "Robot Code" - the Driver Station won't let motors move otherwise. That's a safety feature, not a bug.</p>
+  </section>
+
+  <section>
+    <div class="kicker">The four modes</div>
+    <h2>What "enabled" means</h2>
+    <p>An FRC robot is always in one of a few states, and the Driver Station picks which. While <strong>disabled</strong>, your code still runs - but motor outputs are forced to zero, so nothing moves. <strong>Enable</strong> a mode and the matching code takes over:</p>
+    <div class="note">
+      <div class="nh">Disabled · Teleoperated · Autonomous · Test</div>
+      <p><strong>Teleoperated</strong> - you drive with the controller. <strong>Autonomous</strong> - the robot runs a pre-programmed routine on its own. <strong>Test</strong> - for checking mechanisms in the pit. <strong>Disabled</strong> - code runs, motors don't. In a real match the field controls these for you; on the bench, the Driver Station does.</p>
+    </div>
+    <div class="note red">
+      <div class="nh">The space bar is E-STOP</div>
+      <p>In the Driver Station, the spacebar (and the big red button on a real one) is an emergency stop - it kills the robot instantly. Know where it is before you ever enable a robot near people.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>A full deploy rebuilds and resends everything, which is slow when you only tweaked one number. Look up "deploy without rebuild" and live tuning for FRC, plus how teams tune constants live from a dashboard instead of redeploying. Here is a question to chew on: why is shrinking the deploy loop, like shrinking the time between trying a bike gear and feeling the result, worth so much during a build season?</p>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">What does "deploy" do?</div>
+        <div class="opts">
+          <button class="opt">Turns on the robot's battery</button>
+          <button class="opt">Copies your built program onto the roboRIO and starts it running</button>
+          <button class="opt">Only packages your Python locally, without sending it</button>
+        </div>
+        <div class="explain">Build packages; deploy sends the program to the roboRIO and launches it. After a successful deploy the robot reports "Robot Code" and is ready to be enabled.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">Your code is deployed and running, but the robot is <em>disabled</em>. What happens?</div>
+        <div class="opts">
+          <button class="opt">The code stops running entirely</button>
+          <button class="opt">The robot drives anyway</button>
+          <button class="opt">Your code keeps running, but all motor outputs are forced to zero</button>
+        </div>
+        <div class="explain">Disabled doesn't stop your program - periodic methods still run. It just blocks motor output for safety. Nothing moves until you enable a mode.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">Which mode runs a pre-programmed routine with no driver input?</div>
+        <div class="opts">
+          <button class="opt">Autonomous</button>
+          <button class="opt">Teleoperated</button>
+          <button class="opt">Test</button>
+        </div>
+        <div class="explain">Autonomous runs your autonomousPeriodic / auto command on its own - the first ~15 seconds of an FRC match. Teleoperated is driver control; Test is for pit checks.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 1 · 03 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Build</b><span>Package your Python into a program.</span></div>
+        <div class="gl"><b>Deploy</b><span>Send it to the roboRIO and start it.</span></div>
+        <div class="gl"><b>Driver Station</b><span>Enables the robot; picks the mode.</span></div>
+        <div class="gl"><b>Robot Code light</b><span>Green once a deploy is running.</span></div>
+        <div class="gl"><b>Disabled</b><span>Code runs; motors forced to zero.</span></div>
+        <div class="gl"><b>E-Stop</b><span>Spacebar - kills the robot instantly.</span></div>
+      </div>
+      <a class="next" href="deploy-lesson-4-py.html">
+        <div class="n-eyebrow">Up next · Part 1 · 04</div>
+        <h3>Git &amp; GitHub for Teams</h3>
+        <p>One laptop's code isn't a team's code. Next: version control - how a whole team writes the same robot without overwriting each other.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="deploy-lesson-2-py.html">← Part 1 · 02 · Setting Up RobotPy</a>
+    <a class="map" href="code.html">Course map</a>
+    <a href="deploy-lesson-4-py.html">Part 1 · 04 · Git &amp; GitHub →</a>
+  </nav>
+
+</div>
+
+<footer>Deploy · Programming an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var consoleEl=document.getElementById("console");
+  var chipCode=document.getElementById("chipCode");
+  var stateEl=document.getElementById("state"), stateBig=document.getElementById("stateBig");
+  var enableBtn=document.getElementById("enableBtn"), disableBtn=document.getElementById("disableBtn");
+  var deployBtn=document.getElementById("deployBtn"), resetBtn=document.getElementById("resetBtn");
+  var modeBtns=document.querySelectorAll("#modes button");
+
+  var S={deployed:false, enabled:false, mode:"Teleoperated", busy:false};
+
+  function line(html){ var d=document.createElement("div"); d.className="cl"; d.innerHTML=html; consoleEl.appendChild(d); consoleEl.scrollTop=consoleEl.scrollHeight; }
+  function clearConsole(){ consoleEl.innerHTML='<div class="cl dim">- ready - press Deploy code -</div>'; }
+
+  function renderState(){
+    if(S.enabled){ stateEl.classList.add("enabled"); stateBig.textContent=S.mode.toUpperCase()+" · ENABLED"; }
+    else { stateEl.classList.remove("enabled"); stateBig.textContent="DISABLED"; }
+    enableBtn.classList.toggle("armed", S.deployed && !S.enabled);
+    enableBtn.disabled = !S.deployed || S.enabled || S.busy;
+  }
+  function setCode(on){ S.deployed=on; chipCode.classList.toggle("on", on); renderState(); }
+
+  var DELAY = (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) ? 0 : 1;
+  function steps(seq){
+    var i=0;
+    (function next(){
+      if(i>=seq.length){ S.busy=false; deployBtn.disabled=false; renderState(); return; }
+      var s=seq[i++]; line(s.t);
+      if(s.done) s.done();
+      setTimeout(next, s.d*DELAY);
+    })();
+  }
+  deployBtn.addEventListener("click",function(){
+    if(S.busy) return;
+    S.busy=true; deployBtn.disabled=true; S.enabled=false; setCode(false); consoleEl.innerHTML="";
+    steps([
+      {t:'<span class="cmd">&gt; robotpy deploy</span>', d:500},
+      {t:'<span class="dim">Building robot code…</span>', d:900},
+      {t:'<span class="ok">BUILD SUCCESSFUL</span> <span class="dim">in 9s</span>', d:600},
+      {t:'<span class="dim">Deploying to roboRIO (10.TE.AM.2)…</span>', d:1000},
+      {t:'<span class="dim">Starting program…</span>', d:600, done:function(){ setCode(true); }},
+      {t:'<span class="ok">✓ Robot Code running.</span> Ready to enable.', d:300}
+    ]);
+  });
+  resetBtn.addEventListener("click",function(){ S.deployed=false; S.enabled=false; S.busy=false; setCode(false); deployBtn.disabled=false; clearConsole(); renderState(); });
+  modeBtns.forEach(function(b){ b.addEventListener("click",function(){ S.mode=b.getAttribute("data-mode"); modeBtns.forEach(function(x){x.classList.toggle("active",x===b);}); renderState(); }); });
+  enableBtn.addEventListener("click",function(){ if(!S.deployed||S.busy) return; S.enabled=true; line('<span class="warn">▶ Enabled - '+S.mode+'.</span> Motors live.'); renderState(); });
+  disableBtn.addEventListener("click",function(){ if(!S.enabled) return; S.enabled=false; line('<span class="dim">■ Disabled. Motors off.</span>'); renderState(); });
+
+  clearConsole(); renderState();
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){
+      opt.addEventListener('click',function(){
+        if(done)return;done=true;
+        opts.forEach(function(o){o.classList.add('locked');});
+        if(idx===correct){opt.classList.add('correct');}
+        else{opt.classList.add('wrong');opts[correct].classList.add('correct');}
+        explain.classList.add('show');
+      });
+    });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="deploy:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

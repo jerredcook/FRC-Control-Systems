@@ -54,6 +54,11 @@
   .reset-btn{border:1px solid var(--line-bright);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;padding:8px 12px;border-radius:8px;cursor:pointer;transition:.12s}
   .reset-btn:hover{border-color:var(--bad);color:var(--bad)}
   .howto{font-size:14.5px;color:var(--muted);margin:14px 0 0;font-style:italic}
+  .langsel{display:flex;align-items:center;gap:10px;margin:16px 0 0;flex-wrap:wrap}
+  .langsel-label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  .langbtn{font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--line-bright);background:var(--panel-2);color:var(--muted);padding:7px 15px;border-radius:8px;cursor:pointer;transition:.12s}
+  .langbtn:hover{border-color:var(--indigo);color:var(--ink)}
+  .langbtn.active{background:var(--indigo);border-color:var(--indigo);color:#0b1020;font-weight:700}
 
   .part{padding:34px 0 6px}
   .part-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px}
@@ -110,7 +115,7 @@
   <div class="hero">
     <div class="eyebrow">Code · the robot</div>
     <h1>Program an<br>FRC <span class="accent">robot</span>.</h1>
-    <p class="dek">From your first line of Java to a full command-based robot you can drive: the <b>toolchain</b>, the <b>hardware</b>, <b>autonomous</b>, <b>vision</b>, and the pro practices that hold up under competition. A little coding helps; we build up the rest.</p>
+    <p class="dek">From your first line of code to a full command-based robot you can drive: the <b>toolchain</b>, the <b>hardware</b>, <b>autonomous</b>, <b>vision</b>, and the pro practices that hold up under competition. A little coding helps; we build up the rest. Taught in <b>Java</b> and <b>Python</b>, your pick.</p>
 
     <div class="progress-card">
       <div class="pc-stats">
@@ -125,6 +130,11 @@
       <button class="reset-btn" id="resetBtn" title="Clear saved progress on this device">Reset</button>
     </div>
     <p class="howto">Lessons are meant in order. Finish a lesson's quiz and it marks itself done - progress is saved in this browser.</p>
+    <div class="langsel" role="group" aria-label="Code language">
+      <span class="langsel-label">Code in</span>
+      <button class="langbtn" id="langJava" data-lang="java">Java</button>
+      <button class="langbtn" id="langPython" data-lang="python">Python</button>
+    </div>
   </div>
 
   <main id="course"></main>
@@ -219,6 +229,12 @@
   var done=loadDone();
   function lid(c,n){ return c+"-"+n; }
 
+  var LANG_KEY="code:lang";
+  var lang=(localStorage.getItem(LANG_KEY)==="python")?"python":"java";
+  function activeFile(L){ return (lang==="python" && L.file) ? L.file.replace(/\.html$/,"-py.html") : L.file; }
+  function syncLangUI(){ var j=document.getElementById("langJava"), p=document.getElementById("langPython"); if(j) j.classList.toggle("active", lang==="java"); if(p) p.classList.toggle("active", lang==="python"); }
+  function setLang(next){ lang=(next==="python")?"python":"java"; try{ localStorage.setItem(LANG_KEY, lang); }catch(e){} syncLangUI(); render(); }
+
   var courseEl=document.getElementById("course");
 
   function render(){
@@ -233,11 +249,12 @@
 
       part.lessons.forEach(function(L){
         var id=lid(part.code,L.n);
-        var isControl=!!L.link, available=!!L.file, isDone=!!done[L.file], isNext=(id===NEXT_ID);
+        var af=activeFile(L);
+        var isControl=!!L.link, available=!!L.file, isDone=!!done[af], isNext=(id===NEXT_ID);
         var card=document.createElement("div");
         card.className="card "+(isControl?"control":(available?"available":"planned"))+(isDone?" done":"")+(isNext?" next":"");
         card.setAttribute("data-id",id);
-        if(available) card.setAttribute("data-file",L.file);
+        if(available) card.setAttribute("data-file",af);
         if(isControl) card.setAttribute("data-link",L.link);
 
         var pill, link, toggle="";
@@ -261,7 +278,7 @@
     var total=0, open=0, doneCount=0;
     COURSE.forEach(function(part){ part.lessons.forEach(function(L){
       if(L.link) return;              // the control-course card isn't counted here
-      total++; if(L.file){ open++; } if(done[L.file]){ doneCount++; }
+      total++; if(L.file){ open++; } if(done[activeFile(L)]){ doneCount++; }
     });});
     document.getElementById("statDone").innerHTML=doneCount+' <small>/ '+total+'</small>';
     document.getElementById("statOpen").textContent=open;
@@ -288,6 +305,10 @@
   document.getElementById("resetBtn").addEventListener("click",function(){
     if(confirm("Clear your saved progress for this course?")){ done={}; saveDone(done); render(); }
   });
+
+  document.getElementById("langJava").addEventListener("click",function(){ setLang("java"); });
+  document.getElementById("langPython").addEventListener("click",function(){ setLang("python"); });
+  syncLangUI();
 
   render();
 })();

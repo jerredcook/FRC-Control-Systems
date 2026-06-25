@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deploy · Part 2.4 - Inheritance &amp; Interfaces (Python)</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(138,140,248,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .inh{display:grid;grid-template-columns:1fr;gap:0;padding:16px}
+  @media(min-width:600px){.inh{grid-template-columns:1fr 28px 1fr;align-items:center}}
+  .cls{border:1px solid var(--line-2);border-radius:11px;background:#0B1322;overflow:hidden}
+  .cls .ch{padding:10px 13px;border-bottom:1px solid var(--line-2);font-family:var(--mono);font-size:12.5px;color:var(--text)}
+  .cls.parent .ch{color:var(--muted)} .cls.child .ch{color:var(--indigo)}
+  .cls .mem{padding:8px 13px;font-family:var(--mono);font-size:12.5px;color:#cdd9ec;border-bottom:1px solid rgba(255,255,255,.03);display:flex;justify-content:space-between;gap:8px;align-items:center}
+  .cls .mem:last-child{border-bottom:none}
+  .cls .mem.click{cursor:pointer;transition:.1s} .cls .mem.click:hover{background:var(--panel-2)}
+  .cls .mem.active{background:rgba(138,140,248,.12)}
+  .tag2{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:20px;border:1px solid var(--line-2);color:var(--faint)}
+  .tag2.inh{color:var(--muted)} .tag2.over{color:var(--amber);border-color:rgba(255,176,32,.4)} .tag2.new{color:var(--green);border-color:rgba(67,214,126,.4)}
+  .mem.inherited{color:var(--faint)}
+  .arrow{text-align:center;color:var(--indigo);font-family:var(--mono);font-size:13px}
+  @media(max-width:599px){.arrow{padding:8px 0}}
+  .detail{padding:14px 16px;border-top:1px solid var(--line);background:#080d16;font-size:14px;color:var(--muted);min-height:54px}
+  .detail b{color:var(--text)}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;padding:10px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--indigo);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:13.5px;line-height:1.85;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic} .code .kw{color:#ff9bbf} .code .ty{color:var(--teal)} .code .fn{color:var(--indigo)} .code .num{color:var(--amber)} .code .an{color:var(--amber)}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(138,140,248,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .code-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .code-ex .chead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .code-ex .chead .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,176,32,.14);display:grid;place-items:center;color:var(--amber);font-size:13px}
+  .code-ex .ctask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .code-ex pre.code{margin:0 0 14px}
+  .blank{font-family:var(--mono);font-size:13px;width:13ch;text-align:center;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:2px 4px;outline:none}
+  .blank:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
+  .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:110px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="code.html"><span class="dot"></span><span class="name">Deploy</span></a>
+    <div class="top-meta">Part 2 · 04 / 05 · Just-Enough Python</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 2 · 04</b> Just-Enough Python</div>
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:-6px 0 14px">Code shown in <b style="color:var(--indigo)">Python</b> &middot; <a href="deploy-lesson-9.html" style="color:var(--muted)">switch to Java</a></div>
+    <div class="eyebrow">Inheritance &amp; Interfaces</div>
+    <h1>Build on what<br><span class="accent">exists</span>.</h1>
+    <p class="dek">A class can build on another, inheriting everything it has and customizing the parts it wants. It's the reason every WPILib subsystem starts with <code>class Elevator(Subsystem)</code>.</p>
+  </div>
+
+  <section>
+    <p class="lead">You rarely start a robot class from nothing.</p>
+    <p>WPILib gives you a base class - <span class="k">Subsystem</span> - that already knows how to register with the scheduler and run every loop. When you write <span class="k">class Elevator(Subsystem)</span>, your Elevator <strong>inherits</strong> all of that for free. You then <strong>override</strong> the one method you care about (<span class="k">periodic</span>) and <strong>add</strong> your own. Click the Elevator's members to see where each comes from.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">class Elevator(Subsystem)</span><span class="demo-tag">inherit · override · add</span></div>
+      <div class="inh">
+        <div class="cls parent">
+          <div class="ch">Subsystem <span style="color:var(--faint)">(WPILib)</span></div>
+          <div class="mem">periodic()</div>
+          <div class="mem">register()</div>
+          <div class="mem">getName()</div>
+          <div class="mem">setDefaultCommand()</div>
+        </div>
+        <div class="arrow">◂ inherits</div>
+        <div class="cls child" id="childCls">
+          <div class="ch">Elevator</div>
+          <div class="mem click" data-k="periodic">periodic() <span class="tag2 over">override</span></div>
+          <div class="mem click" data-k="motor">motor <span class="tag2 new">new</span></div>
+          <div class="mem click" data-k="setGoal">set_goal() <span class="tag2 new">new</span></div>
+          <div class="mem inherited click" data-k="register">register() <span class="tag2 inh">inherited</span></div>
+          <div class="mem inherited click" data-k="getName">getName() <span class="tag2 inh">inherited</span></div>
+        </div>
+      </div>
+      <div class="detail" id="detail">Click a member of <b>Elevator</b> to see where it comes from.</div>
+      <div class="legend"><span style="color:var(--amber)">● override = replace a parent method</span><span style="color:var(--green)">● new = your own addition</span><span style="color:var(--muted)">● inherited = free from the parent</span></div>
+    </div>
+    <p class="caption">You wrote three things; you got six. Inheritance hands you the boilerplate so you only write what's unique to <em>your</em> elevator.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In code</div>
+    <h2>Subclassing and overriding</h2>
+    <p>Putting the parent in parentheses does all the work. <span class="k">class Elevator(Subsystem)</span> says "build on this parent." To <strong>override</strong> a method, you just define one with the same name - your version replaces the parent's. Calling <span class="k">super().__init__()</span> runs the parent's constructor so its setup still happens:</p>
+    <div class="codewrap">
+      <div class="clabel">elevator.py <span class="badge">Python · WPILib</span></div>
+<pre class="code"><span class="kw">class</span> <span class="ty">Elevator</span>(commands2.<span class="ty">Subsystem</span>):    <span class="cm"># inherit everything Subsystem has</span>
+    <span class="kw">def</span> <span class="fn">__init__</span>(self):
+        <span class="kw">super</span>().<span class="fn">__init__</span>()                <span class="cm"># run the parent's setup first</span>
+        self.motor = <span class="ty">TalonFX</span>(<span class="num">10</span>)         <span class="cm"># new attribute</span>
+
+    <span class="kw">def</span> <span class="fn">periodic</span>(self):                  <span class="cm"># replace the empty parent periodic()</span>
+        <span class="cm"># your control code runs here, every loop</span>
+        <span class="kw">pass</span>
+
+    <span class="kw">def</span> <span class="fn">set_goal</span>(self, m: <span class="ty">float</span>):       <span class="cm"># your own method</span>
+        <span class="kw">pass</span></pre>
+    </div>
+    <div class="note indigo">
+      <div class="nh">Interfaces - a promise instead of a parent</div>
+      <p>An <strong>interface</strong> is a list of methods a class promises to provide - a contract, not a parent. Python often handles this with <em>duck typing</em>: if your object has the right methods, it just works, no formal declaration needed. When you want the contract written down, an <strong>abstract base class</strong> (<span class="k">from abc import ABC, abstractmethod</span>) lists the methods a subclass must fill in. WPILib's <span class="k">Command</span> and <span class="k">Sendable</span> play this role; you'll mostly <em>use</em> them rather than write them.</p>
+    </div>
+
+    <div class="code-ex">
+      <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
+      <div class="ctask">Make an Arm a subsystem by building on the WPILib base class. Fill the blank.</div>
+<pre class="code"><span class="kw">class</span> <span class="ty">Arm</span>(commands2.<input class="blank" data-ans="subsystem" aria-label="blank" autocomplete="off" spellcheck="false">):
+    <span class="kw">def</span> <span class="fn">periodic</span>(self):
+        <span class="kw">pass</span>  <span class="cm"># ...</span></pre>
+      <div class="code-actions">
+        <button class="btn" id="check">Check</button>
+        <button class="btn" id="reveal">Reveal</button>
+        <span class="code-result" id="cres"></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>Try misspelling the overridden method, like <span class="k">periodc()</span>, and see what happens. Python will not warn you, because to it that is simply a brand-new method that nothing calls, so your code "runs" but the scheduler never fires your control loop. That silent failure is sneaky. One guard against it: add the <span class="k">@override</span> decorator (from <span class="k">typing</span>), which lets a type checker like mypy flag a name that matches no parent method. Worth pondering: why is catching that mistake before you deploy so much kinder than discovering it on the field?</p>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="2">
+        <div class="qn">Question 1</div>
+        <div class="qt">When Elevator is written as <code style="font-family:var(--mono);color:var(--teal)">class Elevator(Subsystem)</code>, what does it get?</div>
+        <div class="opts">
+          <button class="opt">Nothing - it just renames the class</button>
+          <button class="opt">A copy it has to maintain by hand</button>
+          <button class="opt">All of Subsystem's members for free, which it can use or override</button>
+        </div>
+        <div class="explain">Inheritance gives the child everything the parent has. Elevator automatically registers with the scheduler and gets called each loop - you only write the parts that are unique to your elevator.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 2</div>
+        <div class="qt">How do you override an inherited method in Python?</div>
+        <div class="opts">
+          <button class="opt">Define a method with the same name in the child class</button>
+          <button class="opt">Mark it with a special keyword the runtime requires</button>
+          <button class="opt">You can't - inherited methods are frozen</button>
+        </div>
+        <div class="explain">Defining a method with the same name as a parent's replaces it for your class. There's no required keyword - though a @override decorator lets a type checker confirm the name really matches a parent method, catching a misspelling.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 3</div>
+        <div class="qt">How is an interface different from a parent class?</div>
+        <div class="opts">
+          <button class="opt">There's no difference</button>
+          <button class="opt">An interface is a contract of methods a class promises to provide, not code it inherits</button>
+          <button class="opt">An interface can only have one method</button>
+        </div>
+        <div class="explain">Inheriting from a class gets its actual code. An interface (an abstract base class, or just duck typing) only requires that you supply the methods it lists - the contract. WPILib uses both; you mostly consume contracts like Command and Sendable.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 2 · 04 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>(Parent)</b><span>Build on a parent class, inheriting it.</span></div>
+        <div class="gl"><b>Inherit</b><span>Get the parent's members for free.</span></div>
+        <div class="gl"><b>Override</b><span>Redefine a parent method by name.</span></div>
+        <div class="gl"><b>Subsystem</b><span>The WPILib base every subsystem builds on.</span></div>
+        <div class="gl"><b>Duck typing</b><span>If it has the methods, it fits the contract.</span></div>
+        <div class="gl"><b>ABC</b><span>An abstract base class spells out the contract.</span></div>
+      </div>
+      <a class="next" href="deploy-lesson-10-py.html">
+        <div class="n-eyebrow">Up next · Part 2 · 05</div>
+        <h3>Collections &amp; Enums</h3>
+        <p>Last Python piece: holding many things at once (lists of swerve modules) and naming a robot's states with enums. Then you're ready to build robots.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="deploy-lesson-8-py.html">← Part 2 · 03 · Classes &amp; Objects</a>
+    <a class="map" href="code.html">Course map</a>
+    <a href="deploy-lesson-10-py.html">Part 2 · 05 · Collections &amp; Enums →</a>
+  </nav>
+
+</div>
+
+<footer>Deploy · Programming an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var DETAIL={
+    periodic:'<b>periodic()</b> - overridden. Subsystem has an empty one the scheduler calls every loop; you replace it by defining your own with the same name.',
+    motor:'<b>motor</b> - new. An attribute that exists only on Elevator; Subsystem knows nothing about it.',
+    setGoal:'<b>set_goal()</b> - new. A method you add so commands can tell the elevator where to go.',
+    register:'<b>register()</b> - inherited. Comes straight from Subsystem; it’s how the subsystem joins the scheduler. You never write it.',
+    getName:'<b>getName()</b> - inherited. Free from Subsystem, used by dashboards. Use it as-is.'
+  };
+  var detail=document.getElementById('detail');
+  document.querySelectorAll('#childCls .mem.click').forEach(function(m){
+    m.addEventListener('click',function(){
+      document.querySelectorAll('#childCls .mem').forEach(function(x){x.classList.remove('active');});
+      m.classList.add('active');
+      detail.innerHTML=DETAIL[m.getAttribute('data-k')]||'';
+    });
+  });
+
+  var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
+  function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'');}
+  document.getElementById('check').addEventListener('click',function(){
+    var all=true;
+    blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - build on Subsystem'; res.className='code-result '+(all?'ok':'no');
+  });
+  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='Subsystem';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(idx===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="deploy:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

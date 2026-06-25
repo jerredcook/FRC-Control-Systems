@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deploy · Part 1.5 - Docs &amp; Vendordeps (Python)</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ink); color:var(--text);
+    font-family:var(--sans); font-size:17px; line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(900px 500px at 80% -10%, rgba(138,140,248,.07), transparent 60%),
+      radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:54ch;margin-top:6px}
+
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  p .sub,.sub{color:var(--muted)}
+  .lead{font-size:19px}
+  em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .vendors{padding:14px 16px;display:grid;gap:10px}
+  @media(min-width:560px){.vendors{grid-template-columns:1fr 1fr}}
+  .vcard{display:flex;align-items:center;gap:12px;border:1px solid var(--line-2);background:var(--panel-2);border-radius:10px;padding:11px 13px;cursor:pointer;transition:.12s}
+  .vcard:hover{border-color:var(--muted)}
+  .vcard.on{border-color:var(--indigo);background:rgba(138,140,248,.10)}
+  .vcard .chk{width:20px;height:20px;border-radius:6px;border:1px solid var(--line-2);display:flex;align-items:center;justify-content:center;color:transparent;font-size:12px;flex:0 0 auto}
+  .vcard.on .chk{background:var(--indigo);border-color:var(--indigo);color:#0a0f24}
+  .vcard .vn{font-weight:650;font-size:14.5px;color:var(--text)}
+  .vcard .vf{font-size:12.5px;color:var(--muted);margin-top:1px}
+  .result{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  @media(min-width:560px){.result{grid-template-columns:1fr 1fr}}
+  .rcol{background:#0B1322;padding:14px 16px}
+  .rcol .rh{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-bottom:8px}
+  .rcol .rl{font-family:var(--mono);font-size:12.5px;color:var(--teal);padding:3px 0;display:flex;gap:7px;align-items:center}
+  .rcol .rl .b{color:var(--faint)}
+  .rcol .rl.imp{color:#cdd9ec}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(138,140,248,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .docs{display:grid;gap:10px;margin-top:6px}
+  @media(min-width:560px){.docs{grid-template-columns:1fr 1fr}}
+  .doc{border:1px solid var(--line);border-radius:11px;background:var(--panel);padding:13px 15px;text-decoration:none;display:block;transition:.12s;border-left:3px solid var(--accent,var(--teal))}
+  .doc:hover{border-color:var(--line-2);transform:translateY(-2px)}
+  .doc .dn{font-family:var(--mono);font-size:13px;color:var(--text);font-weight:600}
+  .doc .dd{font-size:13px;color:var(--muted);margin-top:3px}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)}
+  .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7}
+  .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px}
+  @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px}
+  .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:120px;text-transform:uppercase}
+  .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)}
+  .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)}
+  .coursenav a.map{border-color:transparent;color:var(--teal)}
+  .coursenav a.next-link{color:var(--teal);border-color:rgba(52,215,197,.4)}
+
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="code.html"><span class="dot"></span><span class="name">Deploy</span></a>
+    <div class="top-meta">Part 1 · 05 / 05 · The Toolchain</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 1 · 05</b> The Toolchain</div>
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:-6px 0 14px">Code shown in <b style="color:var(--indigo)">Python</b> &middot; <a href="deploy-lesson-5.html" style="color:var(--muted)">switch to Java</a></div>
+    <div class="eyebrow">Docs &amp; Vendordeps</div>
+    <h1>Add libraries,<br>never get <span class="accent">stuck</span>.</h1>
+    <p class="dek">RobotPy covers the basics, but your motors come from vendors. A vendor package pulls in their library - and the docs are how you answer your own questions.</p>
+  </div>
+
+  <section>
+    <p class="lead">Your motor controller speaks its own dialect.</p>
+    <p>To talk to a <strong>Kraken</strong> you need CTRE's <strong>Phoenix 6</strong> library; for a <strong>NEO/SparkMax</strong> you need REV's <strong>REVLib</strong>. With RobotPy these are Python packages. You add one by listing it under <span class="k">requires</span> in your project's <span class="k">pyproject.toml</span> (in the <span class="k">[tool.robotpy]</span> section), then running <span class="k">robotpy sync</span>. That downloads the package and cross-builds it for the roboRIO, and from then on that library's classes are yours to import. Toggle a few below and watch what unlocks.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head">
+        <span class="demo-title">Vendor package picker</span>
+        <span class="demo-tag">pick what your robot uses</span>
+      </div>
+      <div class="vendors" id="vendors"></div>
+      <div class="result">
+        <div class="rcol"><div class="rh">pyproject.toml requires</div><div id="depList"></div></div>
+        <div class="rcol"><div class="rh">Now you can import</div><div id="impList"></div></div>
+      </div>
+    </div>
+    <p class="caption">Only add what you use - extra libraries are extra weight. Most teams run RobotPy plus one motor vendor, maybe PathPlanner and a vision library.</p>
+  </section>
+
+  <section>
+    <div class="kicker">Your lifelines</div>
+    <h2>Reading the docs</h2>
+    <p>You will not memorize every class - nobody does. The skill is <strong>finding the answer</strong>. Each library has docs with examples and an API reference (the list of every class and method). When you wonder "how do I read the encoder?", search the docs for the class and skim its methods.</p>
+    <div class="docs">
+      <a class="doc" style="--accent:var(--teal)" href="https://robotpy.readthedocs.io/" target="_blank" rel="noopener"><div class="dn">RobotPy Docs</div><div class="dd">Install, project setup, the API for wpilib and commands2.</div></a>
+      <a class="doc" style="--accent:var(--teal)" href="https://docs.wpilib.org/" target="_blank" rel="noopener"><div class="dn">WPILib Docs</div><div class="dd">The foundation - command-based, sensors, math, examples.</div></a>
+      <a class="doc" style="--accent:var(--amber)" href="https://v6.docs.ctr-electronics.com/" target="_blank" rel="noopener"><div class="dn">CTRE Phoenix 6</div><div class="dd">TalonFX, CANcoder, Tuner X - everything Kraken/Falcon.</div></a>
+      <a class="doc" style="--accent:var(--indigo)" href="https://www.chiefdelphi.com/" target="_blank" rel="noopener"><div class="dn">Chief Delphi</div><div class="dd">The FRC forum - someone has hit your problem before.</div></a>
+    </div>
+    <div class="note indigo">
+      <div class="nh">How to read an API reference</div>
+      <p>An API page lists a class's <strong>methods</strong>: each has a name, what you pass it (parameters), and what it gives back (return type). To find "how do I set a motor's speed?", open the class and scan for a method like <span class="k">set_voltage(volts)</span>. Your editor helps too - type a dot after an object and it lists everything you can call.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>Open your <span class="k">pyproject.toml</span> and find where <span class="k">phoenix6</span> is pinned to a version. That number says which release of the library your project pulls in, and it must line up with the firmware flashed on the device, much like a bike chain that has to match the cassette to mesh. Read about why mismatched library and firmware versions are a classic source of "it worked yesterday" bugs, and how teams keep everyone on the same version.</p>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">You bought Krakens. What do you need to control them in code?</div>
+        <div class="opts">
+          <button class="opt">Nothing - RobotPy includes every motor library</button>
+          <button class="opt">Add the CTRE Phoenix 6 package (phoenix6)</button>
+          <button class="opt">Add the REV REVLib package</button>
+        </div>
+        <div class="explain">Krakens use CTRE's TalonFX, so you add the phoenix6 package. (REVLib is for REV's SparkMax/NEO.) RobotPy alone doesn't include vendor motor libraries.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">How do you add a vendor library?</div>
+        <div class="opts">
+          <button class="opt">Copy the vendor's whole GitHub repo into your project</button>
+          <button class="opt">Email the vendor</button>
+          <button class="opt">List it under requires in pyproject.toml, then run robotpy sync</button>
+        </div>
+        <div class="explain">RobotPy reads the requires list in pyproject.toml; robotpy sync downloads each package and cross-builds it for the roboRIO. No copying source by hand.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">You don't know how to make a sensor return its value. What's the move?</div>
+        <div class="opts">
+          <button class="opt">Open the library's docs / API and find the class's methods</button>
+          <button class="opt">Guess method names until one runs</button>
+          <button class="opt">Give up and use a different sensor</button>
+        </div>
+        <div class="explain">The docs and API reference list every class and what its methods do. Finding the answer there (or on Chief Delphi) is the core skill - far faster and more reliable than guessing.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 1 · 05 · Recap · Part 1 complete ★</h3>
+      <div class="glossary">
+        <div class="gl"><b>Vendor package</b><span>A pip package that adds a vendor's library.</span></div>
+        <div class="gl"><b>phoenix6</b><span>CTRE library for Kraken/Falcon (TalonFX).</span></div>
+        <div class="gl"><b>rev (REVLib)</b><span>REV library for NEO / SparkMax.</span></div>
+        <div class="gl"><b>API reference</b><span>The list of every class &amp; method.</span></div>
+        <div class="gl"><b>The docs</b><span>RobotPy / WPILib / CTRE / Chief Delphi.</span></div>
+        <div class="gl"><b>The skill</b><span>Finding answers, not memorizing.</span></div>
+      </div>
+      <a class="next" href="code.html">
+        <div class="n-eyebrow">Part 1 complete · The Toolchain</div>
+        <h3>On to Part 2 - Just-Enough Python →</h3>
+        <p>You can create, deploy, run, and version a robot project. Next, the handful of Python ideas robot code is built on - taught with motors, not toy examples. Continue from the course map.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="deploy-lesson-4-py.html">← Part 1 · 04 · Git &amp; GitHub</a>
+    <a class="map" href="code.html">Course map</a>
+    <a class="next-link" href="code.html">Part 2 · Just-Enough Python →</a>
+  </nav>
+
+</div>
+
+<footer>Deploy · Programming an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var VENDORS=[
+    {id:'phoenix', name:'CTRE Phoenix 6', for:'Kraken / Falcon, CANcoder, Pigeon 2', dep:'phoenix6', imports:['TalonFX','CANcoder','Pigeon2']},
+    {id:'rev', name:'REV REVLib', for:'NEO motors via SparkMax / SparkFlex', dep:'robotpy-rev', imports:['SparkMax','SparkFlex']},
+    {id:'pathplanner', name:'PathPlannerLib', for:'Autonomous path following', dep:'robotpy-pathplannerlib', imports:['PathPlannerPath','AutoBuilder']},
+    {id:'photon', name:'PhotonLib', for:'Vision &amp; AprilTags', dep:'photonlibpy', imports:['PhotonCamera','PhotonPoseEstimator']},
+    {id:'navx', name:'Studica navX', for:'navX-MXP gyro', dep:'robotpy-navx', imports:['AHRS']}
+  ];
+  var state={};
+  var vEl=document.getElementById('vendors'), depList=document.getElementById('depList'), impList=document.getElementById('impList');
+
+  VENDORS.forEach(function(v){
+    var c=document.createElement('div'); c.className='vcard'; c.setAttribute('data-id',v.id);
+    c.innerHTML='<div class="chk">✓</div><div><div class="vn">'+v.name+'</div><div class="vf">'+v.for+'</div></div>';
+    c.addEventListener('click',function(){ state[v.id]=!state[v.id]; c.classList.toggle('on',!!state[v.id]); render(); });
+    vEl.appendChild(c);
+  });
+
+  function render(){
+    var deps='<div class="rl"><span class="b">·</span> robotpy-commands-v2 <span class="b">(built in)</span></div>';
+    var imps='<div class="rl imp">PIDController, Subsystem…</div>';
+    VENDORS.forEach(function(v){
+      if(state[v.id]){
+        deps+='<div class="rl"><span class="b">·</span> '+v.dep+'</div>';
+        imps+='<div class="rl imp">'+v.imports.join(', ')+'</div>';
+      }
+    });
+    depList.innerHTML=deps; impList.innerHTML=imps;
+  }
+  render();
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){
+      opt.addEventListener('click',function(){
+        if(done)return;done=true;
+        opts.forEach(function(o){o.classList.add('locked');});
+        if(idx===correct){opt.classList.add('correct');}
+        else{opt.classList.add('wrong');opts[correct].classList.add('correct');}
+        explain.classList.add('show');
+      });
+    });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="deploy:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

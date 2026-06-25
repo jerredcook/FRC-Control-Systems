@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deploy · Part 7.4 - State Machines (Python)</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(138,140,248,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .flow{display:flex;align-items:stretch;gap:0;padding:20px 16px;flex-wrap:wrap;justify-content:center}
+  .node{flex:1 1 130px;max-width:170px;border:1px solid var(--line-2);border-radius:11px;padding:13px;text-align:center;transition:.18s;background:#0E1525}
+  .node .nn{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.05em}
+  .node .nm{font-size:11px;color:var(--faint);margin-top:5px;line-height:1.35}
+  .node.active{border-color:var(--teal);background:rgba(52,215,197,.10);box-shadow:0 0 22px -6px var(--teal)} .node.active .nn{color:var(--teal)} .node.active .nm{color:var(--muted)}
+  .node.flash{border-color:var(--amber);box-shadow:0 0 22px -4px var(--amber)}
+  .arrow{display:flex;align-items:center;color:var(--line-2);font-size:18px;padding:0 4px}
+  @media(max-width:560px){.arrow{transform:rotate(90deg)}}
+  .events{display:flex;flex-wrap:wrap;gap:9px;padding:0 16px 8px}
+  .ev{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;padding:10px 13px;border-radius:8px;cursor:pointer;transition:.12s}
+  .ev:hover{border-color:var(--indigo);color:var(--text)}
+  .log{margin:6px 16px 16px;background:#080d16;border:1px solid var(--line-2);border-radius:10px;padding:12px 14px;font-family:var(--mono);font-size:12.5px;line-height:1.7;min-height:96px;max-height:128px;overflow-y:auto}
+  .log .l{color:var(--muted)} .log .l .ok{color:var(--green)} .log .l .no{color:var(--red)} .log .l .ar{color:var(--teal)}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--indigo);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:12.5px;line-height:1.8;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic} .code .kw{color:#ff9bbf} .code .ty{color:var(--teal)} .code .fn{color:var(--indigo)} .code .num{color:var(--amber)} .code .en{color:var(--amber)}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(138,140,248,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .code-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .code-ex .chead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .code-ex .chead .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,176,32,.14);display:grid;place-items:center;color:var(--amber);font-size:13px}
+  .code-ex .ctask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .code-ex pre.code{margin:0 0 14px}
+  .blank{font-family:var(--mono);font-size:13px;width:12ch;text-align:center;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:2px 4px;outline:none}
+  .blank:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
+  .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .roadmap{display:grid;gap:12px;margin:20px 0}
+  @media(min-width:620px){.roadmap{grid-template-columns:repeat(2,1fr)}}
+  .rm{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:15px 16px;border-left:3px solid var(--accent,var(--indigo))}
+  .rm .pt{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent,var(--indigo));margin-bottom:5px}
+  .rm h4{margin:0 0 4px;font-size:15.5px;color:var(--text)} .rm p{margin:0;font-size:13.5px;color:var(--muted)}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:110px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)} .coursenav a.next-link{color:var(--teal);border-color:rgba(52,215,197,.4)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="code.html"><span class="dot"></span><span class="name">Deploy</span></a>
+    <div class="top-meta">Part 7 · 04 / 04 · Finale</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 7 · 04</b> Seeing &amp; Thinking · Finale</div>
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:-6px 0 14px">Code shown in <b style="color:var(--indigo)">Python</b> &middot; <a href="deploy-lesson-31.html" style="color:var(--muted)">switch to Java</a></div>
+    <div class="eyebrow">State Machines</div>
+    <h1>One clear<br><span class="accent">state</span> at a time.</h1>
+    <p class="dek">A superstructure has a lot of moving parts. Instead of juggling a dozen booleans, name the states the robot can be in and the events that move between them. Illegal combinations simply can't happen.</p>
+  </div>
+
+  <section>
+    <p class="lead">The robot is always in exactly one state.</p>
+    <p>Intake a game piece, hold it, shoot it. Model that as four states, <span class="k">IDLE</span>, <span class="k">INTAKING</span>, <span class="k">LOADED</span>, <span class="k">SHOOTING</span>, with defined transitions between them. Each state says what the mechanisms do; each event either causes a valid transition or is ignored. Press the events and try to break it: you can't shoot from IDLE, because there's no path there.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Superstructure state machine</span><span class="demo-tag" id="stTag">IDLE</span></div>
+      <div class="flow" id="flow"></div>
+      <div class="events">
+        <button class="ev" data-e="intake">Press intake</button>
+        <button class="ev" data-e="note">Note detected</button>
+        <button class="ev" data-e="shoot">Press shoot</button>
+        <button class="ev" data-e="done">Shot complete</button>
+      </div>
+      <div class="log" id="log"></div>
+    </div>
+    <p class="caption">A valid event slides the highlight to the next state. An invalid one (shoot while IDLE, note while LOADED) is rejected and logged, the machine refuses to enter an impossible situation. That refusal is the whole point.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In code</div>
+    <h2>An enum and an if/elif</h2>
+    <p>Name the states in an <span class="k">Enum</span>, keep one <span class="k">state</span> attribute, and let each state decide what runs and which events it accepts:</p>
+    <div class="codewrap">
+      <div class="clabel">superstructure.py <span class="badge">Python · WPILib</span></div>
+<pre class="code"><span class="kw">from</span> enum <span class="kw">import</span> <span class="ty">Enum</span>, auto
+
+<span class="kw">class</span> <span class="ty">State</span>(<span class="ty">Enum</span>):
+    <span class="en">IDLE</span> = auto()
+    <span class="en">INTAKING</span> = auto()
+    <span class="en">LOADED</span> = auto()
+    <span class="en">SHOOTING</span> = auto()
+
+self.state = <span class="ty">State</span>.<span class="en">IDLE</span>
+
+<span class="kw">def</span> <span class="fn">periodic</span>(self):
+    <span class="kw">if</span> self.state == <span class="ty">State</span>.<span class="en">IDLE</span>:
+        self.intake.<span class="fn">stop</span>(); self.feeder.<span class="fn">stop</span>()
+    <span class="kw">elif</span> self.state == <span class="ty">State</span>.<span class="en">INTAKING</span>:
+        self.intake.<span class="fn">run</span>()
+        <span class="kw">if</span> self.beam.<span class="fn">has_note</span>(): self.state = <span class="ty">State</span>.<span class="en">LOADED</span>
+    <span class="kw">elif</span> self.state == <span class="ty">State</span>.<span class="en">LOADED</span>:
+        self.intake.<span class="fn">stop</span>()   <span class="cm"># hold the piece</span>
+    <span class="kw">elif</span> self.state == <span class="ty">State</span>.<span class="en">SHOOTING</span>:
+        self.feeder.<span class="fn">run</span>()
+        <span class="kw">if</span> self.<span class="fn">shot_done</span>(): self.state = <span class="ty">State</span>.<span class="en">IDLE</span>
+
+<span class="kw">def</span> <span class="fn">on_intake_button</span>(self):
+    <span class="kw">if</span> self.state == <span class="ty">State</span>.<span class="en">IDLE</span>: self.state = <span class="ty">State</span>.<span class="en">INTAKING</span>
+
+<span class="kw">def</span> <span class="fn">on_shoot_button</span>(self):
+    <span class="kw">if</span> self.state == <span class="ty">State</span>.<span class="en">LOADED</span>: self.state = <span class="ty">State</span>.<span class="en">SHOOTING</span></pre>
+    </div>
+    <div class="note indigo">
+      <div class="nh">Why not just booleans?</div>
+      <p>You could track <span class="k">is_intaking</span>, <span class="k">has_note</span>, <span class="k">is_shooting</span> separately, but then nothing stops the combination "intaking AND shooting", and you write tangled checks to prevent it. A state machine makes the illegal states <em>unrepresentable</em>: there's exactly one state at a time, and only the listed transitions exist. It's the clean way to coordinate a whole robot, and Triggers from Lesson 3.5 can fire the transitions for you.</p>
+    </div>
+
+    <div class="code-ex">
+      <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
+      <div class="ctask">From LOADED, pressing shoot should move to the shooting state. Fill in the state name.</div>
+<pre class="code"><span class="kw">if</span> self.state == <span class="ty">State</span>.<span class="en">LOADED</span>: self.state = <span class="ty">State</span>.<input class="blank" data-ans="shooting" aria-label="blank" autocomplete="off" spellcheck="false"></pre>
+      <div class="code-actions">
+        <button class="btn" id="check">Check</button>
+        <button class="btn" id="reveal">Reveal</button>
+        <span class="code-result" id="cres"></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>The if/elif above mixes two jobs: deciding what each state does, and deciding when to change state. A cleaner pattern gives every state its own on_enter, run, and the transition rules, so adding a new state does not mean editing one giant block. Here is a what-if to chew on: real robots need an escape hatch from any state, for example a driver eject button that forces you back to IDLE from anywhere. Where would that fit, and how do you keep it from quietly hiding a real bug?</p>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">What is a state machine?</div>
+        <div class="opts">
+          <button class="opt">A kind of motor controller</button>
+          <button class="opt">A set of named states with defined transitions, where the robot is in exactly one at a time</button>
+          <button class="opt">A dashboard widget</button>
+        </div>
+        <div class="explain">A state machine lists the states the system can be in and the events that move between them. At any moment it's in one state, which keeps the logic clear and predictable.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 2</div>
+        <div class="qt">Why is a state machine better than a pile of separate booleans?</div>
+        <div class="opts">
+          <button class="opt">Illegal combinations become impossible - there's no "intaking AND shooting" state</button>
+          <button class="opt">It uses less battery</button>
+          <button class="opt">It runs the motors faster</button>
+        </div>
+        <div class="explain">With one state attribute and explicit transitions, contradictory situations simply can't be represented. Separate booleans let you drift into "is_shooting and is_intaking" and force messy guard code.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 3</div>
+        <div class="qt">In the machine above, you press shoot while in IDLE. What happens?</div>
+        <div class="opts">
+          <button class="opt">The robot shoots anyway</button>
+          <button class="opt">It crashes</button>
+          <button class="opt">Nothing - there's no transition from IDLE on shoot, so the event is ignored</button>
+        </div>
+        <div class="explain">Shooting is only reachable from LOADED. With no IDLE-to-SHOOTING transition defined, the event is simply rejected, which is exactly the safety a state machine buys you.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">You finished Part 7</div>
+    <h2>The robot can see, locate itself, and think</h2>
+    <p>Vision and AprilTags, vision-in-the-loop aiming, drift-free pose estimation, and a state machine to run the whole superstructure. Your robot is genuinely competition-capable. One part remains, the practices that keep it that way under pressure:</p>
+    <div class="roadmap">
+      <div class="rm" style="--accent:var(--green)"><div class="pt">Part 8 · Final part</div><h4>Pro Practices</h4><p>Dashboards and logging, simulation, unit tests, defensive code, and the build-season discipline that wins on Saturday.</p></div>
+      <div class="rm" style="--accent:var(--amber)"><div class="pt">Anytime</div><h4>The Control course</h4><p>Closing the Loop: the PID, feedforward, and CTRE tuning that every precise motion in this course relies on.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 7 · 04 · Recap · Part 7 complete ★</h3>
+      <div class="glossary">
+        <div class="gl"><b>State machine</b><span>Named states + transitions.</span></div>
+        <div class="gl"><b>One state</b><span>Always exactly one at a time.</span></div>
+        <div class="gl"><b>Transition</b><span>An event moves between states.</span></div>
+        <div class="gl"><b>Enum + if/elif</b><span>The simple implementation.</span></div>
+        <div class="gl"><b>Illegal = impossible</b><span>Bad combos can't exist.</span></div>
+        <div class="gl"><b>Triggers fire them</b><span>Ties back to Lesson 3.5.</span></div>
+      </div>
+      <a class="next" href="code.html">
+        <div class="n-eyebrow">Part 7 complete · Seeing &amp; Thinking</div>
+        <h3>On to Part 8 - Pro Practices →</h3>
+        <p>The final stretch: the engineering habits, dashboards, simulation, tests, robustness, that turn a robot that works on the bench into one that wins on Saturday.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="deploy-lesson-30-py.html">← Part 7 · 03 · Pose Estimation</a>
+    <a class="map" href="code.html">Course map</a>
+    <a class="next-link" href="code.html">Part 8 · Pro Practices →</a>
+  </nav>
+
+</div>
+
+<footer>Deploy · Programming an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var STATES=[
+    {id:'IDLE', mech:'everything off'},
+    {id:'INTAKING', mech:'intake roller on'},
+    {id:'LOADED', mech:'holding · ready'},
+    {id:'SHOOTING', mech:'feeder + shooter'}
+  ];
+  var TRANS={ IDLE:{intake:'INTAKING'}, INTAKING:{note:'LOADED', intake:'IDLE'}, LOADED:{shoot:'SHOOTING'}, SHOOTING:{done:'IDLE'} };
+  var EVNAME={intake:'press intake', note:'note detected', shoot:'press shoot', done:'shot complete'};
+  var state='IDLE';
+  var flow=document.getElementById('flow'), logEl=document.getElementById('log'), nodeEls={};
+  STATES.forEach(function(s,i){
+    var n=document.createElement('div'); n.className='node'; n.setAttribute('data-id',s.id);
+    n.innerHTML='<div class="nn">'+s.id+'</div><div class="nm">'+s.mech+'</div>';
+    flow.appendChild(n); nodeEls[s.id]=n;
+    if(i<STATES.length-1){ var a=document.createElement('div'); a.className='arrow'; a.textContent='→'; flow.appendChild(a); }
+  });
+  function render(){ STATES.forEach(function(s){ nodeEls[s.id].classList.toggle('active', s.id===state); }); document.getElementById('stTag').textContent=state; }
+  function logLine(html){ var l=document.createElement('div'); l.className='l'; l.innerHTML=html; logEl.insertBefore(l, logEl.firstChild); while(logEl.children.length>7) logEl.removeChild(logEl.lastChild); }
+  function fire(ev){
+    var t=TRANS[state] && TRANS[state][ev];
+    if(t){ logLine('<span class="ok">'+EVNAME[ev]+'</span> · '+state+' <span class="ar">→</span> '+t); var node=nodeEls[t]; state=t; render(); node.classList.add('flash'); setTimeout(function(){node.classList.remove('flash');},300); }
+    else { logLine('<span class="no">'+EVNAME[ev]+' ignored</span> · no transition from '+state); }
+  }
+  document.querySelectorAll('.events .ev').forEach(function(b){ b.addEventListener('click',function(){ fire(b.getAttribute('data-e')); }); });
+  logLine('<span style="color:var(--faint)">- press an event to drive the machine -</span>'); render();
+
+  var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
+  function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'').replace(/;$/,'');}
+  document.getElementById('check').addEventListener('click',function(){
+    var all=true;
+    blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - SHOOTING'; res.className='code-result '+(all?'ok':'no');
+  });
+  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='SHOOTING';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(idx===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="deploy:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

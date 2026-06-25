@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deploy · Part 6.4 - Trajectories &amp; PathPlanner (Python)</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(138,140,248,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  canvas.field{display:block;width:100%;height:320px;touch-action:none;cursor:crosshair}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .btn.primary{background:linear-gradient(180deg,#a7adff,var(--indigo));color:#0a0f24;font-weight:700;border:none}
+  .hint{font-family:var(--mono);font-size:11px;color:var(--faint)}
+  .prog{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--teal)}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--indigo);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:13px;line-height:1.85;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic} .code .kw{color:#ff9bbf} .code .ty{color:var(--teal)} .code .fn{color:var(--indigo)} .code .num{color:var(--amber)} .code .st{color:#9ce8b0}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(138,140,248,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .code-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .code-ex .chead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .code-ex .chead .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,176,32,.14);display:grid;place-items:center;color:var(--amber);font-size:13px}
+  .code-ex .ctask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .code-ex pre.code{margin:0 0 14px}
+  .blank{font-family:var(--mono);font-size:13px;width:13ch;text-align:center;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:2px 4px;outline:none}
+  .blank:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
+  .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:120px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="code.html"><span class="dot"></span><span class="name">Deploy</span></a>
+    <div class="top-meta">Part 6 · 04 / 05 · Autonomous</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 6 · 04</b> Driving &amp; Autonomous</div>
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:-6px 0 14px">Code shown in <b style="color:var(--indigo)">Python</b> &middot; <a href="deploy-lesson-26.html" style="color:var(--muted)">switch to Java</a></div>
+    <div class="eyebrow">Trajectories &amp; PathPlanner</div>
+    <h1>Plan the<br><span class="accent">route</span>.</h1>
+    <p class="dek">Instead of driving by hand, you draw a smooth path through a few waypoints ahead of time. A follower then steers the robot along that curve on its own, using the pose from odometry to stay on track.</p>
+  </div>
+
+  <section>
+    <p class="lead">A path is a curve the robot promises to follow.</p>
+    <p>You place <strong>waypoints</strong> and a tool fits a smooth <strong>trajectory</strong> through them, with a velocity at every point. During autonomous a <strong>follower</strong> reads the robot's pose, compares it to where the path says it should be right now, and nudges the drivetrain to stay on the line. Drag the dots to reshape the path, then press Play.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Plan &amp; follow a path</span><span class="demo-tag">drag the waypoints</span></div>
+      <canvas class="field" id="cv"></canvas>
+      <div class="controls">
+        <button class="btn primary" id="play">Play ▸</button>
+        <button class="btn" id="reset">Reset</button>
+        <span class="hint">drag any numbered waypoint to reshape the curve</span>
+        <span class="prog" id="prog">0%</span>
+      </div>
+    </div>
+    <p class="caption">The smooth teal curve is the trajectory fit through your waypoints. Press Play and the robot tracks it, turning to face along the path as it goes. Reshape the dots and the whole path re-plans instantly.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In code</div>
+    <h2>Design in a GUI, follow in one line</h2>
+    <p>You draw paths in <strong>PathPlanner</strong> or <strong>Choreo</strong> and save them by name. Your code loads a path and wraps it in a follow command, ready to drop into an autonomous routine:</p>
+    <div class="codewrap">
+      <div class="clabel">Following a planned path <span class="badge">Python · PathPlanner</span></div>
+<pre class="code"><span class="cm"># load a path you drew in the PathPlanner GUI</span>
+path = <span class="ty">PathPlannerPath</span>.<span class="fn">fromPathFile</span>(<span class="st">"ScorePickup"</span>)
+
+<span class="cm"># a command that follows it using your pose + drive controllers</span>
+follow = <span class="ty">AutoBuilder</span>.<span class="fn">followPath</span>(path)
+
+<span class="cm"># or load a whole multi-path routine by name</span>
+auto = <span class="ty">PathPlannerAuto</span>(<span class="st">"FourPiece"</span>)
+
+<span class="cm"># you configure AutoBuilder once with your drive, kinematics, and PID</span></pre>
+    </div>
+    <div class="note indigo">
+      <div class="nh">The follower is a control loop on your pose</div>
+      <p>Following isn't dead reckoning (blindly running a fixed set of moves and hoping it lines up). Each loop the follower asks "where should I be on this path right now?" and "where does odometry say I am?", then applies feedback (the PID and feedforward from the Control course, Part 5) to close the gap. That's why accurate odometry matters so much: the better the robot knows its pose, the tighter it hugs the planned line.</p>
+    </div>
+
+    <div class="code-ex">
+      <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
+      <div class="ctask">Wrap a loaded path in a command that drives the robot along it. Fill in the method.</div>
+<pre class="code">follow = <span class="ty">AutoBuilder</span>.<input class="blank" data-ans="followpath" aria-label="blank" autocomplete="off" spellcheck="false">(path)</pre>
+      <div class="code-actions">
+        <button class="btn" id="check">Check</button>
+        <button class="btn" id="reveal">Reveal</button>
+        <span class="code-result" id="cres"></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>A real gotcha: PathPlanner paths are saved relative to the blue alliance origin, so a path that scores perfectly from the blue side will drive off the field if you run the same code on red without flipping it. AutoBuilder takes a "should flip" supplier so one path works for both alliances by mirroring across the field. Try sketching it: if the field is a mirror down the middle, what happens to an x-coordinate and to a heading when you flip a path to the other alliance?</p>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">What is a trajectory (path)?</div>
+        <div class="opts">
+          <button class="opt">A single target point</button>
+          <button class="opt">A smooth, pre-planned route through waypoints, with speeds, that the robot follows</button>
+          <button class="opt">A list of button bindings</button>
+        </div>
+        <div class="explain">A trajectory is a continuous curve fit through waypoints, carrying a position and velocity for every moment in time. The robot follows it during autonomous instead of being driven by hand.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">How does the path follower stay on the planned line?</div>
+        <div class="opts">
+          <button class="opt">It guesses</button>
+          <button class="opt">It drives full speed and hopes</button>
+          <button class="opt">It compares odometry pose to the path target and corrects with feedback (PID)</button>
+        </div>
+        <div class="explain">Every loop the follower computes the error between where it should be and where odometry says it is, then applies the same PID and feedforward from the Control course to drive that error to zero.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">What are PathPlanner and Choreo?</div>
+        <div class="opts">
+          <button class="opt">Tools to design paths in a GUI that your robot code then follows</button>
+          <button class="opt">Motor controllers</button>
+          <button class="opt">Dashboards for telemetry</button>
+        </div>
+        <div class="explain">They're path-design tools: you place waypoints visually, they generate a smooth, feasible trajectory, and you load it by name. Choreo optimizes for the fastest path; PathPlanner is waypoint-based with events.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 6 · 04 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Waypoint</b><span>A point the path passes through.</span></div>
+        <div class="gl"><b>Trajectory</b><span>Smooth curve + speeds over time.</span></div>
+        <div class="gl"><b>Follower</b><span>Steers the robot along the path.</span></div>
+        <div class="gl"><b>PathPlanner / Choreo</b><span>GUI path-design tools.</span></div>
+        <div class="gl"><b>AutoBuilder</b><span>Turns a path into a command.</span></div>
+        <div class="gl"><b>Needs odometry</b><span>The follower closes on your pose.</span></div>
+      </div>
+      <a class="next" href="deploy-lesson-27-py.html">
+        <div class="n-eyebrow">Up next · Part 6 · 05 · Finale</div>
+        <h3>Building an Autonomous</h3>
+        <p>One path is a move. String paths and mechanism commands into a sequence and the robot scores all by itself. Time to assemble a full routine.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="deploy-lesson-25-py.html">← Part 6 · 03 · Odometry</a>
+    <a class="map" href="code.html">Course map</a>
+    <a href="deploy-lesson-27-py.html">Part 6 · 05 · Building an Auto →</a>
+  </nav>
+
+</div>
+
+<footer>Deploy · Programming an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var cv=document.getElementById('cv'), ctx=cv.getContext('2d'), W=0,H=0,dpr=1;
+  function fit(){ var r=cv.getBoundingClientRect(); if(!r.width)return; dpr=window.devicePixelRatio||1; cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr); ctx.setTransform(dpr,0,0,dpr,0,0); W=r.width; H=r.height; }
+  fit();
+  var WPS=[{fx:0.10,fy:0.80},{fx:0.36,fy:0.22},{fx:0.62,fy:0.80},{fx:0.90,fy:0.28}];
+  var drag=-1, playing=false, animIdx=0, samples=[];
+  function fieldRect(){ return {x:10,y:10,w:W-20,h:H-20}; }
+  function wpScreen(i){ var f=fieldRect(); return {x:f.x+WPS[i].fx*f.w, y:f.y+WPS[i].fy*f.h}; }
+  function buildSamples(){
+    var pts=WPS.map(function(_,i){return wpScreen(i);});
+    var out=[]; var n=pts.length;
+    for(var i=0;i<n-1;i++){
+      var p0=pts[i-1]||pts[i], p1=pts[i], p2=pts[i+1], p3=pts[i+2]||pts[i+1];
+      for(var s=0;s<24;s++){ var t=s/24;
+        out.push(cr(p0,p1,p2,p3,t));
+      }
+    }
+    out.push(pts[n-1]);
+    samples=out;
+  }
+  function cr(p0,p1,p2,p3,t){
+    var t2=t*t, t3=t2*t;
+    return {
+      x:0.5*((2*p1.x)+(-p0.x+p2.x)*t+(2*p0.x-5*p1.x+4*p2.x-p3.x)*t2+(-p0.x+3*p1.x-3*p2.x+p3.x)*t3),
+      y:0.5*((2*p1.y)+(-p0.y+p2.y)*t+(2*p0.y-5*p1.y+4*p2.y-p3.y)*t2+(-p0.y+3*p1.y-3*p2.y+p3.y)*t3)
+    };
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    var f=fieldRect();
+    ctx.fillStyle='#0B1322'; ctx.fillRect(f.x,f.y,f.w,f.h); ctx.strokeStyle='#26324A'; ctx.lineWidth=2; ctx.strokeRect(f.x,f.y,f.w,f.h);
+    ctx.strokeStyle='rgba(120,140,180,0.06)'; ctx.lineWidth=1;
+    for(var gx=f.x+34; gx<f.x+f.w; gx+=34){ ctx.beginPath(); ctx.moveTo(gx,f.y); ctx.lineTo(gx,f.y+f.h); ctx.stroke(); }
+    for(var gy=f.y+34; gy<f.y+f.h; gy+=34){ ctx.beginPath(); ctx.moveTo(f.x,gy); ctx.lineTo(f.x+f.w,gy); ctx.stroke(); }
+    buildSamples();
+    // path
+    ctx.strokeStyle='#34D7C5'; ctx.lineWidth=3; ctx.lineCap='round'; ctx.beginPath();
+    samples.forEach(function(p,i){ if(i===0)ctx.moveTo(p.x,p.y); else ctx.lineTo(p.x,p.y); }); ctx.stroke();
+    // traveled portion
+    if(playing||animIdx>0){
+      ctx.strokeStyle='#FFB020'; ctx.lineWidth=3; ctx.beginPath();
+      for(var i=0;i<=Math.min(animIdx,samples.length-1);i++){ var p=samples[i]; if(i===0)ctx.moveTo(p.x,p.y); else ctx.lineTo(p.x,p.y); } ctx.stroke();
+    }
+    // waypoints
+    WPS.forEach(function(_,i){ var s=wpScreen(i);
+      ctx.fillStyle=(drag===i)?'#a7adff':'#8E8CF8'; ctx.beginPath(); ctx.arc(s.x,s.y,9,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#0E1525'; ctx.font='700 11px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(i+1, s.x, s.y);
+    });
+    // robot
+    var idx=Math.min(Math.floor(animIdx), samples.length-1);
+    var p=samples[idx], pn=samples[Math.min(idx+1,samples.length-1)];
+    var ang=Math.atan2(pn.y-p.y, pn.x-p.x);
+    ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(ang);
+    ctx.fillStyle='#1B2540'; ctx.strokeStyle='#43D67E'; ctx.lineWidth=2; ctx.fillRect(-13,-11,26,22); ctx.strokeRect(-13,-11,26,22);
+    ctx.fillStyle='#FFB020'; ctx.beginPath(); ctx.moveTo(16,0); ctx.lineTo(7,-5); ctx.lineTo(7,5); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+  function loop(){
+    if(playing){ animIdx+=0.7; if(animIdx>=samples.length-1){ animIdx=samples.length-1; playing=false; document.getElementById('play').textContent='Play ▸'; } }
+    draw();
+    var pct=samples.length>1? Math.round(animIdx/(samples.length-1)*100):0;
+    document.getElementById('prog').textContent=pct+'%';
+    requestAnimationFrame(loop);
+  }
+  function pos(e){ var r=cv.getBoundingClientRect(); return {x:e.clientX-r.left,y:e.clientY-r.top}; }
+  cv.addEventListener('pointerdown',function(e){ var p=pos(e); for(var i=0;i<WPS.length;i++){ var s=wpScreen(i); if(Math.hypot(p.x-s.x,p.y-s.y)<16){ drag=i; cv.setPointerCapture(e.pointerId); return; } } });
+  cv.addEventListener('pointermove',function(e){ if(drag<0)return; var p=pos(e), f=fieldRect(); WPS[drag].fx=Math.max(0.04,Math.min(0.96,(p.x-f.x)/f.w)); WPS[drag].fy=Math.max(0.06,Math.min(0.94,(p.y-f.y)/f.h)); });
+  cv.addEventListener('pointerup',function(){ drag=-1; }); cv.addEventListener('pointercancel',function(){ drag=-1; });
+  document.getElementById('play').addEventListener('click',function(){ if(playing){ playing=false; this.textContent='Play ▸'; } else { if(animIdx>=samples.length-1)animIdx=0; playing=true; this.textContent='Pause'; } });
+  document.getElementById('reset').addEventListener('click',function(){ playing=false; animIdx=0; document.getElementById('play').textContent='Play ▸'; });
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
+  buildSamples(); requestAnimationFrame(loop);
+
+  var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
+  function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'').replace(/\(\)$/,'');}
+  document.getElementById('check').addEventListener('click',function(){
+    var all=true;
+    blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - followPath'; res.className='code-result '+(all?'ok':'no');
+  });
+  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='followPath';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(idx===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="deploy:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

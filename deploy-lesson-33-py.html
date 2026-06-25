@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deploy · Part 8.2 - Simulation (Python)</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(138,140,248,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--red);display:flex;align-items:center;gap:6px}
+  .demo-tag .d{width:7px;height:7px;border-radius:50%;background:var(--red)}
+  canvas.sim{display:block;width:100%;height:230px}
+  .loopstrip{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;padding:12px 14px;border-top:1px solid var(--line);background:#0B1322}
+  .lb{font-family:var(--mono);font-size:10.5px;border:1px solid var(--line-2);border-radius:7px;padding:7px 9px;color:var(--muted);text-align:center;line-height:1.3}
+  .lb.sim{border-color:var(--amber);color:var(--amber);background:rgba(255,176,32,.08)}
+  .lb.code{border-color:var(--indigo);color:var(--indigo)}
+  .la{color:var(--faint);font-size:13px;padding:0 7px}
+  .readouts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:18px;font-weight:600;margin-top:3px}
+  .ro .v.amber{color:var(--amber)} .ro .v.teal{color:var(--teal)} .ro .v.indigo{color:var(--indigo)}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)} .btn.active{background:var(--indigo);border-color:var(--indigo);color:#0a0f24;font-weight:700}
+  .hint{font-family:var(--mono);font-size:11px;color:var(--faint)}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--indigo);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:12.5px;line-height:1.8;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic} .code .kw{color:#ff9bbf} .code .ty{color:var(--teal)} .code .fn{color:var(--indigo)} .code .num{color:var(--amber)} .code .an{color:var(--amber)}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(138,140,248,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .code-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .code-ex .chead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .code-ex .chead .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,176,32,.14);display:grid;place-items:center;color:var(--amber);font-size:13px}
+  .code-ex .ctask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .code-ex pre.code{margin:0 0 14px}
+  .blank{font-family:var(--mono);font-size:13px;width:11ch;text-align:center;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:2px 4px;outline:none}
+  .blank:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
+  .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:120px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="code.html"><span class="dot"></span><span class="name">Deploy</span></a>
+    <div class="top-meta">Part 8 · 02 / 05 · Pro Practices</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 8 · 02</b> Pro Practices</div>
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:-6px 0 14px">Code shown in <b style="color:var(--indigo)">Python</b> &middot; <a href="deploy-lesson-33.html" style="color:var(--muted)">switch to Java</a></div>
+    <div class="eyebrow">Simulation</div>
+    <h1>Test without<br>a <span class="accent">robot</span>.</h1>
+    <p class="dek">The robot is shared, half-built, or on the practice field. Your code doesn't have to wait. RobotPy runs the exact same program against a physics model of your mechanism, so you can test logic and tune gains on your laptop.</p>
+  </div>
+
+  <section>
+    <p class="lead">Same code. The sensor just comes from a model.</p>
+    <p>In simulation, your subsystem runs untouched, but instead of a real motor and encoder, a <strong>physics model</strong> takes the voltage you command and computes how the mechanism would move. That motion becomes the sensor value your code reads back. The loop closes exactly as on the robot. Command this simulated flywheel and watch it spin up.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">FlywheelSim · closed loop</span><span class="demo-tag"><span class="d"></span>hardware: disconnected</span></div>
+      <canvas class="sim" id="cv"></canvas>
+      <div class="loopstrip">
+        <div class="lb code">your code<br>PID</div><div class="la">→</div>
+        <div class="lb">set_voltage</div><div class="la">→</div>
+        <div class="lb sim">FlywheelSim<br>physics</div><div class="la">→</div>
+        <div class="lb">getVelocity</div><div class="la">↻</div>
+      </div>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Setpoint</div><div class="v amber" id="roSet">0 rpm</div></div>
+        <div class="ro"><div class="k2">Measured (from sim)</div><div class="v teal" id="roMeas">0 rpm</div></div>
+        <div class="ro"><div class="k2">Applied voltage</div><div class="v indigo" id="roV">0.0 V</div></div>
+      </div>
+      <div class="controls">
+        <button class="btn" data-rpm="0">Stop</button>
+        <button class="btn active" data-rpm="2000">2000 rpm</button>
+        <button class="btn" data-rpm="3500">3500 rpm</button>
+        <span class="hint">no robot plugged in, this all runs on your laptop</span>
+      </div>
+    </div>
+    <p class="caption">There is no motor here. The spinning rotor and the measured RPM both come from the sim's physics, and your PID closes the loop against them just like it would on the real flywheel. Inertia and spin-up time are modeled, so the feel is real.</p>
+  </section>
+
+  <section>
+    <div class="kicker">In code</div>
+    <h2>physics.py feeds the model</h2>
+    <p>Your subsystem code is unchanged. You add a physics file with an <span class="k">update_sim()</span> that pushes your motor's voltage into the model, advances the physics, and writes the result back as the sensor reading:</p>
+    <div class="codewrap">
+      <div class="clabel">physics.py (sim hooks) <span class="badge">Python · RobotPy</span></div>
+<pre class="code">self.sim = <span class="ty">FlywheelSim</span>(
+    <span class="ty">LinearSystemId</span>.<span class="fn">flywheelSystem</span>(<span class="ty">DCMotor</span>.<span class="fn">krakenX60</span>(<span class="num">1</span>), <span class="num">0.004</span>, <span class="num">1.0</span>),
+    <span class="ty">DCMotor</span>.<span class="fn">krakenX60</span>(<span class="num">1</span>))
+
+<span class="kw">def</span> <span class="fn">update_sim</span>(self, now, tm_diff):
+    self.sim.<span class="fn">setInputVoltage</span>(self.motor_sim.<span class="fn">getMotorVoltage</span>())
+    self.sim.<span class="fn">update</span>(<span class="num">0.020</span>)                        <span class="cm"># advance physics 20 ms</span>
+    self.motor_sim.<span class="fn">setRotorVelocity</span>(               <span class="cm"># write the result back as the sensor</span>
+        self.sim.<span class="fn">getAngularVelocity</span>() / <span class="num">60.0</span>)</pre>
+    </div>
+    <div class="note indigo">
+      <div class="nh">Bugs are cheaper to find in sim</div>
+      <p>A wrong sign, a unit slip, an auto that drives into a wall, you can hit all of them on your laptop, where a crash costs nothing and you can step through it. RobotPy ships models for elevators, arms, drivetrains, and flywheels. Teams that simulate write most of their logic before the robot is even wired, then arrive at the field already tuned.</p>
+    </div>
+
+    <div class="code-ex">
+      <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
+      <div class="ctask">Advance the physics model by one 20 ms loop so it produces a new sensor value. Fill in the method.</div>
+<pre class="code">self.sim.<input class="blank" data-ans="update" aria-label="blank" autocomplete="off" spellcheck="false">(<span class="num">0.020</span>)</pre>
+      <div class="code-actions">
+        <button class="btn" id="check">Check</button>
+        <button class="btn" id="reveal">Reveal</button>
+        <span class="code-result" id="cres"></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>A model is a guess about reality, so it is never perfect. The numbers you pass FlywheelSim, the rotor inertia and the gearing, are estimates, and if they are off your sim will spin up faster or slower than the real flywheel. Try tuning your gains in sim, then comparing the real spin-up curve from your logs and adjusting the model until they match. Question to chew on: if your auto works flawlessly in sim but drifts on the real robot, is the bug in your code or in your model, and how would you tell?</p>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="2">
+        <div class="qn">Question 1</div>
+        <div class="qt">What is robot simulation for?</div>
+        <div class="opts">
+          <button class="opt">Charging the battery faster</button>
+          <button class="opt">Replacing the drive team</button>
+          <button class="opt">Running your real code against a physics model, so you can test without hardware</button>
+        </div>
+        <div class="explain">Simulation runs your unchanged program against a model of the mechanism. You can test logic, autos, and tuning on a laptop, no robot required.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 2</div>
+        <div class="qt">In simulation, where do the sensor values come from?</div>
+        <div class="opts">
+          <button class="opt">A real encoder</button>
+          <button class="opt">The physics model, fed by the voltage your code commands</button>
+          <button class="opt">Random numbers</button>
+        </div>
+        <div class="explain">update_sim() pushes your motor voltage into the model, advances the physics, and writes the resulting motion back as the sensor reading. The loop closes just like on the robot.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">Why is simulation worth the setup?</div>
+        <div class="opts">
+          <button class="opt">You catch bugs and tune gains before the robot exists or is available</button>
+          <button class="opt">It makes the robot lighter</button>
+          <button class="opt">It removes the need for a battery</button>
+        </div>
+        <div class="explain">A crash in sim costs nothing and you can step through it. Teams that simulate write and tune most of their code before wiring the robot, arriving at competition ahead.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 8 · 02 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Simulation</b><span>Run real code, no hardware.</span></div>
+        <div class="gl"><b>Physics model</b><span>FlywheelSim, ElevatorSim, etc.</span></div>
+        <div class="gl"><b>physics.py</b><span>Feed voltage, read sim sensors.</span></div>
+        <div class="gl"><b>Same code</b><span>Subsystem is unchanged.</span></div>
+        <div class="gl"><b>update(0.020)</b><span>Advance the model one loop.</span></div>
+        <div class="gl"><b>Cheap bugs</b><span>Crash on the laptop, not the field.</span></div>
+      </div>
+      <a class="next" href="deploy-lesson-34-py.html">
+        <div class="n-eyebrow">Up next · Part 8 · 03</div>
+        <h3>Unit Testing</h3>
+        <p>Simulation tests the whole robot. Unit tests pin down one piece of logic, your conversions, your state transitions, so a bug can't sneak back in.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="deploy-lesson-32-py.html">← Part 8 · 01 · Dashboards &amp; Telemetry</a>
+    <a class="map" href="code.html">Course map</a>
+    <a href="deploy-lesson-34-py.html">Part 8 · 03 · Unit Testing →</a>
+  </nav>
+
+</div>
+
+<footer>Deploy · Programming an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var cv=document.getElementById('cv'), ctx=cv.getContext('2d'), W=0,H=0,dpr=1;
+  function fit(){ var r=cv.getBoundingClientRect(); if(!r.width)return; dpr=window.devicePixelRatio||1; cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr); ctx.setTransform(dpr,0,0,dpr,0,0); W=r.width; H=r.height; }
+  fit();
+  var setpoint=2000, meas=0, angle=0, MAX=3500;
+  function volts(){ var err=setpoint-meas; return Math.max(0,Math.min(12, 0.0026*setpoint + 0.004*err)); } // kV-ish + kP
+  function step(){
+    var v=volts();
+    // first-order plant driven by voltage; steady-state ~ v scaled
+    var ss=v/12*MAX*1.02;
+    meas += (ss-meas)*0.055;
+    if(meas<0)meas=0;
+    angle += meas/600;
+    draw(v);
+    document.getElementById('roSet').textContent=Math.round(setpoint)+' rpm';
+    document.getElementById('roMeas').textContent=Math.round(meas)+' rpm';
+    document.getElementById('roV').textContent=v.toFixed(1)+' V';
+    requestAnimationFrame(step);
+  }
+  function draw(v){
+    ctx.clearRect(0,0,W,H);
+    var cx=W*0.26, cy=H/2, R=Math.min(H*0.34,70);
+    ctx.beginPath(); ctx.arc(cx,cy,R+10,0,Math.PI*2); ctx.fillStyle='#11192B'; ctx.fill(); ctx.strokeStyle='#33415e'; ctx.lineWidth=2; ctx.stroke();
+    ctx.save(); ctx.translate(cx,cy); ctx.rotate(angle);
+    ctx.beginPath(); ctx.arc(0,0,R,0,Math.PI*2); ctx.fillStyle='#1B2540'; ctx.fill(); ctx.strokeStyle='#34D7C5'; ctx.lineWidth=2; ctx.stroke();
+    for(var i=0;i<6;i++){ ctx.save(); ctx.rotate(i*Math.PI/3); ctx.fillStyle=i===0?'#FFB020':'#34D7C5'; ctx.fillRect(R*0.30,-3,R*0.62,6); ctx.restore(); }
+    ctx.beginPath(); ctx.arc(0,0,6,0,Math.PI*2); ctx.fillStyle='#E7ECF6'; ctx.fill(); ctx.restore();
+    ctx.fillStyle='#5E6F8E'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText('SIMULATED ROTOR', cx, cy+R+24);
+    // bars
+    var bx=W*0.55, bw=W*0.36, by=H*0.32, bh=18;
+    ctx.fillStyle='#5E6F8E'; ctx.font='10px ui-monospace,Menlo,monospace'; ctx.textAlign='left'; ctx.fillText('MEASURED RPM (from sim)', bx, by-8);
+    ctx.fillStyle='#0B1322'; ctx.strokeStyle='#26324A'; ctx.fillRect(bx,by,bw,bh); ctx.strokeRect(bx,by,bw,bh);
+    ctx.fillStyle='#34D7C5'; ctx.fillRect(bx,by,bw*Math.min(1,meas/MAX),bh);
+    // setpoint marker
+    var sf=Math.min(1,setpoint/MAX); ctx.strokeStyle='#FFB020'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(bx+bw*sf,by-3); ctx.lineTo(bx+bw*sf,by+bh+3); ctx.stroke();
+    ctx.fillStyle='#FFB020'; ctx.font='8px ui-monospace,Menlo,monospace'; ctx.fillText('setpoint', bx+bw*sf-2, by+bh+12);
+    // voltage bar
+    var vy=H*0.62;
+    ctx.fillStyle='#5E6F8E'; ctx.font='10px ui-monospace,Menlo,monospace'; ctx.fillText('APPLIED VOLTAGE', bx, vy-8);
+    ctx.fillStyle='#0B1322'; ctx.strokeStyle='#26324A'; ctx.fillRect(bx,vy,bw,bh); ctx.strokeRect(bx,vy,bw,bh);
+    ctx.fillStyle='#8E8CF8'; ctx.fillRect(bx,vy,bw*Math.min(1,v/12),bh);
+  }
+  document.querySelectorAll('.controls .btn[data-rpm]').forEach(function(b){ b.addEventListener('click',function(){ setpoint=+b.getAttribute('data-rpm'); document.querySelectorAll('.controls .btn[data-rpm]').forEach(function(x){x.classList.toggle('active',x===b);}); }); });
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
+  requestAnimationFrame(step);
+
+  var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
+  function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'').replace(/\(\)$/,'');}
+  document.getElementById('check').addEventListener('click',function(){
+    var all=true;
+    blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - update'; res.className='code-result '+(all?'ok':'no');
+  });
+  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='update';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(idx===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="deploy:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

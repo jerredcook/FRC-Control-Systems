@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deploy · Part 3.1 - The Big Picture (Python)</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(138,140,248,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .terms{display:grid;gap:12px;margin:22px 0 6px}
+  @media(min-width:560px){.terms{grid-template-columns:repeat(2,1fr)}}
+  .term{border:1px solid var(--line);border-radius:10px;padding:13px 15px;background:var(--panel);border-top:2px solid var(--accent,var(--indigo))}
+  .term h4{margin:0 0 4px;font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--accent,var(--indigo))}
+  .term p{margin:0;font-size:14px;color:var(--muted);line-height:1.5}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;gap:6px;align-items:center}
+  .demo-tag .live{width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 8px var(--red)}
+  .demo-tag .live.on{background:var(--green);box-shadow:0 0 8px var(--green)}
+  .pipe{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;justify-content:center;padding:26px 16px}
+  .stage{flex:1 1 180px;max-width:230px;border:1px solid var(--line-2);border-radius:12px;background:#0B1322;padding:16px 14px;text-align:center;transition:.14s}
+  .stage.on{border-color:var(--indigo);background:rgba(138,140,248,.1);box-shadow:0 0 24px -6px var(--indigo);transform:translateY(-3px)}
+  .stage .sn{width:28px;height:28px;border-radius:8px;background:var(--panel-2);border:1px solid var(--line-2);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:700;color:var(--muted);margin:0 auto 10px}
+  .stage.on .sn{background:var(--indigo);border-color:var(--indigo);color:#0a0f24}
+  .stage .stt{font-size:14.5px;color:var(--text);font-weight:600;line-height:1.3}
+  .stage .ssub{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:5px}
+  .sarrow{display:flex;align-items:center;color:var(--faint);font-size:18px}
+  @media(max-width:559px){.sarrow{transform:rotate(90deg);justify-content:center}}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .btn.primary{background:linear-gradient(180deg,#a7adff,var(--indigo));color:#0a0f24;font-weight:700;border:none}
+  .readouts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:19px;font-weight:600;margin-top:3px}
+  .ro .v.indigo{color:var(--indigo)} .ro .v.amber{color:var(--amber)} .ro .v.teal{color:var(--teal)}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--indigo);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:13.5px;line-height:1.85;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic} .code .kw{color:#ff9bbf} .code .ty{color:var(--teal)} .code .fn{color:var(--indigo)} .code .num{color:var(--amber)} .code .an{color:var(--amber)}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(138,140,248,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:130px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="code.html"><span class="dot"></span><span class="name">Deploy</span></a>
+    <div class="top-meta">Part 3 · 01 / 06 · Command-Based</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 3 · 01</b> Command-Based Robots</div>
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:-6px 0 14px">Code shown in <b style="color:var(--indigo)">Python</b> &middot; <a href="deploy-lesson-11.html" style="color:var(--muted)">switch to Java</a></div>
+    <div class="eyebrow">The Big Picture</div>
+    <h1>One scheduler,<br>running <span class="accent">everything</span>.</h1>
+    <p class="dek">Command-based robots have a heartbeat: a scheduler that, every 20 ms, reads your inputs, runs your active actions, and updates every mechanism. Meet it before the pieces.</p>
+  </div>
+
+  <section>
+    <p class="lead">Three files, one loop.</p>
+    <p>A command-based robot is built from a few parts you'll meet over this part. The glue that runs them is the <span class="k">CommandScheduler</span> - called once per loop from <span class="k">robot.py</span>. Here's the cast:</p>
+    <div class="terms">
+      <div class="term"><h4>Subsystem</h4><p>One mechanism - its hardware and state. The <em>nouns</em> of your robot (Elevator, Intake).</p></div>
+      <div class="term"><h4>Command</h4><p>An action over time. The <em>verbs</em> - "raise the elevator," "run the intake."</p></div>
+      <div class="term"><h4>RobotContainer</h4><p>Where you create the subsystems, build commands, and bind them to buttons. Set up once.</p></div>
+      <div class="term"><h4>CommandScheduler</h4><p>The engine. Each loop it runs the active commands and every subsystem's periodic().</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Watch it</div>
+    <h2>What the scheduler does each loop</h2>
+    <p>One call - <span class="k">CommandScheduler.getInstance().run()</span> - drives the whole robot. Every 20 ms it walks these three steps. Watch them cycle; this is happening under everything you'll write.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">CommandScheduler.run()</span><span class="demo-tag"><span class="live on" id="live"></span> <span id="status">running</span></span></div>
+      <div class="pipe">
+        <div class="stage" data-i="0"><div class="sn">1</div><div class="stt">Read inputs</div><div class="ssub">poll buttons &amp; triggers</div></div>
+        <div class="sarrow">→</div>
+        <div class="stage" data-i="1"><div class="sn">2</div><div class="stt">Run commands</div><div class="ssub">execute() the active ones</div></div>
+        <div class="sarrow">→</div>
+        <div class="stage" data-i="2"><div class="sn">3</div><div class="stt">Update subsystems</div><div class="ssub">each periodic()</div></div>
+      </div>
+      <div class="controls">
+        <button class="btn primary" id="runBtn">Pause</button>
+        <button class="btn" id="stepBtn">Step ▸</button>
+      </div>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Loop iteration</div><div class="v indigo" id="roTick">0</div></div>
+        <div class="ro"><div class="k2">Current step</div><div class="v amber" id="roPhase">Read inputs</div></div>
+        <div class="ro"><div class="k2">Loop period</div><div class="v teal">20 ms</div></div>
+      </div>
+    </div>
+    <p class="caption">You never write this loop. You just hand the scheduler subsystems and commands; it runs them on the robot's heartbeat for you.</p>
+  </section>
+
+  <section>
+    <div class="kicker">The one line that starts it</div>
+    <h2>robot.py hands off to the scheduler</h2>
+    <p>In a command-based project, <span class="k">robot.py</span> is tiny - its main job is to call the scheduler every loop. Everything interesting lives in your subsystems and commands; this just keeps the engine turning:</p>
+    <div class="codewrap">
+      <div class="clabel">robot.py <span class="badge">Python · RobotPy</span></div>
+<pre class="code"><span class="kw">def</span> <span class="fn">robotPeriodic</span>(self):
+    <span class="ty">commands2</span>.<span class="ty">CommandScheduler</span>.<span class="fn">getInstance</span>().<span class="fn">run</span>()   <span class="cm"># the 3 steps above, every 20 ms</span></pre>
+    </div>
+    <p>And in <span class="k">RobotContainer</span> - built once at startup - you create the subsystems and wire up the buttons. After that, the scheduler takes over and your robot is alive.</p>
+    <div class="note indigo">
+      <div class="nh">Why command-based at all?</div>
+      <p>You <em>could</em> stuff everything into <span class="k">teleopPeriodic</span> with a wall of if-statements. Command-based instead splits the robot into named subsystems and reusable commands the scheduler coordinates - so two mechanisms can act at once, actions compose, and your code stays readable as the robot grows. The rest of this part builds those pieces.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>The scheduler runs on the same 20 ms heartbeat as a bike wheel ticking past a sensor: steady, but not free. If one command's <span class="k">execute()</span> does something slow (a long loop, a blocking call), it eats into that 20 ms and the whole robot stutters, a real bug FRC teams hit called loop overrun. Worth pondering: how would you measure where the time goes, and why does that make heavy work like vision belong off the main thread?</p>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">What runs the whole command-based robot each loop?</div>
+        <div class="opts">
+          <button class="opt">Your teleopPeriodic, line by line</button>
+          <button class="opt">The CommandScheduler, called once from robotPeriodic()</button>
+          <button class="opt">The Driver Station</button>
+        </div>
+        <div class="explain">CommandScheduler.getInstance().run() is the engine - called every 20 ms, it reads inputs, runs active commands, and updates every subsystem. You write the pieces; it runs them.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">In command-based terms, a Subsystem is a ___ and a Command is a ___.</div>
+        <div class="opts">
+          <button class="opt">verb … noun</button>
+          <button class="opt">file … folder</button>
+          <button class="opt">noun (a mechanism) … verb (an action)</button>
+        </div>
+        <div class="explain">Subsystems are the nouns - the Elevator, the Intake. Commands are the verbs - raise it, run it. The scheduler coordinates verbs acting on nouns.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">What is RobotContainer for?</div>
+        <div class="opts">
+          <button class="opt">Creating subsystems, building commands, and binding them to buttons - once at startup</button>
+          <button class="opt">Running the control loop every 20 ms</button>
+          <button class="opt">Storing the battery charge</button>
+        </div>
+        <div class="explain">RobotContainer is the setup/wiring file: it instantiates your subsystems and connects controller buttons to commands. It runs once; the scheduler does the per-loop work afterward.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 3 · 01 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>CommandScheduler</b><span>The engine; runs everything each loop.</span></div>
+        <div class="gl"><b>The 3 steps</b><span>Read inputs → run commands → update subsystems.</span></div>
+        <div class="gl"><b>Subsystem</b><span>A mechanism (noun).</span></div>
+        <div class="gl"><b>Command</b><span>An action over time (verb).</span></div>
+        <div class="gl"><b>RobotContainer</b><span>Create &amp; wire it all, once.</span></div>
+        <div class="gl"><b>robotPeriodic()</b><span>Calls scheduler.run() every 20 ms.</span></div>
+      </div>
+      <a class="next" href="deploy-lesson-12-py.html">
+        <div class="n-eyebrow">Up next · Part 3 · 02</div>
+        <h3>Subsystems</h3>
+        <p>Start with the nouns. Build a subsystem - its hardware, its state, its periodic loop - the home for one mechanism.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="deploy-lesson-10-py.html">← Part 2 · 05 · Collections &amp; Enums</a>
+    <a class="map" href="code.html">Course map</a>
+    <a href="deploy-lesson-12-py.html">Part 3 · 02 · Subsystems →</a>
+  </nav>
+
+</div>
+
+<footer>Deploy · Programming an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var PHASES=['Read inputs','Run commands','Update subsystems'];
+  var stages=document.querySelectorAll('.stage');
+  var live=document.getElementById('live'), statusEl=document.getElementById('status');
+  var roTick=document.getElementById('roTick'), roPhase=document.getElementById('roPhase');
+  var S={phase:0, tick:0, running:true, acc:0};
+  function show(){
+    var a=Math.floor(S.phase)%3;
+    stages.forEach(function(s,i){ s.classList.toggle('on', i===a); });
+    roTick.textContent=String(S.tick); roPhase.textContent=PHASES[a];
+  }
+  function setRun(on){ S.running=on; document.getElementById('runBtn').textContent=on?'Pause':'Run'; live.classList.toggle('on',on); statusEl.textContent=on?'running':'paused'; }
+  document.getElementById('runBtn').addEventListener('click',function(){ setRun(!S.running); });
+  document.getElementById('stepBtn').addEventListener('click',function(){ setRun(false); S.phase=Math.floor(S.phase)+1; if(S.phase>=3){ S.phase=0; S.tick++; } show(); });
+  var last=0;
+  function frame(ts){ var t=ts/1000, dt=last?Math.min(0.05,t-last):0.016; last=t;
+    if(S.running){ S.acc+=dt; if(S.acc>0.7){ S.acc=0; S.phase=Math.floor(S.phase)+1; if(S.phase>=3){ S.phase=0; S.tick++; } show(); } }
+    requestAnimationFrame(frame);
+  }
+  show(); requestAnimationFrame(frame);
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(idx===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="deploy:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>
