@@ -204,7 +204,7 @@
   <section>
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
-      <p>Try misspelling the overridden method, like <span class="k">periodc()</span>, and see what happens. Python will not warn you, because to it that is simply a brand-new method that nothing calls, so your code "runs" but the scheduler never fires your control loop. That silent failure is sneaky. One guard against it: add the <span class="k">@override</span> decorator (from <span class="k">typing</span>), which lets a type checker like mypy flag a name that matches no parent method. Worth pondering: why is catching that mistake before you deploy so much kinder than discovering it on the field?</p>
+      <p>Try misspelling the overridden method, like <span class="k">periodc()</span>, and see what happens. Python will not warn you, because to it that is a brand-new method that nothing calls, so your code "runs" but the scheduler never fires your control loop. That silent failure is sneaky. One guard against it: add the <span class="k">@override</span> decorator (from <span class="k">typing</span>), which lets a type checker like mypy flag a name that matches no parent method. Worth pondering: why is catching that mistake before you deploy so much kinder than discovering it on the field?</p>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

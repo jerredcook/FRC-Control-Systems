@@ -241,9 +241,12 @@
         cfg.current_limits.stator_current_limit = <span class="num">60</span>
         cfg.current_limits.stator_current_limit_enable = <span class="kw">True</span>
         cfg.feedback.sensor_to_mechanism_ratio = <span class="num">12.0</span>
-        cfg.slot0.k_s = <span class="num">0.14</span>;  cfg.slot0.k_g = <span class="num">0.31</span>                      <span class="cm"># step 2 (SysId)</span>
-        cfg.slot0.k_v = <span class="num">0.115</span>; cfg.slot0.k_a = <span class="num">0.004</span>
-        cfg.slot0.k_p = <span class="num">12</span>;    cfg.slot0.k_d = <span class="num">0.2</span>                        <span class="cm"># step 3 (tracking)</span>
+        cfg.slot0.k_s = <span class="num">0.14</span>                                  <span class="cm"># step 2 (SysId)</span>
+        cfg.slot0.k_g = <span class="num">0.31</span>
+        cfg.slot0.k_v = <span class="num">0.115</span>
+        cfg.slot0.k_a = <span class="num">0.004</span>
+        cfg.slot0.k_p = <span class="num">12.0</span>                                  <span class="cm"># step 3 (tracking)</span>
+        cfg.slot0.k_d = <span class="num">0.2</span>
         cfg.slot0.gravity_type = <span class="ty">GravityTypeValue</span>.ELEVATOR_STATIC
         cfg.motion_magic.motion_magic_cruise_velocity = <span class="num">80</span>                <span class="cm"># step 4</span>
         cfg.motion_magic.motion_magic_acceleration = <span class="num">200</span>

@@ -170,10 +170,10 @@
     <span class="ty">DCMotor</span>.<span class="fn">krakenX60</span>(<span class="num">1</span>))
 
 <span class="kw">def</span> <span class="fn">update_sim</span>(self, now, tm_diff):
-    self.sim.<span class="fn">setInputVoltage</span>(self.motor_sim.<span class="fn">getMotorVoltage</span>())
+    self.sim.<span class="fn">setInputVoltage</span>(self.motor_sim.motor_voltage)
     self.sim.<span class="fn">update</span>(<span class="num">0.020</span>)                        <span class="cm"># advance physics 20 ms</span>
-    self.motor_sim.<span class="fn">setRotorVelocity</span>(               <span class="cm"># write the result back as the sensor</span>
-        self.sim.<span class="fn">getAngularVelocity</span>() / <span class="num">60.0</span>)</pre>
+    self.motor_sim.<span class="fn">set_rotor_velocity</span>(             <span class="cm"># write the result back as the sensor</span>
+        self.sim.<span class="fn">getAngularVelocityRPM</span>() / <span class="num">60.0</span>)</pre>
     </div>
     <div class="note indigo">
       <div class="nh">Bugs are cheaper to find in sim</div>

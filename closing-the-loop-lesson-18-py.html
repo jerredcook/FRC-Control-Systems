@@ -236,7 +236,7 @@
     <p>The routine drives the motor with a plain <span class="k">VoltageOut</span> request while <span class="k">SignalLogger</span> captures position, velocity, and voltage in the background. You bind four commands - quasistatic and dynamic, each direction - and run them on the real robot:</p>
     <div class="codewrap">
       <div class="clabel">A Phoenix 6 SysId routine <span class="badge">Python</span></div>
-<pre class="code"><span class="kw">from</span> wpilib.sysid <span class="kw">import</span> <span class="ty">SysIdRoutine</span>
+<pre class="code"><span class="kw">from</span> wpilib.sysid <span class="kw">import</span> <span class="ty">SysIdRoutine</span>, <span class="ty">SysIdRoutineLog</span>
 <span class="kw">from</span> phoenix6 <span class="kw">import</span> <span class="ty">SignalLogger</span>
 <span class="kw">from</span> phoenix6.controls <span class="kw">import</span> <span class="ty">VoltageOut</span>
 <span class="kw">from</span> wpimath.units <span class="kw">import</span> volts
@@ -247,7 +247,7 @@ self.routine = <span class="ty">SysIdRoutine</span>(
     <span class="ty">SysIdRoutine</span>.<span class="ty">Config</span>(
         stepVoltage=<span class="num">4.0</span>,                                  <span class="cm"># step voltage for the dynamic test</span>
         recordState=<span class="kw">lambda</span> state: <span class="ty">SignalLogger</span>.<span class="fn">write_string</span>(
-            <span class="str">"sysid-state"</span>, <span class="ty">SysIdRoutine</span>.<span class="ty">stateEnumToString</span>(state)),
+            <span class="str">"sysid-state"</span>, <span class="ty">SysIdRoutineLog</span>.<span class="fn">stateEnumToString</span>(state)),
     ),
     <span class="ty">SysIdRoutine</span>.<span class="ty">Mechanism</span>(
         <span class="kw">lambda</span> v: self.motor.<span class="fn">set_control</span>(self.sys_id_req.<span class="fn">with_output</span>(v)),  <span class="cm"># drive the motor</span>

@@ -131,7 +131,7 @@
         <div class="ro"><div class="k2">Status</div><div class="v green" id="roS">OK</div></div>
       </div>
       <div class="controls">
-        <button class="btn" data-amps="480" id="m1">Drivetrain pushing <b>+480 A</b></button>
+        <button class="btn" data-amps="250" id="m1">Drivetrain pushing <b>+250 A</b></button>
         <button class="btn" data-amps="120" id="m2">Intake stalled <b>+120 A</b></button>
         <button class="btn" data-amps="90" id="m3">Arm lifting <b>+90 A</b></button>
         <button class="btn" data-amps="150" id="m4">Shooter spin-up <b>+150 A</b></button>
@@ -217,7 +217,7 @@
         <div class="gl"><b>Power budget</b><span>Adding up the current mechanisms pull at once.</span></div>
         <div class="gl"><b>Main breaker</b><span>One 120 A, thermal and time-dependent breaker.</span></div>
         <div class="gl"><b>Stall current</b><span>A blocked motor pulls hundreds of amps.</span></div>
-        <div class="gl"><b>Brownout</b><span>Volts sag past ~6.8 V, controller cuts motors.</span></div>
+        <div class="gl"><b>Brownout</b><span>Volts sag too low (~6.8 V on the roboRIO; the 2027 board differs), controller cuts motors.</span></div>
         <div class="gl"><b>Current limiting</b><span>Software caps each motor's draw.</span></div>
         <div class="gl"><b>Fresh battery</b><span>Low internal resistance sags less.</span></div>
       </div>
@@ -248,7 +248,7 @@
 
   // mechanism buttons, each adds a current estimate
   var btns=[
-    {el:document.getElementById('m1'), amps:480, on:false, label:'DRIVE'},
+    {el:document.getElementById('m1'), amps:250, on:false, label:'DRIVE'},
     {el:document.getElementById('m2'), amps:120, on:false, label:'INTAKE'},
     {el:document.getElementById('m3'), amps:90,  on:false, label:'ARM'},
     {el:document.getElementById('m4'), amps:150, on:false, label:'SHOOTER'}

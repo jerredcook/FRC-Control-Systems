@@ -241,7 +241,7 @@
     <span class="kw">def</span> <span class="fn">periodic</span>(self):                      <span class="cm"># ← the robot runs this every 20 ms</span>
         measured = self.motor.<span class="fn">get_position</span>().value
         volts = self.pid.<span class="fn">calculate</span>(measured, self.goal_meters)   <span class="cm"># the Part I loop,</span>
-        self.motor.<span class="fn">setVoltage</span>(volts)                              <span class="cm"># in real code</span></pre>
+        self.motor.<span class="fn">set_control</span>(<span class="ty">VoltageOut</span>(volts))                <span class="cm"># in real code</span></pre>
     </div>
     <p>That's the entire idea. <span class="k">periodic()</span> reads where the elevator is, asks the PID controller for a voltage, and applies it - exactly "measure, decide, act," running on the robot's heartbeat. Over the rest of Part II we'll make every line of that method correct and robust.</p>
     <div class="note teal">
@@ -271,7 +271,7 @@ self.driver = <span class="ty">CommandXboxController</span>(<span class="num">0<
 <pre class="code"><span class="kw">def</span> <span class="fn">periodic</span>(self):                          <span class="cm"># runs every 20 ms</span>
     measured = self.motor.<span class="fn">get_position</span>().value
     volts = self.pid.<span class="fn">calculate</span>(measured, <input class="blank" data-ans="self.goal_meters|goal_meters|self.goal|goal" aria-label="blank 1" autocomplete="off" spellcheck="false">)
-    self.motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="volts" aria-label="blank 2" autocomplete="off" spellcheck="false">)</pre>
+    self.motor.<span class="fn">set_control</span>(<span class="ty">VoltageOut</span>(<input class="blank" data-ans="volts" aria-label="blank 2" autocomplete="off" spellcheck="false">))</pre>
       <div class="code-actions">
         <button class="btn" id="check">Check</button>
         <button class="btn" id="reveal">Reveal</button>

@@ -217,7 +217,7 @@ states = self.kinematics.<span class="fn">toSwerveModuleStates</span>(speeds)
 <span class="cm"># inside a module:</span>
 <span class="kw">def</span> <span class="fn">set_desired_state</span>(self, state: <span class="ty">SwerveModuleState</span>) -> <span class="kw">None</span>:
     state = <span class="ty">SwerveModuleState</span>.<span class="fn">optimize</span>(state, self.current_angle)            <span class="cm"># never turn 270 when 90 does it</span>
-    self.steer.<span class="fn">set_control</span>(self.steer_req.<span class="fn">with_position</span>(state.angle.<span class="fn">rotations</span>()))   <span class="cm"># position</span>
+    self.steer.<span class="fn">set_control</span>(self.steer_req.<span class="fn">with_position</span>(state.angle.<span class="fn">degrees</span>() / <span class="num">360</span>))   <span class="cm"># position, in rotations</span>
     self.drive.<span class="fn">set_control</span>(self.drive_req.<span class="fn">with_velocity</span>(self.<span class="fn">to_rps</span>(state.speed)))      <span class="cm"># velocity</span></pre>
     </div>
     <div class="note teal">

@@ -240,7 +240,7 @@
   <span class="kw">public</span> <span class="kw">void</span> <span class="fn">periodic</span>() {                  <span class="cm">// ← the robot runs this every 20 ms</span>
     <span class="ty">double</span> measured = motor.<span class="fn">getPosition</span>().<span class="fn">getValueAsDouble</span>();
     <span class="ty">double</span> volts = pid.<span class="fn">calculate</span>(measured, goalMeters);   <span class="cm">// the Part I loop,</span>
-    motor.<span class="fn">setVoltage</span>(volts);                              <span class="cm">// in real code</span>
+    motor.<span class="fn">setControl</span>(<span class="kw">new</span> <span class="ty">VoltageOut</span>(volts));            <span class="cm">// in real code</span>
   }
 }</pre>
     </div>
@@ -273,7 +273,7 @@
 <pre class="code"><span class="kw">public</span> <span class="kw">void</span> <span class="fn">periodic</span>() {                       <span class="cm">// runs every 20 ms</span>
   <span class="ty">double</span> measured = motor.<span class="fn">getPosition</span>().<span class="fn">getValueAsDouble</span>();
   <span class="ty">double</span> volts = pid.<span class="fn">calculate</span>(measured, <input class="blank" data-ans="goalmeters|goal" aria-label="blank 1" autocomplete="off" spellcheck="false">);
-  motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="volts" aria-label="blank 2" autocomplete="off" spellcheck="false">);
+  motor.<span class="fn">setControl</span>(<span class="kw">new</span> <span class="ty">VoltageOut</span>(<input class="blank" data-ans="volts" aria-label="blank 2" autocomplete="off" spellcheck="false">));
 }</pre>
       <div class="code-actions">
         <button class="btn" id="check">Check</button>

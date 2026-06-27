@@ -4,7 +4,7 @@ in exactly one place. From "Closing the Loop" Part II.1.
 
 The subsystem templates inline their constants for clarity; this file is the
 "grown-up" version once your robot has several mechanisms. Move the values
-here and reference Constants.ElevatorK.kP, etc.
+here and reference ElevatorK.kP, etc.
 
 Replace every # TODO with your robot's measured numbers (see Part III.5).
 """
