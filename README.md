@@ -7,6 +7,8 @@ with no install.
 
 ### 🌐 Live: https://jerredcook.github.io/FRC-Control-Systems/
 
+> 📋 **[Curriculum review & competitive analysis](docs/curriculum-review-2026-06.md)** - a critical assessment of how well this teaches HS students, how much they really learn, and how it compares to the best FRC training that exists.
+
 Three courses - three pillars - **103 interactive lessons, all complete:**
 
 | | Course | Covers | Status |

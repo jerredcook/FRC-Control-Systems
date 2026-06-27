@@ -292,13 +292,13 @@
 self.pid = <span class="ty">PIDController</span>(kP, <span class="num">0.0</span>, kD)
 
 <span class="kw">def</span> <span class="fn">periodic</span>(self):
-    ff_volts  = self.ff.<span class="fn">calculate</span>(velocity, next_velocity)   <span class="cm"># discrete (2026) form</span>
+    ff_volts  = self.ff.<span class="fn">calculate</span>(velocity, next_velocity)   <span class="cm"># discrete form, for a moving profile</span>
     pid_volts = self.pid.<span class="fn">calculate</span>(self.encoder.<span class="fn">getPosition</span>(), self.setpoint)
     self.motor.<span class="fn">setVoltage</span>(ff_volts + pid_volts)</pre>
     </div>
     <div class="note">
       <div class="nh">Under the hood - where kV and kA come alive</div>
-      <p>For a static hold, feed velocity 0 and feedforward returns just <span class="k">kG</span>. The velocity and acceleration terms only earn their keep when the setpoint is actually <em>moving</em> - fed a planned trajectory. As of WPILib 2026 the single-argument <span class="k">calculate(velocity)</span> is deprecated in favor of the discrete <span class="k">calculate(current_velocity, next_velocity)</span>. Generating that smooth moving trajectory is <strong>motion profiling</strong>, which we reach at the end of the course - where kV and kA finally shine.</p>
+      <p>For a static hold, feed velocity 0 and feedforward returns just <span class="k">kG</span>. The velocity and acceleration terms only earn their keep when the setpoint is actually <em>moving</em> - fed a planned trajectory. The single-argument <span class="k">calculate(velocity)</span> gives the steady-state voltage to hold a speed; to follow a setpoint that is actively moving, newer WPILib also offers the discrete <span class="k">calculate(current_velocity, next_velocity)</span>, which accounts for the change between loops. Generating that smooth moving trajectory is <strong>motion profiling</strong>, which we reach at the end of the course - where kV and kA finally shine.</p>
     </div>
   </section>
 

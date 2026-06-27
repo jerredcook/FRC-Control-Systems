@@ -288,7 +288,7 @@
   motor.<span class="fn">setVoltage</span>(output);
 }</pre>
     </div>
-    <p>The constructor takes the three gains in order - <span class="k">kP</span>, <span class="k">kI</span>, <span class="k">kD</span>. We're leaving the last two at zero because they're the next two lessons. <span class="k">calculate(measurement, setpoint)</span> returns the same <span class="k">kP × error</span> you wrote by hand.</p>
+    <p>The constructor takes the three gains in order - <span class="k">kP</span>, <span class="k">kI</span>, <span class="k">kD</span>. We're leaving the last two at zero because they're the next two lessons. <span class="k">calculate(measurement, setpoint)</span> returns the same <span class="k">kP × error</span> you wrote by hand. Real robot code also clamps that output to the battery's reach (about ±12 V) and only drives the motor when the robot is enabled, guard rails we leave off here to keep the loop bare.</p>
 
     <div class="note">
       <div class="nh">Under the hood - gains have units</div>
