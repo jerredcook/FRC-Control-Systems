@@ -14,7 +14,7 @@ required.** Every file opens directly in a browser.
 | Pillar | Course | Hub file | Lesson files | Count | Accent |
 |--------|--------|----------|--------------|-------|--------|
 | 🎯 Control | **Closing the Loop** | `closing-the-loop.html` | `closing-the-loop-lesson-{1..24}.html` | 24 | teal |
-| 🎮 Code | **Deploy** | `code.html` | `deploy-lesson-{1..36}.html` | 36 | indigo |
+| 🎮 Code | **Deploy** | `code.html` | `deploy-lesson-{1..37}.html` | 37 | indigo |
 | 🔧 Build | **Fabricate** | `build.html` | `build-lesson-{1..44}.html` | 44 | amber |
 
 `index.html` is the academy landing page that links to all three hubs.
@@ -31,6 +31,13 @@ preview that the course replaced).
 **The pillars connect:** Deploy's Part 5 ("Make It Move") is a single card that
 links straight into the Closing the Loop course rather than re-teaching control. So
 the control material is shared, not duplicated.
+
+**Deploy's capstone (Part 9):** `deploy-lesson-37.html` (+ `-py` twin) is a hands-on
+capstone that runs the same WPILib command-based code on a real, low-cost **XRP**
+robot (runs in simulation on the laptop, talking to the XRP over WiFi). It is wired
+as a `{code:"9", title:"Capstone"}` part in `code.html`'s `COURSE`, and the hub
+render skips a checkpoint card for it (the condition excludes part codes `5` and `9`).
+It hands the exact, current setup to the official WPILib XRP/Romi guides.
 
 ### Filename ↔ course-name gotcha
 

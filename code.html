@@ -222,6 +222,11 @@
        {n:3, title:"Unit Testing", desc:"JUnit for robot code - catch bugs before the field does.", file:"deploy-lesson-34.html"},
        {n:4, title:"Debugging & Robust Code", desc:"Defensive coding, brownouts, and fail-safes.", file:"deploy-lesson-35.html"},
        {n:5, title:"Competition-Ready", desc:"Deploy hygiene and the build-season workflow.", file:"deploy-lesson-36.html"}
+     ]},
+    {code:"9", title:"Capstone", sub:"Run it on a real robot",
+     blurb:"The synthesis: take the same command-based code you have learned and run it on the XRP, a real, low-cost robot. Build, Code, and Control meet on hardware you can hold.",
+     lessons:[
+       {n:1, title:"Real hardware - the XRP", desc:"Run your WPILib code on a small real robot. Drive a square, then close the loop with PID.", file:"deploy-lesson-37.html"}
      ]}
   ];
 
@@ -272,7 +277,7 @@
         grid.appendChild(card);
       });
       sec.appendChild(grid);
-      if(part.code!=="5"){ var cpFile="deploy-checkpoint-"+part.code+".html";
+      if(part.code!=="5" && part.code!=="9"){ var cpFile="deploy-checkpoint-"+part.code+".html";
         var cp=document.createElement("a"); cp.className="card checkpoint"+(done[cpFile]?" done":""); cp.href=cpFile; cp.innerHTML='<div class="card-num">★</div><div class="card-body"><div class="card-title">Part '+part.code+' Checkpoint</div><p class="card-desc">A short cumulative quiz over this part and what came before. Answer them all correctly to clear it.</p><div class="card-foot"><span class="pill">Checkpoint</span><span class="open-link">Start →</span></div></div>'; sec.appendChild(cp); }
       courseEl.appendChild(sec);
     });

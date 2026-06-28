@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deploy · Part 9 - Capstone: Real hardware (Python)</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(138,140,248,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .stage{position:relative;background:#0B1120}
+  canvas{display:block;width:100%;height:auto}
+  .demo-controls{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:13px 16px;border-top:1px solid var(--line)}
+  .toggle{display:inline-flex;border:1px solid var(--line-2);border-radius:9px;overflow:hidden}
+  .toggle button{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--panel-2);color:var(--muted);border:none;padding:9px 13px;cursor:pointer;transition:.12s}
+  .toggle button.on{background:var(--indigo);color:#0b1020;font-weight:700}
+  .readout{font-family:var(--mono);font-size:12px;color:var(--muted);margin-left:auto}
+  .readout b{color:var(--teal)}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--indigo);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:12.5px;line-height:1.85;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic} .code .kw{color:#ff9bbf} .code .ty{color:var(--teal)} .code .fn{color:var(--indigo)} .code .num{color:var(--amber)} .code .st{color:#9ce8b0}
+
+  ul.need{list-style:none;padding:0;margin:6px 0 0}
+  ul.need li{position:relative;padding:6px 0 6px 26px;color:var(--text);font-size:16px}
+  ul.need li::before{content:"›";position:absolute;left:6px;color:var(--indigo);font-weight:700}
+  ol.steps{margin:6px 0 0;padding-left:22px}
+  ol.steps li{margin:0 0 9px;color:var(--text)}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(138,140,248,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .cta-box{border:1px solid var(--indigo);border-radius:14px;background:radial-gradient(600px 240px at 50% 0%, rgba(138,140,248,.10), transparent 70%),linear-gradient(180deg,var(--panel),#11192B);padding:22px 22px;margin:24px 0}
+  .cta-box .ch{font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--indigo);margin-bottom:8px}
+  .cta-box p{font-size:16px;margin:0 0 12px}
+  .cta-box .links{display:flex;flex-wrap:wrap;gap:10px}
+  .cta-box a{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:11px 15px;color:var(--text);transition:.14s;word-break:break-word}
+  .cta-box a:hover{border-color:var(--indigo)} .cta-box a.primary{background:linear-gradient(180deg,#a8a7ff,var(--indigo));color:#0b1020;font-weight:700;border-color:transparent}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+  .quiz.predict{border-color:var(--line-2)}
+  .quiz.predict .qn{color:var(--indigo)}
+
+  .capstone{border:1px solid var(--green);border-radius:16px;background:radial-gradient(700px 300px at 50% 0%, rgba(67,214,126,.10), transparent 70%),linear-gradient(180deg,var(--panel),#11192B);padding:30px 24px;text-align:center}
+  .capstone .star{font-size:30px}
+  .capstone h2{margin:8px 0 6px;font-size:clamp(1.8rem,4vw,2.6rem)}
+  .capstone .sub{color:var(--muted);max-width:52ch;margin:0 auto 18px;font-size:16.5px}
+  .parts{display:grid;gap:8px;margin:18px 0 6px;text-align:left}
+  @media(min-width:560px){.parts{grid-template-columns:1fr 1fr}}
+  .pt{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:9px;padding:10px 12px;background:#0E1525;font-size:14px}
+  .pt .ck2{color:var(--green);font-family:var(--mono);font-size:13px}
+  .pt b{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--indigo);text-transform:uppercase;min-width:48px}
+  .pt span{color:var(--muted)}
+  .cta{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:20px}
+  .cta a{text-decoration:none;font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding:12px 18px;border-radius:9px;transition:.14s}
+  .cta a.primary{background:linear-gradient(180deg,#6ff0dd,var(--teal));color:#06121f;font-weight:700}
+  .cta a.ghost{border:1px solid var(--line-2);color:var(--muted)} .cta a.ghost:hover{border-color:var(--indigo);color:var(--text)}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:120px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .upnext{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:20px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .upnext .un-l{flex:1;min-width:220px}
+  .upnext .un-k{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);margin-bottom:5px}
+  .upnext .un-t{font-size:18px;font-weight:750}
+  .upnext .un-d{color:var(--muted);font-size:14.5px;margin-top:3px}
+  .upnext a{text-decoration:none;font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding:12px 18px;border-radius:9px;background:linear-gradient(180deg,#6ff0dd,var(--teal));color:#06121f;font-weight:700;white-space:nowrap}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)} .coursenav a.next-link{color:var(--teal);border-color:rgba(52,215,197,.4)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="code.html"><span class="dot"></span><span class="name">Deploy</span></a>
+    <div class="top-meta">Part 9 · Capstone · Real hardware</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 9 · Capstone</b> Real hardware</div>
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:-6px 0 14px">Code shown in <b style="color:var(--indigo)">Python</b> &middot; <a href="deploy-lesson-37.html" style="color:var(--muted)">switch to Java</a></div>
+    <div class="eyebrow">Capstone</div>
+    <h1>Run it on a<br><span class="accent">real robot</span>.</h1>
+    <p class="dek">You have written command-based code, tuned it, and seen it move in simulation. Now run the same code on a small robot you can hold in your hand, no FRC build and no budget needed.</p>
+  </div>
+
+  <section>
+    <div class="kicker">What &amp; why</div>
+    <h2>A real robot for the cost of a video game</h2>
+    <p class="lead">Everything you learned in this course runs on the XRP.</p>
+    <p>The <strong>XRP</strong> (Experimental Robotics Platform) is a small, low-cost robot built on the Raspberry Pi Pico W. WPILib officially supports it, which means the same RobotPy code you have been writing all course, subsystems, commands, PID, drives a real robot you can put on your desk. A full FRC robot costs thousands of dollars and fills a workshop. An XRP is roughly $35 to $70, so check the current price before you buy. It is the bridge between the simulator and a competition robot.</p>
+    <p>There is an older cousin called the <strong>Romi</strong>. The Romi is built on a Raspberry Pi instead of a Pico W, it is also WPILib-supported, and it works the same way. It is the pricier predecessor. The XRP is the newer, cheaper option, so this lesson uses the XRP, and almost everything here applies to the Romi too.</p>
+    <div class="note indigo">
+      <div class="nh">Why this matters</div>
+      <p>Code that only ever ran in a simulator can hide mistakes that real wheels and a real battery expose in seconds. Running on hardware closes the gap. The XRP makes that possible for the price of a couple of pizzas, so you can practice the whole loop, build an idea, code it, tune it, before you ever touch a competition robot.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">How it works</div>
+    <h2>"Deploy" here means run in simulation, over WiFi</h2>
+    <p>This is the one mental model to hold on to. On a competition robot, your code is loaded onto the roboRIO and runs there. The XRP is different and simpler:</p>
+    <ul class="need">
+      <li>Your robot program runs on <strong>your laptop</strong>, in WPILib <strong>simulation</strong>.</li>
+      <li>The XRP creates its own <strong>WiFi network</strong>. Your laptop joins it.</li>
+      <li>A <strong>WebSocket</strong> link carries your motor commands out to the XRP and streams its sensor readings back, many times per second.</li>
+    </ul>
+    <p>So when we say "deploy to the XRP," we really mean: run your code in simulation on the laptop, connected to the XRP over WiFi. Your program thinks it is talking to motors and encoders. It is, they only live across a WiFi link in a little robot on the table. The Romi uses the exact same model, so what you learn here carries straight over.</p>
+    <p>That is the whole trick: the parts of your code that matter, the subsystem, the commands, the controller, never change. Only where the motors physically live changes.</p>
+  </section>
+
+  <section>
+    <div class="kicker">Setup</div>
+    <h2>What you need, and the high-level steps</h2>
+    <p>You need three things:</p>
+    <ul class="need">
+      <li>An <strong>XRP kit</strong> (the robot, motors, and sensors).</li>
+      <li>A <strong>laptop with RobotPy and WPILib installed</strong>, which you set up back in Part 1.</li>
+      <li><strong>Batteries</strong> for the XRP (it runs on its own pack, not your laptop).</li>
+    </ul>
+    <p>The setup, at a high level, is short:</p>
+    <ol class="steps">
+      <li>Install RobotPy and WPILib, if you have not already (Part 1).</li>
+      <li>Make a new project from the RobotPy XRP example.</li>
+      <li>Power on the XRP and connect your laptop to the XRP's WiFi network.</li>
+      <li>Run the program in simulation with <span class="k">robotpy sim</span>. This connects to the XRP over WiFi.</li>
+      <li>Open the Simulation GUI, set the robot to <strong>Teleop</strong> and click Enable, then drive it.</li>
+    </ol>
+    <div class="cta-box">
+      <div class="ch">Follow the official guide for the exact commands</div>
+      <p>We teach the idea here. Versions and commands change, so follow the official WPILib XRP guide for the exact, current setup, including the precise RobotPy commands. It is kept up to date by the people who make the tools.</p>
+      <div class="links">
+        <a class="primary" href="https://docs.wpilib.org/en/stable/docs/xrp-robot/index.html" target="_blank" rel="noopener">WPILib XRP guide ↗</a>
+        <a href="https://docs.wpilib.org/en/stable/docs/romi-robot/index.html" target="_blank" rel="noopener">WPILib Romi guide ↗</a>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">The hardware in code</div>
+    <h2>The same command-based pattern</h2>
+    <p>RobotPy gives the XRP its own small set of classes, but they plug into the same patterns you already know. The XRP exposes:</p>
+    <ul class="need">
+      <li>Two drive motors: <span class="k">XRPMotor</span> on channels 0 (left) and 1 (right).</li>
+      <li>Wheel encoders: <span class="k">Encoder</span> on DIO 4 and 5 (left), 6 and 7 (right).</li>
+      <li>An onboard gyro: <span class="k">XRPGyro</span>.</li>
+      <li>A servo: <span class="k">XRPServo</span>, plus a rangefinder and reflectance line sensors.</li>
+    </ul>
+    <p>Here is a <span class="k">Drivetrain</span> subsystem for the XRP. Look closely: this is the same <span class="k">commands2.Subsystem</span> shape from Part 3. Only the class names for the motors, encoders, and gyro are XRP-specific. Note that RobotPy keeps the WPILib method names like <span class="k">setDistancePerPulse</span> and <span class="k">getDistance</span>.</p>
+    <div class="codewrap">
+      <div class="clabel">drivetrain.py <span class="badge">python</span></div>
+<pre class="code"><span class="kw">from</span> wpilib.xrp <span class="kw">import</span> XRPMotor, XRPGyro
+<span class="kw">from</span> wpilib <span class="kw">import</span> Encoder
+<span class="kw">import</span> math
+<span class="kw">import</span> commands2
+
+
+<span class="kw">class</span> <span class="ty">Drivetrain</span>(commands2.Subsystem):
+    WHEEL_DIAMETER_M = <span class="num">0.060</span>   <span class="cm"># 60 mm wheels</span>
+    COUNTS_PER_REV = <span class="num">585.0</span>     <span class="cm"># from the XRP example</span>
+
+    <span class="kw">def</span> <span class="fn">__init__</span>(self):
+        super().<span class="fn">__init__</span>()
+        <span class="cm"># XRP drive motors live on channels 0 (left) and 1 (right)</span>
+        self.left = <span class="ty">XRPMotor</span>(<span class="num">0</span>)
+        self.right = <span class="ty">XRPMotor</span>(<span class="num">1</span>)
+        <span class="cm"># Wheel encoders are wired to these DIO channels</span>
+        self.left_enc = <span class="ty">Encoder</span>(<span class="num">4</span>, <span class="num">5</span>)
+        self.right_enc = <span class="ty">Encoder</span>(<span class="num">6</span>, <span class="num">7</span>)
+        self.gyro = <span class="ty">XRPGyro</span>()
+
+        meters_per_count = (math.pi * self.WHEEL_DIAMETER_M) / self.COUNTS_PER_REV
+        self.left_enc.<span class="fn">setDistancePerPulse</span>(meters_per_count)
+        self.right_enc.<span class="fn">setDistancePerPulse</span>(meters_per_count)
+        self.right.<span class="fn">setInverted</span>(<span class="kw">True</span>)   <span class="cm"># the right side is mirrored</span>
+        self.<span class="fn">reset_encoders</span>()
+
+    <span class="kw">def</span> <span class="fn">arcade_drive</span>(self, speed, rotation):
+        self.left.<span class="fn">set</span>(speed + rotation)
+        self.right.<span class="fn">set</span>(speed - rotation)
+
+    <span class="kw">def</span> <span class="fn">average_distance_meters</span>(self):
+        <span class="kw">return</span> (self.left_enc.<span class="fn">getDistance</span>() + self.right_enc.<span class="fn">getDistance</span>()) / <span class="num">2.0</span>
+
+    <span class="kw">def</span> <span class="fn">heading_degrees</span>(self):
+        <span class="kw">return</span> self.gyro.<span class="fn">getAngle</span>()
+
+    <span class="kw">def</span> <span class="fn">reset_encoders</span>(self):
+        self.left_enc.<span class="fn">reset</span>(); self.right_enc.<span class="fn">reset</span>()
+
+    <span class="kw">def</span> <span class="fn">reset_gyro</span>(self):
+        self.gyro.<span class="fn">reset</span>()</pre>
+    </div>
+    <p>If that reads like the subsystems you wrote earlier, that is the point. The skills transfer because the framework is the same.</p>
+  </section>
+
+  <section>
+    <div class="kicker">The guided project</div>
+    <h2>Make the XRP drive a square</h2>
+    <p>Here is your capstone challenge: drive the XRP around a square all on its own, then upgrade it with real control. We will build it in three steps.</p>
+
+    <p><strong>Step 1.</strong> Two building blocks, written as commands: drive forward a set distance, and turn a set number of degrees. These are open-loop, they set a fixed speed and stop when the sensor passes a target.</p>
+    <div class="codewrap">
+      <div class="clabel">Open-loop building blocks <span class="badge">python</span></div>
+<pre class="code"><span class="kw">import</span> commands2.cmd <span class="kw">as</span> cmd
+
+
+<span class="kw">def</span> <span class="fn">drive_forward</span>(drivetrain, meters, speed):
+    <span class="kw">return</span> (
+        cmd.<span class="fn">runEnd</span>(
+            <span class="kw">lambda</span>: drivetrain.<span class="fn">arcade_drive</span>(speed, <span class="num">0</span>),
+            <span class="kw">lambda</span>: drivetrain.<span class="fn">arcade_drive</span>(<span class="num">0</span>, <span class="num">0</span>),
+            drivetrain,
+        )
+        .<span class="fn">beforeStarting</span>(drivetrain.reset_encoders)
+        .<span class="fn">until</span>(<span class="kw">lambda</span>: drivetrain.<span class="fn">average_distance_meters</span>() >= meters)
+    )
+
+
+<span class="kw">def</span> <span class="fn">turn_degrees</span>(drivetrain, degrees, speed):
+    <span class="kw">return</span> (
+        cmd.<span class="fn">runEnd</span>(
+            <span class="kw">lambda</span>: drivetrain.<span class="fn">arcade_drive</span>(<span class="num">0</span>, speed),
+            <span class="kw">lambda</span>: drivetrain.<span class="fn">arcade_drive</span>(<span class="num">0</span>, <span class="num">0</span>),
+            drivetrain,
+        )
+        .<span class="fn">beforeStarting</span>(drivetrain.reset_gyro)
+        .<span class="fn">until</span>(<span class="kw">lambda</span>: abs(drivetrain.<span class="fn">heading_degrees</span>()) >= abs(degrees))
+    )</pre>
+    </div>
+
+    <p><strong>Step 2.</strong> A square is those two blocks, four times: drive a side, turn a corner, repeat. Sequence them.</p>
+    <div class="codewrap">
+      <div class="clabel">The square as a sequence <span class="badge">python</span></div>
+<pre class="code"><span class="kw">def</span> <span class="fn">drive_square</span>(drivetrain):
+    side = <span class="kw">lambda</span>: <span class="fn">drive_forward</span>(drivetrain, <span class="num">0.5</span>, <span class="num">0.5</span>)
+    corner = <span class="kw">lambda</span>: <span class="fn">turn_degrees</span>(drivetrain, <span class="num">90</span>, <span class="num">0.5</span>)
+    <span class="kw">return</span> cmd.<span class="fn">sequence</span>(
+        <span class="fn">side</span>(), <span class="fn">corner</span>(),
+        <span class="fn">side</span>(), <span class="fn">corner</span>(),
+        <span class="fn">side</span>(), <span class="fn">corner</span>(),
+        <span class="fn">side</span>(), <span class="fn">corner</span>(),
+    )</pre>
+    </div>
+    <p>Run that and the XRP traces a square. Mostly. Each side coasts a little past the line before it stops, and on a tired battery the wheels turn slower and each side comes up short. The open-loop blocks never look at the gap between where the robot is and where you wanted it, so the errors stack up and the square does not quite close.</p>
+
+    <p><strong>Step 3, the upgrade.</strong> This is where the Control course pays off. Replace the open-loop drive with a <span class="k">PIDController</span> drive-to-distance, the exact idea from Closing the Loop, now running on real wheels.</p>
+    <div class="codewrap">
+      <div class="clabel">Closed-loop drive, with a PIDController <span class="badge">python</span></div>
+<pre class="code"><span class="kw">from</span> wpimath.controller <span class="kw">import</span> PIDController
+<span class="kw">from</span> wpimath <span class="kw">import</span> applyDeadband  <span class="cm"># handy if you want a deadband</span>
+
+
+<span class="kw">def</span> <span class="fn">drive_distance_pid</span>(drivetrain, meters):
+    pid = <span class="ty">PIDController</span>(<span class="num">2.0</span>, <span class="num">0</span>, <span class="num">0</span>)
+    pid.<span class="fn">setTolerance</span>(<span class="num">0.02</span>)
+
+    <span class="kw">def</span> <span class="fn">step</span>():
+        out = pid.<span class="fn">calculate</span>(drivetrain.<span class="fn">average_distance_meters</span>(), meters)
+        drivetrain.<span class="fn">arcade_drive</span>(max(-<span class="num">0.6</span>, min(<span class="num">0.6</span>, out)), <span class="num">0</span>)
+
+    <span class="kw">def</span> <span class="fn">setup</span>():
+        drivetrain.<span class="fn">reset_encoders</span>(); pid.<span class="fn">reset</span>()
+
+    <span class="kw">return</span> (
+        cmd.<span class="fn">run</span>(step, drivetrain)
+        .<span class="fn">beforeStarting</span>(setup)
+        .<span class="fn">until</span>(pid.atSetpoint)
+        .<span class="fn">andThen</span>(cmd.<span class="fn">runOnce</span>(<span class="kw">lambda</span>: drivetrain.<span class="fn">arcade_drive</span>(<span class="num">0</span>, <span class="num">0</span>)))
+    )</pre>
+    </div>
+    <p>The open-loop version says "drive until distance is at least the target," then coasts. It overshoots when the battery is fresh and comes up short when the battery is weak, because it never looks at the error. The PID version watches the remaining gap and drives it toward zero, slowing down as it gets close. That is the same droop-and-correct idea from Closing the Loop, now on hardware you can hold. Want to take it further? Add a small feedforward term, or tune <span class="k">kP</span> for your robot, and check the control course for how.</p>
+  </section>
+
+  <section>
+    <div class="kicker">See it</div>
+    <h2>Open-loop vs PID, on a square</h2>
+    <p>Step through the square one leg at a time. Flip the drive mode and watch what happens to the corners.</p>
+
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="1">
+        <div class="qn">Predict first</div>
+        <div class="qt">You run the square with the OPEN-LOOP drive (drive until distance is at least the target) and the battery is a little weak. What does the path look like?</div>
+        <div class="opts">
+          <button class="opt">It traces a perfect square either way, because the code says 0.5 m</button>
+          <button class="opt">Each leg comes up a bit short, so the square does not close, because open-loop never looks at the error</button>
+          <button class="opt">The XRP refuses to move until the battery is full</button>
+        </div>
+        <div class="explain">Open-loop "drive until distance is at least the target" sets a fixed motor speed and stops when the encoder passes the line. On a weak battery the wheels turn slower and it coasts differently, so legs drift off and the square does not close. The PID version watches the remaining gap and drives it to zero, the same correction idea from Closing the Loop. Flip the toggle to PID and watch the square close.</div>
+      </div>
+    </div>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">XRP path tracer</span><span class="demo-tag" id="modeTag">open-loop</span></div>
+      <div class="stage"><canvas id="cv" width="760" height="420"></canvas></div>
+      <div class="demo-controls">
+        <button class="btn" id="stepBtn">Step</button>
+        <button class="btn" id="resetBtn">Reset</button>
+        <div class="toggle" role="group" aria-label="Drive mode">
+          <button id="mOpen" class="on">Open-loop</button>
+          <button id="mPid">PID</button>
+        </div>
+        <div class="readout">leg <b id="legN">0</b> / 8 · gap <b id="gap">closed</b></div>
+      </div>
+    </div>
+    <p class="caption">Open-loop legs drift, a touch long or short, so the corners never line up and the square stays open. Switch to PID and each leg lands on target, so the path comes back to where it started and the square closes. Same code shape, different ending.</p>
+  </section>
+
+  <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>The square is a starting line, not a finish line. Try a triangle (three sides, three 120 degree turns) and see if your turn logic still holds. Use the XRP's rangefinder to stop a fixed distance before a wall instead of after a set distance. Line-follow with the reflectance sensors, steering toward whichever side sees the line. Or take one of the mechanisms you tuned earlier, an elevator or an arm idea, and port its controller onto the XRP servo. Question to chew on: when you switched the drive from open-loop to PID, what specifically made the square close, and what would happen to each version if you swapped in a much heavier battery?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">The square closed because the PID drive stops at the target distance instead of past it. Open-loop picks a fixed speed and stops the instant the encoder crosses the line, so it always coasts a little further, and how far depends on speed, which depends on the battery. PID measures the gap to the target every loop and eases off as it shrinks, so it lands on the line no matter the battery. Swap in a heavier, fresher battery and the open-loop version overshoots more (faster wheels coast further), while the PID version still lands on target, it only gets there a bit quicker. That battery-proof behavior is exactly why feedback control is worth the extra few lines, and it is the whole point of the Closing the Loop course.</p>
+      </details>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">When you "deploy" your code to an XRP, where does your robot program actually run?</div>
+        <div class="opts">
+          <button class="opt">It is flashed onto the XRP and runs on the Pico W itself</button>
+          <button class="opt">It runs in WPILib simulation on your laptop, connected to the XRP over WiFi</button>
+          <button class="opt">It runs in the cloud and streams to the robot over the internet</button>
+        </div>
+        <div class="explain">With the XRP, your code runs in simulation on your laptop with robotpy sim. A WebSocket link over the XRP's own WiFi network carries motor commands out and sensor readings back. "Deploy" here means run in simulation, connected to the XRP.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 2</div>
+        <div class="qt">In the XRP Drivetrain, which classes give you the two drive motors and the heading?</div>
+        <div class="opts">
+          <button class="opt">XRPMotor for each drive motor, and XRPGyro for the heading</button>
+          <button class="opt">TalonFX for the motors, and a Pigeon for the heading</button>
+          <button class="opt">Spark for the motors, and an accelerometer for the heading</button>
+        </div>
+        <div class="explain">The XRP exposes its drive motors as XRPMotor (channels 0 and 1), its wheel encoders as Encoder on DIO pins, and its onboard gyro as XRPGyro. TalonFX and Pigeon are CTRE parts you would use on a full FRC robot.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 3</div>
+        <div class="qt">Why does the open-loop "drive until distance is at least the target" overshoot, while the PID version lands on target?</div>
+        <div class="opts">
+          <button class="opt">Open-loop uses a slower motor, so it cannot reach full speed</button>
+          <button class="opt">PID drives a higher fixed speed the whole way</button>
+          <button class="opt">Open-loop sets a fixed speed and never looks at the error, so it coasts past; PID watches the remaining gap and eases off as it closes</button>
+        </div>
+        <div class="explain">Open-loop picks a speed and stops once the encoder crosses the line, so it always coasts a bit further. PID measures the gap to the target every loop and slows down as the gap shrinks, so it settles on the line, the droop-and-correct idea from Closing the Loop.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 4</div>
+        <div class="qt">How much of the command-based code you wrote earlier in this course works on the XRP?</div>
+        <div class="opts">
+          <button class="opt">None of it; the XRP uses a completely different framework</button>
+          <button class="opt">Only the autonomous parts</button>
+          <button class="opt">The same patterns: subsystems, commands, and PID controllers, with XRP-specific classes for the motors, encoders, and gyro</button>
+        </div>
+        <div class="explain">The XRP is WPILib-supported, so the structure you learned, commands2.Subsystem, command factories, PIDController, is the same. Only the hardware classes change to XRPMotor, Encoder, and XRPGyro. That is why the skills transfer.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 5</div>
+        <div class="qt">Why is the XRP a good way to practice without an FRC team's budget?</div>
+        <div class="opts">
+          <button class="opt">It is free and ships with every RobotPy install</button>
+          <button class="opt">It is a low-cost robot, roughly $35 to $70, that runs the same WPILib code, so you do not need a full FRC robot to practice</button>
+          <button class="opt">It only works with special paid software you rent each season</button>
+        </div>
+        <div class="explain">A full FRC robot costs thousands of dollars. The XRP is roughly $35 to $70 (check the current price) and runs the very same WPILib code, so you can practice the whole build-code-tune loop on real hardware on your own desk.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="capstone">
+      <div class="star">🏁</div>
+      <h2>You ran your code on a real robot</h2>
+      <p class="sub">This is where the three pillars meet on hardware you can hold: a mechanism idea from Build, the command-based structure from Code, and the PID feedback from Control, all on one small robot.</p>
+      <div class="parts">
+        <div class="pt"><span class="ck2">✓</span><b>Build</b><span>A drivetrain, a mechanism idea to chase</span></div>
+        <div class="pt"><span class="ck2">✓</span><b>Code</b><span>Subsystems and commands, unchanged</span></div>
+        <div class="pt"><span class="ck2">✓</span><b>Control</b><span>PID closes the loop on real wheels</span></div>
+        <div class="pt"><span class="ck2">✓</span><b>Hardware</b><span>The XRP, for the cost of a couple of pizzas</span></div>
+      </div>
+      <p class="sub" style="margin-top:18px">Get an XRP into your hands, drive the square, then make it close with PID. There is no substitute for watching your own code move a real robot.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 9 · Capstone · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>XRP</b><span>Low-cost real robot, roughly $35 to $70.</span></div>
+        <div class="gl"><b>Romi</b><span>The older, pricier cousin, same idea.</span></div>
+        <div class="gl"><b>Run in sim</b><span>robotpy sim on the laptop, over WiFi.</span></div>
+        <div class="gl"><b>WebSocket link</b><span>Carries commands out, sensors back.</span></div>
+        <div class="gl"><b>Same code</b><span>Subsystems, commands, PID, unchanged.</span></div>
+        <div class="gl"><b>PID closes it</b><span>Watch the gap, land on target.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="upnext">
+      <div class="un-l">
+        <div class="un-k">Up next</div>
+        <div class="un-t">Now tune it for real</div>
+        <div class="un-d">You closed the loop once. The Control course is the whole craft: feedforward, kP, Motion Magic, and how to tune them so the XRP, or a competition robot, lands on target every time.</div>
+      </div>
+      <a href="closing-the-loop.html">Closing the Loop →</a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="deploy-lesson-36-py.html">← Part 8 · 05 · Competition-Ready</a>
+    <a class="map" href="code.html">Course map</a>
+    <a class="next-link" href="closing-the-loop.html">Closing the Loop →</a>
+  </nav>
+
+</div>
+
+<footer>Deploy · Programming an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  var cv=document.getElementById('cv'); if(!cv) return;
+  var ctx=cv.getContext('2d');
+  var W=cv.width, H=cv.height;
+  var mode='open';            // 'open' or 'pid'
+  var leg=0;                  // legs completed (0..8)
+  var SIDE=130;               // pixels per side of the intended square
+  var ox=W*0.30, oy=H*0.72;   // start point on canvas
+
+  // Deterministic per-leg drift for open-loop: small over/undershoot in
+  // distance and heading. PID legs land exactly on target (no drift).
+  var distDrift=[8,-6,10,-5,7,-9,6,-7];     // pixels long(+)/short(-) per side
+  var turnDrift=[4,-5,6,-3,5,-4,3,-6];      // degrees of corner error
+
+  // Build the path as a list of points by walking the square. The Step button
+  // advances through 8 legs: even legs (0,2,4,6) drive a side, odd legs turn.
+  function buildPath(uptoLeg){
+    var pts=[{x:ox,y:oy}];
+    var heading=0;            // degrees, 0 = pointing up (-y)
+    var x=ox, y=oy;
+    var driveIndex=0, turnIndex=0;
+    for(var i=0;i<uptoLeg;i++){
+      if(i%2===0){
+        // drive a side
+        var len=SIDE;
+        if(mode==='open'){ len=SIDE+distDrift[driveIndex]; }
+        driveIndex++;
+        var rad=heading*Math.PI/180;
+        x += Math.sin(rad)*len;
+        y -= Math.cos(rad)*len;
+        pts.push({x:x,y:y});
+      } else {
+        // turn a corner (right turn, +90)
+        var t=90;
+        if(mode==='open'){ t=90+turnDrift[turnIndex]; }
+        turnIndex++;
+        heading += t;
+      }
+    }
+    return {pts:pts, x:x, y:y, heading:heading, driveIndex:driveIndex};
+  }
+
+  function gapText(){
+    if(leg<8) return 'leg '+leg;
+    var info=buildPath(8);
+    var dx=info.x-ox, dy=info.y-oy;
+    var d=Math.sqrt(dx*dx+dy*dy);
+    if(mode==='pid' || d<2) return 'closed';
+    return Math.round(d)+' px open';
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    // backdrop grid
+    ctx.strokeStyle='rgba(120,140,180,0.08)';
+    ctx.lineWidth=1;
+    for(var gx=0;gx<W;gx+=38){ ctx.beginPath();ctx.moveTo(gx,0);ctx.lineTo(gx,H);ctx.stroke(); }
+    for(var gy=0;gy<H;gy+=38){ ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(W,gy);ctx.stroke(); }
+
+    // intended (target) square, faint
+    ctx.strokeStyle='rgba(142,140,248,0.35)';
+    ctx.setLineDash([5,6]); ctx.lineWidth=2;
+    ctx.strokeRect(ox, oy-SIDE, SIDE, SIDE);
+    ctx.setLineDash([]);
+
+    // start marker
+    ctx.fillStyle='#43D67E';
+    ctx.beginPath(); ctx.arc(ox,oy,5,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='rgba(146,162,190,0.9)';
+    ctx.font='11px ui-monospace, monospace';
+    ctx.fillText('start', ox-14, oy+20);
+
+    // traced path so far
+    var info=buildPath(leg);
+    var pts=info.pts;
+    if(pts.length>1){
+      ctx.strokeStyle = mode==='pid' ? '#34D7C5' : '#FFB020';
+      ctx.lineWidth=3; ctx.lineJoin='round';
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x,pts[0].y);
+      for(var i=1;i<pts.length;i++){ ctx.lineTo(pts[i].x,pts[i].y); }
+      ctx.stroke();
+      // robot dot at current end
+      var last=pts[pts.length-1];
+      ctx.fillStyle = mode==='pid' ? '#34D7C5' : '#FFB020';
+      ctx.beginPath(); ctx.arc(last.x,last.y,6,0,Math.PI*2); ctx.fill();
+    }
+
+    // closing gap highlight when the square should be done
+    if(leg>=8){
+      var ex=info.x, ey=info.y;
+      var dx=ex-ox, dy=ey-oy;
+      var d=Math.sqrt(dx*dx+dy*dy);
+      if(mode==='open' && d>2){
+        ctx.strokeStyle='rgba(255,107,107,0.9)';
+        ctx.setLineDash([3,4]); ctx.lineWidth=2;
+        ctx.beginPath(); ctx.moveTo(ex,ey); ctx.lineTo(ox,oy); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle='rgba(255,107,107,0.95)';
+        ctx.fillText('gap', (ex+ox)/2+6, (ey+oy)/2);
+      }
+    }
+
+    document.getElementById('legN').textContent=Math.min(leg,8);
+    document.getElementById('gap').textContent=gapText();
+    document.getElementById('modeTag').textContent = mode==='pid' ? 'PID' : 'open-loop';
+  }
+
+  document.getElementById('stepBtn').addEventListener('click',function(){
+    if(leg<8){ leg++; draw(); }
+  });
+  document.getElementById('resetBtn').addEventListener('click',function(){
+    leg=0; draw();
+  });
+  function setMode(m){
+    mode=m;
+    document.getElementById('mOpen').classList.toggle('on', m==='open');
+    document.getElementById('mPid').classList.toggle('on', m==='pid');
+    draw();
+  }
+  document.getElementById('mOpen').addEventListener('click',function(){ setMode('open'); });
+  document.getElementById('mPid').addEventListener('click',function(){ setMode('pid'); });
+
+  draw();
+})();
+</script>
+<script>
+(function(){
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain'); var done=false;
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else {opt.classList.add('wrong'); opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+})();
+</script>
+<script>
+(function(){
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,idx){ opt.addEventListener('click',function(){ if(done)return; if(idx===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="deploy:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>
