@@ -131,6 +131,19 @@
     <p class="lead">A match is over in seconds. The log lasts forever.</p>
     <p>Two tools, two jobs. <strong>Elastic</strong> is the live driver dashboard, a quick glance during the match. <strong>AdvantageScope</strong> reads the recorded log afterward, so you can scrub the timeline and see exactly what every signal did. Drag the cursor across this recorded shooter sequence and watch the values.</p>
 
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="1">
+        <div class="qn">Predict first</div>
+        <div class="qt">Before you scrub it: at the moments where teal (measured RPM) dips below amber (setpoint RPM), what do you expect the purple current and red battery traces to be doing?</div>
+        <div class="opts">
+          <button class="opt">Current flat and battery steady, because firing a shot does not load the motor</button>
+          <button class="opt">Current spiking up and battery voltage sagging, because the shot loads the flywheel</button>
+          <button class="opt">Current dropping to zero and battery rising, because the motor coasts during a shot</button>
+        </div>
+        <div class="explain">A shot drags the flywheel down, so the controller pulls hard to recover: current spikes up and the battery sags under that draw, which is exactly why the dip happens. Reading the four signals together tells the story a live glance cannot. Scrub the cursor to a teal dip and watch the purple current spike and the red battery sag line up with it.</div>
+      </div>
+    </div>
+
     <div class="demo" id="demo">
       <div class="demo-head"><span class="demo-title">AdvantageScope · recorded log</span><span class="demo-tag">scrub the timeline</span></div>
       <canvas class="scope" id="cv"></canvas>
@@ -345,6 +358,15 @@
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then run the sim
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain'); var done=false;
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else {opt.classList.add('wrong'); opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
 })();
 </script>
 </body>

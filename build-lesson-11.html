@@ -119,6 +119,19 @@
     <p class="lead">A chain is a flexible gear train.</p>
     <p>The ratio works exactly like gears, driven teeth over driver teeth, but the two sprockets can sit wherever your design needs them. Change the sprocket sizes and the spacing below and watch the chain carry the power across.</p>
 
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="1">
+        <div class="qn">Predict first</div>
+        <div class="qt">Before you run it: you leave the two sprockets at 18 and 36 teeth and drag the center distance slider to spread them farther apart. What changes?</div>
+        <div class="opts">
+          <button class="opt">The ratio climbs, because the sprockets are farther apart</button>
+          <button class="opt">The chain gets longer but the 2:1 ratio stays the same</button>
+          <button class="opt">The two sprockets start spinning in opposite directions</button>
+        </div>
+        <div class="explain">Ratio depends only on the tooth counts, driven over driver, so moving the sprockets apart leaves it at 2:1. What changes is the chain length, which is why you must buy or build a chain to match the spacing. The sprockets also keep spinning the same direction, unlike meshed gears. Run the sim, drag the center distance, and watch the chain-length readout grow while the ratio holds.</div>
+      </div>
+    </div>
+
     <div class="demo" id="demo">
       <div class="demo-head"><span class="demo-title">Chain drive</span><span class="demo-tag" id="ratioTag">2.0:1</span></div>
       <canvas class="chain" id="cv"></canvas>
@@ -318,6 +331,15 @@
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then run the sim
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain'); var done=false;
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else {opt.classList.add('wrong'); opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
 })();
 </script>
 </body>

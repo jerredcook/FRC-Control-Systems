@@ -118,6 +118,19 @@
     <p class="lead">Keep the weight low and the base wide.</p>
     <p>A robot tips when its <strong>center of mass</strong> swings out past a wheel. Accelerate or stop hard and inertia tries to topple it. The defenses are simple: a <strong>low</strong> center of mass and a <strong>wide</strong> wheelbase. Push the sliders and try to keep this robot on its wheels.</p>
 
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="0">
+        <div class="qn">Predict first</div>
+        <div class="qt">Before you run it: you leave the wheelbase and acceleration where they are and raise the CoM height slider toward the top. What happens to the robot's stability?</div>
+        <div class="opts">
+          <button class="opt">It tips more easily, going unstable at a smaller acceleration</button>
+          <button class="opt">It gets steadier, because a taller robot sits more firmly</button>
+          <button class="opt">Nothing changes, only a wider wheelbase affects tipping</button>
+        </div>
+        <div class="explain">Raising the center of mass lengthens the lever that the inertia pull acts through, so the same nudge tips it past the front wheel sooner. A tall, narrow robot goes over with a gentle stop; a low, wide one shrugs it off. Run the sim, slide the CoM up, and watch the stability readout slip from stable to tipping at the same acceleration.</div>
+      </div>
+    </div>
+
     <div class="demo" id="demo">
       <div class="demo-head"><span class="demo-title">Tipping stability</span><span class="demo-tag" id="stTag">stable</span></div>
       <canvas class="tip" id="cv"></canvas>
@@ -295,6 +308,15 @@
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then run the sim
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain'); var done=false;
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else {opt.classList.add('wrong'); opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
 })();
 </script>
 </body>

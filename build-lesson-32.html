@@ -122,6 +122,19 @@
     <p class="lead">Score your options, don't just argue.</p>
     <p>When three concepts are on the table, a <strong>decision matrix</strong> settles it fairly: rate each concept on the things that matter, weight those things by importance, and add it up. Slide the weights below to match what <em>you</em> think wins games, and watch which concept comes out ahead.</p>
 
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="0">
+        <div class="qn">Predict first</div>
+        <div class="qt">Three concepts are scored: one is Simple and Sturdy, one is Fast and Fancy, one is Balanced. You drag the Scoring weight all the way up and the others down. Which concept wins?</div>
+        <div class="opts">
+          <button class="opt">Fast and Fancy, because it rates highest on scoring and that is now the only thing that counts</button>
+          <button class="opt">Simple and Sturdy, because a heavy weight always favors the reliable option</button>
+          <button class="opt">The winner never changes, because the weights do not affect the totals</button>
+        </div>
+        <div class="explain">The total is each concept's rating times the weight on every criterion. Pile all the weight onto Scoring and the concept that scores highest there, Fast and Fancy, pulls ahead. Change what you value and you change the winner, which is the whole point of the matrix. Run the sim, max out Scoring, then max out Reliability instead and watch Simple and Sturdy take over.</div>
+      </div>
+    </div>
+
     <div class="demo" id="demo">
       <div class="demo-head"><span class="demo-title">Concept decision matrix</span><span class="demo-tag">weighted scoring</span></div>
       <div class="matrix">
@@ -277,6 +290,15 @@
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then run the sim
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain'); var done=false;
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else {opt.classList.add('wrong'); opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
 })();
 </script>
 </body>

@@ -120,6 +120,19 @@
       <p>A charged tank stays dangerous even after the robot is switched off. Always bleed the tank down to zero pressure before you touch a fitting or a line. Keep fingers out of a cylinder's path, it snaps out hard enough to crush or pinch. Wear eye protection, and have a mentor check any air system before you charge it. FRC rules cap the working pressure at 60 psi, never run it higher than your team's regulator is set to.</p>
     </div>
 
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="2">
+        <div class="qn">Predict first</div>
+        <div class="qt">The tank starts at 0 psi. Before you run the compressor at all, you press Fire cylinder. What happens?</div>
+        <div class="opts">
+          <button class="opt">The cylinder fires hard and fast, the same as when the tank is full</button>
+          <button class="opt">The compressor turns itself on first, then the cylinder fires at full force</button>
+          <button class="opt">There is almost no stored air, so the cylinder barely moves until you build up pressure</button>
+        </div>
+        <div class="explain">The cylinder is pushed by air stored in the tank, and an empty tank has none to give, so firing on 0 psi does almost nothing. Run the compressor first to fill the tank, then fire and watch the piston snap out, and notice each shot drains the tank a little. Run the sim: fire on an empty tank, then run the compressor and fire again.</div>
+      </div>
+    </div>
+
     <div class="demo" id="demo">
       <div class="demo-head"><span class="demo-title">Pneumatic system</span><span class="demo-tag" id="tag">tank low</span></div>
       <canvas class="pn" id="cv"></canvas>
@@ -303,6 +316,15 @@
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then run the sim
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain'); var done=false;
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else {opt.classList.add('wrong'); opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
 })();
 </script>
 </body>

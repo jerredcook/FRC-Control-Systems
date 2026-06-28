@@ -162,6 +162,19 @@
     <h2>The loop you'll live in</h2>
     <p>Writing robot code is a cycle: <strong>write</strong> a change, <strong>build</strong> it, <strong>deploy</strong> it to the robot, <strong>run</strong> it and watch what happens - then go again. You'll spin this loop constantly. Here it is, one lap at a time.</p>
 
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="2">
+        <div class="qn">Predict first</div>
+        <div class="qt">Before you run it: the animation reaches Run and shows what your code did. What happens next in the loop?</div>
+        <div class="opts">
+          <button class="opt">It stops at Run, because the robot is finished and now only plays your program</button>
+          <button class="opt">It jumps to Deploy, since you only ever need to write the code once</button>
+          <button class="opt">It loops back to Write, so you can make the next change and go around again</button>
+        </div>
+        <div class="explain">The loop never really stops. After you run a change and see how it behaves, you go right back to Write for the next tweak, then build, deploy, and run again. A build season is hundreds of these laps. Play it and watch the arrow return to Write each time, and the deploy counter tick up.</div>
+      </div>
+    </div>
+
     <div class="demo" id="demo">
       <div class="demo-head">
         <span class="demo-title">The write → deploy loop</span>
@@ -366,6 +379,15 @@
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then run the sim
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain'); var done=false;
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else {opt.classList.add('wrong'); opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
 })();
 </script>
 </body>

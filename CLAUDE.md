@@ -111,6 +111,18 @@ the part code in `render()` and append a green `.card.checkpoint` card after eac
 part's lessons; there is no `checkpoint` field in the `COURSE` array. Checkpoints are
 not counted in the lesson totals.
 
+### Predict-first on interactive sims
+
+Every lesson with a manipulable sim (canvas or slider, 118 pages counting `-py`
+twins) has a `<div class="quiz predict" id="predict">` block immediately **before**
+its `<div class="demo" ...>`: a single "Predict first" question (3 options,
+`data-correct`) tied to the sim's key dynamic. The student commits a guess, the
+answer reveals, then they run the sim. It is wired by a small isolated `<script>`
+(`querySelector('#predict .q')`) added just before `</body>`. The `#predict` id keeps
+it fully separate from the lesson's `#quiz` (predictions never affect completion),
+and it reveals on **any** click (formative, not mastery-gated). The `-py` twins share
+the identical block and handler.
+
 ### Lesson file anatomy
 
 Each lesson is one standalone HTML file:

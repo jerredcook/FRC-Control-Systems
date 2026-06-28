@@ -124,6 +124,19 @@
     <p class="lead">Same shape, very different behavior.</p>
     <p>Clamp a flat panel at one end and push down on the free end. Polycarbonate flexes far and springs back. Acrylic, which looks identical, snaps. Thin aluminum bends and stays bent. Pick a material and load it up.</p>
 
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="1">
+        <div class="qn">Predict first</div>
+        <div class="qt">Before you run it: you pick acrylic and push the load slider all the way to 100%. What does the panel do, and how is that different from polycarbonate at the same load?</div>
+        <div class="opts">
+          <button class="opt">Acrylic flexes far and springs back, the same way polycarbonate does</button>
+          <button class="opt">Acrylic reaches its limit and shatters, while polycarbonate flexes and recovers</button>
+          <button class="opt">Acrylic bends and stays permanently bent, the way aluminum does</button>
+        </div>
+        <div class="explain">Acrylic is brittle, so under a hard load it snaps instead of flexing. Polycarbonate, which looks identical on the shelf, bends far and springs back unharmed. That is the whole reason guards and bellypans are polycarbonate, never acrylic. Run the sim, max the load on acrylic to watch it shatter, then switch to polycarbonate and see it flex and recover.</div>
+      </div>
+    </div>
+
     <div class="demo" id="demo">
       <div class="demo-head"><span class="demo-title">Load the panel</span><span class="demo-tag" id="matTag">polycarbonate</span></div>
       <canvas class="bend" id="cv"></canvas>
@@ -320,6 +333,15 @@
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then run the sim
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain'); var done=false;
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else {opt.classList.add('wrong'); opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
 })();
 </script>
 </body>

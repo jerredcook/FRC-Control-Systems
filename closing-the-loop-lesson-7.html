@@ -210,6 +210,19 @@
     <h2>Run the ramp test</h2>
     <p>Press <strong>Run ramp test</strong>. The motor voltage rises <em>slowly</em> - slow enough that the carriage is always cruising at its steady speed for that voltage (engineers call this a <strong>quasistatic</strong> test). Each instant we plot a dot: <span style="color:var(--indigo)">velocity</span> across, <span class="sub">voltage</span> up. Watch the cloud of dots line up.</p>
 
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="2">
+        <div class="qn">Predict first</div>
+        <div class="qt">Before you run it: the ramp test plots voltage up and velocity across, and the dots fall on a straight line. Once you fit that line, what does its slope hand you?</div>
+        <div class="opts">
+          <button class="opt">kA, the voltage needed to accelerate the mass</button>
+          <button class="opt">kS plus kG, the voltage needed only to start creeping</button>
+          <button class="opt">kV, the extra voltage each unit of speed costs</button>
+        </div>
+        <div class="explain">At steady speed the kA term drops out, leaving voltage equal to the intercept plus kV times velocity, a straight line. The slope is kV, the cost of each extra unit of speed, while the intercept is kS plus kG bundled. kA needs a separate step test. Run the ramp, drag the slope slider until the line lies through the dots, and read kV straight off it.</div>
+      </div>
+    </div>
+
     <div class="demo" id="demo">
       <div class="demo-head">
         <span class="demo-title">Elevator · Characterization bench</span>
@@ -614,6 +627,15 @@
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then run the sim
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain'); var done=false;
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else {opt.classList.add('wrong'); opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
 })();
 </script>
 </body>

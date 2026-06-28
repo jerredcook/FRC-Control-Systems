@@ -191,6 +191,19 @@
     <h2>The robot's heartbeat</h2>
     <p>Here's that loop, slowed way down so you can see it. Each lap is one <strong>iteration</strong>: the robot reads its sensors, the controller decides on a voltage, the motors are commanded, and then it waits a few milliseconds before going again. It's the Part I loop - now it's the literal structure of the program.</p>
 
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="2">
+        <div class="qn">Predict first</div>
+        <div class="qt">Before you run it: the sim shows one lap of read, decide, act, slowed way down so you can watch it. On the real roboRIO, how often does one full lap actually run?</div>
+        <div class="opts">
+          <button class="opt">Once per second, a steady one-hertz beat</button>
+          <button class="opt">As fast as the processor can go, with no fixed timing</button>
+          <button class="opt">About 50 times a second, one lap every 20 milliseconds</button>
+        </div>
+        <div class="explain">The roboRIO runs your periodic code on a fixed heartbeat: once every 20 milliseconds, which is 50 times per second. That is the same rate every Part I controller assumed. The sim only slows it down so the read, decide, act phases are visible. Run it and watch the iteration counter tick through one slowed lap that the real robot would finish in 20 ms.</div>
+      </div>
+    </div>
+
     <div class="demo" id="demo">
       <div class="demo-head">
         <span class="demo-title">The 20 ms loop · slowed for viewing</span>
@@ -555,6 +568,15 @@ self.driver = <span class="ty">CommandXboxController</span>(<span class="num">0<
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then run the sim
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain'); var done=false;
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else {opt.classList.add('wrong'); opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
 })();
 </script>
 </body>

@@ -160,6 +160,19 @@
     <h2>Two places the loop can live</h2>
     <p>Toggle where the control loop runs. On the <strong>roboRIO</strong>, your code computes volts and ships them out 50 times a second. On the <strong>TalonFX</strong>, you send a target once and the motor grinds out its own loop 1,000 times a second - watch the iteration counters pull apart.</p>
 
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="2">
+        <div class="qn">Predict first</div>
+        <div class="qt">You switch the loop to run on the TalonFX instead of the roboRIO and let the same number of seconds pass. How do the two iteration counters compare?</div>
+        <div class="opts">
+          <button class="opt">They climb together, since the same code runs either way</button>
+          <button class="opt">The roboRIO counter climbs faster, because it has a faster processor</button>
+          <button class="opt">The TalonFX counter climbs about 20 times faster, running at 1 kHz instead of 50 Hz</button>
+        </div>
+        <div class="explain">The roboRIO loop runs every 20 ms, about 50 times a second. The TalonFX runs its loop onboard at 1,000 times a second, roughly 20 times more often, so in the same seconds it racks up about 20 times the iterations. More corrections per second means it catches a disturbance sooner. Run the sim and watch the two counters pull apart.</div>
+      </div>
+    </div>
+
     <div class="demo" id="demo">
       <div class="demo-head">
         <span class="demo-title">Where does the control loop run?</span>
@@ -409,6 +422,15 @@ rps       = motor.<span class="fn">get_velocity</span>().value  <span class="cm"
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then run the sim
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain'); var done=false;
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else {opt.classList.add('wrong'); opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
 })();
 </script>
 </body>

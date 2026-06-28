@@ -210,6 +210,19 @@
     <h2>Add a memory</h2>
     <p>Same elevator. Start with <span class="k">kI</span> at zero and press <strong>Step</strong> - you'll see last lesson's droop, parked below the line. Now raise <span class="k">kI</span> and watch the carriage finally climb the rest of the way, while the integral term builds up underneath it.</p>
 
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="1">
+        <div class="qn">Predict first</div>
+        <div class="qt">Before you run it: you set kI to zero, then press Step, so it is plain proportional control again. Now you slowly raise kI. What happens to the carriage?</div>
+        <div class="opts">
+          <button class="opt">With kI at zero it lands on the line, and raising kI pushes it past</button>
+          <button class="opt">With kI at zero it parks below the line, and raising kI climbs it the rest of the way</button>
+          <button class="opt">kI changes nothing, because only kP can move the carriage</button>
+        </div>
+        <div class="explain">At kI zero you are back to pure P and its droop, parked below the line. As kI rises, the integral keeps adding up the leftover error and builds the push until the gap closes to zero. Run it, watch the carriage sit low with kI off, then raise kI and watch it finish the climb while the I-term readout builds underneath it.</div>
+      </div>
+    </div>
+
     <div class="demo" id="demo">
       <div class="demo-head">
         <span class="demo-title">Elevator · Proportional + Integral</span>
@@ -563,6 +576,15 @@ motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="output" 
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then run the sim
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain'); var done=false;
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else {opt.classList.add('wrong'); opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
 })();
 </script>
 </body>

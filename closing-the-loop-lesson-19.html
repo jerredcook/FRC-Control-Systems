@@ -182,6 +182,19 @@
     <h2>A validated elevator</h2>
     <p>Below is the elevator after all five steps: SysId gains in Slot0, kP trimmed, Motion Magic shaping every move. Send it to scoring presets and it glides in and holds. Add a <strong>load</strong> - a game piece, a worn belt - and feedforward plus a touch of feedback shrug it off.</p>
 
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="0">
+        <div class="qn">Predict first</div>
+        <div class="qt">The elevator is fully tuned and holding a scoring height. You drag the Added load slider up, like hanging a game piece on it. What does the carriage do?</div>
+        <div class="opts">
+          <button class="opt">Holds almost dead-on, because feedforward plus a touch of feedback absorb the extra weight</button>
+          <button class="opt">Sags well below the target and stays there, since the gains were set for no load</button>
+          <button class="opt">Starts oscillating up and down, because any added load makes a tuned loop unstable</button>
+        </div>
+        <div class="explain">A validated elevator holds under load. Feedforward supplies the bulk of the holding voltage, and the small leftover from the extra weight shows up as a tiny error that feedback drives back out, so the carriage barely budges. That is the whole point of finishing the workflow. Run it, drag the load up, and watch the position hold.</div>
+      </div>
+    </div>
+
     <div class="demo" id="demo">
       <div class="demo-head">
         <span class="demo-title">Elevator · tuned · Motion Magic + Slot0</span>
@@ -490,6 +503,15 @@
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then run the sim
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain'); var done=false;
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else {opt.classList.add('wrong'); opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
 })();
 </script>
 </body>

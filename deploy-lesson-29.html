@@ -134,6 +134,19 @@
     <p class="lead">tx is the error. The setpoint is zero.</p>
     <p>Point the robot at an AprilTag automatically: each loop, read <span class="k">tx</span>, run it through a <strong>PID controller</strong> whose target is 0, and apply the output as a turn. The robot spins until it's dead-on. It's the same loop you tuned in the Control course, only the camera supplies the measurement. Set an offset, press Aim, and try different gains.</p>
 
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="2">
+        <div class="qn">Predict first</div>
+        <div class="qt">Before you run it: you slide kP all the way up, set a target offset, and press Aim. The camera reports tx a few frames late. What does the robot do?</div>
+        <div class="opts">
+          <button class="opt">Reaches the tag faster and locks on more precisely than a moderate kP</button>
+          <button class="opt">Refuses to move, because too high a kP saturates and cancels itself out</button>
+          <button class="opt">Overshoots center and hunts back and forth, because it reacts hard to stale tx</button>
+        </div>
+        <div class="explain">A high kP commands a big turn from each error reading, but the camera's small delay means the robot is acting on where the tag was a few frames ago, so it sails past center and swings back, oscillating. It is the same over-tuning you saw with mechanisms, now driven by sensor lag. Crank kP up, press Aim, and watch the tx trace swing back and forth instead of settling.</div>
+      </div>
+    </div>
+
     <div class="demo" id="demo">
       <div class="demo-head"><span class="demo-title">Vision-aim controller</span><span class="demo-tag" id="stTag">idle</span></div>
       <canvas class="aim" id="cv"></canvas>
@@ -348,6 +361,15 @@
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then run the sim
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain'); var done=false;
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else {opt.classList.add('wrong'); opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
 })();
 </script>
 </body>

@@ -177,6 +177,19 @@
     <h2>An onboard position loop</h2>
     <p>Set a <strong>target</strong> and watch the Kraken drive to it and hold - no droop, because <span class="k">kG</span> in slot0 supplies gravity. Push <span class="k">kP</span> for a snappier approach. The whole loop is running on the motor; your code just sent the number.</p>
 
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="1">
+        <div class="qn">Predict first</div>
+        <div class="qt">The onboard loop drives to the target and holds. You drag Slot0 kG down to zero and leave kP where it is. What happens to where the carriage holds?</div>
+        <div class="opts">
+          <button class="opt">Nothing changes, because the target is set by the slider, not by kG</button>
+          <button class="opt">It droops and settles a little below the target, since nothing supplies the gravity-holding voltage</button>
+          <button class="opt">It climbs above the target, since removing kG lets the motor run away</button>
+        </div>
+        <div class="explain">In Slot0, kG is the steady gravity-holding voltage. Take it to zero and only kP times the error is left, so the loop has to droop below the target far enough for kP to make up the gravity voltage. That leftover gap is steady-state error, the same droop you saw before feedforward. Run the sim, drag kG to zero, and watch the carriage settle low.</div>
+      </div>
+    </div>
+
     <div class="demo" id="demo">
       <div class="demo-head">
         <span class="demo-title">TalonFX · PositionVoltage · Slot0</span>
@@ -489,6 +502,15 @@ self.motor.configurator.<span class="fn">apply</span>(cfg)</pre>
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then run the sim
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain'); var done=false;
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else {opt.classList.add('wrong'); opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
 })();
 </script>
 </body>

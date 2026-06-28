@@ -130,6 +130,19 @@
     <p class="lead">A digital input answers a single yes-or-no question.</p>
     <p>A <strong>limit switch</strong> is pressed or it isn't. A <strong>beam break</strong> is blocked or it's clear. <span class="k">DigitalInput.get()</span> hands you a boolean, and two jobs lean on it constantly. <strong>Homing</strong> drives a mechanism slowly until a switch trips, giving it a known zero. <strong>Detection</strong> watches a beam to know a game piece is in the robot. Run both below.</p>
 
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="1">
+        <div class="qn">Predict first</div>
+        <div class="qt">Before you run it: you press Run homing. What makes the elevator stop and decide where position 0 is?</div>
+        <div class="opts">
+          <button class="opt">It stops after a fixed time, then guesses zero from how long it ran</button>
+          <button class="opt">It creeps down until the bottom limit switch reads true, then calls that spot zero</button>
+          <button class="opt">It stops the instant the beam break is blocked by a game piece</button>
+        </div>
+        <div class="explain">Homing drives slowly until the limit switch flips from false to true, then defines that exact spot as position 0, a known reference the encoder can count from. The beam break is for detecting game pieces, a separate job. Run homing and watch the switch flip to true and the zero get set, then pass a game piece to see the beam break.</div>
+      </div>
+    </div>
+
     <div class="demo" id="demo">
       <div class="demo-head"><span class="demo-title">Homing &amp; beam break</span><span class="demo-tag" id="stateTag">idle</span></div>
       <canvas class="dig" id="cv"></canvas>
@@ -359,6 +372,15 @@ self.elevator.<input class="blank" data-ans="setposition" aria-label="blank" aut
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then run the sim
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain'); var done=false;
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else {opt.classList.add('wrong'); opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
 })();
 </script>
 </body>

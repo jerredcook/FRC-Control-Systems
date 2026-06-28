@@ -118,6 +118,19 @@
     <p class="lead">The holding torque follows a cosine.</p>
     <p>Hold an arm at an angle and the motor has to fight gravity's twist on it. That twist depends on the <strong>horizontal reach</strong> of the load: maximum when the arm is level (sticking straight out), zero when it's vertical (load directly over the pivot). Swing the arm and watch the torque it takes to hold.</p>
 
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="0">
+        <div class="qn">Predict first</div>
+        <div class="qt">Before you run it: you drag the arm from horizontal (sticking straight out) up toward vertical (pointing straight up). What happens to the holding torque the motor must supply?</div>
+        <div class="opts">
+          <button class="opt">It drops, falling as the cosine of the angle until it reaches zero at vertical</button>
+          <button class="opt">It rises, because lifting the load higher takes more torque</button>
+          <button class="opt">It stays the same, since the load's weight never changes</button>
+        </div>
+        <div class="explain">The holding torque is the weight times the moment arm, the horizontal distance from the pivot to the load. That distance is longest at horizontal and shrinks to zero when the load sits straight over the pivot, so the torque follows cos(angle) and reaches zero at vertical. Run the sim, swing the arm up, and watch the amber torque bar shrink and the dashed moment arm collapse to nothing.</div>
+      </div>
+    </div>
+
     <div class="demo" id="demo">
       <div class="demo-head"><span class="demo-title">Holding torque vs angle</span><span class="demo-tag" id="angTag">horizontal</span></div>
       <canvas class="arm" id="cv"></canvas>
@@ -286,6 +299,15 @@
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then run the sim
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain'); var done=false;
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else {opt.classList.add('wrong'); opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
 })();
 </script>
 </body>

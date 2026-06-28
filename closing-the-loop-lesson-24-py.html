@@ -200,6 +200,19 @@
     </div>
     <p>k₁ is your kP. k₂ is your kD. PD wasn't a trick - it was state feedback the whole time, on a two-state system. So what does state-space buy you? Two big things: a principled way to <em>choose</em> the gains, and the ability to scale past two states to systems PID can't touch.</p>
 
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="2">
+        <div class="qn">Predict first</div>
+        <div class="qt">There is only one knob, sliding from high R (gentle effort) toward high Q (tight error). You slide it toward high Q. What happens to k1 and k2, the two readouts that match kP and kD?</div>
+        <div class="opts">
+          <button class="opt">Only k1 changes, since high Q cares about position error, not velocity</button>
+          <button class="opt">They trade off: k1 climbs while k2 drops, so you give up damping for speed</button>
+          <button class="opt">Both climb together, because LQR derives the whole gain set from your single Q-versus-R choice</button>
+        </div>
+        <div class="explain">That is the point of LQR. You do not tune k1 and k2 separately; you state how much you value tight tracking (Q) versus cheap, gentle effort (R), and LQR solves for the whole optimal gain vector at once. Slide toward high Q and both k1 (about kP) and k2 (about kD) rise together for a snappier response. Run it, drag the knob toward high Q, and watch both readouts climb.</div>
+      </div>
+    </div>
+
     <div class="demo" id="demo">
       <div class="demo-head">
         <span class="demo-title">Elevator · state feedback · u = K(reference − x)</span>
@@ -531,6 +544,15 @@ volts = lqr.<span class="fn">calculate</span>(x, reference)[<span class="num">0<
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then run the sim
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain'); var done=false;
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else {opt.classList.add('wrong'); opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
 })();
 </script>
 </body>

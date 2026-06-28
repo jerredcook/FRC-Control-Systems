@@ -233,6 +233,19 @@
     <h2>The tuning clinic</h2>
     <p>Load a misbehaving tune, read what the scope is telling you, then fix it with the sliders. The diagnostic table below is your cheat sheet - match the symptom to the cause to the cure.</p>
 
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="1">
+        <div class="qn">Predict first</div>
+        <div class="qt">Before you run it: you load the Oscillating preset and the carriage shoots past the line and rings back and forth. Which move settles it down?</div>
+        <div class="opts">
+          <button class="opt">Add kI, since the ringing is leftover steady-state error</button>
+          <button class="opt">Lower kP or raise kD, to ease the aggression and add damping</button>
+          <button class="opt">Turn on Noise, which averages the wobble out</button>
+        </div>
+        <div class="explain">Overshoot and ringing mean the response is too aggressive and underdamped, which is kP too high or kD too low. Backing kP down or raising kD damps the approach into a clean settle. kI fixes a steady offset, not ringing, and Noise only makes things worse. Run it, load Oscillating, then lower kP or raise kD and watch the scope trace stop bouncing.</div>
+      </div>
+    </div>
+
     <div class="demo" id="demo">
       <div class="demo-head">
         <span class="demo-title">Elevator · Tuning clinic</span>
@@ -611,6 +624,15 @@ self.controller.<span class="fn">setPID</span>(<input class="blank" data-ans="kp
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then run the sim
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain'); var done=false;
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else {opt.classList.add('wrong'); opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
 })();
 </script>
 </body>

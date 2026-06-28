@@ -211,6 +211,19 @@
     <h2>Predict the load</h2>
     <p>Here's the elevator with feedforward. Notice the integral is <strong>off</strong> (kI = 0) - yet with <span class="k">kG</span> set right, the carriage holds dead on the line. That's feedforward supplying gravity directly. Switch <strong>Feedforward off</strong> and Lesson 2's droop snaps back. Then mis-set kG and watch it park high or low.</p>
 
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="0">
+        <div class="qn">Predict first</div>
+        <div class="qt">Before you run it: kI is at zero and, with feedforward on and kG matched, the carriage holds right on the line. Now you press the Feedforward off button. What happens?</div>
+        <div class="opts">
+          <button class="opt">It sags below the line, because Lesson 2's droop snaps right back</button>
+          <button class="opt">Nothing changes, because kP alone can still hold it on the line</button>
+          <button class="opt">It climbs above the line, because removing kG adds extra push</button>
+        </div>
+        <div class="explain">With feedforward off and kI at zero, only proportional feedback is left to fight gravity, and that needs leftover error to make the holding voltage. So the droop from Lesson 2 returns and the carriage parks low. kG was supplying gravity directly. Run it, toggle Feedforward off, and watch the carriage drop below the line as the error readout grows.</div>
+      </div>
+    </div>
+
     <div class="demo" id="demo">
       <div class="demo-head">
         <span class="demo-title">Elevator · Feedforward + PID</span>
@@ -573,6 +586,15 @@ self.motor.<span class="fn">setVoltage</span>(feedforward + <input class="blank"
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then run the sim
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain'); var done=false;
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else {opt.classList.add('wrong'); opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
 })();
 </script>
 </body>

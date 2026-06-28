@@ -117,6 +117,19 @@
     <p class="lead">Bolt the corner, then load it.</p>
     <p>Here are two tubes meeting at a corner with a <strong>gusset</strong> plate over the joint. Click the holes to add bolts, then press Test load. With too few bolts the joint pivots and sags. Get two or more into each tube and it holds rigid.</p>
 
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="1">
+        <div class="qn">Predict first</div>
+        <div class="qt">Before you run it: you add only one bolt into each tube, then press Test load. What does the joint do?</div>
+        <div class="opts">
+          <button class="opt">It holds rigid, one bolt per tube is plenty to lock the corner</button>
+          <button class="opt">Each tube pivots around its single bolt like a hinge, so the joint sags</button>
+          <button class="opt">Nothing moves, because one bolt makes the joint even stronger than two</button>
+        </div>
+        <div class="explain">A single bolt is a pivot point, so the tube can swing around it and the corner folds under load. It takes two bolts spread apart in each tube to fix the angle and stop the rotation. Run the sim with one bolt per tube and watch it sag, then add a second bolt to each and Test load again to see it hold.</div>
+      </div>
+    </div>
+
     <div class="demo" id="demo">
       <div class="demo-head"><span class="demo-title">Build the joint</span><span class="demo-tag" id="tag">click holes to add bolts</span></div>
       <canvas class="joint" id="cv"></canvas>
@@ -307,6 +320,15 @@
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then run the sim
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain'); var done=false;
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else {opt.classList.add('wrong'); opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
 })();
 </script>
 </body>

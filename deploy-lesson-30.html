@@ -131,6 +131,19 @@
     <p class="lead">Two imperfect sources, one good answer.</p>
     <p>A <strong>pose estimator</strong> runs odometry every loop for smooth motion, then folds in a <strong>vision measurement</strong> whenever the camera sees an AprilTag. Because tags sit at known field spots, that measurement is <em>absolute</em>, it corrects the accumulated drift instead of adding to it. Drive around with vision off and watch it wander; turn vision on and watch it snap straight.</p>
 
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="0">
+        <div class="qn">Predict first</div>
+        <div class="qt">Before you run it: you have driven a while with vision OFF and the dashed estimate has drifted off the truth. Now you press Vision: ON and keep driving. What happens to the estimate?</div>
+        <div class="opts">
+          <button class="opt">Each AprilTag sighting pulls it back toward the truth, so drift stays bounded</button>
+          <button class="opt">It keeps drifting at the same rate, since vision only matters at the start of a match</button>
+          <button class="opt">It freezes in place and stops following the robot entirely</button>
+        </div>
+        <div class="explain">Vision measurements are absolute, because each AprilTag sits at a known field spot, so folding them in corrects the accumulated drift instead of adding more. Between sightings odometry still gives smooth motion. Turn vision on and watch a teal pulse yank the dashed estimate back onto the solid robot, keeping drift from growing all match.</div>
+      </div>
+    </div>
+
     <div class="demo" id="demo">
       <div class="demo-head"><span class="demo-title">Odometry + vision fusion</span><span class="demo-tag" id="vsTag">vision OFF</span></div>
       <canvas class="field" id="cv"></canvas>
@@ -363,6 +376,15 @@
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then run the sim
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain'); var done=false;
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else {opt.classList.add('wrong'); opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
 })();
 </script>
 </body>

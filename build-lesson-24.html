@@ -118,6 +118,19 @@
     <p class="lead">Traction equals grip times weight.</p>
     <p>The most a wheel can push before it slips is its <strong>grip</strong> (the tread's coefficient of friction) times the <strong>weight</strong> pressing it down. Command more force than that and the wheel breaks loose and spins. Set the tread and weight, then push harder and harder against the wall.</p>
 
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="1">
+        <div class="qn">Predict first</div>
+        <div class="qt">Before you run it: the drive force is already past the green traction zone and the wheels are spinning. You push the Drive force slider even higher. What happens to the actual push?</div>
+        <div class="opts">
+          <button class="opt">It climbs higher, since more drive force always means more push</button>
+          <button class="opt">It stays stuck at the traction limit, because the wheels are already slipping</button>
+          <button class="opt">It drops to zero the instant the wheels spin</button>
+        </div>
+        <div class="explain">Once the wheels break loose, the tread can only deliver as much push as friction allows, the traction limit. Adding throttle past that only spins the wheels faster without pushing any harder. To push harder you need grippier tread or more weight on the wheels, not more drive force. Run the sim, crank the drive force, and watch the actual push readout stay pinned at the limit while the wheels spin.</div>
+      </div>
+    </div>
+
     <div class="demo" id="demo">
       <div class="demo-head"><span class="demo-title">Push battle</span><span class="demo-tag" id="stTag">gripping</span></div>
       <canvas class="trac" id="cv"></canvas>
@@ -297,6 +310,15 @@
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then run the sim
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain'); var done=false;
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else {opt.classList.add('wrong'); opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
 })();
 </script>
 </body>

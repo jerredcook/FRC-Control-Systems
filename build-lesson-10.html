@@ -119,6 +119,19 @@
     <p class="lead">Count the teeth, and you know the ratio.</p>
     <p>Two meshed gears turn in opposite directions, and their speeds are set by their tooth counts. Drive a 12-tooth gear into a 36-tooth gear and the output spins one-third the speed with three times the torque, a 3:1 reduction. Change the teeth below and watch the ratio.</p>
 
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="0">
+        <div class="qn">Predict first</div>
+        <div class="qt">Before you run it: the driver is 12 teeth and the driven is 36, a 3:1 reduction. You drag the driven gear up to 48 teeth. What happens to the output?</div>
+        <div class="opts">
+          <button class="opt">It slows down and gains torque, the ratio climbs to 4:1</button>
+          <button class="opt">It speeds up and loses torque, the ratio drops below 3:1</button>
+          <button class="opt">Nothing changes, only the driver gear sets the ratio</button>
+        </div>
+        <div class="explain">The ratio is driven divided by driver, so 48 over 12 is 4:1. A bigger driven gear is a bigger reduction: the output spins slower and its torque goes up by the same factor. They always trade. Run the sim, drag the driven teeth up, and watch the ratio readout climb while the output speed drops and the torque multiplier rises.</div>
+      </div>
+    </div>
+
     <div class="demo" id="demo">
       <div class="demo-head"><span class="demo-title">Two meshed gears</span><span class="demo-tag" id="ratioTag">3.0:1</span></div>
       <canvas class="gears" id="cv"></canvas>
@@ -298,6 +311,15 @@
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then run the sim
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain'); var done=false;
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else {opt.classList.add('wrong'); opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
 })();
 </script>
 </body>
