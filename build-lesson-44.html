@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fabricate · Part 3.7 - Sizing a Mechanism (with ReCalc)</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .readouts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:17px;font-weight:600;margin-top:3px;color:var(--muted)}
+  .ro .v.teal{color:var(--teal)} .ro .v.green{color:var(--green)} .ro .v.amber{color:var(--amber)} .ro .v.indigo{color:var(--indigo)} .ro .v.red{color:var(--red)}
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+  .ctl{display:flex;flex-direction:column;gap:6px;flex:1 1 220px;min-width:200px}
+  .ctl label{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between;gap:10px}
+  .ctl label span{color:var(--amber)}
+  .ctl input[type=range]{width:100%;accent-color:var(--indigo);height:22px;cursor:pointer}
+  .verdict{padding:12px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--muted);display:flex;align-items:center;gap:10px}
+  .verdict .dotv{width:9px;height:9px;border-radius:50%;background:var(--faint);flex:0 0 auto}
+  .verdict.good .dotv{background:var(--green);box-shadow:0 0 10px var(--green)} .verdict.good{color:var(--green)}
+  .verdict.warn .dotv{background:var(--amber);box-shadow:0 0 10px var(--amber)} .verdict.warn{color:var(--amber)}
+  .verdict.bad .dotv{background:var(--red);box-shadow:0 0 10px var(--red)} .verdict.bad{color:var(--red)}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)} .btn.on{background:var(--indigo);border-color:var(--indigo);color:#2a1503;font-weight:700}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .cta{display:inline-flex;align-items:center;gap:10px;margin:8px 0 6px;border:1px solid rgba(255,176,32,.45);background:radial-gradient(500px 160px at 0% 0%,rgba(255,176,32,0.14),transparent 70%);color:var(--text);text-decoration:none;font-family:var(--mono);font-size:13px;letter-spacing:.06em;padding:14px 20px;border-radius:11px;transition:.14s}
+  .cta:hover{border-color:var(--amber);transform:translateY(-2px);color:var(--amber)}
+  .cta .lk{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber)}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(255,138,76,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .rules{display:grid;gap:10px;margin:18px 0} @media(min-width:560px){.rules{grid-template-columns:1fr 1fr}}
+  .rule{display:flex;gap:11px;border:1px solid var(--line);border-radius:11px;padding:13px 14px;background:var(--panel)}
+  .rule .ri{font-size:20px;flex:0 0 auto}
+  .rule b{display:block;font-size:14.5px;color:var(--text);margin-bottom:2px}
+  .rule span{font-size:13.5px;color:var(--muted)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:108px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(255,176,32,0.12),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--amber);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--amber)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)} .coursenav a.next-link{color:var(--amber);border-color:rgba(255,176,32,.4)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="build.html"><span class="dot"></span><span class="name">Fabricate</span></a>
+    <div class="top-meta">Part 3 &middot; 07 / 07 &middot; Power Transmission</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 3 &middot; 07</b> Power Transmission</div>
+    <div class="eyebrow">Sizing &amp; Design Math</div>
+    <h1>Pick the right<br><span class="accent">motor and ratio</span>.</h1>
+    <p class="dek">A mechanism that is too slow, too weak, or pops a breaker was sized wrong on a screen first. Sizing is the math that picks the motor count and gear ratio before you cut metal, and a free tool called ReCalc does the heavy arithmetic for you.</p>
+  </div>
+
+  <section>
+    <p class="lead">Every motor lives between two limits.</p>
+    <p>Think about pedaling a bike. In a tiny gear you spin the pedals fast but barely move, and in a huge gear you crawl up a hill with all your weight on each push. A motor is the same. With nothing attached it hits its <strong>free speed</strong>, spinning as fast as it ever will. Pushing against something so heavy it cannot turn, it gives its <strong>stall torque</strong>, its hardest possible push. It can never do both at once. All real work happens somewhere in between, and the harder it pushes, the more current it pulls from the battery.</p>
+
+    <div class="note">
+      <div class="nh">Reduction is the gear you choose on the bike</div>
+      <p><strong>Gear reduction</strong> trades speed for torque. A 10:1 reduction spins the output about 10 times slower but with roughly 10 times the twist, minus a little friction. That is the main knob you turn to match a motor to a job. Need to lift something heavy? Add reduction. Need it to move fast? Take reduction away. You met gears back in the gears lesson; sizing is deciding which one to actually use. <strong>Adding motors</strong> is the other knob: two motors share the load, so you get more torque and more power, but together they also pull more current.</p>
+    </div>
+
+    <p>So the design question is always two numbers. What <strong>speed</strong> does this mechanism need, and what <strong>force or torque</strong> does it need? Once you know those targets, you pick a motor count and a gear ratio that hit them without stalling, without tipping the robot over, and without drawing so much current that you trip the 120 A main breaker or brown out the battery. Slide the controls below to feel that tradeoff.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Speed vs torque tradeoff</span><span class="demo-tag">approximate</span></div>
+      <div class="controls">
+        <div class="ctl">
+          <label>Gear reduction <span id="lblRed">10 : 1</span></label>
+          <input type="range" id="red" min="1" max="100" step="1" value="10" />
+        </div>
+        <div class="ctl">
+          <label>Motors <span id="lblMot">2</span></label>
+          <input type="range" id="mot" min="1" max="4" step="1" value="2" />
+        </div>
+      </div>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Output speed</div><div class="v teal" id="roSpd">--</div></div>
+        <div class="ro"><div class="k2">Output torque</div><div class="v amber" id="roTrq">--</div></div>
+        <div class="ro"><div class="k2">Est. current</div><div class="v" id="roCur">--</div></div>
+      </div>
+      <div class="verdict" id="verdict"><span class="dotv"></span><span id="verdictTxt">--</span></div>
+    </div>
+    <p class="caption">These numbers are approximate and use simple proportions to show the shape of the tradeoff. ReCalc does this exactly with real motor curves. The example target is a job that needs a moderate speed and enough torque to lift its load without a high current spike.</p>
+
+    <a class="cta" href="https://www.reca.lc" target="_blank" rel="noopener"><span class="lk">Go try it</span> Open ReCalc (reca.lc) and size your own mechanism &rarr;</a>
+  </section>
+
+  <section>
+    <div class="kicker">The tool</div>
+    <h2>What ReCalc actually does</h2>
+    <p>You do not memorize motor curves and you do not do this arithmetic by hand. <strong>ReCalc</strong> at reca.lc has every FRC motor built in, and it is free and open source, made by and for the FRC community. You tell it the kind of mechanism and your numbers, and it reports back the answers you care about.</p>
+    <div class="rules">
+      <div class="rule"><div class="ri">🧱</div><div><b>Pick the mechanism</b><span>Drivetrain, elevator, arm, flywheel, linear, and more, each with its own page.</span></div></div>
+      <div class="rule"><div class="ri">⌨️</div><div><b>Enter your numbers</b><span>Weight, travel distance, target speed, the motor, and the gear ratio.</span></div></div>
+      <div class="rule"><div class="ri">📈</div><div><b>Read the results</b><span>Top speed, time to move, current draw, whether the robot tips, a suggested ratio.</span></div></div>
+      <div class="rule"><div class="ri">🔁</div><div><b>Adjust and repeat</b><span>Change the ratio, re-read, keep tuning until speed and current both look right.</span></div></div>
+    </div>
+    <div class="note indigo">
+      <div class="nh">The loop is the real skill</div>
+      <p>Nobody nails the ratio on the first try. The skill is the loop: <em>define your requirements, plug them into ReCalc, read the speed and the current, adjust the ratio, and read again.</em> A good ratio is one where the mechanism moves fast enough, pushes hard enough, and keeps its current low enough that the battery and breaker stay happy. When all three land in a comfortable band, you have your number, and only then do you cut metal.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Worked example</div>
+    <h2>Sizing an elevator, in words</h2>
+    <p>Say an elevator has to lift a 12 lb carriage about 1 meter straight up, and you want it to make that trip in under a second using two motors. What gear reduction do you pick? Here is the reasoning you would carry into ReCalc.</p>
+    <div class="rules">
+      <div class="rule"><div class="ri">🐇</div><div><b>Too little reduction</b><span>Output spins fast but cannot make the lift; the motors strain and stall near the weight.</span></div></div>
+      <div class="rule"><div class="ri">🐢</div><div><b>Too much reduction</b><span>Plenty of lifting force, but it crawls, misses the one-second target, and drags current up.</span></div></div>
+      <div class="rule"><div class="ri">🎯</div><div><b>A ratio in between</b><span>Lifts the weight and clears the time, with current low enough to stay off the breaker.</span></div></div>
+      <div class="rule"><div class="ri">🔍</div><div><b>Let ReCalc find it</b><span>Try ratios on the elevator page until the time and the current both read good.</span></div></div>
+    </div>
+    <p>You would open the elevator page, type in the 12 lb load, the 1 meter of travel, two of your chosen motor, and a starting ratio. ReCalc shows the time to lift and the current draw. If it is too slow, lower the reduction. If the current is scary or it stalls, raise it or add reasoning about a different motor. After a few passes the time drops under a second and the current settles into a safe range, and that ratio is the one to build. We are not claiming a single magic number here, because the right ratio depends on the exact motor, and finding it is exactly the job ReCalc is built to do.</p>
+
+    <a class="cta" href="https://www.reca.lc" target="_blank" rel="noopener"><span class="lk">Your turn</span> Open ReCalc (reca.lc) and run the elevator yourself &rarr;</a>
+  </section>
+
+  <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>ReCalc is not the only tool that does this job. The JVN design calculator is a big spreadsheet that veteran teams use the same way, and the ILITE drivetrain simulator goes further by modeling how the robot accelerates and what the battery voltage does under load across a whole match. Flywheels have their own twist: more reduction spins up slower but recovers its speed faster after a shot, so a shooter that fires rapidly cares about recovery time as much as top speed. Here is one to take to a mentor: if your shooter has to fire five game pieces in a row, would you trade a little top speed for faster recovery between shots, and how would you check that in ReCalc?</p>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="2">
+        <div class="qn">Question 1</div>
+        <div class="qt">A 10:1 gear reduction does what to a motor's output?</div>
+        <div class="opts">
+          <button class="opt">Speeds it up about 10 times and adds torque too</button>
+          <button class="opt">Changes nothing, it only saves space</button>
+          <button class="opt">Slows it about 10 times slower for roughly 10 times the torque</button>
+        </div>
+        <div class="explain">Reduction trades speed for torque. A 10:1 turns the output about 10 times slower but with roughly 10 times the twist, minus a little friction loss. That is the main knob you turn to match a motor to a job.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 2</div>
+        <div class="qt">What is ReCalc for?</div>
+        <div class="opts">
+          <button class="opt">Writing the robot's driving code</button>
+          <button class="opt">You give it the mechanism, weight, target speed, motor, and ratio, and it reports speed, time, current, and a suggested ratio</button>
+          <button class="opt">Ordering parts and tracking your budget</button>
+        </div>
+        <div class="explain">ReCalc has every FRC motor built in. You pick the mechanism type and enter your numbers, and it reports the top speed, the time to move, the current draw, whether the robot tips, and a recommended ratio so you can adjust and re-read.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">Why does the current draw matter when you choose a gear ratio?</div>
+        <div class="opts">
+          <button class="opt">Too much current can trip the 120 A breaker or brown out the battery</button>
+          <button class="opt">Current has nothing to do with the gear ratio</button>
+          <button class="opt">More current always makes the robot faster, so you want the most</button>
+        </div>
+        <div class="explain">Pushing harder and adding motors both raise current. If the draw climbs too high it can trip the main breaker or sag the battery into a brownout, so a good ratio hits your speed and force targets while keeping current in a safe range.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 3 &middot; 07 &middot; Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Free speed</b><span>Fastest a motor spins with nothing attached.</span></div>
+        <div class="gl"><b>Stall torque</b><span>Hardest push, when it cannot move at all.</span></div>
+        <div class="gl"><b>Gear reduction</b><span>Trades speed for torque; the main knob.</span></div>
+        <div class="gl"><b>ReCalc</b><span>Free tool that does the sizing math.</span></div>
+        <div class="gl"><b>Current draw</b><span>Rises with push and motors; watch the breaker.</span></div>
+        <div class="gl"><b>Sizing loop</b><span>Define, plug in, read, adjust, repeat.</span></div>
+      </div>
+      <a class="next" href="build-lesson-16.html">
+        <div class="n-eyebrow">Up next &middot; Part 4 &middot; 01</div>
+        <h3>The Mechanism Toolbox &rarr;</h3>
+        <p>You can now pick a motor and size it. Next: the menu of mechanisms you can build, so you know what to point all that math at.</p>
+      </a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="build-lesson-15.html">&larr; Part 3 &middot; 06 &middot; Gearboxes</a>
+    <a class="map" href="build.html">Course map</a>
+    <a class="next-link" href="build-lesson-16.html">Part 4 &middot; 01 &middot; Mechanism Toolbox &rarr;</a>
+  </nav>
+
+</div>
+
+<footer>Fabricate · Building an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  // Approximate, conceptual model of the speed vs torque tradeoff.
+  // Real motor curves are nonlinear; ReCalc does this exactly. These are
+  // simple proportions chosen to show the SHAPE of the tradeoff only.
+  var BASE_SPEED = 600;   // arbitrary "fast" output units at 1:1, one motor
+  var BASE_TORQUE = 1.0;  // arbitrary torque units at 1:1, one motor
+  var LOAD_TORQUE = 6.0;  // example load the mechanism must overcome
+  var SPEED_FLOOR = 12;   // below this output speed the example job is "too slow"
+  var CUR_WARN = 90;      // amps, getting close to the 120 A main breaker
+
+  var redEl=document.getElementById('red'), motEl=document.getElementById('mot');
+  var lblRed=document.getElementById('lblRed'), lblMot=document.getElementById('lblMot');
+  var roSpd=document.getElementById('roSpd'), roTrq=document.getElementById('roTrq'), roCur=document.getElementById('roCur');
+  var verdict=document.getElementById('verdict'), verdictTxt=document.getElementById('verdictTxt');
+
+  function update(){
+    var red=parseInt(redEl.value,10);
+    var mot=parseInt(motEl.value,10);
+
+    // speed goes DOWN as reduction goes up (motor count does not change top speed)
+    var speed = BASE_SPEED / red;
+    // torque goes UP with reduction and with motor count (small friction loss factor)
+    var torque = BASE_TORQUE * red * mot * 0.9;
+    // current estimate rises with both reduction (harder push) and motor count
+    var current = (8 * mot) + (red * 0.9 * mot);
+
+    lblRed.textContent = red + ' : 1';
+    lblMot.textContent = mot;
+    roSpd.textContent = speed.toFixed(1) + ' rpm';
+    roTrq.textContent = torque.toFixed(1) + ' x';
+    roCur.textContent = Math.round(current) + ' A';
+
+    // colour the current readout as it climbs toward the breaker
+    roCur.className = 'v ' + (current >= CUR_WARN ? 'red' : (current >= CUR_WARN*0.7 ? 'amber' : 'green'));
+
+    // verdict against the example target band
+    var cls='good', msg='Good range, lifts the load with current to spare';
+    if (torque < LOAD_TORQUE){ cls='bad'; msg='Stalls, too weak to move the load'; }
+    else if (speed < SPEED_FLOOR){ cls='warn'; msg='Too slow for the example target'; }
+    else if (current >= CUR_WARN){ cls='warn'; msg='High current, watch the breaker'; }
+    verdict.className = 'verdict ' + cls;
+    verdictTxt.textContent = msg;
+  }
+
+  redEl.addEventListener('input', update);
+  motEl.addEventListener('input', update);
+  update();
+
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return;done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else{opt.classList.add('wrong');opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="build:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

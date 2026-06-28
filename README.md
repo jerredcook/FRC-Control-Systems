@@ -9,13 +9,13 @@ with no install.
 
 > 📋 **[Curriculum review & competitive analysis](docs/curriculum-review-2026-06.md)** - a critical assessment of how well this teaches HS students, how much they really learn, and how it compares to the best FRC training that exists.
 
-Three courses - three pillars - **103 interactive lessons, all complete:**
+Three courses - three pillars - **104 interactive lessons, all complete:**
 
 | | Course | Covers | Status |
 |---|--------|--------|--------|
 | 🎯 **Control** | **Closing the Loop** | Feedback, PID, feedforward, CTRE Phoenix 6, tuning, swerve, vision, state-space | ✅ **Complete - 24 lessons** + glossary, certificate, worksheet, field guide |
 | 🎮 **Code** | **Deploy** | Toolchain, Java, command-based robots, hardware, autonomous, vision, pro practices | ✅ **Complete - 36 lessons** across 8 parts |
-| 🔧 **Build** | **Fabricate** | CAD, motors & gearboxes, drivetrains, mechanisms, electrical, pneumatics, battery & power, manufacturing | ✅ **Complete - 43 lessons** across 8 parts |
+| 🔧 **Build** | **Fabricate** | CAD, motors & gearboxes, drivetrains, mechanisms, electrical, pneumatics, battery & power, sizing/design math, manufacturing | ✅ **Complete - 44 lessons** across 8 parts |
 | 🆕 *Preview* | **SystemCore** | The 2027 control system (replaces the roboRIO): hardware, MotionCore, WPILib 2027, the new Driver Station | ⚠️ **Alpha - 9 lessons.** Provisional, based on alpha/beta info; *will change* |
 
 The pillars connect: **Deploy**'s "Make It Move" unit *is* the **Closing the Loop**
@@ -32,7 +32,7 @@ Open **`index.html`** (the academy landing) in any browser, or visit the live
 site. Pick a course:
 
 - **`code.html`** - the Code course hub: **Deploy** (36 lessons).
-- **`build.html`** - the Build course hub: **Fabricate** (43 lessons).
+- **`build.html`** - the Build course hub: **Fabricate** (44 lessons).
 - **`closing-the-loop.html`** - the Control course hub: **Closing the Loop** (24 lessons).
 
 No install, no build step, no internet required. Progress is saved per-course in

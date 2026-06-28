@@ -15,7 +15,7 @@ required.** Every file opens directly in a browser.
 |--------|--------|----------|--------------|-------|--------|
 | 🎯 Control | **Closing the Loop** | `closing-the-loop.html` | `closing-the-loop-lesson-{1..24}.html` | 24 | teal |
 | 🎮 Code | **Deploy** | `code.html` | `deploy-lesson-{1..36}.html` | 36 | indigo |
-| 🔧 Build | **Fabricate** | `build.html` | `build-lesson-{1..43}.html` | 43 | amber |
+| 🔧 Build | **Fabricate** | `build.html` | `build-lesson-{1..44}.html` | 44 | amber |
 
 `index.html` is the academy landing page that links to all three hubs.
 
