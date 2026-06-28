@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sign in · FRC Academy</title>
+<style>
+  :root{
+    --bg:#090d15; --bg-grad:#0b1019; --panel:#0f1626; --panel-2:#131c30;
+    --line:#1e2840; --line-bright:#2c3c5e; --ink:#e8edf7; --ink-dim:#aeb9d1; --muted:#75829e;
+    --indigo:#8a93ff; --teal:#34d6c0; --good:#46d6a0; --bad:#ff6f6f;
+    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono","Cascadia Code",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;color:var(--ink);font-family:var(--sans);line-height:1.6;
+    background:radial-gradient(1200px 600px at 70% -10%, #161433 0%, transparent 60%),linear-gradient(180deg,var(--bg-grad),var(--bg));
+    display:flex;flex-direction:column;align-items:center}
+  header.top{width:100%;border-bottom:1px solid var(--line);background:rgba(9,13,21,.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:940px;margin:0 auto;padding:14px 22px;display:flex;justify-content:space-between;align-items:center}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--ink-dim)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;text-decoration:none}
+  a.top-meta:hover{color:var(--ink)}
+  .card{width:100%;max-width:440px;margin:48px 20px;border:1px solid var(--line);border-radius:16px;
+    background:linear-gradient(180deg,var(--panel),#0c1320);padding:26px 24px}
+  h1{font-size:26px;margin:2px 0 4px;letter-spacing:-.02em}
+  .sub{color:var(--ink-dim);font-size:14.5px;margin:0 0 18px}
+  .tabs{display:flex;gap:8px;margin-bottom:18px}
+  .tab{flex:1;font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;
+    border:1px solid var(--line-bright);background:var(--panel-2);color:var(--muted);padding:9px;border-radius:9px;cursor:pointer}
+  .tab.active{background:var(--indigo);border-color:var(--indigo);color:#0b1020;font-weight:700}
+  label{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px}
+  input{width:100%;padding:11px 12px;border:1px solid var(--line-bright);background:#0b1322;color:var(--ink);border-radius:9px;font-size:15px;font-family:var(--sans)}
+  input:focus{outline:none;border-color:var(--indigo)}
+  .btn{width:100%;margin-top:18px;padding:12px;border:none;border-radius:10px;background:linear-gradient(180deg,#a7adff,var(--indigo));
+    color:#0b1020;font-weight:700;font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+  .btn.ghost{background:var(--panel-2);border:1px solid var(--line-bright);color:var(--ink-dim)}
+  .msg{margin-top:14px;font-size:13.5px;padding:10px 12px;border-radius:9px;display:none}
+  .msg.show{display:block}
+  .msg.err{background:rgba(255,111,111,.1);border:1px solid rgba(255,111,111,.4);color:#ffb4b4}
+  .msg.ok{background:rgba(70,214,160,.1);border:1px solid rgba(70,214,160,.4);color:#9bf0cd}
+  .row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+  .row .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .row .v{font-size:15px;color:var(--ink)}
+  .pill{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:3px 9px;border-radius:20px;border:1px solid var(--line-bright);color:var(--indigo)}
+  .links{margin-top:18px;display:flex;flex-wrap:wrap;gap:10px}
+  .links a{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--teal);text-decoration:none;border:1px solid var(--line-bright);border-radius:9px;padding:9px 12px}
+  .links a:hover{border-color:var(--teal)}
+  .hide{display:none}
+  small.hint{display:block;color:var(--muted);font-size:12.5px;margin-top:6px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <div class="brand"><span class="dot"></span><span class="name">FRC Academy</span></div>
+    <a class="top-meta" href="index.html">← Home</a>
+  </div>
+</header>
+
+<div class="card" id="card">
+  <h1>Account</h1>
+  <p class="sub" id="sub">Sign in to save your progress across devices.</p>
+
+  <!-- disabled notice -->
+  <div id="disabled" class="hide">
+    <div class="msg ok show">Accounts are not switched on for this site yet. Your progress is still saved in this browser. A mentor can turn accounts on by following <b>BACKEND-SETUP.md</b>.</div>
+    <div class="links"><a href="index.html">Back to the academy</a></div>
+  </div>
+
+  <!-- signed-out: sign in / sign up -->
+  <div id="authForms" class="hide">
+    <div class="tabs">
+      <button class="tab active" id="tabIn">Sign in</button>
+      <button class="tab" id="tabUp">Create account</button>
+    </div>
+    <div id="nameWrap" class="hide">
+      <label>Display name</label>
+      <input id="name" type="text" autocomplete="nickname" placeholder="What should mentors see?" />
+    </div>
+    <label>Email</label>
+    <input id="email" type="email" autocomplete="email" placeholder="you@example.com" />
+    <label>Password</label>
+    <input id="password" type="password" autocomplete="current-password" placeholder="At least 6 characters" />
+    <button class="btn" id="submit">Sign in</button>
+    <div class="msg err" id="msg"></div>
+  </div>
+
+  <!-- signed-in: account panel -->
+  <div id="account" class="hide">
+    <div class="row"><span class="k">Signed in</span><span class="v" id="who"></span></div>
+    <div class="row"><span class="k">Role</span><span class="pill" id="role">student</span></div>
+    <div class="row"><span class="k">Team</span><span class="v" id="team">none yet</span></div>
+
+    <div id="joinWrap" style="margin-top:18px">
+      <label>Join a team (enter the code your mentor gave you)</label>
+      <input id="joinCode" type="text" placeholder="e.g. FALCONS24" />
+      <button class="btn ghost" id="joinBtn">Join team</button>
+    </div>
+
+    <div class="msg ok" id="msg2"></div>
+
+    <div class="links">
+      <a href="index.html">Go learn →</a>
+      <a id="mentorLink" class="hide" href="mentor.html">Mentor dashboard →</a>
+    </div>
+    <button class="btn ghost" id="signout" style="margin-top:16px">Sign out</button>
+  </div>
+</div>
+
+<script src="account-config.js"></script>
+<script src="account.js"></script>
+<script>
+(function(){
+  var mode = "in"; // "in" | "up"
+  var $ = function(id){ return document.getElementById(id); };
+  function showMsg(el, text, kind){ el.textContent = text; el.className = "msg " + (kind||"err") + " show"; }
+  function hideMsg(el){ el.className = "msg"; }
+
+  function setMode(m){
+    mode = m;
+    $("tabIn").classList.toggle("active", m==="in");
+    $("tabUp").classList.toggle("active", m==="up");
+    $("nameWrap").classList.toggle("hide", m!=="up");
+    $("submit").textContent = m==="in" ? "Sign in" : "Create account";
+    $("password").setAttribute("autocomplete", m==="in" ? "current-password" : "new-password");
+    hideMsg($("msg"));
+  }
+  $("tabIn").onclick = function(){ setMode("in"); };
+  $("tabUp").onclick = function(){ setMode("up"); };
+
+  function render(){
+    var acc = window.FRCAccount;
+    $("authForms").classList.add("hide");
+    $("account").classList.add("hide");
+    $("disabled").classList.add("hide");
+    if(!acc || !acc.enabled){ $("disabled").classList.remove("hide"); $("sub").textContent="Accounts are not switched on yet."; return; }
+    if(acc.user){
+      $("account").classList.remove("hide");
+      $("sub").textContent = "Your progress now follows your account.";
+      $("who").textContent = (acc.profile && acc.profile.display_name) ? acc.profile.display_name + " · " + acc.user.email : acc.user.email;
+      var role = (acc.profile && acc.profile.role) || "student";
+      $("role").textContent = role;
+      var hasTeam = acc.profile && acc.profile.team_id;
+      $("team").textContent = hasTeam ? "joined" : "none yet";
+      $("joinWrap").classList.toggle("hide", !!(hasTeam) && role==="student" ? false : false); // always allow re-join
+      $("mentorLink").classList.toggle("hide", !(role==="mentor"||role==="admin"));
+    } else {
+      $("authForms").classList.remove("hide");
+      $("sub").textContent = "Sign in to save your progress across devices.";
+      setMode(mode);
+    }
+  }
+
+  $("submit").onclick = function(){
+    var email = $("email").value.trim(), pass = $("password").value;
+    if(!email || !pass){ showMsg($("msg"), "Enter your email and a password."); return; }
+    $("submit").disabled = true;
+    var acc = window.FRCAccount;
+    var p = mode==="in" ? acc.signIn(email, pass) : acc.signUp(email, pass, $("name").value.trim());
+    p.then(function(res){
+      $("submit").disabled = false;
+      if(res && res.error){ showMsg($("msg"), res.error.message); return; }
+      if(mode==="up" && res && res.data && res.data.user && !res.data.session){
+        showMsg($("msg"), "Account made. Check your email to confirm, then sign in.", "ok");
+        setMode("in"); return;
+      }
+      // signed in: account.js auth listener will fire and we re-render
+    }).catch(function(e){ $("submit").disabled=false; showMsg($("msg"), e.message||"Something went wrong."); });
+  };
+
+  $("joinBtn").onclick = function(){
+    var code = $("joinCode").value.trim();
+    if(!code){ showMsg($("msg2"), "Enter the join code.", "err"); $("msg2").className="msg err show"; return; }
+    $("joinBtn").disabled = true;
+    window.FRCAccount.joinTeam(code).then(function(r){
+      $("joinBtn").disabled = false;
+      if(r && r.error){ $("msg2").className="msg err show"; $("msg2").textContent = r.error.message; return; }
+      $("msg2").className="msg ok show"; $("msg2").textContent = "You joined the team. Your mentor can now see your progress.";
+      render();
+    }).catch(function(e){ $("joinBtn").disabled=false; $("msg2").className="msg err show"; $("msg2").textContent = e.message||"Could not join."; });
+  };
+
+  $("signout").onclick = function(){ window.FRCAccount.signOut(); };
+
+  function boot(){
+    var acc = window.FRCAccount;
+    if(!acc){ setTimeout(boot, 50); return; }
+    acc.ready.then(render);
+    window.addEventListener("frc:authchange", render);
+  }
+  boot();
+})();
+</script>
+</body>
+</html>

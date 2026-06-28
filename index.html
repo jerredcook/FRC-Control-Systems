@@ -84,7 +84,7 @@
 <header class="top">
   <div class="top-inner">
     <div class="brand"><span class="dot"></span><span class="name">FRC Academy</span></div>
-    <div class="top-meta">Build · Code · Control</div>
+    <a class="top-meta" id="acctLink" href="login.html" style="text-decoration:none">Sign in</a>
   </div>
 </header>
 
@@ -105,7 +105,7 @@
       <h3>Deploy</h3>
       <div class="sub">Programming an FRC robot</div>
       <div class="desc">From your first line of Java to a full command-based robot - the toolchain, hardware, autonomous, vision, and the pro practices that win.</div>
-      <div class="foot"><span class="pill done" id="codePill">36 lessons · Complete</span><span class="go">Enter →</span></div>
+      <div class="foot"><span class="pill done" id="codePill">37 lessons · Complete</span><span class="go">Enter →</span></div>
       <div class="bar"><i id="codeBar"></i></div>
     </a>
 
@@ -171,10 +171,31 @@
       // done===0 keeps the default "N lessons · Complete" label
     }catch(e){}
   }
-  reflect("deploy:done", 36, "codePill", "codeBar");
-  reflect("build:done", 44, "bldPill", "bldBar");
-  reflect("closing-the-loop:done", 24, "ctlPill", "ctlBar");
+  function renderProgress(){
+    reflect("deploy:done", 37, "codePill", "codeBar");
+    reflect("build:done", 44, "bldPill", "bldBar");
+    reflect("closing-the-loop:done", 24, "ctlPill", "ctlBar");
+  }
+  renderProgress();
+  window.addEventListener("frc:progresssynced", renderProgress);
+
+  function paintAcct(){
+    var a=document.getElementById("acctLink"); if(!a) return;
+    var acc=window.FRCAccount;
+    if(acc && acc.enabled && acc.user){
+      a.textContent=(acc.profile && acc.profile.display_name) ? acc.profile.display_name : acc.user.email;
+    } else { a.textContent="Sign in"; }
+    a.href="login.html";
+  }
+  function bootAcct(){
+    var acc=window.FRCAccount;
+    if(!acc){ setTimeout(bootAcct,50); return; }
+    if(acc.enabled){ acc.ready.then(paintAcct); window.addEventListener("frc:authchange", paintAcct); }
+  }
+  bootAcct();
 })();
 </script>
+<script src="account-config.js"></script>
+<script src="account.js"></script>
 </body>
 </html>

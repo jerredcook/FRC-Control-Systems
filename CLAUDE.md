@@ -130,6 +130,30 @@ it fully separate from the lesson's `#quiz` (predictions never affect completion
 and it reveals on **any** click (formative, not mastery-gated). The `-py` twins share
 the identical block and handler.
 
+### Accounts and progress sync (optional backend)
+
+The site is still fully static and works with no backend. An **optional** Supabase
+layer adds student accounts, cross-device progress, and a mentor dashboard. It is
+**off until configured** and degrades gracefully.
+
+- `account-config.js` holds `FRC_SUPABASE_URL` / `FRC_SUPABASE_ANON_KEY`. **Blank =
+  disabled** (anonymous, localStorage-only, exactly as before). The anon key is
+  public by design; row-level security protects the data.
+- `account.js` is a plain `<script>` (loaded on every page, after the sweep) that,
+  when configured and signed in, merges remote progress into `localStorage`, pushes
+  local progress up, and **hooks `localStorage.setItem`** so any `*:done` write syncs
+  with no change to the 200+ lesson files. It exposes `window.FRCAccount` and never
+  throws into the page. It dispatches `frc:progresssynced` (hubs/index re-render on
+  it) and `frc:authchange`.
+- `login.html` = sign up / sign in / join a team by code. `mentor.html` = the
+  dashboard (role-gated; admins manage teams + roles).
+- `supabase/schema.sql` = tables (`teams`, `profiles` with role student/mentor/admin,
+  `progress`), RLS, and `SECURITY DEFINER` helpers/RPCs. `BACKEND-SETUP.md` is the
+  turnkey setup guide. Data model: progress rows are `(user_id, course, item_key,
+  done)`; the dashboard normalizes `-py` twins to one lesson.
+- Every page includes `account-config.js` + `account.js` before `</body>`. New pages
+  must keep that include.
+
 ### Lesson file anatomy
 
 Each lesson is one standalone HTML file:

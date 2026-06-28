@@ -333,5 +333,7 @@
   opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else {opt.classList.add('wrong'); opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
 })();
 </script>
+<script src="account-config.js"></script>
+<script src="account.js"></script>
 </body>
 </html>

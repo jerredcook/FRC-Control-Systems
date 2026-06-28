@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mentor dashboard · FRC Academy</title>
+<style>
+  :root{
+    --bg:#090d15; --bg-grad:#0b1019; --panel:#0f1626; --panel-2:#131c30;
+    --line:#1e2840; --line-bright:#2c3c5e; --ink:#e8edf7; --ink-dim:#aeb9d1; --muted:#75829e;
+    --indigo:#8a93ff; --teal:#34d6c0; --amber:#ffb454; --coral:#ff7a7a; --good:#46d6a0; --bad:#ff6f6f;
+    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono","Cascadia Code",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;color:var(--ink);font-family:var(--sans);line-height:1.55;
+    background:radial-gradient(1200px 600px at 70% -10%, #161433 0%, transparent 60%),linear-gradient(180deg,var(--bg-grad),var(--bg))}
+  header.top{border-bottom:1px solid var(--line);background:rgba(9,13,21,.6);backdrop-filter:blur(6px);position:sticky;top:0;z-index:10}
+  .top-inner{max-width:1180px;margin:0 auto;padding:14px 22px;display:flex;justify-content:space-between;align-items:center}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--teal);box-shadow:0 0 12px var(--teal)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--ink-dim)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;text-decoration:none}
+  a.top-meta:hover{color:var(--ink)}
+  .wrap{max-width:1180px;margin:0 auto;padding:30px 22px 80px}
+  h1{font-size:30px;margin:0 0 4px;letter-spacing:-.02em}
+  .sub{color:var(--ink-dim);margin:0 0 22px}
+  .notice{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:22px;max-width:560px}
+  .notice a{color:var(--teal)}
+  .panel{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:18px 20px;margin-bottom:20px}
+  .panel h2{font-size:15px;font-family:var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0 0 14px}
+  .teamgrid{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+  .teamcard{border:1px solid var(--line-bright);border-radius:10px;background:var(--panel-2);padding:10px 14px;min-width:160px}
+  .teamcard .tn{font-weight:650}
+  .teamcard .tc{font-family:var(--mono);font-size:12px;color:var(--teal);margin-top:3px;letter-spacing:.1em}
+  .teamcard .tm{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:4px}
+  .formrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  input,select{padding:9px 11px;border:1px solid var(--line-bright);background:#0b1322;color:var(--ink);border-radius:8px;font-size:14px;font-family:var(--sans)}
+  input:focus,select:focus{outline:none;border-color:var(--indigo)}
+  .btn{padding:9px 14px;border:none;border-radius:8px;background:linear-gradient(180deg,#a7adff,var(--indigo));color:#0b1020;font-weight:700;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+  .btn.ghost{background:var(--panel-2);border:1px solid var(--line-bright);color:var(--ink-dim)}
+  .filterbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:14px}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{text-align:left;padding:11px 10px;border-bottom:1px solid var(--line)}
+  th{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500}
+  td .nm{font-weight:600}
+  .cell{min-width:96px}
+  .bar{height:7px;border-radius:5px;background:var(--line-bright);overflow:hidden;margin-top:5px}
+  .bar i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,var(--indigo),var(--teal))}
+  .cnum{font-family:var(--mono);font-size:12px;color:var(--ink-dim)}
+  .pill{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:20px;border:1px solid var(--line-bright);color:var(--muted)}
+  .pill.mentor{color:var(--amber);border-color:rgba(255,180,84,.4)}
+  .pill.admin{color:var(--coral);border-color:rgba(255,122,122,.4)}
+  .muted{color:var(--muted)}
+  .hide{display:none}
+  .msg{margin-top:10px;font-size:13px;color:var(--muted)}
+  .manage{display:flex;gap:6px;align-items:center}
+  .manage select{padding:6px 8px;font-size:12.5px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <div class="brand"><span class="dot"></span><span class="name">Mentor dashboard</span></div>
+    <a class="top-meta" href="index.html">← Academy</a>
+  </div>
+</header>
+
+<div class="wrap">
+  <h1>Team progress</h1>
+  <p class="sub" id="sub">Loading…</p>
+
+  <div id="gate" class="notice hide"></div>
+
+  <div id="adminPanel" class="panel hide">
+    <h2>Teams (admin)</h2>
+    <div class="teamgrid" id="teamGrid"></div>
+    <div class="formrow">
+      <input id="newTeamName" type="text" placeholder="New team name" />
+      <input id="newTeamCode" type="text" placeholder="JOIN CODE" />
+      <button class="btn" id="createTeam">Create team</button>
+      <span class="msg" id="adminMsg"></span>
+    </div>
+  </div>
+
+  <div id="board" class="hide">
+    <div class="filterbar">
+      <span class="muted" id="count"></span>
+      <span id="teamFilterWrap" class="hide">
+        <label class="muted" style="font-size:12px">Team
+          <select id="teamFilter"><option value="">All teams</option></select>
+        </label>
+      </span>
+      <button class="btn ghost" id="refresh">Refresh</button>
+    </div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr id="headrow"></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="account-config.js"></script>
+<script src="account.js"></script>
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  // Java-track lesson totals per course (checkpoints counted separately).
+  var COURSES = [
+    {key:"deploy", label:"Deploy", total:37},
+    {key:"closing-the-loop", label:"Control", total:24},
+    {key:"build", label:"Build", total:44},
+    {key:"systemcore", label:"SystemCore", total:9}
+  ];
+  var state = { isAdmin:false, teams:[], teamsById:{}, profiles:[], progress:[] };
+
+  function gate(html){ $("gate").innerHTML = html; $("gate").classList.remove("hide"); $("sub").classList.add("hide"); }
+
+  function normLesson(key){ return key.replace(/-py\.html$/, ".html"); }
+
+  function aggregate(){
+    // byUser[id] = { lessons:{course:Set}, checkpoints:{course:Set}, last:ts }
+    var byUser = {};
+    state.progress.forEach(function(r){
+      var u = byUser[r.user_id] || (byUser[r.user_id] = { lessons:{}, checks:{}, last:0 });
+      var isCheck = /-checkpoint-/.test(r.item_key);
+      var bucket = isCheck ? u.checks : u.lessons;
+      (bucket[r.course] || (bucket[r.course] = {}))[normLesson(r.item_key)] = true;
+      var t = r.updated_at ? Date.parse(r.updated_at) : 0;
+      if(t > u.last) u.last = t;
+    });
+    return byUser;
+  }
+
+  function fmtDate(ts){
+    if(!ts) return "—";
+    var d = new Date(ts), now = Date.now(), days = Math.floor((now-ts)/86400000);
+    if(days<=0) return "today";
+    if(days===1) return "yesterday";
+    if(days<30) return days+" days ago";
+    return d.toISOString().slice(0,10);
+  }
+
+  function render(){
+    var byUser = aggregate();
+    var filterTeam = $("teamFilter") ? $("teamFilter").value : "";
+    var students = state.profiles.filter(function(p){
+      if(p.role==="admin") return false;
+      if(filterTeam && p.team_id !== filterTeam) return false;
+      return true;
+    });
+
+    // header
+    var head = "<th>Member</th>";
+    if(state.isAdmin) head += "<th>Team</th>";
+    COURSES.forEach(function(c){ head += "<th>"+c.label+"</th>"; });
+    head += "<th>Last active</th>";
+    if(state.isAdmin) head += "<th>Manage</th>";
+    $("headrow").innerHTML = head;
+
+    var html = "";
+    students.forEach(function(p){
+      var u = byUser[p.id] || { lessons:{}, checks:{}, last:0 };
+      var rolePill = p.role!=="student" ? ' <span class="pill '+p.role+'">'+p.role+'</span>' : '';
+      html += "<tr>";
+      html += '<td><span class="nm">'+esc(p.display_name||"(no name set)")+'</span>'+rolePill+'</td>';
+      if(state.isAdmin){ var tn = state.teamsById[p.team_id]; html += '<td class="muted">'+(tn?esc(tn.name):"—")+'</td>'; }
+      COURSES.forEach(function(c){
+        var done = u.lessons[c.key] ? Object.keys(u.lessons[c.key]).length : 0;
+        var ck = u.checks[c.key] ? Object.keys(u.checks[c.key]).length : 0;
+        var pct = Math.min(100, Math.round(done/c.total*100));
+        html += '<td class="cell"><span class="cnum">'+done+"/"+c.total+(ck?(' <span class="muted">+'+ck+'ck</span>'):'')+'</span>'
+              + '<div class="bar"><i style="width:'+pct+'%"></i></div></td>';
+      });
+      html += '<td class="muted">'+fmtDate(u.last)+'</td>';
+      if(state.isAdmin) html += '<td>'+manageCell(p)+'</td>';
+      html += "</tr>";
+    });
+    $("rows").innerHTML = html || '<tr><td colspan="9" class="muted">No students yet. Share a team join code from the panel above.</td></tr>';
+    $("count").textContent = students.length + (students.length===1?" member":" members");
+    if(state.isAdmin) wireManage();
+  }
+
+  function manageCell(p){
+    var roleOpts = ["student","mentor","admin"].map(function(r){ return '<option value="'+r+'"'+(p.role===r?' selected':'')+'>'+r+'</option>'; }).join("");
+    var teamOpts = '<option value="">no team</option>' + state.teams.map(function(t){ return '<option value="'+t.id+'"'+(p.team_id===t.id?' selected':'')+'>'+esc(t.name)+'</option>'; }).join("");
+    return '<span class="manage" data-uid="'+p.id+'">'
+      + '<select class="mrole">'+roleOpts+'</select>'
+      + '<select class="mteam">'+teamOpts+'</select>'
+      + '<button class="btn ghost msave">Save</button></span>';
+  }
+  function wireManage(){
+    Array.prototype.forEach.call(document.querySelectorAll(".manage"), function(span){
+      span.querySelector(".msave").onclick = function(){
+        var uid = span.getAttribute("data-uid");
+        var role = span.querySelector(".mrole").value;
+        var team = span.querySelector(".mteam").value || null;
+        this.disabled = true;
+        window.FRCAccount.adminSetMember(uid, role, team).then(function(r){
+          if(r && r.error){ alert(r.error.message); }
+          load();
+        }).catch(function(e){ alert(e.message||"Failed"); load(); });
+      };
+    });
+  }
+
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c]; }); }
+
+  function renderTeams(){
+    if(!state.isAdmin) return;
+    $("adminPanel").classList.remove("hide");
+    $("teamGrid").innerHTML = state.teams.map(function(t){
+      var n = state.profiles.filter(function(p){ return p.team_id===t.id && p.role==="student"; }).length;
+      return '<div class="teamcard"><div class="tn">'+esc(t.name)+'</div><div class="tc">'+esc(t.join_code)+'</div><div class="tm">'+n+' student'+(n===1?'':'s')+'</div></div>';
+    }).join("") || '<span class="muted">No teams yet. Create one below.</span>';
+    var sel = $("teamFilter");
+    sel.innerHTML = '<option value="">All teams</option>' + state.teams.map(function(t){ return '<option value="'+t.id+'">'+esc(t.name)+'</option>'; }).join("");
+    $("teamFilterWrap").classList.remove("hide");
+  }
+
+  function load(){
+    var acc = window.FRCAccount, sb = acc.raw();
+    var jobs = [
+      sb.from("profiles").select("id,display_name,role,team_id"),
+      sb.from("progress").select("user_id,course,item_key,updated_at")
+    ];
+    if(state.isAdmin) jobs.push(sb.from("teams").select("id,name,join_code"));
+    else jobs.push(sb.from("teams").select("id,name,join_code"));
+    Promise.all(jobs).then(function(res){
+      state.profiles = (res[0] && res[0].data) || [];
+      state.progress = (res[1] && res[1].data) || [];
+      state.teams = (res[2] && res[2].data) || [];
+      state.teamsById = {}; state.teams.forEach(function(t){ state.teamsById[t.id]=t; });
+      renderTeams();
+      render();
+    });
+  }
+
+  $("refresh").onclick = load;
+  $("teamFilter").onchange = render;
+  $("createTeam").onclick = function(){
+    var name = $("newTeamName").value.trim(), code = $("newTeamCode").value.trim().toUpperCase();
+    if(!name || !code){ $("adminMsg").textContent = "Enter a name and a code."; return; }
+    this.disabled = true;
+    window.FRCAccount.adminCreateTeam(name, code).then(function(r){
+      $("createTeam").disabled = false;
+      if(r && r.error){ $("adminMsg").textContent = r.error.message; return; }
+      $("newTeamName").value=""; $("newTeamCode").value=""; $("adminMsg").textContent = "Team created.";
+      load();
+    }).catch(function(e){ $("createTeam").disabled=false; $("adminMsg").textContent = e.message||"Failed."; });
+  };
+
+  function boot(){
+    var acc = window.FRCAccount;
+    if(!acc){ setTimeout(boot, 50); return; }
+    if(!acc.enabled){ gate('Accounts are not switched on for this site yet. A mentor can enable them by following <b>BACKEND-SETUP.md</b>. <br><br><a href="index.html">Back to the academy</a>'); return; }
+    acc.ready.then(function(){ return acc.getProfile(); }).then(function(profile){
+      if(!acc.user){ gate('Please <a href="login.html">sign in</a> to view the dashboard.'); return; }
+      var role = (profile && profile.role) || "student";
+      if(role!=="mentor" && role!=="admin"){
+        gate('This page is for mentors. You are signed in as a student. <br><br><a href="index.html">Back to learning →</a>'); return;
+      }
+      state.isAdmin = (role==="admin");
+      $("sub").textContent = state.isAdmin ? "Admin view: every team and member." : "Your team's progress at a glance.";
+      $("board").classList.remove("hide");
+      load();
+    });
+  }
+  boot();
+})();
+</script>
+</body>
+</html>
