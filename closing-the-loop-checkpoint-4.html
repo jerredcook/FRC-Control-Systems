@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Closing the Loop · Part IV Checkpoint - Tune a Real Mechanism</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020;   /* setpoint / target / brand */
+    --teal:#34D7C5;    /* measured position */
+    --indigo:#8E8CF8;  /* voltage / velocity */
+    --red:#FF6B6B;     /* error / overshoot */
+    --green:#43D67E;   /* correct */
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+    --maxw:1160px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ink); color:var(--text);
+    font-family:var(--sans); font-size:17px; line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(900px 500px at 80% -10%, rgba(255,176,32,.06), transparent 60%),
+      radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--teal);box-shadow:0 0 12px var(--teal)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--teal),var(--indigo));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:44ch;margin-top:6px}
+
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--teal);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  p .sub,.sub{color:var(--muted)}
+  .lead{font-size:19px}
+  em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .formula{font-family:var(--mono);background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:18px 20px;margin:20px 0;font-size:18px;overflow-x:auto;color:#cfe;text-align:center}
+  .formula .small{display:block;font-size:13px;color:var(--muted);margin-top:8px}
+  .formula b{color:var(--amber)} .formula .t{color:var(--teal)}
+
+  /* term chips */
+  .terms{display:grid;gap:12px;margin:22px 0 6px}
+  @media(min-width:560px){.terms{grid-template-columns:repeat(3,1fr)}}
+  .term{border:1px solid var(--line);border-radius:10px;padding:14px 15px;background:var(--panel);border-top:2px solid var(--accent,var(--teal))}
+  .term h4{margin:0 0 4px;font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent,var(--teal))}
+  .term p{margin:0;font-size:14.5px;color:var(--muted);line-height:1.45}
+
+  /* interactive panels */
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;gap:6px;align-items:center}
+  .demo-tag .live{width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 8px var(--red)}
+  .demo-tag .live.on{background:var(--green);box-shadow:0 0 8px var(--green)}
+  .demo-stage{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line)}
+  @media(min-width:600px){.demo-stage{grid-template-columns:minmax(150px,0.78fr) 1.5fr}}
+  .stage-cell{background:#0B1322;position:relative}
+  .stage-cell .cell-label{position:absolute;top:8px;left:10px;z-index:2;font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);pointer-events:none}
+  canvas.world{display:block;width:100%;height:320px}
+  canvas.scope{display:block;width:100%;height:320px}
+
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--teal);color:var(--text)}
+  .btn.active{background:var(--teal);border-color:var(--teal);color:#06121f;font-weight:700}
+  .btn.primary{background:linear-gradient(180deg,#6FF0DD,var(--teal));color:#06121f;font-weight:700;border:none}
+  .slider-group{flex:1 1 200px;display:flex;flex-direction:column;gap:6px;min-width:170px}
+  .slider-group label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+  .slider-group label .val{color:var(--amber)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:var(--line-2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--amber);cursor:pointer;box-shadow:0 0 10px -1px var(--amber)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--amber);cursor:pointer}
+
+  .readouts{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  @media(min-width:560px){.readouts{grid-template-columns:repeat(4,1fr)}}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:20px;font-weight:600;margin-top:3px}
+  .ro .v.amber{color:var(--amber)} .ro .v.teal{color:var(--teal)} .ro .v.indigo{color:var(--indigo)} .ro .v.red{color:var(--red)} .ro .v.ink{color:var(--text)}
+
+  .legend{display:flex;flex-wrap:wrap;gap:16px;padding:11px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .legend i{width:16px;height:2px;border-radius:2px;display:inline-block}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  /* shared callout pattern */
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.teal{border-color:var(--teal);background:rgba(52,215,197,.06)} .note.teal .nh{color:var(--teal)}
+
+  /* code */
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--teal);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:13.5px;line-height:1.85;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic}
+  .code .kw{color:#ff9bbf}
+  .code .ty{color:var(--teal)}
+  .code .fn{color:var(--indigo)}
+  .code .num{color:var(--amber)}
+
+  /* code exercise */
+  .code-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .code-ex .chead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .code-ex .chead .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,176,32,.14);display:grid;place-items:center;color:var(--amber);font-size:13px}
+  .code-ex .ctask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .code-ex pre.code{margin:0 0 14px}
+  .blank{font-family:var(--mono);font-size:13px;width:13ch;text-align:center;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:2px 4px;outline:none}
+  .blank:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
+  .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+
+  /* quiz */
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)}
+  .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7}
+  .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--teal);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  /* recap */
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px}
+  @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px}
+  .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--teal);min-width:130px;text-transform:uppercase}
+  .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(142,140,248,0.1),transparent 70%)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--indigo)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)}
+  .next code{font-family:var(--mono);background:var(--panel-2);border:1px solid var(--line-2);padding:2px 8px;border-radius:5px;color:var(--teal);font-size:14px}
+
+  footer{padding:40px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+  /* lesson navigation */
+  .brand{text-decoration:none}
+  .brand .name{transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--teal);color:var(--text)}
+  .coursenav a.map{border-color:transparent;color:var(--indigo)}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="closing-the-loop.html"><span class="dot"></span><span class="name">Closing the Loop</span></a>
+    <div class="top-meta">Checkpoint IV / V · Tune a Real Mechanism</div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="hero">
+    <div class="lesson-no"><b>Part IV &middot; Checkpoint</b> Tune a Real Mechanism</div>
+    <div class="eyebrow">Checkpoint</div>
+    <h1>Part IV<br><span class="accent">checkpoint</span>.</h1>
+    <p class="dek">A short cumulative check over Part IV, Tune a Real Mechanism and the ideas before it. Answer every question correctly to clear it; a wrong answer turns red, so try again.</p>
+  </div>
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Show what stuck</h2>
+    <p>Pick an answer. Get them all right to clear the checkpoint.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="0">
+        <div class="qn">Question 1</div>
+        <div class="qt">You are tuning a real elevator start to finish. Which order gives a stable, easy result?</div>
+        <div class="opts"><button class="opt">SysId to measure kS, kG, kV, kA first, then add a small kP to trim the leftover, then set Motion Magic limits, then validate</button><button class="opt">Crank kP as high as it goes first, then add feedforward only if it still misses</button><button class="opt">Set Motion Magic limits first, then guess kP, kI, kD, and skip SysId entirely</button></div>
+        <div class="explain">Feedforward before feedback, always. Measured kS, kG, kV, kA supply most of the voltage, so kP stays small and stable while it only trims the residual. Then profile the move and validate under load.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 2</div>
+        <div class="qt">After SysId on a well-built mechanism, your kP comes out surprisingly small. Is something wrong?</div>
+        <div class="opts"><button class="opt">Yes, kP should always be the largest gain, so SysId failed</button><button class="opt">No, this is expected: feedforward already supplies most of the voltage, so kP only trims the small leftover error</button><button class="opt">No, but only because kI is secretly doing the work instead</button></div>
+        <div class="explain">When feedforward (kS, kG, kV, kA) carries the load, the feedback term has little left to do. A modest kP that trims residual error is exactly the goal, and it stays easy to tune and stable.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 3</div>
+        <div class="qt">You reuse the elevator's workflow on an arm, but the arm sags worst when it is near horizontal and barely sags when near vertical. Why, and what is the right gravity model?</div>
+        <div class="opts"><button class="opt">The encoder drifts at horizontal; use Elevator_Static gravity</button><button class="opt">kV is too small near horizontal; raise kV until the sag is gone</button><button class="opt">Gravity load follows the cosine of the arm angle, so use Arm_Cosine (kG times cos of the angle, measured from horizontal)</button></div>
+        <div class="explain">An arm fights full weight at horizontal (cos 0 = 1) and almost none straight up (cos 90 = 0). Arm_Cosine scales kG by cos(angle). The same end-to-end workflow as the elevator applies; only the gravity type changes.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 4</div>
+        <div class="qt">A flywheel shooter holds a target speed, not a position. Compared with the elevator's position loop, which gain does most of the work, and what about kG?</div>
+        <div class="opts"><button class="opt">kV does most of the work, predicting the voltage to sustain the speed; there is no kG because gravity does not slow a spinning wheel</button><button class="opt">kP does most of the work, since velocity loops need a very large kP; kG holds the wheel at speed</button><button class="opt">kA does most of the work, since the wheel is always accelerating; kG resists drag</button></div>
+        <div class="explain">Velocity control is kV's domain: kV times target speed predicts the holding voltage. A flywheel has no gravity term to fight, so kG is not used. kP only trims small errors.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 5</div>
+        <div class="qt">On that same flywheel, a teammate keeps cranking kP to make recovery faster after a shot, but the speed starts hunting and oscillating. What is the better mental model for a velocity loop?</div>
+        <div class="opts"><button class="opt">A bigger kP is always better for velocity, so the hunting must be a sensor fault</button><button class="opt">Let kV hold the base voltage and use only a small kP to trim; too large a kP in velocity makes the speed hunt and chase itself</button><button class="opt">Add kG so the wheel stops hunting</button></div>
+        <div class="explain">In a velocity loop, kV supplies the bulk and a small kP trims. A large kP amplifies tiny velocity errors and the loop chases its own tail. After a shot, kV holds the base voltage while a modest kP drives recovery.</div>
+      </div>
+    </div>
+  </section>
+  <nav class="coursenav">
+    <a class="map" href="closing-the-loop.html">&larr; Back to the course map</a>
+  </nav>
+</div>
+<footer>Closing the Loop &middot; Control systems for FRC</footer>
+
+<script>
+(function(){
+  "use strict";
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong');} }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="closing-the-loop:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body>
+</html>

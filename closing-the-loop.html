@@ -110,6 +110,9 @@
 
   /* ---------- lesson cards ---------- */
   .lessons{display:grid;gap:12px}
+  .card.checkpoint{margin-top:12px;cursor:pointer;text-decoration:none;color:inherit;border-left-color:var(--good)}
+  .card.checkpoint:hover{border-color:var(--line-bright);transform:translateY(-2px);box-shadow:0 18px 40px -26px rgba(0,0,0,0.9)}
+  .card.checkpoint .card-num{background:rgba(70,214,160,0.14);border-color:var(--good);color:var(--good)}
   @media(min-width:640px){.lessons{grid-template-columns:1fr 1fr}}
   .card{
     position:relative;border:1px solid var(--line);border-radius:12px;background:var(--panel);
@@ -371,6 +374,8 @@
       });
 
       sec.appendChild(grid);
+      var cpMap={I:"1",II:"2",III:"3",IV:"4",V:"5"}; var cpFile="closing-the-loop-checkpoint-"+cpMap[part.code]+".html";
+      var cp=document.createElement("a"); cp.className="card checkpoint"+(done[cpFile]?" done":""); cp.href=cpFile; cp.innerHTML='<div class="card-num">★</div><div class="card-body"><div class="card-title">Part '+part.code+' Checkpoint</div><p class="card-desc">A short cumulative quiz over this part and what came before. Answer them all correctly to clear it.</p><div class="card-foot"><span class="pill">Checkpoint</span><span class="open-link">Start →</span></div></div>'; sec.appendChild(cp);
       courseEl.appendChild(sec);
     });
     updateStats();

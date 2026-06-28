@@ -91,11 +91,25 @@ Fabricate use numbers (`1` to `8`).
 - Each course stores progress in `localStorage` under its own key:
   `closing-the-loop:done`, `deploy:done`, `build:done`.
 - The value is a map `{ "lesson-filename.html": true }`.
-- **Lessons auto-mark done**: when every quiz question in a lesson is answered
-  (all `.opt` elements `locked`), the lesson writes its filename into the course's
-  `done` map. See the small trailing `<script>` in each lesson (`KEY=...`, `mark()`).
+- **Mastery completion**: a quiz question locks only when the **correct** option is
+  clicked (a wrong answer turns red and stays retryable). The trailing mark-done
+  `<script>` gates on `.opt.locked`, so a lesson auto-marks done only when **every
+  question is answered correctly**. (Older "any answer marks done" behavior was
+  replaced; the handler is identical across all quiz pages.)
 - Hubs read the map to render progress bars, stats, and a Reset button. `index.html`
   reflects Control-course progress on its card.
+
+### Per-Part cumulative checkpoints
+
+Each Part has a standalone **checkpoint** quiz page that cumulatively re-tests that
+Part (and interleaves earlier parts): `build-checkpoint-{1..8}.html`,
+`deploy-checkpoint-{1,2,3,4,6,7,8}.html` (Part 5 is the control-course link, no
+checkpoint), `closing-the-loop-checkpoint-{1..5}.html` (1..5 = Parts I..V). They use
+the mastery quiz handler and mark themselves done in the course's `done` map (so the
+filename appears alongside lessons). The hubs **derive** the checkpoint filename from
+the part code in `render()` and append a green `.card.checkpoint` card after each
+part's lessons; there is no `checkpoint` field in the `COURSE` array. Checkpoints are
+not counted in the lesson totals.
 
 ### Lesson file anatomy
 

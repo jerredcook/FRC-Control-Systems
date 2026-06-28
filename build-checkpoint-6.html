@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fabricate · Part 6 · Checkpoint - Electrical &amp; Pneumatics</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(255,138,76,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="build.html"><span class="dot"></span><span class="name">Fabricate</span></a>
+    <div class="top-meta">Part 6 · Checkpoint · Electrical</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 6 &middot; Checkpoint</b> Electrical &amp; Pneumatics</div>
+    <div class="eyebrow">Checkpoint</div>
+    <h1>Part 6<br><span class="accent">checkpoint</span>.</h1>
+    <p class="dek">A short cumulative check over Electrical &amp; Pneumatics and the ideas before it. Answer every question correctly to clear it; a wrong answer turns red, so try again.</p>
+  </div>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Show what stuck</h2>
+    <p>Pick an answer. Get them all right to clear the checkpoint.</p>
+    <div class="quiz" id="quiz">
+
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">A single motor's wire shorts out during a match. In a properly built robot, what should happen?</div>
+        <div class="opts">
+          <button class="opt">The whole robot loses power until you reset the main breaker</button>
+          <button class="opt">That branch's fuse blows and isolates it while the rest of the robot keeps running</button>
+          <button class="opt">The battery overheats and the radio reboots</button>
+        </div>
+        <div class="explain">Power runs battery to main breaker to the Power Distribution Hub to fused branches. Each branch is fused, so a short pops only that fuse and cuts that one circuit. Layered protection is the whole point of the power chain.</div>
+      </div>
+
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">You wire a Kraken drive motor with thin 18 AWG wire on a 60 amp breaker. The wire gets hot and the insulation starts to soften. What went wrong?</div>
+        <div class="opts">
+          <button class="opt">Nothing; thin wire is fine if the breaker is large enough</button>
+          <button class="opt">The breaker is too small for that motor</button>
+          <button class="opt">18 AWG is too thin to carry that motor's current, and the big breaker never protects it</button>
+        </div>
+        <div class="explain">A bigger motor pulls more amps, so it needs thicker wire (a lower AWG number), around 12 AWG for most FRC motors. The breaker has to sit at or below what the wire can safely carry, or it will let the wire overheat before tripping.</div>
+      </div>
+
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">Mid-match, half your motor controllers suddenly stop responding while the rest still work. The CAN bus is a daisy chain. What is the classic cause?</div>
+        <div class="opts">
+          <button class="opt">A loose CAN connector partway down the chain killed everything downstream of it</button>
+          <button class="opt">The battery is fully charged, overpowering the controllers</button>
+          <button class="opt">Two motors are spinning the same direction</button>
+        </div>
+        <div class="explain">CAN is one two-wire daisy chain, so a single bad crimp or unplugged connector silences every device after it. That is why a pull test, secure crimps, and strain relief matter so much; the data is only as reliable as the weakest connection.</div>
+      </div>
+
+      <div class="q" data-correct="1">
+        <div class="qn">Question 4</div>
+        <div class="qt">You need a clamp that snaps fully open or fully closed and holds tight while drawing no power. Should you use a motor or pneumatics, and why?</div>
+        <div class="opts">
+          <button class="opt">A motor, because it can stop at any position</button>
+          <button class="opt">A pneumatic cylinder, because it is snappy, strong, and holds either end with zero holding current</button>
+          <button class="opt">Neither; clamps must be hand-operated by the rules</button>
+        </div>
+        <div class="explain">Pneumatics shines at binary jobs: all the way out or all the way in. A cylinder holds its position drawing no current, where a motor would keep pulling amps. Air is wrong only when you need to stop partway or move constantly. Keep the working pressure within the 60 psi limit.</div>
+      </div>
+
+      <div class="q" data-correct="2">
+        <div class="qn">Question 5</div>
+        <div class="qt">Two batteries both read 12.8 volts at rest, but the Battery Beak shows one at 12 milliohms and the other at 28 milliohms. You are about to drive a hard pushing match. Which do you pick, and why?</div>
+        <div class="opts">
+          <button class="opt">Either; equal resting voltage means equal performance</button>
+          <button class="opt">The 28 milliohm one, since higher resistance means more stored energy</button>
+          <button class="opt">The 12 milliohm one, because lower internal resistance sags less under heavy current and resists brownout</button>
+        </div>
+        <div class="explain">Resting voltage only shows the tank is full; internal resistance is how wide the pipe is. Terminal voltage equals resting voltage minus current times internal resistance, so the higher-resistance pack sags much harder under a big drivetrain pull and is the one that browns out when the match is on the line.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a class="map" href="build.html">&larr; Back to the Fabricate course map</a>
+  </nav>
+
+</div>
+
+<footer>Fabricate &middot; Building an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong');} }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="build:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body></html>

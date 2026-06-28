@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fabricate · Part 1 - Checkpoint</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .task{padding:18px 16px 6px;text-align:center}
+  .task .tno{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-bottom:8px}
+  .task .tp{font-size:18px;color:var(--text);font-weight:600;max-width:46ch;margin:0 auto}
+  .tools{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;padding:14px 16px} @media(min-width:560px){.tools{grid-template-columns:repeat(3,1fr)}}
+  .tool{border:1px solid var(--line-2);background:var(--panel-2);border-radius:10px;padding:13px 8px;cursor:pointer;text-align:center;transition:.12s;display:flex;flex-direction:column;align-items:center;gap:6px}
+  .tool:hover{border-color:var(--indigo)} .tool .ti{font-size:22px}
+  .tool .tl{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.02em;line-height:1.25}
+  .tool.correct{border-color:var(--green);background:rgba(67,214,126,.12)} .tool.correct .tl{color:var(--green)}
+  .tool.wrong{border-color:var(--red);background:rgba(255,107,107,.1)} .tool.wrong .tl{color:var(--red)}
+  .tool.locked{cursor:default}
+  .fb{padding:0 16px 14px;min-height:48px}
+  .fb .line{border-left:2px solid var(--indigo);padding:6px 0 6px 12px;font-size:14.5px;color:var(--muted);display:none}
+  .fb .line.show{display:block} .fb .line b{color:var(--text)}
+  .controls{padding:12px 16px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)} .btn:disabled{opacity:.4;cursor:not-allowed}
+  .btn.primary{background:linear-gradient(180deg,#ffb37e,var(--indigo));color:#2a1503;font-weight:700;border:none}
+  .score{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--indigo)}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(255,138,76,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .rules{display:grid;gap:10px;margin:18px 0} @media(min-width:560px){.rules{grid-template-columns:1fr 1fr}}
+  .rule{display:flex;gap:11px;border:1px solid var(--line);border-radius:11px;padding:13px 14px;background:var(--panel)}
+  .rule .ri{font-size:20px;flex:0 0 auto}
+  .rule b{display:block;font-size:14.5px;color:var(--text);margin-bottom:2px}
+  .rule span{font-size:13.5px;color:var(--muted)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:96px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(52,215,197,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)} .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="build.html"><span class="dot"></span><span class="name">Fabricate</span></a>
+    <div class="top-meta">Part 1 · Checkpoint · The Shop</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 1 &middot; Checkpoint</b> The Shop</div>
+    <div class="eyebrow">Checkpoint</div>
+    <h1>Part 1<br><span class="accent">checkpoint</span>.</h1>
+    <p class="dek">A short cumulative check over The Shop and the ideas before it. Answer every question correctly to clear it; a wrong answer turns red, so try again.</p>
+  </div>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Show what stuck</h2>
+    <p>Pick an answer. Get them all right to clear the checkpoint.</p>
+    <div class="quiz" id="quiz">
+
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">A teammate walks up to the bandsaw wearing thin work gloves to handle the sharp aluminum. They are about to start cutting. What should you say?</div>
+        <div class="opts">
+          <button class="opt">Gloves are fine, the aluminum is sharp</button>
+          <button class="opt">Take the gloves off before running the saw, a glove can catch the blade and pull your hand in</button>
+          <button class="opt">Add a second glove on each hand for extra grip</button>
+        </div>
+        <div class="explain">On any spinning or moving cutter, a glove that snags drags your hand into the machine. Bare hands pull away cleanly. Save gloves for handling sharp stock by hand, never for running the tool.</div>
+      </div>
+
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">You need to drill four clean holes in a small steel plate. The plate keeps shifting under the bit. The right move is to:</div>
+        <div class="opts">
+          <button class="opt">Pinch the plate hard with your fingers and drill fast</button>
+          <button class="opt">Speed the drill up so it finishes before the plate moves</button>
+          <button class="opt">Clamp the plate to the table, and slow the drill down for steel</button>
+        </div>
+        <div class="explain">Always clamp; an unclamped part can grab the bit and spin like a propeller. Steel also wants a slower speed than wood or aluminum, since too much speed burns the bit dull and work-hardens the metal.</div>
+      </div>
+
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">A drawing calls for a hole spaced 2.000 &plusmn; 0.005 in from the edge. Which measured value passes, and what tool reads it?</div>
+        <div class="opts">
+          <button class="opt">1.997 in, read with a caliper</button>
+          <button class="opt">2.040 in, read with a tape measure</button>
+          <button class="opt">1.250 in, read with a ruler</button>
+        </div>
+        <div class="explain">The tolerance allows 1.995 to 2.005 in, so 1.997 passes and 2.040 is way out. A caliper reads to 0.001 in, the precision parts need to line up; a tape or ruler is too coarse for this.</div>
+      </div>
+
+      <div class="q" data-correct="1">
+        <div class="qn">Question 4</div>
+        <div class="qt">A 1/4-20 bolt on a vibrating drivetrain keeps backing out mid-match. What fixes it?</div>
+        <div class="opts">
+          <button class="opt">Keep tightening past snug until it cannot turn anymore</button>
+          <button class="opt">Add a nylock nut or a drop of threadlocker so it cannot rattle loose</button>
+          <button class="opt">Swap to a metric bolt of about the same size</button>
+        </div>
+        <div class="explain">A nylock nut grips the threads with a nylon ring, and blue threadlocker bonds them. Over-tightening only strips the threads, and a metric bolt will not match a 1/4-20 thread, so it would not hold at all.</div>
+      </div>
+
+      <div class="q" data-correct="2">
+        <div class="qn">Question 5</div>
+        <div class="qt">You strip the hex socket on a screw because the Allen key was a hair too small and spun inside the head. What is the lesson for next time?</div>
+        <div class="opts">
+          <button class="opt">Use any key that almost fits, then push harder</button>
+          <button class="opt">Reach for pliers on socket-head cap screws from now on</button>
+          <button class="opt">Seat the correctly sized key fully before turning, since the wrong size rounds out the head</button>
+        </div>
+        <div class="explain">A driver one size off cannot grip and rounds the head into a stripped, hard-to-remove fastener. Socket-head cap screws take a hex key, so match the size and seat it fully before you turn.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a class="map" href="build.html">&larr; Back to the Fabricate course map</a>
+  </nav>
+
+</div>
+
+<footer>Fabricate &middot; Building an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong');} }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="build:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+</body></html>
