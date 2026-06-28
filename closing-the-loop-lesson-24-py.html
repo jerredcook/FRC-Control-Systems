@@ -279,6 +279,10 @@ volts = lqr.<span class="fn">calculate</span>(x, reference)[<span class="num">0<
     <div class="note teal">
       <div class="nh">Going further &middot; optional</div>
       <p>LQR hands you the best gains only if your A and B tables match the real machine, so the deeper skill is honesty about the model, not the math. If your model thinks the elevator is lighter than it really is, LQR confidently picks gains that are too gentle and the carriage comes up short, which is why SysId comes first: it measures the true A and B instead of letting you wish them. There is also a sibling for the other half of the problem, the Kalman filter, which does for noisy sensors what LQR does for control, blending a shaky measurement with the model's prediction the way you trust both your eyes and your sense of balance to stay upright on a bike. Worth chewing on: if you handed LQR a model that overstated the motor's strength, would it tend to overshoot or undershoot, and why?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">It would undershoot, ending up sluggish and short. If the model thinks the motor is stronger than it is, LQR expects a small voltage to produce a big response, so it picks low gains and commands too little effort for the real, weaker actuator. The carriage then accelerates less than planned and lags behind the target. This is the mirror image of the lesson's other case: understating motor strength makes LQR overcommand and risk overshoot, which is why the safe move is to measure A and B with SysId rather than guess them.</p>
+      </details>
     </div>
     <div class="note">
       <div class="nh">Go deeper: the controls bible</div>

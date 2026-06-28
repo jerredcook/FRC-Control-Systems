@@ -134,6 +134,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>There is an optional extra for teams who want even more vision power: an M.2 A+E slot on the board that accepts a Hailo-8 AI accelerator, a small chip built for machine-learning vision. Most teams will not need it, but it is there for advanced projects like training a robot to recognize game pieces by sight. Here is one to think about with a mentor: if vision already runs on the main board, what kinds of jobs would be worth adding a dedicated AI chip for, and which jobs are fine without it?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">The dividing line is whether the job needs a trained machine-learning model and needs it fast. Spotting a specific game piece in a cluttered scene, telling your robots from the other alliance, or sorting objects by shape or color are the kinds of learned tasks an AI chip handles well without slowing the main board. Jobs that follow fixed rules, like reading an AprilTag, finding a bright retroreflective target, or tracking a known color, run fine on the main board already and gain little from the extra chip. Most teams should start on the main board and only add the accelerator if a real task is too slow or too hard without it, and note this slot is an alpha detail to confirm against official sources.</p>
+      </details>
     </div>
 
     <div class="kicker">Checkpoint</div>

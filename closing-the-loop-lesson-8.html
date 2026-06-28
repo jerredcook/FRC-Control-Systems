@@ -308,6 +308,10 @@ motor.<span class="fn">setVoltage</span>( <input class="blank" data-ans="feedfor
     <div class="note teal">
       <div class="nh">Going further &middot; optional</div>
       <p>This whole course built the controller in volts inside your own periodic loop, but modern FRC motor controllers like a CTRE Kraken can run this exact recipe onboard the motor itself at roughly 1000 times a second, far faster than the 50 Hz robot loop - you hand it the feedforward gains and the profile constraints and it closes the loop locally. Here is the payoff question to carry forward: if a faster loop means less delay between sensing and acting, why does moving the control onto the motor let you safely turn the gains up higher than you ever could from the main robot code?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">High gains are only safe up to the point where the loop's own delay makes it overcorrect and oscillate. Running the loop on the motor at about 1000 Hz instead of 50 Hz shrinks the time between sensing and acting to almost nothing, so the controller catches an error while it is still small and eases off before it overshoots. With that delay nearly gone, the mechanism stays stable at gains that would have rung or gone unstable from the slower main-robot loop, which is the same delay-versus-gain tradeoff from the very first lesson.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

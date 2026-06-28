@@ -186,6 +186,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>The scheduler runs on the same 20 ms heartbeat as a bike wheel ticking past a sensor: steady, but not free. If one command's <span class="k">execute()</span> does something slow (a long loop, a blocking call), it eats into that 20 ms and the whole robot stutters, a real bug FRC teams hit called loop overrun. Worth pondering: how would you measure where the time goes, and why does that make heavy work like vision belong off the main thread?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">Time the loop itself. RobotPy's watchdog already prints a warning when a loop runs past 20 ms and lists which parts were slow, and you can wrap suspect sections with <span class="k">wpilib.Timer.getFPGATimestamp()</span> before and after to see where the milliseconds go. Vision belongs off the main thread because processing a camera frame can take tens of milliseconds, far more than the 20 ms budget, so running it inline would push every loop into overrun and make the whole robot stutter. Moving it to a separate thread or a coprocessor lets the main loop keep its steady heartbeat and read the latest result when it is ready.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

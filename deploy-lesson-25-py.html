@@ -189,6 +189,10 @@ self.odometry.<span class="fn">resetPosition</span>(self.gyro.<span class="fn">g
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>Notice the demo's estimate drifts even though the gyro is "perfect" here; in real life wheel slip during a hard collision is a big culprit, since a spinning-but-not-gripping wheel reports distance the robot never traveled. That is why pose estimators trust the gyro for heading far more than they trust the wheels, and why a SwerveDrive4PoseEstimator lets you weight each measurement by how much you believe it. Here is a question to sit with: if a defender slams your robot and a wheel skids, would your X-Y position or your heading drift more, and why?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">Your X-Y position drifts more, because position comes from the wheel distances, and a skidding wheel reports travel that never happened. Heading holds up far better because it comes from the gyro, which measures rotation directly and does not care whether the wheels are gripping. That is exactly why a pose estimator trusts the gyro for heading and treats wheel-based position as the weaker measurement, and why a vision fix off an AprilTag is so useful for pulling the X-Y estimate back after a hit.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

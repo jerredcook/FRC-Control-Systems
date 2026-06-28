@@ -206,6 +206,10 @@ self.drive.<span class="fn">arcadeDrive</span>(fwd, rot)</pre>
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>Try this in your own code: bind the right trigger to a "slow mode" that scales the whole drive output to maybe 40 percent, so a driver can creep up to a precise scoring spot. A CommandXboxController gives you trigger axes and button bindings like driver.rightBumper().whileTrue(...) to make that clean. Think about it like the low gear on a bike: same pedaling, finer control. Why might a separate slow-mode button feel better to a driver than relying on the squared curve near center alone?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">The squared curve only softens the stick near center, so to creep slowly the driver has to hold the stick in a tiny, twitchy range right by zero, which is hard to do precisely. A slow-mode button caps the top speed instead, so the driver gets the full sweep of the stick to control a small amount of output, like a bike's low gear giving fine control over the whole pedal stroke. It also gives a clear on or off feel the driver can trust under pressure, instead of guessing how hard to push.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

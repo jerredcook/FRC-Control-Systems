@@ -199,6 +199,10 @@ driver.<span class="fn">x</span>().<span class="fn">whileTrue</span>(drive.<span
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>A default command must permanently require its subsystem, so it should never finish on its own (if its <span class="k">isFinished()</span> returns true, it ends and the subsystem sits idle until you reschedule). Here is a sharp gotcha: a default command can be interrupted but resumes the instant the interrupter ends, so what happens if you accidentally give two subsystems the <em>same</em> command instance as their default? Try reasoning it out, then ask why each subsystem needs its own command object.</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">One command instance can only be scheduled once at a time, and it would now claim both subsystems as requirements, so the scheduler cannot let it be the default for two mechanisms at once. In practice WPILib rejects this: a command may only be the default for the subsystem it requires, and a single instance requiring two subsystems is not a valid default for either, so you get an error rather than two mechanisms quietly sharing one object. Each subsystem needs its own command object because a command carries its own state and its own requirement set, and two mechanisms running "their" default at the same time are genuinely two separate jobs. Build a fresh command per subsystem, or use a factory that returns a new one each call.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

@@ -140,6 +140,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>CAN is the shared wiring that lets the brain talk to every motor controller over one pair of wires, like a group chat where each device has its own name. CAN FD is a faster version of that chat, so more messages fit in the same time. With a quicker computer and quicker wiring, the robot can check its sensors and adjust more times each second. Here is one to think about: if your robot could correct its aim twice as often, where on your robot would that smoother, faster control help the most?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">Faster correction helps most where small errors grow quickly or where the target is moving. A spinning shooter wheel holding an exact speed, an arm balancing at a precise angle, or a drivetrain trying to track a moving goal all benefit because the robot catches and fixes drift before it becomes a miss. It matters far less for slow, forgiving jobs like a simple intake roller or a latch that only opens and closes, where checking twice as often does not change the result. The useful question for any mechanism is whether being a beat late actually costs you anything.</p>
+      </details>
     </div>
 
     <div class="kicker">Checkpoint</div>

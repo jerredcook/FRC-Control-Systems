@@ -192,6 +192,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>ReCalc is not the only tool that does this job. The JVN design calculator is a big spreadsheet that veteran teams use the same way, and the ILITE drivetrain simulator goes further by modeling how the robot accelerates and what the battery voltage does under load across a whole match. Flywheels have their own twist: more reduction spins up slower but recovers its speed faster after a shot, so a shooter that fires rapidly cares about recovery time as much as top speed. Here is one to take to a mentor: if your shooter has to fire five game pieces in a row, would you trade a little top speed for faster recovery between shots, and how would you check that in ReCalc?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">For five quick shots in a row, yes, trade a little top speed for faster recovery. Each shot dumps energy into the game piece and drops the wheel's speed, so what limits your fire rate is how fast the flywheel climbs back to its target between shots, not its absolute top speed. More reduction gives the motor more torque to re-accelerate the wheel, so it recovers quicker even though its ceiling is a touch lower. In ReCalc you check this on the flywheel page: it reports spin-up and recovery time, so you raise the ratio and watch recovery time fall, stopping once the top speed is still high enough to make the shot but the recovery is fast enough to keep up with five rapid shots.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

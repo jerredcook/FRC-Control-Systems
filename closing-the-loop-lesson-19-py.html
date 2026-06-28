@@ -268,6 +268,10 @@
     <div class="note teal">
       <div class="nh">Going further &middot; optional</div>
       <p>Step 5 says "validate," but a real elevator hides a trap the demo does not: it usually has two motors, a leader and a follower, bolted to the same carriage. If the follower is configured to spin the wrong direction it fights the leader instead of helping, and the giveaway is current, not motion. The carriage might still reach its target while both motors draw far more amps than they should, quietly cooking themselves. Something to ponder: which readout would catch a backwards follower first, position error or stator current, and why?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">Stator current catches it first. The leader can muscle a backward follower into submission, so position error may still look fine and the carriage reaches its target, hiding the fault from anyone watching motion alone. The cost shows up as current: both motors push hard against each other, so stator amps run far above what that move should ever need. Watch each motor's stator current side by side during validation, and a follower spiking opposite the leader, or both pinned near the limit on a light move, is the tell.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

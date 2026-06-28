@@ -196,6 +196,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>Here is a gotcha that bites teams: an object variable does not hold the object itself, it holds a reference to it, like a luggage tag pointing at one bag. So if you write <span class="k">Motor b = a;</span>, both names tag the <em>same</em> Motor, and changing <span class="k">b.canId</span> also changes <span class="k">a.canId</span>. Try it in the demo logic in your head, then look up "reference vs value" and "null pointer" to see why an untouched object reference starts out pointing at nothing.</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">Yes, after <span class="k">Motor b = a;</span> both names refer to the one Motor, so <span class="k">b.canId = 5</span> also shows up as <span class="k">a.canId</span>, because you copied the tag, not the bag. To get an independent Motor you build a new one with <span class="k">new Motor(...)</span> rather than assigning an existing reference. An object reference that was never pointed at anything holds <span class="k">null</span> (an empty tag), and calling a method on it throws a <span class="k">NullPointerException</span>, which is the runtime crash that "starts out pointing at nothing" warns about.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

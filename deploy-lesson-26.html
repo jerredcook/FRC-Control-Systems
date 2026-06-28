@@ -176,6 +176,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>A real gotcha: PathPlanner paths are saved relative to the blue alliance origin, so a path that scores perfectly from the blue side will drive off the field if you run the same code on red without flipping it. AutoBuilder takes a "should flip" supplier so one path works for both alliances by mirroring across the field. Try sketching it: if the field is a mirror down the middle, what happens to an x-coordinate and to a heading when you flip a path to the other alliance?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">Mirroring across the center of the field's length flips x to (field length minus x), so a point near the blue wall lands the same distance from the red wall, while y stays the same. A heading of theta becomes (180 degrees minus theta), since the direction is reflected left-to-right: straight downfield at 0 degrees flips to 180 degrees, and a heading already pointing across the field is barely changed. PathPlanner's "should flip" supplier does this math for you, so you draw the path once for blue and let it mirror for red.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

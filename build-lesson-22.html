@@ -154,6 +154,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>Design challenge: tipping is not only about the static base, it is about how fast you change speed. Software can cap how hard the drivetrain accelerates and brakes, a slew-rate limit, so a tall robot stays planted without you widening the frame at all. Where would you rather spend your weight budget: a wider, heavier base that never tips, or a slimmer one that leans on code to stay upright? Real teams weigh exactly that.</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">There is no single right answer, it depends on how tall and top-heavy the robot is and how much weight budget you have to spare. A wider, heavier base never tips and needs no clever code, but it eats weight you could have spent on mechanisms and it can make the robot slower to turn and easier to push around. A slimmer base with a slew-rate limit stays planted in normal driving and frees that weight, but it leans on the software being right, and a sensor fault, a hard collision, or a partly disabled robot can take the protection away. The common middle path is to set the wheelbase wide enough that the robot survives a bump on its own, then add the slew limit on top as insurance and to keep the ride smooth, rather than betting the whole match on either one alone.</p>
+      </details>
     </div>
 
   <section>

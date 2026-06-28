@@ -191,6 +191,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>A steering motor never needs to spin more than 90 degrees to reach any target: if a wheel is asked to point "backward," it is faster to flip the wheel 180 and run the drive motor in reverse instead. WPILib's SwerveModuleState.optimize() does exactly this trick. Try reasoning it out: if a module currently points at 10 degrees and you command 170 degrees, is it shorter to rotate the steering 160 degrees forward, or to rotate it 20 degrees the other way and drive backward?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">The 20 degree move is shorter, and it is what optimize() picks. Pointing at 170 degrees and pointing at minus 10 degrees push the wheel along the same line, only driven in opposite directions, so the module can reach minus 10 degrees (a 20 degree turn from 10) and run the drive motor backward to get the same motion. That beats swinging the steering a full 160 degrees, and because no flip is ever worse than 90 degrees of steering, the wheel snaps to its heading and starts pushing sooner.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

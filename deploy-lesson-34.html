@@ -198,6 +198,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>One test that passes proves almost nothing; the trick is choosing inputs that would actually catch a mistake. For the gear math, try adding tests for the tricky edges: zero rotations, a negative direction, a ratio that is not a whole number. A real gotcha lives in that tolerance argument too: assertEquals on doubles needs a small wiggle room (here 1e-6) because <span class="k">0.1 + 0.2</span> is not exactly <span class="k">0.3</span> in floating point. What happens to your test if you make that tolerance far too loose?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">A tolerance that is too loose makes the test pass even when the answer is wrong, so it stops catching the very bugs it exists to find. If you allow a wiggle of 5 on a gear ratio, a real error of 3 slips through and you ship broken math thinking it was tested. The goal is the smallest tolerance that still survives normal floating point noise, which is why <span class="k">1e-6</span> works: it forgives the tiny rounding in <span class="k">0.1 + 0.2</span> but rejects any real mistake. A test you cannot fail on purpose is not really testing anything.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

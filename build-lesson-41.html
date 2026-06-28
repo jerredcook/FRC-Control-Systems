@@ -180,6 +180,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>There is a wrinkle in that tidy "18 amp-hours" rating. The number is measured at a gentle, steady draw, but FRC batteries get hammered with short, hard bursts of hundreds of amps. The harder and faster you pull, the less total charge you actually get out, so a battery that should last on paper can fade early under brutal use. Engineers call this the Peukert effect, and in plain words it means heavy bursty draws "waste" capacity that a slow draw would have kept. Here is one to chew on with a mentor: if two robots both drain the same battery, but one sprints in hard stop-and-go bursts and the other cruises smoothly, which one runs out of usable battery first, and why?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">The hard stop-and-go sprinter runs out of usable battery first. That is the Peukert effect: the harder and faster you pull current, the less of the rated 18 amp-hours you actually get, so big bursts "waste" capacity that a gentle, steady draw would have kept. The bursts also drag the terminal voltage down hard each time, since the loss across the battery's internal resistance grows with current, so you hit the brownout floor sooner even with charge still left. The smooth cruiser pulls fewer peak amps, stays closer to the rated capacity, and holds its voltage up longer.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

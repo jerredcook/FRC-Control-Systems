@@ -172,6 +172,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>A software current limit trades a little top-end push for never browning out, and the trade is usually worth it. Here is why: a brownout can cascade. The voltage drops, motors cut, the load disappears for a blink so the voltage springs back, the motors fire again, the load slams back on, and the voltage sags right back down. The robot can stutter through several of these cycles in a single second, which feels like the robot is fighting you. A current limit smooths that out by never letting the draw spike high enough to start the cycle in the first place. Here is one to chew on with a mentor: if you lower a motor's current limit, you lose a little pushing force but gain consistency. How would you pick the limit for a drivetrain that has to push a heavy game piece without ever browning out?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">Work backward from the battery, not from the motor. Figure out the most current all your mechanisms can pull at once and the lowest voltage you are willing to sag to before the roboRIO browns out, then divide a safe total across the drive motors so the worst-case sum stays under what a healthy battery and the 120 amp breaker can hold. Start with a per-motor limit there, push a real heavy load, and watch the logged voltage and current; raise the limit until you have the push you need, then back off as soon as the voltage dips toward the brownout floor. The limit you keep is the highest one that still leaves margin under the worst-case stack, tested on a tired battery, not a fresh one.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

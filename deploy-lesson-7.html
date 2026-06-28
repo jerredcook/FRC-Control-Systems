@@ -180,6 +180,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>If you already code, try writing the deadband as a single line with the <strong>ternary</strong> operator: <span class="k">return Math.abs(x) &lt; tol ? 0.0 : x;</span>. Then chew on this: a hard cutoff makes the output jump from 0 straight to whatever x is, so the robot lurches the instant you cross the edge. How might you reshape the math so the output eases in smoothly from the deadband instead of snapping? Search "scaled deadband" to compare your idea.</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">The fix is to rescale the part of the range that is left after the deadband so the output starts at 0 right at the edge and reaches 1 at full stick, instead of jumping. For a positive <span class="k">x</span> past the deadband that is <span class="k">(x - tol) / (1 - tol)</span>, mirrored for negative <span class="k">x</span>, which is the "scaled deadband" you will find online. That removes the lurch: crossing the edge now gives a tiny output that grows smoothly. Many teams then square or cube that result for finer control near center, which is a separate shaping choice on top of the same idea.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

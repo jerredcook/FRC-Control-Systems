@@ -158,6 +158,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>Most reliable intakes do not stop at one roller, they hand the piece off to a second set of wheels deeper inside so it can never drift back out, a bit like a conveyor passing a box from one belt to the next. A design worth sketching: where does the piece go the instant after the roller grabs it, and what keeps it there while the robot drives and bumps around? Many teams also tune the two sides at slightly different speeds to spin a piece into the right orientation as it enters. Catching is easy, controlling what happens next is the real craft.</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">The instant after the first roller grabs the piece, it should be driven into a defined pocket where a hard stop or a backstop wall sets its final position, not left sitting against the spinning intake. A second set of wheels or a belt past the entry keeps a light squeeze on the piece so driving, bumps, and tipping cannot shake it loose, and a sensor at the stop tells the code the piece has fully seated so the rollers can ease off. Running the two sides at slightly different speeds works because a faster wheel on one edge spins the piece about its center, the way pushing one side of a coin on a table makes it rotate, which lets you square up an odd entry angle before the piece reaches the stop. Good looks like every piece ending in the same spot and orientation regardless of how it came in.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

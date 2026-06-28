@@ -258,6 +258,10 @@ cfg.Slot0.GravityType = <span class="ty">GravityTypeValue</span>.<input class="b
     <div class="note teal">
       <div class="nh">Going further &middot; optional</div>
       <p>The cosine trick assumes the heavy part of the arm sits at the far end, so the pull is strongest at horizontal. But put a real game piece in the gripper and the arm's effective weight, and the angle where its mass actually balances, both shift, which means the kG you measured empty is now slightly off. Top teams handle this by switching to a second gains slot, or scaling kG, the moment they pick up a piece. Worth chewing on: if your kG is tuned empty, would a loaded arm tend to sag below the target or drift above it, and at which angle would you notice it most?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">It sags below the target. A game piece adds weight the empty kG never accounted for, so the feedforward holds up less than gravity now pulls down, and the small kP cannot make up the rest, leaving the arm low. You notice it most near horizontal, because the gravity torque follows the cosine of the angle and peaks there, so the shortfall is largest. Near vertical the cosine term fades toward zero and the sag nearly disappears, which is the clue to bump kG, or switch to a loaded gains slot, the moment a piece is in hand.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

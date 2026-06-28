@@ -154,6 +154,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>The terminator at the end of the chain is not optional dressing, it is a small resistor that soaks up the signal so it does not echo back down the wire and scramble the messages, a bit like how a rope tied off at the end stops a wave from bouncing back at you. A bus actually wants exactly two terminators, one at each end, and many roboRIOs build one in, so the team only adds the far one. Each device also needs its own unique ID on the bus, and two devices sharing an ID is a classic head-scratcher. Why would the bus get confused if two motor controllers answered to the same number?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">The bus uses the ID as the address, so a command sent to a number is meant for exactly one device. If two controllers share an ID, both grab the same command and both try to report back on it, so their replies collide on the shared wire and the roboRIO gets garbled or contradictory data. You end up unable to tell which device you are really talking to, and one motor may move when you meant the other. The fix is to give every device on the bus its own unique ID before you rely on it.</p>
+      </details>
     </div>
 
   <section>

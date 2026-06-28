@@ -211,6 +211,10 @@ neo.<span class="fn">setVoltage</span>(<span class="num">6.0</span>)</pre>
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>There is a ceiling on <span class="k">VoltageOut</span>: you can ask for 6 volts all match, but only while the battery can actually supply it. Late in a match a sagging battery may sit near 10 volts under load, so a command for 11 saturates and you silently lose authority right when you need it. Worth pondering: how would you detect that you are commanding more than the battery can give, and why does that make a current limit on each motor part of keeping the whole robot's voltage healthy?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">Compare what you are asking for against what the bus is actually delivering. Read battery voltage from <span class="k">wpilib.RobotController.getBatteryVoltage()</span> (or the PDH/PDP), and if your commanded voltage is at or above it, you are saturated and cannot get what you asked for. A current limit helps because voltage sag is caused by current draw: every amp pulled through the battery's internal resistance drops the bus voltage for the whole robot. Capping each motor's current keeps any single mechanism, like a stalled arm or a slipping drivetrain, from yanking the bus down and starving everything else, including the roboRIO, which can brown out and reboot. So a per-motor current limit is really a way of protecting the shared voltage that every device depends on.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

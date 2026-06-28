@@ -149,6 +149,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>Splitting a system into a big general chip and a small dedicated one is a pattern you see everywhere, from game consoles to cars. The big chip is flexible but busy, the small chip is simple but rock-steady at one timing-critical job. Here is one to chew on with a mentor: if the brain chip is briefly busy crunching a camera frame, why is it a good thing that the RP2350, not the brain, is the part holding a motor's PWM signal steady?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">A PWM signal has to keep perfect timing, every pulse on schedule, or the motor twitches or stutters. The brain chip runs many things at once and can get tied up for a moment on a big job like a camera frame, so its timing is not always exact to the microsecond. The small dedicated chip does almost nothing else, so it can hold that steady beat no matter how busy the brain gets. Handing the timing-critical job to the part that is never distracted keeps the motor smooth, which is the whole reason for splitting the work this way.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

@@ -217,6 +217,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>If you already code, predict each result before you run it: <span class="k">0.1 + 0.2 == 0.3</span> is actually false, because <span class="k">double</span> stores numbers in binary and cannot hold 0.1 exactly, so tiny rounding creeps in. This is why robot code compares decimals with a tolerance (is it within a small epsilon?) instead of asking for an exact match. Look up "floating point rounding" and try printing <span class="k">0.1 + 0.2</span> to see the leftover digits.</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">Correct, it is <span class="k">false</span>. A <span class="k">double</span> stores numbers in base 2, and 0.1, 0.2, and 0.3 have no exact finite binary form, so each is rounded to the nearest value the type can hold. The rounded 0.1 plus the rounded 0.2 lands slightly off from the rounded 0.3, and printing <span class="k">0.1 + 0.2</span> shows the leftover digits near the end. That is why robot code tests <span class="k">Math.abs(a - b) &lt; epsilon</span> instead of <span class="k">a == b</span>: real sensor values rarely match a target to the last bit.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

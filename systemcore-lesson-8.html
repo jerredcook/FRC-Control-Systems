@@ -161,6 +161,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>On a Raspberry Pi you image the memory card once and then reuse that operating system for many different programs. A robot is similar: imaging is the rare setup step, while deploying is the everyday loop you run dozens of times during a build session. Here is one to think through with a mentor: if imaging is the slow, occasional step and deploying is the fast, frequent one, how would you organize a competition day so a sudden code fix takes seconds, not a full reset of the board?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">The plan is to get all the slow setup out of the way before competition so the only thing left during the day is the fast step. Image the board and confirm it boots and runs known-good code the night before or first thing in the morning, while there is time to fix problems. Then during matches a code change is only a quick deploy, which takes seconds, plus a fast test. Keeping a copy of the last working code on hand also means that if a new change misbehaves, you redeploy the known-good version instead of re-imaging the whole board under pressure.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

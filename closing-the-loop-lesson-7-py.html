@@ -318,6 +318,10 @@ ks = <input class="blank" data-ans="(up_intercept-down_intercept)/2|(up_intercep
     <div class="note teal">
       <div class="nh">Going further &middot; optional</div>
       <p>Fitting a line by eye works, but the analyzer does it with least squares: it picks the slope and intercept that make the total of all the squared up-and-down distances from the dots to the line as small as possible. Squaring is the clever part - it punishes one wildly-off point far more than several slightly-off ones, which is why a single bad data sample can drag your whole fit. Try this: why would the same tests run on a worn-out chain or a cold battery hand you slightly different gains each time, and what does that tell you about how often a competitive team should re-characterize a mechanism?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">Each run samples a slightly different machine: a worn chain adds friction and slack, a cold battery sags more under load, so the voltage-versus-speed dots land in new spots and least squares hands back slightly different kS, kV, and kA every time. That means the gains are a snapshot of the hardware on that day, not fixed truths. A competitive team should re-characterize after any big mechanical change, such as a new gearbox or a rebuilt mechanism, and is wise to leave a little tuning margin and recheck across a season as parts wear in and conditions shift.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

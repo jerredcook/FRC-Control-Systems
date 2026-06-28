@@ -157,6 +157,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>Building subsystems in parallel only saves time if you find the critical path, the longest chain of tasks that have to happen in order. Practice cannot start until the robot is integrated, integration cannot start until the slowest subsystem is done, so that slowest subsystem secretly sets your whole schedule. Pour extra people onto it and start the others a little later if you must. It is like a group bike ride where the whole team only moves as fast as the slowest rider: speeding up everyone else does not help until you help them. Which subsystem is on your critical path, and what would it take to shorten it?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">The answer depends on your robot, but the critical path is usually the most complex subsystem or the one whose parts arrive last, often the drivetrain, since nothing can be integrated or driven until it rolls. To find it, list each subsystem with how long it takes and what it waits on, then trace the longest chain that has to happen in order. You shorten it by attacking that chain only: order its parts first, put your most experienced people on it, simplify its design, or run a fallback version in parallel. Speeding up anything off the critical path buys you nothing.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

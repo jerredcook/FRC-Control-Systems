@@ -194,6 +194,10 @@ git tag districts-day1            <span class="cm"># mark the exact code that ra
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>A tag marks a moment in time, but a branch marks a line of work. Once a robot is at competition, try keeping a stable "competition" branch that only ever gets tested fixes, while bigger experiments live on their own branch you can merge in later. That way a half-finished idea can never accidentally ride along on the build you deploy at the field. Question to chew on: if a fix you pushed between matches makes things worse, what is the fastest way back to the exact code that worked, and how does tagging make that a ten-second job instead of a panic?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">If you tagged the build that worked, for example <span class="k">qual-12-good</span>, getting back is one command: check out that tag and redeploy, and you are running the exact code from that moment. Without a tag you are scrolling through commit history under match pressure trying to guess which one was the good one, which is where mistakes happen. The tag is a named bookmark you made when you knew the code was solid, so recovery is a lookup instead of a search. The habit that makes this work is tagging the build right after each match it performed well, while you still know it was good.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

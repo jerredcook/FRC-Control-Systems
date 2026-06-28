@@ -161,6 +161,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>The same speed-versus-force trade is hiding in your gearbox choice too, so you get to pick where the multiplication happens. A 3-stage cascade triples carriage speed but the motor must supply triple the force, so you might add gear reduction to get that force back, which slows it down again. Try reasoning through it: if you need a tall reach quickly, is it smarter to add an elevator stage or to gear the motor for more pulling power? Often the cleanest answer is a 2-stage cascade with a sensible ratio, not the most aggressive rigging you can build.</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">Adding cascade stages and adding gear reduction push the same trade in opposite directions, so the smart move is to decide your needed height first, then size the ratio to that height. Stages buy you reach and carriage speed but multiply the force the motor must hold, while reduction buys back force and holding power at the cost of speed. Pick the fewest stages that physically reach the target, since each extra stage adds rigging, friction, and a heavier moving mass, then gear the motor so it can both lift the load and stop it without stalling or slamming. A 2-stage cascade with a moderate ratio usually wins because it reaches high enough, keeps the carriage controllable, and leaves margin so the motor is not pinned at its limit the whole match.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

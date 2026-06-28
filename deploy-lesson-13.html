@@ -203,6 +203,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>Here is a gotcha that bites teams: an inline factory like <span class="k">runOnce(...)</span> or <span class="k">run(...)</span> built directly on a subsystem usually adds that subsystem as a requirement for you, but a bare <span class="k">Commands.run(() -&gt; ...)</span> with no subsystem requires nothing, so two of them can quietly fight over the same motor. Try writing the same simple action two ways and ask: which one did the scheduler protect, and how would you confirm a command's requirements before trusting it?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">The scheduler protected the one built on the subsystem, like <span class="k">subsystem.run(...)</span>, because that factory adds the subsystem as a requirement, so the scheduler knows to interrupt any other command that needs it. The bare <span class="k">Commands.run(() -&gt; ...)</span> declares no requirement, so the scheduler sees no conflict and lets two of them run at once, both writing to the same motor with the last write winning. To confirm a command's requirements before trusting it, call <span class="k">command.getRequirements()</span> and check the subsystem is in the set, or pass the subsystem explicitly as the second argument to <span class="k">Commands.run(...)</span> so the requirement is never left out by accident.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

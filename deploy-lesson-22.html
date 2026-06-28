@@ -233,6 +233,10 @@ rpmPub.<span class="fn">set</span>(shooter.<span class="fn">getRPM</span>());</p
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>A common trap: a value you putNumber() every loop can NOT be tuned from the dashboard, because your code overwrites whatever you typed on the very next loop. For a live-tunable number, publish it once with a default and only read it back, or use WPILib's Preferences, which remembers the value across reboots. Try wiring up a tunable kP that survives a power cycle. Why would a number that resets to its default every time you restart the robot be a headache on competition day?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">On competition day the robot gets power-cycled often, between matches and after fixes, and a value that resets each reboot means every careful tuning change is lost the moment the robot restarts. You would have to retype your kP into the dashboard before every match, which is slow and easy to forget under time pressure, and forgetting it sends the robot out with the wrong gains. Preferences solves this by saving the value to the roboRIO so it survives a power cycle and loads automatically.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

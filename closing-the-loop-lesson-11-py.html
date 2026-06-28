@@ -266,6 +266,10 @@
     <div class="note teal">
       <div class="nh">Going further &middot; optional</div>
       <p>The D term works by comparing this reading to the last one, like noticing how much closer the wall got between two glances. If your sensor reading is noisy, those tiny jitters between beats look like fast motion to D, and it can fight back hard and make the motor buzz. That is why teams keep kD modest and clean up the measurement first. Try this thought experiment: if every reading were perfect and smooth, would a big kD still cause buzzing?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">With a truly clean reading the noise-driven buzz goes away, because D only sees real motion instead of jitter. But a very large kD can still misbehave: it reacts to the velocity it estimates from one beat to the next, and if it is large enough it can over-correct and oscillate even on a smooth signal. So clean measurement removes the noise problem, and a sane kD removes the rest.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

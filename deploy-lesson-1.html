@@ -209,6 +209,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>The periodic methods run every 20 ms, which gives a budget of 20 ms per loop. What do you think happens if your code inside one loop takes longer than 20 ms to finish, say a slow calculation or a print statement in a tight loop? Look up "loop overrun" and you will find the warning real teams see when their robot starts to stutter.</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">If one loop runs long, the next one starts late, so the whole schedule slips behind. WPILib prints a "Loop overrun" warning and your control feels laggy or stuttery because sensor reads and motor updates happen less often than the 20 ms you planned for. The code does not crash, it falls behind, which is why you keep each loop fast: read sensors, decide, set outputs, and push slow or blocking work elsewhere.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

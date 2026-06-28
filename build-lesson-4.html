@@ -158,6 +158,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>Real designs care about which way the tolerances stack. If you bolt five spacers in a row and each one can be 0.005 inch over or under, the whole stack can drift by much more than one part's worth, and suddenly nothing lines up. Try this design challenge: think of a way to lay out a row of holes so the error does not pile up the same direction every time, for example measuring every hole from one shared edge instead of measuring each from the last hole you drilled.</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">The hint in the question is the real fix: measure every hole from one shared edge or datum, not from the hole before it. When you chain measurements hole to hole, each small error carries forward and adds onto the next, so the last hole can be way off. Measuring each hole from the same starting edge keeps every error small and independent instead of letting them stack the same direction. CAD and a drill press with a fence do this naturally, since each position is set from a fixed zero.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

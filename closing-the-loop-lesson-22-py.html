@@ -230,6 +230,10 @@ states = self.kinematics.<span class="fn">toSwerveModuleStates</span>(speeds)
     <div class="note teal">
       <div class="nh">Going further &middot; optional</div>
       <p>The optimize() step does more than save time, it dodges a genuine trap. Without it, a module asked to swing from 179 degrees to -179 might take the long way around, a near full turn, when a 2 degree nudge plus reversing the drive wheel gets there instantly. Picture steering a bike: you would never spin the bars almost all the way around when a flick the other way points you the same direction. Worth chewing on: across a fast figure-eight, which costs you more lost traction, the steer motors hunting the long way around, or the drive wheels briefly running backward?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">The steer hunting the long way costs you more. While a module slews a big angle, the wheel is pointed wrong for that whole sweep, so it scrubs sideways across the floor and the contact patch fights the direction the robot is actually moving, which is exactly where traction bleeds away. Reversing the drive wheel costs almost nothing by comparison: the wheel still rolls in line with travel, it only spins the other way, and optimize() pairs that small reversal with the short steer move. In a fast figure-eight with constant direction changes, that saved scrub is the difference between holding the floor and sliding.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

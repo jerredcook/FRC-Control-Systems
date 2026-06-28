@@ -156,6 +156,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>The PDH does more than split power, it can report how many amps each branch is pulling back to your code over the data bus. That turns the power system into a sensor: software can watch a motor's current and notice it is climbing, which usually means the mechanism is jammed or stalling, and back off before anything overheats. This is real motor protection that goes beyond the breaker, and it is safer because it acts in software well before a fuse ever needs to blow. What might a sudden current spike on the intake branch be telling you?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">A sudden current spike means the intake motor is being forced to work much harder than normal, which usually means it is jammed or stalled. The most common cause is a game piece stuck or wedged so the rollers cannot turn, and a fully blocked motor pulls many times its running draw, which is exactly what the spike shows. Your code can watch for that and react, for example stop or reverse the intake to clear the jam, before the motor heats up or the breaker trips. A spike could also come from a mechanical bind or a piece of debris, so it is a cue to look, not a guaranteed diagnosis.</p>
+      </details>
     </div>
 
   <section>

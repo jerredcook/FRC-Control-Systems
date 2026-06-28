@@ -192,6 +192,10 @@ pose = self.estimator.<span class="fn">getEstimatedPosition</span>()</pre>
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>The trust dials (standard deviations) do not have to be fixed. A real gotcha that bites teams: a tag seen from far away, or at a steep angle, gives a much shakier pose than one seen up close and head-on. Try scaling your vision trust by distance or by how many tags are in view, trusting a close two-tag fix a lot and a single faraway tag a little. What would go wrong if you fed in a pose from a tag the camera only half-saw at the edge of the frame?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">A tag cut off or smeared at the edge of the frame gives a corner solve that can be badly wrong, so the pose it reports may jump several feet from where the robot really is. If you feed that into the estimator with normal trust, it yanks your blended pose toward the bad reading, and the whole match your odometry fights a lie. The fix is to reject suspect frames before they go in: skip tags below a size or ambiguity threshold, and widen the standard deviations so a shaky fix barely nudges the estimate. Trash in with high trust is worse than no vision at all.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

@@ -205,6 +205,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>Try misspelling the overridden method, like <span class="k">periodc()</span>, and see what happens. Python will not warn you, because to it that is a brand-new method that nothing calls, so your code "runs" but the scheduler never fires your control loop. That silent failure is sneaky. One guard against it: add the <span class="k">@override</span> decorator (from <span class="k">typing</span>), which lets a type checker like mypy flag a name that matches no parent method. Worth pondering: why is catching that mistake before you deploy so much kinder than discovering it on the field?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">Python will not flag a misspelled override on its own, so the safety net is a type checker: adding <span class="k">@override</span> from <span class="k">typing</span> lets a tool like mypy report a name that matches no parent method when you run it at your desk. Caught there, it names the file and line and costs you a quick rename. The same mistake found on the field shows up as a robot that behaves wrong with no obvious cause, under match pressure, where you cannot calmly read the code or attach tools. The point is to make a silent "this method is never called" bug loud and early, when fixing it is cheap.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

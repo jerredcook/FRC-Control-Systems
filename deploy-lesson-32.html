@@ -188,6 +188,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>Logging is not free: every signal you record takes space and a little time on the roboRIO, and flooding NetworkTables with too many fast updates can actually slow your loop. Try logging at a sensible rate and being picky about what truly helps you debug. A real gotcha to think about: when AdvantageScope shows the shooter dipping right as the battery sags, which one caused which? Logging the timestamps carefully is what lets you tell cause from coincidence.</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">Timestamps tell you the order of events, and a cause has to come before its effect. If the voltage sag starts a few milliseconds before the shooter speed dips, the battery is the likely cause; if the dip comes first, something else is dragging both down. Two signals moving together is correlation, and that alone does not prove one caused the other, so line them up on the same time axis and look at which moved first. Be careful that all your signals share one clock, because logging from different sources at different rates can fake a lead that is not real.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

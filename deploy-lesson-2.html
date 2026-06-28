@@ -170,6 +170,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>Try this: open the generated <span class="k">build.gradle</span> and find the line that sets <span class="k">def includeDesktopSupport</span>. Flipping it to true lets you run the robot code in simulation on your laptop with no roboRIO attached, which is how you can test logic at home. Skim the comments in that file and see how much of the build you can follow.</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">Setting <span class="k">def includeDesktopSupport = true</span> tells Gradle to also build the desktop versions of the WPILib libraries, so you can run <span class="k">simulateJava</span> and exercise your logic without a roboRIO. The cost is that desktop builds are not what the robot runs, so a few hardware-only pieces will not behave in sim, and you still deploy the normal build to the robot. The wider lesson of <span class="k">build.gradle</span> is that the project is not magic: it lists the WPILib and vendor dependencies, the deploy target, and the tasks (build, deploy, simulate) the toolchain runs for you.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

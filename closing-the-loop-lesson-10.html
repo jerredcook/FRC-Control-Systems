@@ -253,6 +253,10 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(cf
     <div class="note teal">
       <div class="nh">Going further &middot; optional</div>
       <p>A real edge case: a winch that wraps cable in layers, like wrapping string around a pencil until it gets fatter. As cable piles up on the drum, the effective diameter grows, so one turn pays out more cable near the top than at the bottom and a single fixed circumference is slightly wrong. Most teams accept the small error, but some model the changing radius. Can you reason out whether this makes the elevator read a bit high or a bit low as it climbs?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">It reads a bit low as it climbs. The math multiplies turns by a fixed circumference, but once cable layers build up the drum is fatter than that, so each turn actually pays out more cable than the formula credits. The true height climbs faster than the computed number, so the reading lags behind the real position. The fix, if you care about the small error, is to model the radius growing with the number of wraps.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

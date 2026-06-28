@@ -183,6 +183,10 @@ drive.<span class="fn">withTimeout</span>(<span class="num">3.0</span>)   <span 
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>Compositions follow the same one-owner rule as single commands: the group inherits the requirements of everything inside it. That means you cannot put two commands that both need the <em>same</em> subsystem inside one <span class="k">parallel</span>, WPILib will throw an error when you build it, because they would fight over that mechanism. Try to picture a routine where this rule saves you, and ask: how would you run "drive while also driving slowly" if both truly need the drivetrain?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">You do not run them in parallel, because two commands cannot both own the drivetrain at the same instant, and trying is what the build-time error is protecting you from. The fix is to make it one command that produces a single output, so instead of "drive" and "drive slowly" fighting, you have one drive command whose speed is scaled down, maybe by reading a slow-mode trigger and multiplying the joystick value. If the two behaviors are meant to happen one after another, a <span class="k">sequence</span> works fine because only one is active at a time. The rule saves you from the silent bug where two commands send conflicting outputs to the same motor and the last write quietly wins.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

@@ -196,6 +196,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>A model is a guess about reality, so it is never perfect. The numbers you pass FlywheelSim, the rotor inertia and the gearing, are estimates, and if they are off your sim will spin up faster or slower than the real flywheel. Try tuning your gains in sim, then comparing the real spin-up curve from your logs and adjusting the model until they match. Question to chew on: if your auto works flawlessly in sim but drifts on the real robot, is the bug in your code or in your model, and how would you tell?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">It is almost always the model, because your code ran the exact same way in both places; what changed is the world it is running against. Sim leaves out real effects like carpet friction, wheel slip, battery sag, and backlash, so a path that is perfect on idealized physics drifts once those are present. To tell them apart, log the same signals on both and overlay them: if the commands match but the measured motion does not, the model is too clean, and if the commands themselves differ, the bug is in your code. Sim proves the logic is sound, the real robot proves the model was honest.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

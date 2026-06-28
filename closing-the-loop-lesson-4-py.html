@@ -332,6 +332,10 @@ self.motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="out
     <div class="note teal">
       <div class="nh">Going further &middot; optional</div>
       <p>The lesson fixes noisy-derivative pain by keeping kD modest and filtering, but there is a sharper way to think about it. A raw derivative trusts the very newest sensor reading the most, which is also the jitteriest, so a common trick is to blend in older readings with a low-pass filter on the D term. That smoothing buys you calm at a price: it adds a little lag, so the brake reacts a beat late. Try sketching why every filter that quiets noise also slows your reaction - that tradeoff between smoothness and responsiveness shows up everywhere in control.</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">A filter calms a noisy signal by leaning on past readings, like averaging the last several samples instead of trusting the newest one. But a real, sudden change also lives in that newest reading, so blending in the older values waters it down and the response shows up a beat late. You cannot tell a spike of noise from a true fast move without waiting to see more data, and that waiting is the lag, so more smoothing always costs you some quickness.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

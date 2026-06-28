@@ -183,6 +183,10 @@ driver.<span class="fn">rightBumper</span>().<span class="fn">whileTrue</span>(d
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>Because a Trigger is any boolean, you can combine them with <span class="k">and</span>, <span class="k">or</span>, and <span class="k">negate</span>, the same way you join two conditions in an if-statement. Try binding an action to "X is held <em>and</em> the intake is loaded": <span class="k">driver.x().and(intake::hasGamePiece).onTrue(score())</span>. Question to chew on: a press-and-release happens in an instant, so how does the scheduler notice the exact loop a Trigger flips from false to true, and what would <span class="k">whileTrue</span> do if the condition never goes false?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">Each loop the scheduler reads every bound Trigger and remembers its previous value, so it can compare now against last loop. <span class="k">onTrue</span> fires on the loop where the stored value was false and the new value is true, which is the rising edge, so even a quick press is caught as long as the button is down during one of the 20 ms samples. <span class="k">whileTrue</span> schedules its command when the Trigger becomes true and cancels it when the Trigger becomes false, so if the condition never goes back to false, the command keeps running until something else interrupts it or it finishes on its own. That is why a <span class="k">whileTrue</span> command should be one that ends cleanly or is safe to run continuously.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

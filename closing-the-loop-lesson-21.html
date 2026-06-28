@@ -302,6 +302,10 @@ cfg.Slot0.kP = <span class="num">5.0</span>;    <span class="cm">// amps per rps
     <div class="note teal">
       <div class="nh">Going further &middot; optional</div>
       <p>There is a sneaky reason a flywheel recovers faster than your gut expects: the same spinning mass that makes it slow to start also makes it a tiny energy bank. Right after a shot, the wheel still carries most of its stored spin, so feedforward plus a gentle kP only has to top off a small dip rather than rebuild from zero, like a heavy bike flywheel that barely flinches when you tap the brake. That points at a real design tension: a heavier wheel dips less per shot but takes longer to spin up the first time. If your match plan is rapid-fire scoring, would you reach for a heavier wheel or a lighter one, and what does that cost you?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">For rapid fire, lean heavier. The extra inertia means each shot pulls only a small dip out of the wheel, so it holds speed shot to shot and you wait less between them. The cost is the first spin-up: more inertia takes longer and more energy to reach speed, so the wheel must be running before the first shot, and the same inertia makes any commanded speed change sluggish. The usual compromise is enough mass to ride through a burst plus strong feedforward so recovery rides the stored spin rather than rebuilding it.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

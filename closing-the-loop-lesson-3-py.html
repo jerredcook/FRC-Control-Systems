@@ -323,6 +323,10 @@ self.motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="out
     <div class="note teal">
       <div class="nh">Going further &middot; optional</div>
       <p>Clamping and iZone are the blunt fixes for windup, but there is a cleverer one used in real controllers called back-calculation: when the motor command hits its voltage limit and saturates, you feed the difference between what you asked for and what the motor could actually deliver back into the integrator to bleed it down, so the memory never charges up on a push the hardware refused to make. Here is the question to chew on: why is windup fundamentally a problem about the gap between the command you send and the command the motor can physically obey, rather than a problem with the integral itself?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">While the motor is pinned at its voltage limit, asking for more does nothing, yet the integrator keeps piling up error as if the extra command were helping. That stored memory is built from a command the hardware never delivered, so it has to be unwound before the output can come back down, which shows up as overshoot. The integral itself is doing exactly its job; the trouble is only the gap between what you asked for and what the motor could physically do, which is why every fix watches that gap rather than the integral alone.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

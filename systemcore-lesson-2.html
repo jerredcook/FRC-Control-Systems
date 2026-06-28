@@ -140,6 +140,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>A graphics chip, a GPU, was built for drawing pictures, but it is also great at doing the same small math on thousands of pixels at once, which is exactly what reading a camera image needs. That is why SystemCore leans on its GPU for vision. Here is one to chew on: if the same chip can crunch many pixels in parallel, what other robot job that involves a lot of repeated math might you hand to it instead of the main CPU?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">The key idea is that GPUs shine when the same operation runs over and over on lots of separate pieces of data at once. So good candidates are jobs with that shape: machine-learning models that recognize objects, blending readings from several cameras at the same time, or sorting through many possible robot paths to pick a good one. Jobs that are mostly one decision at a time, like reading a single sensor or running one control loop, are usually better left on the CPU because the GPU's parallel strength does not help there.</p>
+      </details>
     </div>
 
     <div class="kicker">Checkpoint</div>

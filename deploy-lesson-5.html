@@ -178,6 +178,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>Open the Phoenix 6 JSON in <span class="k">vendordeps/</span> and find the <span class="k">version</span> field. That number pins which release of the library your build pulls in, and it must line up with the firmware flashed on the device, much like a bike chain that has to match the cassette to mesh. Read about why mismatched vendordep and firmware versions are a classic source of "it worked yesterday" bugs, and how teams keep everyone on the same version.</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">The library on your laptop and the firmware on the device have to speak the same protocol, and a version bump can change what calls or fields exist on each side. If one laptop updates the vendordep but the device firmware is older (or the reverse), calls can fail, behave oddly, or the device may not respond, even though nothing in your own code changed. Teams avoid this by committing the <span class="k">vendordeps/</span> JSON to git so everyone pulls the same version, and by flashing all devices to the firmware that matches it.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

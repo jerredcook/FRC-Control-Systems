@@ -215,6 +215,10 @@
     <div class="note teal">
       <div class="nh">Going further &middot; optional</div>
       <p>The motor runs its loop at 1 kHz, but a status signal traveling back over the CAN bus only updates as fast as that wire allows, by default around 50 to 100 times a second, like a fast worker whose progress reports you only read once in a while. So the onboard loop is genuinely quick even though the number your roboRIO sees refreshes slower. For tighter timing, teams raise the update rate or move devices onto a faster CANivore bus. Worth pondering: why is it fine for the control to be faster than what you can watch?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">Because the onboard loop does not wait on the number you see. It runs on the motor's own local measurement at full 1 kHz, so it reacts instantly to what the mechanism is actually doing. The slower status frame is only there for your roboRIO to log, display, or make higher level decisions, and those jobs are fine with a 50 to 100 Hz snapshot. The control quality comes from the fast local loop, not from how often you read it back.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

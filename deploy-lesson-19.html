@@ -185,6 +185,10 @@ gyro.<span class="fn">setYaw</span>(<span class="num">0</span>);
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>Most IMUs read yaw, pitch, and roll. After zeroing on flat ground, try logging pitch and roll to NetworkTables, then drive partway up a ramp and watch them change. Teams use that exact reading to auto-balance on a charge station: feed the tilt angle into a controller that drives the robot until the angle returns to zero. What heading, pitch, or roll value would mean "perfectly level"?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">Level means pitch and roll are both 0, since those measure tilt away from flat. Heading (yaw) does not matter for level, because the robot can sit flat at any heading by spinning in place on flat ground. So an auto-balance controller drives pitch and roll back toward 0, and a small deadband of a degree or two around 0 keeps the robot from twitching back and forth forever once it is close enough.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

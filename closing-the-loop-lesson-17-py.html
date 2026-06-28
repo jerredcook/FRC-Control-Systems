@@ -255,6 +255,10 @@ motor.<span class="fn">set_control</span>(self.request.<span class="fn">with_pos
     <div class="note teal">
       <div class="nh">Going further &middot; optional</div>
       <p>Plain Motion Magic asks you to guess a cruise velocity, but a heavy mechanism can never actually reach the speed you picked, so it spends the whole move accelerating and the profile is a fib. Motion Magic Expo skips the guess: from kV and kA it predicts the real speed-vs-time curve, the way a loaded bike trailer eases toward its own top speed instead of a number you wrote down. Try this thought experiment: if you doubled the load on the carriage, which one would need you to re-pick the cruise velocity, and which would adjust on its own?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">Plain Motion Magic is the one you have to re-pick. Doubling the load roughly doubles kA, so the mechanism is now even slower to reach speed, and the cruise velocity you hand-picked is even more of a fib than before, so you would lower it by hand. Expo adjusts on its own once kA reflects the heavier load, because it builds the velocity curve straight from kV and kA instead of from a number you typed. The catch is that Expo only stays honest if those gains are current, so re-characterize after a big mass change.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

@@ -155,6 +155,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>The real power of CAD shows up when you drive a sketch with named variables instead of fixed numbers. Define one variable like plate thickness or hole spacing, then reuse it everywhere, change it once and every part that depends on it updates together. Onshape also keeps a full version history, so your team can branch a design, try a risky idea, and roll back if it does not work, the same safety net that version control gives the programmers in the Deploy course. Try building a bracket whose hole pattern is driven by a single spacing variable and watch what happens when you change it.</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">When the hole pattern is driven by one spacing variable, changing that number makes every hole move at once and stay evenly spaced, instead of you dragging each hole by hand and hoping they line up. The big win is that the part now matches a real standard, like the 1 inch hole pattern on common FRC extrusion, by setting one variable, and if that standard changes you update one number rather than rebuilding the sketch. The lesson to take away is to design with the few numbers that actually matter as named variables, so your CAD bends to fit the robot instead of locking you into fixed dimensions you have to redraw later.</p>
+      </details>
     </div>
     <div class="note indigo">
       <div class="nh">Learn it for real: FRCDesign.org</div>

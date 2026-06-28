@@ -181,6 +181,10 @@ autos.<span class="fn">add</span>(scoreThenLeave);              <span class="cm"
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>A plain enum can carry data too. Try giving your <span class="k">State</span> a constructor field, like a target shooter RPM for each state (<span class="k">SHOOTING(60)</span>, <span class="k">IDLE(0)</span>), so <span class="k">state.rpm</span> reads the number instead of a switch. Question to chew on: once states hold their own values, what work is left for the switch to do, and could a Map from state to action replace it entirely?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">Once each state carries its own number, the switch is left only with behavior that cannot live on the enum itself, such as calling a motor method or starting a command. If every branch only reads a value, you do not need the switch at all, because <span class="k">state.rpm</span> already gives you the answer. A Map from state to action (an <span class="k">EnumMap</span>) can replace a switch when each state maps to one stored thing, like a <span class="k">Runnable</span> or a setpoint, and it stays in sync because adding a state forces you to add its entry. The switch earns its place when the branches do genuinely different work rather than look up one value.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

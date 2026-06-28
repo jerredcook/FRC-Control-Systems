@@ -198,6 +198,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>The plain arcade mixing can clip: command full forward plus full turn and left = 1 + 1 = 2, which a motor can not do, so it saturates at 1 and the robot turns less than you asked. WPILib's DifferentialDrive scales the two sides down together to preserve the turn, much like the desaturate step you will meet in swerve. Try logging the raw left and right values before clamping and watch them blow past 1. What would happen to the robot's path if you let one side clip to 1 while the other stayed in range?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">Clipping only one side changes the ratio between the two sides, and that ratio is what sets how sharply the robot turns. So the robot would turn less than you asked, because the side that wanted more than 1 gets held back while the other side keeps its value, shrinking the difference between them. Desaturating instead scales both sides down by the same factor, which keeps their ratio and preserves the turn, only at a lower overall speed.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

@@ -161,6 +161,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>16-bit axis resolution means each joystick reading lands in one of roughly 65,000 steps instead of 256. For a slow, precise approach to a game piece, that finer reading lets your code tell tiny stick nudges apart that the old 8-bit reading would have lumped together. Here is one to think through with a mentor: where on your robot would smoother, finer joystick control actually change how the driver plays, and where would it make no difference at all?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">Finer readings matter where the driver makes small, careful moves and a tiny difference shows up in the result. Lining up gently on a game piece, creeping the last inch into a scoring spot, or feathering an arm to a delicate angle all reward being able to tell small nudges apart. It makes no real difference for full-speed driving across the field or for controls that only go fully on or fully off, like a button-style intake, because there you are using the big end of the stick, not the fine middle. The useful test is whether the driver ever holds the stick slightly off center on purpose.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

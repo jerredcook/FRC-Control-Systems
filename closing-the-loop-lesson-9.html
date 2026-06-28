@@ -287,6 +287,10 @@
     <div class="note teal">
       <div class="nh">Going further &middot; optional</div>
       <p>Here is a question to chew on: what happens if your periodic() takes longer than 20 ms to finish, the way a bike chain that skips means you miss a pedal stroke? The roboRIO cannot start the next beat until this one ends, so a slow loop quietly falls behind and your control gets choppy. This is called a loop overrun, and real teams watch for the warning it prints. Try to picture which line in a periodic() would be the slowest, and you have found the first thing to optimize.</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">The slow lines are almost always the ones that wait on something outside the code: reading a sensor over a slow bus, asking a vision camera or the network for an answer, or printing to the console with System.out.println. Those block until the answer comes back, so the loop cannot finish until they do. The fixes are to read those values less often, cache them, or hand the heavy work to a separate thread, and to keep logging out of the hot path.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

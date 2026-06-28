@@ -186,6 +186,10 @@ speeds = {<span class="str">"left"</span>: <span class="num">0.5</span>, <span c
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>A Python enum can carry data too. Try giving each <span class="k">State</span> member a value, like a target shooter RPM (<span class="k">SHOOTING = 60</span>, <span class="k">IDLE = 0</span>), so <span class="k">state.value</span> reads the number instead of a match. Question to chew on: once states hold their own values, what work is left for the match to do, and could a dict from state to action replace it entirely?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">Once each state carries its own number, the match is left only with behavior that cannot live on the enum itself, such as calling a motor method or starting a command. If every branch only reads a value, you do not need the match at all, because <span class="k">state.value</span> already gives you the answer. A dict from state to action can replace a match when each state maps to one stored thing, like a callable or a setpoint, and keying it on the enum member keeps it tidy. The match earns its place when the branches do genuinely different work rather than look up one value.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

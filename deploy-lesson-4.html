@@ -175,6 +175,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>Two people edit the same line of the same file on different branches, then both merge. Git cannot guess who is right, so it stops and hands you a <strong>merge conflict</strong>, marking both versions with <span class="k">&lt;&lt;&lt;&lt;&lt;&lt;&lt;</span> and <span class="k">&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span> for you to resolve by hand. Read up on how to resolve one, and think about why small, frequent commits and short-lived branches make conflicts rarer and easier to untangle.</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">To resolve a conflict, open each marked file, pick the right lines (often a blend of both sides), delete the <span class="k">&lt;&lt;&lt;&lt;&lt;&lt;&lt;</span>, <span class="k">=======</span>, and <span class="k">&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span> markers, then stage and commit. Small, frequent commits and short branches help because two changes only conflict when they touch the same lines, and the longer a branch lives the more lines drift apart from everyone else's work. Merging often means each conflict covers a few lines you still remember, not a giant pile of unfamiliar changes.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

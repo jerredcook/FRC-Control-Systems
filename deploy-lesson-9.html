@@ -204,6 +204,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>Try removing the <span class="k">@Override</span> line above a method whose name you then misspell, like <span class="k">periodc()</span>, and see what the compiler does. With <span class="k">@Override</span> it errors, because no parent method matches; without it, Java happily makes a brand-new method that the scheduler never calls, so your code "runs" but does nothing. That silent failure is exactly the bug <span class="k">@Override</span> exists to catch. Worth pondering: why is an error at compile time so much kinder than one discovered on the field?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">A compile error stops the build right at your desk, names the file and line, and costs you a quick rename before anything ships. The same mistake found on the field shows up as a robot that behaves wrong with no obvious cause, under match pressure, where you cannot easily attach a debugger or read the code calmly. <span class="k">@Override</span> turns a silent "this method is never called" bug into a loud, early, located one, which is the whole point: catch it when it is cheap, not when it is costing you a match.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

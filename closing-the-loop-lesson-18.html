@@ -276,6 +276,10 @@ cfg.Slot0.kP = <span class="num">12</span>;     <span class="cm">// then tune kP
     <div class="note teal">
       <div class="nh">Going further &middot; optional</div>
       <p>SysId offers two test shapes, and the names tell you why. The quasistatic ramp creeps up so slowly that acceleration is near zero, which isolates kS and kV cleanly, like riding a bike at a steady crawl to feel exactly how hard you must pedal to hold each speed. The dynamic step slams full voltage so the mechanism accelerates hard, and that burst is what exposes kA. Worth chewing on: why can't a slow ramp ever measure kA well, no matter how careful you are?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">kA is the volts needed per unit of acceleration, so the only way to see it in the data is to make the mechanism accelerate. A slow ramp holds acceleration near zero on purpose, so the kA term contributes almost nothing to the voltage and the fit has nothing to grab onto. Pushing the ramp faster to force some acceleration turns it into a step test, so the clean answer is to let the dynamic step do that job. This is why both tests exist: the ramp pins down kS and kV at near-zero acceleration, and the step adds the hard acceleration that reveals kA.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

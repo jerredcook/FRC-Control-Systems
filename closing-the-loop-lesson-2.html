@@ -315,6 +315,10 @@ motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="output" 
     <div class="note teal">
       <div class="nh">Going further &middot; optional</div>
       <p>The lesson says droop equals g / kP, but notice that depends on gravity being a constant pull. Try this thought experiment: what is the steady-state error of a pure-P controller driving a flywheel up to a target speed with no gravity and only friction? The answer is not zero, because friction still demands some voltage to hold speed, so P still needs leftover error to make it. The deeper rule is that pure proportional control leaves an offset whenever the system needs a nonzero output to sit still, which control theory calls a type-0 system.</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">It is not zero. With no gravity but real friction, the flywheel still needs some steady voltage to hold its target speed against drag, and a pure-P controller only makes voltage out of error, so it has to sit at a small leftover error to produce that holding voltage. The error shrinks as you raise kP but never reaches zero, which is the type-0 offset the lesson describes. Adding an integral term is what finally drives it to zero, because the integral can supply that holding voltage on its own.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

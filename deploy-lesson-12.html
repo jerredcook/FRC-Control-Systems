@@ -174,6 +174,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>Try adding a method like <span class="k">atGoal()</span> to your subsystem that returns a boolean (true when the sensor reading is within a small tolerance of the goal). A command can then call it from <span class="k">isFinished()</span>, and a Trigger can watch it. Question to sit with: if <span class="k">periodic()</span> both reads the sensor and drives the motor, what is the right order to do those two steps in, and does it matter?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">Read the sensor first, then drive the motor using that fresh reading. The order matters because a controller should act on the newest measurement it can get, so reading first means the output you send this loop reflects where the mechanism actually is right now, not where it was 20 ms ago. If you drove the motor before reading, your decision would lag the truth by one full loop, which adds delay and can make a tight controller oscillate. Reading first also means <span class="k">atGoal()</span> reports on the same value the controller acted on this loop, so the command and the motor stay in agreement within the loop.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

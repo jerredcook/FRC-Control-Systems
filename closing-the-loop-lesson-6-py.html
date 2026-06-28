@@ -321,6 +321,10 @@ self.motor.<span class="fn">setVoltage</span>(feedforward + <input class="blank"
     <div class="note teal">
       <div class="nh">Going further &middot; optional</div>
       <p>Gravity feedforward for an elevator is one constant kG, but think about an arm instead of an elevator: an arm hanging straight down needs almost no holding voltage, while an arm held straight out sideways needs the most, and at any angle in between it needs something proportional to how far it is tipped over. So an arm's gravity term is not a constant - it scales with the cosine of the arm angle, which is exactly why WPILib has a separate ArmFeedforward whose kG gets multiplied by cos(angle). Here is the question to sit with: why does a leaning bookshelf push hardest against your hand when it is halfway to falling, not when it has barely started to tip?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">Gravity's turning effect is the weight times the horizontal distance from the pivot out to the center of mass, not the full weight. Standing nearly upright, the shelf's center of mass sits almost over its base, so that horizontal distance is tiny and it barely leans on your hand. As it tips, the center of mass swings out to the side and that horizontal lever arm grows, so the shelf pushes harder the farther it leans past upright, reaching the most when its mass hangs straight out to the side. That same geometry is why an arm's gravity term follows cos(angle), since cosine measures how far the mass sticks out sideways from the pivot.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

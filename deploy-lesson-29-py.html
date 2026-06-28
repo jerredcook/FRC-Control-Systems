@@ -194,6 +194,10 @@ aim = <span class="ty">PIDController</span>(<span class="num">0.03</span>, <span
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>Try this: add <span class="k">aim.setTolerance(1.0)</span> when you build the controller, then let <span class="k">isFinished()</span> return <span class="k">aim.atSetpoint()</span> instead of comparing tx yourself, so the lock test and the controller share one number. Then think about the harder case: if the tag is to your right but a wall is in the way, a pure aim loop spins forever. How would you give up gracefully, for example a timeout, so the robot is never stuck mid-match?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">Put a hard cap on how long the command is allowed to run, and end it when the cap is hit even if it never reached the setpoint. The clean way is to wrap the aim command with <span class="k">withTimeout(1.5)</span>, or check a <span class="k">Timer</span> inside <span class="k">isFinished()</span>, so the command always finishes one way or another. Have it report whether it gave up or truly locked on, so the next step can react, for example skip the shot or back up and try a new angle. A loop that can only end on success is a loop that can hang the whole match.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

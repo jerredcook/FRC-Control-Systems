@@ -264,6 +264,10 @@ self.motor.configurator.<span class="fn">apply</span>(cfg)</pre>
     <div class="note teal">
       <div class="nh">Going further &middot; optional</div>
       <p>The device holds more than one gain set: there is a slot0, slot1, and slot2, and a control request can name which to use with <span class="k">with_slot</span>. That lets one mechanism switch gains on the fly, like shifting a bike into a different gear, say gentle gains for holding a game piece and aggressive ones for a fast empty move. Worth chewing on: the <span class="k">PositionVoltage</span> request also carries its own feedforward field you can add per command. When would you want a feedforward that changes move to move instead of one baked into slot0?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">You want a per-command feedforward whenever the extra voltage a move needs depends on something the fixed slot0 gains cannot know ahead of time. The common case is a load that changes: an arm holding a heavy game piece needs more gravity voltage than the same arm empty, so you pass that bonus in the request. The other case is a value computed live each loop, like a feedforward from a motion profile or trajectory that wants a different number at every setpoint. Steady gravity that only varies with angle is already handled by GravityType in slot0, so the per-command field is for what that model misses.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

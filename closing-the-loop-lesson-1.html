@@ -421,6 +421,10 @@
     <div class="note teal">
       <div class="nh">Going further &middot; optional</div>
       <p>Closed loop survives surprises, but there is a catch: every loop only acts on what the sensor read a moment ago, so there is always a tiny delay between the gust hitting and the correction arriving. Think about riding a bike with your eyes closed for half a second at a time. What happens to a closed loop if that delay gets long, or if the sensor lies to it? Hold onto that question - it is exactly where overshoot, oscillation, and the hardest tuning problems come from later in this course.</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">A long delay makes the loop correct on stale readings, so it keeps pushing after the error is already gone and overshoots, then swings back the other way, which is oscillation. A lying sensor is worse: the loop trusts it completely, so it drives the real mechanism toward whatever wrong value the sensor reports. Both turn the loop's strength into a weakness, and both are why high gains plus delay add up to instability.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

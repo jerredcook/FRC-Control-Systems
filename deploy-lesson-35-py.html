@@ -191,6 +191,10 @@ motor.<span class="fn">configurator</span>.<span class="fn">apply</span>(cfg)
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>There are two current limits worth knowing apart: the supply limit (amps pulled from the battery, what protects against brownout) and the stator limit (amps through the motor itself, what protects against burning it up when a mechanism stalls). Try reasoning about why a jammed intake can be fine on the battery yet still cook a motor. And here is the deeper habit: a brownout is not a freak event, it is a budget problem. Could you add up the worst-case draw of every mechanism running at once and check it fits the battery before you ever drive?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">A jammed intake can sit at a low command, so the controller only pulls a modest amount from the battery (low supply current) while pushing a huge stalled current through the motor windings (high stator current). The battery is fine because little is leaving it, but the motor heats up fast because nearly all that current turns into heat in a coil that is not spinning. So you want a stator limit to save the motor and a supply limit to save the battery, and they are not the same number. The budget idea works: add up the expected draw of drivetrain plus every mechanism at once, leave headroom, and a brownout stops being a surprise and becomes something you designed out.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

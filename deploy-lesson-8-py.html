@@ -191,6 +191,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>Here is a gotcha that bites teams: an object variable does not hold the object itself, it holds a reference to it, like a luggage tag pointing at one bag. So if you write <span class="k">b = a</span>, both names tag the <em>same</em> Motor, and changing <span class="k">b.can_id</span> also changes <span class="k">a.can_id</span>. Try it in the demo logic in your head, then look up "reference vs value" and Python's <span class="k">is</span> operator versus <span class="k">==</span> to see how identity and equality differ.</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">Yes, after <span class="k">b = a</span> both names refer to the one Motor, so <span class="k">b.can_id = 5</span> also shows up as <span class="k">a.can_id</span>, because you copied the tag, not the bag. To get an independent Motor you build a new one with <span class="k">Motor(...)</span> rather than assigning an existing object. The <span class="k">is</span> operator asks whether two names point at the same object (same bag), while <span class="k">==</span> asks whether their contents are considered equal, so here <span class="k">a is b</span> is true; that distinction is exactly the reference-versus-value idea. A name set to <span class="k">None</span> points at nothing, and reaching for an attribute on it raises <span class="k">AttributeError</span>.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

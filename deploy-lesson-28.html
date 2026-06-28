@@ -192,6 +192,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>The best target is whichever tag is most centered, but that is not always the one you want. If two tags are in view and you only trust tag 7, filter the results yourself: loop over <span class="k">result.getTargets()</span> and pick the one whose <span class="k">getFiducialId()</span> matches, instead of taking <span class="k">getBestTarget()</span> blindly. Here is a question to chew on: what should your code do for the split second when the camera sees no tag at all, hold the last reading, or treat it as "no answer"?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">Treat it as "no answer" and stop acting on vision. Check <span class="k">result.hasTargets()</span> every loop, and when it is false, fall back to a safe default like holding still or driving on the odometry pose instead of the camera. Holding the last reading is dangerous, because a tag that left view a second ago may now be in a completely different spot, and your robot would confidently aim at where it used to be. The honest move is to report "no lock" and let the rest of the robot decide what to do without vision.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

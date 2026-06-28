@@ -171,6 +171,10 @@
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>Try this: open the generated <span class="k">pyproject.toml</span> and find the <span class="k">[tool.robotpy]</span> section. That is where your robot's dependencies and target year live. Running the code in simulation on your laptop with no roboRIO attached is one command away (<span class="k">robotpy sim</span>), which is how you can test logic at home. Skim the comments in that file and see how much of the setup you can follow.</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">The <span class="k">[tool.robotpy]</span> section sets your target year and lists the robotpy components your code needs, which is what <span class="k">robotpy sync</span> installs. Running <span class="k">robotpy sim</span> then exercises your logic on the laptop with no roboRIO, so you can test the flow at home. The cost is that sim is not the robot, so a few hardware-only pieces will not behave the same, and you still run <span class="k">robotpy deploy</span> to put real code on the robot. The wider lesson is that <span class="k">pyproject.toml</span> is not magic: it is the one place that declares which libraries and year your project pulls in.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>

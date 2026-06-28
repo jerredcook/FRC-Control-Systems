@@ -268,6 +268,10 @@ motor.<span class="fn">setVoltage</span>(ffVolts + fbVolts);</pre>
     <div class="note teal">
       <div class="nh">Going further &middot; optional</div>
       <p>A trapezoid profile speeds up at a steady rate, cruises, then slows at a steady rate, which means acceleration jumps instantly from zero to full at the very start. That sudden jolt, the change in acceleration, is called jerk, and you feel it as a thunk in a tall mechanism. WPILib also offers an <span class="k">ExponentialProfile</span> and other tools soften the corners. Here is the question: a short hop might never reach max velocity at all. What shape does the speed plan take then, and is it still a trapezoid?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">The speed plan becomes a triangle: it speeds up until it is halfway there, then slows back down, with no flat cruise in the middle. You can think of it as a trapezoid whose cruise segment shrank to zero length, so it is the same plan handling a move too short to ever hit max velocity. TrapezoidProfile produces this on its own when the distance is small, so the code does not change.</p>
+      </details>
     </div>
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>
