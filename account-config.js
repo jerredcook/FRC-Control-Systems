@@ -8,5 +8,5 @@
  * meant to be public; row-level security in the database is what protects
  * everyone's data.
  */
-window.FRC_SUPABASE_URL = "";
-window.FRC_SUPABASE_ANON_KEY = "";
+window.FRC_SUPABASE_URL = "https://ezdtsuxgcetuotcdophu.supabase.co";
+window.FRC_SUPABASE_ANON_KEY = "sb_publishable_jsZeYAVAmQN0MFsutW3GYw_zdAbjDaj";
