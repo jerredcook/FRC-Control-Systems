@@ -41,7 +41,7 @@ create index if not exists profiles_team_idx on public.profiles(team_id);
 -- profile WITHOUT triggering row-level-security recursion).
 -- ---------------------------------------------------------------------------
 
-create or replace function public.current_role() returns text
+create or replace function public.auth_role() returns text
   language sql security definer stable set search_path = public as $$
   select role from public.profiles where id = auth.uid()
 $$;
@@ -120,7 +120,7 @@ create or replace function public.admin_create_team(p_name text, p_code text) re
   language plpgsql security definer set search_path = public as $$
 declare t uuid;
 begin
-  if public.current_role() <> 'admin' then raise exception 'Admins only'; end if;
+  if public.auth_role() <> 'admin' then raise exception 'Admins only'; end if;
   insert into public.teams (name, join_code)
   values (left(trim(p_name), 80), upper(trim(p_code)))
   returning id into t;
@@ -132,7 +132,7 @@ $$;
 create or replace function public.admin_set_member(p_user uuid, p_role text, p_team uuid) returns void
   language plpgsql security definer set search_path = public as $$
 begin
-  if public.current_role() <> 'admin' then raise exception 'Admins only'; end if;
+  if public.auth_role() <> 'admin' then raise exception 'Admins only'; end if;
   if p_role is not null and p_role not in ('student','mentor','admin') then
     raise exception 'Invalid role';
   end if;
@@ -161,11 +161,11 @@ create policy "read own profile" on public.profiles
 
 create policy "mentor reads team profiles" on public.profiles
   for select using (
-    public.current_role() = 'mentor' and team_id = public.current_team()
+    public.auth_role() = 'mentor' and team_id = public.current_team()
   );
 
 create policy "admin reads all profiles" on public.profiles
-  for select using (public.current_role() = 'admin');
+  for select using (public.auth_role() = 'admin');
 
 -- No direct INSERT/UPDATE/DELETE for users: profile creation is the trigger,
 -- and changes go through the SECURITY DEFINER RPCs above.
@@ -178,7 +178,7 @@ create policy "members read their team" on public.teams
   for select using (id = public.current_team());
 
 create policy "admin reads all teams" on public.teams
-  for select using (public.current_role() = 'admin');
+  for select using (public.auth_role() = 'admin');
 
 -- ---- progress -----------------------------------------------------------
 drop policy if exists "student manages own progress" on public.progress;
@@ -190,11 +190,11 @@ create policy "student manages own progress" on public.progress
 
 create policy "mentor reads team progress" on public.progress
   for select using (
-    public.current_role() = 'mentor' and public.same_team(progress.user_id)
+    public.auth_role() = 'mentor' and public.same_team(progress.user_id)
   );
 
 create policy "admin reads all progress" on public.progress
-  for select using (public.current_role() = 'admin');
+  for select using (public.auth_role() = 'admin');
 
 -- ============================================================================
 -- AFTER you create your own account through the app, make yourself the admin:
