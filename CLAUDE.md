@@ -55,6 +55,10 @@ The course *name* and its *file prefix* don't always match. Keep this map handy:
   (Control / Code / Build / Academy). Counts real per-course progress (excludes
   checkpoints, normalizes `-py` twins); the Academy tab certifies all three courses
   (105 lessons). Linked from all three hubs. Name persists under `frc:name`.
+- `review.html` - academy-wide "review what you missed" page. Re-tests, with the
+  mastery handler, every quiz question the student first got wrong; answering one
+  correctly clears it. Filterable by course. Linked from all three hubs. Reads the
+  `frc:review` pool (see review capture below); localStorage-only, no backend needed.
 - `worksheet.html` - interactive tuning worksheet: enter a mechanism's numbers → paste-ready Phoenix 6 Java + a printable gains record
 - `closing-the-loop-troubleshooting.html` - troubleshooting field guide
 - `templates/` - complete, paste-ready WPILib + CTRE Phoenix 6 Java subsystems (`Elevator.java`, `Arm.java`, `Flywheel.java`, `Constants.java`) with `// TODO` markers, capstone code from Part IV
@@ -157,6 +161,14 @@ layer adds student accounts, cross-device progress, and a mentor dashboard. It i
   done)`; the dashboard normalizes `-py` twins to one lesson.
 - Every page includes `account-config.js` + `account.js` before `</body>`. New pages
   must keep that include.
+- **Review capture**: `account.js` begins with a small, always-on IIFE (runs even with
+  no backend, before the disabled-mode return) that records missed quiz questions. It
+  attaches one delegated listener to `#quiz`, reads the same `.q[data-correct]` markup
+  the mastery handler uses, works out right/wrong itself, and on a first wrong answer
+  writes the question (prompt, options, correct index, explanation, course) into the
+  `frc:review` localStorage map - keyed `filename.html#qN`. It skips once a question is
+  solved (`.opt.locked`/`.correct` present) and records each question at most once per
+  page load. No change to the 200+ lesson files. `review.html` consumes this pool.
 
 ### Lesson file anatomy
 

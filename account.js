@@ -12,6 +12,89 @@
  * It NEVER throws into the page: every remote call is wrapped so a backend
  * hiccup can't break a lesson.
  */
+
+/* FRC Academy - review capture.
+ *
+ * Always on, no backend needed, and no change to the 200+ lesson files. It
+ * reads the same "#quiz .q[data-correct]" markup the mastery handler uses,
+ * works out right/wrong on its own, and records every question a student gets
+ * wrong (before getting it right) into localStorage under "frc:review".
+ * review.html later resurfaces those questions for practice.
+ */
+(function () {
+  "use strict";
+  var KEY = "frc:review";
+  var CAP = 400; // keep the pool bounded
+
+  function fileName() {
+    try { return (location.pathname.split("/").pop() || "index.html") || "index.html"; }
+    catch (e) { return "index.html"; }
+  }
+  function courseOf(f) {
+    if (f.indexOf("closing-the-loop") === 0) return "closing-the-loop";
+    if (f.indexOf("deploy") === 0) return "deploy";
+    if (f.indexOf("build") === 0) return "build";
+    if (f.indexOf("systemcore") === 0) return "systemcore";
+    return "other";
+  }
+  function load() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } }
+  function save(map) {
+    try {
+      var keys = Object.keys(map);
+      if (keys.length > CAP) {
+        keys.sort(function (a, b) { return (map[a].ts || 0) - (map[b].ts || 0); });
+        keys.slice(0, keys.length - CAP).forEach(function (k) { delete map[k]; });
+      }
+      localStorage.setItem(KEY, JSON.stringify(map));
+    } catch (e) {}
+  }
+  function txt(el) { return el ? (el.textContent || "").trim() : ""; }
+
+  function record(q, qi) {
+    try {
+      var f = fileName(), id = f + "#q" + qi, map = load();
+      var e = map[id] || {
+        file: f, course: courseOf(f), qi: qi,
+        qn: txt(q.querySelector(".qn")),
+        prompt: txt(q.querySelector(".qt")),
+        opts: Array.prototype.map.call(q.querySelectorAll(".opt"), txt),
+        correct: parseInt(q.getAttribute("data-correct"), 10) || 0,
+        explain: txt(q.querySelector(".explain")),
+        misses: 0
+      };
+      e.misses = (e.misses || 0) + 1;
+      e.ts = Date.now();
+      map[id] = e;
+      save(map);
+      try { window.dispatchEvent(new CustomEvent("frc:reviewupdated")); } catch (e2) {}
+    } catch (e) {}
+  }
+
+  function attach() {
+    var quiz = document.getElementById("quiz");
+    if (!quiz) return;
+    var qs = Array.prototype.slice.call(quiz.querySelectorAll(".q"));
+    if (!qs.length) return;
+    var recorded = {}; // first fumble per question per page load only
+    quiz.addEventListener("click", function (ev) {
+      var t = ev.target;
+      var opt = t && t.closest ? t.closest(".opt") : null;
+      if (!opt || !quiz.contains(opt)) return;
+      var q = opt.closest(".q"); if (!q) return;
+      var qi = qs.indexOf(q); if (qi < 0) return;
+      // ignore clicks once the question is already solved
+      if (q.querySelector(".opt.locked") || q.querySelector(".opt.correct")) return;
+      var correct = parseInt(q.getAttribute("data-correct"), 10);
+      var sibs = opt.parentNode ? opt.parentNode.querySelectorAll(".opt") : [];
+      var idx = Array.prototype.indexOf.call(sibs, opt);
+      if (idx !== correct && !recorded[qi]) { recorded[qi] = true; record(q, qi); }
+    }, false);
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", attach);
+  else attach();
+})();
+
 (function () {
   "use strict";
 

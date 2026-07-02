@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FRC Academy · Review</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --coral:#FF7D6B; --green:#43D67E; --red:#FF6B6B;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--ink); color:var(--text);
+    font-family:var(--sans); font-size:17px; line-height:1.6; -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(900px 500px at 80% -10%, rgba(52,215,197,.06), transparent 60%),
+      radial-gradient(700px 500px at -10% 10%, rgba(142,140,248,.05), transparent 55%);
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:0 22px}
+
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px);position:sticky;top:0;z-index:20}
+  .top-inner{max-width:760px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--teal);box-shadow:0 0 12px var(--teal)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted)}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:40px 0 6px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--teal)}
+  h1{font-size:clamp(2rem,5vw,3rem);line-height:1.05;margin:.1em 0 .3em;letter-spacing:-.03em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--teal),var(--indigo));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(15px,2.2vw,18px);color:var(--muted);max-width:56ch}
+
+  .tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:18px 0 6px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;flex:1 1 auto}
+  .chip{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:var(--panel-2);border:1px solid var(--line-2);border-radius:20px;padding:6px 12px;cursor:pointer;transition:.12s}
+  .chip:hover{color:var(--text)}
+  .chip.active{background:var(--teal);border-color:var(--teal);color:#06121f;font-weight:700}
+  .clear-btn{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:var(--panel-2);border:1px solid var(--line-2);border-radius:8px;padding:8px 12px;cursor:pointer;transition:.12s}
+  .clear-btn:hover{border-color:var(--red);color:var(--red)}
+  .count{font-family:var(--mono);font-size:11px;color:var(--faint);margin:8px 0 2px}
+
+  main{padding:8px 0 0}
+  .q{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:20px 20px 18px;margin:14px 0;border-left:3px solid var(--accent,var(--teal))}
+  .q.cleared{opacity:.55}
+  .q .head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:8px}
+  .q .src{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);text-decoration:none;white-space:nowrap}
+  .q .src:hover{color:var(--text)}
+  .q .badge{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+  .q .qt{font-size:16.5px;font-weight:650;margin-bottom:14px;line-height:1.4}
+  .opts{display:flex;flex-direction:column;gap:9px}
+  .opt{font-family:var(--sans);font-size:15px;text-align:left;background:var(--panel-2);border:1px solid var(--line-2);color:var(--text);border-radius:10px;padding:12px 14px;cursor:pointer;transition:.12s;line-height:1.35}
+  .opt:hover:not(.locked){border-color:var(--teal)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1)}
+  .opt.locked{cursor:default;opacity:.7}
+  .explain{max-height:0;overflow:hidden;opacity:0;transition:.2s;font-size:14px;color:var(--muted);border-left:2px solid var(--line-2);padding-left:0;margin-top:0}
+  .explain.show{max-height:400px;opacity:1;margin-top:14px;padding-left:12px}
+  .cleared-tag{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--green);border:1px solid var(--green);border-radius:20px;padding:3px 9px;margin-top:12px}
+
+  .empty{text-align:center;padding:60px 20px}
+  .empty .big{font-size:40px;margin-bottom:10px}
+  .empty .t{font-size:20px;font-weight:750;margin-bottom:6px}
+  .empty .d{color:var(--muted);max-width:44ch;margin:0 auto 20px}
+  .empty a{display:inline-block;font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--teal);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:11px 15px}
+  .empty a:hover{border-color:var(--teal)}
+
+  .backlink{display:inline-block;margin:22px 0 0;font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--indigo);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px}
+  .backlink:hover{border-color:var(--teal);color:var(--text)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><span class="name">FRC Academy</span></a>
+    <div class="top-meta">Review</div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="hero">
+    <div class="eyebrow">Practice</div>
+    <h1>Review what you <span class="accent">missed</span></h1>
+    <p class="dek">Every question you got wrong on your first try, gathered here to try again. Answer one correctly and it clears from the pile. This lives on your device and needs no account.</p>
+  </div>
+
+  <div class="tools" id="tools" style="display:none">
+    <div class="chips" id="chips"></div>
+    <button class="clear-btn" id="clearAll">Clear all</button>
+  </div>
+  <div class="count" id="count" style="display:none"></div>
+
+  <main id="list"></main>
+
+  <a class="backlink" href="index.html">← Back to the academy</a>
+</div>
+
+<footer>FRC Academy · Build · Code · Control</footer>
+
+<script>
+(function(){
+  "use strict";
+  var KEY="frc:review";
+  var META={
+    "closing-the-loop":{label:"🎯 Control", accent:"#34D7C5", hub:"closing-the-loop.html"},
+    "deploy":{label:"🎮 Code", accent:"#8E8CF8", hub:"code.html"},
+    "build":{label:"🔧 Build", accent:"#FFB020", hub:"build.html"},
+    "systemcore":{label:"🪸 SystemCore", accent:"#FF7D6B", hub:"systemcore.html"},
+    "other":{label:"Other", accent:"#34D7C5", hub:"index.html"}
+  };
+  var ORDER=["closing-the-loop","deploy","build","systemcore","other"];
+
+  var listEl=document.getElementById("list");
+  var chipsEl=document.getElementById("chips");
+  var toolsEl=document.getElementById("tools");
+  var countEl=document.getElementById("count");
+  var activeCourse=null;
+
+  function load(){ try{ return JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){ return {}; } }
+  function save(map){ try{ localStorage.setItem(KEY, JSON.stringify(map)); }catch(e){} }
+  function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+  // snapshot the pool once; interacting clears entries from storage as we go
+  function items(){
+    var map=load();
+    return Object.keys(map).map(function(id){ var e=map[id]; e.id=id; return e; })
+      .filter(function(e){ return e && e.opts && e.opts.length && typeof e.correct==="number"; })
+      .sort(function(a,b){ return (b.ts||0)-(a.ts||0); });
+  }
+  var POOL=items();
+
+  function pending(course){
+    return POOL.filter(function(e){ return !e.cleared && (!course || e.course===course); }).length;
+  }
+
+  function clearEntry(id){
+    var map=load(); if(map[id]){ delete map[id]; save(map); }
+  }
+
+  function emptyState(){
+    listEl.innerHTML =
+      '<div class="empty"><div class="big">✓</div>'+
+      '<div class="t">Nothing to review</div>'+
+      '<div class="d">You have not missed any questions yet, or you have cleared them all. Nicely done.</div>'+
+      '<a href="index.html">Pick a course →</a></div>';
+  }
+
+  function questionHTML(e){
+    var m=META[e.course]||META.other;
+    var opts=e.opts.map(function(o,i){ return '<button class="opt" data-i="'+i+'">'+esc(o)+'</button>'; }).join("");
+    var src='<a class="src" href="'+esc(e.file)+'" title="Open the lesson">'+m.label+' · open ↗</a>';
+    return '<div class="q" data-id="'+esc(e.id)+'" data-correct="'+e.correct+'" style="--accent:'+m.accent+'">'+
+      '<div class="head">'+(e.qn?'<span class="badge">'+esc(e.qn)+'</span>':'<span class="badge"></span>')+src+'</div>'+
+      '<div class="qt">'+esc(e.prompt||"(question)")+'</div>'+
+      '<div class="opts">'+opts+'</div>'+
+      '<div class="explain">'+esc(e.explain||"")+'</div>'+
+    '</div>';
+  }
+
+  function render(){
+    var shown=POOL.filter(function(e){ return !e.cleared && (!activeCourse || e.course===activeCourse); });
+    if(!pending(null)){ toolsEl.style.display="none"; countEl.style.display="none"; emptyState(); return; }
+    toolsEl.style.display="flex"; countEl.style.display="block";
+    listEl.innerHTML = shown.length ? shown.map(questionHTML).join("")
+      : '<div class="empty"><div class="big">✓</div><div class="t">All clear in this course</div><div class="d">Try another course filter, or you are all caught up here.</div></div>';
+    var n=pending(activeCourse);
+    countEl.textContent = n+" question"+(n===1?"":"s")+" to review"+(activeCourse?" in "+(META[activeCourse].label):"");
+  }
+
+  // chips
+  function buildChips(){
+    chipsEl.innerHTML="";
+    var all=document.createElement("button"); all.className="chip active"; all.textContent="All"; all.setAttribute("data-course",""); chipsEl.appendChild(all);
+    var present={}; POOL.forEach(function(e){ if(!e.cleared) present[e.course]=true; });
+    ORDER.forEach(function(c){ if(!present[c]) return; var b=document.createElement("button"); b.className="chip"; b.textContent=META[c].label; b.setAttribute("data-course",c); chipsEl.appendChild(b); });
+    chipsEl.querySelectorAll(".chip").forEach(function(b){
+      b.addEventListener("click",function(){
+        activeCourse=b.getAttribute("data-course")||null;
+        chipsEl.querySelectorAll(".chip").forEach(function(x){x.classList.toggle("active",x===b);});
+        render();
+      });
+    });
+  }
+
+  // answering
+  listEl.addEventListener("click",function(ev){
+    var opt=ev.target.closest ? ev.target.closest(".opt") : null;
+    if(!opt) return;
+    var q=opt.closest(".q"); if(!q || q.classList.contains("cleared")) return;
+    if(q.querySelector(".opt.locked")) return; // already solved
+    var correct=parseInt(q.getAttribute("data-correct"),10);
+    var idx=parseInt(opt.getAttribute("data-i"),10);
+    var explain=q.querySelector(".explain");
+    if(idx===correct){
+      q.querySelectorAll(".opt").forEach(function(o){ o.classList.add("locked"); });
+      opt.classList.add("correct");
+      explain.classList.add("show");
+      var id=q.getAttribute("data-id");
+      clearEntry(id);
+      var e=POOL.filter(function(x){return x.id===id;})[0]; if(e) e.cleared=true;
+      if(!q.querySelector(".cleared-tag")){ var tag=document.createElement("div"); tag.className="cleared-tag"; tag.textContent="Cleared ✓"; q.appendChild(tag); }
+      q.classList.add("cleared");
+      // update counts + chips, keep this card visible so the explanation can be read
+      var n=pending(activeCourse);
+      countEl.textContent = n+" question"+(n===1?"":"s")+" to review"+(activeCourse?" in "+(META[activeCourse].label):"");
+      if(!pending(null)){ buildChips(); /* leave cleared cards on screen until reload */ }
+    } else {
+      opt.classList.add("wrong");
+      explain.classList.add("show");
+    }
+  });
+
+  document.getElementById("clearAll").addEventListener("click",function(){
+    if(!confirm("Clear every question from your review pile? This cannot be undone.")) return;
+    try{ localStorage.removeItem(KEY); }catch(e){}
+    POOL=[]; activeCourse=null; buildChips(); render();
+  });
+
+  buildChips();
+  render();
+})();
+</script>
+<script src="account-config.js"></script>
+<script src="account.js"></script>
+</body>
+</html>
