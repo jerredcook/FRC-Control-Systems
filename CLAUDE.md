@@ -51,7 +51,10 @@ The course *name* and its *file prefix* don't always match. Keep this map handy:
 
 - `glossary.html` - academy-wide terms reference (Build + Code + Control, filterable by
   course and topic; linked from all three hubs, not just Control)
-- `certificate.html` - completion certificate
+- `certificate.html` - completion certificate; academy-wide with a course selector
+  (Control / Code / Build / Academy). Counts real per-course progress (excludes
+  checkpoints, normalizes `-py` twins); the Academy tab certifies all three courses
+  (105 lessons). Linked from all three hubs. Name persists under `frc:name`.
 - `worksheet.html` - interactive tuning worksheet: enter a mechanism's numbers → paste-ready Phoenix 6 Java + a printable gains record
 - `closing-the-loop-troubleshooting.html` - troubleshooting field guide
 - `templates/` - complete, paste-ready WPILib + CTRE Phoenix 6 Java subsystems (`Elevator.java`, `Arm.java`, `Flywheel.java`, `Constants.java`) with `// TODO` markers, capstone code from Part IV
