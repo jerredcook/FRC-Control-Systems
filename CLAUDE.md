@@ -154,7 +154,10 @@ layer adds student accounts, cross-device progress, and a mentor dashboard. It i
   throws into the page. It dispatches `frc:progresssynced` (hubs/index re-render on
   it) and `frc:authchange`.
 - `login.html` = sign up / sign in / join a team by code. `mentor.html` = the
-  dashboard (role-gated; admins manage teams + roles).
+  dashboard (role-gated; admins manage teams + roles). Each member row expands to a
+  per-student drill-down (per-course lessons + which checkpoints are passed/stuck,
+  per-course last-active, a recent-activity timeline) plus a class-readiness summary
+  strip. All derived client-side from the existing `progress` rows - no schema change.
 - `supabase/schema.sql` = tables (`teams`, `profiles` with role student/mentor/admin,
   `progress`), RLS, and `SECURITY DEFINER` helpers/RPCs. `BACKEND-SETUP.md` is the
   turnkey setup guide. Data model: progress rows are `(user_id, course, item_key,

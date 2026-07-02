@@ -56,6 +56,40 @@
   .msg{margin-top:10px;font-size:13px;color:var(--muted)}
   .manage{display:flex;gap:6px;align-items:center}
   .manage select{padding:6px 8px;font-size:12.5px}
+  .tip{font-size:12px}
+
+  /* class-readiness summary */
+  .summary{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+  .scard{border:1px solid var(--line);border-radius:10px;background:var(--panel-2);padding:10px 14px;min-width:118px}
+  .scard .sl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .scard .sv{font-size:20px;font-weight:750;margin-top:3px}
+  .scard .sv small{font-size:11px;color:var(--muted);font-weight:500}
+  .scard .sa{font-family:var(--mono);font-size:11px;color:var(--ink-dim);margin-top:2px}
+
+  /* expandable per-student drill-down */
+  tr.srow{cursor:pointer}
+  tr.srow:hover > td{background:rgba(138,147,255,.05)}
+  tr.srow .caret{display:inline-block;width:12px;color:var(--muted);transition:transform .12s}
+  tr.srow.expanded .caret{transform:rotate(90deg);color:var(--ink)}
+  tr.drow{display:none}
+  tr.drow.open{display:table-row}
+  tr.drow > td{background:#0b1322;padding:0}
+  .detail{display:grid;grid-template-columns:1.4fr 1fr;gap:22px;padding:18px 16px 20px}
+  @media(max-width:720px){.detail{grid-template-columns:1fr}}
+  .dcourses{display:flex;flex-direction:column;gap:14px}
+  .dcourse .dch{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .dcourse .dlabel{font-weight:650;font-size:13.5px}
+  .dcourse .dstat{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+  .dcourse .bar{margin-top:6px}
+  .cprow{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+  .cpchip{font-family:var(--mono);font-size:10px;min-width:22px;text-align:center;padding:3px 6px;border-radius:6px;border:1px solid var(--line-bright);color:var(--muted);background:var(--panel-2)}
+  .cpchip.ok{color:#08110c;background:var(--good);border-color:var(--good);font-weight:700}
+  .drecent .drh{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .drecent ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+  .drecent li{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;border-bottom:1px dashed var(--line);padding-bottom:5px}
+  .drecent .ri{color:var(--ink-dim)}
+  .drecent .rt{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap}
+  .dhint{font-size:11.5px;color:var(--muted);margin-top:14px;line-height:1.5}
 </style>
 </head>
 <body>
@@ -84,8 +118,10 @@
   </div>
 
   <div id="board" class="hide">
+    <div class="summary" id="summary"></div>
     <div class="filterbar">
       <span class="muted" id="count"></span>
+      <span class="muted tip">Click a member for a full breakdown</span>
       <span id="teamFilterWrap" class="hide">
         <label class="muted" style="font-size:12px">Team
           <select id="teamFilter"><option value="">All teams</option></select>
@@ -114,6 +150,14 @@
     {key:"build", label:"Build", total:44},
     {key:"systemcore", label:"SystemCore", total:9}
   ];
+  var LABEL = {}; COURSES.forEach(function(c){ LABEL[c.key] = c.label; });
+  // Checkpoint part codes per course (which -checkpoint-N.html files exist).
+  var CHECKPOINTS = {
+    "deploy":[1,2,3,4,6,7,8],       // Part 5 is the control-course link, no checkpoint
+    "closing-the-loop":[1,2,3,4,5],
+    "build":[1,2,3,4,5,6,7,8],
+    "systemcore":[]
+  };
   var state = { isAdmin:false, teams:[], teamsById:{}, profiles:[], progress:[] };
 
   function gate(html){ $("gate").innerHTML = html; $("gate").classList.remove("hide"); $("sub").classList.add("hide"); }
@@ -121,15 +165,18 @@
   function normLesson(key){ return key.replace(/-py\.html$/, ".html"); }
 
   function aggregate(){
-    // byUser[id] = { lessons:{course:Set}, checkpoints:{course:Set}, last:ts }
+    // byUser[id] = { lessons:{course:Set}, checks:{course:Set}, last:ts,
+    //               courseLast:{course:ts}, events:[{key,course,ts}] }
     var byUser = {};
     state.progress.forEach(function(r){
-      var u = byUser[r.user_id] || (byUser[r.user_id] = { lessons:{}, checks:{}, last:0 });
+      var u = byUser[r.user_id] || (byUser[r.user_id] = { lessons:{}, checks:{}, last:0, courseLast:{}, events:[] });
       var isCheck = /-checkpoint-/.test(r.item_key);
       var bucket = isCheck ? u.checks : u.lessons;
       (bucket[r.course] || (bucket[r.course] = {}))[normLesson(r.item_key)] = true;
       var t = r.updated_at ? Date.parse(r.updated_at) : 0;
       if(t > u.last) u.last = t;
+      if(t > (u.courseLast[r.course] || 0)) u.courseLast[r.course] = t;
+      u.events.push({ key:r.item_key, course:r.course, ts:t });
     });
     return byUser;
   }
@@ -143,6 +190,66 @@
     return d.toISOString().slice(0,10);
   }
 
+  function lessonsDone(u, key){ return u.lessons[key] ? Object.keys(u.lessons[key]).length : 0; }
+  function checkpointsPassed(u, key){
+    var passed = u.checks[key] || {};
+    return (CHECKPOINTS[key]||[]).filter(function(code){ return passed[key+"-checkpoint-"+code+".html"]; }).length;
+  }
+
+  function summaryHTML(students, byUser){
+    return COURSES.map(function(c){
+      var complete=0, sum=0;
+      students.forEach(function(p){
+        var u = byUser[p.id] || { lessons:{} };
+        var d = lessonsDone(u, c.key);
+        if(d>=c.total) complete++;
+        sum += Math.min(100, Math.round(d/c.total*100));
+      });
+      var avg = students.length ? Math.round(sum/students.length) : 0;
+      return '<div class="scard"><div class="sl">'+esc(c.label)+'</div>'
+        + '<div class="sv">'+complete+'<small> / '+students.length+' done</small></div>'
+        + '<div class="sa">avg '+avg+'%</div></div>';
+    }).join("");
+  }
+
+  function itemName(ev){
+    var m = /(lesson|checkpoint)-(\d+)/.exec(ev.key);
+    var py = /-py\.html$/.test(ev.key) ? " (Py)" : "";
+    var label = LABEL[ev.course] || ev.course;
+    if(m) return label+" · "+(m[1]==="checkpoint"?"Checkpoint ":"Lesson ")+m[2]+py;
+    return label+" · "+ev.key;
+  }
+
+  function detailHTML(u){
+    var blocks = COURSES.map(function(c){
+      var done = lessonsDone(u, c.key);
+      var cps = CHECKPOINTS[c.key] || [];
+      var passed = u.checks[c.key] || {};
+      var passedN = checkpointsPassed(u, c.key);
+      var pct = Math.min(100, Math.round(done/c.total*100));
+      var chips = cps.map(function(code){
+        var ok = !!passed[c.key+"-checkpoint-"+code+".html"];
+        return '<span class="cpchip'+(ok?" ok":"")+'" title="Checkpoint '+code+(ok?" passed":" not passed yet")+'">'+code+'</span>';
+      }).join("");
+      return '<div class="dcourse">'
+        + '<div class="dch"><span class="dlabel">'+esc(c.label)+'</span>'
+        + '<span class="dstat">'+done+'/'+c.total+' lessons'
+        + (cps.length ? ' · '+passedN+'/'+cps.length+' checkpoints' : '')
+        + ' · '+fmtDate(u.courseLast[c.key]||0)+'</span></div>'
+        + '<div class="bar"><i style="width:'+pct+'%"></i></div>'
+        + (cps.length ? '<div class="cprow">'+chips+'</div>' : '')
+        + '</div>';
+    }).join("");
+    var recent = (u.events||[]).slice().sort(function(a,b){ return b.ts-a.ts; }).slice(0,6).map(function(ev){
+      return '<li><span class="ri">'+esc(itemName(ev))+'</span><span class="rt">'+fmtDate(ev.ts)+'</span></li>';
+    }).join("");
+    return '<div class="detail"><div class="dcourses">'+blocks+'</div>'
+      + '<div class="drecent"><div class="drh">Recent activity</div>'
+      + (recent ? '<ul>'+recent+'</ul>' : '<p class="muted" style="margin:6px 0 0">No completed lessons recorded yet.</p>')
+      + '<div class="dhint">Green checkpoint = passed. A gap in the checkpoints shows where a student is stuck.</div>'
+      + '</div></div>';
+  }
+
   function render(){
     var byUser = aggregate();
     var filterTeam = $("teamFilter") ? $("teamFilter").value : "";
@@ -152,6 +259,8 @@
       return true;
     });
 
+    $("summary").innerHTML = students.length ? summaryHTML(students, byUser) : "";
+
     // header
     var head = "<th>Member</th>";
     if(state.isAdmin) head += "<th>Team</th>";
@@ -159,16 +268,17 @@
     head += "<th>Last active</th>";
     if(state.isAdmin) head += "<th>Manage</th>";
     $("headrow").innerHTML = head;
+    var cols = 2 + COURSES.length + (state.isAdmin ? 2 : 0);
 
     var html = "";
     students.forEach(function(p){
-      var u = byUser[p.id] || { lessons:{}, checks:{}, last:0 };
+      var u = byUser[p.id] || { lessons:{}, checks:{}, last:0, courseLast:{}, events:[] };
       var rolePill = p.role!=="student" ? ' <span class="pill '+p.role+'">'+p.role+'</span>' : '';
-      html += "<tr>";
-      html += '<td><span class="nm">'+esc(p.display_name||"(no name set)")+'</span>'+rolePill+'</td>';
+      html += '<tr class="srow" data-uid="'+esc(p.id)+'">';
+      html += '<td><span class="caret">▸</span><span class="nm">'+esc(p.display_name||"(no name set)")+'</span>'+rolePill+'</td>';
       if(state.isAdmin){ var tn = state.teamsById[p.team_id]; html += '<td class="muted">'+(tn?esc(tn.name):"—")+'</td>'; }
       COURSES.forEach(function(c){
-        var done = u.lessons[c.key] ? Object.keys(u.lessons[c.key]).length : 0;
+        var done = lessonsDone(u, c.key);
         var ck = u.checks[c.key] ? Object.keys(u.checks[c.key]).length : 0;
         var pct = Math.min(100, Math.round(done/c.total*100));
         html += '<td class="cell"><span class="cnum">'+done+"/"+c.total+(ck?(' <span class="muted">+'+ck+'ck</span>'):'')+'</span>'
@@ -177,10 +287,22 @@
       html += '<td class="muted">'+fmtDate(u.last)+'</td>';
       if(state.isAdmin) html += '<td>'+manageCell(p)+'</td>';
       html += "</tr>";
+      html += '<tr class="drow"><td colspan="'+cols+'">'+detailHTML(u)+'</td></tr>';
     });
-    $("rows").innerHTML = html || '<tr><td colspan="9" class="muted">No students yet. Share a team join code from the panel above.</td></tr>';
+    $("rows").innerHTML = html || '<tr><td colspan="'+cols+'" class="muted">No students yet. Share a team join code from the panel above.</td></tr>';
     $("count").textContent = students.length + (students.length===1?" member":" members");
+    wireRows();
     if(state.isAdmin) wireManage();
+  }
+
+  function wireRows(){
+    Array.prototype.forEach.call($("rows").querySelectorAll("tr.srow"), function(tr){
+      tr.addEventListener("click", function(ev){
+        if(ev.target.closest(".manage")) return; // don't toggle while using admin controls
+        var d = tr.nextElementSibling;
+        if(d && d.classList.contains("drow")){ d.classList.toggle("open"); tr.classList.toggle("expanded"); }
+      });
+    });
   }
 
   function manageCell(p){
