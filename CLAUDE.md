@@ -49,7 +49,8 @@ The course *name* and its *file prefix* don't always match. Keep this map handy:
 
 ### Companions (Control course)
 
-- `glossary.html` - terms reference
+- `glossary.html` - academy-wide terms reference (Build + Code + Control, filterable by
+  course and topic; linked from all three hubs, not just Control)
 - `certificate.html` - completion certificate
 - `worksheet.html` - interactive tuning worksheet: enter a mechanism's numbers → paste-ready Phoenix 6 Java + a printable gains record
 - `closing-the-loop-troubleshooting.html` - troubleshooting field guide

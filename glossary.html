@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Closing the Loop · Glossary &amp; Reference</title>
+<title>FRC Academy · Glossary &amp; Reference</title>
 <style>
   :root{
     --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
@@ -69,7 +69,7 @@
 
 <header class="top">
   <div class="top-inner">
-    <a class="brand" href="closing-the-loop.html"><span class="dot"></span><span class="name">Closing the Loop</span></a>
+    <a class="brand" href="index.html"><span class="dot"></span><span class="name">FRC Academy</span></a>
     <div class="top-meta">Glossary</div>
   </div>
 </header>
@@ -78,27 +78,39 @@
   <div class="hero">
     <div class="eyebrow">Reference</div>
     <h1>Every term, <span class="accent">one page</span></h1>
-    <p class="dek">The vocabulary of FRC control, from the whole course. Search it, or filter by topic. A quick refresher when a word slips your mind.</p>
+    <p class="dek">The vocabulary of the whole academy - Build, Code, and Control - in one place. Search it, or filter by course and topic. A quick refresher when a word slips your mind.</p>
   </div>
 
   <div class="tools">
-    <input class="search" id="search" type="text" placeholder="Search terms and definitions… (e.g. kV, Motion Magic, feedforward)" autocomplete="off" spellcheck="false" />
+    <input class="search" id="search" type="text" placeholder="Search terms and definitions… (e.g. kV, gusset, NetworkTables)" autocomplete="off" spellcheck="false" />
+    <div class="chips" id="coursechips"></div>
     <div class="chips" id="chips"></div>
     <div class="count" id="count"></div>
   </div>
 
   <main id="list"></main>
 
-  <a class="backlink" href="closing-the-loop.html">← Back to the course map</a>
+  <a class="backlink" href="index.html">← Back to the academy</a>
 </div>
 
-<footer>Closing the Loop · A control systems course for FRC</footer>
+<footer>FRC Academy · Build · Code · Control</footer>
 
 <script>
 (function(){
   "use strict";
-  var ACCENT={Concepts:"#34D7C5",Gains:"#FFB020","Tuning & SysId":"#8E8CF8",Motion:"#43D67E",
-    "WPILib (Java)":"#34D7C5","Phoenix 6 / CTRE":"#FFB020",Mechanisms:"#8E8CF8","Drive & Vision":"#43D67E","State-Space":"#FF6B6B"};
+  var COURSE_ACCENT={Control:"#34D7C5",Code:"#8E8CF8",Build:"#FFB020"};
+  var COURSE_LABEL={Control:"🎯 Control",Code:"🎮 Code",Build:"🔧 Build"};
+  var CAT_COURSE={
+    // Control (Closing the Loop)
+    "Concepts":"Control","Gains":"Control","Tuning & SysId":"Control","Motion":"Control",
+    "WPILib (Java)":"Control","Phoenix 6 / CTRE":"Control","Mechanisms":"Control","Drive & Vision":"Control","State-Space":"Control",
+    // Code (Deploy)
+    "Toolchain & Deploy":"Code","Java Basics":"Code","Command-Based":"Code","Hardware I/O":"Code","Drive & Auto":"Code","Vision & Logic":"Code","Pro Practices":"Code",
+    // Build (Fabricate)
+    "The Shop":"Build","Materials & Stock":"Build","Power Transmission":"Build","Mechanism Design":"Build","Drivetrain":"Build","Electrical & Pneumatics":"Build","Design & CAD":"Build","Build Season":"Build"
+  };
+  function courseOf(cat){ return CAT_COURSE[cat]||"Control"; }
+  function catAccent(cat){ return COURSE_ACCENT[courseOf(cat)]||"#34D7C5"; }
 
   var TERMS=[
     // ---- Concepts ----
@@ -193,7 +205,129 @@
     {c:"State-Space",t:"State-space model",d:"ẋ = Ax + Bu - how the state changes with input.",r:"V.3"},
     {c:"State-Space",t:"State feedback",d:"u = K(reference − x). On [pos, vel] it's exactly PD.",r:"V.3"},
     {c:"State-Space",t:"LQR",d:"Picks the optimal gains K by trading off error (Q) vs effort (R).",r:"V.3"},
-    {c:"State-Space",t:"Q and R",d:"How much you penalize state error (Q) vs control effort (R).",r:"V.3"}
+    {c:"State-Space",t:"Q and R",d:"How much you penalize state error (Q) vs control effort (R).",r:"V.3"},
+
+    // ================= DEPLOY (Code) =================
+    // ---- Toolchain & Deploy ----
+    {c:"Toolchain & Deploy",t:"roboRIO",d:"The robot's small computer that runs your code, 50 times a second.",r:"1.1"},
+    {c:"Toolchain & Deploy",t:"Deploy",d:"Sending your compiled code from the laptop to the roboRIO over WiFi.",r:"1.3"},
+    {c:"Toolchain & Deploy",t:"Driver Station",d:"The laptop app that enables, disables, and shows the robot's status.",r:"1.3"},
+    {c:"Toolchain & Deploy",t:"WPILib VS Code",d:"A version of VS Code preloaded with every FRC tool you need.",r:"1.2"},
+    {c:"Toolchain & Deploy",t:"Gradle build",d:"The step that compiles your project and packages it for the robot.",r:"1.3"},
+    {c:"Toolchain & Deploy",t:"Vendordep",d:"A small file that pulls a vendor's library (CTRE, REV) into your project.",r:"1.5"},
+
+    // ---- Java Basics ----
+    {c:"Java Basics",t:"Variable",d:"A named box that holds a value your code can read and change.",r:"2.1"},
+    {c:"Java Basics",t:"Type",d:"What kind of value a variable holds - a double, an int, a boolean.",r:"2.1"},
+    {c:"Java Basics",t:"Method",d:"A named block of code you call to do one job.",r:"2.2"},
+    {c:"Java Basics",t:"Class",d:"A blueprint for a kind of thing; you build objects from it.",r:"2.3"},
+    {c:"Java Basics",t:"Object",d:"One live thing built from a class, often modeling real hardware.",r:"2.3"},
+    {c:"Java Basics",t:"Inheritance (extends)",d:"One class building on another. WPILib is built on this.",r:"2.4"},
+    {c:"Java Basics",t:"@Override",d:"Replacing a method you inherited, like a subsystem's periodic().",r:"2.4"},
+    {c:"Java Basics",t:"Interface",d:"A list of methods a class promises to provide.",r:"2.4"},
+    {c:"Java Basics",t:"Enum",d:"A fixed set of named states - perfect for robot modes.",r:"2.5"},
+
+    // ---- Command-Based ----
+    {c:"Command-Based",t:"Command-based",d:"The framework that splits robot code into subsystems and commands.",r:"3.1"},
+    {c:"Command-Based",t:"RobotContainer",d:"Where you wire subsystems, commands, and buttons together.",r:"3.1"},
+    {c:"Command-Based",t:"Command composition",d:"Combining commands: sequence, parallel, deadline, race.",r:"3.4"},
+    {c:"Command-Based",t:"Trigger",d:"A condition (like a button press) that runs a command.",r:"3.5"},
+    {c:"Command-Based",t:"Button binding",d:"Mapping a controller button to a command.",r:"3.5"},
+    {c:"Command-Based",t:"Default command",d:"What a subsystem does when nothing else has claimed it.",r:"3.6"},
+    {c:"Command-Based",t:"Requirement",d:"A subsystem a command needs, so two commands can't fight over it.",r:"3.6"},
+
+    // ---- Hardware I/O ----
+    {c:"Hardware I/O",t:"setVoltage",d:"Commanding a motor in volts - the honest, battery-proof unit.",r:"4.1"},
+    {c:"Hardware I/O",t:"SparkMax",d:"REV's motor controller, usually driving a NEO motor.",r:"4.1"},
+    {c:"Hardware I/O",t:"Gyro / IMU",d:"A sensor that reports heading and rotation.",r:"4.3"},
+    {c:"Hardware I/O",t:"Pigeon 2",d:"CTRE's IMU - the robot's sense of which way it's pointing.",r:"4.3"},
+    {c:"Hardware I/O",t:"Limit switch",d:"A switch that trips at the end of a mechanism's travel.",r:"4.4"},
+    {c:"Hardware I/O",t:"Beam break",d:"An optical sensor that notices a game piece passing through.",r:"4.4"},
+    {c:"Hardware I/O",t:"Homing",d:"Driving to a known reference (a switch) to zero a sensor.",r:"4.4"},
+    {c:"Hardware I/O",t:"Deadband",d:"Ignoring tiny joystick wiggles near center so the robot sits still.",r:"4.5"},
+    {c:"Hardware I/O",t:"NetworkTables",d:"The shared table of values the robot and dashboards both read.",r:"4.6"},
+
+    // ---- Drive & Auto ----
+    {c:"Drive & Auto",t:"Tank drive",d:"Left stick drives the left wheels, right stick the right.",r:"6.1"},
+    {c:"Drive & Auto",t:"Arcade drive",d:"One stick for forward, one axis for turning.",r:"6.1"},
+    {c:"Drive & Auto",t:"Trajectory",d:"A timed path the robot follows on its own.",r:"6.4"},
+    {c:"Drive & Auto",t:"PathPlanner / Choreo",d:"Tools to draw an autonomous path and follow it smoothly.",r:"6.4"},
+    {c:"Drive & Auto",t:"Autonomous",d:"The opening seconds where the robot runs with no driver.",r:"6.5"},
+
+    // ---- Vision & Logic ----
+    {c:"Vision & Logic",t:"PhotonVision / Limelight",d:"Camera systems that hand your code the targets they see.",r:"7.1"},
+    {c:"Vision & Logic",t:"State machine",d:"A clean way to step a superstructure through intake, index, shoot.",r:"7.4"},
+
+    // ---- Pro Practices ----
+    {c:"Pro Practices",t:"Telemetry",d:"Sending values out to a dashboard so you can see what the robot is doing.",r:"8.1"},
+    {c:"Pro Practices",t:"AdvantageScope",d:"A dashboard for replaying logs and plotting every signal.",r:"8.1"},
+    {c:"Pro Practices",t:"Elastic",d:"A simple live driver dashboard for match day.",r:"8.1"},
+    {c:"Pro Practices",t:"Simulation",d:"Running your robot code against a modeled robot, no hardware needed.",r:"8.2"},
+    {c:"Pro Practices",t:"Unit test (JUnit)",d:"Code that checks your code, catching bugs before the field does.",r:"8.3"},
+
+    // ================= FABRICATE (Build) =================
+    // ---- The Shop ----
+    {c:"The Shop",t:"PPE",d:"Personal protective equipment. Safety glasses go on first, always.",r:"1.1"},
+    {c:"The Shop",t:"E-stop",d:"The emergency button that cuts robot power in an instant.",r:"1.1"},
+    {c:"The Shop",t:"Caliper",d:"A tool that measures thickness and diameter precisely.",r:"1.4"},
+    {c:"The Shop",t:"Tolerance (fit)",d:"How far a real part is allowed to differ from its drawing.",r:"1.4"},
+    {c:"The Shop",t:"Fastener",d:"A bolt or screw that holds two parts together.",r:"1.5"},
+    {c:"The Shop",t:"Stripping",d:"Ruining threads or a bolt head by over-tightening or slipping.",r:"1.5"},
+
+    // ---- Materials & Stock ----
+    {c:"Materials & Stock",t:"Aluminum extrusion",d:"Hollow aluminum tube and channel - the robot's skeleton.",r:"2.1"},
+    {c:"Materials & Stock",t:"Polycarbonate",d:"Tough clear plastic for guards and panels; it bends, not shatters.",r:"2.2"},
+    {c:"Materials & Stock",t:"COTS",d:"Commercial off-the-shelf: a part you buy instead of make.",r:"2.3"},
+    {c:"Materials & Stock",t:"Gusset",d:"A bracket plate that ties tubes together at a joint.",r:"2.4"},
+
+    // ---- Power Transmission ----
+    {c:"Power Transmission",t:"Sprocket",d:"A toothed wheel that pulls a chain.",r:"3.2"},
+    {c:"Power Transmission",t:"Chain (#25, #35)",d:"Linked steel that carries power across a gap between shafts.",r:"3.2"},
+    {c:"Power Transmission",t:"Timing belt",d:"A toothed belt (GT2, HTD): quiet, clean, and needs no oil.",r:"3.3"},
+    {c:"Power Transmission",t:"Bearing",d:"Lets a shaft spin freely with almost no friction.",r:"3.4"},
+    {c:"Power Transmission",t:"Hex shaft",d:"A six-sided shaft that grips hubs so they can't slip.",r:"3.5"},
+    {c:"Power Transmission",t:"Gearbox",d:"A package of gears giving one big reduction (like MAXPlanetary).",r:"3.6"},
+    {c:"Power Transmission",t:"ReCalc",d:"A web calculator for picking motor count and gear ratio.",r:"3.7"},
+
+    // ---- Mechanism Design ----
+    {c:"Mechanism Design",t:"Four-bar linkage",d:"A jointed loop that keeps an end effector level as an arm swings.",r:"4.2"},
+    {c:"Mechanism Design",t:"Cascade elevator",d:"Stacked stages that extend together for extra reach.",r:"4.3"},
+    {c:"Mechanism Design",t:"Hard stop",d:"A physical block that limits how far a mechanism can travel.",r:"4.4"},
+    {c:"Mechanism Design",t:"Intake",d:"A roller mechanism that scoops game pieces off the floor.",r:"4.5"},
+    {c:"Mechanism Design",t:"End effector",d:"The business end of a mechanism - the part that touches the game piece.",r:"4.6"},
+
+    // ---- Drivetrain ----
+    {c:"Drivetrain",t:"Chassis / frame",d:"The structural box every mechanism bolts onto.",r:"5.1"},
+    {c:"Drivetrain",t:"West Coast Drive",d:"A rugged tank-style drivetrain many teams build.",r:"5.2"},
+    {c:"Drivetrain",t:"Durometer",d:"How hard or soft a wheel's rubber is - grip versus wear.",r:"5.3"},
+    {c:"Drivetrain",t:"Traction",d:"A wheel's grip on the carpet, which sets pushing power.",r:"5.3"},
+    {c:"Drivetrain",t:"Bumper",d:"The padded, rules-required frame protector.",r:"5.5"},
+
+    // ---- Electrical & Pneumatics ----
+    {c:"Electrical & Pneumatics",t:"Battery (12V)",d:"The sealed lead-acid brick that powers the whole robot.",r:"6.1"},
+    {c:"Electrical & Pneumatics",t:"Main breaker",d:"The 120-amp breaker that feeds everything and can shut it all off.",r:"6.1"},
+    {c:"Electrical & Pneumatics",t:"PDH",d:"Power Distribution Hub - fuses and feeds every circuit from the battery.",r:"6.1"},
+    {c:"Electrical & Pneumatics",t:"Crimp",d:"A tight, gas-proof wire connection squeezed on with a crimper.",r:"6.4"},
+    {c:"Electrical & Pneumatics",t:"Strain relief",d:"Anchoring a wire so motion never yanks its connection loose.",r:"6.4"},
+    {c:"Electrical & Pneumatics",t:"Pneumatics",d:"Using compressed air for fast, simple on/off motion.",r:"6.5"},
+    {c:"Electrical & Pneumatics",t:"Solenoid",d:"An electric valve that switches air to a cylinder.",r:"6.5"},
+    {c:"Electrical & Pneumatics",t:"Cylinder",d:"An air actuator that extends and retracts.",r:"6.5"},
+    {c:"Electrical & Pneumatics",t:"Voltage sag",d:"Battery voltage dropping when the motors pull hard.",r:"6.6"},
+    {c:"Electrical & Pneumatics",t:"Brownout",d:"The roboRIO shedding load when battery voltage drops too low.",r:"6.7"},
+    {c:"Electrical & Pneumatics",t:"Power budget",d:"Adding up the amps so the battery stays above the brownout line.",r:"6.7"},
+
+    // ---- Design & CAD ----
+    {c:"Design & CAD",t:"Onshape",d:"Browser-based CAD for designing parts and assemblies.",r:"7.2"},
+    {c:"Design & CAD",t:"Sketch (CAD)",d:"2D geometry you pull into a 3D part.",r:"7.2"},
+    {c:"Design & CAD",t:"Assembly (CAD)",d:"Parts mated together into a working mechanism on screen.",r:"7.2"},
+    {c:"Design & CAD",t:"Prototyping",d:"Quick cardboard or wood tests before you cut metal.",r:"7.3"},
+    {c:"Design & CAD",t:"Design for manufacture",d:"Designing parts your own shop can actually make.",r:"7.4"},
+
+    // ---- Build Season ----
+    {c:"Build Season",t:"Build season",d:"The six intense weeks to design and build the competition robot.",r:"8.1"},
+    {c:"Build Season",t:"Mill / Lathe",d:"Machine tools that cut precise metal parts.",r:"8.2"},
+    {c:"Build Season",t:"Inspection",d:"The pre-competition check that a robot is legal and safe.",r:"8.5"},
+    {c:"Build Season",t:"The pit",d:"Your team's work area at a competition.",r:"8.5"}
   ];
 
   var CATS=[];
@@ -203,16 +337,33 @@
   var countEl=document.getElementById("count");
   var searchEl=document.getElementById("search");
   var chipsEl=document.getElementById("chips");
-  var activeCat=null, query="";
+  var courseChipsEl=document.getElementById("coursechips");
+  var activeCat=null, activeCourse=null, query="";
 
-  // chips
-  var allChip=document.createElement("button"); allChip.className="chip active"; allChip.textContent="All"; allChip.setAttribute("data-cat","");
+  function resetRow(row){ var first=row.querySelector(".chip"); row.querySelectorAll(".chip").forEach(function(x){x.classList.toggle("active",x===first);}); }
+
+  // course chips (primary filter)
+  var allCourse=document.createElement("button"); allCourse.className="chip active"; allCourse.textContent="All courses"; allCourse.setAttribute("data-course","");
+  courseChipsEl.appendChild(allCourse);
+  ["Control","Code","Build"].forEach(function(cs){ var b=document.createElement("button"); b.className="chip"; b.textContent=COURSE_LABEL[cs]; b.setAttribute("data-course",cs); courseChipsEl.appendChild(b); });
+  courseChipsEl.querySelectorAll(".chip").forEach(function(b){
+    b.addEventListener("click",function(){
+      activeCourse=b.getAttribute("data-course")||null;
+      courseChipsEl.querySelectorAll(".chip").forEach(function(x){x.classList.toggle("active",x===b);});
+      activeCat=null; resetRow(chipsEl);
+      render();
+    });
+  });
+
+  // topic chips (secondary filter)
+  var allChip=document.createElement("button"); allChip.className="chip active"; allChip.textContent="All topics"; allChip.setAttribute("data-cat","");
   chipsEl.appendChild(allChip);
   CATS.forEach(function(c){ var b=document.createElement("button"); b.className="chip"; b.textContent=c; b.setAttribute("data-cat",c); chipsEl.appendChild(b); });
   chipsEl.querySelectorAll(".chip").forEach(function(b){
     b.addEventListener("click",function(){
       activeCat=b.getAttribute("data-cat")||null;
       chipsEl.querySelectorAll(".chip").forEach(function(x){x.classList.toggle("active",x===b);});
+      activeCourse=null; resetRow(courseChipsEl);
       render();
     });
   });
@@ -224,25 +375,27 @@
     var shown=0, html="";
     CATS.forEach(function(cat){
       if(activeCat && cat!==activeCat) return;
+      if(activeCourse && courseOf(cat)!==activeCourse) return;
       var items=TERMS.filter(function(x){
         if(x.c!==cat) return false;
         if(!query) return true;
         return (x.t+" "+x.d).toLowerCase().indexOf(query)>=0;
       });
       if(!items.length) return;
-      html+='<section class="cat"><h2>'+esc(cat)+'</h2><div class="terms">';
+      var acc=catAccent(cat);
+      html+='<section class="cat"><h2 style="color:'+acc+'">'+esc(cat)+'</h2><div class="terms">';
       items.forEach(function(x){
         shown++;
-        html+='<div class="term" style="--accent:'+(ACCENT[cat]||"#34D7C5")+'">'+
+        html+='<div class="term" style="--accent:'+acc+'">'+
           '<div class="t">'+esc(x.t)+'</div>'+
           '<div class="d">'+esc(x.d)+'</div>'+
-          '<div class="ref">Lesson '+esc(x.r)+'</div>'+
+          '<div class="ref">'+COURSE_LABEL[courseOf(cat)]+' · Lesson '+esc(x.r)+'</div>'+
         '</div>';
       });
       html+='</div></section>';
     });
     listEl.innerHTML = shown ? html : '<div class="empty">No terms match "'+esc(query)+'".</div>';
-    countEl.textContent = shown+" term"+(shown===1?"":"s")+(query||activeCat?" shown":" total");
+    countEl.textContent = shown+" term"+(shown===1?"":"s")+(query||activeCat||activeCourse?" shown":" total");
   }
   render();
 })();
