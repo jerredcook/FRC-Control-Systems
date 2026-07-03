@@ -173,6 +173,31 @@ layer adds student accounts, cross-device progress, and a mentor dashboard. It i
   solved (`.opt.locked`/`.correct` present) and records each question at most once per
   page load. No change to the 200+ lesson files. `review.html` consumes this pool.
 
+### Installable app (PWA)
+
+The site is an installable, offline-capable Progressive Web App - still static, no
+build step, no dependencies.
+
+- `manifest.webmanifest` (name, icons, `display:standalone`, dark theme). All paths
+  are **relative** because GitHub Pages serves the site under a project subpath
+  (`/FRC-Control-Systems/`); absolute `/` paths would break. `icons/` holds the PNGs,
+  generated from `icons/icon.svg` (the glowing loop + three pillar dots).
+- `service-worker.js` precaches an app **shell** (home, hubs, companions, scripts,
+  icons, `offline.html`) and then **runtime-caches** every other same-origin page the
+  first time it is opened (stale-while-revalidate). So a lesson works offline after
+  one online visit. It **never intercepts cross-origin** requests, so the Supabase
+  library (`esm.sh`) and external doc links are untouched and can't break offline use.
+  Bump `VERSION` to ship a new shell and evict the old cache.
+- **No per-file change**: `account.js` (already on every page) injects the manifest
+  link, theme-color, apple-touch icon/metas, and registers the service worker - the
+  same "don't touch the 200+ lesson files" trick used for review capture. New pages
+  get PWA behavior for free just by keeping the `account.js` include.
+- `offline.html` is the fallback shown when navigating offline to an uncached page.
+- **Play Store (TWA) later**: needs a Digital Asset Links file at the *origin root*
+  (`/.well-known/assetlinks.json`), which a project subpath can't serve - so it
+  requires a custom domain or the user-root Pages repo first, then PWABuilder/
+  Bubblewrap. The browser-install PWA works as-is on the current subpath.
+
 ### Lesson file anatomy
 
 Each lesson is one standalone HTML file:

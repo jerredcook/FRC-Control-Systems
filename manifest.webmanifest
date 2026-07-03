@@ -1,0 +1,20 @@
+{
+  "id": "frc-academy",
+  "name": "FRC Academy",
+  "short_name": "FRC Academy",
+  "description": "Learn to build, code, and control an FRC robot. Free, interactive, and works offline.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#090d15",
+  "theme_color": "#090d15",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["education"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

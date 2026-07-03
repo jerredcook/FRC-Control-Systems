@@ -95,6 +95,44 @@
   else attach();
 })();
 
+/* FRC Academy - PWA glue.
+ *
+ * Makes every page installable and offline-capable with no per-file change:
+ * injects the manifest link, theme color, and app icons, then registers the
+ * service worker. All paths are relative so they work under the GitHub Pages
+ * project subpath. Registration is a no-op on file:// or older browsers.
+ */
+(function () {
+  "use strict";
+  try {
+    var head = document.head || document.getElementsByTagName("head")[0];
+    if (head) {
+      function addEl(tag, attrs) {
+        var el = document.createElement(tag);
+        for (var a in attrs) el.setAttribute(a, attrs[a]);
+        head.appendChild(el);
+      }
+      if (!document.querySelector('link[rel="manifest"]'))
+        addEl("link", { rel: "manifest", href: "manifest.webmanifest" });
+      if (!document.querySelector('meta[name="theme-color"]'))
+        addEl("meta", { name: "theme-color", content: "#090d15" });
+      if (!document.querySelector('link[rel="apple-touch-icon"]'))
+        addEl("link", { rel: "apple-touch-icon", href: "icons/apple-touch-icon.png" });
+      if (!document.querySelector('meta[name="apple-mobile-web-app-capable"]')) {
+        addEl("meta", { name: "apple-mobile-web-app-capable", content: "yes" });
+        addEl("meta", { name: "mobile-web-app-capable", content: "yes" });
+        addEl("meta", { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" });
+        addEl("meta", { name: "apple-mobile-web-app-title", content: "FRC Academy" });
+      }
+    }
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("service-worker.js").catch(function () {});
+      });
+    }
+  } catch (e) { /* never break a page over install glue */ }
+})();
+
 (function () {
   "use strict";
 
