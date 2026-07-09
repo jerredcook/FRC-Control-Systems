@@ -95,6 +95,97 @@
   else attach();
 })();
 
+/* FRC Academy - completion moment.
+ *
+ * Finishing a lesson used to be silent: the mark-done script wrote localStorage
+ * and nothing happened on screen. This standalone block (works with or without
+ * the backend) watches for the current page's own filename being added to a
+ * course's :done map and celebrates with a small toast offering the next lesson
+ * (read from the page's existing .coursenav forward link) and the course map.
+ * No change to any lesson file.
+ */
+(function () {
+  "use strict";
+  var here = (location.pathname.split("/").pop() || "").toLowerCase();
+  if (!/lesson-\d|checkpoint-\d/.test(here)) return;
+  var isCheckpoint = /checkpoint/.test(here);
+  var shown = false;
+
+  function navLinks() {
+    var next = null, map = null;
+    var links = document.querySelectorAll(".coursenav a");
+    Array.prototype.forEach.call(links, function (a) {
+      if (a.classList.contains("map")) { map = a; return; }
+      if (/→\s*$/.test(a.textContent)) next = a;
+    });
+    return { next: next, map: map };
+  }
+
+  function celebrate() {
+    if (shown) return;
+    shown = true;
+    try {
+      var nav = navLinks();
+      var css = document.createElement("style");
+      css.textContent =
+        ".frc-toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,16px);opacity:0;" +
+        "z-index:9999;background:#10192e;border:1px solid #34d6c0;border-radius:14px;padding:16px 18px;" +
+        "box-shadow:0 18px 50px -18px rgba(0,0,0,.85);max-width:min(92vw,430px);" +
+        "font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,system-ui,sans-serif;" +
+        "transition:transform .35s ease,opacity .35s ease}" +
+        ".frc-toast.on{transform:translate(-50%,0);opacity:1}" +
+        "@media (prefers-reduced-motion: reduce){.frc-toast{transition:none}}" +
+        ".frc-toast .t-eyebrow{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;letter-spacing:.22em;" +
+        "text-transform:uppercase;color:#34d6c0;margin-bottom:4px}" +
+        ".frc-toast .t-msg{color:#e8edf7;font-size:15px;font-weight:700;letter-spacing:-.01em}" +
+        ".frc-toast .t-sub{color:#92a2be;font-size:12.5px;margin-top:2px}" +
+        ".frc-toast .t-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}" +
+        ".frc-toast a{font-family:ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.08em;" +
+        "text-transform:uppercase;text-decoration:none;border-radius:8px;padding:9px 12px}" +
+        ".frc-toast a.t-next{background:linear-gradient(180deg,#6ff0dd,#34d6c0);color:#06121f;font-weight:700}" +
+        ".frc-toast a.t-map{border:1px solid #33415e;color:#92a2be}" +
+        ".frc-toast button{position:absolute;top:6px;right:9px;background:none;border:none;color:#5e6f8e;" +
+        "font-size:15px;cursor:pointer;padding:4px}";
+      document.head.appendChild(css);
+
+      var box = document.createElement("div");
+      box.className = "frc-toast";
+      box.setAttribute("role", "status");
+      var eyebrow = isCheckpoint ? "Checkpoint cleared" : "Lesson complete";
+      var msg = isCheckpoint ? "★ You proved this whole Part." : "✓ Every question answered correctly.";
+      var sub = isCheckpoint ? "Cumulative mastery, on the record." : "This lesson is now marked done on your map.";
+      var row = "";
+      if (nav.next) row += '<a class="t-next" href="' + nav.next.getAttribute("href") + '">Next lesson →</a>';
+      if (nav.map) row += '<a class="t-map" href="' + nav.map.getAttribute("href") + '">Course map</a>';
+      box.innerHTML =
+        '<button aria-label="Dismiss">✕</button>' +
+        '<div class="t-eyebrow">' + eyebrow + "</div>" +
+        '<div class="t-msg">' + msg + "</div>" +
+        '<div class="t-sub">' + sub + "</div>" +
+        (row ? '<div class="t-row">' + row + "</div>" : "");
+      document.body.appendChild(box);
+      box.querySelector("button").addEventListener("click", function () { box.remove(); });
+      requestAnimationFrame(function () { requestAnimationFrame(function () { box.classList.add("on"); }); });
+    } catch (e) { /* never break a page over a celebration */ }
+  }
+
+  try {
+    var prev = localStorage.setItem;
+    localStorage.setItem = function (k, v) {
+      var before = null;
+      if (/:done$/.test(String(k))) {
+        try { before = JSON.parse(localStorage.getItem(k)) || {}; } catch (e) { before = {}; }
+      }
+      prev.call(localStorage, k, v);
+      if (before === null) return;
+      try {
+        var after = JSON.parse(v) || {};
+        if (after[here] && !before[here]) celebrate();
+      } catch (e) {}
+    };
+  } catch (e) {}
+})();
+
 /* FRC Academy - PWA glue.
  *
  * Makes every page installable and offline-capable with no per-file change:
