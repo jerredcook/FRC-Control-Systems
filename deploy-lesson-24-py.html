@@ -378,8 +378,25 @@ states = <span class="ty">SwerveDrive4Kinematics</span>.<span class="fn">desatur
   // predict-first: commit a guess, reveal the answer, then run the sim
   var q=document.querySelector('#predict .q'); if(!q) return;
   var correct=parseInt(q.getAttribute('data-correct'),10);
-  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain'); var done=false;
-  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; done=true; opts.forEach(function(o){o.classList.add('locked');}); if(i===correct){opt.classList.add('correct');} else {opt.classList.add('wrong'); opts[correct].classList.add('correct');} explain.classList.add('show'); }); });
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain');
+  var picked=-1, revealed=false, ran=false;
+  var demos=document.querySelectorAll('.demo');
+  var note=document.createElement('div');
+  note.textContent='Prediction locked in. Now run the sim and see if you were right.';
+  note.style.cssText='display:none;font-size:13px;color:#92A2BE;margin-top:10px;font-style:italic';
+  q.appendChild(note);
+  function reveal(){ if(revealed||picked<0) return; revealed=true; note.style.display='none';
+    if(picked===correct){opts[picked].classList.add('correct');} else {opts[picked].classList.add('wrong'); opts[correct].classList.add('correct');}
+    explain.classList.add('show'); }
+  function onRan(){ ran=true; if(picked>=0) reveal(); }
+  if(demos.length){
+    Array.prototype.forEach.call(demos,function(d){
+      d.addEventListener('pointerdown',onRan,true);
+      d.addEventListener('input',onRan,true);
+    });
+    window.addEventListener('keydown',onRan,true);
+  } else { ran=true; }
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(picked>=0)return; picked=i; opts.forEach(function(o){o.classList.add('locked');}); if(ran){ reveal(); } else { note.style.display='block'; } }); });
 })();
 </script>
 <script src="account-config.js"></script>
