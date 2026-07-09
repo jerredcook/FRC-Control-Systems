@@ -58,6 +58,15 @@
   .btn.primary{background:linear-gradient(180deg,#ffb37e,var(--indigo));color:#2a1503;font-weight:700;border:none}
   .btn:hover{filter:brightness(1.08)}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--amber);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
 
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
@@ -149,6 +158,13 @@
       </div>
     </div>
     <p class="caption">Twisted and unsecured, the wire pulls right out. Crimped and zip-tied, the tug lands on the anchor and the joint holds. Inspectors and good drivers both do this test, because a connection that survives a tug survives a match.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
+      <div class="m-item" data-m="baseline"><span class="m-st">○</span><span>Tug the joint as it starts, <b>Twisted + None</b>, and watch it <b>pull out</b>. That is the connection a rushed build makes.</span></div>
+      <div class="m-item" data-m="halffix"><span class="m-st">○</span><span>Prove half a fix fails in this sim: get a pull out with <b>Crimped + None</b>, then another with <b>Twisted + Zip-tied</b>. The crimp and the zip tie do different jobs.</span></div>
+      <div class="m-item" data-m="holds"><span class="m-st">○</span><span>Build the joint that passes: <b>Crimped + Zip-tied</b>. Tug it and read <b>HOLDS</b>.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> test all <b>4 combos</b> in one run, flipping only <b>one toggle</b> between tugs. Changing one thing at a time is how you trace any fault.</span></div>
+    </div>
   </section>
 
   <section>
@@ -307,6 +323,50 @@
     }, 380);
   });
   setConn(); reset(); requestAnimationFrame(loop);
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  // Poll the sim: a tug's verdict is 'fail' when the wire lets go, or 'hold' when the
+  // pull maxes out on a crimped + zip-tied joint. Edge-detect one verdict per tug.
+  var mTested=false, mFailCN=false, mFailTZ=false, mChainLast=null, mChainSet={};
+  setInterval(function(){
+    var verdict = failed ? 'fail' : ((pulling && pull>=1) ? 'hold' : null);
+    if(verdict && !mTested){
+      mTested=true;
+      var combo=(crimped?'C':'T')+(relief?'Z':'N');
+      if(combo==='TN'&&verdict==='fail') mClear('baseline');
+      if(combo==='CN'&&verdict==='fail') mFailCN=true;
+      if(combo==='TZ'&&verdict==='fail') mFailTZ=true;
+      if(mFailCN&&mFailTZ) mClear('halffix');
+      if(combo==='CZ'&&verdict==='hold') mClear('holds');
+      if(mChainLast===null){ mChainSet={}; mChainSet[combo]=true; }
+      else if(combo!==mChainLast){
+        var d=((combo.charAt(0)!==mChainLast.charAt(0))?1:0)+((combo.charAt(1)!==mChainLast.charAt(1))?1:0);
+        if(d===1){ mChainSet[combo]=true; } else { mChainSet={}; mChainSet[combo]=true; }
+      }
+      mChainLast=combo;
+      if(mChainSet.TN&&mChainSet.CN&&mChainSet.TZ&&mChainSet.CZ) mClear('gold');
+    }
+    if(!pulling && !failed) mTested=false;
+  },150);
+  }catch(e){}
 
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);

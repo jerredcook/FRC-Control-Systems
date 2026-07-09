@@ -53,10 +53,15 @@
   .cat h2::before{content:"";width:24px;height:1px;background:var(--line-2)}
   .terms{display:grid;gap:10px}
   @media(min-width:620px){.terms{grid-template-columns:1fr 1fr}}
-  .term{border:1px solid var(--line);border-radius:11px;background:var(--panel);padding:13px 15px;border-left:3px solid var(--accent,var(--teal))}
+  .term{border:1px solid var(--line);border-radius:11px;background:var(--panel);padding:13px 15px;border-left:3px solid var(--accent,var(--teal));scroll-margin-top:140px}
   .term .t{font-family:var(--mono);font-size:14px;color:var(--text);font-weight:650}
   .term .d{font-size:14px;color:var(--muted);margin-top:4px;line-height:1.45}
   .term .ref{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-top:6px}
+  .term .ref a{color:inherit;text-decoration:none;border-bottom:1px dotted var(--line-2)}
+  .term .ref a:hover{color:var(--accent,var(--teal));border-bottom-color:currentColor}
+  .term.flash{animation:termflash 1.5s ease-out 1}
+  @keyframes termflash{0%,35%{box-shadow:0 0 0 3px var(--accent,var(--teal))}100%{box-shadow:0 0 0 3px transparent}}
+  @media (prefers-reduced-motion: reduce){.term.flash{animation:none;box-shadow:0 0 0 3px var(--accent,var(--teal))}}
   .empty{color:var(--faint);font-style:italic;padding:30px 0;text-align:center}
 
   .backlink{display:inline-block;margin:18px 0 0;font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--indigo);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px}
@@ -111,6 +116,49 @@
   };
   function courseOf(cat){ return CAT_COURSE[cat]||"Control"; }
   function catAccent(cat){ return COURSE_ACCENT[courseOf(cat)]||"#34D7C5"; }
+
+  // Lesson refs ("I.6", "3.2") to real files, derived from each hub's COURSE array.
+  // Each part maps to the ordered list of lesson file numbers it contains.
+  var LESSON_MAP={
+    Control:{prefix:"closing-the-loop-lesson-", parts:{
+      "I":[1,2,3,4,5,6,7,8],
+      "II":[9,10,11,12,13],
+      "III":[14,15,16,17,18],
+      "IV":[19,20,21],
+      "V":[22,23,24]
+    }},
+    Code:{prefix:"deploy-lesson-", parts:{
+      "1":[1,2,3,4,5],
+      "2":[6,7,8,9,10],
+      "3":[11,12,13,14,15,16],
+      "4":[17,18,19,20,21,22],
+      // Part 5 links to the Control course, no Deploy files
+      "6":[23,24,25,26,27],
+      "7":[28,29,30,31],
+      "8":[32,33,34,35,36],
+      "9":[37]
+    }},
+    Build:{prefix:"build-lesson-", parts:{
+      "1":[1,2,3,4,5],
+      "2":[6,7,8,9],
+      "3":[10,11,12,13,14,15,44],
+      "4":[16,17,18,19,20,21],
+      "5":[22,23,24,25,26],
+      "6":[27,28,29,30,31,41,42,43],
+      "7":[32,33,34,35],
+      "8":[36,37,38,39,40]
+    }}
+  };
+  function lessonFile(course, ref){
+    var m=LESSON_MAP[course]; if(!m) return null;
+    var bits=String(ref).split(".");
+    if(bits.length!==2) return null;
+    var list=m.parts[bits[0]], idx=parseInt(bits[1],10)-1;
+    if(!list || isNaN(idx) || idx<0 || idx>=list.length) return null;
+    return m.prefix+list[idx]+".html";
+  }
+
+  function slugify(s){ return String(s).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,""); }
 
   var TERMS=[
     // ---- Concepts ----
@@ -333,6 +381,16 @@
   var CATS=[];
   TERMS.forEach(function(x){ if(CATS.indexOf(x.c)<0) CATS.push(x.c); });
 
+  // Stable, unique slug id per term (for deep links like glossary.html#feedforward).
+  (function(){
+    var seen={};
+    TERMS.forEach(function(x){
+      var s=slugify(x.t)||"term";
+      if(seen[s]){ seen[s]++; s=s+"-"+seen[s]; } else { seen[s]=1; }
+      x.id=s;
+    });
+  })();
+
   var listEl=document.getElementById("list");
   var countEl=document.getElementById("count");
   var searchEl=document.getElementById("search");
@@ -386,10 +444,13 @@
       html+='<section class="cat"><h2 style="color:'+acc+'">'+esc(cat)+'</h2><div class="terms">';
       items.forEach(function(x){
         shown++;
-        html+='<div class="term" style="--accent:'+acc+'">'+
+        var refText=COURSE_LABEL[courseOf(cat)]+' · Lesson '+esc(x.r);
+        var refFile=lessonFile(courseOf(cat), x.r);
+        var refHtml=refFile ? '<a href="'+esc(refFile)+'">'+refText+'</a>' : refText;
+        html+='<div class="term" id="'+esc(x.id)+'" style="--accent:'+acc+'">'+
           '<div class="t">'+esc(x.t)+'</div>'+
           '<div class="d">'+esc(x.d)+'</div>'+
-          '<div class="ref">'+COURSE_LABEL[courseOf(cat)]+' · Lesson '+esc(x.r)+'</div>'+
+          '<div class="ref">'+refHtml+'</div>'+
         '</div>';
       });
       html+='</div></section>';
@@ -398,6 +459,34 @@
     countEl.textContent = shown+" term"+(shown===1?"":"s")+(query||activeCat||activeCourse?" shown":" total");
   }
   render();
+
+  // Deep links: glossary.html#some-term scrolls to the term and flashes its border.
+  var flashTimer=null;
+  function focusHash(){
+    var raw=location.hash.replace(/^#/,"");
+    if(!raw) return;
+    var id;
+    try{ id=decodeURIComponent(raw); }catch(e){ id=raw; }
+    var el=document.getElementById(id);
+    if((!el || !el.classList.contains("term")) && (query||activeCat||activeCourse)){
+      // The term may be hidden by a filter or search. Clear them and retry.
+      query=""; searchEl.value="";
+      activeCat=null; activeCourse=null;
+      resetRow(chipsEl); resetRow(courseChipsEl);
+      render();
+      el=document.getElementById(id);
+    }
+    if(!el || !el.classList.contains("term")) return;
+    el.scrollIntoView({block:"center"});
+    el.classList.remove("flash");
+    void el.offsetWidth; // restart the animation if re-triggered
+    el.classList.add("flash");
+    if(flashTimer) clearTimeout(flashTimer);
+    flashTimer=setTimeout(function(){ el.classList.remove("flash"); }, 2000);
+  }
+  window.addEventListener("hashchange", focusHash);
+  // Run after the browser's own fragment scroll so our centered scroll wins.
+  if(location.hash) setTimeout(focusHash, 0);
 })();
 </script>
 <script src="account-config.js"></script>

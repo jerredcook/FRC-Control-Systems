@@ -57,6 +57,16 @@
   input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
 
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--amber);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
   .note p{margin:0;color:var(--text);font-size:16px}
@@ -144,6 +154,13 @@
       </div>
     </div>
     <p class="caption">The steer motor swings the module to whatever heading you set; the drive motor spins the wheel at whatever speed you ask. Four of these on a robot, each pointing where it needs to, is what lets swerve glide in any direction while it spins.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
+      <div class="m-item" data-m="steer0"><span class="m-st">○</span><span>Set Drive speed to <b>0%</b>, then swing the Steer angle at least <b>90°</b>. The speed arrow is gone, but the module still points wherever you ask. Two motors, two separate jobs.</span></div>
+      <div class="m-item" data-m="arrow"><span class="m-st">○</span><span>Park the Steer at <b>90°</b> and leave it. Sweep Drive speed from <b>20% or less</b> up to <b>90% or more</b>. Only the arrow grows, the heading never budges.</span></div>
+      <div class="m-item" data-m="wrap"><span class="m-st">○</span><span>Drag the Steer from <b>170°</b> all the way around to <b>-170°</b>. You dragged 340°, but those two headings are only <b>20° apart</b>. A smart module takes the short way.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> hold a commanded state, Steer <b>-135°</b> and Drive <b>35%</b>, steady for <b>2 seconds</b>. An angle plus a speed is exactly the order swerve kinematics sends each module.</span></div>
+    </div>
   </section>
 
   <section>
@@ -284,6 +301,51 @@
   function roundRect(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
   document.getElementById('ang').addEventListener('input',function(e){ angDeg=+e.target.value; document.getElementById('angv').textContent=angDeg+'°'; document.getElementById('roAng').textContent=angDeg+'°'; });
   document.getElementById('spd').addEventListener('input',function(e){ spd=+e.target.value; document.getElementById('spdv').textContent=spd+'%'; document.getElementById('roSpd').textContent=spd+'%'; });
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  var m1lo=null,m1hi=null, m2lo=null,m2hi=null, mEndHi=false,mEndLo=false, mHold=0;
+  function mEval(){
+    if(spd===0){
+      if(m1lo===null){m1lo=angDeg;m1hi=angDeg;}
+      if(angDeg<m1lo)m1lo=angDeg; if(angDeg>m1hi)m1hi=angDeg;
+      if(m1hi-m1lo>=90) mClear('steer0');
+    } else { m1lo=null; m1hi=null; }
+    if(Math.abs(angDeg-90)<=3){
+      if(m2lo===null){m2lo=spd;m2hi=spd;}
+      if(spd<m2lo)m2lo=spd; if(spd>m2hi)m2hi=spd;
+      if(m2lo<=20&&m2hi>=90) mClear('arrow');
+    } else { m2lo=null; m2hi=null; }
+    if(angDeg>=170) mEndHi=true;
+    if(angDeg<=-170) mEndLo=true;
+    if(mEndHi&&mEndLo) mClear('wrap');
+  }
+  document.getElementById('ang').addEventListener('input',mEval);
+  document.getElementById('spd').addEventListener('input',mEval);
+  setInterval(function(){
+    mEval();
+    if(Math.abs(angDeg+135)<=2 && Math.abs(spd-35)<=2){ mHold+=0.2; } else { mHold=0; }
+    if(mHold>=2) mClear('gold');
+  },200);
+  }catch(e){}
+
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
   requestAnimationFrame(step);
 

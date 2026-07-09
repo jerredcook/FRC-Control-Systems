@@ -105,6 +105,8 @@
   .opt.locked.correct,.opt.locked.wrong{opacity:1}
   .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
   .explain.show{display:block}
+  .explain a.ref{display:inline-block;margin-top:10px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--indigo);text-decoration:none;border:1px solid var(--line-2);border-radius:7px;padding:4px 10px;transition:.12s}
+  .explain a.ref:hover{border-color:var(--indigo);color:var(--text)}
 
   .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
   .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
@@ -157,7 +159,7 @@
           <button class="opt">The right side gets more, because turn is added to it</button>
           <button class="opt">The left side gets more (fwd + turn) and the right side less (fwd - turn), so the robot curves right while moving ahead</button>
         </div>
-        <div class="explain">Arcade mixing is left = fwd + turn, right = fwd - turn. A forward-and-right command speeds up the left wheels and slows the right, curving the robot to the right while it still drives ahead.</div>
+        <div class="explain">Arcade mixing is left = fwd + turn, right = fwd - turn. A forward-and-right command speeds up the left wheels and slows the right, curving the robot to the right while it still drives ahead. <a class="ref" href="deploy-lesson-23.html">Review: Lesson 6.1 &middot; The Drivetrain</a></div>
       </div>
       <div class="q" data-correct="1">
         <div class="qn">Question 2</div>
@@ -167,7 +169,7 @@
           <button class="opt">Field-relative control on a holonomic drive: each wheel steers, so translation is independent of which way the body points</button>
           <button class="opt">Higher motor voltage, which lets the robot push sideways</button>
         </div>
-        <div class="explain">Swerve is holonomic because every module steers, so the robot can translate any direction while pointed any way. fromFieldRelativeSpeeds rotates the stick command by the gyro heading so push-away always means down-field.</div>
+        <div class="explain">Swerve is holonomic because every module steers, so the robot can translate any direction while pointed any way. fromFieldRelativeSpeeds rotates the stick command by the gyro heading so push-away always means down-field. <a class="ref" href="deploy-lesson-24.html">Review: Lesson 6.2 &middot; Swerve Drive in Code</a></div>
       </div>
       <div class="q" data-correct="0">
         <div class="qn">Question 3</div>
@@ -177,7 +179,7 @@
           <button class="opt">The field physically shifts during the match</button>
           <button class="opt">getPoseMeters() returns the wrong units after a while</button>
         </div>
-        <div class="explain">Odometry is a running sum of motion from a known start. Each tiny measurement error, such as a slipping wheel, is added to the total and never corrected, so the estimate drifts. A vision fix or a known reset re-anchors it.</div>
+        <div class="explain">Odometry is a running sum of motion from a known start. Each tiny measurement error, such as a slipping wheel, is added to the total and never corrected, so the estimate drifts. A vision fix or a known reset re-anchors it. <a class="ref" href="deploy-lesson-25.html">Review: Lesson 6.3 &middot; Odometry</a></div>
       </div>
       <div class="q" data-correct="1">
         <div class="qn">Question 4</div>
@@ -187,7 +189,7 @@
           <button class="opt">How accurate its pose is, because the follower compares odometry to the path target and corrects the error with feedback</button>
           <button class="opt">Whether tankDrive or arcadeDrive is used to read the sticks</button>
         </div>
-        <div class="explain">A path follower is a control loop on your pose: each loop it asks where it should be versus where odometry says it is, then closes the gap with PID and feedforward. A drifting pose means a wrong error, so it cuts the line. Better odometry means tighter tracking.</div>
+        <div class="explain">A path follower is a control loop on your pose: each loop it asks where it should be versus where odometry says it is, then closes the gap with PID and feedforward. A drifting pose means a wrong error, so it cuts the line. Better odometry means tighter tracking. <a class="ref" href="deploy-lesson-26.html">Review: Lesson 6.4 &middot; Trajectories &amp; PathPlanner</a></div>
       </div>
       <div class="q" data-correct="2">
         <div class="qn">Question 5</div>
@@ -197,7 +199,7 @@
           <button class="opt">Set a higher current limit so both can run</button>
           <button class="opt">Run them in parallel: drive.followPath(...).alongWith(shooter.spinUp())</button>
         </div>
-        <div class="explain">An auto is a command composition. sequence runs steps in order; alongWith runs them in parallel. Overlapping a spin-up with a drive means the shooter is at speed the moment the robot arrives, which shaves time off the routine.</div>
+        <div class="explain">An auto is a command composition. sequence runs steps in order; alongWith runs them in parallel. Overlapping a spin-up with a drive means the shooter is at speed the moment the robot arrives, which shaves time off the routine. <a class="ref" href="deploy-lesson-27.html">Review: Lesson 6.5 &middot; Building an Autonomous</a></div>
       </div>
     </div>
   </section>

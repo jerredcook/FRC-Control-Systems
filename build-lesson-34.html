@@ -57,6 +57,15 @@
   input[type=range]::-moz-range-thumb{width:18px;height:18px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
   .ticks{display:flex;justify-content:space-between;margin-top:6px;font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--amber);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
 
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
@@ -149,6 +158,13 @@
       </div>
     </div>
     <p class="caption">Cardboard gets you a dozen quick tries to nail the shape and motion; aluminum gives you maybe two and answers "is it match-ready?" Use the cheap rungs to settle the cheap questions, and only spend metal once you're confident.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
+      <div class="m-item" data-m="trade"><span class="m-st">○</span><span>Slide through all <b>three rungs</b>. Watch the tries you can afford drop from <b>12</b> to <b>2</b> while time goes from minutes to an afternoon.</span></div>
+      <div class="m-item" data-m="shape"><span class="m-st">○</span><span>Build season asks: <b>will the intake grab the piece? Will it reach the top shelf?</b> Those are shape questions. Dial the rung that answers shape almost for free and hold it for <b>2 seconds</b>.</span></div>
+      <div class="m-item" data-m="motion"><span class="m-st">○</span><span>Next: <b>will the arm really swing through its full travel?</b> That is motion, not just shape. Pick the matching rung and hold it for <b>2 seconds</b>.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> final ask: <b>will it survive a full match load, and is it match-ready?</b> Only one rung can answer that. Hold it for <b>2 seconds</b>.</span></div>
+    </div>
   </section>
 
   <section>
@@ -290,6 +306,40 @@
   document.getElementById('fid').addEventListener('input',function(e){ fid=+e.target.value; refresh(); });
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();bracket();},120);});
   refresh();
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  function mDone(id){ return !!mItems[id]&&mItems[id].classList.contains('cleared'); }
+  var mSeen={}, mAt=fid, mHold=0, mTouched=false;
+  document.getElementById('fid').addEventListener('input',function(e){ mTouched=true; mSeen[+e.target.value]=true; });
+  setInterval(function(){
+    mSeen[fid]=true;
+    if(mSeen[0]&&mSeen[1]&&mSeen[2]) mClear('trade');
+    if(fid===mAt){ mHold+=0.2; } else { mAt=fid; mHold=0; }
+    if(mTouched&&mHold>=2){
+      if(fid===0&&mDone('trade')) mClear('shape');
+      if(fid===1&&mDone('shape')) mClear('motion');
+      if(fid===2&&mDone('motion')) mClear('gold');
+    }
+  },200);
+  }catch(e){}
 
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);

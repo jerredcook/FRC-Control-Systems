@@ -56,6 +56,16 @@
   .hint{font-family:var(--mono);font-size:11px;color:var(--faint)}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
 
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--amber);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
   .note p{margin:0;color:var(--text);font-size:16px}
@@ -145,6 +155,13 @@
       </div>
     </div>
     <p class="caption">With drop center, the robot spins about the highlighted middle wheels with little scrub. Turn it off and all six wheels grip, so it grinds around slowly with skid marks at every corner. Same drivetrain, very different turning.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
+      <div class="m-item" data-m="clean"><span class="m-st">○</span><span>With drop center <b>ON</b>, press <b>Turn</b> and spin one <b>full circle</b>. Watch the scrub meter stay green the whole way around.</span></div>
+      <div class="m-item" data-m="grind"><span class="m-st">○</span><span>Turn drop center <b>OFF</b> and grind through a <b>full circle</b> with all six wheels flat. Same motors, about <b>2.5x slower</b>.</span></div>
+      <div class="m-item" data-m="rescue"><span class="m-st">○</span><span>Start a turn with drop center <b>OFF</b>, then flip it <b>ON mid-spin</b>. Watch the robot jump from grinding to pivoting.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> spin at least one full circle, then hit <b>Stop</b> with the front arrow pointing <b>straight up</b>, within <b>15 degrees</b>. Try both modes. Which one is easier to aim?</span></div>
+    </div>
   </section>
 
   <section>
@@ -291,6 +308,50 @@
   });
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
   requestAnimationFrame(step);
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  var mTau=Math.PI*2, mLast=ang, mCleanAcc=0, mFlatAcc=0, mFlatRun=0, mSeg=ang;
+  setInterval(function(){
+    var d=ang-mLast; mLast=ang;
+    if(d<=0) return;
+    if(drop){ mCleanAcc+=d; } else { mFlatAcc+=d; mFlatRun+=d; }
+    if(mCleanAcc>=mTau) mClear('clean');
+    if(mFlatAcc>=mTau) mClear('grind');
+  },200);
+  document.getElementById('drop').addEventListener('click',function(){
+    // fires after the sim's own toggle, so `drop` already holds the new state
+    if(drop){ if(turning&&mFlatRun>=0.5) mClear('rescue'); mFlatRun=0; }
+    else { mFlatRun=0; }
+  });
+  document.getElementById('turn').addEventListener('click',function(){
+    // fires after the sim's own toggle, so `turning` already holds the new state
+    if(turning){ mSeg=ang; }
+    else{
+      var h=((ang%mTau)+mTau)%mTau;
+      var off=Math.min(h,mTau-h);
+      if(ang-mSeg>=6.0&&off<=0.26) mClear('gold');
+      mFlatRun=0;
+    }
+  });
+  }catch(e){}
 
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);

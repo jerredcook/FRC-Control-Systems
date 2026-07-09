@@ -62,6 +62,8 @@
   .pill{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;padding:4px 9px;border-radius:20px;border:1px solid var(--line-bright);color:var(--muted)}
   .pill.done{color:var(--good);border-color:rgba(70,214,160,.4);background:rgba(70,214,160,.08)}
   .pill.now{color:var(--amber);border-color:rgba(255,180,84,.4);background:rgba(255,180,84,.08)}
+  .pill.chip-continue{color:var(--accent,var(--teal));border-color:var(--accent,var(--teal));background:transparent;cursor:pointer}
+  .pill.chip-continue:hover{background:rgba(255,255,255,0.06)}
   .go{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);display:inline-flex;gap:6px;align-items:center}
   .course.planned .go{color:var(--muted)}
   .course .bar{height:5px;border-radius:5px;background:var(--line-bright);overflow:hidden;margin-top:12px}
@@ -105,7 +107,7 @@
       <h3>Deploy</h3>
       <div class="sub">Programming an FRC robot</div>
       <div class="desc">From your first line of Java to a full command-based robot - the toolchain, hardware, autonomous, vision, and the pro practices that win.</div>
-      <div class="foot"><span class="pill done" id="codePill">37 lessons · Complete</span><span class="go">Enter →</span></div>
+      <div class="foot"><span class="pill done" id="codePill">37 lessons · Complete</span><span class="pill chip-continue" id="codeChip" data-href="code.html#continue" hidden>Continue →</span><span class="go">Enter →</span></div>
       <div class="bar"><i id="codeBar"></i></div>
     </a>
 
@@ -115,7 +117,7 @@
       <h3>Fabricate</h3>
       <div class="sub">Building an FRC robot</div>
       <div class="desc">The shop, materials, gears and mechanisms, the drivetrain, electrical, pneumatics, CAD, and the build season - the physical machine, end to end.</div>
-      <div class="foot"><span class="pill done" id="bldPill">44 lessons · Complete</span><span class="go">Enter →</span></div>
+      <div class="foot"><span class="pill done" id="bldPill">44 lessons · Complete</span><span class="pill chip-continue" id="bldChip" data-href="build.html#continue" hidden>Continue →</span><span class="go">Enter →</span></div>
       <div class="bar"><i id="bldBar"></i></div>
     </a>
 
@@ -125,7 +127,7 @@
       <h3>Closing the Loop</h3>
       <div class="sub">Control systems for FRC</div>
       <div class="desc">The complete control course - feedback, PID, feedforward, real WPILib code, CTRE Phoenix 6, tuned mechanisms, swerve, vision, and state-space.</div>
-      <div class="foot"><span class="pill done" id="ctlPill">24 lessons · Complete</span><span class="go">Enter →</span></div>
+      <div class="foot"><span class="pill done" id="ctlPill">24 lessons · Complete</span><span class="pill chip-continue" id="ctlChip" data-href="closing-the-loop.html#continue" hidden>Continue →</span><span class="go">Enter →</span></div>
       <div class="bar"><i id="ctlBar"></i></div>
     </a>
 
@@ -159,12 +161,14 @@
 (function(){
   "use strict";
   // reflect each course's saved progress on its card
-  function reflect(key, total, pillId, barId){
+  function reflect(key, total, pillId, barId, chipId){
     try{
       var d=JSON.parse(localStorage.getItem(key))||{};
       var done=Object.keys(d).filter(function(k){return !!d[k];}).length;
       var pct=Math.min(100,Math.round(done/total*100));
       var bar=document.getElementById(barId); if(bar) bar.style.width=pct+"%";
+      var chip=chipId?document.getElementById(chipId):null;
+      if(chip) chip.hidden=!(done>0 && done<total);
       var pill=document.getElementById(pillId); if(!pill) return;
       if(done>0 && done<total){ pill.textContent=done+" / "+total+" done"; pill.className="pill now"; }
       else if(done>=total){ pill.textContent="✓ Complete · "+total+" lessons"; pill.className="pill done"; }
@@ -172,12 +176,21 @@
     }catch(e){}
   }
   function renderProgress(){
-    reflect("deploy:done", 37, "codePill", "codeBar");
-    reflect("build:done", 44, "bldPill", "bldBar");
-    reflect("closing-the-loop:done", 24, "ctlPill", "ctlBar");
+    reflect("deploy:done", 37, "codePill", "codeBar", "codeChip");
+    reflect("build:done", 44, "bldPill", "bldBar", "bldChip");
+    reflect("closing-the-loop:done", 24, "ctlPill", "ctlBar", "ctlChip");
   }
   renderProgress();
   window.addEventListener("frc:progresssynced", renderProgress);
+
+  // the chips live inside the course-card anchors, so take over the click
+  document.addEventListener("click", function(e){
+    var chip=e.target.closest(".chip-continue");
+    if(!chip || chip.hidden) return;
+    e.preventDefault();
+    e.stopPropagation();
+    window.location.href=chip.getAttribute("data-href");
+  });
 
   function paintAcct(){
     var a=document.getElementById("acctLink"); if(!a) return;

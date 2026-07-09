@@ -58,6 +58,15 @@
   .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:9px 13px;border-radius:8px;cursor:pointer;transition:.12s}
   .btn.on{background:var(--indigo);border-color:var(--indigo);color:#2a1503;font-weight:700}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--amber);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
 
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
@@ -146,6 +155,13 @@
       </div>
     </div>
     <p class="caption">At zero depth it's just a drawing. Pull it out and the same outline becomes a real plate you could machine. Change the sketch (add the hole) and the part changes with it, that link between sketch and solid is the heart of CAD.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
+      <div class="m-item" data-m="solid25"><span class="m-st">○</span><span>Drag the depth to exactly <b>25 mm</b> and watch the <b>State</b> readout flip to <b>solid part</b>. Same outline, now with thickness.</span></div>
+      <div class="m-item" data-m="holehome"><span class="m-st">○</span><span>Make the plate solid, press <b>Add hole</b>, then bring the depth back to <b>0 mm</b>. The hole is still in the flat drawing, because the sketch owns the shape. The extrude only gives it depth.</span></div>
+      <div class="m-item" data-m="edge"><span class="m-st">○</span><span>Before you try it, predict what the tag reads at <b>1 mm</b>. Then park the depth there. It still says <b>sketch (2D)</b>, one more millimeter makes it a part.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> with the hole on, ride the depth from <b>0</b> up to the full <b>60 mm</b> and back down to <b>0</b> without removing the hole. One sketch, and the part rebuilds itself every time.</span></div>
+    </div>
   </section>
 
   <section>
@@ -302,6 +318,42 @@
   document.getElementById('hole').addEventListener('click',function(){ hole=!hole; this.classList.toggle('on',hole); this.textContent=hole?'Remove hole':'Add hole'; draw(); });
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();draw();},120);});
   refresh(); draw();
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  // Event-shaped checks: the sim only changes on slider input / hole clicks,
+  // and the sim's own listeners (registered above) update depth/hole first.
+  var mSolidHole=false, mTrip=0;
+  function mCheck(){
+    if(depth===25) mClear('solid25');
+    if(depth===1) mClear('edge');
+    if(hole&&depth>1) mSolidHole=true;
+    if(mSolidHole&&hole&&depth===0) mClear('holehome');
+    if(!hole){ mTrip=0; }
+    else if(mTrip===0&&depth===0){ mTrip=1; }
+    else if(mTrip===1&&depth>=60){ mTrip=2; }
+    else if(mTrip===2&&depth===0){ mClear('gold'); mTrip=1; }
+  }
+  document.getElementById('depth').addEventListener('input',mCheck);
+  document.getElementById('hole').addEventListener('click',mCheck);
+  }catch(e){}
 
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);

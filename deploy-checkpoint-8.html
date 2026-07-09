@@ -105,6 +105,8 @@
   .opt.locked.correct,.opt.locked.wrong{opacity:1}
   .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
   .explain.show{display:block}
+  .explain a.ref{display:inline-block;margin-top:10px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--indigo);text-decoration:none;border:1px solid var(--line-2);border-radius:7px;padding:4px 10px;transition:.12s}
+  .explain a.ref:hover{border-color:var(--indigo);color:var(--text)}
 
   .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
   .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
@@ -157,7 +159,7 @@
           <button class="opt">Log only the measured RPM, since the setpoint is already in the code</button>
           <button class="opt">Skip logging and watch the live dashboard during the match</button>
         </div>
-        <div class="explain">A measured value alone cannot show whether it was right. Logging setpointRpm beside measuredRpm makes the error, the thing a control loop is trying to close, jump out. You replay the .wpilog in AdvantageScope afterward, since a match is over too fast to study live.</div>
+        <div class="explain">A measured value alone cannot show whether it was right. Logging setpointRpm beside measuredRpm makes the error, the thing a control loop is trying to close, jump out. You replay the .wpilog in AdvantageScope afterward, since a match is over too fast to study live. <a class="ref" href="deploy-lesson-32.html">Review: Lesson 8.1 &middot; Dashboards &amp; Telemetry</a></div>
       </div>
       <div class="q" data-correct="2">
         <div class="qn">Question 2</div>
@@ -167,7 +169,7 @@
           <button class="opt">Random numbers, so the test is only a stress check</button>
           <button class="opt">A physics model fed by the voltage the code commands: simulationPeriodic pushes the voltage in, advances the model, and writes the motion back as the sensor reading</button>
         </div>
-        <div class="explain">Simulation runs the exact same subsystem code, but the motor and encoder are replaced by a model. simulationPeriodic() feeds the commanded voltage into FlywheelSim, advances the physics, and reports the result as the measured value, so the loop closes the same way it does on the real robot.</div>
+        <div class="explain">Simulation runs the exact same subsystem code, but the motor and encoder are replaced by a model. simulationPeriodic() feeds the commanded voltage into FlywheelSim, advances the physics, and reports the result as the measured value, so the loop closes the same way it does on the real robot. <a class="ref" href="deploy-lesson-33.html">Review: Lesson 8.2 &middot; Simulation</a></div>
       </div>
       <div class="q" data-correct="1">
         <div class="qn">Question 3</div>
@@ -177,7 +179,7 @@
           <button class="opt">Pure logic like a gear-ratio conversion; red means the actual result disagreed with the assertion, so there is a bug to fix</button>
           <button class="opt">Anything that talks to a camera; red means the camera is unplugged</button>
         </div>
-        <div class="explain">Unit tests shine on pure logic: conversions, state transitions, decisions. You assert expected against actual with assertEquals. Red means the code's output did not match what you expected, which points you straight at a bug. Run the suite on every commit so regressions cannot sneak back.</div>
+        <div class="explain">Unit tests shine on pure logic: conversions, state transitions, decisions. You assert expected against actual with assertEquals. Red means the code's output did not match what you expected, which points you straight at a bug. Run the suite on every commit so regressions cannot sneak back. <a class="ref" href="deploy-lesson-34.html">Review: Lesson 8.3 &middot; Unit Testing</a></div>
       </div>
       <div class="q" data-correct="2">
         <div class="qn">Question 4</div>
@@ -187,7 +189,7 @@
           <button class="opt">Logging the battery voltage to AdvantageScope</button>
           <button class="opt">A supply current limit on each motor, capping how many amps it pulls so the combined draw never crashes the bus</button>
         </div>
-        <div class="explain">Voltage sag is driven by current. A supply current limit caps how much each motor pulls from the battery, keeping the total draw in a safe range so the bus stays above the brownout threshold. Logging and tests help you understand and prevent problems, but the current limit is what actually keeps the voltage up under load.</div>
+        <div class="explain">Voltage sag is driven by current. A supply current limit caps how much each motor pulls from the battery, keeping the total draw in a safe range so the bus stays above the brownout threshold. Logging and tests help you understand and prevent problems, but the current limit is what actually keeps the voltage up under load. <a class="ref" href="deploy-lesson-35.html">Review: Lesson 8.4 &middot; Debugging &amp; Robust Code</a></div>
       </div>
       <div class="q" data-correct="1">
         <div class="qn">Question 5</div>
@@ -197,7 +199,7 @@
           <button class="opt">Do not deploy untested code into a real match: test on the practice field first, and if there is no time, run the last tagged version that worked</button>
           <button class="opt">Delete the unit tests so the build is faster</button>
         </div>
-        <div class="explain">The most expensive habit in FRC is deploying an untested "one fix" right before a match. The practice field is for testing; the match is not. A committed, tagged, working build is always your safety net, so if there is no time to test, run the last version that worked.</div>
+        <div class="explain">The most expensive habit in FRC is deploying an untested "one fix" right before a match. The practice field is for testing; the match is not. A committed, tagged, working build is always your safety net, so if there is no time to test, run the last version that worked. <a class="ref" href="deploy-lesson-36.html">Review: Lesson 8.5 &middot; Competition-Ready</a></div>
       </div>
     </div>
   </section>

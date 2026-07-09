@@ -85,6 +85,8 @@
   .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
   .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
   .explain.show{display:block}
+  .explain a.ref{display:inline-block;margin-top:8px;font-family:var(--mono);font-size:12px;letter-spacing:.05em;color:var(--teal);text-decoration:none;border:1px solid var(--line-2);border-radius:7px;padding:4px 10px;transition:.12s}
+  .explain a.ref:hover{border-color:var(--teal);color:var(--text)}
 
   .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
   .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
@@ -133,7 +135,7 @@
           <button class="opt">An elevator that only goes straight up</button>
           <button class="opt">A parallel four-bar linkage</button>
         </div>
-        <div class="explain">A parallel four-bar keeps two equal arms parallel, so the coupler forms a parallelogram and never tilts. The tray stays level through the whole motion, set by geometry, not software. A single arm would rotate the tray as it swings.</div>
+        <div class="explain">A parallel four-bar keeps two equal arms parallel, so the coupler forms a parallelogram and never tilts. The tray stays level through the whole motion, set by geometry, not software. A single arm would rotate the tray as it swings. <a class="ref" href="build-lesson-17.html">Review: Lesson 4.2 · Linkages &amp; Four-Bars</a></div>
       </div>
 
       <div class="q" data-correct="1">
@@ -144,7 +146,7 @@
           <button class="opt">Held level, sticking straight out to the side</button>
           <button class="opt">Anywhere; the torque is the same at every angle</button>
         </div>
-        <div class="explain">Holding torque follows the moment arm, the horizontal distance from pivot to load. It is longest when the arm is level (torque peaks, scaling with the cosine of the angle) and drops to zero when the arm points straight up and the load sits over the pivot.</div>
+        <div class="explain">Holding torque follows the moment arm, the horizontal distance from pivot to load. It is longest when the arm is level (torque peaks, scaling with the cosine of the angle) and drops to zero when the arm points straight up and the load sits over the pivot. <a class="ref" href="build-lesson-19.html">Review: Lesson 4.4 · Arms &amp; Wrists</a></div>
       </div>
 
       <div class="q" data-correct="0">
@@ -155,7 +157,7 @@
           <button class="opt">Raise the rollers far above the piece so they never touch it</button>
           <button class="opt">Spin the rollers backward, away from the robot</button>
         </div>
-        <div class="explain">Intakes grip by compression, the rollers sit a little closer to the floor than the piece is tall, so they squeeze it and drag it in. Slipping means too little squeeze. You find the sweet spot by prototyping, since too much compression jams instead.</div>
+        <div class="explain">Intakes grip by compression, the rollers sit a little closer to the floor than the piece is tall, so they squeeze it and drag it in. Slipping means too little squeeze. You find the sweet spot by prototyping, since too much compression jams instead. <a class="ref" href="build-lesson-20.html">Review: Lesson 4.5 · Intakes &amp; Rollers</a></div>
       </div>
 
       <div class="q" data-correct="2">
@@ -166,7 +168,7 @@
           <button class="opt">The game pieces are different colors</button>
           <button class="opt">The flywheel RPM sags after each shot, so exit speed and range vary; hold a steady RPM with a velocity loop</button>
         </div>
-        <div class="explain">Range depends directly on flywheel speed, so if RPM sags between shots, every shot lands somewhere different. A velocity loop with strong feedforward holds the wheel at a steady RPM and recovers fast after each piece, tightening the grouping.</div>
+        <div class="explain">Range depends directly on flywheel speed, so if RPM sags between shots, every shot lands somewhere different. A velocity loop with strong feedforward holds the wheel at a steady RPM and recovers fast after each piece, tightening the grouping. <a class="ref" href="build-lesson-21.html">Review: Lesson 4.6 · Shooters &amp; End Effectors</a></div>
       </div>
 
       <div class="q" data-correct="1">
@@ -177,7 +179,7 @@
           <button class="opt">It has about half the lifting force and puts more tension on the cable and pulleys</button>
           <button class="opt">It changes nothing about force, only speed</button>
         </div>
-        <div class="explain">Cascade rigging multiplying carriage speed is the same speed-versus-torque trade as gears, wearing a different hat. Twice the speed means about half the lifting force and higher cable tension, so you pick cascade for light, fast loads and continuous rigging for heavy ones.</div>
+        <div class="explain">Cascade rigging multiplying carriage speed is the same speed-versus-torque trade as gears, wearing a different hat. Twice the speed means about half the lifting force and higher cable tension, so you pick cascade for light, fast loads and continuous rigging for heavy ones. <a class="ref" href="build-lesson-18.html">Review: Lesson 4.3 · Elevators &amp; Lifts</a></div>
       </div>
 
     </div>

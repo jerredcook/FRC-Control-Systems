@@ -105,6 +105,8 @@
   .opt.locked.correct,.opt.locked.wrong{opacity:1}
   .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
   .explain.show{display:block}
+  .explain a.ref{display:inline-block;margin-top:10px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--indigo);text-decoration:none;border:1px solid var(--line-2);border-radius:7px;padding:4px 10px;transition:.12s}
+  .explain a.ref:hover{border-color:var(--indigo);color:var(--text)}
 
   .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
   .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
@@ -157,7 +159,7 @@
           <button class="opt">tx is how far left or right of center the tag is, computed on a coprocessor (PhotonVision or a Limelight) and sent over NetworkTables</button>
           <button class="opt">tx is the tag's ID number, computed by the AprilTag itself</button>
         </div>
-        <div class="explain">A coprocessor does the image processing and publishes simple numbers like the fiducial ID, tx (yaw), and ty over NetworkTables. tx is the horizontal angle from the camera center to the target. The roboRIO never touches a pixel.</div>
+        <div class="explain">A coprocessor does the image processing and publishes simple numbers like the fiducial ID, tx (yaw), and ty over NetworkTables. tx is the horizontal angle from the camera center to the target. The roboRIO never touches a pixel. <a class="ref" href="deploy-lesson-28.html">Review: Lesson 7.1 &middot; Vision &amp; AprilTags</a></div>
       </div>
       <div class="q" data-correct="2">
         <div class="qn">Question 2</div>
@@ -167,7 +169,7 @@
           <button class="opt">The camera ran out of battery</button>
           <button class="opt">The camera reports a few frames late, so a big gain overshoots the stale tx before the new measurement catches up</button>
         </div>
-        <div class="explain">Vision aiming is the same PID loop from the Control course, with tx as the error and 0 as the setpoint. Camera latency means the robot acts on slightly old data, so a high kP overshoots and oscillates. The fixes are a gentler kP, a touch of D, and a tolerance band.</div>
+        <div class="explain">Vision aiming is the same PID loop from the Control course, with tx as the error and 0 as the setpoint. Camera latency means the robot acts on slightly old data, so a high kP overshoots and oscillates. The fixes are a gentler kP, a touch of D, and a tolerance band. <a class="ref" href="deploy-lesson-29.html">Review: Lesson 7.2 &middot; Closing the Loop on Vision</a></div>
       </div>
       <div class="q" data-correct="0">
         <div class="qn">Question 3</div>
@@ -177,7 +179,7 @@
           <button class="opt">Cameras never make mistakes, so their measurement is always exact</button>
           <button class="opt">Odometry uses a weaker battery than the camera</button>
         </div>
-        <div class="explain">Because tags are at surveyed locations, a sighting pins the robot to an absolute spot and erases accumulated drift. Odometry, from Lesson 6.3, only integrates wheel and gyro motion, so its errors pile up until vision corrects them.</div>
+        <div class="explain">Because tags are at surveyed locations, a sighting pins the robot to an absolute spot and erases accumulated drift. Odometry, from Lesson 6.3, only integrates wheel and gyro motion, so its errors pile up until vision corrects them. <a class="ref" href="deploy-lesson-30.html">Review: Lesson 7.3 &middot; Pose Estimation</a></div>
       </div>
       <div class="q" data-correct="1">
         <div class="qn">Question 4</div>
@@ -187,7 +189,7 @@
           <button class="opt">update() runs every loop for the wheels and gyro; addVisionMeasurement() runs only when the camera has a tag fix</button>
           <button class="opt">Both run every loop, regardless of whether a tag is in view</button>
         </div>
-        <div class="explain">update() advances the odometry part each loop from the gyro and module positions. addVisionMeasurement() is the extra call you make only when the camera reports a tag, blending that absolute fix into the running estimate.</div>
+        <div class="explain">update() advances the odometry part each loop from the gyro and module positions. addVisionMeasurement() is the extra call you make only when the camera reports a tag, blending that absolute fix into the running estimate. <a class="ref" href="deploy-lesson-30.html">Review: Lesson 7.3 &middot; Pose Estimation</a></div>
       </div>
       <div class="q" data-correct="2">
         <div class="qn">Question 5</div>
@@ -197,7 +199,7 @@
           <button class="opt">The code crashes, because no transition exists from IDLE</button>
           <button class="opt">Nothing: there is no IDLE-to-SHOOTING transition, so the event is ignored, which keeps illegal situations from ever happening</button>
         </div>
-        <div class="explain">Shooting is only reachable from LOADED. With no transition defined from IDLE on shoot, the event is rejected. A state machine makes illegal combinations like an empty shot unrepresentable, which is the safety it buys over a pile of separate booleans.</div>
+        <div class="explain">Shooting is only reachable from LOADED. With no transition defined from IDLE on shoot, the event is rejected. A state machine makes illegal combinations like an empty shot unrepresentable, which is the safety it buys over a pile of separate booleans. <a class="ref" href="deploy-lesson-31.html">Review: Lesson 7.4 &middot; State Machines</a></div>
       </div>
     </div>
   </section>

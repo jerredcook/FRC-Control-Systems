@@ -56,6 +56,15 @@
   input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--indigo);cursor:pointer;box-shadow:0 0 10px -1px var(--indigo)}
   input[type=range]::-moz-range-thumb{width:18px;height:18px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--amber);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
 
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
@@ -143,6 +152,13 @@
       </div>
     </div>
     <p class="caption">Inside the green zone the bumper passes; mounted too high or too low it fails inspection, even if everything else is built right. Robots have to bump in the same band, so the rule is strict.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
+      <div class="m-item" data-m="failboth"><span class="m-st">○</span><span>Fail inspection <b>both ways</b>: slide the bumper up until it reads <b>too high</b>, then down until it reads <b>too low</b>. The zone has a ceiling and a floor.</span></div>
+      <div class="m-item" data-m="ridelow"><span class="m-st">○</span><span>Defense bots ride low so they can wedge under opponents. Park the bumper legal but within <b>5%</b> of the bottom of the zone and hold it for <b>2 seconds</b>.</span></div>
+      <div class="m-item" data-m="ridehigh"><span class="m-st">○</span><span>Now ride high, so nobody rides up over you: legal but within <b>5%</b> of the top of the zone, held for <b>2 seconds</b>.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> pin both edges. Hold within <b>2%</b> of the bottom edge, then within <b>2%</b> of the top edge, <b>2 seconds</b> each. Arrow keys nudge the slider one step at a time.</span></div>
+    </div>
   </section>
 
   <section>
@@ -281,6 +297,39 @@
   document.getElementById('h').addEventListener('input',function(e){ hPct=+e.target.value; document.getElementById('hv').textContent=hPct+'%'; });
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
   requestAnimationFrame(loop);
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  // same legality rule as draw(): f = 0.30 + hPct/100*0.62, legal when 0.55 <= f <= 0.85
+  // (integer slider -> legal band is 41..88, so the edges below are 41-45, 84-88, 41-42, 87-88)
+  var mSawHigh=false, mSawLow=false, mLowHold=0, mHighHold=0, mEdgeLo=false, mEdgeHi=false, mEdgeLoHold=0, mEdgeHiHold=0;
+  setInterval(function(){
+    var f=0.30+hPct/100*0.62, mLegal=(f>=0.55&&f<=0.85);
+    if(!mLegal){ if(f>0.85) mSawHigh=true; else mSawLow=true; if(mSawHigh&&mSawLow) mClear('failboth'); }
+    if(mLegal&&hPct<=45){ mLowHold+=0.2; if(mLowHold>=2) mClear('ridelow'); } else { mLowHold=0; }
+    if(mLegal&&hPct>=84){ mHighHold+=0.2; if(mHighHold>=2) mClear('ridehigh'); } else { mHighHold=0; }
+    if(mLegal&&hPct<=42){ mEdgeLoHold+=0.2; if(mEdgeLoHold>=2) mEdgeLo=true; } else { mEdgeLoHold=0; }
+    if(mLegal&&hPct>=87){ mEdgeHiHold+=0.2; if(mEdgeHiHold>=2) mEdgeHi=true; } else { mEdgeHiHold=0; }
+    if(mEdgeLo&&mEdgeHi) mClear('gold');
+  },200);
+  }catch(e){}
 
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);

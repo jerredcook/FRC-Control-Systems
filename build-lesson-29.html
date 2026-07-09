@@ -53,6 +53,15 @@
   .btn:hover{border-color:var(--indigo);color:var(--text)}
   .hint{font-family:var(--mono);font-size:11px;color:var(--faint)}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--amber);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
 
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
@@ -146,6 +155,13 @@
       </div>
     </div>
     <p class="caption">Break the link after the roboRIO and almost the whole robot goes silent. Break it near the end and you lose just the last device. Either way, everything <em>downstream</em> of the break stops talking, which is exactly why one loose connector is so dangerous.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
+      <div class="m-item" data-m="blackout"><span class="m-st">○</span><span>Break the <b>first link</b>, right after the roboRIO. One bad connector and all 5 downstream devices go dark: <b>1 / 6</b> online.</span></div>
+      <div class="m-item" data-m="term"><span class="m-st">○</span><span>Reconnect all, then break <b>only the last link</b>. Just the <b>120 Ω</b> terminator drops, the smallest outage, but a real bus with no terminator gets garbled everywhere.</span></div>
+      <div class="m-item" data-m="three"><span class="m-st">○</span><span>Pit report: exactly <b>3 / 6</b> devices are answering. Recreate that symptom with a <b>single break</b>. Which link has to be the loose one?</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> break <b>two different links</b>, then get back to <b>6 / 6</b> by clicking the links, no Reconnect button. Fixing the first break only reveals the second.</span></div>
+    </div>
   </section>
 
   <section>
@@ -297,6 +313,39 @@
     for(var i=0;i<DEVS.length-1;i++){ var mid=(devX(i)+devX(i+1))/2; if(Math.abs(mx-mid)<((devX(i+1)-devX(i))/2)-20){ brk[i]=!brk[i]; refresh(); return; } }
   });
   document.getElementById('reset').addEventListener('click',function(){ brk=[false,false,false,false,false]; refresh(); });
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  var mArmed=false;
+  document.getElementById('reset').addEventListener('click',function(){ mArmed=false; });
+  setInterval(function(){
+    var nb=0; for(var i=0;i<brk.length;i++){ if(brk[i]) nb++; }
+    var oc=onlineCount();
+    if(brk[0]&&oc===1) mClear('blackout');
+    if(nb===1&&brk[4]) mClear('term');
+    if(nb===1&&oc===3) mClear('three');
+    if(nb>=2) mArmed=true;
+    if(mArmed&&nb===0){ mArmed=false; mClear('gold'); }
+  },200);
+  }catch(e){}
+
   refresh(); requestAnimationFrame(step);
 
   document.querySelectorAll('#quiz .q').forEach(function(q){

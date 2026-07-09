@@ -56,6 +56,15 @@
   input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--indigo);cursor:pointer;box-shadow:0 0 10px -1px var(--indigo)}
   input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--amber);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
 
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
@@ -146,6 +155,13 @@
       </div>
     </div>
     <p class="caption">The amber dot is the center of mass; the red arrow is the inertia from accelerating or stopping. When that combined pull leans past the front wheel, over it goes. A tall, narrow robot tips with a gentle nudge; a low, wide one shrugs it off.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
+      <div class="m-item" data-m="wobble"><span class="m-st">○</span><span>Keep the wheelbase at <b>50%</b> and the stop at its starting <b>0.4 g</b> (1 g means slowing as hard as gravity pulls, like grabbing both bike brakes). Raise only the <b>CoM height</b> until the readout says <b>wobbling</b>.</span></div>
+      <div class="m-item" data-m="edge"><span class="m-st">○</span><span>Slide CoM height to <b>100%</b>, wheelbase still at <b>50%</b>. Push the stop until it says <b>TIPPING</b>, then back off to the biggest stop the tall robot survives and hold it. That number is its tipping threshold.</span></div>
+      <div class="m-item" data-m="rescue"><span class="m-st">○</span><span>Keep CoM height at <b>100%</b> and set the stop to <b>0.8 g</b>. Save the tall robot by moving only the <b>wheelbase</b> slider. Wobbling counts, it is still on its wheels.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> survive the full <b>1.2 g</b> panic stop with CoM height still at <b>60% or higher</b>. The window is tiny, find it.</span></div>
+    </div>
   </section>
 
   <section>
@@ -293,6 +309,40 @@
   document.getElementById('a').addEventListener('input',function(e){ aPct=+e.target.value; document.getElementById('av').textContent=(aPct/100).toFixed(1)+' g'; });
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
   requestAnimationFrame(step);
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  var mSawTip=false, mEdgeHold=0, mResHold=0, mGoldHold=0;
+  setInterval(function(){
+    // same physics as step(): margin = halfBase/comH is the max a/g before tipping
+    var halfBase=40+bPct/100*70, comH=24+hPct/100*110, ag=aPct/100, margin=halfBase/comH;
+    if(bPct===50 && aPct>=40 && aPct<=44 && ag>=margin*0.7 && ag<margin) mClear('wobble');
+    if(hPct===100 && bPct===50 && ag>=margin) mSawTip=true;
+    if(mSawTip && hPct===100 && bPct===50 && ag<margin && (margin-ag)<=0.02){ mEdgeHold+=0.2; } else { mEdgeHold=0; }
+    if(mEdgeHold>=1) mClear('edge');
+    if(hPct===100 && ag>=0.75 && ag<margin){ mResHold+=0.2; } else { mResHold=0; }
+    if(mResHold>=1) mClear('rescue');
+    if(aPct===120 && hPct>=60 && ag<margin){ mGoldHold+=0.2; } else { mGoldHold=0; }
+    if(mGoldHold>=1) mClear('gold');
+  },200);
+  }catch(e){}
 
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);

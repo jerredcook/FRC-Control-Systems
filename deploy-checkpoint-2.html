@@ -105,6 +105,8 @@
   .opt.locked.correct,.opt.locked.wrong{opacity:1}
   .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
   .explain.show{display:block}
+  .explain a.ref{display:inline-block;margin-top:10px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--indigo);text-decoration:none;border:1px solid var(--line-2);border-radius:7px;padding:4px 10px;transition:.12s}
+  .explain a.ref:hover{border-color:var(--indigo);color:var(--text)}
 
   .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
   .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
@@ -160,7 +162,7 @@
           <button class="opt">Both 60 and 9 are int literals, so Java did integer division and truncated before storing the result</button>
           <button class="opt">The variable name ratio is reserved, so Java reset it to 6.0</button>
         </div>
-        <div class="explain">When both sides of a division are int, Java does integer division and drops the decimal, giving 6. The result is only converted to double afterward. Write 60.0 / 9 or 60 / 9.0 to keep the fraction.</div>
+        <div class="explain">When both sides of a division are int, Java does integer division and drops the decimal, giving 6. The result is only converted to double afterward. Write 60.0 / 9 or 60 / 9.0 to keep the fraction. <a class="ref" href="deploy-lesson-6.html">Review: Lesson 2.1 &middot; Variables, Types &amp; Math</a></div>
       </div>
 
       <div class="q" data-correct="2">
@@ -171,7 +173,7 @@
           <button class="opt">An int, using 0, 1, and 2 for the three states</button>
           <button class="opt">An enum listing the three states</button>
         </div>
-        <div class="explain">An enum is a named, fixed set of values. The compiler only allows those three, which prevents invalid states and reads better than 0, 1, 2. A switch on the enum then forms a clean state machine.</div>
+        <div class="explain">An enum is a named, fixed set of values. The compiler only allows those three, which prevents invalid states and reads better than 0, 1, 2. A switch on the enum then forms a clean state machine. <a class="ref" href="deploy-lesson-10.html">Review: Lesson 2.5 &middot; Collections &amp; Enums</a></div>
       </div>
 
       <div class="q" data-correct="0">
@@ -182,7 +184,7 @@
           <button class="opt">One SwerveModule object reused four times by changing its fields between modules</button>
           <button class="opt">Four separate double variables, one per module</button>
         </div>
-        <div class="explain">Each module is its own object made with new, so each holds independent state. An array is the right fit for a known, fixed count like four modules. Reusing one object would make all modules share the same fields, which is wrong.</div>
+        <div class="explain">Each module is its own object made with new, so each holds independent state. An array is the right fit for a known, fixed count like four modules. Reusing one object would make all modules share the same fields, which is wrong. <a class="ref" href="deploy-lesson-8.html">Review: Lesson 2.3 &middot; Classes &amp; Objects</a></div>
       </div>
 
       <div class="q" data-correct="2">
@@ -193,7 +195,7 @@
           <button class="opt">Run the method, but you must read its answer from a separate global variable</button>
           <button class="opt">Use its result wherever you call it, so the same cleanup logic stays in one place instead of being copied</button>
         </div>
-        <div class="explain">A method takes parameters as input and hands back a return value as output. Because the cleanup lives in one named method, every caller gets the same behavior and you fix bugs in one spot instead of many copies.</div>
+        <div class="explain">A method takes parameters as input and hands back a return value as output. Because the cleanup lives in one named method, every caller gets the same behavior and you fix bugs in one spot instead of many copies. <a class="ref" href="deploy-lesson-7.html">Review: Lesson 2.2 &middot; Methods &amp; Logic</a></div>
       </div>
 
       <div class="q" data-correct="1">
@@ -204,7 +206,7 @@
           <button class="opt">It tells the compiler you mean to replace a parent method, so a typo in the name fails to compile instead of silently never running</button>
           <button class="opt">It is required on every method in Java or the class will not build</button>
         </div>
-        <div class="explain">extends gives Robot all of TimedRobot's machinery for free, and @Override marks a method as replacing the parent's version. If you misspell robotPeriodic, the compiler catches it instead of quietly creating a new method that never gets called every 20 ms.</div>
+        <div class="explain">extends gives Robot all of TimedRobot's machinery for free, and @Override marks a method as replacing the parent's version. If you misspell robotPeriodic, the compiler catches it instead of quietly creating a new method that never gets called every 20 ms. <a class="ref" href="deploy-lesson-9.html">Review: Lesson 2.4 &middot; Inheritance &amp; Interfaces</a></div>
       </div>
 
     </div>

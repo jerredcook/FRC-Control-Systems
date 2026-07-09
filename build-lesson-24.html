@@ -56,6 +56,15 @@
   input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--indigo);cursor:pointer;box-shadow:0 0 10px -1px var(--indigo)}
   input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--amber);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
 
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
@@ -146,6 +155,13 @@
       </div>
     </div>
     <p class="caption">The green zone is your traction limit. Keep the drive force inside it and the push climbs with it. Push past the line and the wheels spin uselessly, the actual push is stuck at the limit. To push harder, grippier tread or more weight, not more throttle.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
+      <div class="m-item" data-m="spin"><span class="m-st">○</span><span>Break loose: push <b>Drive force</b> at least <b>20 points past</b> the Max push limit. Watch Actual push stay stuck at the limit while the wheels spin.</span></div>
+      <div class="m-item" data-m="limit40"><span class="m-st">○</span><span>Traction is grip times weight. Using the <b>grip</b> and <b>weight</b> sliders, make <b>Max push read exactly 40%</b> and hold it. Then hit <b>40%</b> again with a clearly different grip, less grip needs more weight.</span></div>
+      <div class="m-item" data-m="brake"><span class="m-st">○</span><span>Weight transfer: with grip on <b>mid</b> and weight at <b>55% or more</b>, get gripping at <b>Drive force 50%+</b>. Now cut <b>Weight to 30%</b> without touching the other sliders. Same throttle, instant spin, like a bike's back wheel going light when you grab the front brake.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> a light robot can still shove. With <b>Weight at 40% or less</b>, get <b>Max push to 55%</b>. The tread has to do all the work.</span></div>
+    </div>
   </section>
 
   <section>
@@ -295,6 +311,45 @@
   document.getElementById('dr').addEventListener('input',function(e){ drv=+e.target.value; document.getElementById('drv').textContent=drv+'%'; });
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
   requestAnimationFrame(step);
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  var mHold40=0, m40FirstMu=null, mHoldGold=0, mBrakeArm=null;
+  setInterval(function(){
+    var mp=maxPush(), slip=drv>mp;
+    // spin: commanded force way past the limit, wheels loose, actual push pinned
+    if(slip && drv>=mp+20) mClear('spin');
+    // limit40: hold Max push at exactly 40%, then repeat with a clearly different grip
+    if(mp===40){ mHold40+=0.2; } else { mHold40=0; }
+    if(mHold40>=1.2){
+      if(m40FirstMu===null) m40FirstMu=mu;
+      else if(Math.abs(mu-m40FirstMu)>=15) mClear('limit40');
+    }
+    // brake: arm on a solid grip (mid-or-less tread guarantees the cut breaks it), clear when
+    // dropping weight alone turns the same commanded force into a spin
+    if(!slip && drv>=50 && wt>=55 && mu<70) mBrakeArm={drv:drv, mu:mu};
+    if(mBrakeArm && slip && wt<=30 && drv===mBrakeArm.drv && mu===mBrakeArm.mu) mClear('brake');
+    // gold: light on the wheels, tread carries the whole traction budget
+    if(wt<=40 && mp>=55){ mHoldGold+=0.2; if(mHoldGold>=1.2) mClear('gold'); } else { mHoldGold=0; }
+  },200);
+  }catch(e){}
 
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);

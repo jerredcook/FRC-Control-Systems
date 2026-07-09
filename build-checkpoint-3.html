@@ -85,6 +85,8 @@
   .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
   .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
   .explain.show{display:block}
+  .explain a.ref{display:inline-block;margin-top:8px;font-family:var(--mono);font-size:12px;letter-spacing:.05em;color:var(--teal);text-decoration:none;border:1px solid var(--line-2);border-radius:7px;padding:4px 10px;transition:.12s}
+  .explain a.ref:hover{border-color:var(--teal);color:var(--text)}
 
   .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
   .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
@@ -133,7 +135,7 @@
           <button class="opt">4:1 reduction, output 1500 rpm with about four times the torque</button>
           <button class="opt">1:4 overdrive, output 1500 rpm with four times the torque</button>
         </div>
-        <div class="explain">Ratio is driven divided by driver, 48 over 12 equals 4:1. A reduction divides speed by 4 (6000 to 1500 rpm) and multiplies torque by about 4. Speed and torque always trade inversely.</div>
+        <div class="explain">Ratio is driven divided by driver, 48 over 12 equals 4:1. A reduction divides speed by 4 (6000 to 1500 rpm) and multiplies torque by about 4. Speed and torque always trade inversely. <a class="ref" href="build-lesson-10.html">Review: Lesson 3.1 · Gears &amp; Gear Ratios</a></div>
       </div>
 
       <div class="q" data-correct="2">
@@ -144,7 +146,7 @@
           <button class="opt">The sprockets are the wrong direction; flip one over</button>
           <button class="opt">The chain is too loose; add a tensioner or move a mount to take up the slack</button>
         </div>
-        <div class="explain">Chain that skips under load is almost always too loose, and new chain goes slightly slack over a season. Add a tensioner, a movable mount, or a half-link to take up the slack. Too tight wears it fast, but it is the rarer problem here.</div>
+        <div class="explain">Chain that skips under load is almost always too loose, and new chain goes slightly slack over a season. Add a tensioner, a movable mount, or a half-link to take up the slack. Too tight wears it fast, but it is the rarer problem here. <a class="ref" href="build-lesson-11.html">Review: Lesson 3.2 · Sprockets &amp; Chain</a></div>
       </div>
 
       <div class="q" data-correct="0">
@@ -155,7 +157,7 @@
           <button class="opt">5:1 and 5:1, because the stage ratios add: 5 plus 5 plus 15 is 25</button>
           <button class="opt">4:1 and 4:1, because that is close enough to 25:1</button>
         </div>
-        <div class="explain">Gearbox stages multiply, so total ratio is stage one times stage two. Two 5:1 cartridges give 5 times 5 equals 25:1. They do not add, and 4 times 4 is only 16:1, not close enough.</div>
+        <div class="explain">Gearbox stages multiply, so total ratio is stage one times stage two. Two 5:1 cartridges give 5 times 5 equals 25:1. They do not add, and 4 times 4 is only 16:1, not close enough. <a class="ref" href="build-lesson-15.html">Review: Lesson 3.6 · Gearboxes</a></div>
       </div>
 
       <div class="q" data-correct="1">
@@ -166,7 +168,7 @@
           <button class="opt">Add a second bearing on the other side of the gear so the shaft is supported on both ends</button>
           <button class="opt">Loosen the set screw so the gear can float</button>
         </div>
-        <div class="explain">One bearing leaves the gear cantilevered like a diving board, so it bows and wobbles (runout). A bearing on each side of the load runs the shaft dead straight. A fatter shaft also helps, since stiffness climbs sharply with diameter.</div>
+        <div class="explain">One bearing leaves the gear cantilevered like a diving board, so it bows and wobbles (runout). A bearing on each side of the load runs the shaft dead straight. A fatter shaft also helps, since stiffness climbs sharply with diameter. <a class="ref" href="build-lesson-13.html">Review: Lesson 3.4 · Bearings</a></div>
       </div>
 
       <div class="q" data-correct="2">
@@ -177,7 +179,7 @@
           <button class="opt">Remove all reduction so the output spins as fast as possible</button>
           <button class="opt">Lower the reduction some and re-check, trading a little force for speed until time and current both land in a safe band</button>
         </div>
-        <div class="explain">Too much reduction has force to spare but is too slow and drags current up toward the breaker. Too little cannot make the lift at all. The sizing loop is to adjust the ratio and re-check in ReCalc until speed, force, and current all sit in a safe band, then cut metal.</div>
+        <div class="explain">Too much reduction has force to spare but is too slow and drags current up toward the breaker. Too little cannot make the lift at all. The sizing loop is to adjust the ratio and re-check in ReCalc until speed, force, and current all sit in a safe band, then cut metal. <a class="ref" href="build-lesson-44.html">Review: Lesson 3.7 · Sizing a Mechanism (with ReCalc)</a></div>
       </div>
 
     </div>

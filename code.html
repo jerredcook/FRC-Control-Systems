@@ -60,6 +60,12 @@
   .langbtn:hover{border-color:var(--indigo);color:var(--ink)}
   .langbtn.active{background:var(--indigo);border-color:var(--indigo);color:#0b1020;font-weight:700}
 
+  .continue-btn{flex:1 1 100%;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;border:1px solid rgba(138,147,255,0.45);background:rgba(138,147,255,0.08);border-radius:10px;padding:12px 16px;text-decoration:none;transition:.14s}
+  .continue-btn:hover{border-color:var(--indigo);transform:translateY(-1px)}
+  .continue-btn[hidden]{display:none}
+  .continue-btn .cb-act{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--indigo);font-weight:700;white-space:nowrap}
+  .continue-btn .cb-what{font-size:15px;color:var(--ink);font-weight:650}
+
   .part{padding:34px 0 6px}
   .part-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px}
   .part-tag{font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);border:1px solid var(--line-bright);border-radius:6px;padding:4px 9px}
@@ -71,6 +77,12 @@
   .card.checkpoint{margin-top:12px;cursor:pointer;text-decoration:none;color:inherit;border-left-color:var(--good)}
   .card.checkpoint:hover{border-color:var(--line-bright);transform:translateY(-2px);box-shadow:0 18px 40px -26px rgba(0,0,0,0.9)}
   .card.checkpoint .card-num{background:rgba(70,214,160,0.14);border-color:var(--good);color:var(--good)}
+  .card.checkpoint .cp-hint{font-size:12.5px;color:var(--muted);margin:6px 0 0;font-style:italic}
+  .card.checkpoint.ready{border-color:rgba(70,214,160,0.55);box-shadow:0 0 24px -8px rgba(70,214,160,0.45)}
+  .card.checkpoint.ready:hover{border-color:var(--good)}
+  .pill.ready{color:var(--good);border-color:rgba(70,214,160,0.4);background:rgba(70,214,160,0.08)}
+  .part-progress{margin-left:auto;font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--muted)}
+  .part-progress.full{color:var(--good)}
   @media(min-width:640px){.lessons{grid-template-columns:1fr 1fr}}
   .card{position:relative;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:16px 16px 14px;display:flex;gap:14px;transition:.14s;overflow:hidden;border-left:3px solid var(--line-bright)}
   .card.available{cursor:pointer;border-left-color:var(--indigo)}
@@ -121,6 +133,7 @@
     <p class="dek">From your first line of code to a full command-based robot you can drive: the <b>toolchain</b>, the <b>hardware</b>, <b>autonomous</b>, <b>vision</b>, and the pro practices that hold up under competition. A little coding helps; we build up the rest. Taught in <b>Java</b> and <b>Python</b>, your pick.</p>
 
     <div class="progress-card">
+      <a class="continue-btn" id="continueBtn" hidden></a>
       <div class="pc-stats">
         <div class="pc-stat"><div class="k">Completed</div><div class="v indigo" id="statDone">0 <small>/ 0</small></div></div>
         <div class="pc-stat"><div class="k">Available now</div><div class="v amber" id="statOpen">0</div></div>
@@ -263,9 +276,12 @@
   function render(){
     courseEl.innerHTML="";
     COURSE.forEach(function(part){
+      var pAvail=0, pDone=0;
+      part.lessons.forEach(function(L){ if(L.file){ pAvail++; if(done[activeFile(L)]) pDone++; } });
       var sec=document.createElement("section"); sec.className="part";
       var head=document.createElement("div"); head.className="part-head";
-      head.innerHTML='<span class="part-tag">Part '+part.code+'</span><h2>'+part.title+'</h2><span class="part-sub">'+part.sub+'</span>';
+      head.innerHTML='<span class="part-tag">Part '+part.code+'</span><h2>'+part.title+'</h2><span class="part-sub">'+part.sub+'</span>'+
+        (pAvail?'<span class="part-progress'+(pDone===pAvail?" full":"")+'">'+pDone+'/'+pAvail+'</span>':'');
       sec.appendChild(head);
       var blurb=document.createElement("p"); blurb.className="part-blurb"; blurb.textContent=part.blurb; sec.appendChild(blurb);
       var grid=document.createElement("div"); grid.className="lessons";
@@ -293,10 +309,14 @@
       });
       sec.appendChild(grid);
       if(part.code!=="5" && part.code!=="9"){ var cpFile="deploy-checkpoint-"+part.code+".html";
-        var cp=document.createElement("a"); cp.className="card checkpoint"+(done[cpFile]?" done":""); cp.href=cpFile; cp.innerHTML='<div class="card-num">★</div><div class="card-body"><div class="card-title">Part '+part.code+' Checkpoint</div><p class="card-desc">A short cumulative quiz over this part and what came before. Answer them all correctly to clear it.</p><div class="card-foot"><span class="pill">Checkpoint</span><span class="open-link">Start →</span></div></div>'; sec.appendChild(cp); }
+        var cpDone=!!done[cpFile], cpReady=!cpDone && pAvail>0 && pDone===pAvail;
+        var cpPill=cpReady?'<span class="pill ready">Checkpoint ready - prove it</span>':'<span class="pill">Checkpoint</span>';
+        var cpHint=(!cpDone && !cpReady)?'<p class="cp-hint">Best after finishing Part '+part.code+'.</p>':'';
+        var cp=document.createElement("a"); cp.className="card checkpoint"+(cpDone?" done":"")+(cpReady?" ready":""); cp.href=cpFile; cp.innerHTML='<div class="card-num">★</div><div class="card-body"><div class="card-title">Part '+part.code+' Checkpoint</div><p class="card-desc">A short cumulative quiz over this part and what came before. Answer them all correctly to clear it.</p>'+cpHint+'<div class="card-foot">'+cpPill+'<span class="open-link">Start →</span></div></div>'; sec.appendChild(cp); }
       courseEl.appendChild(sec);
     });
     updateStats();
+    updateContinue();
   }
 
   function updateStats(){
@@ -311,6 +331,35 @@
     var pct=total?Math.round(doneCount/total*100):0;
     document.getElementById("pcPct").textContent=pct+"%";
     document.getElementById("pcBar").style.width=pct+"%";
+  }
+
+  function nextUp(){
+    var started=false, next=null;
+    COURSE.forEach(function(part){
+      part.lessons.forEach(function(L){
+        if(!L.file) return;
+        var af=activeFile(L);
+        if(done[af]){ started=true; }
+        else if(!next){ next={href:af, label:part.code+"."+L.n+" "+L.title}; }
+      });
+    });
+    if(!next){
+      COURSE.forEach(function(part){
+        if(next || part.code==="5" || part.code==="9") return;
+        var cpFile="deploy-checkpoint-"+part.code+".html";
+        if(!done[cpFile]) next={href:cpFile, label:"Part "+part.code+" Checkpoint"};
+      });
+    }
+    return {next:next, started:started};
+  }
+
+  function updateContinue(){
+    var btn=document.getElementById("continueBtn"); if(!btn) return;
+    var r=nextUp();
+    if(!r.next){ btn.hidden=true; return; }
+    btn.hidden=false;
+    btn.setAttribute("href", r.next.href);
+    btn.innerHTML='<span class="cb-act">'+(r.started?"Continue →":"Start →")+'</span><span class="cb-what">'+r.next.label+'</span>';
   }
 
   courseEl.addEventListener("click",function(e){
@@ -336,6 +385,7 @@
   syncLangUI();
 
   render();
+  if(location.hash==="#continue"){ var jump=nextUp(); if(jump.next){ location.replace(jump.next.href); } }
   window.addEventListener("frc:progresssynced", function(){ try{ done = loadDone(); render(); }catch(e){} });
 })();
 </script>

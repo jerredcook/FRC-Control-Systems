@@ -53,11 +53,21 @@
   .btn:hover{border-color:var(--indigo);color:var(--text)} .btn.on{background:var(--indigo);border-color:var(--indigo);color:#2a1503;font-weight:700}
   .btn.comp.on{background:var(--green);border-color:var(--green);color:#06210f}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--amber);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
 
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
   .note p{margin:0;color:var(--text);font-size:16px}
   .note.indigo{border-color:var(--indigo);background:rgba(255,138,76,.07)} .note.indigo .nh{color:var(--indigo)}
+  .note.red{border-color:var(--red);background:rgba(255,107,107,.08)} .note.red .nh{color:var(--red)}
 
   .rules{display:grid;gap:10px;margin:18px 0} @media(min-width:560px){.rules{grid-template-columns:1fr 1fr}}
   .rule{display:flex;gap:11px;border:1px solid var(--line);border-radius:11px;padding:13px 14px;background:var(--panel)}
@@ -147,6 +157,13 @@
       </div>
     </div>
     <p class="caption">Each shot dumps pressure from the tank; the compressor builds it back up. Fire too fast with the compressor off and the tank runs dry and the cylinder gets weak, the same reason real robots watch their air supply during a match.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
+      <div class="m-item" data-m="shot"><span class="m-st">○</span><span>Fill the tank to <b>full (120 psi)</b>, switch the compressor <b>off</b>, then fire <b>one shot</b>. Watch the tank readout, each full-force shot costs about <b>6 psi</b>.</span></div>
+      <div class="m-item" data-m="crawl"><span class="m-st">○</span><span>Keep the compressor off and keep firing until the tank is nearly <b>empty</b>. The piston stops snapping out and only <b>crawls</b>. No stored air, no push.</span></div>
+      <div class="m-item" data-m="band"><span class="m-st">○</span><span>Match play: get the tank into the <b>40 to 60 psi</b> band, then land <b>6 shots</b> without leaving it. Run the compressor in <b>short bursts</b> between shots to top back up.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> each shot really costs about <b>6.5 psi</b>, so one full tank holds <b>12 shots</b> before dipping under <b>40 psi</b>. Prove it: fill to full, compressor <b>off</b>, land all <b>12</b>, then stop firing while the tank still reads <b>40 or more</b>.</span></div>
+    </div>
   </section>
 
   <section>
@@ -300,6 +317,49 @@
   }
   document.getElementById('comp').addEventListener('click',function(){ comp=!comp; this.textContent=comp?'Stop compressor':'Run compressor'; this.classList.toggle('on',comp); });
   document.getElementById('fire').addEventListener('click',function(){ extended=!extended; firing=true; this.textContent=extended?'Retract cylinder':'Fire cylinder'; this.classList.toggle('on',extended); });
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  var mWasFull=false, mWasCharged=false, mPrevExt=ext;
+  var mBandOn=false, mBandShots=0, mGoldOn=false, mGoldShots=0, mGoldHold=0;
+  setInterval(function(){
+    if(psi>=119.9) mWasFull=true;
+    if(psi>=60) mWasCharged=true;
+    var mShot = extended && mPrevExt<1 && ext>=1; // a full extend just finished
+    mPrevExt=ext;
+    // shot: one compressor-off firing from a full tank (one shot from 120 lands at 113.5)
+    if(mWasFull && !comp && extended && ext>=1 && psi>111 && psi<118) mClear('shot');
+    // crawl: charged past 60 once, then drained until an extend only creeps out
+    if(mWasCharged && !comp && extended && ext>=0.6 && psi<=2.4) mClear('crawl');
+    // band: six shots while holding roughly 40-60 psi (a little slack up top for reaction time)
+    if(!mBandOn && psi>=40 && psi<=60){ mBandOn=true; mBandShots=0; }
+    if(mBandOn && (psi<39.5 || psi>65)){ mBandOn=false; mBandShots=0; }
+    if(mBandOn && mShot){ mBandShots++; if(mBandShots>=6) mClear('band'); }
+    // gold: 12 shots on one full tank, compressor off, then hold >=40 for 2s (firing on drains below 40 and disarms)
+    if(!mGoldOn && psi>=119.9 && !comp){ mGoldOn=true; mGoldShots=0; mGoldHold=0; }
+    if(mGoldOn && (comp || psi<39.5)){ mGoldOn=false; mGoldShots=0; mGoldHold=0; }
+    if(mGoldOn && mShot){ mGoldShots++; mGoldHold=0; }
+    if(mGoldOn && mGoldShots>=12){ mGoldHold+=0.1; if(mGoldHold>=2) mClear('gold'); }
+  },100);
+  }catch(e){}
+
   requestAnimationFrame(tick);
 
   document.querySelectorAll('#quiz .q').forEach(function(q){

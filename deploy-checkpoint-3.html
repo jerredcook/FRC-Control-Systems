@@ -105,6 +105,8 @@
   .opt.locked.correct,.opt.locked.wrong{opacity:1}
   .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
   .explain.show{display:block}
+  .explain a.ref{display:inline-block;margin-top:10px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--indigo);text-decoration:none;border:1px solid var(--line-2);border-radius:7px;padding:4px 10px;transition:.12s}
+  .explain a.ref:hover{border-color:var(--indigo);color:var(--text)}
 
   .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
   .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
@@ -160,7 +162,7 @@
           <button class="opt">The subsystem owns the motor and encoder and updates them in periodic(); the command is the action like "move arm to score"</button>
           <button class="opt">Both the subsystem and the command directly call set() on the same motor</button>
         </div>
-        <div class="explain">A subsystem is the noun: it owns the hardware and updates itself in periodic() every 20 ms. A command is the verb: it asks the subsystem to do something. Only the subsystem touches its own motor, which stops two pieces of code from fighting over it.</div>
+        <div class="explain">A subsystem is the noun: it owns the hardware and updates itself in periodic() every 20 ms. A command is the verb: it asks the subsystem to do something. Only the subsystem touches its own motor, which stops two pieces of code from fighting over it. <a class="ref" href="deploy-lesson-12.html">Review: Lesson 3.2 &middot; Subsystems</a></div>
       </div>
 
       <div class="q" data-correct="2">
@@ -171,7 +173,7 @@
           <button class="opt">The new command is ignored until the first one finishes on its own</button>
           <button class="opt">The first command is interrupted, its end(true) runs, so motor shutdown belongs in end()</button>
         </div>
-        <div class="explain">The scheduler lets only one command own a subsystem at a time. Scheduling a new one interrupts the old, and end(interrupted) always fires, even on interrupt. That is why stopping the motor and other cleanup belong in end(), not isFinished().</div>
+        <div class="explain">The scheduler lets only one command own a subsystem at a time. Scheduling a new one interrupts the old, and end(interrupted) always fires, even on interrupt. That is why stopping the motor and other cleanup belong in end(), not isFinished(). <a class="ref" href="deploy-lesson-13.html">Review: Lesson 3.3 &middot; Commands</a></div>
       </div>
 
       <div class="q" data-correct="0">
@@ -182,7 +184,7 @@
           <button class="opt">intakeCommand.andThen(wait), which runs the intake then waits 3 seconds afterward</button>
           <button class="opt">A parallel group, which only ends once both the intake and the timer finish</button>
         </div>
-        <div class="explain">withTimeout races the command against a timer and ends when either finishes, so the intake stops after at most 3 seconds. andThen would run them one after another, and a parallel group waits for all members, so neither caps the time.</div>
+        <div class="explain">withTimeout races the command against a timer and ends when either finishes, so the intake stops after at most 3 seconds. andThen would run them one after another, and a parallel group waits for all members, so neither caps the time. <a class="ref" href="deploy-lesson-14.html">Review: Lesson 3.4 &middot; Command Compositions</a></div>
       </div>
 
       <div class="q" data-correct="1">
@@ -193,7 +195,7 @@
           <button class="opt">shootCommand runs only while A is held, and when you release, the shooter's default command resumes automatically</button>
           <button class="opt">The default command blocks the binding, so pressing A does nothing</button>
         </div>
-        <div class="explain">whileTrue runs the command while the button is held and ends it on release. A default command is the fallback a subsystem runs when nothing else requires it, so releasing A interrupts shootCommand and the default resumes on its own.</div>
+        <div class="explain">whileTrue runs the command while the button is held and ends it on release. A default command is the fallback a subsystem runs when nothing else requires it, so releasing A interrupts shootCommand and the default resumes on its own. <a class="ref" href="deploy-lesson-16.html">Review: Lesson 3.6 &middot; Default Commands &amp; Requirements</a></div>
       </div>
 
       <div class="q" data-correct="2">
@@ -204,7 +206,7 @@
           <button class="opt">new Trigger(...) must be given an int, and the scheduler converts it to true or false</button>
           <button class="opt">new Trigger(intake::hasGamePiece).onTrue(stowCommand) fires once when the sensor first reports a piece</button>
         </div>
-        <div class="explain">A Trigger wraps any boolean supplier, including a method like hasGamePiece() that returns true or false. onTrue schedules a command once when the condition flips to true, so the robot reacts to a sensor automatically, the same way it reacts to a button.</div>
+        <div class="explain">A Trigger wraps any boolean supplier, including a method like hasGamePiece() that returns true or false. onTrue schedules a command once when the condition flips to true, so the robot reacts to a sensor automatically, the same way it reacts to a button. <a class="ref" href="deploy-lesson-15.html">Review: Lesson 3.5 &middot; Triggers &amp; Button Bindings</a></div>
       </div>
 
     </div>

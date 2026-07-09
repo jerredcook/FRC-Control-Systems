@@ -149,6 +149,8 @@
   .opt.locked.correct,.opt.locked.wrong{opacity:1}
   .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--teal);padding:4px 0 4px 13px;display:none}
   .explain.show{display:block}
+  a.ref{font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--teal);text-decoration:none}
+  a.ref:hover{text-decoration:underline}
 
   /* recap */
   .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
@@ -201,31 +203,31 @@
         <div class="qn">Question 1</div>
         <div class="qt">In a WPILib robot, where does the control loop you wrote in Part I actually run, and how often?</div>
         <div class="opts"><button class="opt">In the constructor, once when the robot turns on</button><button class="opt">In a subsystem's periodic() method, called every 20 ms by the CommandScheduler</button><button class="opt">In a Command's end() method, only when the move finishes</button></div>
-        <div class="explain">The roboRIO runs a fixed 20 ms (50 Hz) loop. The CommandScheduler calls each subsystem's periodic() every beat, so read sensor, compute output, apply voltage happens there about 50 times a second.</div>
+        <div class="explain">The roboRIO runs a fixed 20 ms (50 Hz) loop. The CommandScheduler calls each subsystem's periodic() every beat, so read sensor, compute output, apply voltage happens there about 50 times a second. <a class="ref" href="closing-the-loop-lesson-9.html">Review: Lesson II.1 &middot; Robot Code Anatomy</a></div>
       </div>
       <div class="q" data-correct="2">
         <div class="qn">Question 2</div>
         <div class="qt">Your elevator uses a motor geared 10:1 driving a drum 0.05 m in diameter. The encoder reports motor rotations, but your code treats them as meters. The carriage flies past every target. What is the fix?</div>
         <div class="opts"><button class="opt">Raise kP until the overshoot goes away</button><button class="opt">Switch from a PIDController to feedforward only</button><button class="opt">Convert motor rotations to meters: divide by the gear ratio, then multiply by pi times the drum diameter</button></div>
-        <div class="explain">Unit and gear-ratio mistakes are the number one real-robot bug. Motor rotations divided by 10, times pi times 0.05 m, gives the carriage height in meters. No gain tuning fixes a units error.</div>
+        <div class="explain">Unit and gear-ratio mistakes are the number one real-robot bug. Motor rotations divided by 10, times pi times 0.05 m, gives the carriage height in meters. No gain tuning fixes a units error. <a class="ref" href="closing-the-loop-lesson-10.html">Review: Lesson II.2 &middot; Units, Gears &amp; Conversions</a></div>
       </div>
       <div class="q" data-correct="1">
         <div class="qn">Question 3</div>
         <div class="qt">You wire up WPILib's PIDController for the elevator and call it correctly, but with pure P it still parks a little below target, exactly like the Part I simulation. How do you call it, and why the droop?</div>
         <div class="opts"><button class="opt">calculate(setpoint, measurement); the droop is a bug in the WPILib class</button><button class="opt">calculate(measurement, setpoint); the droop is real, because P needs a small leftover error to make the gravity-holding voltage</button><button class="opt">calculate(setpoint) only; the droop means kI is set too high</button></div>
-        <div class="explain">PIDController.calculate takes the measurement first, then the setpoint. The droop is the same behavior from Lesson 2 showing up in code: pure P leaves a steady-state error against a gravity load.</div>
+        <div class="explain">PIDController.calculate takes the measurement first, then the setpoint. The droop is the same behavior from Lesson 2 showing up in code: pure P leaves a steady-state error against a gravity load. <a class="ref" href="closing-the-loop-lesson-11.html">Review: Lesson II.3 &middot; Your First Closed Loop in Code</a></div>
       </div>
       <div class="q" data-correct="0">
         <div class="qn">Question 4</div>
         <div class="qt">You add feedforward in code. For an arm, the WPILib ArmFeedforward needs the arm angle, but for an elevator the ElevatorFeedforward does not. Why does the arm need the angle?</div>
         <div class="opts"><button class="opt">Gravity on an arm changes with angle, so the gravity term scales by the cosine of the angle; an elevator fights the same gravity everywhere</button><button class="opt">The arm spins faster than the elevator, so it needs a velocity term the elevator does not</button><button class="opt">ArmFeedforward needs the angle only to convert degrees to radians, nothing physical</button></div>
-        <div class="explain">An arm held horizontal fights full weight (cos 0 = 1); pointed straight up it barely strains (cos 90 = 0). ArmFeedforward scales kG by cos(angle). An elevator's gravity load is constant, so kG alone holds it anywhere.</div>
+        <div class="explain">An arm held horizontal fights full weight (cos 0 = 1); pointed straight up it barely strains (cos 90 = 0). ArmFeedforward scales kG by cos(angle). An elevator's gravity load is constant, so kG alone holds it anywhere. <a class="ref" href="closing-the-loop-lesson-12.html">Review: Lesson II.4 &middot; Feedforward in Code</a></div>
       </div>
       <div class="q" data-correct="2">
         <div class="qn">Question 5</div>
         <div class="qt">You want smooth, fast moves that never slam the mechanism. You wrap everything in a ProfiledPIDController and feed the profile's current velocity to feedforward. What does the motion profile buy you, and why feed its velocity to feedforward?</div>
         <div class="opts"><button class="opt">It removes the need for feedforward entirely, since the profile already knows the voltage</button><button class="opt">It only makes moves slower, with no effect on tracking error</button><button class="opt">It limits velocity and acceleration for a smooth move, and feeding its velocity to feedforward lets kV and kA supply voltage throughout the move so error stays tiny</button></div>
-        <div class="explain">A TrapezoidProfile plans a ramp-up, cruise, ramp-down move within velocity and acceleration limits. Feeding the profile's instantaneous velocity to ElevatorFeedforward means kV and kA predict the voltage for the planned motion, not a static hold, keeping feedback's job small the whole way.</div>
+        <div class="explain">A TrapezoidProfile plans a ramp-up, cruise, ramp-down move within velocity and acceleration limits. Feeding the profile's instantaneous velocity to ElevatorFeedforward means kV and kA predict the voltage for the planned motion, not a static hold, keeping feedback's job small the whole way. <a class="ref" href="closing-the-loop-lesson-13.html">Review: Lesson II.5 &middot; Motion Profiles</a></div>
       </div>
     </div>
   </section>

@@ -149,6 +149,8 @@
   .opt.locked.correct,.opt.locked.wrong{opacity:1}
   .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--teal);padding:4px 0 4px 13px;display:none}
   .explain.show{display:block}
+  a.ref{font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--teal);text-decoration:none}
+  a.ref:hover{text-decoration:underline}
 
   /* recap */
   .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
@@ -201,31 +203,31 @@
         <div class="qn">Question 1</div>
         <div class="qt">Each swerve module has a steer motor and a drive motor. Which Part IV mechanism does each one behave like?</div>
         <div class="opts"><button class="opt">Steer is position control (point the wheel, like the arm); drive is velocity control (spin the wheel, like the flywheel)</button><button class="opt">Steer is velocity control like the flywheel; drive is position control like the arm</button><button class="opt">Both steer and drive are position control, identical to the elevator</button></div>
-        <div class="explain">A swerve module reuses Part IV directly: the steer loop points the wheel to an angle (position control, like the arm), and the drive loop holds a wheel speed (velocity control, like the flywheel). Four modules means eight motors, all built from mechanisms you already know.</div>
+        <div class="explain">A swerve module reuses Part IV directly: the steer loop points the wheel to an angle (position control, like the arm), and the drive loop holds a wheel speed (velocity control, like the flywheel). Four modules means eight motors, all built from mechanisms you already know. <a class="ref" href="closing-the-loop-lesson-22.html">Review: Lesson V.1 &middot; Swerve Drive Control</a></div>
       </div>
       <div class="q" data-correct="1">
         <div class="qn">Question 2</div>
         <div class="qt">Each steer motor uses a FusedCANcoder. Why does a position loop like steering need an absolute sensor at power-on, when drive (velocity) does not?</div>
         <div class="opts"><button class="opt">FusedCANcoder is only for the 1 kHz loop rate, not for sensing angle</button><button class="opt">A position loop must know its true absolute angle from the first instant, or the wheel starts crooked; a velocity loop only cares about rate, not absolute position</button><button class="opt">Drive needs it more than steer, because velocity drifts faster than angle</button></div>
-        <div class="explain">Steering is position control, so it needs the wheel's real angle the moment the robot powers on, or it starts pointed wrong. The FusedCANcoder gives an absolute angle while still allowing the crisp fast loop. A velocity loop tracks rate of change, so it does not need an absolute starting reference.</div>
+        <div class="explain">Steering is position control, so it needs the wheel's real angle the moment the robot powers on, or it starts pointed wrong. The FusedCANcoder gives an absolute angle while still allowing the crisp fast loop. A velocity loop tracks rate of change, so it does not need an absolute starting reference. <a class="ref" href="closing-the-loop-lesson-22.html">Review: Lesson V.1 &middot; Swerve Drive Control</a></div>
       </div>
       <div class="q" data-correct="2">
         <div class="qn">Question 3</div>
         <div class="qt">A camera reports tx, the horizontal angle from the robot's bore-sight to a target. You auto-aim by spinning the robot with omega = -kP times tx. Which earlier idea is this, and what is its known weakness?</div>
         <div class="opts"><button class="opt">It is integral control, and its weakness is windup</button><button class="opt">It is derivative control, and its weakness is noise amplification</button><button class="opt">It is proportional control with the camera as the sensor, and against a moving target a small steady-state error remains because a P loop only turns while there is an offset</button></div>
-        <div class="explain">Setpoint is tx = 0 (centered), so omega = -kP times tx is pure proportional control from Lesson 2, now reading a camera. Tracking a moving target leaves a small steady offset, since P needs an error to keep turning. Adding an I term or target-velocity feedforward fixes it.</div>
+        <div class="explain">Setpoint is tx = 0 (centered), so omega = -kP times tx is pure proportional control from Lesson 2, now reading a camera. Tracking a moving target leaves a small steady offset, since P needs an error to keep turning. Adding an I term or target-velocity feedforward fixes it. <a class="ref" href="closing-the-loop-lesson-23.html">Review: Lesson V.2 &middot; Vision-Assisted Control</a></div>
       </div>
       <div class="q" data-correct="0">
         <div class="qn">Question 4</div>
         <div class="qt">Odometry alone drifts as wheels slip. The team blends in AprilTag pose estimates with addVisionMeasurement(). What makes vision worth fusing in, and what is the main complication?</div>
         <div class="opts"><button class="opt">An AprilTag is a fixed field reference that pins the robot's true position, but vision frames are tens of milliseconds old, so measurements must be time-stamped and trusted carefully</button><button class="opt">Vision is always more accurate than odometry with no downside, so odometry can be deleted</button><button class="opt">AprilTags remove all need for a gyro and wheel encoders</button></div>
-        <div class="explain">A known tag gives an absolute field location that corrects odometry drift. The catch is latency: frames arrive delayed, so you time-stamp them, weight them against odometry, and reject wild jumps rather than trusting vision blindly.</div>
+        <div class="explain">A known tag gives an absolute field location that corrects odometry drift. The catch is latency: frames arrive delayed, so you time-stamp them, weight them against odometry, and reject wild jumps rather than trusting vision blindly. <a class="ref" href="closing-the-loop-lesson-23.html">Review: Lesson V.2 &middot; Vision-Assisted Control</a></div>
       </div>
       <div class="q" data-correct="1">
         <div class="qn">Question 5</div>
         <div class="qt">The state-space lesson reveals that the PD control you used all course is a special case. On a system with state [position, velocity], state feedback u = K times (reference minus state) turns out to be which two gains, and what does an LQR add?</div>
         <div class="opts"><button class="opt">k1 and k2 are kI and kA; LQR removes the need for feedforward</button><button class="opt">k1 and k2 are kP and kD; an LQR computes the optimal K by trading state error (Q) against control effort (R)</button><button class="opt">k1 and k2 are kS and kG; LQR only applies to flywheels</button></div>
-        <div class="explain">On a position-velocity system, the state gains are exactly kP (on position error) and kD (on velocity error), so PD is state feedback. An LQR picks K optimally from Q (penalize error, tighter) and R (penalize effort, gentler), which scales to multi-state systems where eyeballing gains is hopeless.</div>
+        <div class="explain">On a position-velocity system, the state gains are exactly kP (on position error) and kD (on velocity error), so PD is state feedback. An LQR picks K optimally from Q (penalize error, tighter) and R (penalize effort, gentler), which scales to multi-state systems where eyeballing gains is hopeless. <a class="ref" href="closing-the-loop-lesson-24.html">Review: Lesson V.3 &middot; State-Space &amp; LQR</a></div>
       </div>
     </div>
   </section>
