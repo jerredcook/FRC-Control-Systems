@@ -13,18 +13,23 @@
  * hiccup can't break a lesson.
  */
 
-/* FRC Academy - review capture.
+/* FRC Academy - review capture + spaced retrieval.
  *
  * Always on, no backend needed, and no change to the 200+ lesson files. It
  * reads the same "#quiz .q[data-correct]" markup the mastery handler uses,
- * works out right/wrong on its own, and records every question a student gets
- * wrong (before getting it right) into localStorage under "frc:review".
- * review.html later resurfaces those questions for practice.
+ * works out right/wrong on its own, and records into localStorage under
+ * "frc:review":
+ *   - every question a student gets wrong (due for review immediately), and
+ *   - every question answered right on the first try (scheduled to come back
+ *     in 3 days - successful retrieval later is what makes memory stick).
+ * review.html resurfaces whatever is due; answering there pushes the question
+ * further out (3 -> 9 -> 27 days) until it graduates.
  */
 (function () {
   "use strict";
   var KEY = "frc:review";
-  var CAP = 400; // keep the pool bounded
+  var CAP = 800; // keep the pool bounded
+  var DAY = 86400000;
 
   function fileName() {
     try { return (location.pathname.split("/").pop() || "index.html") || "index.html"; }
@@ -50,23 +55,44 @@
   }
   function txt(el) { return el ? (el.textContent || "").trim() : ""; }
 
+  function entryFrom(q, qi, f) {
+    return {
+      file: f, course: courseOf(f), qi: qi,
+      qn: txt(q.querySelector(".qn")),
+      prompt: txt(q.querySelector(".qt")),
+      opts: Array.prototype.map.call(q.querySelectorAll(".opt"), txt),
+      correct: parseInt(q.getAttribute("data-correct"), 10) || 0,
+      explain: txt(q.querySelector(".explain")),
+      misses: 0
+    };
+  }
+
+  // wrong answer: into the pool, due for review right away
   function record(q, qi) {
     try {
       var f = fileName(), id = f + "#q" + qi, map = load();
-      var e = map[id] || {
-        file: f, course: courseOf(f), qi: qi,
-        qn: txt(q.querySelector(".qn")),
-        prompt: txt(q.querySelector(".qt")),
-        opts: Array.prototype.map.call(q.querySelectorAll(".opt"), txt),
-        correct: parseInt(q.getAttribute("data-correct"), 10) || 0,
-        explain: txt(q.querySelector(".explain")),
-        misses: 0
-      };
+      var e = map[id] || entryFrom(q, qi, f);
       e.misses = (e.misses || 0) + 1;
       e.ts = Date.now();
+      e.due = Date.now();
+      e.ivl = 1;
       map[id] = e;
       save(map);
       try { window.dispatchEvent(new CustomEvent("frc:reviewupdated")); } catch (e2) {}
+    } catch (e) {}
+  }
+
+  // right on the first try: schedule a future retrieval (never overrides a miss)
+  function schedule(q, qi) {
+    try {
+      var f = fileName(), id = f + "#q" + qi, map = load();
+      if (map[id]) return;
+      var e = entryFrom(q, qi, f);
+      e.ts = Date.now();
+      e.due = Date.now() + 3 * DAY;
+      e.ivl = 3;
+      map[id] = e;
+      save(map);
     } catch (e) {}
   }
 
@@ -87,7 +113,10 @@
       var correct = parseInt(q.getAttribute("data-correct"), 10);
       var sibs = opt.parentNode ? opt.parentNode.querySelectorAll(".opt") : [];
       var idx = Array.prototype.indexOf.call(sibs, opt);
-      if (idx !== correct && !recorded[qi]) { recorded[qi] = true; record(q, qi); }
+      if (recorded[qi]) return;
+      recorded[qi] = true;
+      if (idx !== correct) record(q, qi);
+      else schedule(q, qi);
     }, false);
   }
 
