@@ -90,6 +90,16 @@
   .legend i{width:16px;height:2px;border-radius:2px;display:inline-block}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
 
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--teal);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
   .note p{margin:0;color:var(--text);font-size:16px}
@@ -228,6 +238,13 @@
       </div>
     </div>
     <p class="caption">Tap the scoring presets - each move is a clean profile, and the carriage holds dead-on even as you drag the load up.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
+      <div class="m-item" data-m="sweep"><span class="m-st">○</span><span>Run step 5 yourself: tap all four presets, <b>Stow, L1, L2, L3</b>, and get <b>On target? yes</b> at every height.</span></div>
+      <div class="m-item" data-m="hold"><span class="m-st">○</span><span>Park at any height, then drag <b>Added load</b> to about <b>0.10</b> (anywhere from <b>0.08 to 0.13</b>) and keep <b>On target? yes</b>. Feedback absorbs the extra weight.</span></div>
+      <div class="m-item" data-m="limit"><span class="m-st">○</span><span>Push <b>Added load past 0.25</b>. The carriage settles low and <b>On target?</b> flips to <b>no</b>. The leftover error is about <b>load ÷ kP</b>, and kP can only hide so much.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> find the ceiling. Get <b>Added load to 0.16 or more</b> while <b>On target?</b> stays <b>yes</b>. Past about <b>0.20</b> it is impossible, so creep up on it.</span></div>
+    </div>
   </section>
 
   <section>
@@ -455,6 +472,40 @@
     });
   });
   el.load.addEventListener('input',function(){S.load=parseFloat(el.load.value);el.loadVal.textContent=S.load.toFixed(2);});
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  var mSeen={}, mHoldN=0, mLimitN=0, mGoldN=0;
+  setInterval(function(){
+    var mErr=S.tgt-S.y;
+    var at=Math.abs(mErr)<S.tol && Math.abs(S.v)<0.05;
+    if(at){ mSeen[S.tgt.toFixed(2)]=true;
+      if(mSeen['0.12']&&mSeen['0.40']&&mSeen['0.66']&&mSeen['0.92']) mClear('sweep'); }
+    if(S.load>=0.0799 && S.load<=0.1301 && at){ mHoldN++; } else { mHoldN=0; }
+    if(mHoldN>=5) mClear('hold');
+    if(S.load>=0.2499 && S.pPos===S.tgt && Math.abs(S.v)<0.03 && mErr>S.tol && mErr<0.12){ mLimitN++; } else { mLimitN=0; }
+    if(mLimitN>=4) mClear('limit');
+    if(S.load>=0.1599 && at && Math.abs(S.v)<0.01){ mGoldN++; } else { mGoldN=0; }
+    if(mGoldN>=5) mClear('gold');
+  },200);
+  }catch(e){}
 
   function updateProfile(dt){
     var dist=S.tgt-S.pPos, dir=dist>=0?1:-1;

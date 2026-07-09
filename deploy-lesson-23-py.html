@@ -59,6 +59,15 @@
   .btn:hover{border-color:var(--indigo);color:var(--text)}
   .hint{font-family:var(--mono);font-size:11px;color:var(--faint)}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--indigo);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
 
   .codewrap{margin:18px 0}
   .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
@@ -167,6 +176,13 @@
       </div>
     </div>
     <p class="caption">In arcade mode the two wheel bars light up from one stick, that is the mixing at work: left = forward + turn, right = forward - turn. Switch to tank and you command each side directly.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
+      <div class="m-item" data-m="pivot"><span class="m-st">○</span><span>Pivot in place: in arcade, drag the stick straight sideways until <b>Turn</b> passes <b>0.50</b> while <b>Forward</b> stays under <b>0.10</b>. Hold it for a second and watch the wheels run opposite.</span></div>
+      <div class="m-item" data-m="arc"><span class="m-st">○</span><span>Carve a smooth arc: hold the stick so <b>Left</b> reads near <b>0.80</b> and <b>Right</b> near <b>0.40</b> for a second. That is forward with a little turn, like leaning a bike through a corner.</span></div>
+      <div class="m-item" data-m="oneoar"><span class="m-st">○</span><span>Switch to <b>tank</b> and push only the <b>L</b> throttle past <b>0.50</b>. With Right at zero the robot wheels around its stopped side, like paddling a canoe on one side.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> overflow the mix. In arcade, push the stick toward the top-right corner until <b>Forward + Turn</b> adds past <b>1.30</b>. Watch <b>Left</b> pin at <b>1.00</b>, that clipping is why real drive code scales both sides down together.</span></div>
+    </div>
   </section>
 
   <section>
@@ -388,6 +404,43 @@ self.drive = <span class="ty">DifferentialDrive</span>(self.left_group, self.rig
   document.getElementById('reset').addEventListener('click',resetRobot);
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();resetRobot();},120);});
   requestAnimationFrame(step);
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  var mPivot=0, mArc=0, mOar=0;
+  setInterval(function(){
+    var w=wheels();
+    if(mode==='arcade'){
+      mOar=0;
+      if(Math.abs(w.fwd)<0.10&&Math.abs(w.turn)>=0.50){ mPivot++; } else { mPivot=0; }
+      if(Math.abs(w.l-0.8)<=0.10&&Math.abs(w.r-0.4)<=0.10){ mArc++; } else { mArc=0; }
+      if(mPivot>=4) mClear('pivot');
+      if(mArc>=4) mClear('arc');
+      if(joy.y+joy.x>=1.30) mClear('gold');
+    } else {
+      mPivot=0; mArc=0;
+      if(tank.l>=0.50&&Math.abs(tank.r)<=0.05){ mOar++; } else { mOar=0; }
+      if(mOar>=4) mClear('oneoar');
+    }
+  },200);
+  }catch(e){}
 
   var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
   function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'').replace(/\(\)$/,'');}

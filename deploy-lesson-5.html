@@ -71,6 +71,15 @@
   .rcol .rl .b{color:var(--faint)}
   .rcol .rl.imp{color:#cdd9ec}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--indigo);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
 
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
@@ -156,6 +165,13 @@
       </div>
     </div>
     <p class="caption">Only add what you use - extra libraries are extra weight. Most teams run WPILib plus one motor vendor, maybe PathPlanner and a vision library.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the installer above</span></div>
+      <div class="m-item" data-m="unlock"><span class="m-st">○</span><span>Install <b>CTRE Phoenix 6</b> and watch <b>TalonFX</b> show up under "Now you can import".</span></div>
+      <div class="m-item" data-m="kraken"><span class="m-st">○</span><span>Your robot: <b>Kraken drive</b>, a <b>navX gyro</b>, <b>PathPlanner autos</b>. Install exactly what it needs, nothing missing, nothing extra. Krakens are CTRE, so REVLib controls nothing here.</span></div>
+      <div class="m-item" data-m="neo"><span class="m-st">○</span><span>New season: <b>NEO drive</b> plus <b>AprilTag vision</b>, autos written by hand. Swap the list to exactly what this robot needs.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> a robot with <b>Falcon drive</b>, a <b>Pigeon 2 gyro</b>, and <b>AprilTag vision</b>. Read each card's fine print. Exactly <b>two</b> libraries cover all three.</span></div>
+    </div>
   </section>
 
   <section>
@@ -281,6 +297,44 @@
     depList.innerHTML=deps; impList.innerHTML=imps;
   }
   render();
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  var mAll=['phoenix','rev','pathplanner','photon','navx'];
+  var mGoals={kraken:['phoenix','navx','pathplanner'],neo:['rev','photon'],gold:['phoenix','photon']};
+  var mHold={kraken:0,neo:0,gold:0};
+  function mExact(need){
+    for(var i=0;i<mAll.length;i++){
+      var on=!!state[mAll[i]], wanted=need.indexOf(mAll[i])>=0;
+      if(on!==wanted) return false;
+    }
+    return true;
+  }
+  setInterval(function(){
+    if(state.phoenix) mClear('unlock');
+    Object.keys(mGoals).forEach(function(id){
+      if(mExact(mGoals[id])){ mHold[id]+=0.2; if(mHold[id]>=1.2) mClear(id); }
+      else { mHold[id]=0; }
+    });
+  },200);
+  }catch(e){}
 
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);

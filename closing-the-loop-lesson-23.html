@@ -78,6 +78,16 @@
   .ro .v.amber{color:var(--amber)} .ro .v.teal{color:var(--teal)} .ro .v.indigo{color:var(--indigo)} .ro .v.green{color:var(--green)} .ro .v.red{color:var(--red)} .ro .v.ink{color:var(--text)}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
 
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--teal);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
   .note p{margin:0;color:var(--text);font-size:16px}
@@ -213,6 +223,13 @@
       </div>
     </div>
     <p class="caption">The amber wedge is the camera's view of the offset; the teal line is where the robot points. Auto-aim closes the gap - pure proportional control.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
+      <div class="m-item" data-m="lock"><span class="m-st">○</span><span>Turn <b>auto-aim off</b>, drag the target until <b>tx reads 35°</b> or more, then flip aim back on. Watch the loop drive the error to zero.</span></div>
+      <div class="m-item" data-m="rate"><span class="m-st">○</span><span>Turn rate is kP times tx. Push the <b>Turn rate</b> readout past <b>8.0</b>. You need a big error and a <b>big kP</b> at the same moment.</span></div>
+      <div class="m-item" data-m="track"><span class="m-st">○</span><span>Sweep the target a full <b>40°</b> without ever losing <b>locked on</b>. Drag slow and steady, the aim is always chasing you.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> do the 40° locked sweep with <b>kP at 2.0 or less</b>. A weak gain can only follow a target that crawls.</span></div>
+    </div>
   </section>
 
   <section>
@@ -358,6 +375,43 @@ drive.<span class="fn">drive</span>(<span class="num">0</span>, <span class="num
   el.tgt.addEventListener('input',function(){S.targetBearing=parseFloat(el.tgt.value)*RAD;el.tgtVal.textContent=el.tgt.value+'°';});
   el.kp.addEventListener('input',function(){S.kP=parseFloat(el.kp.value);el.kpVal.textContent=S.kP.toFixed(1);});
   el.aim.addEventListener('click',function(){S.aim=!S.aim;el.aim.textContent='Auto-aim: '+(S.aim?'on':'off');el.aim.classList.toggle('active',S.aim);});
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  // checker rides requestAnimationFrame: at high kP the turn-rate spike lasts one
+  // frame, so a 200ms poll would miss it. Sampling every frame never does.
+  var mArmed=false, mSweep=0, mPrevTb=S.targetBearing;
+  function mTick(){
+    try{
+      var mTx=(S.targetBearing-S.heading)*DEG, mLocked=Math.abs(mTx)<1.5;
+      if(!S.aim && Math.abs(mTx)>=34.5) mArmed=true;
+      if(mArmed && S.aim && mLocked) mClear('lock');
+      if(S.aim && Math.abs(S.omega)>=8) mClear('rate');
+      if(mLocked){ mSweep+=Math.abs(S.targetBearing-mPrevTb)*DEG; } else { mSweep=0; }
+      mPrevTb=S.targetBearing;
+      if(mSweep>=40){ mClear('track'); if(S.kP<=2.05) mClear('gold'); }
+    }catch(e){}
+    requestAnimationFrame(mTick);
+  }
+  requestAnimationFrame(mTick);
+  }catch(e){}
 
   function draw(){
     var ctx=F.ctx,W=F.w,H=F.h; ctx.clearRect(0,0,W,H);

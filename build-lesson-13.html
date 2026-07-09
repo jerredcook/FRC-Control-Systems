@@ -60,6 +60,15 @@
   input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--indigo);cursor:pointer;box-shadow:0 0 10px -1px var(--indigo)}
   input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--amber);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
 
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
@@ -152,6 +161,13 @@
       </div>
     </div>
     <p class="caption">The cantilever shaft bows under load and the end whirls in a circle as it spins, that wobble is runout, and it wrecks precision and wears parts. The supported shaft, pinned at both ends, barely moves no matter the load.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
+      <div class="m-item" data-m="fullload"><span class="m-st">○</span><span>Keep <b>1 bearing</b> selected and push the load to <b>100%</b>. Read the Runout box: <b>high wobble</b>. The diving board is at its worst.</span></div>
+      <div class="m-item" data-m="flip"><span class="m-st">○</span><span>Find the flip point. Slide the load down, then creep back up until Runout first flips from <b>wobbling</b> to <b>high wobble</b>. Hold the slider there for a second. Hint: it is a little past halfway.</span></div>
+      <div class="m-item" data-m="twobearings"><span class="m-st">○</span><span>Leave the load at <b>100%</b> and switch to <b>2 bearings</b>. Runout now reads <b>runs true ✓</b>. Same load, zero wobble.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> use the fourth-power rule from the note below. A <b>3/4"</b> shaft is exactly twice the diameter of a <b>3/8"</b> shaft. How many times stiffer against bending is it? <input id="mGoldIn" type="number" step="any" inputmode="decimal" style="width:74px;margin-left:4px;background:var(--panel-2);border:1px solid var(--line-2);border-radius:7px;color:var(--text);font-family:var(--mono);font-size:13px;padding:5px 8px"> <button id="mGoldBtn" type="button" style="margin-left:4px;background:var(--panel-2);border:1px solid var(--line-2);border-radius:7px;color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:6px 10px;cursor:pointer">Check</button></span></div>
+    </div>
   </section>
 
   <section>
@@ -294,6 +310,43 @@
   document.getElementById('load').addEventListener('input',function(e){ load=+e.target.value; document.getElementById('loadv').textContent=load+'%'; refresh(); });
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
   refresh(); requestAnimationFrame(step);
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  var mFlipHold=0;
+  setInterval(function(){
+    if(cfg==='cant'&&load>=100) mClear('fullload');
+    if(cfg==='sup'&&load>=100) mClear('twobearings');
+    if(cfg==='cant'&&load>=56&&load<=62){ mFlipHold+=0.2; } else { mFlipHold=0; }
+    if(mFlipHold>=1) mClear('flip');
+  },200);
+  var gIn=document.getElementById('mGoldIn'), gBtn=document.getElementById('mGoldBtn');
+  if(gIn&&gBtn){
+    gBtn.addEventListener('click',function(){
+      var v=parseFloat(gIn.value);
+      if(!isNaN(v)&&v>=15.5&&v<=16.5){ gIn.style.borderColor='var(--green)'; mClear('gold'); }
+      else { gIn.style.borderColor='var(--red)'; }
+    });
+    gIn.addEventListener('input',function(){ gIn.style.borderColor='var(--line-2)'; });
+  }
+  }catch(e){}
 
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);

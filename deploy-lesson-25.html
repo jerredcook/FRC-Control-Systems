@@ -56,6 +56,15 @@
   .btn.amber{border-color:rgba(255,176,32,.4);color:var(--amber)}
   .hint{font-family:var(--mono);font-size:11px;color:var(--faint)}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--indigo);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
 
   .codewrap{margin:18px 0}
   .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
@@ -159,6 +168,13 @@
       </div>
     </div>
     <p class="caption">The dashed ghost is what the robot <em>thinks</em> its pose is. After enough driving it lags the real robot, that's accumulated drift. "Reset pose" snaps the estimate back onto the truth, exactly what a vision fix or a known start does.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
+      <div class="m-item" data-m="drift"><span class="m-st">○</span><span>Drive a <b>full lap</b> around the field. Tiny per-loop errors pile up: push <b>Drift from truth</b> past <b>0.30 m</b>.</span></div>
+      <div class="m-item" data-m="bend"><span class="m-st">○</span><span>Spin in place <b>3 full turns</b>, then drive straight. A crooked heading bends the whole trail: Drift jumps another <b>0.50 m</b> in about one meter.</span></div>
+      <div class="m-item" data-m="fix"><span class="m-st">○</span><span>Let Drift build past <b>0.50 m</b>, then press <b>Reset pose</b>. That snap is exactly what a vision fix or a known start does.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> rack up <b>10 m</b> of driving and <b>2 full turns</b> while Drift never touches <b>0.15 m</b>. Reset pose is your vision fix, use it early and often.</span></div>
+    </div>
   </section>
 
   <section>
@@ -352,6 +368,50 @@ odometry.<span class="fn">resetPosition</span>(gyro.<span class="fn">getRotation
   document.getElementById('reset').addEventListener('click',reset);
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
   requestAnimationFrame(step);
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  function mDrift(){ return Math.hypot(tru.x-est.x, tru.y-est.y); }
+  var mPT={x:tru.x,y:tru.y,th:tru.th};   // pose at the previous checker tick
+  var mSpin=0, mSpun=false, mBendBase=0; // "bend" mission: spins done, drift when they finished
+  var mGDist=0, mGTurn=0;                // gold: distance and turning racked up while drift stays low
+  document.addEventListener('click',function(ev){
+    if(!ev.target||ev.target.id!=='reset') return;
+    if(mDrift()>=0.5) mClear('fix');     // capture phase: reads drift before the sim snaps the pose back
+    mSpin=0; mSpun=false;                // a reset restarts the spin experiment
+  },true);
+  setInterval(function(){
+    var d=mDrift();
+    var dist=Math.hypot(tru.x-mPT.x,tru.y-mPT.y);
+    var dth=Math.abs(tru.th-mPT.th);
+    mPT.x=tru.x; mPT.y=tru.y; mPT.th=tru.th;
+    if(d>=0.30) mClear('drift');
+    if(!mSpun){
+      if(dist>0.3){ mSpin=0; }                        // driving off resets the spin-in-place count
+      else if(dth>0.15&&dist<0.08){ mSpin+=dth; }     // turning fast while barely translating
+      if(mSpin>=5.8*Math.PI){ mSpun=true; mBendBase=d; } // ~3 full turns, slack for tick timing
+    } else if(d>=mBendBase+0.5){ mClear('bend'); }
+    if(d>=0.15){ mGDist=0; mGTurn=0; }
+    else { mGDist+=dist; mGTurn+=dth; if(mGDist>=10&&mGTurn>=4*Math.PI) mClear('gold'); }
+  },200);
+  }catch(e){}
 
   var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
   function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'').replace(/\(\)$/,'');}

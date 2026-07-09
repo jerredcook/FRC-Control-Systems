@@ -61,6 +61,16 @@
   input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
 
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--amber);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
   .note p{margin:0;color:var(--text);font-size:16px}
@@ -152,6 +162,13 @@
       </div>
     </div>
     <p class="caption">Same slider, same cable pulled, but the cascade elevator reaches the dashed line while the continuous one only makes it halfway. Cascade buys you reach. The catch is on the next card.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
+      <div class="m-item" data-m="topline"><span class="m-st">○</span><span>Stay on <b>Cascade</b> and pull the cable to <b>100%</b>. The carriage lands on the <b>dashed max reach line</b> while the cable mark only climbs halfway up. The rigging doubled your pull.</span></div>
+      <div class="m-item" data-m="halfway"><span class="m-st">○</span><span>Switch to <b>Continuous</b> and pull to <b>100%</b> again. Read the amber bracket beside the carriage: same cable, but it tops out at <b>50%</b>.</span></div>
+      <div class="m-item" data-m="samespot"><span class="m-st">○</span><span>Now match that height the cheap way: switch back to <b>Cascade</b> and park the slider at <b>50%</b>. Same 50 percent height, half the cable.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> leave the slider near <b>50%</b> and click between <b>Cascade</b> and <b>Continuous</b>. Rigging alone doubles the height, but remember the bill: cascade lifts with half the force.</span></div>
+    </div>
   </section>
 
   <section>
@@ -294,6 +311,39 @@
   document.getElementById('ext').addEventListener('input',function(e){ ext=(+e.target.value)/100; document.getElementById('extv').textContent=(+e.target.value)+'%'; refresh(); });
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
   refresh(); requestAnimationFrame(loop);
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  // gold: flip the rigging both ways while the cable sits mid-pull (40-60%)
+  var mFlip={};
+  document.querySelectorAll('#rigSeg button').forEach(function(b){
+    b.addEventListener('click',function(){
+      if(ext>=0.4&&ext<=0.6){ mFlip[b.getAttribute('data-r')]=true; if(mFlip.cascade&&mFlip.cont) mClear('gold'); }
+    });
+  });
+  setInterval(function(){
+    if(rig==='cascade'&&ext>=0.995) mClear('topline');
+    if(rig==='cont'&&ext>=0.995) mClear('halfway');
+    if(mItems.halfway&&mItems.halfway.classList.contains('cleared')&&rig==='cascade'&&Math.abs(ext-0.5)<=0.02) mClear('samespot');
+  },200);
+  }catch(e){}
 
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);

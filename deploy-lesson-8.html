@@ -66,6 +66,16 @@
   .obj .row .f{color:var(--muted)}
   .emptyobjs{font-family:var(--mono);font-size:12px;color:var(--faint);grid-column:1/-1;padding:6px 0}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--indigo);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+  .objs .obj .row:nth-child(3)>span:last-child{cursor:pointer;text-decoration:underline dotted var(--faint);text-underline-offset:3px}
 
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
@@ -169,6 +179,13 @@
       <div class="objs" id="objs"></div>
     </div>
     <p class="caption">Each object is a separate box of data made from the same blueprint. <span class="k">left</span> and <span class="k">right</span> are both Motors, but changing one never touches the other.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the spawner above</span></div>
+      <div class="m-item" data-m="pair"><span class="m-st">○</span><span>Stamp out two Motors from the one blueprint: <b>Left</b> on canId <b>1</b>, then <b>Right</b> on canId <b>2</b>.</span></div>
+      <div class="m-item" data-m="edit9"><span class="m-st">○</span><span>Click <b>left</b>'s canId on its card and retype it as <b>9</b>. Watch <b>right</b> keep <b>2</b>. Changing one object never touches the other.</span></div>
+      <div class="m-item" data-m="fleet"><span class="m-st">○</span><span>Grow the fleet to <b>4 Motors</b> with <b>no two canIds the same</b>, like giving every device on the robot its own address.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> make two Motors <b>collide</b> on the same canId, then fix it by editing one card until every id is unique again. Teams debug this exact bug at competitions.</span></div>
+    </div>
   </section>
 
   <section>
@@ -292,6 +309,71 @@
   });
   document.getElementById('clr').addEventListener('click',function(){ objs=[]; render(); });
   render();
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  var mDup=false;
+  function mLow(s){ return String(s==null?'':s).trim().toLowerCase(); }
+  function mHasDup(){ var seen={},dup=false; objs.forEach(function(o){ var k=String(o.canId); if(seen[k])dup=true; seen[k]=true; }); return dup; }
+  function mAfterEdit(idx,oldV,newV){
+    if(String(newV)===String(oldV)) return;
+    if(String(newV)==='9'&&objs.some(function(o,i){ return i!==idx&&String(o.canId)!=='9'; })) mClear('edit9');
+    if(mHasDup()){ mDup=true; }
+    else if(mDup&&objs.length>=2){ mClear('gold'); mDup=false; }
+  }
+  setInterval(function(){
+    if(!objs.length){ mDup=false; return; }
+    var byName={}; objs.forEach(function(o){ byName[mLow(o.name)]=o; });
+    if(byName.left&&String(byName.left.canId)==='1'&&byName.right&&String(byName.right.canId)==='2') mClear('pair');
+    var dup=mHasDup();
+    if(dup&&objs.length>=2) mDup=true;
+    if(objs.length>=4&&!dup) mClear('fleet');
+  },200);
+  // editable canId on each card, so independence is demonstrated instead of asserted
+  objsEl.addEventListener('click',function(ev){
+    var t=ev.target;
+    if(!t||!t.closest) return;
+    var row=t.closest('.row'); if(!row||row.querySelector('input')) return;
+    var f=row.querySelector('.f'); if(!f) return;
+    var fname=f.textContent.trim(); if(fname!=='canId'&&fname!=='can_id') return;
+    var card=row.closest('.obj'); if(!card) return;
+    var idx=Array.prototype.indexOf.call(objsEl.querySelectorAll('.obj'),card);
+    if(idx<0||!objs[idx]) return;
+    var val=row.children[row.children.length-1];
+    var inp=document.createElement('input');
+    inp.value=objs[idx].canId;
+    inp.setAttribute('aria-label','edit canId');
+    inp.style.cssText='font-family:var(--mono);font-size:12.5px;width:6ch;text-align:right;background:var(--ink);border:1px solid var(--indigo);color:var(--text);border-radius:5px;padding:1px 4px;outline:none';
+    val.textContent=''; val.appendChild(inp); inp.focus(); inp.select();
+    var doneEdit=false;
+    function commit(){
+      if(doneEdit) return; doneEdit=true;
+      var old=objs[idx].canId;
+      var nv=(inp.value||'').trim().replace(/[^0-9-]/g,'');
+      if(nv==='') nv=old;
+      objs[idx].canId=nv; render(); mAfterEdit(idx,old,nv);
+    }
+    inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); inp.blur(); } });
+    inp.addEventListener('blur',commit);
+  });
+  }catch(e){}
 
   var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
   function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'');}

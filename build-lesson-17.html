@@ -62,6 +62,15 @@
   .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:9px 12px;border-radius:8px;cursor:pointer;transition:.12s}
   .btn:hover{border-color:var(--indigo);color:var(--text)} .btn.on{background:var(--amber);border-color:var(--amber);color:#2a1a00;font-weight:700}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--amber);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
 
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
@@ -155,6 +164,13 @@
       </div>
     </div>
     <p class="caption">Watch the tray and its game piece. On the four-bar it stays perfectly level no matter where the arms point, so the piece rides along safely. On the single arm the tray tilts with the arm and the piece would roll right off.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
+      <div class="m-item" data-m="compute"><span class="m-st">○</span><span>Switch to <b>Single arm</b>. The tilt rule is tilt = 90 - arm angle. Work out the tilt at <b>30°</b> in your head, then drag the slider there to check. It should read <b>60°</b>.</span></div>
+      <div class="m-item" data-m="level"><span class="m-st">○</span><span>Still on <b>Single arm</b>, swing well away, then hunt down the one arm angle where the tray reads <b>0°</b> tilt again.</span></div>
+      <div class="m-item" data-m="sweep"><span class="m-st">○</span><span>Switch to <b>Four-bar</b> and press <b>Auto-swing</b>. Watch a full sweep: the tilt never leaves <b>0°</b>. That is the parallelogram working, no code needed.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> run the rule backwards. Park the single arm so the tilt reads exactly <b>-45°</b>. Work out the arm angle first, then check yourself.</span></div>
+    </div>
   </section>
 
   <section>
@@ -300,6 +316,41 @@
   document.querySelectorAll('#typeSeg button').forEach(function(b){ b.addEventListener('click',function(){ setType(b.getAttribute('data-t')); }); });
   document.getElementById('ang').addEventListener('input',function(e){ auto=false; document.getElementById('auto').classList.remove('on'); angDeg=+e.target.value; document.getElementById('angv').textContent=angDeg+'°'; });
   document.getElementById('auto').addEventListener('click',function(){ auto=!auto; this.classList.toggle('on',auto); });
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  var mAway=false, mLo=90, mHi=90;
+  setInterval(function(){
+    if(type==='single'){
+      if(Math.abs(angDeg-90)>25) mAway=true;
+      if(!auto&&Math.abs(angDeg-30)<0.5) mClear('compute');
+      if(!auto&&mAway&&Math.abs(angDeg-90)<0.5) mClear('level');
+      if(!auto&&Math.abs(angDeg-135)<0.5) mClear('gold');
+    } else if(auto){
+      if(angDeg<mLo) mLo=angDeg;
+      if(angDeg>mHi) mHi=angDeg;
+      if(mLo<=35&&mHi>=145) mClear('sweep');
+    }
+  },200);
+  }catch(e){}
+
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
   requestAnimationFrame(step);
 

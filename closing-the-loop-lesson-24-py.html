@@ -86,6 +86,18 @@
   .legend i{width:16px;height:2px;border-radius:2px;display:inline-block}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
 
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--teal);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+  .missions .m-live{font-family:var(--mono);font-size:12px;color:var(--faint);border-top:1px dashed var(--line-2);margin-top:9px;padding-top:9px}
+  .missions .m-live b{color:var(--amber)}
+
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
   .note p{margin:0;color:var(--text);font-size:16px}
@@ -242,6 +254,14 @@
       </div>
     </div>
     <p class="caption">One knob, both gains. LQR derives k₁ and k₂ together from a single choice: how much you value tight tracking versus gentle effort.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
+      <div class="m-item" data-m="sweep"><span class="m-st">○</span><span>Sweep the knob from full <b>gentle</b> to full <b>tight</b> and watch the readouts: <b>k₁</b> and <b>k₂</b> climb together. One choice sets both gains.</span></div>
+      <div class="m-item" data-m="gentle"><span class="m-st">○</span><span>Park the knob at full <b>gentle (high R)</b>, then press <b>Move ▸</b> until the carriage makes the big climb. Cheap effort is slow: over <b>2.8 s</b> to settle, peak push under <b>3 V</b>.</span></div>
+      <div class="m-item" data-m="tight"><span class="m-st">○</span><span>Go full <b>tight (high Q)</b> and climb again. It settles in under <b>1.9 s</b>, but the peak push blows past <b>10 V</b>. Speed is bought with volts.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> find a knob spot that settles a climb in under <b>2 s</b> with a peak push under <b>5 V</b>. Hunt below the middle. That balance is what LQR computes for you.</span></div>
+      <div class="m-live" id="mLive">Press <b>Move ▸</b> and let the carriage settle to log a climb here.</div>
+    </div>
   </section>
 
   <section>
@@ -484,6 +504,55 @@ volts = lqr.<span class="fn">calculate</span>(x, reference)[<span class="num">0<
   }
   el.agg.addEventListener('input',function(){S.agg=parseFloat(el.agg.value);applyAgg();});
   el.move.addEventListener('click',function(){S.sp=(S.sp>0.5)?0.18:0.82;S.y=Math.min(S.y,0.2);scopeObj.clear();});
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  var mLive=document.getElementById('mLive');
+  var mLo=false,mHi=false;
+  el.agg.addEventListener('input',function(){
+    var a=parseFloat(el.agg.value);
+    if(a<=0.05)mLo=true; if(a>=0.95)mHi=true;
+    if(mLo&&mHi)mClear('sweep');
+  });
+  var mRun=false,mT0=0,mPeak=0,mHold=0;
+  el.move.addEventListener('click',function(){
+    // runs after the sim's own Move handler, so S.sp and S.y are already updated
+    if(S.sp-S.y>=0.5){ mRun=true; mT0=performance.now(); mHold=0; mPeak=Math.abs(S.kG+S.k1*(S.sp-S.y)-S.k2*S.v); }
+    else { mRun=false; }
+  });
+  setInterval(function(){
+    if(!mRun)return;
+    var au=Math.abs(S.u); if(au>mPeak)mPeak=au;
+    if(Math.abs(S.sp-S.y)<0.02&&Math.abs(S.v)<0.02){ mHold+=0.1; } else { mHold=0; }
+    if(mHold<0.5){
+      if(mLive)mLive.innerHTML='Climbing... peak push so far <b>'+mPeak.toFixed(1)+' V</b>';
+      return;
+    }
+    mRun=false;
+    var ts=(performance.now()-mT0)/1000-0.5;
+    if(mLive)mLive.innerHTML='Last climb: settled in <b>'+ts.toFixed(2)+' s</b> · peak push <b>'+mPeak.toFixed(1)+' V</b>';
+    if(ts>=2.8&&mPeak<=3.0)mClear('gentle');
+    if(ts<=1.9&&mPeak>=10.0)mClear('tight');
+    if(ts<=2.0&&mPeak<=5.0)mClear('gold');
+  },100);
+  }catch(e){}
 
   function step(dt){
     var meas=S.y;

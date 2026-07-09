@@ -87,6 +87,16 @@
   .btn:disabled{opacity:.4;cursor:not-allowed}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
 
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--indigo);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
   .note p{margin:0;color:var(--text);font-size:16px}
@@ -186,6 +196,13 @@
       </div>
     </div>
     <p class="caption">You can't enable until code is deployed and the robot reports "Robot Code" - the Driver Station won't let motors move otherwise. That's a safety feature, not a bug.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
+      <div class="m-item" data-m="greenlight"><span class="m-st">○</span><span>Press <b>Deploy code</b> and watch the chips. <b>Enable</b> stays grey and dead until the <b>Robot Code</b> chip turns green. Then press <b>Enable</b>.</span></div>
+      <div class="m-item" data-m="codedrop"><span class="m-st">○</span><span>While the robot is enabled, hit <b>Reset</b>. The <b>Robot Code</b> chip drops and the state slams back to <b>DISABLED</b>. A reboot forgets your deploy.</span></div>
+      <div class="m-item" data-m="estop"><span class="m-st">○</span><span>With the robot enabled, press <b>Space</b>. That is <b>E-stop</b>. This sim kills the robot instantly, just like a real Driver Station.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> muscle memory. Enable, then E-stop with <b>Space</b> in under <b>1.5 seconds</b>. Fast enough to save a robot headed for a wall.</span></div>
+    </div>
   </section>
 
   <section>
@@ -326,6 +343,50 @@
   modeBtns.forEach(function(b){ b.addEventListener("click",function(){ S.mode=b.getAttribute("data-mode"); modeBtns.forEach(function(x){x.classList.toggle("active",x===b);}); renderState(); }); });
   enableBtn.addEventListener("click",function(){ if(!S.deployed||S.busy) return; S.enabled=true; line('<span class="warn">▶ Enabled - '+S.mode+'.</span> Motors live.'); renderState(); });
   disableBtn.addEventListener("click",function(){ if(!S.enabled) return; S.enabled=false; line('<span class="dim">■ Disabled. Motors off.</span>'); renderState(); });
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  var mEnabledAt=0;
+  // runs after the sim's own enable handler, so S.enabled is already set
+  enableBtn.addEventListener('click',function(){
+    if(!S.enabled) return;
+    mEnabledAt=Date.now();
+    mClear('greenlight');
+  });
+  // capture phase: read the state BEFORE the sim's reset handler wipes it
+  document.addEventListener('click',function(e){
+    var t=(e.target&&e.target.closest)?e.target.closest('#resetBtn'):null;
+    if(t&&S.deployed&&S.enabled) mClear('codedrop');
+  },true);
+  // spacebar E-stop: only intercepts Space while the robot is enabled
+  document.addEventListener('keydown',function(e){
+    if(e.code!=='Space'&&e.key!==' ') return;
+    if(!S.enabled) return;
+    e.preventDefault();
+    S.enabled=false;
+    line('<span class="warn">⛔ E-STOP (spacebar). Robot killed instantly.</span>');
+    renderState();
+    mClear('estop');
+    if(mEnabledAt&&(Date.now()-mEnabledAt)<=1500) mClear('gold');
+  });
+  }catch(e){}
 
   clearConsole(); renderState();
 

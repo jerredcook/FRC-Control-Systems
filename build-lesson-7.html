@@ -62,6 +62,15 @@
   .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:10px 13px;border-radius:8px;cursor:pointer;transition:.12s}
   .btn:hover{border-color:var(--indigo);color:var(--text)}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--indigo);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
 
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
@@ -156,6 +165,13 @@
       </div>
     </div>
     <p class="caption">Push the load up on each. Polycarbonate just keeps flexing and recovers. Acrylic reaches its limit and shatters. Aluminum bends past a point and takes a permanent set. This is why guards and bellypans are polycarbonate, never acrylic.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
+      <div class="m-item" data-m="shatter"><span class="m-st">○</span><span>Pick <b>Acrylic</b> and creep the load up a few % at a time. Catch the exact number where it shatters - it breaks at <b>46%</b>. Slam the slider and you miss it, so Reset and go slower.</span></div>
+      <div class="m-item" data-m="set"><span class="m-st">○</span><span>Pick <b>Aluminum sheet</b>, push the load to <b>60%</b>, then bring it back to <b>0</b>. The panel keeps a bend, like a paperclip you opened too far. That leftover is a <b>permanent set</b>.</span></div>
+      <div class="m-item" data-m="recover"><span class="m-st">○</span><span>Pick <b>Polycarbonate</b>, max the load to <b>100%</b>, then back to <b>0</b>. It comes back dead flat. That is why guards take hits and shrug them off.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> ride the edge. Take aluminum up to at least <b>48%</b> but never past <b>52%</b>, then back to <b>0</b> with the panel still flat. One tick too far and you need <b>Reset</b>.</span></div>
+    </div>
   </section>
 
   <section>
@@ -318,6 +334,43 @@
   document.getElementById('reset').addEventListener('click',function(){ setMat(mat); });
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
   requestAnimationFrame(step);
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  var mShatSeen=false, mPolyHigh=false;
+  setInterval(function(){
+    if(mat==='acrylic'){
+      // only counts if the load was still near the break point when it shattered (a slow creep)
+      if(shattered&&!mShatSeen){ mShatSeen=true; if(load<=52) mClear('shatter'); }
+      if(!shattered) mShatSeen=false;
+    } else { mShatSeen=false; }
+    if(mat==='alum'&&load<=2){
+      if(maxLoad>MATS.alum.yieldLoad) mClear('set');
+      if(maxLoad>=48&&maxLoad<=MATS.alum.yieldLoad) mClear('gold');
+    }
+    if(mat==='poly'){
+      if(load>=95) mPolyHigh=true;
+      if(mPolyHigh&&load<=2) mClear('recover');
+    } else { mPolyHigh=false; }
+  },200);
+  }catch(e){}
 
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);

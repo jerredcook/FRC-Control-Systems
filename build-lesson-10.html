@@ -57,6 +57,15 @@
   input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--indigo);cursor:pointer;box-shadow:0 0 10px -1px var(--indigo)}
   input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--amber);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
 
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
@@ -147,6 +156,13 @@
       </div>
     </div>
     <p class="caption">The driver (orange) is on the motor; the driven (teal) is the output. More teeth on the driven means a bigger reduction: slower output, more torque. Make the driven smaller than the driver and you get an overdrive, faster but weaker.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
+      <div class="m-item" data-m="ratio3"><span class="m-st">○</span><span>Build a second <b>3:1</b>: pick any driver except <b>12</b> and give the driven <b>exactly 3×</b> its teeth. Same ratio, different gears. Only the tooth ratio matters, not the sizes.</span></div>
+      <div class="m-item" data-m="overdrive"><span class="m-st">○</span><span>Flip the trade: make an <b>overdrive</b> that spins the output past <b>9000 rpm</b>, then check what happened to the torque multiplier.</span></div>
+      <div class="m-item" data-m="shooter"><span class="m-st">○</span><span>A shooter wheel needs about <b>1500 rpm</b> from the 6000 rpm motor. Work out the ratio on paper first, then set a tooth pair that lands within <b>100 rpm</b> and hold it.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> find the limit. Get the output under <b>850 rpm</b>. One pair can only reach about 7.5:1 here, which is why real gearboxes chain stages.</span></div>
+    </div>
   </section>
 
   <section>
@@ -171,7 +187,7 @@
       <p>One pair of gears can only reduce so much before the big gear gets huge, so teams chain reductions in stages: gear down 4:1, then 4:1 again, and the ratios multiply to 16:1 in a compact gearbox. Try the math on a target: if an arm needs about 100:1, how would you split that across two or three stages with reasonable tooth counts? And a real trade-off to chew on, a bigger reduction gives more torque but also makes the output slower and adds friction at every mesh, so why might a team deliberately pick a little less reduction than the maximum they could fit?</p>
       <details style="margin-top:12px">
         <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
-        <p style="margin-top:8px">For about 100:1 in two stages you want each stage near the square root of 100, so roughly 10:1 and 10:1; a clean version is a 12-tooth driving a 60-tooth twice, which is 5:1 times 5:1 for 25:1, or split it 4:1 then 25:1, and the stages multiply. Three stages let you use smaller, easier-to-fit gears, like 4:1, 5:1, and 5:1 for 100:1. A team picks less than the maximum reduction when the mechanism is fast enough already and they would rather keep speed, save weight and space, or cut the friction that every extra mesh adds. More reduction is not free, it trades away speed and efficiency for torque you may not need.</p>
+        <p style="margin-top:8px">The stages multiply, so for 100:1 in two stages you want each stage near the square root of 100, roughly 10:1 and 10:1, like a 10-tooth driving a 100-tooth, twice. But a 100-tooth gear is huge, so teams usually split the work across three smaller stages instead: 4:1, then 5:1, then 5:1, and 4 &times; 5 &times; 5 = 100:1 exactly. With real teeth that could be a 12-tooth into a 48-tooth, then a 12 into a 60, then another 12 into a 60, and every gear stays an easy size to fit. A team picks less than the maximum reduction when the mechanism is fast enough already and they would rather keep speed, save weight and space, or cut the friction that every extra mesh adds. More reduction is not free, it trades away speed and efficiency for torque you may not need.</p>
       </details>
     </div>
     <div class="kicker">Checkpoint</div>
@@ -296,6 +312,38 @@
   document.getElementById('t2').addEventListener('input',function(e){ t2=+e.target.value; document.getElementById('t2v').textContent=t2; refresh(); });
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
   refresh(); requestAnimationFrame(step);
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  var mHold={ratio3:0, shooter:0, gold:0};
+  setInterval(function(){
+    var out=INRPM*t1/t2;
+    if(out>=9000) mClear('overdrive');
+    if(t2===t1*3 && t1!==12){ mHold.ratio3+=0.2; } else { mHold.ratio3=0; }
+    if(mHold.ratio3>=1) mClear('ratio3');
+    if(Math.abs(out-1500)<=100){ mHold.shooter+=0.2; } else { mHold.shooter=0; }
+    if(mHold.shooter>=1.5) mClear('shooter');
+    if(out<=850){ mHold.gold+=0.2; } else { mHold.gold=0; }
+    if(mHold.gold>=1) mClear('gold');
+  },200);
+  }catch(e){}
 
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);

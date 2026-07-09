@@ -76,6 +76,16 @@
   .ch .v.teal{color:var(--teal)} .ch .v.indigo{color:var(--indigo)} .ch .v.amber{color:var(--amber)}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
 
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--teal);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
   .note p{margin:0;color:var(--text);font-size:16px}
@@ -215,6 +225,13 @@
       </div>
     </div>
     <p class="caption">A bigger gear ratio means more motor turns per meter - finer control, but a slower mechanism. This trade-off is yours to choose when you design the robot.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
+      <div class="m-item" data-m="oneturn"><span class="m-st">○</span><span>Keep gear at <b>9 : 1</b> and drum at <b>2.0 in</b>, then drag motor rotations to exactly <b>9.0</b>. That is one full output turn, so Height should read one circumference, about <b>0.16 m</b>.</span></div>
+      <div class="m-item" data-m="reach050"><span class="m-st">○</span><span>Set gear to <b>12 : 1</b>, drum <b>2.0 in</b>. On paper, find the motor rotations that reach <b>0.50 m</b>: 0.50 &divide; 0.16 &times; 12. Drag the slider to your answer - Height should read <b>0.50 m</b>.</span></div>
+      <div class="m-item" data-m="bigdrum"><span class="m-st">○</span><span>Keep <b>12 : 1</b> and <b>37.5</b> rotations, then grow the drum to <b>3.0 in</b>. Predict the new Height before you look: 1.5&times; the drum means 1.5&times; the height, about <b>0.75 m</b>.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> reach <b>0.60 m</b> two ways on the <b>2.0 in</b> drum: once at <b>6 : 1</b>, once at <b>18 : 1</b>. Work out both rotation counts on paper first. Triple the ratio costs triple the turns.</span></div>
+    </div>
   </section>
 
   <section>
@@ -384,6 +401,38 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(cf
   rot.addEventListener('input',function(){S.motorRot=parseFloat(rot.value);rotVal.textContent=S.motorRot.toFixed(1);});
   gearS.addEventListener('input',function(){S.G=parseFloat(gearS.value);gearVal.textContent=S.G.toFixed(1)+' : 1';});
   dia.addEventListener('input',function(){S.diaIn=parseFloat(dia.value);diaVal.textContent=S.diaIn.toFixed(1)+' in';});
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  var mHold={oneturn:0,reach050:0,bigdrum:0,goldA:0,goldB:0}, mGoldA=false, mGoldB=false;
+  function mHeld(k,cond){ mHold[k]=cond?mHold[k]+1:0; return mHold[k]>=2; }
+  setInterval(function(){
+    var mCirc=Math.PI*S.diaIn*0.0254, mHt=(S.motorRot/S.G)*mCirc;
+    if(mHeld('oneturn', Math.abs(S.G-9)<0.01 && Math.abs(S.diaIn-2)<0.01 && Math.abs(S.motorRot-9)<0.01)) mClear('oneturn');
+    if(mHeld('reach050', Math.abs(S.G-12)<0.01 && Math.abs(S.diaIn-2)<0.01 && Math.abs(mHt-0.50)<0.004)) mClear('reach050');
+    if(mHeld('bigdrum', Math.abs(S.G-12)<0.01 && Math.abs(S.diaIn-3)<0.01 && Math.abs(S.motorRot-37.5)<0.01)) mClear('bigdrum');
+    if(mHeld('goldA', Math.abs(S.G-6)<0.01 && Math.abs(S.diaIn-2)<0.01 && Math.abs(mHt-0.60)<0.004)) mGoldA=true;
+    if(mHeld('goldB', Math.abs(S.G-18)<0.01 && Math.abs(S.diaIn-2)<0.01 && Math.abs(mHt-0.60)<0.004)) mGoldB=true;
+    if(mGoldA&&mGoldB) mClear('gold');
+  },200);
+  }catch(e){}
 
   var TRACK_M=1.6;  // visible track height in meters
 

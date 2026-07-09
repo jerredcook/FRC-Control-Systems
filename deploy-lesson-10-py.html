@@ -60,6 +60,16 @@
   .doing{font-family:var(--mono);font-size:12.5px;color:var(--green);margin-left:auto}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
 
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--indigo);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
   .note p{margin:0;color:var(--text);font-size:16px}
@@ -159,6 +169,14 @@ speeds = {<span class="str">"left"</span>: <span class="num">0.5</span>, <span c
       </div>
     </div>
     <p class="caption">The highlighted chip is the current state; the highlighted case is the code that runs for it. Named states make a robot's behavior readable - and impossible to set to a value that doesn't exist.</p>
+
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
+      <div class="m-item" data-m="loop"><span class="m-st">○</span><span>Press <b>Advance</b> until you have ridden the loop all the way around and landed back on <b>IDLE</b>. Watch the highlighted case follow the state.</span></div>
+      <div class="m-item" data-m="piece"><span class="m-st">○</span><span>Be the sensor. Get the machine to <b>INTAKING</b>, then a game piece arrives. Click the chip for the state that should run next.</span></div>
+      <div class="m-item" data-m="atspeed"><span class="m-st">○</span><span>Now the flywheel reports it is at speed. From <b>READY</b>, click the chip for the state that actually fires the piece.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> Run one full cycle on events alone. Start at <b>IDLE</b> and click each next state chip in order, with no wrong clicks and no <b>Advance</b>.</span></div>
+    </div>
   </section>
 
   <section>
@@ -285,6 +303,51 @@ speeds = {<span class="str">"left"</span>: <span class="num">0.5</span>, <span c
   document.getElementById('advBtn').addEventListener('click',function(){ idx=(idx+1)%STATES.length; render(); });
   document.getElementById('resetBtn').addEventListener('click',function(){ idx=0; render(); });
   render();
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  // Event-shaped checker: a capture-phase listener on document fires BEFORE the
+  // sim's own handlers update idx, so idx here is the state the click happened in.
+  // mAdv = consecutive Advance presses; mSeq = correct chip transitions from IDLE.
+  var mAdv=0, mSeq=0;
+  document.addEventListener('click',function(e){
+    try{
+      var t=e.target; if(!t||!t.getAttribute||!t.classList) return;
+      if(t.classList.contains('stt')&&statesEl.contains(t)){
+        var prev=idx, next=parseInt(t.getAttribute('data-i'),10);
+        mAdv=0;
+        if(prev===1&&next===2) mClear('piece');
+        if(prev===2&&next===3) mClear('atspeed');
+        if(next===(prev+1)%STATES.length&&mSeq===prev){ mSeq++; }
+        else if(prev===0&&next===1){ mSeq=1; }
+        else { mSeq=0; }
+        if(mSeq===STATES.length) mClear('gold');
+      } else if(t.id==='advBtn'){
+        mSeq=0; mAdv++;
+        if(mAdv>=STATES.length&&(idx+1)%STATES.length===0) mClear('loop');
+      } else if(t.id==='resetBtn'){
+        mSeq=0; mAdv=0;
+      }
+    }catch(err){}
+  },true);
+  }catch(e){}
 
   var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
   function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'');}

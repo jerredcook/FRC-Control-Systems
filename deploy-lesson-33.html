@@ -59,6 +59,20 @@
   .btn:hover{border-color:var(--indigo);color:var(--text)} .btn.active{background:var(--indigo);border-color:var(--indigo);color:#0a0f24;font-weight:700}
   .hint{font-family:var(--mono);font-size:11px;color:var(--faint)}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--indigo);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+  .missions .m-lab{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:11px;padding-top:11px;border-top:1px solid var(--line-2);font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .missions .m-lab label{letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+  .missions .m-lab input[type=range]{flex:1;min-width:110px;accent-color:var(--indigo)}
+  .missions .m-lab .m-iv{color:var(--indigo);min-width:4ch}
+  .missions .m-lab .m-sw{margin-left:auto;color:var(--faint)}
 
   .codewrap{margin:18px 0}
   .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
@@ -169,6 +183,19 @@
       </div>
     </div>
     <p class="caption">There is no motor here. The spinning rotor and the measured RPM both come from the sim's physics, and your PID closes the loop against them just like it would on the real flywheel. Inertia and spin-up time are modeled, so the feel is real.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
+      <div class="m-item" data-m="sensor"><span class="m-st">○</span><span>Command <b>3500 rpm</b> and let the measured RPM climb past <b>3000</b>. Hardware says disconnected, so every rpm you see is the model talking.</span></div>
+      <div class="m-item" data-m="baseline"><span class="m-st">○</span><span>Time a spin-up: with <b>rotor inertia at 1.0x</b>, press <b>Stop</b>, let it wind down, then press <b>3500 rpm</b>. The stopwatch below clocks 0 to 85% of the target.</span></div>
+      <div class="m-item" data-m="heavy"><span class="m-st">○</span><span>Drag <b>rotor inertia to 2.0x</b> or more and repeat the same spin-up. Same code, same gains, about twice the wait, like getting a loaded bike trailer up to speed.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> run the mismatch experiment. Clock a <b>1.0x</b> spin-up, then crank inertia to <b>4.0x</b> and clock that one. The heavy run must take at least <b>3x</b> longer. A wrong FlywheelSim constant lies to your tuning exactly like this.</span></div>
+      <div class="m-lab">
+        <label for="mInertia">Rotor inertia</label>
+        <input type="range" id="mInertia" min="1" max="4" step="0.1" value="1">
+        <span class="m-iv" id="mInertiaV">1.0x</span>
+        <span class="m-sw" id="mStopwatch">stopwatch: press Stop, then a target</span>
+      </div>
+    </div>
   </section>
 
   <section>
@@ -327,6 +354,69 @@
   document.querySelectorAll('.controls .btn[data-rpm]').forEach(function(b){ b.addEventListener('click',function(){ setpoint=+b.getAttribute('data-rpm'); document.querySelectorAll('.controls .btn[data-rpm]').forEach(function(x){x.classList.toggle('active',x===b);}); }); });
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
   requestAnimationFrame(step);
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  // Rotor-inertia slider: emulates a heavier rotor without touching step().
+  // step() moves meas by (ss-meas)*0.055 each frame; this runs right after it
+  // (registered after step, so rAF keeps that order) and re-does the same move
+  // with the slower constant 0.055/F. At F=1 it changes nothing.
+  var mSlider=document.getElementById('mInertia'), mIv=document.getElementById('mInertiaV'), mSw=document.getElementById('mStopwatch');
+  var mF=1;
+  mSlider.addEventListener('input',function(){ mF=parseFloat(mSlider.value)||1; mIv.textContent=mF.toFixed(1)+'x'; });
+  var mPrev=meas, mLastSp=setpoint, mEp=null, mBaseFrames=0;
+  function mTick(){
+    try{
+      var F=mF;
+      if(F>1.001){
+        var v0=Math.max(0,Math.min(12, 0.0026*setpoint+0.004*(setpoint-mPrev)));
+        var ss0=v0/12*MAX*1.02;
+        meas=mPrev+(ss0-mPrev)*(0.055/F);
+        if(meas<0)meas=0;
+        document.getElementById('roMeas').textContent=Math.round(meas)+' rpm';
+        draw(v0);
+      }
+      if(setpoint!==mLastSp){
+        mEp=(setpoint>0&&mPrev<300)?{sp:setpoint,frames:0,minF:F,maxF:F,t0:performance.now()}:null;
+        if(mEp) mSw.textContent='stopwatch: timing...';
+        mLastSp=setpoint;
+      }
+      if(mEp){
+        mEp.frames++; if(F<mEp.minF)mEp.minF=F; if(F>mEp.maxF)mEp.maxF=F;
+        if(meas>=mEp.sp*0.85){
+          mSw.textContent='stopwatch: '+((performance.now()-mEp.t0)/1000).toFixed(2)+' s at '+mEp.minF.toFixed(1)+'x';
+          if(mEp.sp===3500){
+            if(mEp.maxF<=1.05){ mBaseFrames=mEp.frames; mClear('baseline'); }
+            if(mEp.minF>=1.95) mClear('heavy');
+            if(mEp.minF>=3.85&&mBaseFrames&&mEp.frames>=3*mBaseFrames) mClear('gold');
+          }
+          mEp=null;
+        }
+      }
+      if(setpoint===3500&&meas>=3000) mClear('sensor');
+      mPrev=meas;
+    }catch(e){}
+    requestAnimationFrame(mTick);
+  }
+  requestAnimationFrame(mTick);
+  }catch(e){}
 
   var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
   function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'').replace(/\(\)$/,'');}

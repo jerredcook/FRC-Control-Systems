@@ -63,6 +63,15 @@
   .out-line{padding:12px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:14px;background:#080d16;color:var(--muted)}
   .out-line b{color:var(--green)}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--indigo);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
 
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
@@ -145,6 +154,13 @@
       <div class="out-line" id="out"></div>
     </div>
     <p class="caption">The highlighted line is the branch that actually runs. Inside the deadband, the method returns 0; outside, it passes the joystick straight through.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
+      <div class="m-item" data-m="zero"><span class="m-st">○</span><span>Slide <b>tol to 0.00</b>, then nudge <b>x to 0.03</b>. With no deadband, even that tiny wiggle reaches the motors and the robot creeps.</span></div>
+      <div class="m-item" data-m="edge"><span class="m-st">○</span><span>Set <b>tol to 0.10</b> and walk <b>x</b> one step at a time from <b>0.08 to 0.11</b>. Find the exact edge where the highlight jumps branches.</span></div>
+      <div class="m-item" data-m="dead"><span class="m-st">○</span><span>Max out <b>tol at 0.40</b>, then push <b>x to 0.35</b>. It still returns 0. That deadband eats <b>40%</b> of your stick's travel.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> a worn stick rests at <b>x = 0.07</b>. Find the <b>smallest tol</b> that still returns 0. Careful: the test is <b>abs(x) &lt; tol</b>, strictly less.</span></div>
+    </div>
   </section>
 
   <section>
@@ -272,6 +288,40 @@
     outEl.innerHTML='&gt; returns: <b>'+f(result)+'</b>'+(inside?'  (inside the deadband)':'  (passed through)');
   }
   x.addEventListener('input',render); t.addEventListener('input',render); render();
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  var mEdgeIn=false, mEdgeOut=false;
+  function mCheck(){
+    var xv=parseFloat(x.value), tv=parseFloat(t.value), ax=Math.abs(xv), inside=ax<tv;
+    if(tv<0.005 && ax>=0.005 && ax<=0.045) mClear('zero');
+    if(Math.abs(tv-0.10)<0.005){
+      if(inside && ax>0.075) mEdgeIn=true;
+      if(!inside && ax<0.125) mEdgeOut=true;
+      if(mEdgeIn && mEdgeOut) mClear('edge');
+    }
+    if(tv>0.395 && inside && ax>=0.295) mClear('dead');
+    if(inside && Math.abs(ax-0.07)<0.005 && Math.abs(tv-0.08)<0.005) mClear('gold');
+  }
+  x.addEventListener('input',mCheck); t.addEventListener('input',mCheck); mCheck();
+  }catch(e){}
 
   var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
   function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'');}

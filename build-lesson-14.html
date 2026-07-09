@@ -60,6 +60,15 @@
   input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--indigo);cursor:pointer;box-shadow:0 0 10px -1px var(--indigo)}
   input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--indigo);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
 
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
@@ -153,6 +162,13 @@
       </div>
     </div>
     <p class="caption">The teal mark is on the shaft, the amber mark is on the gear. When they stay aligned, torque is passing through. Crank the torque on the set-screw mount and the shaft mark pulls ahead, the gear is slipping, exactly what you don't want under load.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
+      <div class="m-item" data-m="slip"><span class="m-st">○</span><span>Switch to <b>Round + set screw</b> and raise the torque until Result reads <b>SLIPPING</b>. Watch the teal shaft mark pull ahead of the amber gear mark.</span></div>
+      <div class="m-item" data-m="edge"><span class="m-st">○</span><span>Find the slip point. Ease back down to the <b>lowest torque that still slips</b> and hold it for <b>1 second</b>. The amber tick on the torque dial is your answer key, land within <b>3%</b> above it.</span></div>
+      <div class="m-item" data-m="hold"><span class="m-st">○</span><span>Prove the shape lock: at <b>100% torque</b>, confirm that <b>Hex shaft</b> and <b>Round + key</b> both still read <b>gripping</b>.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> just past the slip point the gear still creeps forward. Find a torque of <b>60% or less</b> where the gear mark <b>stops dead</b> while the shaft keeps spinning.</span></div>
+    </div>
   </section>
 
   <section>
@@ -313,6 +329,41 @@
   function setType(t){ type=t; torque=+document.getElementById('tq').value; document.getElementById('typeTag').textContent= t==='hex'?'hex shaft':(t==='screw'?'set screw':'key'); document.querySelectorAll('#typeSeg button').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-t')===t);}); }
   document.querySelectorAll('#typeSeg button').forEach(function(b){ b.addEventListener('click',function(){ setType(b.getAttribute('data-t')); }); });
   document.getElementById('tq').addEventListener('input',function(e){ torque=+e.target.value; document.getElementById('tqv').textContent=torque+'%'; });
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  var mEdgeHold=0, mStallHold=0, mHexHi=false, mKeyHi=false, mLastGear=null, mLastShaft=null;
+  setInterval(function(){
+    var slipping = !grips();
+    if(slipping) mClear('slip');
+    if(slipping && torque<=THR+3){ mEdgeHold+=0.2; } else { mEdgeHold=0; }
+    if(mEdgeHold>=1) mClear('edge');
+    if(type==='hex' && torque>=100) mHexHi=true;
+    if(type==='key' && torque>=100) mKeyHi=true;
+    if(mHexHi && mKeyHi) mClear('hold');
+    if(slipping && torque<=60 && mLastGear!==null && gearA===mLastGear && shaftA!==mLastShaft){ mStallHold+=0.2; } else { mStallHold=0; }
+    if(mStallHold>=1) mClear('gold');
+    mLastGear=gearA; mLastShaft=shaftA;
+  },200);
+  }catch(e){}
+
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
   requestAnimationFrame(step);
 

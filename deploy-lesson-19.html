@@ -54,6 +54,15 @@
   .btn.turn{font-size:16px;min-width:54px}
   .btn.zero{margin-left:auto;border-color:rgba(255,176,32,.4);color:var(--amber)}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--indigo);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
 
   .codewrap{margin:18px 0}
   .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
@@ -158,6 +167,13 @@
       </div>
     </div>
     <p class="caption">The green arrow is "field forward," and it never moves, that is the point. The robot's nose turns, but the gyro lets your code rotate the joystick back into the field frame so forward stays forward. Keep spinning right past 180° to see continuous and wrapped disagree.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
+      <div class="m-item" data-m="snap"><span class="m-st">○</span><span>Hold <b>⟲</b> and watch the wrapped readout as you pass <b>+180</b>. It snaps straight to <b>-180</b> while continuous keeps climbing like nothing happened.</span></div>
+      <div class="m-item" data-m="wrap450"><span class="m-st">○</span><span>Park continuous at about <b>+450</b> (within 10) and let go. Predict wrapped before you look. It reads <b>+90</b>: one full turn, plus 90.</span></div>
+      <div class="m-item" data-m="rezero"><span class="m-st">○</span><span>Turn until wrapped reads at least <b>45</b> either way, then press <b>Zero gyro</b>. That is <b>setYaw(0)</b>: the heading you chose becomes the new zero, the new down-field.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> park continuous within <b>6</b> of <b>+720</b>. Wrapped sits near <b>0</b> and full turns reads about <b>2.00</b>: the nose is back where it started, but the gyro remembers both laps.</span></div>
+    </div>
   </section>
 
   <section>
@@ -322,6 +338,44 @@ gyro.<span class="fn">setYaw</span>(<span class="num">0</span>);
   document.getElementById('zero').addEventListener('click',function(){ yaw=0; refresh(); });
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
   refresh(); requestAnimationFrame(loop); requestAnimationFrame(tick);
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  var mPrevW=wrapped(), mLastYaw=yaw, mZeroSnap=null, mZeroBtn=document.getElementById('zero');
+  mZeroBtn.addEventListener('pointerdown',function(){ mZeroSnap=yaw; });
+  mZeroBtn.addEventListener('click',function(){
+    var y=(mZeroSnap===null)?mLastYaw:mZeroSnap; mZeroSnap=null;
+    var w=((y%360)+360)%360; if(w>180)w-=360;
+    if(Math.abs(w)>=45) mClear('rezero');
+  });
+  setInterval(function(){
+    var w=wrapped();
+    if(Math.abs(w-mPrevW)>200) mClear('snap');
+    mPrevW=w;
+    if(!held){
+      if(Math.abs(yaw-450)<=10) mClear('wrap450');
+      if(Math.abs(yaw-720)<=6) mClear('gold');
+    }
+    mLastYaw=yaw;
+  },100);
+  }catch(e){}
 
   var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
   function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'').replace(/\(\)$/,'');}

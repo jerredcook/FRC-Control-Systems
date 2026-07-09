@@ -84,6 +84,16 @@
   .legend i{width:16px;height:2px;border-radius:2px;display:inline-block}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
 
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--teal);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
   .note p{margin:0;color:var(--text);font-size:16px}
@@ -234,6 +244,13 @@
       </div>
     </div>
     <p class="caption">With the profile on, the carriage rides the amber plan - error stays tiny the whole move because feedforward already knows the planned speed at every instant.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
+      <div class="m-item" data-m="snap"><span class="m-st">○</span><span>Turn <b>Motion profile: off</b> and press <b>Move</b>. With no plan, the loop sees the whole <b>0.67</b> of error in one instant. Watch <b>Total (V)</b> spike as the carriage lunges.</span></div>
+      <div class="m-item" data-m="triangle"><span class="m-st">○</span><span>Profile back on. Drop <b>max acceleration to 0.3</b> and Move. The amber plan becomes a <b>triangle</b>: <b>Profile vel</b> peaks near <b>0.45</b> and never cruises at your 0.62 limit.</span></div>
+      <div class="m-item" data-m="shorthop"><span class="m-st">○</span><span>Now set <b>max acceleration to 1.5</b> and <b>max velocity to 1.2</b>, then Move. The move is too short: <b>Profile vel</b> tops out near <b>0.97</b> and never reaches 1.2.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> ride the plan like a wheel on a rail. Set <b>max velocity to 0.22 or less</b> and finish a full move with the carriage never more than <b>0.10</b> behind the amber plan on the scope. Slow plans are the easiest to follow.</span></div>
+    </div>
   </section>
 
   <section>
@@ -503,6 +520,49 @@ self.motor.<span class="fn">setVoltage</span>(ff_volts + fb_volts)</pre>
   function frame(ts){var t=ts/1000;var dt=last?Math.min(0.033,t-last):0.016;last=t;step(dt);requestAnimationFrame(frame);}
   requestAnimationFrame(frame);
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){world.fit();scope.fit();},120);});
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  // A move runs from a Move click (S.sp changes) until the plan snaps onto the
+  // goal (updateProfile sets pPos=sp, pVel=0 exactly). Thresholds validated against
+  // this sim's physics: snap-move plan gap 0.64; triangle peak 0.444 at amax 0.3
+  // (0.62 cruise at defaults); short-hop peak 0.967 at vmax 1.2 with amax 1.5
+  // (reaches 1.2 if amax is raised); plan gap 0.196 at defaults vs 0.088 at vmax 0.22.
+  var mLastSp=S.sp, mActive=false, mPeakPv=0, mFar=0, mGap=0;
+  setInterval(function(){
+    if(!S.profiled && Math.abs(S.pPos-S.y)>0.4) mClear('snap');
+    if(S.sp!==mLastSp){ mLastSp=S.sp; mActive=true; mPeakPv=0; mFar=0; mGap=0; }
+    if(!mActive) return;
+    var pv=Math.abs(S.pVel); if(pv>mPeakPv)mPeakPv=pv;
+    var f=Math.abs(S.sp-S.y); if(f>mFar)mFar=f;
+    if(S.profiled){ var g=Math.abs(S.pPos-S.y); if(g>mGap)mGap=g; }
+    if(S.profiled && S.pPos===S.sp && S.pVel===0){
+      mActive=false;
+      if(mFar>0.5 && mPeakPv>0.1){
+        if(S.amax<=0.35 && mPeakPv<S.vmax-0.08) mClear('triangle');
+        if(S.vmax>=1.15 && mPeakPv>0.3 && mPeakPv<S.vmax-0.15) mClear('shorthop');
+        if(mGap<0.10) mClear('gold');
+      }
+    }
+  },100);
+  }catch(e){}
 
   // code exercise
   var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));

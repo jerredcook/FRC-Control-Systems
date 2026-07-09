@@ -50,6 +50,15 @@
   .hint{font-family:var(--mono);font-size:11px;color:var(--faint)}
   .prog{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--teal)}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--indigo);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
 
   .codewrap{margin:18px 0}
   .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
@@ -149,6 +158,13 @@
       </div>
     </div>
     <p class="caption">The smooth teal curve is the trajectory fit through your waypoints. Press Play and the robot tracks it, turning to face along the path as it goes. Reshape the dots and the whole path re-plans instantly.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
+      <div class="m-item" data-m="hit"><span class="m-st">○</span><span>Press <b>Play</b> and let the starting path run to <b>100%</b>. The robot plows straight through the <b>crate</b>. A follower obeys its path, even a bad one.</span></div>
+      <div class="m-item" data-m="clear"><span class="m-st">○</span><span>Drag the middle waypoints until the readout says <b>CLEAR</b>, keep <b>1</b> on START and <b>4</b> on GOAL, then Play a clean run.</span></div>
+      <div class="m-item" data-m="efficient"><span class="m-st">○</span><span>Detours cost autonomous seconds. Get a clean run with the path under <b>14.0 m</b>.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> a clean run under <b>12.0 m</b>. Hug the crate like a cyclist taking the tightest line around a corner.</span></div>
+    </div>
   </section>
 
   <section>
@@ -334,6 +350,96 @@
   document.getElementById('reset').addEventListener('click',function(){ playing=false; animIdx=0; document.getElementById('play').textContent='Play ▸'; });
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
   buildSamples(); requestAnimationFrame(loop);
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  // the field is treated as 16 m x 8 m; crate and start/goal pads in field fractions
+  var OB={x:0.46,y:0.40,w:0.14,h:0.30};
+  var MSTART={x:0.05,y:0.68,w:0.13,h:0.24};
+  var MGOAL={x:0.82,y:0.16,w:0.13,h:0.24};
+  function mCurve(){
+    var pts=WPS.map(function(w){return {x:w.fx*16,y:w.fy*8};});
+    var out=[],n=pts.length;
+    for(var i=0;i<n-1;i++){
+      var p0=pts[i-1]||pts[i],p1=pts[i],p2=pts[i+1],p3=pts[i+2]||pts[i+1];
+      for(var s=0;s<48;s++) out.push(cr(p0,p1,p2,p3,s/48));
+    }
+    out.push(pts[n-1]);
+    return out;
+  }
+  function mLen(c){ var L=0; for(var i=1;i<c.length;i++) L+=Math.hypot(c[i].x-c[i-1].x,c[i].y-c[i-1].y); return L; }
+  function mHit(c){
+    var x0=OB.x*16,x1=(OB.x+OB.w)*16,y0=OB.y*8,y1=(OB.y+OB.h)*8;
+    for(var i=0;i<c.length;i++){ if(c[i].x>=x0&&c[i].x<=x1&&c[i].y>=y0&&c[i].y<=y1) return true; }
+    return false;
+  }
+  function mInPad(w,r){ return w.fx>=r.x&&w.fx<=r.x+r.w&&w.fy>=r.y&&w.fy<=r.y+r.h; }
+  function mPads(){ return mInPad(WPS[0],MSTART)&&mInPad(WPS[3],MGOAL); }
+  function mRect(r,f){ return {x:f.x+r.x*f.w,y:f.y+r.y*f.h,w:r.w*f.w,h:r.h*f.h}; }
+  function mOverlay(){
+    try{
+      if(W>0&&H>0){
+        var f=fieldRect(), c=mCurve(), hit=mHit(c), L=mLen(c), ok=mPads();
+        ctx.save();
+        ctx.font='700 9px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.textBaseline='middle';
+        var sp=mRect(MSTART,f), gp=mRect(MGOAL,f);
+        ctx.setLineDash([4,4]); ctx.lineWidth=1.5; ctx.strokeStyle='rgba(67,214,126,0.55)'; ctx.fillStyle='rgba(67,214,126,0.05)';
+        ctx.fillRect(sp.x,sp.y,sp.w,sp.h); ctx.strokeRect(sp.x,sp.y,sp.w,sp.h);
+        ctx.fillRect(gp.x,gp.y,gp.w,gp.h); ctx.strokeRect(gp.x,gp.y,gp.w,gp.h);
+        ctx.fillStyle='rgba(67,214,126,0.8)';
+        ctx.fillText('START',sp.x+sp.w/2,sp.y+9);
+        ctx.fillText('GOAL',gp.x+gp.w/2,gp.y+9);
+        ctx.setLineDash([]);
+        var ob=mRect(OB,f);
+        ctx.fillStyle=hit?'rgba(255,107,107,0.18)':'rgba(255,176,32,0.10)';
+        ctx.strokeStyle=hit?'#FF6B6B':'#FFB020'; ctx.lineWidth=2;
+        ctx.fillRect(ob.x,ob.y,ob.w,ob.h); ctx.strokeRect(ob.x,ob.y,ob.w,ob.h);
+        ctx.fillStyle=hit?'#FF6B6B':'#FFB020'; ctx.font='700 10px ui-monospace,Menlo,monospace';
+        ctx.fillText('CRATE',ob.x+ob.w/2,ob.y+ob.h/2);
+        ctx.textAlign='right'; ctx.font='700 11px ui-monospace,Menlo,monospace';
+        var msg=ok?(hit?'HIT':'CLEAR'):'PUT 1 ON START, 4 ON GOAL';
+        ctx.fillStyle=(ok&&!hit)?'#43D67E':'#FF6B6B';
+        ctx.fillText('path '+L.toFixed(1)+' m · '+msg, f.x+f.w-8, f.y+f.h-12);
+        ctx.restore();
+      }
+    }catch(e){}
+    requestAnimationFrame(mOverlay);
+  }
+  requestAnimationFrame(mOverlay);
+  var mPrevRun=false;
+  setInterval(function(){
+    try{
+      var end=samples.length>1&&animIdx>=samples.length-1;
+      if(mPrevRun&&end){
+        var c=mCurve(), hit=mHit(c), L=mLen(c);
+        if(hit) mClear('hit');
+        else if(mPads()){
+          mClear('clear');
+          if(L<=14.0) mClear('efficient');
+          if(L<=12.0) mClear('gold');
+        }
+      }
+      mPrevRun=playing&&!end;
+    }catch(e){}
+  },200);
+  }catch(e){}
 
   var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
   function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'').replace(/\(\)$/,'');}

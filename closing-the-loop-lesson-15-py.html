@@ -79,6 +79,16 @@
   .code .str,.bcode .str{color:#9ad6a0}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
 
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--teal);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+
   .terms{display:grid;gap:12px;margin:22px 0 6px}
   @media(min-width:560px){.terms{grid-template-columns:repeat(2,1fr)}}
   .term{border:1px solid var(--line);border-radius:10px;padding:14px 15px;background:var(--panel);border-top:2px solid var(--accent,var(--teal))}
@@ -221,6 +231,13 @@
       </div>
     </div>
     <p class="caption">This is real, paste-ready Phoenix 6. Notice the feedback block change when you pick a Fused CANcoder - that's how you add an absolute sensor.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the builder above</span></div>
+      <div class="m-item" data-m="pitpush"><span class="m-st">○</span><span>Config a pit-friendly drivetrain: switch neutral mode to <b>Coast</b> so the wheels roll free when you push the robot by hand.</span></div>
+      <div class="m-item" data-m="breaker"><span class="m-st">○</span><span>This motor keeps tripping its <b>40 A</b> breaker. Drop the supply limit to <b>35 A or less</b>, but keep the stator limit at <b>60 A or more</b> so it still has torque.</span></div>
+      <div class="m-item" data-m="armboot"><span class="m-st">○</span><span>An arm on a <b>25:1</b> gearbox must know its angle the instant the robot powers on. Set the ratio to <b>25</b> and pick <b>Fused CANcoder</b>.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> build the full arm config in one shot: <b>Brake</b> so it never flops when disabled, <b>Fused CANcoder</b> at <b>25:1</b>, supply at <b>35 A or less</b>, stator at <b>60 A or more</b>.</span></div>
+    </div>
   </section>
 
   <section>
@@ -400,6 +417,34 @@ self.motor.configurator.<span class="fn">apply</span>(<input class="blank" data-
     document.getElementById('cfgCode').innerHTML=L.join('\n');
   }
   render();
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  setInterval(function(){
+    var mMode=String(S.neutral).toUpperCase();
+    if(mMode==='COAST') mClear('pitpush');
+    if(S.supply<=35 && S.stator>=60) mClear('breaker');
+    if(S.fused==='fused' && Math.abs(S.ratio-25)<0.001) mClear('armboot');
+    if(mMode==='BRAKE' && S.fused==='fused' && Math.abs(S.ratio-25)<0.001 && S.supply<=35 && S.stator>=60) mClear('gold');
+  },200);
+  }catch(e){}
 
   // code exercise
   var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));

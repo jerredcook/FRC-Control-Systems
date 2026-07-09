@@ -61,6 +61,15 @@
   input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--indigo);cursor:pointer;box-shadow:0 0 10px -1px var(--indigo)}
   input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--indigo);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
 
   .codewrap{margin:18px 0}
   .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
@@ -170,6 +179,13 @@
       </div>
     </div>
     <p class="caption">Set the deadband to 0% and release the stick: the output jitters from the resting wobble. Raise the deadband and it snaps to a clean zero. The graph on the right is the transfer function: flat through the deadband, then curving up to full.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
+      <div class="m-item" data-m="wobble"><span class="m-st">○</span><span>Click <b>Linear</b>, set the deadband to <b>0%</b>, then let go of the stick. Output speed never rests at a clean <b>0</b>. On a real robot that wobble is a slow creep across the floor.</span></div>
+      <div class="m-item" data-m="halfpush"><span class="m-st">○</span><span>Keep the deadband at <b>0%</b> and hold the stick at <b>half push</b> on each curve. Read Output speed: Linear about <b>50%</b>, Squared about <b>25%</b>, Cubed about <b>13%</b>. Same push, three different robots.</span></div>
+      <div class="m-item" data-m="creep"><span class="m-st">○</span><span>Line up a shot: on <b>Squared</b> or <b>Cubed</b>, hold Output speed between <b>1%</b> and <b>10%</b> for <b>2 seconds</b>. That wide gentle zone is why drivers get a curve.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> same shot on <b>Linear</b>: hold Output speed between <b>1%</b> and <b>10%</b> for <b>2 seconds</b>. Feel how little stick room you get. That is the case for curves.</span></div>
+    </div>
   </section>
 
   <section>
@@ -366,6 +382,43 @@ self.drive.<span class="fn">arcadeDrive</span>(fwd, rot)</pre>
   document.getElementById('db').addEventListener('input',function(e){ db=(+e.target.value)/100; document.getElementById('dbv').textContent=(+e.target.value)+'%'; });
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
   refresh(); requestAnimationFrame(loop);
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  var mHalf={1:0,2:0,3:0}, mSeen={1:false,2:false,3:false}, mCreep=0, mCreepLin=0;
+  setInterval(function(){
+    var o=outputs();
+    // wobble: Linear + 0% deadband, hands off, the resting wobble reaches the output
+    if(!dragging && expo===1 && db<0.005 && o.mag>=0.005) mClear('wobble');
+    // halfpush: hold half push (rawMag near 0.5) on each of the three curves, db 0%
+    if(dragging && db<0.005 && Math.abs(o.rawMag-0.5)<=0.06){ mHalf[expo]+=1; } else { mHalf[expo]=0; }
+    if(mHalf[expo]>=2) mSeen[expo]=true;
+    if(mSeen[1]&&mSeen[2]&&mSeen[3]) mClear('halfpush');
+    // creep: hold a gentle 1-10% output on a curved response for 2s
+    if(dragging && (expo===2||expo===3) && o.mag>=0.005 && o.mag<=0.10){ mCreep+=0.2; } else { mCreep=0; }
+    if(mCreep>=2) mClear('creep');
+    // gold: the same gentle hold on Linear, a much narrower stick band
+    if(dragging && expo===1 && o.mag>=0.005 && o.mag<=0.10){ mCreepLin+=0.2; } else { mCreepLin=0; }
+    if(mCreepLin>=2) mClear('gold');
+  },200);
+  }catch(e){}
 
   var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
   function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'').replace(/\(\)$/,'');}

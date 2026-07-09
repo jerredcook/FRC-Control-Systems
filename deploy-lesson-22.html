@@ -74,6 +74,15 @@
   input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--amber);cursor:pointer}
   .echo{font-family:var(--mono);font-size:12px;color:var(--muted)} .echo b{color:var(--amber)}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--indigo);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
 
   .codewrap{margin:18px 0}
   .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
@@ -204,6 +213,13 @@
       </div>
     </div>
     <p class="caption">The left side is the raw table the robot writes; the right side is how a dashboard draws those same keys. The kP row glows amber because it flows the other way: you set it on the dashboard, the robot reads it live.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
+      <div class="m-item" data-m="readback"><span class="m-st">○</span><span>Drag <b>Shooter/kP</b> to exactly <b>0.30</b> and watch the amber row and the read-back follow instantly. The dashboard wrote it, the robot read it, no redeploy.</span></div>
+      <div class="m-item" data-m="sag"><span class="m-st">○</span><span>Watch <b>PDH/voltage</b> drain like a phone battery. The moment it dips below <b>12.0 V</b>, drag kP down to <b>0.05 or lower</b>. You read one stream and answered on another.</span></div>
+      <div class="m-item" data-m="restore"><span class="m-st">○</span><span>Now bring kP back up to the code default, exactly <b>0.18</b>. Watch, react, recover, and the robot never rebooted.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> sweep the whole range, <b>0.00</b> up to <b>0.50</b> and back to exactly <b>0.18</b>, in under <b>10 seconds</b>. One redeploy takes longer than that whole sweep.</span></div>
+    </div>
   </section>
 
   <section>
@@ -371,6 +387,41 @@ rpmPub.<span class="fn">set</span>(shooter.<span class="fn">getRPM</span>());</p
   }
   requestAnimationFrame(frame);
   document.getElementById('kp').addEventListener('input',function(e){ kp=(+e.target.value)/100; document.getElementById('kpv').textContent=kp.toFixed(2); document.getElementById('kpEcho').textContent=kp.toFixed(2); });
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  function mDone(id){ var n=mItems[id]; return !!(n&&n.classList.contains('cleared')); }
+  // event-shaped checks: every kP change fires 'input' on the slider, and the
+  // original listener above runs first, so kp is already updated here
+  var mPhase=0, mT0=0;
+  document.getElementById('kp').addEventListener('input',function(){
+    var now=Date.now();
+    var volt=parseFloat(rowMap['PDH/voltage'].textContent);
+    if(Math.abs(kp-0.30)<0.005) mClear('readback');
+    if(kp<=0.055 && volt<12.0) mClear('sag');
+    if(mDone('sag') && Math.abs(kp-0.18)<0.005) mClear('restore');
+    if(kp<0.005){ mPhase=1; mT0=now; }
+    else if(mPhase===1 && kp>0.495){ mPhase=2; }
+    else if(mPhase===2 && Math.abs(kp-0.18)<0.005){ if(now-mT0<=10000) mClear('gold'); mPhase=0; }
+  });
+  }catch(e){}
 
   var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
   function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'').replace(/\(\)$/,'');}

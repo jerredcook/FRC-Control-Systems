@@ -59,6 +59,15 @@
   .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:9px 12px;border-radius:8px;cursor:pointer;transition:.12s}
   .btn:hover{border-color:var(--indigo);color:var(--text)}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--indigo);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
 
   .codewrap{margin:18px 0}
   .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
@@ -162,6 +171,13 @@
       </div>
     </div>
     <p class="caption">Drag inside the robot to set translation; the rotation slider spins it. Pure translation points all four wheels the same way. Pure rotation aims them in a pinwheel. Together, each module solves for its own angle and speed.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
+      <div class="m-item" data-m="parallel"><span class="m-st">○</span><span>Drag translation at least <b>halfway out</b> with <b>omega at 0</b>. All four arrows point the same way, so the robot slides without turning.</span></div>
+      <div class="m-item" data-m="pinwheel"><span class="m-st">○</span><span>Press <b>Center</b>, then slide <b>omega to 0.5</b> or more with no translation. The arrows form a <b>pinwheel</b>, each wheel pushing along the circle around the center.</span></div>
+      <div class="m-item" data-m="saturate"><span class="m-st">○</span><span>Combine them: drag translation <b>to the edge</b> and push <b>omega to 1.0</b>. The fastest module pins at <b>100%</b> and every arrow shrinks together - that is desaturateWheelSpeeds keeping the robot on course. The longest arrow is the wheel whose spin push lines up with your travel direction.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> with <b>omega near 0.5</b>, drag translation until one wheel's arrow <b>vanishes</b> while the other three keep pushing. You have put the turn center right on that wheel, so the robot pivots around it, like planting one foot and swinging around it.</span></div>
+    </div>
   </section>
 
   <section>
@@ -347,6 +363,35 @@ states = <span class="ty">SwerveDrive4Kinematics</span>.<span class="fn">desatur
   document.getElementById('center').addEventListener('click',function(){ vx=0; vy=0; omega=0; document.getElementById('om').value=0; document.getElementById('omv').textContent='0.0'; });
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
   requestAnimationFrame(loop);
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  setInterval(function(){
+    var t=Math.hypot(vx,vy), w=Math.abs(omega), st=states();
+    var mn=Math.min.apply(null, st.arr.map(function(s){return s.sp;}));
+    if(t>=0.5 && w<0.03) mClear('parallel');
+    if(w>=0.5 && t<0.05) mClear('pinwheel');
+    if(t>=0.9 && w>=0.9 && st.max>1) mClear('saturate');
+    if(w>=0.35 && w<=0.75 && t>=0.3 && mn<=0.15) mClear('gold');
+  },200);
+  }catch(e){}
 
   var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
   function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'').replace(/\(\)$/,'');}

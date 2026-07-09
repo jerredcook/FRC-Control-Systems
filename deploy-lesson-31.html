@@ -56,6 +56,15 @@
   .log{margin:6px 16px 16px;background:#080d16;border:1px solid var(--line-2);border-radius:10px;padding:12px 14px;font-family:var(--mono);font-size:12.5px;line-height:1.7;min-height:96px;max-height:128px;overflow-y:auto}
   .log .l{color:var(--muted)} .log .l .ok{color:var(--green)} .log .l .no{color:var(--red)} .log .l .ar{color:var(--teal)}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--indigo);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
 
   .codewrap{margin:18px 0}
   .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
@@ -151,6 +160,13 @@
       <div class="log" id="log"></div>
     </div>
     <p class="caption">A valid event slides the highlight to the next state. An invalid one (shoot while IDLE, note while LOADED) is rejected and logged, the machine refuses to enter an impossible situation. That refusal is the whole point.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
+      <div class="m-item" data-m="guard"><span class="m-st">○</span><span>Prove the guardrail: while in <b>IDLE</b>, press <b>shoot</b> and read the <b>ignored</b> line in the log.</span></div>
+      <div class="m-item" data-m="cancel"><span class="m-st">○</span><span><b>INTAKING</b> has a second exit besides note detected. Find the event that cancels back to <b>IDLE</b>.</span></div>
+      <div class="m-item" data-m="fast"><span class="m-st">○</span><span>From a fresh <b>IDLE</b>, reach <b>SHOOTING</b> in just <b>3 presses</b>. No wasted taps.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> get an event <b>ignored in all 4 states</b>. Each state answers only to its own short list, everything else bounces off.</span></div>
+    </div>
   </section>
 
   <section>
@@ -304,6 +320,43 @@
   }
   document.querySelectorAll('.events .ev').forEach(function(b){ b.addEventListener('click',function(){ fire(b.getAttribute('data-e')); }); });
   logLine('<span style="color:var(--faint)">- press an event to drive the machine -</span>'); render();
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  // These listeners were added after fire()'s, so they run second: state is
+  // already post-transition, and mLast still holds the state before the press.
+  var mLast=state, mPresses=0, mRej={};
+  document.querySelectorAll('.events .ev').forEach(function(b){
+    b.addEventListener('click',function(){
+      var ev=b.getAttribute('data-e');
+      var accepted=!!(TRANS[mLast] && TRANS[mLast][ev]);
+      mPresses++;
+      if(mLast==='IDLE' && ev==='shoot' && !accepted) mClear('guard');
+      if(mLast==='INTAKING' && ev==='intake' && state==='IDLE') mClear('cancel');
+      if(!accepted){ mRej[mLast]=true; if(mRej.IDLE && mRej.INTAKING && mRej.LOADED && mRej.SHOOTING) mClear('gold'); }
+      if(state==='SHOOTING' && mPresses<=3) mClear('fast');
+      if(state==='IDLE') mPresses=0;
+      mLast=state;
+    });
+  });
+  }catch(e){}
 
   var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
   function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'').replace(/;$/,'');}
