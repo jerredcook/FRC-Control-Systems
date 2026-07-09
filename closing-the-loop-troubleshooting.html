@@ -71,6 +71,8 @@
   .diag .fix{font-size:15px;color:var(--text)}
   .diag .fix b{color:var(--teal)}
   .diag .ref{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-top:8px}
+  .diag .ref a,.sg .r a{color:var(--teal);text-decoration:none;border-bottom:1px dotted rgba(52,215,197,.45)}
+  .diag .ref a:hover,.sg .r a:hover{border-bottom-style:solid}
   .legend{display:flex;flex-wrap:wrap;gap:16px;padding:11px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
   .legend span{display:inline-flex;align-items:center;gap:7px}
   .legend i{width:16px;height:2px;border-radius:2px;display:inline-block}
@@ -323,6 +325,15 @@
     ctx.setLineDash([]);ctx.shadowBlur=0;
   };
 
+  // Map "Part.lesson" refs to lesson files (lesson numbering matches
+  // closing-the-loop.html's COURSE: I starts at 1, II at 9, III at 14, IV at 19, V at 22).
+  var PART_START={I:0,II:8,III:13,IV:18,V:21};
+  function linkRefs(s){
+    return s.replace(/\b(III|II|IV|V|I)\.(\d+)\b/g,function(m,part,n){
+      return '<a href="closing-the-loop-lesson-'+(PART_START[part]+parseInt(n,10))+'.html">'+m+'</a>';
+    });
+  }
+
   var BUGS={
     tuned:   {label:"tuned", bad:false, kG:0.45,kP:6,kD:2.5,invert:false,
       sym:"Healthy ✓", ok:true,
@@ -394,7 +405,7 @@
       '<h4>'+b.h+'</h4>'+
       '<p>'+b.why+'</p>'+
       '<div class="fix">'+b.fix+'</div>'+
-      '<div class="ref">See '+b.ref+'</div>';
+      '<div class="ref">See '+linkRefs(b.ref)+'</div>';
   }
   document.querySelectorAll('#bugbar button').forEach(function(btn){
     btn.addEventListener('click',function(){ applyBug(btn.getAttribute('data-bug')); });
@@ -423,7 +434,7 @@
 
   // symptom grid
   document.getElementById('symgrid').innerHTML=SYMS.map(function(x){
-    return '<div class="sg" style="--accent:'+x.a+'"><div class="s">'+x.s+'</div><div class="c">'+x.c+'</div><div class="r">'+x.r+'</div></div>';
+    return '<div class="sg" style="--accent:'+x.a+'"><div class="s">'+x.s+'</div><div class="c">'+x.c+'</div><div class="r">'+linkRefs(x.r)+'</div></div>';
   }).join('');
 
   // quiz

@@ -60,7 +60,9 @@
   .field label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
   .field input{font-family:var(--mono);font-size:13px;background:var(--panel-2);border:1px solid var(--line-2);color:var(--text);border-radius:7px;padding:8px 10px;outline:none;width:100%}
   .field input:focus{border-color:var(--amber);box-shadow:0 0 0 3px rgba(255,176,32,.18)}
-  .field .hint{font-size:10px;color:var(--faint)}
+  .field .hint{font-size:10px;color:var(--faint);line-height:1.5}
+  .field .hint a{color:var(--teal);text-decoration:none;border-bottom:1px dotted rgba(52,215,197,.45)}
+  .field .hint a:hover{border-bottom-style:solid}
 
   .bcode{background:var(--ink);padding:0;overflow:hidden;display:flex;flex-direction:column}
   .bcode .ch{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:12px 16px 0}
@@ -162,7 +164,7 @@
 
   <div class="note no-print">
     <div class="nh">Get the gains from SysId - don't guess</div>
-    <p>kS, kG, kV, kA come from running the characterization (Lessons I.7 + III.5), not from a slider. Measure them, paste them here, then trim kP. Tuning order: configure → characterize → kP → Motion Magic → validate. New here? The boxes start with realistic example numbers so you can see how it works, replace them with your robot's measured values once you've run SysId.</p>
+    <p>kS, kG, kV, kA come from running the characterization (Lessons <a href="closing-the-loop-lesson-7.html" style="color:var(--teal)">I.7</a> + <a href="closing-the-loop-lesson-18.html" style="color:var(--teal)">III.5</a>), not from a slider. Measure them, paste them here, then trim kP. Tuning order: configure → characterize → kP → Motion Magic → validate. New here? The boxes start with realistic example numbers so you can see how it works, replace them with your robot's measured values once you've run SysId.</p>
   </div>
 
   <a class="backlink no-print" href="closing-the-loop.html">← Back to the course map</a>
@@ -175,28 +177,35 @@
 (function(){
   "use strict";
 
+  // ---- lesson links for field hints ----
+  var LESSON_FILE = {
+    "I.4":4, "I.5":5, "I.6":6, "I.7":7, "II.2":10,
+    "III.1":14, "III.2":15, "III.4":17, "III.5":18, "IV.2":20, "IV.3":21
+  };
+  function lref(id){ return '<a href="closing-the-loop-lesson-'+LESSON_FILE[id]+'.html">Lesson '+id+'</a>'; }
+
   // ---- field definitions per mechanism ----
   var SPEC = {
     elevator: {
       label:"Elevator", gravity:"Elevator_Static", motionMagic:true, control:"MotionMagicVoltage", target:"withPosition",
       groups:[
         {t:"Device", f:[
-          {k:"name", l:"Subsystem name", v:"Elevator", text:true, wide:true},
-          {k:"canId", l:"Motor CAN id", v:"10"},
-          {k:"gear", l:"Gear ratio (motor:out)", v:"12.0"},
-          {k:"stator", l:"Stator current limit (A)", v:"60"}
+          {k:"name", l:"Subsystem name", v:"Elevator", text:true, wide:true, hint:"any name you like - it becomes the Java class name"},
+          {k:"canId", l:"Motor CAN id", v:"10", hint:"the id you gave the motor in Tuner X - "+lref("III.1")},
+          {k:"gear", l:"Gear ratio (motor:out)", v:"12.0", hint:"motor rotations per mechanism rotation - "+lref("II.2")},
+          {k:"stator", l:"Stator current limit (A)", v:"60", hint:"a safe ceiling for motor current - "+lref("III.2")}
         ]},
         {t:"Slot0 gains - from SysId", f:[
-          {k:"kS", l:"kS (static, V)", v:"0.14"},
-          {k:"kG", l:"kG (gravity, V)", v:"0.31"},
-          {k:"kV", l:"kV (V per rot/s)", v:"0.115"},
-          {k:"kA", l:"kA (V per rot/s²)", v:"0.004"},
-          {k:"kP", l:"kP (V per rot err)", v:"12"},
-          {k:"kD", l:"kD", v:"0.2"}
+          {k:"kS", l:"kS (static, V)", v:"0.14", hint:"from the SysId ramp test - "+lref("I.7")},
+          {k:"kG", l:"kG (gravity, V)", v:"0.31", hint:"hold-against-gravity volts - "+lref("I.6")},
+          {k:"kV", l:"kV (V per rot/s)", v:"0.115", hint:"from the SysId ramp test - "+lref("I.7")},
+          {k:"kA", l:"kA (V per rot/s²)", v:"0.004", hint:"from the SysId dynamic test - "+lref("III.5")},
+          {k:"kP", l:"kP (V per rot err)", v:"12", hint:"trim up after feedforward is right - "+lref("I.5")},
+          {k:"kD", l:"kD", v:"0.2", hint:"damping if it overshoots - "+lref("I.4")}
         ]},
         {t:"Motion Magic", f:[
-          {k:"mmV", l:"Cruise velocity (rot/s)", v:"80"},
-          {k:"mmA", l:"Acceleration (rot/s²)", v:"200"}
+          {k:"mmV", l:"Cruise velocity (rot/s)", v:"80", hint:"cruise speed for profiled moves - "+lref("III.4")},
+          {k:"mmA", l:"Acceleration (rot/s²)", v:"200", hint:"how quickly it ramps to cruise - "+lref("III.4")}
         ]}
       ]
     },
@@ -204,23 +213,23 @@
       label:"Arm", gravity:"Arm_Cosine", motionMagic:true, control:"MotionMagicVoltage", target:"withPosition", arm:true,
       groups:[
         {t:"Device", f:[
-          {k:"name", l:"Subsystem name", v:"Arm", text:true, wide:true},
-          {k:"canId", l:"Motor CAN id", v:"11"},
-          {k:"ccId", l:"CANcoder CAN id", v:"21"},
-          {k:"gear", l:"Rotor:sensor ratio", v:"50.0"},
-          {k:"stator", l:"Stator current limit (A)", v:"40"}
+          {k:"name", l:"Subsystem name", v:"Arm", text:true, wide:true, hint:"any name you like - it becomes the Java class name"},
+          {k:"canId", l:"Motor CAN id", v:"11", hint:"the id you gave the motor in Tuner X - "+lref("III.1")},
+          {k:"ccId", l:"CANcoder CAN id", v:"21", hint:"the CANcoder id from Tuner X - "+lref("III.2")},
+          {k:"gear", l:"Rotor:sensor ratio", v:"50.0", hint:"motor rotations per CANcoder rotation - "+lref("III.2")},
+          {k:"stator", l:"Stator current limit (A)", v:"40", hint:"a safe ceiling for motor current - "+lref("III.2")}
         ]},
         {t:"Slot0 gains - from SysId  ·  0 = horizontal!", f:[
-          {k:"kS", l:"kS (static, V)", v:"0.10"},
-          {k:"kG", l:"kG @ horizontal (V)", v:"0.40"},
-          {k:"kV", l:"kV (V per rot/s)", v:"0.9"},
-          {k:"kA", l:"kA (V per rot/s²)", v:"0.02"},
-          {k:"kP", l:"kP (V per rot err)", v:"60"},
-          {k:"kD", l:"kD", v:"0.5"}
+          {k:"kS", l:"kS (static, V)", v:"0.10", hint:"from the SysId ramp test - "+lref("I.7")},
+          {k:"kG", l:"kG @ horizontal (V)", v:"0.40", hint:"volts to hold the arm level at horizontal - "+lref("IV.2")},
+          {k:"kV", l:"kV (V per rot/s)", v:"0.9", hint:"from the SysId ramp test - "+lref("I.7")},
+          {k:"kA", l:"kA (V per rot/s²)", v:"0.02", hint:"from the SysId dynamic test - "+lref("III.5")},
+          {k:"kP", l:"kP (V per rot err)", v:"60", hint:"trim up after feedforward is right - "+lref("I.5")},
+          {k:"kD", l:"kD", v:"0.5", hint:"damping if it overshoots - "+lref("I.4")}
         ]},
         {t:"Motion Magic", f:[
-          {k:"mmV", l:"Cruise velocity (rot/s)", v:"2.0"},
-          {k:"mmA", l:"Acceleration (rot/s²)", v:"4.0"}
+          {k:"mmV", l:"Cruise velocity (rot/s)", v:"2.0", hint:"cruise speed for profiled moves - "+lref("III.4")},
+          {k:"mmA", l:"Acceleration (rot/s²)", v:"4.0", hint:"how quickly it ramps to cruise - "+lref("III.4")}
         ]}
       ]
     },
@@ -228,15 +237,15 @@
       label:"Flywheel", gravity:null, motionMagic:false, control:"VelocityVoltage", target:"withVelocity",
       groups:[
         {t:"Device", f:[
-          {k:"name", l:"Subsystem name", v:"Flywheel", text:true, wide:true},
-          {k:"canId", l:"Motor CAN id", v:"12"},
-          {k:"stator", l:"Stator current limit (A)", v:"60"}
+          {k:"name", l:"Subsystem name", v:"Flywheel", text:true, wide:true, hint:"any name you like - it becomes the Java class name"},
+          {k:"canId", l:"Motor CAN id", v:"12", hint:"the id you gave the motor in Tuner X - "+lref("III.1")},
+          {k:"stator", l:"Stator current limit (A)", v:"60", hint:"a safe ceiling for motor current - "+lref("III.2")}
         ]},
         {t:"Slot0 gains - from SysId  ·  no kG, small kP", f:[
-          {k:"kS", l:"kS (static, V)", v:"0.10"},
-          {k:"kV", l:"kV - dominant (V per rot/s)", v:"0.12"},
-          {k:"kP", l:"kP - keep small", v:"0.18"},
-          {k:"target", l:"Target speed (rot/s)", v:"60"}
+          {k:"kS", l:"kS (static, V)", v:"0.10", hint:"from the SysId ramp test - "+lref("I.7")},
+          {k:"kV", l:"kV - dominant (V per rot/s)", v:"0.12", hint:"from the SysId ramp test, it does most of the work - "+lref("I.7")},
+          {k:"kP", l:"kP - keep small", v:"0.18", hint:"velocity loops want a small kP - "+lref("IV.3")},
+          {k:"target", l:"Target speed (rot/s)", v:"60", hint:"the speed your shooter needs - "+lref("IV.3")}
         ]}
       ]
     }
@@ -270,6 +279,7 @@
         html+='<div class="field'+(f.wide?' wide':'')+'">'+
           '<label>'+f.l+'</label>'+
           '<input data-k="'+f.k+'" type="'+(f.text?'text':'text')+'" value="'+(state[f.k]||'')+'" autocomplete="off" spellcheck="false" inputmode="'+(f.text?'text':'decimal')+'">'+
+          (f.hint?'<div class="hint">'+f.hint+'</div>':'')+
         '</div>';
       });
       html+='</div>';
