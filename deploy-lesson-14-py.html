@@ -113,6 +113,16 @@
   .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
   .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  .write-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .write-ex .whead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:6px}
+  .write-ex .whead .ic{width:22px;height:22px;border-radius:6px;background:rgba(52,215,197,.14);display:grid;place-items:center;color:var(--teal);font-size:13px}
+  .write-ex .wtask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .write-ex .wline{font-family:var(--mono);font-size:13px;width:100%;background:var(--ink);border:1px solid var(--line-2);color:var(--text);border-radius:8px;padding:10px 12px;outline:none}
+  .write-ex .wline:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(52,215,197,.18)}
+  .write-ex .wline.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.08)}
+  .write-ex .wline.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.08)}
+  .write-ex .whint{display:none;margin-top:12px;font-size:14px;color:var(--muted);border-left:2px solid var(--amber);padding:2px 0 2px 12px;font-family:var(--mono)}
+  .write-ex .whint.show{display:block}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -198,13 +208,34 @@ drive.<span class="fn">withTimeout</span>(<span class="num">3.0</span>)   <span 
 
     <div class="code-ex">
       <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
-      <div class="ctask">Run "drive to the goal" and then "score" - one after the other. Fill in the composition.</div>
-<pre class="code">commands2.cmd.<input class="blank" data-ans="sequence" aria-label="blank" autocomplete="off" spellcheck="false">(drive_to_goal, score)</pre>
+      <div class="ctask">Four jobs, four operators. Read each comment, then fill in the composition that does it.</div>
+<pre class="code"><span class="cm"># drive to the goal, then score - one after the other</span>
+commands2.cmd.<input class="blank" data-ans="sequence" aria-label="blank" autocomplete="off" spellcheck="false">(drive_to_goal, score)
+
+<span class="cm"># aim and spin up together - the group waits for BOTH to finish</span>
+commands2.cmd.<input class="blank" data-ans="parallel|parallel()" data-reveal="parallel" aria-label="blank" autocomplete="off" spellcheck="false">(aim, spin_up)
+
+<span class="cm"># run the intake, but give up on it after 3 seconds</span>
+intake_until_loaded.<input class="blank" data-ans="withtimeout|withtimeout()" data-reveal="withTimeout" aria-label="blank" autocomplete="off" spellcheck="false">(<span class="num">3.0</span>)
+
+<span class="cm"># score, and the instant it ends, stow the arm</span>
+score.<input class="blank" data-ans="andthen|andthen()" data-reveal="andThen" aria-label="blank" autocomplete="off" spellcheck="false">(stow)</pre>
       <div class="code-actions">
         <button class="btn" id="check">Check</button>
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+    </div>
+
+    <div class="write-ex" id="writeit">
+      <div class="whead"><span class="ic">&gt;_</span> Now you write it</div>
+      <div class="wtask">Write the one line that runs aim but gives up on it after 2 seconds.</div>
+      <input class="wline" data-ans="aim.withtimeout(2.0)|aim.withtimeout(2)" aria-label="your line of code" autocomplete="off" spellcheck="false" placeholder="type the whole line, then press Check">
+      <div class="code-actions" style="margin-top:12px">
+        <button class="btn" id="wcheck">Check</button>
+        <span class="code-result" id="wres"></span>
+      </div>
+      <div class="whint" id="whint">Hint: withTimeout races a command against a timer. Chain it onto the command: aim.withTimeout(seconds)</div>
     </div>
   </section>
 
@@ -471,9 +502,9 @@ drive.<span class="fn">withTimeout</span>(<span class="num">3.0</span>)   <span 
   document.getElementById('check').addEventListener('click',function(){
     var all=true;
     blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
-    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - one after another is sequence'; res.className='code-result '+(all?'ok':'no');
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - check the red blanks'; res.className='code-result '+(all?'ok':'no');
   });
-  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='sequence';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
+  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value=b.getAttribute('data-reveal')||'sequence';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
 
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
@@ -515,6 +546,30 @@ drive.<span class="fn">withTimeout</span>(<span class="num">3.0</span>)   <span 
     window.addEventListener('keydown',onRan,true);
   } else { ran=true; }
   opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(picked>=0)return; picked=i; opts.forEach(function(o){o.classList.add('locked');}); if(ran){ reveal(); } else { note.style.display='block'; } }); });
+})();
+</script>
+<script>
+(function(){
+  // "Now you write it" - free-text production exercise (isolated so it can never break the page)
+  try{
+    var ex=document.getElementById('writeit'); if(!ex) return;
+    var input=ex.querySelector('.wline'), btn=document.getElementById('wcheck');
+    var res=document.getElementById('wres'), hint=document.getElementById('whint'), misses=0;
+    function wnorm(s){ return (s||'').toLowerCase().replace(/\s+/g,'').replace(/;+$/,''); }
+    var answers=(input.getAttribute('data-ans')||'').split('|').map(wnorm);
+    function judge(){
+      var ok=answers.indexOf(wnorm(input.value))!==-1;
+      input.classList.remove('ok','bad'); input.classList.add(ok?'ok':'bad');
+      if(ok){ res.textContent='Correct \u2713'; res.className='code-result ok'; return; }
+      misses++;
+      if(misses>=2){ hint.classList.add('show'); res.textContent='Not yet - hint below'; }
+      else { res.textContent='Not quite - try again'; }
+      res.className='code-result no';
+    }
+    btn.addEventListener('click',judge);
+    input.addEventListener('keydown',function(e){ if(e.key==='Enter'){ judge(); } });
+    input.addEventListener('input',function(){ input.classList.remove('ok','bad'); });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

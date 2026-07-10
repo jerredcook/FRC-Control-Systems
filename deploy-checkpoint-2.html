@@ -107,6 +107,7 @@
   .explain.show{display:block}
   .explain a.ref{display:inline-block;margin-top:10px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--indigo);text-decoration:none;border:1px solid var(--line-2);border-radius:7px;padding:4px 10px;transition:.12s}
   .explain a.ref:hover{border-color:var(--indigo);color:var(--text)}
+  .whyline{font-size:13.5px;line-height:1.5;color:var(--muted);border-left:2px solid var(--red);background:rgba(255,107,107,.06);border-radius:0 8px 8px 0;padding:7px 12px}
 
   .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
   .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
@@ -158,9 +159,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">You write <span class="k">double ratio = 60 / 9;</span> expecting about 6.67, but printing it shows 6.0. What went wrong?</div>
         <div class="opts">
-          <button class="opt">double can only store whole numbers, so it rounded down</button>
+          <button class="opt" data-why="A double stores decimals fine; the fraction was already gone from the int division before the double ever saw it.">double can only store whole numbers, so it rounded down</button>
           <button class="opt">Both 60 and 9 are int literals, so Java did integer division and truncated before storing the result</button>
-          <button class="opt">The variable name ratio is reserved, so Java reset it to 6.0</button>
+          <button class="opt" data-why="ratio is an ordinary name; Java never changes a value because of what you called the variable.">The variable name ratio is reserved, so Java reset it to 6.0</button>
         </div>
         <div class="explain">When both sides of a division are int, Java does integer division and drops the decimal, giving 6. The result is only converted to double afterward. Write 60.0 / 9 or 60 / 9.0 to keep the fraction. <a class="ref" href="deploy-lesson-6.html">Review: Lesson 2.1 &middot; Variables, Types &amp; Math</a></div>
       </div>
@@ -169,8 +170,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">You want a value that can only ever be one of <span class="k">STOWED</span>, <span class="k">INTAKING</span>, or <span class="k">SCORING</span>, and the compiler should reject anything else. What fits best?</div>
         <div class="opts">
-          <button class="opt">A String, so you can name each state clearly</button>
-          <button class="opt">An int, using 0, 1, and 2 for the three states</button>
+          <button class="opt" data-why="A String accepts any text, so a typo like STOWD still compiles and only breaks while the robot runs.">A String, so you can name each state clearly</button>
+          <button class="opt" data-why="An int happily holds 7 or -3, so the compiler cannot stop values that mean nothing.">An int, using 0, 1, and 2 for the three states</button>
           <button class="opt">An enum listing the three states</button>
         </div>
         <div class="explain">An enum is a named, fixed set of values. The compiler only allows those three, which prevents invalid states and reads better than 0, 1, 2. A switch on the enum then forms a clean state machine. <a class="ref" href="deploy-lesson-10.html">Review: Lesson 2.5 &middot; Collections &amp; Enums</a></div>
@@ -181,8 +182,8 @@
         <div class="qt">Your robot has four swerve modules. You build them in a constructor and store them so each keeps its own angle and speed. Which is the most fitting structure?</div>
         <div class="opts">
           <button class="opt">An array of four SwerveModule objects, each created with new and holding its own state</button>
-          <button class="opt">One SwerveModule object reused four times by changing its fields between modules</button>
-          <button class="opt">Four separate double variables, one per module</button>
+          <button class="opt" data-why="One object has one set of fields, so all four modules would share the same angle and speed.">One SwerveModule object reused four times by changing its fields between modules</button>
+          <button class="opt" data-why="Each module needs several values plus behavior; a lone double holds one number and has no methods.">Four separate double variables, one per module</button>
         </div>
         <div class="explain">Each module is its own object made with new, so each holds independent state. An array is the right fit for a known, fixed count like four modules. Reusing one object would make all modules share the same fields, which is wrong. <a class="ref" href="deploy-lesson-8.html">Review: Lesson 2.3 &middot; Classes &amp; Objects</a></div>
       </div>
@@ -191,8 +192,8 @@
         <div class="qn">Question 4</div>
         <div class="qt">You write a method <span class="k">deadband(double value)</span> that returns 0 when the input is small and otherwise returns the value. You call it from several places. What does the return value let you do?</div>
         <div class="opts">
-          <button class="opt">Nothing useful, since a method that returns a value cannot also take a parameter</button>
-          <button class="opt">Run the method, but you must read its answer from a separate global variable</button>
+          <button class="opt" data-why="Methods do both all the time: parameters carry data in, the return value carries the answer out.">Nothing useful, since a method that returns a value cannot also take a parameter</button>
+          <button class="opt" data-why="No extra variable is needed; the call itself hands back the result right where you wrote it.">Run the method, but you must read its answer from a separate global variable</button>
           <button class="opt">Use its result wherever you call it, so the same cleanup logic stays in one place instead of being copied</button>
         </div>
         <div class="explain">A method takes parameters as input and hands back a return value as output. Because the cleanup lives in one named method, every caller gets the same behavior and you fix bugs in one spot instead of many copies. <a class="ref" href="deploy-lesson-7.html">Review: Lesson 2.2 &middot; Methods &amp; Logic</a></div>
@@ -202,9 +203,9 @@
         <div class="qn">Question 5</div>
         <div class="qt">In Part 1 you saw <span class="k">Robot extends TimedRobot</span> and methods marked <span class="k">@Override</span>. Now that you know Java, what does <span class="k">@Override</span> actually buy you on something like <span class="k">robotPeriodic()</span>?</div>
         <div class="opts">
-          <button class="opt">It makes the method run faster because the compiler skips safety checks</button>
+          <button class="opt" data-why="@Override changes nothing at runtime; it is purely a compile-time check on the method name.">It makes the method run faster because the compiler skips safety checks</button>
           <button class="opt">It tells the compiler you mean to replace a parent method, so a typo in the name fails to compile instead of silently never running</button>
-          <button class="opt">It is required on every method in Java or the class will not build</button>
+          <button class="opt" data-why="It is optional, and it only belongs on methods that replace a parent version; ordinary methods build fine without it.">It is required on every method in Java or the class will not build</button>
         </div>
         <div class="explain">extends gives Robot all of TimedRobot's machinery for free, and @Override marks a method as replacing the parent's version. If you misspell robotPeriodic, the compiler catches it instead of quietly creating a new method that never gets called every 20 ms. <a class="ref" href="deploy-lesson-9.html">Review: Lesson 2.4 &middot; Inheritance &amp; Interfaces</a></div>
       </div>
@@ -226,7 +227,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show'); try{var why=opt.getAttribute('data-why'); if(why){var w=opt.nextElementSibling; if(!w||!w.classList.contains('whyline')){w=document.createElement('div'); w.className='whyline'; opt.insertAdjacentElement('afterend',w);} w.textContent=why;}}catch(e){}} }); });
   });
 })();
 </script>

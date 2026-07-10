@@ -149,6 +149,7 @@
   .opt.locked.correct,.opt.locked.wrong{opacity:1}
   .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--teal);padding:4px 0 4px 13px;display:none}
   .explain.show{display:block}
+  .whyline{margin:2px 0 2px;font-size:13.5px;line-height:1.5;color:var(--muted);border-left:2px solid var(--red);background:rgba(255,107,107,.05);padding:6px 12px;border-radius:0 8px 8px 0}
   a.ref{font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--teal);text-decoration:none}
   a.ref:hover{text-decoration:underline}
 
@@ -202,31 +203,31 @@
       <div class="q" data-correct="1">
         <div class="qn">Question 1</div>
         <div class="qt">A robot drives to a wall and stops at a fixed distance using a sensor, correcting itself the whole way. A second robot only runs its motors for 1.5 seconds and hopes. What is the key difference?</div>
-        <div class="opts"><button class="opt">The first robot is open loop; the second is closed loop</button><button class="opt">The first robot is closed loop because it measures, compares, and corrects; the second is open loop and never checks</button><button class="opt">There is no real difference, only the timing changes</button></div>
+        <div class="opts"><button class="opt" data-why="That is the two labels swapped. The robot that measures and corrects is the closed-loop one, because the sensor is what closes the loop.">The first robot is open loop; the second is closed loop</button><button class="opt">The first robot is closed loop because it measures, compares, and corrects; the second is open loop and never checks</button><button class="opt" data-why="The difference is not timing, it is the sensor. One robot checks its result and fixes it, the other never looks.">There is no real difference, only the timing changes</button></div>
         <div class="explain">Closed loop means measure, compare to the goal, correct, repeat. The timed robot sets an action and never looks at the result, so it fails the moment the battery sags or the floor changes. <a class="ref" href="closing-the-loop-lesson-1.html">Review: Lesson I.1 &middot; Feedback &amp; Control</a></div>
       </div>
       <div class="q" data-correct="2">
         <div class="qn">Question 2</div>
         <div class="qt">An elevator under pure proportional control with a gravity load settles a few centimeters below its target and stays there. Raising kP shrinks the gap but never closes it. Why?</div>
-        <div class="opts"><button class="opt">The encoder is reading high, so the real position is correct</button><button class="opt">kP is negative, which inverts the controller</button><button class="opt">Holding against gravity needs a steady voltage, and P only makes voltage from error, so a leftover error must remain</button></div>
+        <div class="opts"><button class="opt" data-why="A bad encoder would park the carriage in the wrong spot, but it would not explain why raising kP shrinks the gap. That shrinking pattern is pure P droop.">The encoder is reading high, so the real position is correct</button><button class="opt" data-why="A negative kP would push the elevator away from the target so it runs off, not settle calmly just below it.">kP is negative, which inverts the controller</button><button class="opt">Holding against gravity needs a steady voltage, and P only makes voltage from error, so a leftover error must remain</button></div>
         <div class="explain">This is droop, equal to g over kP. Output is kP times error, so the carriage parks exactly where the leftover error supplies the gravity-holding voltage. More kP shrinks it but cannot reach zero. <a class="ref" href="closing-the-loop-lesson-2.html">Review: Lesson I.2 &middot; Proportional Control</a></div>
       </div>
       <div class="q" data-correct="0">
         <div class="qn">Question 3</div>
         <div class="qt">That same elevator still parks below target. Which term is designed to drive that steady-state error to zero, and how?</div>
-        <div class="opts"><button class="opt">The integral term, by accumulating error over time until it supplies the holding voltage on its own</button><button class="opt">The derivative term, by reacting to how fast the error changes</button><button class="opt">A larger kP, which removes steady-state error completely</button></div>
+        <div class="opts"><button class="opt">The integral term, by accumulating error over time until it supplies the holding voltage on its own</button><button class="opt" data-why="Derivative reacts to changing error, and an error that is parked and steady is not changing, so kD outputs nothing here.">The derivative term, by reacting to how fast the error changes</button><button class="opt" data-why="More kP only shrinks the leftover error, it can never zero it, because P still needs some error to make the holding voltage.">A larger kP, which removes steady-state error completely</button></div>
         <div class="explain">The integral is the controller's memory: it adds up error every loop and keeps growing while any gap remains, eventually supplying the gravity-holding voltage so the proportional term can drive error to zero. <a class="ref" href="closing-the-loop-lesson-3.html">Review: Lesson I.3 &middot; Integral Control</a></div>
       </div>
       <div class="q" data-correct="1">
         <div class="qn">Question 4</div>
         <div class="qt">After adding integral, you raise kD to tame overshoot, but the motor starts buzzing and jittering on a noisy encoder. What is happening?</div>
-        <div class="opts"><button class="opt">The integral term has wound up and saturated the motor</button><button class="opt">The derivative term amplifies sensor noise, since differentiating small wiggles produces large voltage spikes</button><button class="opt">kP has become too small to move the mechanism</button></div>
+        <div class="opts"><button class="opt" data-why="Windup shows up as overshoot after a long move, not buzzing. Buzz and jitter on a noisy sensor is the derivative's signature.">The integral term has wound up and saturated the motor</button><button class="opt">The derivative term amplifies sensor noise, since differentiating small wiggles produces large voltage spikes</button><button class="opt" data-why="Raising kD does not shrink kP, and a too-small kP makes a mechanism sluggish, not buzzy and jittery.">kP has become too small to move the mechanism</button></div>
         <div class="explain">Derivative reacts to rate of change, so noise in the measurement gets magnified. Lower kD or filter the sensor. Buzzing on noise is the classic derivative symptom; windup instead shows up as overshoot after long moves. <a class="ref" href="closing-the-loop-lesson-4.html">Review: Lesson I.4 &middot; Derivative Control</a></div>
       </div>
       <div class="q" data-correct="0">
         <div class="qn">Question 5</div>
         <div class="qt">Instead of fighting droop with feedback, you measure the mechanism with a SysId routine and add feedforward. Which gain holds an elevator against gravity, and what does feedforward let you do?</div>
-        <div class="opts"><button class="opt">kG holds against gravity, and feedforward supplies most of the voltage up front so feedback only trims the leftover</button><button class="opt">kV holds against gravity, and feedforward replaces the need for any feedback at all</button><button class="opt">kA holds against gravity, and feedforward eliminates the need to ever tune kP</button></div>
+        <div class="opts"><button class="opt">kG holds against gravity, and feedforward supplies most of the voltage up front so feedback only trims the leftover</button><button class="opt" data-why="kV is the cost of speed, volts per unit of velocity. The constant gravity-holding term is kG, and feedforward never replaces feedback, it only shrinks its job.">kV holds against gravity, and feedforward replaces the need for any feedback at all</button><button class="opt" data-why="kA pays for acceleration, changing speed. Holding still against gravity is kG's job, and you still tune a small kP to trim the leftover.">kA holds against gravity, and feedforward eliminates the need to ever tune kP</button></div>
         <div class="explain">kG is the constant gravity-holding voltage for an elevator, measured by SysId along with kS, kV, kA. Feedforward predicts the bulk of the voltage from physics, so the PID feedback only corrects the small remaining error. It does not replace feedback, it only shrinks its job. <a class="ref" href="closing-the-loop-lesson-6.html">Review: Lesson I.6 &middot; Feedforward</a></div>
       </div>
     </div>
@@ -243,7 +244,9 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');
+      try{var why=opt.getAttribute('data-why');if(why){var wl=opt.nextElementSibling;if(!wl||!wl.classList.contains('whyline')){wl=document.createElement('div');wl.className='whyline';opt.insertAdjacentElement('afterend',wl);}wl.textContent=why;}}catch(err){}
+    } }); });
   });
 })();
 </script>

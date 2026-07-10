@@ -87,6 +87,7 @@
   .explain.show{display:block}
   .explain a.ref{display:inline-block;margin-top:8px;font-family:var(--mono);font-size:12px;letter-spacing:.05em;color:var(--teal);text-decoration:none;border:1px solid var(--line-2);border-radius:7px;padding:4px 10px;transition:.12s}
   .explain a.ref:hover{border-color:var(--teal);color:var(--text)}
+  .whyline{margin:2px 0 4px;font-size:13.5px;color:var(--muted);border-left:2px solid var(--red);background:rgba(255,107,107,.05);padding:5px 12px;border-radius:0 8px 8px 0}
 
   .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
   .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
@@ -131,9 +132,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">You have a 1x2 aluminum tube to use as a long arm that bends under load. To make it stiffest against bending, you should orient it so the:</div>
         <div class="opts">
-          <button class="opt">2 inch side lies flat, parallel to the load</button>
+          <button class="opt" data-why="Flat looks stable, but it puts only the 1 inch dimension against the load, and stiffness grows with the cube of that height, so flat is the floppy way.">2 inch side lies flat, parallel to the load</button>
           <button class="opt">2 inch side stands tall, in the direction of the load</button>
-          <button class="opt">Tube is rotated 45 degrees to split the difference</button>
+          <button class="opt" data-why="Splitting the difference sounds fair, but at 45 degrees you give up most of the cube-of-height advantage the tall orientation delivers.">Tube is rotated 45 degrees to split the difference</button>
         </div>
         <div class="explain">Bending stiffness rises with the cube of the height in the load direction, so the tall 2 inch dimension does far more work. Same tube, same weight, but orienting it tall is much stiffer than laying it flat. <a class="ref" href="build-lesson-6.html">Review: Lesson 2.1 · Aluminum Extrusion</a></div>
       </div>
@@ -142,8 +143,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">You need a clear guard panel that will take repeated hits from a game piece without shattering. Which material?</div>
         <div class="opts">
-          <button class="opt">Acrylic, because it looks the same and is cheaper</button>
-          <button class="opt">Thin aluminum sheet bent to shape</button>
+          <button class="opt" data-why="Acrylic looks identical on the shelf, but it is brittle; the first hard hit cracks or shatters it instead of flexing.">Acrylic, because it looks the same and is cheaper</button>
+          <button class="opt" data-why="Aluminum is tough but not clear, and instead of springing back it keeps a permanent dent after every hit.">Thin aluminum sheet bent to shape</button>
           <button class="opt">Polycarbonate (Lexan), because it flexes and absorbs the impact</button>
         </div>
         <div class="explain">Polycarbonate bends and springs back, so it survives impacts. Acrylic looks identical but is brittle and cracks on the first hard hit. Aluminum would take a permanent dent rather than recover. <a class="ref" href="build-lesson-7.html">Review: Lesson 2.2 · Plate, Sheet &amp; Polycarbonate</a></div>
@@ -154,8 +155,8 @@
         <div class="qt">Your team can buy a proven swerve module or machine its gears from scratch. The module sits on the critical path to a driving robot. The veteran call is to:</div>
         <div class="opts">
           <button class="opt">Buy the COTS module so a slow custom part never holds up the whole build</button>
-          <button class="opt">Machine every gear to save money, even if it takes weeks</button>
-          <button class="opt">Buy nothing and design a brand new module type</button>
+          <button class="opt" data-why="Weeks of shop time on the critical path is the real cost; a robot that cannot drive yet is far more expensive than a bought module.">Machine every gear to save money, even if it takes weeks</button>
+          <button class="opt" data-why="Inventing a new module type is a season-long project on its own; vendors already spent years debugging the design you would be starting from scratch.">Buy nothing and design a brand new module type</button>
         </div>
         <div class="explain">COTS means commercial off-the-shelf, a part a vendor already perfected. Buy the proven, high-stress precision parts on the critical path, and spend shop time on the geometry unique to your design. Good and done beats perfect and late. <a class="ref" href="build-lesson-8.html">Review: Lesson 2.3 · COTS vs Custom</a></div>
       </div>
@@ -164,8 +165,8 @@
         <div class="qn">Question 4</div>
         <div class="qt">A tube bolted to a gusset with a single bolt keeps swinging out of square under load. What is happening, and the fix?</div>
         <div class="opts">
-          <button class="opt">Nothing is wrong, one bolt makes a rigid joint</button>
-          <button class="opt">The bolt is too long, so cut it shorter</button>
+          <button class="opt" data-why="One bolt clamps but cannot stop rotation; the tube can still swing around that single point like a hinge pin.">Nothing is wrong, one bolt makes a rigid joint</button>
+          <button class="opt" data-why="Extra bolt length is cosmetic; the joint swings because there is only one pivot point, not because the bolt sticks out.">The bolt is too long, so cut it shorter</button>
           <button class="opt">One bolt acts as a hinge; add a second bolt spread apart to lock the angle</button>
         </div>
         <div class="explain">A single bolt is a pivot the tube can swing around. Two bolts spread as far apart as the gusset allows fix the angle and give a wider lever, so each bolt carries less of the twisting load and the joint stays rigid. <a class="ref" href="build-lesson-9.html">Review: Lesson 2.4 · Brackets, Gussets &amp; Joining</a></div>
@@ -175,9 +176,9 @@
         <div class="qn">Question 5</div>
         <div class="qt">You drill a 0.250 in hole in a polycarbonate bellypan with a sharp square inside corner right next to it. Connecting back to tolerance and stress, the better design is to:</div>
         <div class="opts">
-          <button class="opt">Leave the sharp corner; polycarbonate never cracks</button>
+          <button class="opt" data-why="Polycarbonate is tough but not magic; a sharp inside corner concentrates stress and gives even Lexan a place to start tearing.">Leave the sharp corner; polycarbonate never cracks</button>
           <button class="opt">Round the inside corner with a fillet and keep the hole back from the edge so stress does not concentrate</button>
-          <button class="opt">Drill the hole undersize so the bolt is a press fit in the plastic</button>
+          <button class="opt" data-why="A press fit shoves the bolt outward against the plastic all the time, adding constant stress right where cracks like to start.">Drill the hole undersize so the bolt is a press fit in the plastic</button>
         </div>
         <div class="explain">A sharp inside corner concentrates stress, which is where a crack starts and runs. A fillet gives the load a wider path and drops the peak stress. A press fit in plastic only adds more stress, the opposite of what you want here. <a class="ref" href="build-lesson-7.html">Review: Lesson 2.2 · Plate, Sheet &amp; Polycarbonate</a></div>
       </div>
@@ -199,7 +200,10 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');
+      try{ var why=opt.getAttribute('data-why');
+        if(why){ var wl=opt.nextElementSibling; if(!wl||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.insertAdjacentElement('afterend',wl); } wl.textContent=why; }
+      }catch(e){} } }); });
   });
 })();
 </script>

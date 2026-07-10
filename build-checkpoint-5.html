@@ -63,6 +63,7 @@
   .explain.show{display:block}
   .explain a.ref{display:inline-block;margin-top:8px;font-family:var(--mono);font-size:12px;letter-spacing:.05em;color:var(--teal);text-decoration:none;border:1px solid var(--line-2);border-radius:7px;padding:4px 10px;transition:.12s}
   .explain a.ref:hover{border-color:var(--teal);color:var(--text)}
+  .whyline{margin:2px 0 4px;font-size:13.5px;color:var(--muted);border-left:2px solid var(--red);background:rgba(255,107,107,.05);padding:5px 12px;border-radius:0 8px 8px 0}
 
   .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
   .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
@@ -99,9 +100,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">Your robot carries a tall, heavy arm and tips backward every time the driver slams to a stop. Without removing the arm, which change fights the tipping best?</div>
         <div class="opts">
-          <button class="opt">Add ballast weight high on the arm to balance it</button>
+          <button class="opt" data-why="Weight up high raises the center of mass, which is the exact thing making the robot tip; ballast helps only when it goes low.">Add ballast weight high on the arm to balance it</button>
           <button class="opt">Mount the battery low and centered and widen the wheelbase</button>
-          <button class="opt">Switch to slicker, lower-grip wheels</button>
+          <button class="opt" data-why="Slick wheels trade the tipping problem for a robot that cannot push or stop where it wants; they treat the symptom, not the high center of mass.">Switch to slicker, lower-grip wheels</button>
         </div>
         <div class="explain">Tipping happens when the center of mass swings past a wheel. Dropping the heavy battery low and spreading the wheels wider both keep the center of mass inside the base. Adding weight up high makes it worse. <a class="ref" href="build-lesson-22.html">Review: Lesson 5.1 · The Frame / Chassis</a></div>
       </div>
@@ -110,8 +111,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">A six-wheel tank drive grinds and skips at every turn, leaving scrub marks. What is the standard fix?</div>
         <div class="opts">
-          <button class="opt">Add more motor power to overpower the scrub</button>
-          <button class="opt">Use slicker tread on all six wheels</button>
+          <button class="opt" data-why="More power just scrubs harder; the wheels are fighting geometry, and no motor overcomes a wheelbase that will not pivot.">Add more motor power to overpower the scrub</button>
+          <button class="opt" data-why="Slicker tread turns easier but gives up the traction the drivetrain needs to push and accelerate; the standard fix changes geometry instead.">Use slicker tread on all six wheels</button>
           <button class="opt">Drop the center wheels slightly so the robot rocks onto them and pivots</button>
         </div>
         <div class="explain">A drop center lowers the middle wheels a little, so the robot tips onto them and turns about its center. That shortens the effective wheelbase and cuts the sideways scrub that makes a tank drive fight its turns. <a class="ref" href="build-lesson-23.html">Review: Lesson 5.2 · COTS Drivetrains</a></div>
@@ -122,8 +123,8 @@
         <div class="qt">Two robots are locked in a pushing match. Yours has bigger motors but loses the shove. What is the most likely reason, and the fix?</div>
         <div class="opts">
           <button class="opt">Pushing is decided by traction, not power; add grippier tread and more weight over the drive wheels</button>
-          <button class="opt">You need a faster gear ratio for more top speed</button>
-          <button class="opt">Bigger motors always win, so the match must have been a fluke</button>
+          <button class="opt" data-why="A faster ratio helps top speed, not shoving; in a pushing match it just spins the wheels sooner.">You need a faster gear ratio for more top speed</button>
+          <button class="opt" data-why="Past the grip limit, extra motor power only spins the wheels in place; the robot with more traction wins every time, no fluke.">Bigger motors always win, so the match must have been a fluke</button>
         </div>
         <div class="explain">A wheel can only push as hard as its grip times the weight on it. Past that, extra power only spins the wheels. The robot with more traction wins the shove, so chase tread, durometer, and weight on the drive wheels. <a class="ref" href="build-lesson-24.html">Review: Lesson 5.3 · Wheels &amp; Traction</a></div>
       </div>
@@ -132,9 +133,9 @@
         <div class="qn">Question 4</div>
         <div class="qt">Your team wants the agility of swerve. A swerve module is a precision, high-stress part packed with two motors and a sensor. What is the smart call, the same one from Part 2's buy-not-build idea?</div>
         <div class="opts">
-          <button class="opt">Machine your own modules from scratch to save money</button>
+          <button class="opt" data-why="A swerve module is exactly the precision, high-stress part the buy-not-build rule says to buy; a custom one eats the season on the critical path.">Machine your own modules from scratch to save money</button>
           <button class="opt">Buy proven COTS modules and write the swerve kinematics in code</button>
-          <button class="opt">Skip swerve entirely; it is never worth it</button>
+          <button class="opt" data-why="Swerve is a real option now precisely because COTS modules removed the hard machining; never is too strong when thousands of teams run it.">Skip swerve entirely; it is never worth it</button>
         </div>
         <div class="explain">Modules are complex and precise, so nearly every team buys proven COTS units (SDS, WCP, REV MAXSwerve) and bolts them on. The code that computes each module's angle and speed is what you write. It is the clearest place build hands off to code. <a class="ref" href="build-lesson-25.html">Review: Lesson 5.4 · Swerve Modules</a></div>
       </div>
@@ -143,8 +144,8 @@
         <div class="qn">Question 5</div>
         <div class="qt">It is the night before competition and your bumpers are built perfectly but mounted an inch above the legal height zone. What happens at inspection?</div>
         <div class="opts">
-          <button class="opt">It passes, since the construction is correct</button>
-          <button class="opt">It only matters for defense robots</button>
+          <button class="opt" data-why="Good construction cannot save a bumper mounted outside the legal zone; the height rule is checked with a gauge, not a judgment call.">It passes, since the construction is correct</button>
+          <button class="opt" data-why="Bumper rules apply to every robot because every robot gets hit; there is no defense-only exemption.">It only matters for defense robots</button>
           <button class="opt">It fails; bumpers must sit within the legal height zone, so the robot cannot play until it is fixed</button>
         </div>
         <div class="explain">Bumper height is a hard rule so robots collide consistently and safely. Even a well-built bumper outside the zone fails inspection, which is why teams build and mount bumpers early instead of the last night. <a class="ref" href="build-lesson-26.html">Review: Lesson 5.5 · Bumpers</a></div>
@@ -167,7 +168,10 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');
+      try{ var why=opt.getAttribute('data-why');
+        if(why){ var wl=opt.nextElementSibling; if(!wl||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.insertAdjacentElement('afterend',wl); } wl.textContent=why; }
+      }catch(e){} } }); });
   });
 })();
 </script>

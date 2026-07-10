@@ -63,6 +63,7 @@
   .explain.show{display:block}
   .explain a.ref{display:inline-block;margin-top:8px;font-family:var(--mono);font-size:12px;letter-spacing:.05em;color:var(--teal);text-decoration:none;border:1px solid var(--line-2);border-radius:7px;padding:4px 10px;transition:.12s}
   .explain a.ref:hover{border-color:var(--teal);color:var(--text)}
+  .whyline{margin:2px 0 4px;font-size:13.5px;color:var(--muted);border-left:2px solid var(--red);background:rgba(255,107,107,.05);padding:5px 12px;border-radius:0 8px 8px 0}
 
   .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
   .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
@@ -99,9 +100,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">A rookie team plans to spend all six build weeks fabricating, finishing the robot the night before the event. Why does this plan usually fail?</div>
         <div class="opts">
-          <button class="opt">Six weeks is too long; they will get bored</button>
+          <button class="opt" data-why="Teams run out of time, not interest; the season problem is finishing too late to integrate and practice, not boredom.">Six weeks is too long; they will get bored</button>
           <button class="opt">A robot still being assembled at the deadline never gets integrated or driven, and an unpracticed driver fumbles</button>
-          <button class="opt">Fabricating early uses too much aluminum</button>
+          <button class="opt" data-why="Material use barely changes with the schedule; the real cost of late fabrication is losing integration and driver practice time.">Fabricating early uses too much aluminum</button>
         </div>
         <div class="explain">The classic trap is building right up to the deadline. Subsystems that worked alone fight once combined, and a driver needs weeks of practice. A simpler robot done early enough to integrate and practice routinely beats a fancier one finished the night before. <a class="ref" href="build-lesson-36.html">Review: Lesson 8.1 · Planning the Season</a></div>
       </div>
@@ -110,8 +111,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">You need clean, square holes drilled into an aluminum plate. You have not been signed off on any machine yet. What is the right move?</div>
         <div class="opts">
-          <button class="opt">Use a handheld drill since the holes are simple</button>
-          <button class="opt">Run the mill yourself; holes are easy</button>
+          <button class="opt" data-why="A hand drill wanders and tilts, so the holes come out neither clean nor square; the drill press exists for exactly this job.">Use a handheld drill since the holes are simple</button>
+          <button class="opt" data-why="Easy or not, no sign-off means no machine time, and the mill is mentor-operated on most teams anyway.">Run the mill yourself; holes are easy</button>
           <button class="opt">Use the drill press, but only after a mentor has trained and signed you off on it</button>
         </div>
         <div class="explain">A drill press makes far cleaner, squarer holes than a hand drill, and saws plus a drill press make most of a robot. But knowing what a machine does is not the same as being allowed to run it; you never touch one until a mentor trains and signs you off, and the mill and lathe are mentor-operated on most teams. <a class="ref" href="build-lesson-37.html">Review: Lesson 8.2 · Manufacturing Methods</a></div>
@@ -122,8 +123,8 @@
         <div class="qt">Your subsystems are all done and it is time to assemble the robot. Why run the electrical wiring before bolting on the arm and intake?</div>
         <div class="opts">
           <button class="opt">Once mechanisms fill the space, the wiring is buried; run it while the inside is still reachable</button>
-          <button class="opt">Wiring weighs less when installed first</button>
-          <button class="opt">The rules require electrical before mechanisms</button>
+          <button class="opt" data-why="Wire weighs the same whenever you install it; the order matters for access, not weight.">Wiring weighs less when installed first</button>
+          <button class="opt" data-why="No rule dictates assembly order; building upward in layers is about being able to reach things, not compliance.">The rules require electrical before mechanisms</button>
         </div>
         <div class="explain">Assembly order is about access: each layer covers the one beneath it. Build upward, frame, drivetrain, electrical, mechanisms, bumpers last, so you can still reach every layer when you add it. The best design is not only buildable, it is serviceable. <a class="ref" href="build-lesson-38.html">Review: Lesson 8.3 · Assembling the Robot</a></div>
       </div>
@@ -132,9 +133,9 @@
         <div class="qn">Question 4</div>
         <div class="qt">Between matches you have only a few minutes. Your robot drove fine last match. What should the pit crew do before sending it out again?</div>
         <div class="opts">
-          <button class="opt">Nothing; if it worked last match it will work this one</button>
+          <button class="opt" data-why="Matches shake bolts loose and drain batteries; right after it worked is exactly when the quiet failures are building up.">Nothing; if it worked last match it will work this one</button>
           <button class="opt">Run the same short checklist every time: fresh battery, tighten what vibrated loose, check connections</button>
-          <button class="opt">Take it fully apart to inspect everything</button>
+          <button class="opt" data-why="A full teardown takes hours you do not have and creates new chances for error; a short fixed checklist catches the likely failures in minutes.">Take it fully apart to inspect everything</button>
         </div>
         <div class="explain">A fixed pre-match checklist catches the quiet killers, a half-spent battery, a loose bolt, a wiggling connector, before they fail on the field. A fresh, healthy battery alone wins close games a sagging one loses, because lower internal resistance holds voltage under load. <a class="ref" href="build-lesson-39.html">Review: Lesson 8.4 · Maintenance &amp; Spares</a></div>
       </div>
@@ -143,8 +144,8 @@
         <div class="qn">Question 5</div>
         <div class="qt">One gate stands between your robot and the field. The inspector checks weight and size, legal bumpers, fused wiring, and no sharp hazards. How do you make inspection a formality instead of a scramble?</div>
         <div class="opts">
-          <button class="opt">Hide the parts you are unsure about</button>
-          <button class="opt">Wait until the inspection table to total the robot's weight</button>
+          <button class="opt" data-why="Inspectors have seen every trick, and a hidden illegal part found later can pull you off the field mid-event; fix it instead.">Hide the parts you are unsure about</button>
+          <button class="opt" data-why="Finding out you are overweight at the table means hacking parts off in the pit; tracking weight from week one makes it a non-event.">Wait until the inspection table to total the robot's weight</button>
           <button class="opt">Build it legal and safe all season and track the hard checks like weight from week one</button>
         </div>
         <div class="explain">Almost every inspection station traces back to a lesson: weight and size from the frame, legal bumpers, fused branches, clean edges. Track weight in CAD from the start so nothing has to be hacked off the night before, and inspection becomes a formality. <a class="ref" href="build-lesson-40.html">Review: Lesson 8.5 · Competition-Ready</a></div>
@@ -167,7 +168,10 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');
+      try{ var why=opt.getAttribute('data-why');
+        if(why){ var wl=opt.nextElementSibling; if(!wl||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.insertAdjacentElement('afterend',wl); } wl.textContent=why; }
+      }catch(e){} } }); });
   });
 })();
 </script>

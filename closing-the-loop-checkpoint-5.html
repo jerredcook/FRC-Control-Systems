@@ -149,6 +149,7 @@
   .opt.locked.correct,.opt.locked.wrong{opacity:1}
   .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--teal);padding:4px 0 4px 13px;display:none}
   .explain.show{display:block}
+  .whyline{margin:2px 0 2px;font-size:13.5px;line-height:1.5;color:var(--muted);border-left:2px solid var(--red);background:rgba(255,107,107,.05);padding:6px 12px;border-radius:0 8px 8px 0}
   a.ref{font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--teal);text-decoration:none}
   a.ref:hover{text-decoration:underline}
 
@@ -202,31 +203,31 @@
       <div class="q" data-correct="0">
         <div class="qn">Question 1</div>
         <div class="qt">Each swerve module has a steer motor and a drive motor. Which Part IV mechanism does each one behave like?</div>
-        <div class="opts"><button class="opt">Steer is position control (point the wheel, like the arm); drive is velocity control (spin the wheel, like the flywheel)</button><button class="opt">Steer is velocity control like the flywheel; drive is position control like the arm</button><button class="opt">Both steer and drive are position control, identical to the elevator</button></div>
+        <div class="opts"><button class="opt">Steer is position control (point the wheel, like the arm); drive is velocity control (spin the wheel, like the flywheel)</button><button class="opt" data-why="That is the two jobs swapped. Pointing a wheel at an angle is position control, and holding a wheel's speed is velocity control.">Steer is velocity control like the flywheel; drive is position control like the arm</button><button class="opt" data-why="The drive motor never holds a position, it holds a speed. Only the steer motor does position control.">Both steer and drive are position control, identical to the elevator</button></div>
         <div class="explain">A swerve module reuses Part IV directly: the steer loop points the wheel to an angle (position control, like the arm), and the drive loop holds a wheel speed (velocity control, like the flywheel). Four modules means eight motors, all built from mechanisms you already know. <a class="ref" href="closing-the-loop-lesson-22.html">Review: Lesson V.1 &middot; Swerve Drive Control</a></div>
       </div>
       <div class="q" data-correct="1">
         <div class="qn">Question 2</div>
         <div class="qt">Each steer motor uses a FusedCANcoder. Why does a position loop like steering need an absolute sensor at power-on, when drive (velocity) does not?</div>
-        <div class="opts"><button class="opt">FusedCANcoder is only for the 1 kHz loop rate, not for sensing angle</button><button class="opt">A position loop must know its true absolute angle from the first instant, or the wheel starts crooked; a velocity loop only cares about rate, not absolute position</button><button class="opt">Drive needs it more than steer, because velocity drifts faster than angle</button></div>
+        <div class="opts"><button class="opt" data-why="The fused part keeps the loop fast, but the reason the CANcoder is there is the absolute angle, so the wheel knows where it points at power-on.">FusedCANcoder is only for the 1 kHz loop rate, not for sensing angle</button><button class="opt">A position loop must know its true absolute angle from the first instant, or the wheel starts crooked; a velocity loop only cares about rate, not absolute position</button><button class="opt" data-why="Drive only tracks rate of change, so it never needs an absolute reference. It is steering, position control, that starts crooked without one.">Drive needs it more than steer, because velocity drifts faster than angle</button></div>
         <div class="explain">Steering is position control, so it needs the wheel's real angle the moment the robot powers on, or it starts pointed wrong. The FusedCANcoder gives an absolute angle while still allowing the crisp fast loop. A velocity loop tracks rate of change, so it does not need an absolute starting reference. <a class="ref" href="closing-the-loop-lesson-22.html">Review: Lesson V.1 &middot; Swerve Drive Control</a></div>
       </div>
       <div class="q" data-correct="2">
         <div class="qn">Question 3</div>
         <div class="qt">A camera reports tx, the horizontal angle from the robot's bore-sight to a target. You auto-aim by spinning the robot with omega = -kP times tx. Which earlier idea is this, and what is its known weakness?</div>
-        <div class="opts"><button class="opt">It is integral control, and its weakness is windup</button><button class="opt">It is derivative control, and its weakness is noise amplification</button><button class="opt">It is proportional control with the camera as the sensor, and against a moving target a small steady-state error remains because a P loop only turns while there is an offset</button></div>
+        <div class="opts"><button class="opt" data-why="There is no accumulating sum here. omega = -kP times tx makes output straight from the current error, which is the definition of proportional.">It is integral control, and its weakness is windup</button><button class="opt" data-why="Nothing differentiates tx here. The command is a gain times the current error, proportional, not a rate of change.">It is derivative control, and its weakness is noise amplification</button><button class="opt">It is proportional control with the camera as the sensor, and against a moving target a small steady-state error remains because a P loop only turns while there is an offset</button></div>
         <div class="explain">Setpoint is tx = 0 (centered), so omega = -kP times tx is pure proportional control from Lesson 2, now reading a camera. Tracking a moving target leaves a small steady offset, since P needs an error to keep turning. Adding an I term or target-velocity feedforward fixes it. <a class="ref" href="closing-the-loop-lesson-23.html">Review: Lesson V.2 &middot; Vision-Assisted Control</a></div>
       </div>
       <div class="q" data-correct="0">
         <div class="qn">Question 4</div>
         <div class="qt">Odometry alone drifts as wheels slip. The team blends in AprilTag pose estimates with addVisionMeasurement(). What makes vision worth fusing in, and what is the main complication?</div>
-        <div class="opts"><button class="opt">An AprilTag is a fixed field reference that pins the robot's true position, but vision frames are tens of milliseconds old, so measurements must be time-stamped and trusted carefully</button><button class="opt">Vision is always more accurate than odometry with no downside, so odometry can be deleted</button><button class="opt">AprilTags remove all need for a gyro and wheel encoders</button></div>
+        <div class="opts"><button class="opt">An AprilTag is a fixed field reference that pins the robot's true position, but vision frames are tens of milliseconds old, so measurements must be time-stamped and trusted carefully</button><button class="opt" data-why="Vision frames arrive late and tags leave the view. Odometry keeps a smooth estimate between good frames, so you fuse the two, not delete one.">Vision is always more accurate than odometry with no downside, so odometry can be deleted</button><button class="opt" data-why="Tags are not always visible. The gyro and encoders keep the pose alive between sightings; vision corrects them, it cannot replace them.">AprilTags remove all need for a gyro and wheel encoders</button></div>
         <div class="explain">A known tag gives an absolute field location that corrects odometry drift. The catch is latency: frames arrive delayed, so you time-stamp them, weight them against odometry, and reject wild jumps rather than trusting vision blindly. <a class="ref" href="closing-the-loop-lesson-23.html">Review: Lesson V.2 &middot; Vision-Assisted Control</a></div>
       </div>
       <div class="q" data-correct="1">
         <div class="qn">Question 5</div>
         <div class="qt">The state-space lesson reveals that the PD control you used all course is a special case. On a system with state [position, velocity], state feedback u = K times (reference minus state) turns out to be which two gains, and what does an LQR add?</div>
-        <div class="opts"><button class="opt">k1 and k2 are kI and kA; LQR removes the need for feedforward</button><button class="opt">k1 and k2 are kP and kD; an LQR computes the optimal K by trading state error (Q) against control effort (R)</button><button class="opt">k1 and k2 are kS and kG; LQR only applies to flywheels</button></div>
+        <div class="opts"><button class="opt" data-why="On a position-velocity state the gains act on position error and velocity error, which are kP and kD. And LQR still pairs with feedforward, it does not replace it.">k1 and k2 are kI and kA; LQR removes the need for feedforward</button><button class="opt">k1 and k2 are kP and kD; an LQR computes the optimal K by trading state error (Q) against control effort (R)</button><button class="opt" data-why="kS and kG are feedforward constants, not feedback gains on the state, and LQR works on any system you can model, not just flywheels.">k1 and k2 are kS and kG; LQR only applies to flywheels</button></div>
         <div class="explain">On a position-velocity system, the state gains are exactly kP (on position error) and kD (on velocity error), so PD is state feedback. An LQR picks K optimally from Q (penalize error, tighter) and R (penalize effort, gentler), which scales to multi-state systems where eyeballing gains is hopeless. <a class="ref" href="closing-the-loop-lesson-24.html">Review: Lesson V.3 &middot; State-Space &amp; LQR</a></div>
       </div>
     </div>
@@ -243,7 +244,9 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');
+      try{var why=opt.getAttribute('data-why');if(why){var wl=opt.nextElementSibling;if(!wl||!wl.classList.contains('whyline')){wl=document.createElement('div');wl.className='whyline';opt.insertAdjacentElement('afterend',wl);}wl.textContent=why;}}catch(err){}
+    } }); });
   });
 })();
 </script>

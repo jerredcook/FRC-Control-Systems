@@ -107,6 +107,7 @@
   .explain.show{display:block}
   .explain a.ref{display:inline-block;margin-top:10px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--indigo);text-decoration:none;border:1px solid var(--line-2);border-radius:7px;padding:4px 10px;transition:.12s}
   .explain a.ref:hover{border-color:var(--indigo);color:var(--text)}
+  .whyline{font-size:13.5px;line-height:1.5;color:var(--muted);border-left:2px solid var(--red);background:rgba(255,107,107,.06);border-radius:0 8px 8px 0;padding:7px 12px}
 
   .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
   .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
@@ -156,8 +157,8 @@
         <div class="qt">After a match, a team complains "the shooter never got up to speed." What single logging habit turns that guess into something they can point at on the timeline?</div>
         <div class="opts">
           <button class="opt">Log the setpoint right next to the measured value, so the gap between what was wanted and what happened is visible</button>
-          <button class="opt">Log only the measured RPM, since the setpoint is already in the code</button>
-          <button class="opt">Skip logging and watch the live dashboard during the match</button>
+          <button class="opt" data-why="Without the setpoint beside it you cannot see the gap, and the code does not show which setpoint was active at that moment.">Log only the measured RPM, since the setpoint is already in the code</button>
+          <button class="opt" data-why="A match is over in minutes while everyone is busy; only a log lets you scrub the timeline afterward.">Skip logging and watch the live dashboard during the match</button>
         </div>
         <div class="explain">A measured value alone cannot show whether it was right. Logging setpointRpm beside measuredRpm makes the error, the thing a control loop is trying to close, jump out. You replay the .wpilog in AdvantageScope afterward, since a match is over too fast to study live. <a class="ref" href="deploy-lesson-32.html">Review: Lesson 8.1 &middot; Dashboards &amp; Telemetry</a></div>
       </div>
@@ -165,8 +166,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">A team wants to tune their flywheel PID before the robot is even wired. In WPILib simulation, where do the sensor values their PID reads come from?</div>
         <div class="opts">
-          <button class="opt">A real encoder still plugged into the bench supply</button>
-          <button class="opt">Random numbers, so the test is only a stress check</button>
+          <button class="opt" data-why="The point of simulation is needing no hardware at all; nothing is plugged in.">A real encoder still plugged into the bench supply</button>
+          <button class="opt" data-why="The values come from a physics model of the mechanism, so the PID sees realistic motion, not noise.">Random numbers, so the test is only a stress check</button>
           <button class="opt">A physics model fed by the voltage the code commands: simulationPeriodic pushes the voltage in, advances the model, and writes the motion back as the sensor reading</button>
         </div>
         <div class="explain">Simulation runs the exact same subsystem code, but the motor and encoder are replaced by a model. simulationPeriodic() feeds the commanded voltage into FlywheelSim, advances the physics, and reports the result as the measured value, so the loop closes the same way it does on the real robot. <a class="ref" href="deploy-lesson-33.html">Review: Lesson 8.2 &middot; Simulation</a></div>
@@ -175,9 +176,9 @@
         <div class="qn">Question 3</div>
         <div class="qt">Which piece of code is the best fit for a fast unit test that needs no robot, and what does a red test tell you?</div>
         <div class="opts">
-          <button class="opt">Code that sets motor voltage; red means the motor is broken</button>
+          <button class="opt" data-why="Unit tests run with no robot attached, so they can never tell you about physical hardware.">Code that sets motor voltage; red means the motor is broken</button>
           <button class="opt">Pure logic like a gear-ratio conversion; red means the actual result disagreed with the assertion, so there is a bug to fix</button>
-          <button class="opt">Anything that talks to a camera; red means the camera is unplugged</button>
+          <button class="opt" data-why="Talking to a camera needs hardware, exactly what a unit test avoids; red means an assertion failed, not a cable.">Anything that talks to a camera; red means the camera is unplugged</button>
         </div>
         <div class="explain">Unit tests shine on pure logic: conversions, state transitions, decisions. You assert expected against actual with assertEquals. Red means the code's output did not match what you expected, which points you straight at a bug. Run the suite on every commit so regressions cannot sneak back. <a class="ref" href="deploy-lesson-34.html">Review: Lesson 8.3 &middot; Unit Testing</a></div>
       </div>
@@ -185,8 +186,8 @@
         <div class="qn">Question 4</div>
         <div class="qt">Mid-match, several mechanisms push at once and the battery sags below about 6.8 volts, so the roboRIO cuts motor power. This is a brownout. Which line of defense most directly prevents it?</div>
         <div class="opts">
-          <button class="opt">Adding more unit tests for the drivetrain code</button>
-          <button class="opt">Logging the battery voltage to AdvantageScope</button>
+          <button class="opt" data-why="Tests catch logic bugs; a brownout is an electrical overload that correct code alone cannot prevent.">Adding more unit tests for the drivetrain code</button>
+          <button class="opt" data-why="A log shows the sag after the fact, but watching it happen does not stop motors pulling too many amps.">Logging the battery voltage to AdvantageScope</button>
           <button class="opt">A supply current limit on each motor, capping how many amps it pulls so the combined draw never crashes the bus</button>
         </div>
         <div class="explain">Voltage sag is driven by current. A supply current limit caps how much each motor pulls from the battery, keeping the total draw in a safe range so the bus stays above the brownout threshold. Logging and tests help you understand and prevent problems, but the current limit is what actually keeps the voltage up under load. <a class="ref" href="deploy-lesson-35.html">Review: Lesson 8.4 &middot; Debugging &amp; Robust Code</a></div>
@@ -195,9 +196,9 @@
         <div class="qn">Question 5</div>
         <div class="qt">It is five minutes before a match. A teammate wants to push one quick fix that has not been tested. What does deploy discipline say to do?</div>
         <div class="opts">
-          <button class="opt">Push it; small fixes are always safe</button>
+          <button class="opt" data-why="One-line fixes have lost real matches; untested is untested no matter how small.">Push it; small fixes are always safe</button>
           <button class="opt">Do not deploy untested code into a real match: test on the practice field first, and if there is no time, run the last tagged version that worked</button>
-          <button class="opt">Delete the unit tests so the build is faster</button>
+          <button class="opt" data-why="That removes your safety net right when you need it most, and it barely speeds up the build.">Delete the unit tests so the build is faster</button>
         </div>
         <div class="explain">The most expensive habit in FRC is deploying an untested "one fix" right before a match. The practice field is for testing; the match is not. A committed, tagged, working build is always your safety net, so if there is no time to test, run the last version that worked. <a class="ref" href="deploy-lesson-36.html">Review: Lesson 8.5 &middot; Competition-Ready</a></div>
       </div>
@@ -214,7 +215,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show'); try{var why=opt.getAttribute('data-why'); if(why){var w=opt.nextElementSibling; if(!w||!w.classList.contains('whyline')){w=document.createElement('div'); w.className='whyline'; opt.insertAdjacentElement('afterend',w);} w.textContent=why;}}catch(e){}} }); });
   });
 })();
 </script>

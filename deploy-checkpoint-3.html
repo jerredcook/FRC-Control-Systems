@@ -107,6 +107,7 @@
   .explain.show{display:block}
   .explain a.ref{display:inline-block;margin-top:10px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--indigo);text-decoration:none;border:1px solid var(--line-2);border-radius:7px;padding:4px 10px;transition:.12s}
   .explain a.ref:hover{border-color:var(--indigo);color:var(--text)}
+  .whyline{font-size:13.5px;line-height:1.5;color:var(--muted);border-left:2px solid var(--red);background:rgba(255,107,107,.06);border-radius:0 8px 8px 0;padding:7px 12px}
 
   .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
   .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
@@ -158,9 +159,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">You are building an arm. Which split between a subsystem and a command is correct?</div>
         <div class="opts">
-          <button class="opt">The command owns the motor and reads the encoder; the subsystem is the button press</button>
+          <button class="opt" data-why="That swaps the roles: the subsystem is the noun that owns hardware, and the command is the verb that asks for it.">The command owns the motor and reads the encoder; the subsystem is the button press</button>
           <button class="opt">The subsystem owns the motor and encoder and updates them in periodic(); the command is the action like "move arm to score"</button>
-          <button class="opt">Both the subsystem and the command directly call set() on the same motor</button>
+          <button class="opt" data-why="Two pieces of code steering one motor will fight; only the subsystem should touch its own hardware.">Both the subsystem and the command directly call set() on the same motor</button>
         </div>
         <div class="explain">A subsystem is the noun: it owns the hardware and updates itself in periodic() every 20 ms. A command is the verb: it asks the subsystem to do something. Only the subsystem touches its own motor, which stops two pieces of code from fighting over it. <a class="ref" href="deploy-lesson-12.html">Review: Lesson 3.2 &middot; Subsystems</a></div>
       </div>
@@ -169,8 +170,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">A command is running and partway through, another command that requires the same subsystem gets scheduled. What happens, and where should the first command shut its motor off?</div>
         <div class="opts">
-          <button class="opt">Both commands run at once on that subsystem; no cleanup is needed</button>
-          <button class="opt">The new command is ignored until the first one finishes on its own</button>
+          <button class="opt" data-why="Requirements exist exactly to prevent this; the scheduler allows one command per subsystem at a time.">Both commands run at once on that subsystem; no cleanup is needed</button>
+          <button class="opt" data-why="The scheduler sides with the new command: it interrupts the old one instead of waiting behind it.">The new command is ignored until the first one finishes on its own</button>
           <button class="opt">The first command is interrupted, its end(true) runs, so motor shutdown belongs in end()</button>
         </div>
         <div class="explain">The scheduler lets only one command own a subsystem at a time. Scheduling a new one interrupts the old, and end(interrupted) always fires, even on interrupt. That is why stopping the motor and other cleanup belong in end(), not isFinished(). <a class="ref" href="deploy-lesson-13.html">Review: Lesson 3.3 &middot; Commands</a></div>
@@ -181,8 +182,8 @@
         <div class="qt">In autonomous you want to run an intake but give up if it has not grabbed a piece after 3 seconds, so the routine never hangs. Which composition fits?</div>
         <div class="opts">
           <button class="opt">intakeCommand.withTimeout(3), which races the command against a 3 second timer</button>
-          <button class="opt">intakeCommand.andThen(wait), which runs the intake then waits 3 seconds afterward</button>
-          <button class="opt">A parallel group, which only ends once both the intake and the timer finish</button>
+          <button class="opt" data-why="andThen is a sequence, so the wait starts only after the intake ends; a stuck intake would still hang forever.">intakeCommand.andThen(wait), which runs the intake then waits 3 seconds afterward</button>
+          <button class="opt" data-why="A plain parallel group waits for every member to finish, so it cannot cut the intake off at 3 seconds.">A parallel group, which only ends once both the intake and the timer finish</button>
         </div>
         <div class="explain">withTimeout races the command against a timer and ends when either finishes, so the intake stops after at most 3 seconds. andThen would run them one after another, and a parallel group waits for all members, so neither caps the time. <a class="ref" href="deploy-lesson-14.html">Review: Lesson 3.4 &middot; Command Compositions</a></div>
       </div>
@@ -191,9 +192,9 @@
         <div class="qn">Question 4</div>
         <div class="qt">You bind <span class="k">driver.a().whileTrue(shootCommand)</span> and give the shooter a default command. What is the behavior?</div>
         <div class="opts">
-          <button class="opt">shootCommand runs once when A is first pressed and keeps running after you release</button>
+          <button class="opt" data-why="That describes onTrue; whileTrue ends the command the moment you release the button.">shootCommand runs once when A is first pressed and keeps running after you release</button>
           <button class="opt">shootCommand runs only while A is held, and when you release, the shooter's default command resumes automatically</button>
-          <button class="opt">The default command blocks the binding, so pressing A does nothing</button>
+          <button class="opt" data-why="It is the reverse: a bound command interrupts the default, which only runs when nothing else needs the subsystem.">The default command blocks the binding, so pressing A does nothing</button>
         </div>
         <div class="explain">whileTrue runs the command while the button is held and ends it on release. A default command is the fallback a subsystem runs when nothing else requires it, so releasing A interrupts shootCommand and the default resumes on its own. <a class="ref" href="deploy-lesson-16.html">Review: Lesson 3.6 &middot; Default Commands &amp; Requirements</a></div>
       </div>
@@ -202,8 +203,8 @@
         <div class="qn">Question 5</div>
         <div class="qt">Back in Part 2 you learned a Java method can return a boolean. A Trigger reacts to any boolean condition, not only buttons. Which use of that is correct?</div>
         <div class="opts">
-          <button class="opt">A Trigger can only ever wrap a physical controller button, never sensor logic</button>
-          <button class="opt">new Trigger(...) must be given an int, and the scheduler converts it to true or false</button>
+          <button class="opt" data-why="A Trigger wraps any boolean supplier; a controller button is just the most familiar example.">A Trigger can only ever wrap a physical controller button, never sensor logic</button>
+          <button class="opt" data-why="A Trigger takes something that returns true or false, not a number; nothing converts an int for you.">new Trigger(...) must be given an int, and the scheduler converts it to true or false</button>
           <button class="opt">new Trigger(intake::hasGamePiece).onTrue(stowCommand) fires once when the sensor first reports a piece</button>
         </div>
         <div class="explain">A Trigger wraps any boolean supplier, including a method like hasGamePiece() that returns true or false. onTrue schedules a command once when the condition flips to true, so the robot reacts to a sensor automatically, the same way it reacts to a button. <a class="ref" href="deploy-lesson-15.html">Review: Lesson 3.5 &middot; Triggers &amp; Button Bindings</a></div>
@@ -226,7 +227,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show'); try{var why=opt.getAttribute('data-why'); if(why){var w=opt.nextElementSibling; if(!w||!w.classList.contains('whyline')){w=document.createElement('div'); w.className='whyline'; opt.insertAdjacentElement('afterend',w);} w.textContent=why;}}catch(e){}} }); });
   });
 })();
 </script>

@@ -107,6 +107,7 @@
   .explain.show{display:block}
   .explain a.ref{display:inline-block;margin-top:10px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--indigo);text-decoration:none;border:1px solid var(--line-2);border-radius:7px;padding:4px 10px;transition:.12s}
   .explain a.ref:hover{border-color:var(--indigo);color:var(--text)}
+  .whyline{font-size:13.5px;line-height:1.5;color:var(--muted);border-left:2px solid var(--red);background:rgba(255,107,107,.06);border-radius:0 8px 8px 0;padding:7px 12px}
 
   .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
   .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
@@ -155,9 +156,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">Your camera spots AprilTag 7 and reports a tx of about 14 degrees. What does that number tell your roboRIO, and where did the work to compute it happen?</div>
         <div class="opts">
-          <button class="opt">tx is the tag's distance in meters, computed on the roboRIO from raw pixels</button>
+          <button class="opt" data-why="tx is an angle, not a distance, and the roboRIO never touches pixels; the coprocessor does that work.">tx is the tag's distance in meters, computed on the roboRIO from raw pixels</button>
           <button class="opt">tx is how far left or right of center the tag is, computed on a coprocessor (PhotonVision or a Limelight) and sent over NetworkTables</button>
-          <button class="opt">tx is the tag's ID number, computed by the AprilTag itself</button>
+          <button class="opt" data-why="A tag is just a printed pattern that computes nothing, and the ID is a separate value from tx.">tx is the tag's ID number, computed by the AprilTag itself</button>
         </div>
         <div class="explain">A coprocessor does the image processing and publishes simple numbers like the fiducial ID, tx (yaw), and ty over NetworkTables. tx is the horizontal angle from the camera center to the target. The roboRIO never touches a pixel. <a class="ref" href="deploy-lesson-28.html">Review: Lesson 7.1 &middot; Vision &amp; AprilTags</a></div>
       </div>
@@ -165,8 +166,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">A team aims at a tag by feeding tx into a controller with a setpoint of 0. They raise kP a lot and now the robot swings past the tag and hunts back and forth. What is the most likely cause?</div>
         <div class="opts">
-          <button class="opt">AprilTags cannot be aimed at with a controller</button>
-          <button class="opt">The camera ran out of battery</button>
+          <button class="opt" data-why="Aiming with a PID loop on tx is standard practice; the problem here is tuning, not possibility.">AprilTags cannot be aimed at with a controller</button>
+          <button class="opt" data-why="The camera runs off the robot's power, and swinging past then hunting back is classic overshoot from too much gain.">The camera ran out of battery</button>
           <button class="opt">The camera reports a few frames late, so a big gain overshoots the stale tx before the new measurement catches up</button>
         </div>
         <div class="explain">Vision aiming is the same PID loop from the Control course, with tx as the error and 0 as the setpoint. Camera latency means the robot acts on slightly old data, so a high kP overshoots and oscillates. The fixes are a gentler kP, a touch of D, and a tolerance band. <a class="ref" href="deploy-lesson-29.html">Review: Lesson 7.2 &middot; Closing the Loop on Vision</a></div>
@@ -176,8 +177,8 @@
         <div class="qt">A pose estimator runs odometry every loop and folds in a camera fix whenever a tag is seen. Why does the tag sighting count as an absolute correction while odometry alone keeps drifting?</div>
         <div class="opts">
           <button class="opt">Each AprilTag sits at a published, known field position, so seeing one anchors the robot to a real spot, while odometry only adds up motion and accumulates error</button>
-          <button class="opt">Cameras never make mistakes, so their measurement is always exact</button>
-          <button class="opt">Odometry uses a weaker battery than the camera</button>
+          <button class="opt" data-why="Cameras misjudge all the time, which is why vision fixes are blended in carefully instead of trusted outright.">Cameras never make mistakes, so their measurement is always exact</button>
+          <button class="opt" data-why="Both run from the same robot battery; drift comes from adding up small errors, not from power.">Odometry uses a weaker battery than the camera</button>
         </div>
         <div class="explain">Because tags are at surveyed locations, a sighting pins the robot to an absolute spot and erases accumulated drift. Odometry, from Lesson 6.3, only integrates wheel and gyro motion, so its errors pile up until vision corrects them. <a class="ref" href="deploy-lesson-30.html">Review: Lesson 7.3 &middot; Pose Estimation</a></div>
       </div>
@@ -185,9 +186,9 @@
         <div class="qn">Question 4</div>
         <div class="qt">In a SwerveDrivePoseEstimator, which call runs every loop and which runs only sometimes?</div>
         <div class="opts">
-          <button class="opt">addVisionMeasurement() runs every loop; update() runs only when a tag is seen</button>
+          <button class="opt" data-why="That is backwards: wheels and gyro report every loop, while a tag fix only exists when a tag is in view.">addVisionMeasurement() runs every loop; update() runs only when a tag is seen</button>
           <button class="opt">update() runs every loop for the wheels and gyro; addVisionMeasurement() runs only when the camera has a tag fix</button>
-          <button class="opt">Both run every loop, regardless of whether a tag is in view</button>
+          <button class="opt" data-why="With no tag in sight there is no vision measurement to add, so that call cannot run every loop.">Both run every loop, regardless of whether a tag is in view</button>
         </div>
         <div class="explain">update() advances the odometry part each loop from the gyro and module positions. addVisionMeasurement() is the extra call you make only when the camera reports a tag, blending that absolute fix into the running estimate. <a class="ref" href="deploy-lesson-30.html">Review: Lesson 7.3 &middot; Pose Estimation</a></div>
       </div>
@@ -195,8 +196,8 @@
         <div class="qn">Question 5</div>
         <div class="qt">A superstructure is modeled as a state machine with IDLE, INTAKING, LOADED, and SHOOTING. The driver presses the shoot button while the robot is in IDLE. What happens, and why is that the point?</div>
         <div class="opts">
-          <button class="opt">The robot shoots anyway, because the button always fires the feeder</button>
-          <button class="opt">The code crashes, because no transition exists from IDLE</button>
+          <button class="opt" data-why="The button only raises an event; the machine acts on transitions defined for the current state, and IDLE has none for shoot.">The robot shoots anyway, because the button always fires the feeder</button>
+          <button class="opt" data-why="An undefined transition is simply ignored; quietly rejecting bad events is the design, not an error.">The code crashes, because no transition exists from IDLE</button>
           <button class="opt">Nothing: there is no IDLE-to-SHOOTING transition, so the event is ignored, which keeps illegal situations from ever happening</button>
         </div>
         <div class="explain">Shooting is only reachable from LOADED. With no transition defined from IDLE on shoot, the event is rejected. A state machine makes illegal combinations like an empty shot unrepresentable, which is the safety it buys over a pile of separate booleans. <a class="ref" href="deploy-lesson-31.html">Review: Lesson 7.4 &middot; State Machines</a></div>
@@ -214,7 +215,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show'); try{var why=opt.getAttribute('data-why'); if(why){var w=opt.nextElementSibling; if(!w||!w.classList.contains('whyline')){w=document.createElement('div'); w.className='whyline'; opt.insertAdjacentElement('afterend',w);} w.textContent=why;}}catch(e){}} }); });
   });
 })();
 </script>

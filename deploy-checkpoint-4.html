@@ -107,6 +107,7 @@
   .explain.show{display:block}
   .explain a.ref{display:inline-block;margin-top:10px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--indigo);text-decoration:none;border:1px solid var(--line-2);border-radius:7px;padding:4px 10px;transition:.12s}
   .explain a.ref:hover{border-color:var(--indigo);color:var(--text)}
+  .whyline{font-size:13.5px;line-height:1.5;color:var(--muted);border-left:2px solid var(--red);background:rgba(255,107,107,.06);border-radius:0 8px 8px 0;padding:7px 12px}
 
   .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
   .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
@@ -158,8 +159,8 @@
         <div class="qn">Question 1</div>
         <div class="qt">Your shooter spins up to the right speed early in a match but comes up short late in the match when the battery has drained. You currently call <span class="k">set(0.6)</span>. What is the better fix?</div>
         <div class="opts">
-          <button class="opt">Bump set() to 0.8 so there is extra margin all match</button>
-          <button class="opt">Switch the motor to brake neutral mode so it holds speed longer</button>
+          <button class="opt" data-why="0.8 is still a fraction of a sagging battery, so the speed keeps drifting all match; it just misses high instead.">Bump set() to 0.8 so there is extra margin all match</button>
+          <button class="opt" data-why="Neutral mode only decides what happens at zero output; it does nothing while the motor is driving.">Switch the motor to brake neutral mode so it holds speed longer</button>
           <button class="opt">Use setVoltage() so the output is a real voltage that compensates for battery sag</button>
         </div>
         <div class="explain">set(percent) delivers a fraction of whatever the battery is at, so output sags as the battery drains. setVoltage(volts) asks for real volts and compensates for sag, giving repeatable behavior from the first match to the last. <a class="ref" href="deploy-lesson-17.html">Review: Lesson 4.1 &middot; Motors &amp; Controllers</a></div>
@@ -169,9 +170,9 @@
         <div class="qn">Question 2</div>
         <div class="qt">An elevator runs through a 12:1 gearbox. The motor encoder reads 24 rotations. How do you turn that into mechanism rotations, and what config makes <span class="k">getPosition()</span> do it for you?</div>
         <div class="opts">
-          <button class="opt">Multiply by 12 to get 288 mechanism rotations; set MotorToSensorRatio</button>
+          <button class="opt" data-why="The motor spins 12 times for one mechanism turn, so the mechanism moves less than the motor, not more.">Multiply by 12 to get 288 mechanism rotations; set MotorToSensorRatio</button>
           <button class="opt">Divide by 12 to get 2 mechanism rotations; set SensorToMechanismRatio so getPosition() returns mechanism units directly</button>
-          <button class="opt">Leave it at 24, since the encoder already reads the output shaft</button>
+          <button class="opt" data-why="The encoder sits on the motor shaft, before the gearbox, so 24 counts motor turns, not output turns.">Leave it at 24, since the encoder already reads the output shaft</button>
         </div>
         <div class="explain">A 12:1 reduction means the motor turns 12 times per mechanism turn, so you divide: 24 / 12 = 2 mechanism rotations. Setting SensorToMechanismRatio bakes that reduction in once, so getPosition() and getVelocity() report mechanism units and you stop doing the math everywhere. <a class="ref" href="deploy-lesson-18.html">Review: Lesson 4.2 &middot; Encoders &amp; Position</a></div>
       </div>
@@ -181,8 +182,8 @@
         <div class="qt">After every power-on your arm's relative encoder reads 0 wherever it happens to be sitting, so "level" is in a different spot each boot. What is the standard fix?</div>
         <div class="opts">
           <button class="opt">Home the arm at boot by driving it slowly into a limit switch, then call setPosition to set a known zero there</button>
-          <button class="opt">Increase the loop rate so the encoder remembers its position through a power cycle</button>
-          <button class="opt">Read the limit switch with getYaw() to recover the lost angle</button>
+          <button class="opt" data-why="Loop rate has nothing to do with memory; a relative encoder forgets its position the instant power drops.">Increase the loop rate so the encoder remembers its position through a power cycle</button>
+          <button class="opt" data-why="getYaw() reads a gyro heading; a limit switch is a DigitalInput that reports true or false, not an angle.">Read the limit switch with getYaw() to recover the lost angle</button>
         </div>
         <div class="explain">Relative encoders forget their position at power-on. Homing drives the mechanism to a fixed physical reference, a limit switch read with DigitalInput.get(), and sets a known zero there, so the readings mean the same thing every match. An absolute encoder avoids homing by reporting true angle after a power cycle. <a class="ref" href="deploy-lesson-20.html">Review: Lesson 4.4 &middot; Switches &amp; Digital Sensors</a></div>
       </div>
@@ -191,9 +192,9 @@
         <div class="qn">Question 4</div>
         <div class="qt">A driver complains the robot creeps when the sticks are centered. You read the stick with <span class="k">getLeftY()</span> and pass it straight to the drive. What two fixes address the complaint and the feel?</div>
         <div class="opts">
-          <button class="opt">Multiply the input by 2, and switch to set() so it is more responsive</button>
+          <button class="opt" data-why="Doubling the input doubles the near-center noise too, so the creep gets worse, not better.">Multiply the input by 2, and switch to set() so it is more responsive</button>
           <button class="opt">Apply a deadband so near-center reads as 0, and negate getLeftY() since forward returns negative</button>
-          <button class="opt">Read getYaw() instead of the stick so the robot follows its heading</button>
+          <button class="opt" data-why="getYaw() is the gyro, not the stick; it cannot tell you what the driver is asking for.">Read getYaw() instead of the stick so the robot follows its heading</button>
         </div>
         <div class="explain">A released stick does not rest at exactly 0, so a deadband (for example MathUtil.applyDeadband) treats near-center as 0 and stops the creep. getLeftY() returns negative when you push forward, so negate it so push-forward means drive-forward. Squaring the input is an optional extra for finer control near center. <a class="ref" href="deploy-lesson-21.html">Review: Lesson 4.5 &middot; The Gamepad</a></div>
       </div>
@@ -202,8 +203,8 @@
         <div class="qn">Question 5</div>
         <div class="qt">Back in Part 3, subsystems update in periodic() every 20 ms. You want a live tunable shooter speed you can change from the dashboard without redeploying. Using NetworkTables, what is the catch?</div>
         <div class="opts">
-          <button class="opt">NetworkTables only sends data from robot to dashboard, so live tuning is impossible</button>
-          <button class="opt">You must redeploy the code each time you change a value, since the dashboard is read-only</button>
+          <button class="opt" data-why="NetworkTables flows both ways; dashboards write values back to the robot all the time.">NetworkTables only sends data from robot to dashboard, so live tuning is impossible</button>
+          <button class="opt" data-why="Skipping the redeploy is the whole point of NetworkTables; the dashboard can edit a value live.">You must redeploy the code each time you change a value, since the dashboard is read-only</button>
           <button class="opt">If you call putNumber() on that key every loop, it overwrites your dashboard edits, so a tunable value must be read with getNumber() and not pushed back each loop</button>
         </div>
         <div class="explain">NetworkTables is a shared key-value table that flows both ways: telemetry goes robot to dashboard, tuning goes dashboard to robot. A value you want to tune live must be read with getNumber(), not written with putNumber() every loop, or your loop keeps stamping over the change you made. <a class="ref" href="deploy-lesson-22.html">Review: Lesson 4.6 &middot; NetworkTables &amp; Dashboards</a></div>
@@ -226,7 +227,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show'); try{var why=opt.getAttribute('data-why'); if(why){var w=opt.nextElementSibling; if(!w||!w.classList.contains('whyline')){w=document.createElement('div'); w.className='whyline'; opt.insertAdjacentElement('afterend',w);} w.textContent=why;}}catch(e){}} }); });
   });
 })();
 </script>

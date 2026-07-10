@@ -149,6 +149,7 @@
   .opt.locked.correct,.opt.locked.wrong{opacity:1}
   .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--teal);padding:4px 0 4px 13px;display:none}
   .explain.show{display:block}
+  .whyline{margin:2px 0 2px;font-size:13.5px;line-height:1.5;color:var(--muted);border-left:2px solid var(--red);background:rgba(255,107,107,.05);padding:6px 12px;border-radius:0 8px 8px 0}
   a.ref{font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--teal);text-decoration:none}
   a.ref:hover{text-decoration:underline}
 
@@ -202,31 +203,31 @@
       <div class="q" data-correct="0">
         <div class="qn">Question 1</div>
         <div class="qt">You are tuning a real elevator start to finish. Which order gives a stable, easy result?</div>
-        <div class="opts"><button class="opt">SysId to measure kS, kG, kV, kA first, then add a small kP to trim the leftover, then set Motion Magic limits, then validate</button><button class="opt">Crank kP as high as it goes first, then add feedforward only if it still misses</button><button class="opt">Set Motion Magic limits first, then guess kP, kI, kD, and skip SysId entirely</button></div>
+        <div class="opts"><button class="opt">SysId to measure kS, kG, kV, kA first, then add a small kP to trim the leftover, then set Motion Magic limits, then validate</button><button class="opt" data-why="Cranking kP first makes feedback fight physics. The loop turns twitchy, and adding feedforward later forces a full retune.">Crank kP as high as it goes first, then add feedforward only if it still misses</button><button class="opt" data-why="Profile limits only shape the move. Without measured kS, kG, kV, kA, the guessed gains must do all the work, the hard and unstable path.">Set Motion Magic limits first, then guess kP, kI, kD, and skip SysId entirely</button></div>
         <div class="explain">Feedforward before feedback, always. Measured kS, kG, kV, kA supply most of the voltage, so kP stays small and stable while it only trims the residual. Then profile the move and validate under load. <a class="ref" href="closing-the-loop-lesson-19.html">Review: Lesson IV.1 &middot; The Elevator, End to End</a></div>
       </div>
       <div class="q" data-correct="1">
         <div class="qn">Question 2</div>
         <div class="qt">After SysId on a well-built mechanism, your kP comes out surprisingly small. Is something wrong?</div>
-        <div class="opts"><button class="opt">Yes, kP should always be the largest gain, so SysId failed</button><button class="opt">No, this is expected: feedforward already supplies most of the voltage, so kP only trims the small leftover error</button><button class="opt">No, but only because kI is secretly doing the work instead</button></div>
+        <div class="opts"><button class="opt" data-why="There is no rule that kP must be the biggest gain. A small kP after good feedforward means feedback has almost nothing left to fix, which is the goal.">Yes, kP should always be the largest gain, so SysId failed</button><button class="opt">No, this is expected: feedforward already supplies most of the voltage, so kP only trims the small leftover error</button><button class="opt" data-why="Nothing here needs kI. The steady voltage comes from the measured feedforward terms, kS, kG and kV, not from an integral quietly accumulating.">No, but only because kI is secretly doing the work instead</button></div>
         <div class="explain">When feedforward (kS, kG, kV, kA) carries the load, the feedback term has little left to do. A modest kP that trims residual error is exactly the goal, and it stays easy to tune and stable. <a class="ref" href="closing-the-loop-lesson-19.html">Review: Lesson IV.1 &middot; The Elevator, End to End</a></div>
       </div>
       <div class="q" data-correct="2">
         <div class="qn">Question 3</div>
         <div class="qt">You reuse the elevator's workflow on an arm, but the arm sags worst when it is near horizontal and barely sags when near vertical. Why, and what is the right gravity model?</div>
-        <div class="opts"><button class="opt">The encoder drifts at horizontal; use Elevator_Static gravity</button><button class="opt">kV is too small near horizontal; raise kV until the sag is gone</button><button class="opt">Gravity load follows the cosine of the arm angle, so use Arm_Cosine (kG times cos of the angle, measured from horizontal)</button></div>
+        <div class="opts"><button class="opt" data-why="Encoders do not drift more at one angle, and Elevator_Static applies constant gravity help, which is exactly what an arm must not use.">The encoder drifts at horizontal; use Elevator_Static gravity</button><button class="opt" data-why="kV pays for speed, not for holding against weight. Raising it would overdrive fast moves while the sag at horizontal stayed.">kV is too small near horizontal; raise kV until the sag is gone</button><button class="opt">Gravity load follows the cosine of the arm angle, so use Arm_Cosine (kG times cos of the angle, measured from horizontal)</button></div>
         <div class="explain">An arm fights full weight at horizontal (cos 0 = 1) and almost none straight up (cos 90 = 0). Arm_Cosine scales kG by cos(angle). The same end-to-end workflow as the elevator applies; only the gravity type changes. <a class="ref" href="closing-the-loop-lesson-20.html">Review: Lesson IV.2 &middot; The Arm</a></div>
       </div>
       <div class="q" data-correct="0">
         <div class="qn">Question 4</div>
         <div class="qt">A flywheel shooter holds a target speed, not a position. Compared with the elevator's position loop, which gain does most of the work, and what about kG?</div>
-        <div class="opts"><button class="opt">kV does most of the work, predicting the voltage to sustain the speed; there is no kG because gravity does not slow a spinning wheel</button><button class="opt">kP does most of the work, since velocity loops need a very large kP; kG holds the wheel at speed</button><button class="opt">kA does most of the work, since the wheel is always accelerating; kG resists drag</button></div>
+        <div class="opts"><button class="opt">kV does most of the work, predicting the voltage to sustain the speed; there is no kG because gravity does not slow a spinning wheel</button><button class="opt" data-why="A velocity loop wants a small kP trim, not a huge one, and kG is a gravity term. Gravity does not slow a wheel spinning in place.">kP does most of the work, since velocity loops need a very large kP; kG holds the wheel at speed</button><button class="opt" data-why="At steady shooting speed the wheel is barely accelerating, so kA has little to do, and drag is covered by kS and kV, not kG.">kA does most of the work, since the wheel is always accelerating; kG resists drag</button></div>
         <div class="explain">Velocity control is kV's domain: kV times target speed predicts the holding voltage. A flywheel has no gravity term to fight, so kG is not used. kP only trims small errors. <a class="ref" href="closing-the-loop-lesson-21.html">Review: Lesson IV.3 &middot; The Flywheel</a></div>
       </div>
       <div class="q" data-correct="1">
         <div class="qn">Question 5</div>
         <div class="qt">On that same flywheel, a teammate keeps cranking kP to make recovery faster after a shot, but the speed starts hunting and oscillating. What is the better mental model for a velocity loop?</div>
-        <div class="opts"><button class="opt">A bigger kP is always better for velocity, so the hunting must be a sensor fault</button><button class="opt">Let kV hold the base voltage and use only a small kP to trim; too large a kP in velocity makes the speed hunt and chase itself</button><button class="opt">Add kG so the wheel stops hunting</button></div>
+        <div class="opts"><button class="opt" data-why="Bigger kP has a real cost in a velocity loop. It magnifies every tiny speed wiggle into a voltage swing, which is exactly the hunting you hear.">A bigger kP is always better for velocity, so the hunting must be a sensor fault</button><button class="opt">Let kV hold the base voltage and use only a small kP to trim; too large a kP in velocity makes the speed hunt and chase itself</button><button class="opt" data-why="kG counters gravity, and gravity is not what disturbs a flywheel's speed. The hunting comes from too much kP, not a missing gravity term.">Add kG so the wheel stops hunting</button></div>
         <div class="explain">In a velocity loop, kV supplies the bulk and a small kP trims. A large kP amplifies tiny velocity errors and the loop chases its own tail. After a shot, kV holds the base voltage while a modest kP drives recovery. <a class="ref" href="closing-the-loop-lesson-21.html">Review: Lesson IV.3 &middot; The Flywheel</a></div>
       </div>
     </div>
@@ -243,7 +244,9 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');
+      try{var why=opt.getAttribute('data-why');if(why){var wl=opt.nextElementSibling;if(!wl||!wl.classList.contains('whyline')){wl=document.createElement('div');wl.className='whyline';opt.insertAdjacentElement('afterend',wl);}wl.textContent=why;}}catch(err){}
+    } }); });
   });
 })();
 </script>

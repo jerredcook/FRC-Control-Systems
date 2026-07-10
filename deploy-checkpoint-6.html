@@ -107,6 +107,7 @@
   .explain.show{display:block}
   .explain a.ref{display:inline-block;margin-top:10px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--indigo);text-decoration:none;border:1px solid var(--line-2);border-radius:7px;padding:4px 10px;transition:.12s}
   .explain a.ref:hover{border-color:var(--indigo);color:var(--text)}
+  .whyline{font-size:13.5px;line-height:1.5;color:var(--muted);border-left:2px solid var(--red);background:rgba(255,107,107,.06);border-radius:0 8px 8px 0;padding:7px 12px}
 
   .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
   .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
@@ -155,8 +156,8 @@
         <div class="qn">Question 1</div>
         <div class="qt">A driver pushes a single stick fully forward and halfway right, and the code calls <span class="k">arcadeDrive(fwd, turn)</span>. What does the left side get compared to the right side?</div>
         <div class="opts">
-          <button class="opt">Both sides get the same command, since arcade ignores the turn</button>
-          <button class="opt">The right side gets more, because turn is added to it</button>
+          <button class="opt" data-why="Mixing the turn in is the whole job of arcadeDrive; ignoring it would mean the robot could only go straight.">Both sides get the same command, since arcade ignores the turn</button>
+          <button class="opt" data-why="The mix is left = fwd + turn and right = fwd - turn, and a faster right side would curve the robot left.">The right side gets more, because turn is added to it</button>
           <button class="opt">The left side gets more (fwd + turn) and the right side less (fwd - turn), so the robot curves right while moving ahead</button>
         </div>
         <div class="explain">Arcade mixing is left = fwd + turn, right = fwd - turn. A forward-and-right command speeds up the left wheels and slows the right, curving the robot to the right while it still drives ahead. <a class="ref" href="deploy-lesson-23.html">Review: Lesson 6.1 &middot; The Drivetrain</a></div>
@@ -165,9 +166,9 @@
         <div class="qn">Question 2</div>
         <div class="qt">Your swerve robot needs to slide straight down-field while its body stays turned 30 degrees to one side. Which capability makes that possible?</div>
         <div class="opts">
-          <button class="opt">Tank-style mixing, because both sides still spin forward</button>
+          <button class="opt" data-why="Tank wheels always point forward, so no mix of side speeds can ever slide the robot sideways.">Tank-style mixing, because both sides still spin forward</button>
           <button class="opt">Field-relative control on a holonomic drive: each wheel steers, so translation is independent of which way the body points</button>
-          <button class="opt">Higher motor voltage, which lets the robot push sideways</button>
+          <button class="opt" data-why="Voltage sets how hard the wheels push, not which way they point; fixed wheels still cannot slide.">Higher motor voltage, which lets the robot push sideways</button>
         </div>
         <div class="explain">Swerve is holonomic because every module steers, so the robot can translate any direction while pointed any way. fromFieldRelativeSpeeds rotates the stick command by the gyro heading so push-away always means down-field. <a class="ref" href="deploy-lesson-24.html">Review: Lesson 6.2 &middot; Swerve Drive in Code</a></div>
       </div>
@@ -176,8 +177,8 @@
         <div class="qt">During a long match the robot's odometry estimate of its position slowly slides away from where it really is. Why does this happen?</div>
         <div class="opts">
           <button class="opt">Odometry only integrates wheel distance and gyro heading, so small errors like wheel slip add up and never get removed</button>
-          <button class="opt">The field physically shifts during the match</button>
-          <button class="opt">getPoseMeters() returns the wrong units after a while</button>
+          <button class="opt" data-why="The field is bolted down; the error builds up inside the robot's running sum of its own motion.">The field physically shifts during the match</button>
+          <button class="opt" data-why="getPoseMeters() always reports meters; what grows over time is the accumulated error, not a unit change.">getPoseMeters() returns the wrong units after a while</button>
         </div>
         <div class="explain">Odometry is a running sum of motion from a known start. Each tiny measurement error, such as a slipping wheel, is added to the total and never corrected, so the estimate drifts. A vision fix or a known reset re-anchors it. <a class="ref" href="deploy-lesson-25.html">Review: Lesson 6.3 &middot; Odometry</a></div>
       </div>
@@ -185,9 +186,9 @@
         <div class="qn">Question 4</div>
         <div class="qt">A PathPlanner path looks great in the GUI, but the robot keeps cutting the corner during autonomous. Which thing most directly determines how tightly it hugs the planned line?</div>
         <div class="opts">
-          <button class="opt">The color of the waypoints in the editor</button>
+          <button class="opt" data-why="Colors are only editor decoration; the follower sees poses, headings, and velocities, nothing about looks.">The color of the waypoints in the editor</button>
           <button class="opt">How accurate its pose is, because the follower compares odometry to the path target and corrects the error with feedback</button>
-          <button class="opt">Whether tankDrive or arcadeDrive is used to read the sticks</button>
+          <button class="opt" data-why="Those mix driver sticks in teleop; a path follower commands the drivetrain from pose error instead.">Whether tankDrive or arcadeDrive is used to read the sticks</button>
         </div>
         <div class="explain">A path follower is a control loop on your pose: each loop it asks where it should be versus where odometry says it is, then closes the gap with PID and feedforward. A drifting pose means a wrong error, so it cuts the line. Better odometry means tighter tracking. <a class="ref" href="deploy-lesson-26.html">Review: Lesson 6.4 &middot; Trajectories &amp; PathPlanner</a></div>
       </div>
@@ -195,8 +196,8 @@
         <div class="qn">Question 5</div>
         <div class="qt">You want the shooter spinning up while the robot is still driving to the goal during an autonomous routine. How do you express that, given the command pieces from Part 3?</div>
         <div class="opts">
-          <button class="opt">Put the drive and the spin-up in Commands.sequence so they run one after the other</button>
-          <button class="opt">Set a higher current limit so both can run</button>
+          <button class="opt" data-why="sequence finishes the drive before the spin-up starts, so you sit at the goal waiting instead of arriving ready.">Put the drive and the spin-up in Commands.sequence so they run one after the other</button>
+          <button class="opt" data-why="A current limit manages electrical load; it does not make two commands run at the same time.">Set a higher current limit so both can run</button>
           <button class="opt">Run them in parallel: drive.followPath(...).alongWith(shooter.spinUp())</button>
         </div>
         <div class="explain">An auto is a command composition. sequence runs steps in order; alongWith runs them in parallel. Overlapping a spin-up with a drive means the shooter is at speed the moment the robot arrives, which shaves time off the routine. <a class="ref" href="deploy-lesson-27.html">Review: Lesson 6.5 &middot; Building an Autonomous</a></div>
@@ -214,7 +215,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show'); try{var why=opt.getAttribute('data-why'); if(why){var w=opt.nextElementSibling; if(!w||!w.classList.contains('whyline')){w=document.createElement('div'); w.className='whyline'; opt.insertAdjacentElement('afterend',w);} w.textContent=why;}}catch(e){}} }); });
   });
 })();
 </script>

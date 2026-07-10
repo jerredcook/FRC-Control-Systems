@@ -149,6 +149,7 @@
   .opt.locked.correct,.opt.locked.wrong{opacity:1}
   .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--teal);padding:4px 0 4px 13px;display:none}
   .explain.show{display:block}
+  .whyline{margin:2px 0 2px;font-size:13.5px;line-height:1.5;color:var(--muted);border-left:2px solid var(--red);background:rgba(255,107,107,.05);padding:6px 12px;border-radius:0 8px 8px 0}
   a.ref{font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--teal);text-decoration:none}
   a.ref:hover{text-decoration:underline}
 
@@ -202,31 +203,31 @@
       <div class="q" data-correct="1">
         <div class="qn">Question 1</div>
         <div class="qt">A team moves their elevator's closed loop off the roboRIO and onto the Kraken's built-in TalonFX. The main reason competitive teams do this is that the TalonFX runs the loop at:</div>
-        <div class="opts"><button class="opt">50 Hz, the same as the roboRIO, but on a separate processor</button><button class="opt">1 kHz, about 20 times faster than the roboRIO loop, which shrinks delay and rejects disturbances faster</button><button class="opt">1 Hz, slow but extremely stable</button></div>
+        <div class="opts"><button class="opt" data-why="It is a separate processor, but the win is speed. The on-motor loop runs near 1000 Hz, not the roboRIO's 50 Hz, and that shorter delay is the point.">50 Hz, the same as the roboRIO, but on a separate processor</button><button class="opt">1 kHz, about 20 times faster than the roboRIO loop, which shrinks delay and rejects disturbances faster</button><button class="opt" data-why="One update per second would react far slower than the roboRIO. The on-motor loop is fast, about 1 kHz, which is why teams use it.">1 Hz, slow but extremely stable</button></div>
         <div class="explain">The TalonFX has its own processor and closes the loop at roughly 1000 Hz, versus the roboRIO's 50 Hz. Less delay means higher gains stay stable and disturbances get corrected far sooner. <a class="ref" href="closing-the-loop-lesson-14.html">Review: Lesson III.1 &middot; Meet Phoenix 6 &amp; the Kraken</a></div>
       </div>
       <div class="q" data-correct="0">
         <div class="qn">Question 2</div>
         <div class="qt">You store kS, kG, kV, kA and kP, kI, kD in Slot0 of a TalonFXConfiguration, then send a request. For an arm, which GravityType tells the on-motor loop to handle gravity correctly, and why?</div>
-        <div class="opts"><button class="opt">GravityType.Arm_Cosine, so the motor scales kG by the cosine of the measured angle every loop</button><button class="opt">GravityType.Elevator_Static, so the motor applies a constant kG at every angle</button><button class="opt">No GravityType is needed, because Slot0 already contains kG</button></div>
+        <div class="opts"><button class="opt">GravityType.Arm_Cosine, so the motor scales kG by the cosine of the measured angle every loop</button><button class="opt" data-why="Elevator_Static applies the same kG at every angle, which is right for an elevator but wrong for an arm, whose gravity load follows cos(angle).">GravityType.Elevator_Static, so the motor applies a constant kG at every angle</button><button class="opt" data-why="Slot0 stores the kG number, but the motor still needs to know how to apply it. GravityType tells it to hold constant or scale by cosine.">No GravityType is needed, because Slot0 already contains kG</button></div>
         <div class="explain">An arm's gravity load follows cosine of angle, so Arm_Cosine scales kG by cos(angle) on the device at 1 kHz. Elevator_Static applies a constant kG and is correct for an elevator, where gravity does not change with position. <a class="ref" href="closing-the-loop-lesson-16.html">Review: Lesson III.3 &middot; On-Motor Closed Loop</a></div>
       </div>
       <div class="q" data-correct="1">
         <div class="qn">Question 3</div>
         <div class="qt">To protect the circuit breaker and the motor windings, you set current limits in the TalonFXConfiguration. You also want the elevator to hold position when disabled rather than drift down. Which two settings address these?</div>
-        <div class="opts"><button class="opt">MotionMagicCruiseVelocity and MotionMagicAcceleration</button><button class="opt">CurrentLimits (stator and supply) for protection, and NeutralMode set to Brake to hold position</button><button class="opt">SensorToMechanismRatio and FusedCANcoder</button></div>
+        <div class="opts"><button class="opt" data-why="Those two shape how fast a move ramps and cruises. They do not cap current, and they do not hold the mechanism when it is disabled.">MotionMagicCruiseVelocity and MotionMagicAcceleration</button><button class="opt">CurrentLimits (stator and supply) for protection, and NeutralMode set to Brake to hold position</button><button class="opt" data-why="Those are sensing settings, how the motor knows where it is. They neither limit current nor resist drifting down when disabled.">SensorToMechanismRatio and FusedCANcoder</button></div>
         <div class="explain">Stator and supply current limits cap torque and protect the breaker. NeutralMode Brake resists motion when the motor is idle so the carriage holds. Motion Magic settings shape moves; SensorToMechanismRatio and FusedCANcoder handle sensing, not holding or protection. <a class="ref" href="closing-the-loop-lesson-15.html">Review: Lesson III.2 &middot; Configuring a TalonFX</a></div>
       </div>
       <div class="q" data-correct="2">
         <div class="qn">Question 4</div>
         <div class="qt">You send a raw PositionVoltage request and the elevator lunges hard off the line. You switch to Motion Magic instead. What does Motion Magic do differently from a single request?</div>
-        <div class="opts"><button class="opt">It runs the loop on the roboRIO instead of the motor</button><button class="opt">It removes the need for Slot0 gains, since the profile replaces feedback</button><button class="opt">It generates a smooth trapezoidal profile (ramp up, cruise, slow down) on the motor and tracks it with the Slot0 gains</button></div>
+        <div class="opts"><button class="opt" data-why="Motion Magic runs entirely on the motor controller. Moving the loop back to the roboRIO would make it slower, not smoother.">It runs the loop on the roboRIO instead of the motor</button><button class="opt" data-why="The profile is only a plan. The Slot0 feedforward and feedback gains are still what make the motor actually track it.">It removes the need for Slot0 gains, since the profile replaces feedback</button><button class="opt">It generates a smooth trapezoidal profile (ramp up, cruise, slow down) on the motor and tracks it with the Slot0 gains</button></div>
         <div class="explain">Motion Magic builds an onboard motion profile bounded by a cruise velocity and acceleration, so the move eases in instead of lunging. It still uses the Slot0 feedforward and feedback gains to track that profile at 1 kHz. <a class="ref" href="closing-the-loop-lesson-17.html">Review: Lesson III.4 &middot; Motion Magic</a></div>
       </div>
       <div class="q" data-correct="0">
         <div class="qn">Question 5</div>
         <div class="qt">Rather than guessing gains, you run a Phoenix 6 SysId routine and fit a line to the voltage-versus-velocity data. The slope and intercept give you which gains, connecting back to Part I's system identification?</div>
-        <div class="opts"><button class="opt">Slope is kV (volts per unit velocity); intercept is kS plus kG (static friction plus gravity)</button><button class="opt">Slope is kP; intercept is kI</button><button class="opt">Slope is kA; intercept is kD</button></div>
+        <div class="opts"><button class="opt">Slope is kV (volts per unit velocity); intercept is kS plus kG (static friction plus gravity)</button><button class="opt" data-why="kP and kI are feedback gains you pick while tuning. SysId measures the physics of the mechanism, the feedforward constants.">Slope is kP; intercept is kI</button><button class="opt" data-why="kA comes from the dynamic step test, not this ramp's slope, and kD is a feedback gain SysId does not read off this plot.">Slope is kA; intercept is kD</button></div>
         <div class="explain">The quasistatic ramp plots voltage against velocity. The slope is kV, the cost of speed, and the zero-velocity intercept bundles kS (friction) and kG (gravity), exactly the SysId result from Part I. The dynamic step test then reveals kA. <a class="ref" href="closing-the-loop-lesson-18.html">Review: Lesson III.5 &middot; SysId on Phoenix 6</a></div>
       </div>
     </div>
@@ -243,7 +244,9 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');
+      try{var why=opt.getAttribute('data-why');if(why){var wl=opt.nextElementSibling;if(!wl||!wl.classList.contains('whyline')){wl=document.createElement('div');wl.className='whyline';opt.insertAdjacentElement('afterend',wl);}wl.textContent=why;}}catch(err){}
+    } }); });
   });
 })();
 </script>
