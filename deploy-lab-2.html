@@ -214,7 +214,7 @@
   <span class="kw">@Override</span>
   <span class="kw">public void</span> <span class="fn">teleopPeriodic</span>() {
     <span class="cm">// Proof 1: hold the USER button and the LED blinks about twice a second</span>
-    <span class="ty">boolean</span> pressed = io.<span class="fn">getUserButton</span>();
+    <span class="ty">boolean</span> pressed = io.<span class="fn">getUserButtonPressed</span>();
     <span class="ty">boolean</span> blinkOn = ((<span class="ty">long</span>) (<span class="ty">Timer</span>.<span class="fn">getFPGATimestamp</span>() * <span class="num">4</span>)) % <span class="num">2</span> == <span class="num">0</span>;
     io.<span class="fn">setLed</span>(pressed &amp;&amp; blinkOn);
 

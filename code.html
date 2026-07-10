@@ -81,6 +81,10 @@
   .card.checkpoint.ready{border-color:rgba(70,214,160,0.55);box-shadow:0 0 24px -8px rgba(70,214,160,0.45)}
   .card.checkpoint.ready:hover{border-color:var(--good)}
   .pill.ready{color:var(--good);border-color:rgba(70,214,160,0.4);background:rgba(70,214,160,0.08)}
+  .card.lab{margin-top:12px;cursor:pointer;text-decoration:none;color:inherit;border-left-color:var(--indigo);background:linear-gradient(180deg,var(--panel),rgba(138,147,255,0.05))}
+  .card.lab:hover{border-color:var(--line-bright);transform:translateY(-2px);box-shadow:0 18px 40px -26px rgba(0,0,0,0.9)}
+  .card.lab .card-num{background:rgba(138,147,255,0.14);border-color:var(--indigo);color:var(--indigo);font-size:17px}
+  .pill.lab{color:var(--indigo);border-color:rgba(138,147,255,0.4);background:rgba(138,147,255,0.08)}
   .part-progress{margin-left:auto;font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--muted)}
   .part-progress.full{color:var(--good)}
   @media(min-width:640px){.lessons{grid-template-columns:1fr 1fr}}
@@ -313,6 +317,15 @@
         var cpPill=cpReady?'<span class="pill ready">Checkpoint ready - prove it</span>':'<span class="pill">Checkpoint</span>';
         var cpHint=(!cpDone && !cpReady)?'<p class="cp-hint">Best after finishing Part '+part.code+'.</p>':'';
         var cp=document.createElement("a"); cp.className="card checkpoint"+(cpDone?" done":"")+(cpReady?" ready":""); cp.href=cpFile; cp.innerHTML='<div class="card-num">★</div><div class="card-body"><div class="card-title">Part '+part.code+' Checkpoint</div><p class="card-desc">A short cumulative quiz over this part and what came before. Answer them all correctly to clear it.</p>'+cpHint+'<div class="card-foot">'+cpPill+'<span class="open-link">Start →</span></div></div>'; sec.appendChild(cp); }
+      try{
+        if(["2","3","4","6","7","8"].indexOf(part.code)!==-1){
+          var labBase="deploy-lab-"+part.code+".html";
+          var labDone=!!done[labBase]||!!done[labBase.replace(/\.html$/,"-py.html")];
+          var lab=document.createElement("a"); lab.className="card lab"+(labDone?" done":""); lab.href=activeFile({file:labBase});
+          lab.innerHTML='<div class="card-num">🤖</div><div class="card-body"><div class="card-title">Part '+part.code+' Lab · On the real robot</div><p class="card-desc">Put this part to work on the XRP, a real robot. Same code, real motors.</p><div class="card-foot"><span class="pill lab">XRP Lab</span><span class="open-link">Start →</span></div></div>';
+          sec.appendChild(lab);
+        }
+      }catch(e){}
       courseEl.appendChild(sec);
     });
     updateStats();

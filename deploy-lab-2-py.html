@@ -182,7 +182,7 @@
   <section>
     <div class="kicker">Step 3</div>
     <h2>Paste the first-contact code</h2>
-    <p>Replace everything in <span class="k">robot.py</span> with the file below. It is complete, paste-ready, and uses the same XRP hardware map the capstone uses: motors on channels 0 and 1, encoders on DIO 4 and 5 and 6 and 7. Note that RobotPy keeps the WPILib method names, like <span class="k">getUserButton</span> and <span class="k">getAngle</span>.</p>
+    <p>Replace everything in <span class="k">robot.py</span> with the file below. It is complete, paste-ready, and uses the same XRP hardware map the capstone uses: motors on channels 0 and 1, encoders on DIO 4 and 5 and 6 and 7. Note that RobotPy keeps the WPILib method names, like <span class="k">getUserButtonPressed</span> and <span class="k">getAngle</span>.</p>
     <div class="codewrap">
       <div class="clabel">robot.py <span class="badge">python</span></div>
 <pre class="code"><span class="kw">import</span> wpilib
@@ -210,7 +210,7 @@
 
     <span class="kw">def</span> <span class="fn">teleopPeriodic</span>(self):
         <span class="cm"># Proof 1: hold the USER button and the LED blinks about twice a second</span>
-        pressed = self.io.<span class="fn">getUserButton</span>()
+        pressed = self.io.<span class="fn">getUserButtonPressed</span>()
         blink_on = int(<span class="ty">Timer</span>.<span class="fn">getFPGATimestamp</span>() * <span class="num">4</span>) % <span class="num">2</span> == <span class="num">0</span>
         self.io.<span class="fn">setLed</span>(pressed <span class="kw">and</span> blink_on)
 
