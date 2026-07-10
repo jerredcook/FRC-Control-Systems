@@ -11,7 +11,7 @@
  *
  * Bump VERSION to ship a new shell and evict the old cache.
  */
-var VERSION = "frc-academy-v1";
+var VERSION = "frc-academy-v2";
 
 var SHELL = [
   "index.html",
