@@ -75,6 +75,12 @@
   .blank:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
   .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
   .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .wline{font-family:var(--mono);font-size:13px;width:100%;max-width:46ch;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:7px 10px;outline:none}
+  .wline:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .wline.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .wline.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .whint{display:none;margin-top:10px;font-size:14px;color:var(--muted);border-left:2px solid var(--amber);padding:4px 0 4px 12px}
+  .whint.show{display:block}
   .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
   .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
   .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
@@ -193,14 +199,31 @@ self.beam_break   = <span class="ty">DigitalInput</span>(<span class="num">1</sp
 
     <div class="code-ex">
       <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
-      <div class="ctask">The elevator just reached the bottom switch. Define this spot as zero so every later move is measured from here. Fill the method.</div>
-<pre class="code">self.elevator.<span class="fn">setVoltage</span>(<span class="num">0</span>)
-self.elevator.<input class="blank" data-ans="setposition" aria-label="blank" autocomplete="off" spellcheck="false">(<span class="num">0</span>)</pre>
+      <div class="ctask">Home the elevator top to bottom: declare the switch, read it inverted, creep down until it trips, then define zero. Fill in the blanks.</div>
+<pre class="code">self.bottom_limit = <input class="blank" data-ans="digitalinput" data-reveal="DigitalInput" style="width:14ch" aria-label="blank" autocomplete="off" spellcheck="false">(<span class="num">0</span>)   <span class="cm"># DIO port 0</span>
+at_bottom = <span class="kw">not</span> self.bottom_limit.<input class="blank" data-ans="get" data-reveal="get" style="width:6ch" aria-label="blank" autocomplete="off" spellcheck="false">()
+<span class="kw">if</span> <span class="kw">not</span> at_bottom:
+    self.elevator.<input class="blank" data-ans="setvoltage" data-reveal="setVoltage" aria-label="blank" autocomplete="off" spellcheck="false">(<span class="num">-1.0</span>)   <span class="cm"># still above: creep down, slow</span>
+<span class="cm"># the switch just tripped - stop and make this spot zero</span>
+self.elevator.<span class="fn">setVoltage</span>(<span class="num">0</span>)
+self.elevator.<input class="blank" data-ans="setposition" data-reveal="setPosition" aria-label="blank" autocomplete="off" spellcheck="false">(<span class="num">0</span>)</pre>
       <div class="code-actions">
         <button class="btn" id="check">Check</button>
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+    </div>
+
+    <div class="code-ex" id="writeit">
+      <div class="chead"><span class="ic">&#9998;</span> Now you write it</div>
+      <div class="ctask">Write the whole line that creates a DigitalInput called self.beam_break on DIO port 1.</div>
+      <div style="margin:0 0 14px"><input class="wline" id="wIn" data-ans='self.beam_break=digitalinput(1)|self.beam_break=wpilib.digitalinput(1)|beam_break=digitalinput(1)' aria-label="your line of code" autocomplete="off" spellcheck="false" placeholder="type the full line of Python"></div>
+      <div class="code-actions">
+        <button class="btn" id="wCheck">Check</button>
+        <button class="btn" id="wHint" style="display:none">Hint</button>
+        <span class="code-result" id="wRes"></span>
+      </div>
+      <div class="whint" id="wHintText">Hint: it mirrors the bottom_limit line in the ladder: self.beam_break = DigitalInput(1)</div>
     </div>
   </section>
 
@@ -354,9 +377,9 @@ self.elevator.<input class="blank" data-ans="setposition" aria-label="blank" aut
   document.getElementById('check').addEventListener('click',function(){
     var all=true;
     blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
-    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - it\'s setPosition'; res.className='code-result '+(all?'ok':'no');
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - fix the red blanks'; res.className='code-result '+(all?'ok':'no');
   });
-  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='setPosition';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
+  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value=b.getAttribute('data-reveal')||'';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
 
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
@@ -398,6 +421,27 @@ self.elevator.<input class="blank" data-ans="setposition" aria-label="blank" aut
     window.addEventListener('keydown',onRan,true);
   } else { ran=true; }
   opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(picked>=0)return; picked=i; opts.forEach(function(o){o.classList.add('locked');}); if(ran){ reveal(); } else { note.style.display='block'; } }); });
+})();
+</script>
+<script>
+(function(){
+try{
+  var inp=document.getElementById('wIn'); if(!inp)return;
+  var btn=document.getElementById('wCheck'), hb=document.getElementById('wHint'),
+      ht=document.getElementById('wHintText'), res=document.getElementById('wRes'), miss=0;
+  function wnorm(s){return s.toLowerCase().replace(/\s+/g,'').replace(/'/g,'"').replace(/;+$/,'');}
+  var ans=(inp.getAttribute('data-ans')||'').split('|');
+  function go(){
+    var ok=ans.indexOf(wnorm(inp.value))!==-1;
+    inp.classList.remove('ok','bad'); inp.classList.add(ok?'ok':'bad');
+    res.textContent=ok?'Correct \u2713':'Not yet - try again';
+    res.className='code-result '+(ok?'ok':'no');
+    if(!ok){ miss++; if(miss>=2){ hb.style.display=''; } }
+  }
+  btn.addEventListener('click',go);
+  inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); go(); } });
+  hb.addEventListener('click',function(){ ht.classList.add('show'); });
+}catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

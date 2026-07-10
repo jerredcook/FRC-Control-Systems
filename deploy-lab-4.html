@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deploy · Part 4 - Lab: Sensors for real</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(138,140,248,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--indigo);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:12.5px;line-height:1.85;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic} .code .kw{color:#ff9bbf} .code .ty{color:var(--teal)} .code .fn{color:var(--indigo)} .code .num{color:var(--amber)} .code .st{color:#9ce8b0}
+
+  ul.need{list-style:none;padding:0;margin:6px 0 0}
+  ul.need li{position:relative;padding:6px 0 6px 26px;color:var(--text);font-size:16px}
+  ul.need li::before{content:"›";position:absolute;left:6px;color:var(--indigo);font-weight:700}
+  ol.steps{margin:6px 0 0;padding-left:22px}
+  ol.steps li{margin:0 0 9px;color:var(--text)}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(138,140,248,.07)} .note.indigo .nh{color:var(--indigo)}
+  .note.green{border-color:var(--green);background:rgba(67,214,126,.07)} .note.green .nh{color:var(--green)}
+
+  .cta-box{border:1px solid var(--indigo);border-radius:14px;background:radial-gradient(600px 240px at 50% 0%, rgba(138,140,248,.10), transparent 70%),linear-gradient(180deg,var(--panel),#11192B);padding:22px 22px;margin:24px 0}
+  .cta-box .ch{font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--indigo);margin-bottom:8px}
+  .cta-box p{font-size:16px;margin:0 0 12px}
+  .cta-box .links{display:flex;flex-wrap:wrap;gap:10px}
+  .cta-box a{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:11px 15px;color:var(--text);transition:.14s;word-break:break-word}
+  .cta-box a:hover{border-color:var(--indigo)} .cta-box a.primary{background:linear-gradient(180deg,#a8a7ff,var(--indigo));color:#0b1020;font-weight:700;border-color:transparent}
+
+  .tblwrap{overflow-x:auto;margin:18px 0;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+  table.ttable{width:100%;border-collapse:collapse;font-size:14.5px;min-width:560px}
+  .ttable th{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);text-align:left;padding:11px 14px;border-bottom:1px solid var(--line-2)}
+  .ttable td{padding:11px 14px;border-bottom:1px solid var(--line);color:var(--text);vertical-align:top}
+  .ttable tr:last-child td{border-bottom:none}
+  .ttable td:first-child{color:var(--amber);font-family:var(--mono);font-size:13px}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .upnext{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:20px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .upnext .un-l{flex:1;min-width:220px}
+  .upnext .un-k{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);margin-bottom:5px}
+  .upnext .un-t{font-size:18px;font-weight:750}
+  .upnext .un-d{color:var(--muted);font-size:14.5px;margin-top:3px}
+  .upnext a{text-decoration:none;font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding:12px 18px;border-radius:9px;background:linear-gradient(180deg,#6ff0dd,var(--teal));color:#06121f;font-weight:700;white-space:nowrap}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)} .coursenav a.next-link{color:var(--teal);border-color:rgba(52,215,197,.4)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="code.html"><span class="dot"></span><span class="name">Deploy</span></a>
+    <div class="top-meta">Part 4 · Lab · Sensors for real</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 4 · Lab</b> Sensors for real</div>
+    <div class="eyebrow">Lab · Part 4</div>
+    <h1>Sensors,<br><span class="accent">for real</span>.</h1>
+    <p class="dek">You have read encoders, gyros, and digital sensors in lessons. In this lab you read the real ones, on the XRP, and check every number against a tape measure, a quarter turn, and a strip of tape on the floor.</p>
+  </div>
+
+  <section>
+    <div class="kicker">Before you start</div>
+    <h2>What you need</h2>
+    <p>This is the same $60 robot the course capstone uses. If you already set it up for the capstone, you are two minutes from the first step.</p>
+    <ul class="need">
+      <li>An <strong>XRP kit</strong> (the robot, motors, and sensors).</li>
+      <li><strong>Charged batteries</strong> for the XRP. Fresh ones matter, tired batteries make every reading in this lab drift.</li>
+      <li>A <strong>laptop with WPILib installed</strong>, which you set up back in Part 1.</li>
+      <li>A <strong>ruler or tape measure</strong>, plus a strip of <strong>dark tape</strong> and a light surface (a big sheet of white paper works).</li>
+    </ul>
+    <p style="margin-top:18px">Getting connected is the same short routine as the capstone:</p>
+    <ol class="steps">
+      <li>Install WPILib, if you have not already (Part 1).</li>
+      <li>Make a new project from the XRP template or example in VS Code.</li>
+      <li>Power on the XRP and connect your laptop to the XRP's WiFi network.</li>
+      <li>Run the program in simulation: in VS Code, run <span class="k">WPILib: Simulate Robot Code</span>. This connects to the XRP over WiFi.</li>
+      <li>Open the Simulation GUI, set the robot to <strong>Teleop</strong> and click Enable when a step says go.</li>
+    </ol>
+    <p style="margin-top:16px">Remember the mental model from the capstone: your code runs in <strong>simulation on the laptop</strong>, and a WebSocket link over the XRP's own WiFi carries motor commands out and sensor readings back. The sensor numbers you are about to watch are real hardware talking to you across that link.</p>
+    <div class="cta-box">
+      <div class="ch">Follow the official guide for the exact clicks</div>
+      <p>We teach the idea here. Versions and menus change, so follow the official WPILib XRP guide for the exact, current click-by-click setup. It is kept up to date by the people who make the tools.</p>
+      <div class="links">
+        <a class="primary" href="https://docs.wpilib.org/en/stable/docs/xrp-robot/index.html" target="_blank" rel="noopener">WPILib XRP guide ↗</a>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Step 1 · Encoders</div>
+    <h2>Ticks to centimeters</h2>
+    <p>An encoder is a bike computer for a robot wheel. A bike computer counts each pass of a wheel magnet and multiplies by the wheel size to get distance. The XRP's encoders tick <span class="k">585</span> times per wheel revolution, and the wheel is <span class="k">6.0 cm</span> across, so one revolution rolls pi times 6.0, about 18.8 cm. One tick is therefore about 0.032 cm. <span class="k">setDistancePerPulse</span> teaches the <span class="k">Encoder</span> class that conversion once, and from then on <span class="k">getDistance()</span> answers in centimeters.</p>
+    <div class="codewrap">
+      <div class="clabel">Robot.java - drive straight, watch ticks and cm <span class="badge">java</span></div>
+<pre class="code"><span class="kw">import</span> edu.wpi.first.wpilibj.Encoder;
+<span class="kw">import</span> edu.wpi.first.wpilibj.TimedRobot;
+<span class="kw">import</span> edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+<span class="kw">import</span> edu.wpi.first.wpilibj.xrp.XRPMotor;
+
+<span class="kw">public class</span> <span class="ty">Robot</span> <span class="kw">extends</span> <span class="ty">TimedRobot</span> {
+  <span class="kw">private final</span> <span class="ty">XRPMotor</span> leftMotor = <span class="kw">new</span> <span class="ty">XRPMotor</span>(<span class="num">0</span>);
+  <span class="kw">private final</span> <span class="ty">XRPMotor</span> rightMotor = <span class="kw">new</span> <span class="ty">XRPMotor</span>(<span class="num">1</span>);
+  <span class="kw">private final</span> <span class="ty">Encoder</span> leftEncoder = <span class="kw">new</span> <span class="ty">Encoder</span>(<span class="num">4</span>, <span class="num">5</span>);
+  <span class="kw">private final</span> <span class="ty">Encoder</span> rightEncoder = <span class="kw">new</span> <span class="ty">Encoder</span>(<span class="num">6</span>, <span class="num">7</span>);
+
+  <span class="cm">// 60 mm wheels, 585 encoder counts per wheel revolution (from the XRP example)</span>
+  <span class="kw">private static final</span> <span class="ty">double</span> WHEEL_DIAMETER_CM = <span class="num">6.0</span>;
+  <span class="kw">private static final</span> <span class="ty">double</span> COUNTS_PER_REV = <span class="num">585.0</span>;
+
+  <span class="kw">@Override</span>
+  <span class="kw">public void</span> <span class="fn">robotInit</span>() {
+    <span class="ty">double</span> cmPerCount = (<span class="ty">Math</span>.PI * WHEEL_DIAMETER_CM) / COUNTS_PER_REV;
+    leftEncoder.<span class="fn">setDistancePerPulse</span>(cmPerCount);
+    rightEncoder.<span class="fn">setDistancePerPulse</span>(cmPerCount);
+    rightMotor.<span class="fn">setInverted</span>(<span class="kw">true</span>); <span class="cm">// the right side is mirrored</span>
+    leftEncoder.<span class="fn">reset</span>();
+    rightEncoder.<span class="fn">reset</span>();
+  }
+
+  <span class="kw">@Override</span>
+  <span class="kw">public void</span> <span class="fn">robotPeriodic</span>() {
+    SmartDashboard.<span class="fn">putNumber</span>(<span class="st">"Left ticks"</span>, leftEncoder.<span class="fn">get</span>());
+    SmartDashboard.<span class="fn">putNumber</span>(<span class="st">"Right ticks"</span>, rightEncoder.<span class="fn">get</span>());
+    SmartDashboard.<span class="fn">putNumber</span>(<span class="st">"Left cm"</span>, leftEncoder.<span class="fn">getDistance</span>());
+    SmartDashboard.<span class="fn">putNumber</span>(<span class="st">"Right cm"</span>, rightEncoder.<span class="fn">getDistance</span>());
+  }
+
+  <span class="kw">@Override</span>
+  <span class="kw">public void</span> <span class="fn">teleopPeriodic</span>() {
+    <span class="cm">// slow and steady: drive straight while you watch the numbers</span>
+    leftMotor.<span class="fn">set</span>(<span class="num">0.4</span>);
+    rightMotor.<span class="fn">set</span>(<span class="num">0.4</span>);
+  }
+
+  <span class="kw">@Override</span>
+  <span class="kw">public void</span> <span class="fn">teleopExit</span>() {
+    leftMotor.<span class="fn">set</span>(<span class="num">0</span>);
+    rightMotor.<span class="fn">set</span>(<span class="num">0</span>);
+  }
+}</pre>
+    </div>
+    <ol class="steps">
+      <li>Mark a start line on the floor with a small piece of tape and line the XRP's wheels up on it.</li>
+      <li>Start the sim, open the SmartDashboard view in the Simulation GUI, and find the four numbers.</li>
+      <li>Enable <strong>Teleop</strong>. The XRP drives forward on its own.</li>
+      <li>Disable the moment <span class="k">Left cm</span> reads about 50.</li>
+      <li>Now measure from the start line to the wheels with the tape measure. Compare what the ruler says to what the encoder claimed.</li>
+    </ol>
+    <div class="note green">
+      <div class="nh">What you should see</div>
+      <p>Ticks and centimeters climb together while the robot rolls, roughly 1550 ticks by the time the dashboard says 50 cm. Your tape measure should agree with the dashboard within a centimeter or two, coasting after you disable accounts for most of the gap. If the ruler and the dashboard disagree wildly, your distance-per-pulse math is wrong, not the ruler.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Step 2 · Gyro</div>
+    <h2>Turn 90 degrees, then check the claim</h2>
+    <p>Close your eyes and spin once on a swivel chair. You still know roughly how far you turned, because your inner ear senses rotation. The <span class="k">XRPGyro</span> is that inner ear: it reports how many degrees the robot has rotated since the last <span class="k">reset()</span>. This program spins the XRP in place and cuts the motors the instant the gyro passes 90 degrees. Depending on which way yours spins, the angle may count negative, so the code compares <span class="k">Math.abs</span> of the heading, only the size matters here.</p>
+    <div class="codewrap">
+      <div class="clabel">Robot.java - spin in place, stop at 90 <span class="badge">java</span></div>
+<pre class="code"><span class="kw">import</span> edu.wpi.first.wpilibj.TimedRobot;
+<span class="kw">import</span> edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+<span class="kw">import</span> edu.wpi.first.wpilibj.xrp.XRPGyro;
+<span class="kw">import</span> edu.wpi.first.wpilibj.xrp.XRPMotor;
+
+<span class="kw">public class</span> <span class="ty">Robot</span> <span class="kw">extends</span> <span class="ty">TimedRobot</span> {
+  <span class="kw">private final</span> <span class="ty">XRPMotor</span> leftMotor = <span class="kw">new</span> <span class="ty">XRPMotor</span>(<span class="num">0</span>);
+  <span class="kw">private final</span> <span class="ty">XRPMotor</span> rightMotor = <span class="kw">new</span> <span class="ty">XRPMotor</span>(<span class="num">1</span>);
+  <span class="kw">private final</span> <span class="ty">XRPGyro</span> gyro = <span class="kw">new</span> <span class="ty">XRPGyro</span>();
+
+  <span class="kw">@Override</span>
+  <span class="kw">public void</span> <span class="fn">robotInit</span>() {
+    rightMotor.<span class="fn">setInverted</span>(<span class="kw">true</span>); <span class="cm">// the right side is mirrored</span>
+  }
+
+  <span class="kw">@Override</span>
+  <span class="kw">public void</span> <span class="fn">teleopInit</span>() {
+    gyro.<span class="fn">reset</span>(); <span class="cm">// the direction it faces right now becomes 0 degrees</span>
+  }
+
+  <span class="kw">@Override</span>
+  <span class="kw">public void</span> <span class="fn">teleopPeriodic</span>() {
+    <span class="ty">double</span> heading = gyro.<span class="fn">getAngle</span>();
+    SmartDashboard.<span class="fn">putNumber</span>(<span class="st">"Heading deg"</span>, heading);
+    <span class="kw">if</span> (<span class="ty">Math</span>.<span class="fn">abs</span>(heading) &lt; <span class="num">90.0</span>) {
+      leftMotor.<span class="fn">set</span>(<span class="num">0.4</span>);   <span class="cm">// left forward, right back: spin in place</span>
+      rightMotor.<span class="fn">set</span>(-<span class="num">0.4</span>);
+    } <span class="kw">else</span> {
+      leftMotor.<span class="fn">set</span>(<span class="num">0</span>);
+      rightMotor.<span class="fn">set</span>(<span class="num">0</span>);
+    }
+  }
+}</pre>
+    </div>
+    <ol class="steps">
+      <li>Stick a small tape arrow to the floor pointing the same way as the XRP's nose.</li>
+      <li>Before enabling, watch <span class="k">Heading deg</span> for ten seconds with the robot sitting still. Does it hold at zero or creep?</li>
+      <li>Enable <strong>Teleop</strong>. The XRP spins and stops itself.</li>
+      <li>Read the final heading on the dashboard, then eyeball the robot against your tape arrow. Is it really a quarter turn?</li>
+    </ol>
+    <div class="note green">
+      <div class="nh">What you should see</div>
+      <p>The heading counts up (or down) fast while the robot spins, the motors cut at 90, and then the number settles a few degrees past, often 94 to 100. That overshoot is real: the robot coasts after the power cuts, and the gyro honestly reports it. Sitting still, the heading may also creep slowly by a degree or two per minute, that is gyro drift. Both are exactly the problems the Control course teaches you to beat.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Step 3 · Reflectance</div>
+    <h2>Cross a tape line and watch the light</h2>
+    <p>Under the XRP's nose sit two reflectance sensors. Each one shines a little light at the floor and measures how much bounces back, the way a white t-shirt bounces sunlight while a dark hoodie soaks it up. The <span class="k">XRPReflectanceSensor</span> reports each side as a number from <span class="k">0.0</span> (bright surface) to <span class="k">1.0</span> (dark surface). Lay a strip of dark tape across white paper and you have a line the robot can see.</p>
+    <div class="codewrap">
+      <div class="clabel">Robot.java - creep forward, watch both sensors <span class="badge">java</span></div>
+<pre class="code"><span class="kw">import</span> edu.wpi.first.wpilibj.TimedRobot;
+<span class="kw">import</span> edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+<span class="kw">import</span> edu.wpi.first.wpilibj.xrp.XRPMotor;
+<span class="kw">import</span> edu.wpi.first.wpilibj.xrp.XRPReflectanceSensor;
+
+<span class="kw">public class</span> <span class="ty">Robot</span> <span class="kw">extends</span> <span class="ty">TimedRobot</span> {
+  <span class="kw">private final</span> <span class="ty">XRPMotor</span> leftMotor = <span class="kw">new</span> <span class="ty">XRPMotor</span>(<span class="num">0</span>);
+  <span class="kw">private final</span> <span class="ty">XRPMotor</span> rightMotor = <span class="kw">new</span> <span class="ty">XRPMotor</span>(<span class="num">1</span>);
+  <span class="kw">private final</span> <span class="ty">XRPReflectanceSensor</span> reflectance = <span class="kw">new</span> <span class="ty">XRPReflectanceSensor</span>();
+
+  <span class="kw">@Override</span>
+  <span class="kw">public void</span> <span class="fn">robotInit</span>() {
+    rightMotor.<span class="fn">setInverted</span>(<span class="kw">true</span>); <span class="cm">// the right side is mirrored</span>
+  }
+
+  <span class="kw">@Override</span>
+  <span class="kw">public void</span> <span class="fn">robotPeriodic</span>() {
+    <span class="cm">// 0.0 is a bright surface (white paper), 1.0 is dark (black tape)</span>
+    SmartDashboard.<span class="fn">putNumber</span>(<span class="st">"Left reflectance"</span>, reflectance.<span class="fn">getLeftReflectanceValue</span>());
+    SmartDashboard.<span class="fn">putNumber</span>(<span class="st">"Right reflectance"</span>, reflectance.<span class="fn">getRightReflectanceValue</span>());
+  }
+
+  <span class="kw">@Override</span>
+  <span class="kw">public void</span> <span class="fn">teleopPeriodic</span>() {
+    <span class="cm">// creep, so the crossing is slow enough to watch</span>
+    leftMotor.<span class="fn">set</span>(<span class="num">0.3</span>);
+    rightMotor.<span class="fn">set</span>(<span class="num">0.3</span>);
+  }
+
+  <span class="kw">@Override</span>
+  <span class="kw">public void</span> <span class="fn">teleopExit</span>() {
+    leftMotor.<span class="fn">set</span>(<span class="num">0</span>);
+    rightMotor.<span class="fn">set</span>(<span class="num">0</span>);
+  }
+}</pre>
+    </div>
+    <ol class="steps">
+      <li>Lay the white paper down and stick a strip of dark tape across it.</li>
+      <li>With the sim running but the robot <strong>disabled</strong>, hold the XRP by hand: hover the nose over the paper, then over the tape. Watch both numbers move.</li>
+      <li>Set the XRP on the paper aimed at the line, a little crooked on purpose.</li>
+      <li>Enable <strong>Teleop</strong>, let it creep across the tape, and disable on the far side.</li>
+    </ol>
+    <div class="note green">
+      <div class="nh">What you should see</div>
+      <p>Over the white paper both values sit low, around 0.1 to 0.2. As each sensor crosses the tape its value jumps toward 0.8 to 1.0, then drops back on the far side. Because you aimed crooked, one sensor spikes before the other. That timing difference tells the robot which side of the line it is drifting toward, and it is the entire secret of line following.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">When it fights back</div>
+    <h2>Troubleshooting</h2>
+    <div class="tblwrap">
+      <table class="ttable">
+        <thead>
+          <tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Dashboard numbers never move</td>
+            <td>Your laptop is still on the regular WiFi, so the sim never reached the XRP</td>
+            <td>Join the XRP's own WiFi network, then restart the simulation</td>
+          </tr>
+          <tr>
+            <td>Ticks climb but the cm number is way off the tape measure</td>
+            <td><span class="k">setDistancePerPulse</span> is missing or the math is off</td>
+            <td>One tick should be about 0.032 cm: pi times 6.0 cm, divided by 585</td>
+          </tr>
+          <tr>
+            <td>Reflectance barely changes over the tape</td>
+            <td>Not enough contrast between the line and the surface</td>
+            <td>Use matte dark tape on white paper, and test the crossing spot by hand first</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>Three sensors, three upgrades. Turn step 3 into a first line follower: if the left sensor sees the tape, steer left a little, if the right one sees it, steer right. Rerun step 1 with fresh batteries and again when they are tired, and compare how far the robot coasts past 50 cm each time. And in step 2, shrink the overshoot: instead of full speed until 90, slow the spin down as the heading gets close. That last one is you reinventing proportional control, which is where the Closing the Loop course begins.</p>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">Your left encoder reads 585 ticks. About how far has that wheel rolled?</div>
+        <div class="opts">
+          <button class="opt">585 cm, one centimeter per tick</button>
+          <button class="opt">About 18.8 cm, because 585 ticks is one full revolution and the 6.0 cm wheel rolls pi times 6.0 cm per turn</button>
+          <button class="opt">It cannot be known, encoders only measure speed</button>
+        </div>
+        <div class="explain">The XRP encoder ticks 585 times per wheel revolution, and one revolution rolls the wheel one circumference: pi times 6.0 cm, about 18.8 cm. So each tick is about 0.032 cm. Once you hand that conversion to setDistancePerPulse, getDistance() does the multiplication for you.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 2</div>
+        <div class="qt">The step 2 code cuts the motors the instant the heading passes 90 degrees, but the dashboard settles at about 96. What happened?</div>
+        <div class="opts">
+          <button class="opt">The gyro is defective and should be replaced</button>
+          <button class="opt">The robot coasts after the power cuts, and the gyro honestly reports the extra rotation</button>
+          <button class="opt">SmartDashboard rounds every angle up to the nearest 6 degrees</button>
+        </div>
+        <div class="explain">Cutting power does not stop a spinning robot instantly, momentum carries it a few degrees further, and the gyro keeps measuring the whole time. The sensor is telling the truth about an open-loop stop. Feedback control, easing off as the target gets close, is how you shrink that overshoot, and it is what the Control course teaches.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 3</div>
+        <div class="qt">You drive the XRP slowly across a strip of black tape on white paper. What should the reflectance values do?</div>
+        <div class="opts">
+          <button class="opt">Stay flat, the reflectance sensor measures distance to the floor</button>
+          <button class="opt">Drop to 0 over the tape, because black bounces back the most light</button>
+          <button class="opt">Rise toward 1.0 while a sensor is over the dark tape, then fall back near 0 on the white paper</button>
+        </div>
+        <div class="explain">The sensor reports 0.0 for a bright surface and 1.0 for a dark one. White paper bounces the light back, so the value sits low; black tape soaks the light up, so the value jumps high while the sensor crosses it. Cross at an angle and the two sensors spike at different moments, which is the seed of line following.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="upnext">
+      <div class="un-l">
+        <div class="un-k">Up next</div>
+        <div class="un-t">Part 4 checkpoint</div>
+        <div class="un-d">You have now read real encoders, a real gyro, and a real light sensor. Prove the whole of Talking to Hardware with the cumulative checkpoint, then move on to making it all move.</div>
+      </div>
+      <a href="deploy-checkpoint-4.html">Checkpoint →</a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="deploy-lesson-22.html">← Part 4 · 06 · NetworkTables &amp; Dashboards</a>
+    <a class="map" href="code.html">Course map</a>
+    <a class="next-link" href="deploy-checkpoint-4.html">Part 4 · Checkpoint →</a>
+  </nav>
+
+</div>
+
+<footer>Deploy · Programming an FRC robot</footer>
+
+<script>
+(function(){
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="deploy:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script src="account-config.js"></script>
+<script src="account.js"></script>
+</body>
+</html>

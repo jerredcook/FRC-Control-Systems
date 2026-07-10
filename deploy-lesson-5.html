@@ -463,6 +463,25 @@
   var mSaved={}, mGold={};
   try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
   try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  // Two scripts on this page share the mission keys (the library picker above and
+  // this one), and each holds its own copy parsed at page load. Guard the two keys
+  // so every write merges with what is stored right now instead of replacing it,
+  // then neither script can erase a mission the other one cleared this visit.
+  try{
+    var mSet=localStorage.setItem.bind(localStorage);
+    localStorage.setItem=function(k,v){
+      if(k===MKEY||k===GKEY){
+        try{
+          var cur={}, add={};
+          try{ cur=JSON.parse(localStorage.getItem(k))||{}; }catch(e){}
+          try{ add=JSON.parse(v)||{}; }catch(e){}
+          Object.keys(add).forEach(function(kk){ cur[kk]=add[kk]; });
+          v=JSON.stringify(cur);
+        }catch(e){}
+      }
+      return mSet(k,v);
+    };
+  }catch(e){}
   var mItems={};
   Array.prototype.forEach.call(document.querySelectorAll('#missions-vlib .m-item, #missions-hunt .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
   function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
@@ -471,6 +490,12 @@
     mMark(n);
     var gold=n.classList.contains('gold');
     var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    // read-modify-write: pull in whatever is stored right now before saving, so
+    // this script's load-time copy never overwrites a clear made by the other one
+    try{
+      var fresh=JSON.parse(localStorage.getItem(key))||{};
+      Object.keys(fresh).forEach(function(kk){ map[kk]=fresh[kk]; });
+    }catch(e){}
     map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
   }
   Object.keys(mItems).forEach(function(id){

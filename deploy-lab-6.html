@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deploy · Lab · Part 6 - The square, timed vs measured</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(138,140,248,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--indigo);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:12.5px;line-height:1.85;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic} .code .kw{color:#ff9bbf} .code .ty{color:var(--teal)} .code .fn{color:var(--indigo)} .code .num{color:var(--amber)} .code .st{color:#9ce8b0}
+
+  ul.need{list-style:none;padding:0;margin:6px 0 0}
+  ul.need li{position:relative;padding:6px 0 6px 26px;color:var(--text);font-size:16px}
+  ul.need li::before{content:"›";position:absolute;left:6px;color:var(--indigo);font-weight:700}
+  ol.steps{margin:6px 0 0;padding-left:22px}
+  ol.steps li{margin:0 0 9px;color:var(--text)}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(138,140,248,.07)} .note.indigo .nh{color:var(--indigo)}
+  .note.green{border-color:var(--green);background:rgba(67,214,126,.07)} .note.green .nh{color:var(--green)}
+
+  .cta-box{border:1px solid var(--indigo);border-radius:14px;background:radial-gradient(600px 240px at 50% 0%, rgba(138,140,248,.10), transparent 70%),linear-gradient(180deg,var(--panel),#11192B);padding:22px 22px;margin:24px 0}
+  .cta-box .ch{font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--indigo);margin-bottom:8px}
+  .cta-box p{font-size:16px;margin:0 0 12px}
+  .cta-box .links{display:flex;flex-wrap:wrap;gap:10px}
+  .cta-box a{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:11px 15px;color:var(--text);transition:.14s;word-break:break-word}
+  .cta-box a:hover{border-color:var(--indigo)} .cta-box a.primary{background:linear-gradient(180deg,#a8a7ff,var(--indigo));color:#0b1020;font-weight:700;border-color:transparent}
+
+  .tablewrap{overflow-x:auto;margin:14px 0}
+  table.trouble{width:100%;border-collapse:collapse;font-size:14.5px;min-width:560px}
+  .trouble th{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);text-align:left;padding:10px 12px;border-bottom:1px solid var(--line-2)}
+  .trouble td{padding:12px 12px;border-bottom:1px solid var(--line);color:var(--muted);vertical-align:top}
+  .trouble td:first-child{color:var(--amber);font-weight:600}
+  .trouble td:last-child{color:var(--text)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)} .coursenav a.next-link{color:var(--teal);border-color:rgba(52,215,197,.4)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="code.html"><span class="dot"></span><span class="name">Deploy</span></a>
+    <div class="top-meta">Lab · Part 6 · Driving &amp; Autonomous</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Lab · Part 6</b> Hardware lab</div>
+    <div class="eyebrow">Hands-on lab</div>
+    <h1>One square,<br><span class="accent">two ways</span>.</h1>
+    <p class="dek">Your XRP drives a square twice: once by counting seconds, once by measuring with its encoders and gyro. Then you sabotage both runs with a coin and watch which one survives.</p>
+  </div>
+
+  <section>
+    <div class="kicker">What you need</div>
+    <h2>Grab these before you start</h2>
+    <p class="lead">This lab puts Part 6's autonomous ideas, commands, sequences, sensors, on a real floor.</p>
+    <ul class="need">
+      <li>An <strong>XRP</strong>, assembled, with fresh or freshly charged batteries in its pack.</li>
+      <li>A <strong>laptop with WPILib installed</strong>, the same setup from Part 1 and the Part 9 capstone.</li>
+      <li>About a <strong>meter of clear, flat floor</strong>. Hard floor beats carpet.</li>
+      <li><strong>Masking tape</strong> to mark the start, and <strong>one coin</strong> for the sabotage step.</li>
+    </ul>
+    <div class="note indigo">
+      <div class="nh">New to the XRP?</div>
+      <p>The <a href="deploy-lesson-37.html" style="color:var(--indigo)">Part 9 capstone</a> explains what the XRP is, what it costs, and how the run-in-simulation-over-WiFi model works. This lab assumes you have one in front of you.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Step 1 · Connect</div>
+    <h2>Get the XRP talking to your laptop</h2>
+    <p>Remember the mental model from the capstone. Nothing is flashed onto the robot. Your program runs in WPILib <strong>simulation</strong> on your laptop, and a WebSocket link over the XRP's own <strong>WiFi network</strong> carries motor commands out and sensor readings back, many times per second.</p>
+    <ol class="steps">
+      <li>Install WPILib, if you have not already (Part 1).</li>
+      <li>Make a new project from the XRP template or example in VS Code.</li>
+      <li>Power on the XRP and connect your laptop to the XRP's WiFi network.</li>
+      <li>Run the program in simulation: in VS Code, run <span class="k">WPILib: Simulate Robot Code</span>. This connects to the XRP over WiFi.</li>
+      <li>Open the Simulation GUI, set the robot to <strong>Teleop</strong> and click Enable, then drive it.</li>
+    </ol>
+    <div class="cta-box">
+      <div class="ch">Follow the official guide for the exact clicks</div>
+      <p>We teach the idea here. Versions and menus change, so follow the official WPILib XRP guide for the exact, current click-by-click setup. It is kept up to date by the people who make the tools.</p>
+      <div class="links">
+        <a class="primary" href="https://docs.wpilib.org/en/stable/docs/xrp-robot/index.html" target="_blank" rel="noopener">WPILib XRP guide ↗</a>
+      </div>
+    </div>
+    <div class="note green">
+      <div class="nh">What you should see</div>
+      <p>The Simulation GUI opens on your laptop. Pick your controller under Joysticks, set the robot to Teleop, and click Enable. The template project already drives, so the XRP should respond to the sticks. If it moves, the WiFi link works and you are ready for real code.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Step 2 · The drivetrain</div>
+    <h2>Paste in the subsystem</h2>
+    <p>This is the same XRP <span class="k">Drivetrain</span> the Part 9 capstone uses: <span class="k">XRPMotor</span> on channels 0 and 1, <span class="k">Encoder</span> on DIO 4 and 5 (left) and 6 and 7 (right), and <span class="k">XRPGyro</span> for heading. One addition for the lab: a <span class="k">periodic()</span> readout, so you can watch distance and heading live in the sim GUI while the robot moves.</p>
+    <div class="codewrap">
+      <div class="clabel">Drivetrain.java <span class="badge">java</span></div>
+<pre class="code"><span class="kw">import</span> edu.wpi.first.wpilibj.xrp.XRPMotor;
+<span class="kw">import</span> edu.wpi.first.wpilibj.xrp.XRPGyro;
+<span class="kw">import</span> edu.wpi.first.wpilibj.Encoder;
+<span class="kw">import</span> edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+<span class="kw">import</span> edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+<span class="kw">public class</span> <span class="ty">Drivetrain</span> <span class="kw">extends</span> <span class="ty">SubsystemBase</span> {
+  <span class="cm">// XRP drive motors live on channels 0 (left) and 1 (right)</span>
+  <span class="kw">private final</span> <span class="ty">XRPMotor</span> leftMotor = <span class="kw">new</span> <span class="ty">XRPMotor</span>(<span class="num">0</span>);
+  <span class="kw">private final</span> <span class="ty">XRPMotor</span> rightMotor = <span class="kw">new</span> <span class="ty">XRPMotor</span>(<span class="num">1</span>);
+
+  <span class="cm">// The XRP wheel encoders are wired to these DIO channels</span>
+  <span class="kw">private final</span> <span class="ty">Encoder</span> leftEncoder = <span class="kw">new</span> <span class="ty">Encoder</span>(<span class="num">4</span>, <span class="num">5</span>);
+  <span class="kw">private final</span> <span class="ty">Encoder</span> rightEncoder = <span class="kw">new</span> <span class="ty">Encoder</span>(<span class="num">6</span>, <span class="num">7</span>);
+
+  <span class="kw">private final</span> <span class="ty">XRPGyro</span> gyro = <span class="kw">new</span> <span class="ty">XRPGyro</span>();
+
+  <span class="cm">// From the XRP example: 60 mm wheels, 585 encoder counts per wheel revolution</span>
+  <span class="kw">private static final</span> <span class="ty">double</span> WHEEL_DIAMETER_M = <span class="num">0.060</span>;
+  <span class="kw">private static final</span> <span class="ty">double</span> COUNTS_PER_REV = <span class="num">585.0</span>;
+
+  <span class="kw">public</span> <span class="fn">Drivetrain</span>() {
+    <span class="ty">double</span> metersPerCount = (<span class="ty">Math</span>.PI * WHEEL_DIAMETER_M) / COUNTS_PER_REV;
+    leftEncoder.<span class="fn">setDistancePerPulse</span>(metersPerCount);
+    rightEncoder.<span class="fn">setDistancePerPulse</span>(metersPerCount);
+    rightMotor.<span class="fn">setInverted</span>(<span class="kw">true</span>); <span class="cm">// the right side is mirrored</span>
+    <span class="fn">resetEncoders</span>();
+  }
+
+  <span class="kw">public void</span> <span class="fn">arcadeDrive</span>(<span class="ty">double</span> speed, <span class="ty">double</span> rotation) {
+    leftMotor.<span class="fn">set</span>(speed + rotation);
+    rightMotor.<span class="fn">set</span>(speed - rotation);
+  }
+
+  <span class="kw">public</span> <span class="ty">double</span> <span class="fn">getAverageDistanceMeters</span>() {
+    <span class="kw">return</span> (leftEncoder.<span class="fn">getDistance</span>() + rightEncoder.<span class="fn">getDistance</span>()) / <span class="num">2.0</span>;
+  }
+
+  <span class="kw">public</span> <span class="ty">double</span> <span class="fn">getHeadingDegrees</span>() { <span class="kw">return</span> gyro.<span class="fn">getAngle</span>(); }
+  <span class="kw">public void</span> <span class="fn">resetEncoders</span>() { leftEncoder.<span class="fn">reset</span>(); rightEncoder.<span class="fn">reset</span>(); }
+  <span class="kw">public void</span> <span class="fn">resetGyro</span>() { gyro.<span class="fn">reset</span>(); }
+
+  <span class="kw">@Override</span>
+  <span class="kw">public void</span> <span class="fn">periodic</span>() {
+    <span class="cm">// live readout for the lab: watch these numbers in the sim GUI</span>
+    <span class="ty">SmartDashboard</span>.<span class="fn">putNumber</span>(<span class="st">"Distance (m)"</span>, <span class="fn">getAverageDistanceMeters</span>());
+    <span class="ty">SmartDashboard</span>.<span class="fn">putNumber</span>(<span class="st">"Heading (deg)"</span>, <span class="fn">getHeadingDegrees</span>());
+  }
+}</pre>
+    </div>
+    <p>Drop it into your project's <span class="k">subsystems</span> folder, or replace the template's drivetrain with it, and make sure <span class="k">RobotContainer</span> creates one: <span class="k">private final Drivetrain drivetrain = new Drivetrain();</span></p>
+    <div class="note green">
+      <div class="nh">What you should see</div>
+      <p>The project builds with no red errors. Now push the XRP forward about a hand-width on the floor and watch <span class="k">Distance (m)</span> climb in the sim GUI's NetworkTables view (about 0.1 for 10 cm). Twist it in place and <span class="k">Heading (deg)</span> changes. If both numbers move, your sensors are wired to your code.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Step 3 · The timed square</div>
+    <h2>Drive a square by counting seconds</h2>
+    <p>First, mark home. Put a piece of tape on the floor and line the XRP up on it, pointing along your first side. Then paste these into <span class="k">RobotContainer</span>. A timed drive could not be simpler. Its whole plan is "push forward for this many seconds, then stop".</p>
+    <div class="codewrap">
+      <div class="clabel">Timed building blocks, in RobotContainer <span class="badge">java</span></div>
+<pre class="code"><span class="kw">import</span> edu.wpi.first.wpilibj2.command.Command;
+<span class="kw">import</span> edu.wpi.first.wpilibj2.command.Commands;
+
+<span class="ty">Command</span> <span class="fn">timedForward</span>(<span class="ty">double</span> seconds, <span class="ty">double</span> speed) {
+  <span class="kw">return</span> <span class="ty">Commands</span>.<span class="fn">runEnd</span>(
+      () -> drivetrain.<span class="fn">arcadeDrive</span>(speed, <span class="num">0</span>),
+      () -> drivetrain.<span class="fn">arcadeDrive</span>(<span class="num">0</span>, <span class="num">0</span>),
+      drivetrain)
+    .<span class="fn">withTimeout</span>(seconds);
+}
+
+<span class="ty">Command</span> <span class="fn">timedTurn</span>(<span class="ty">double</span> seconds, <span class="ty">double</span> speed) {
+  <span class="kw">return</span> <span class="ty">Commands</span>.<span class="fn">runEnd</span>(
+      () -> drivetrain.<span class="fn">arcadeDrive</span>(<span class="num">0</span>, speed),
+      () -> drivetrain.<span class="fn">arcadeDrive</span>(<span class="num">0</span>, <span class="num">0</span>),
+      drivetrain)
+    .<span class="fn">withTimeout</span>(seconds);
+}
+
+<span class="ty">Command</span> <span class="fn">timedSquare</span>() {
+  <span class="kw">return</span> <span class="ty">Commands</span>.<span class="fn">sequence</span>(
+      <span class="fn">timedForward</span>(<span class="num">2.0</span>, <span class="num">0.5</span>), <span class="fn">timedTurn</span>(<span class="num">0.7</span>, <span class="num">0.5</span>),
+      <span class="fn">timedForward</span>(<span class="num">2.0</span>, <span class="num">0.5</span>), <span class="fn">timedTurn</span>(<span class="num">0.7</span>, <span class="num">0.5</span>),
+      <span class="fn">timedForward</span>(<span class="num">2.0</span>, <span class="num">0.5</span>), <span class="fn">timedTurn</span>(<span class="num">0.7</span>, <span class="num">0.5</span>),
+      <span class="fn">timedForward</span>(<span class="num">2.0</span>, <span class="num">0.5</span>), <span class="fn">timedTurn</span>(<span class="num">0.7</span>, <span class="num">0.5</span>));
+}
+
+<span class="kw">public</span> <span class="ty">Command</span> <span class="fn">getAutonomousCommand</span>() {
+  <span class="kw">return</span> <span class="fn">timedSquare</span>();
+}</pre>
+    </div>
+    <p>In the sim GUI, set the robot to <strong>Autonomous</strong> and click Enable. When the square finishes, click Disable. Now tune it by trial: change <span class="k">2.0</span> until a side is about half a meter, and change <span class="k">0.7</span> until a corner is about a quarter turn. Write your numbers down. You earned them the slow way.</p>
+    <div class="note green">
+      <div class="nh">What you should see</div>
+      <p>The XRP drives four sides and four corners on its own, then stops. It will look mostly like a square. The corners will not be exactly 90 degrees, the sides will not match perfectly, and the finish will miss the tape by a little. Run it twice and the two squares will not even match each other. That wobble is the whole point of this lab.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Step 4 · The measured square</div>
+    <h2>Drive a square by measuring</h2>
+    <p>Now replace guessed seconds with measured sensors. These are the same building blocks the capstone uses: drive until the <strong>encoders</strong> say the distance is covered, turn until the <strong>gyro</strong> says 90 degrees. The motors get the same power as before. The only thing that changed is who decides when to stop.</p>
+    <div class="codewrap">
+      <div class="clabel">Measured building blocks, in RobotContainer <span class="badge">java</span></div>
+<pre class="code"><span class="ty">Command</span> <span class="fn">driveForward</span>(<span class="ty">double</span> meters, <span class="ty">double</span> speed) {
+  <span class="kw">return</span> <span class="ty">Commands</span>.<span class="fn">runEnd</span>(
+      () -> drivetrain.<span class="fn">arcadeDrive</span>(speed, <span class="num">0</span>),
+      () -> drivetrain.<span class="fn">arcadeDrive</span>(<span class="num">0</span>, <span class="num">0</span>),
+      drivetrain)
+    .<span class="fn">beforeStarting</span>(drivetrain::resetEncoders)
+    .<span class="fn">until</span>(() -> drivetrain.<span class="fn">getAverageDistanceMeters</span>() >= meters);
+}
+
+<span class="ty">Command</span> <span class="fn">turnDegrees</span>(<span class="ty">double</span> degrees, <span class="ty">double</span> speed) {
+  <span class="kw">return</span> <span class="ty">Commands</span>.<span class="fn">runEnd</span>(
+      () -> drivetrain.<span class="fn">arcadeDrive</span>(<span class="num">0</span>, speed),
+      () -> drivetrain.<span class="fn">arcadeDrive</span>(<span class="num">0</span>, <span class="num">0</span>),
+      drivetrain)
+    .<span class="fn">beforeStarting</span>(drivetrain::resetGyro)
+    .<span class="fn">until</span>(() -> <span class="ty">Math</span>.<span class="fn">abs</span>(drivetrain.<span class="fn">getHeadingDegrees</span>()) >= <span class="ty">Math</span>.<span class="fn">abs</span>(degrees));
+}
+
+<span class="ty">Command</span> <span class="fn">measuredSquare</span>() {
+  <span class="kw">return</span> <span class="ty">Commands</span>.<span class="fn">sequence</span>(
+      <span class="fn">driveForward</span>(<span class="num">0.5</span>, <span class="num">0.5</span>), <span class="fn">turnDegrees</span>(<span class="num">90</span>, <span class="num">0.5</span>),
+      <span class="fn">driveForward</span>(<span class="num">0.5</span>, <span class="num">0.5</span>), <span class="fn">turnDegrees</span>(<span class="num">90</span>, <span class="num">0.5</span>),
+      <span class="fn">driveForward</span>(<span class="num">0.5</span>, <span class="num">0.5</span>), <span class="fn">turnDegrees</span>(<span class="num">90</span>, <span class="num">0.5</span>),
+      <span class="fn">driveForward</span>(<span class="num">0.5</span>, <span class="num">0.5</span>), <span class="fn">turnDegrees</span>(<span class="num">90</span>, <span class="num">0.5</span>));
+}
+
+<span class="kw">public</span> <span class="ty">Command</span> <span class="fn">getAutonomousCommand</span>() {
+  <span class="kw">return</span> <span class="fn">measuredSquare</span>(); <span class="cm">// was timedSquare()</span>
+}</pre>
+    </div>
+    <p>This is the difference between pedaling your bike with your eyes shut for exactly ten seconds and watching the trip odometer until it reads 100 meters. The first plan falls apart in a headwind. The second one just takes a little longer and still arrives.</p>
+    <div class="note green">
+      <div class="nh">What you should see</div>
+      <p>The same square, but tighter. Sides come out a consistent half meter, corners land near 90 degrees, and the finish sits much closer to your tape mark. Run it three times and the runs now agree with each other. Measurement is what buys you that repeatability, and you never had to tune a single seconds value.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Step 5 · The coin test</div>
+    <h2>Sabotage the square</h2>
+    <p>Time to prove which square is tougher. Tape a coin flat to the floor about halfway down the first side, right in the path of one wheel. The wheel has to climb over it, which drags that side of the robot for a moment, like riding your bike over a stick with one tire. Run the <strong>timed</strong> square over the coin, put the robot back on the tape, then run the <strong>measured</strong> square over the same coin.</p>
+    <div class="note green">
+      <div class="nh">What you should see</div>
+      <p>Timed run: the wheel that hits the coin drags, that side comes up short, and every side after it starts from the wrong place, so the square skews and never recovers. Measured run: the first side takes a beat longer, because the encoder will not say "done" until the wheel has really covered half a meter, and the square still closes. Same disturbance, very different endings.</p>
+    </div>
+    <p>One honest limit: the encoders fix the <em>distance</em>, not the sideways shove. If the coin knocks the robot's heading mid-side, neither version straightens out until the next gyro turn. Fixing heading while you drive takes a feedback controller, and that is exactly where the <a href="deploy-lesson-37.html" style="color:var(--teal)">Part 9 capstone</a> and the Closing the Loop course pick up.</p>
+  </section>
+
+  <section>
+    <div class="kicker">When it misbehaves</div>
+    <h2>Troubleshooting</h2>
+    <p>Three faults cover most bad lab days.</p>
+    <div class="tablewrap">
+      <table class="trouble">
+        <thead>
+          <tr><th>The problem</th><th>The likely cause</th><th>The fix</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Enable is on but nothing moves</td>
+            <td>Your laptop is still on the regular WiFi instead of the XRP's own network, or the batteries are low</td>
+            <td>Join the network named XRP-something, put in fresh batteries, then restart the simulation</td>
+          </tr>
+          <tr>
+            <td>It drives in a curve instead of straight</td>
+            <td>The right motor is not inverted, or the motors are on swapped channels</td>
+            <td>Check rightMotor.setInverted(true) and that left is channel 0, right is channel 1</td>
+          </tr>
+          <tr>
+            <td>Distance (m) never changes when it moves</td>
+            <td>The encoder channels are wrong, or the distance-per-pulse setup never ran</td>
+            <td>Encoders are DIO 4 and 5 on the left, 6 and 7 on the right, and setDistancePerPulse belongs in the constructor</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>Once the measured square closes, keep going. Swap the square for a triangle, three sides and three 120 degree turns, and see if <span class="k">turnDegrees</span> holds up. Or put the XRP's floor-facing reflectance sensors to work: tape a dark line at the finish and stop on the line instead of at a distance.</p>
+      <div class="codewrap" style="margin:14px 0 0">
+        <div class="clabel">Stop on the line, with XRPReflectanceSensor <span class="badge">java</span></div>
+<pre class="code"><span class="kw">import</span> edu.wpi.first.wpilibj.xrp.XRPReflectanceSensor;
+
+<span class="kw">private final</span> <span class="ty">XRPReflectanceSensor</span> reflectance = <span class="kw">new</span> <span class="ty">XRPReflectanceSensor</span>();
+
+<span class="cm">// readings run from about 0 on a bright floor to about 1 on dark tape</span>
+<span class="ty">Command</span> <span class="fn">driveToLine</span>(<span class="ty">double</span> speed) {
+  <span class="kw">return</span> <span class="ty">Commands</span>.<span class="fn">runEnd</span>(
+      () -> drivetrain.<span class="fn">arcadeDrive</span>(speed, <span class="num">0</span>),
+      () -> drivetrain.<span class="fn">arcadeDrive</span>(<span class="num">0</span>, <span class="num">0</span>),
+      drivetrain)
+    .<span class="fn">until</span>(() -> reflectance.<span class="fn">getLeftReflectanceValue</span>() > <span class="num">0.7</span>);
+}</pre>
+      </div>
+      <p style="margin-top:14px">Question to chew on: the coin shoved the robot's heading a little sideways in the middle of a side, and even the measured square did not fix that until the next corner. What sensor, and what kind of command, would fix heading during the side?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">The gyro, read continuously while driving. Reset it at the start of the side, then steer with the error: <span class="k">arcadeDrive(speed, -kP * getHeadingDegrees())</span>. If the heading drifts right, the correction steers left, every loop, all the way down the side. That is a proportional feedback controller on heading, the exact idea the Part 9 capstone applies to distance and the Closing the Loop course teaches you to tune properly.</p>
+      </details>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">Your timed square looked decent yesterday. Today, with tired batteries, every side comes up short. Why?</div>
+        <div class="opts">
+          <button class="opt">The code changed overnight, timed commands drift on their own</button>
+          <button class="opt">A timed drive applies power for a fixed number of seconds, so slower wheels cover less ground in the same time, and nothing in the code notices</button>
+          <button class="opt">The encoders wore out, so the robot cannot find the corners</button>
+        </div>
+        <div class="explain">A timed drive never measures anything. It runs the motors for 2.0 seconds no matter what, so anything that changes wheel speed, tired batteries, carpet, a coin, changes the distance. The timed square does not even use the encoders, which is exactly its weakness.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">With the coin taped in one wheel's path, why does the measured square still finish the side at the right distance?</div>
+        <div class="opts">
+          <button class="opt">The coin makes the wheel spin faster, which cancels the drag</button>
+          <button class="opt">The gyro senses the coin and adds extra time to the command</button>
+          <button class="opt">The encoder counts actual wheel travel, so the command keeps driving until the wheel has really covered the distance, however long that takes</button>
+        </div>
+        <div class="explain">The measured drive's stop condition is getAverageDistanceMeters() >= meters. Drag slows the wheel, so the encoder counts climb slower, so the command simply runs longer until the distance is truly covered. The clock does not decide when to stop. The measurement does.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">In turnDegrees, which sensor decides when the turn is finished?</div>
+        <div class="opts">
+          <button class="opt">The XRPGyro: the command turns until the measured heading change reaches the target degrees</button>
+          <button class="opt">The wheel encoders: they count degrees of robot rotation directly</button>
+          <button class="opt">The reflectance sensor: it watches the floor spin underneath</button>
+        </div>
+        <div class="explain">turnDegrees resets the gyro, spins in place, and stops when Math.abs(getHeadingDegrees()) reaches the target. The encoders measure how far the wheels roll, not how far the robot has rotated, and the reflectance sensors just stare at the floor's brightness.</div>
+      </div>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="deploy-lesson-27.html">← Part 6 · 05 · Building an Autonomous</a>
+    <a class="map" href="code.html">Course map</a>
+    <a class="next-link" href="deploy-checkpoint-6.html">Part 6 checkpoint →</a>
+  </nav>
+
+</div>
+
+<footer>Deploy · Programming an FRC robot</footer>
+
+<script>
+(function(){
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="deploy:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script src="account-config.js"></script>
+<script src="account.js"></script>
+</body>
+</html>

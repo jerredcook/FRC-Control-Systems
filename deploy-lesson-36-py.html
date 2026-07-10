@@ -197,13 +197,34 @@ git tag districts-day1            <span class="cm"># mark the exact code that ra
 
     <div class="code-ex">
       <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
-      <div class="ctask">Save a snapshot of the working code before the event so you can always return to it. Fill in the git command.</div>
-<pre class="code">git <input class="blank" data-ans="commit" aria-label="blank" autocomplete="off" spellcheck="false"> -m <span class="st">"Tune for districts"</span></pre>
+      <div class="ctask">Run the whole pre-event ritual top to bottom: stage everything, commit the snapshot, back it up, then tag the exact build. Fill in the four commands.</div>
+<pre class="code"><span class="cm"># stage every changed file</span>
+git <input class="blank" data-ans="add" data-reveal="add" aria-label="blank" autocomplete="off" spellcheck="false" style="width:7ch"> -A
+
+<span class="cm"># commit the snapshot with a message you'll recognize</span>
+git <input class="blank" data-ans="commit" data-reveal="commit" aria-label="blank" autocomplete="off" spellcheck="false"> -m <span class="st">"Tune for districts"</span>
+
+<span class="cm"># back it up off the robot laptop</span>
+git <input class="blank" data-ans="push" data-reveal="push" aria-label="blank" autocomplete="off" spellcheck="false" style="width:7ch">
+
+<span class="cm"># mark the exact code that ran at the event</span>
+git <input class="blank" data-ans="tag" data-reveal="tag" aria-label="blank" autocomplete="off" spellcheck="false" style="width:7ch"> districts-day1</pre>
       <div class="code-actions">
         <button class="btn" id="check">Check</button>
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+    </div>
+
+    <div class="code-ex" id="writeit">
+      <div class="chead"><span class="ic">✎</span> Now you write it</div>
+      <div class="ctask">No scaffold this time. Write the whole command that backs your commits up off the robot laptop.</div>
+      <input id="wiIn" data-ans="gitpush|gitpushorigin|gitpushoriginmain" aria-label="your command" autocomplete="off" spellcheck="false" placeholder="type the full command here" style="font-family:var(--mono);font-size:13px;width:100%;max-width:52ch;background:var(--panel-2);border:1px solid var(--line-2);color:var(--text);border-radius:6px;padding:8px 10px;outline:none">
+      <div class="code-actions" style="margin-top:12px">
+        <button class="btn" id="wiCheck">Check</button>
+        <span class="code-result" id="wiRes"></span>
+      </div>
+      <div id="wiHint" style="display:none;margin-top:10px;font-size:13.5px;color:var(--muted);border-left:2px solid var(--amber);padding:2px 0 2px 12px">Hint: it is a two-word git command. The verb is what you do to send your commits to GitHub.</div>
     </div>
   </section>
 
@@ -332,9 +353,9 @@ git tag districts-day1            <span class="cm"># mark the exact code that ra
   document.getElementById('check').addEventListener('click',function(){
     var all=true;
     blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
-    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - commit'; res.className='code-result '+(all?'ok':'no');
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - fix the red boxes'; res.className='code-result '+(all?'ok':'no');
   });
-  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='commit';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
+  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value=b.getAttribute('data-reveal')||'';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
 
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
@@ -383,6 +404,29 @@ git tag districts-day1            <span class="cm"># mark the exact code that ra
     var ok=blanks.every(function(b){ return ((b.getAttribute('data-ans')||'').split('|')).indexOf(norm(b.value))!==-1; });
     if(ok) mClear('commit-cmd');
   });
+  }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  // "Now you write it" free-text exercise (isolated; a bug here cannot break the page)
+  try{
+    var inp=document.getElementById('wiIn'), btn=document.getElementById('wiCheck'), res=document.getElementById('wiRes'), hint=document.getElementById('wiHint');
+    if(!inp||!btn||!res||!hint) return;
+    var misses=0;
+    function wnorm(s){ return String(s).toLowerCase().replace(/\s+/g,'').replace(/;/g,''); }
+    function wcheck(){
+      var ans=(inp.getAttribute('data-ans')||'').split('|');
+      var ok=ans.indexOf(wnorm(inp.value))!==-1;
+      inp.style.borderColor=ok?'var(--green)':'var(--red)';
+      inp.style.color=ok?'var(--green)':'var(--red)';
+      res.textContent=ok?'Correct ✓':'Not quite - try again';
+      res.className='code-result '+(ok?'ok':'no');
+      if(!ok){ misses++; if(misses>=2) hint.style.display='block'; }
+    }
+    btn.addEventListener('click',wcheck);
+    inp.addEventListener('keydown',function(e){ if(e.key==='Enter') wcheck(); });
+    inp.addEventListener('input',function(){ inp.style.borderColor='var(--line-2)'; inp.style.color='var(--text)'; });
   }catch(e){}
 })();
 </script>

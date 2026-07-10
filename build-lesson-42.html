@@ -199,6 +199,10 @@
   </section>
 
   <section>
+    <div class="note amber shoptask">
+      <div class="nh">🔧 In the shop &middot; 10 minutes</div>
+      <p>With your team's robot powered off and a mentor aware, put one finger on the battery's positive terminal and trace the whole power path out loud: battery, connector, main breaker, PDH, then one branch out to a motor controller and its motor. Pass test: you name each part before your finger reaches it, without peeking at this lesson. If you get stuck at a part, that is your review target, reread the wiring lesson and trace it again tomorrow. No robot? find your home's breaker panel with a parent and point to the main breaker, every circuit in the house flows through it exactly like the robot's 120 amp main, look but do not touch.</p>
+    </div>
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>A software current limit trades a little top-end push for never browning out, and the trade is usually worth it. Here is why: a brownout can cascade. The voltage drops, motors cut, the load disappears for a blink so the voltage springs back, the motors fire again, the load slams back on, and the voltage sags right back down. The robot can stutter through several of these cycles in a single second, which feels like the robot is fighting you. A current limit smooths that out by never letting the draw spike high enough to start the cycle in the first place. Here is one to chew on with a mentor: if you lower a motor's current limit, you lose a little pushing force but gain consistency. How would you pick the limit for a drivetrain that has to push a heavy game piece without ever browning out?</p>

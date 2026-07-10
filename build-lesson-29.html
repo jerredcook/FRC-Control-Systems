@@ -180,6 +180,11 @@
     </div>
   </section>
 
+    <div class="note amber shoptask">
+      <div class="nh">🔧 In the shop &middot; 10 minutes</div>
+      <p>With the robot powered off, put one finger on the roboRIO's CAN port and follow the yellow and green twisted pair device to device all the way to the end of the chain, counting devices and giving each CAN connector a gentle wiggle as you pass it. Pass test: you reach the terminator without ever losing the pair, your count matches the device list your programmers see in their tuner software, and no connector moved. Any connector that wiggles gets a piece of tape as a flag and a report to your electrical lead. No robot? Chain two extension cords into a lamp and unplug the middle connection: everything downstream goes dead, which is exactly why you wiggle-tested every link.</p>
+    </div>
+
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>The terminator at the end of the chain is not optional dressing, it is a small resistor that soaks up the signal so it does not echo back down the wire and scramble the messages, a bit like how a rope tied off at the end stops a wave from bouncing back at you. A bus actually wants exactly two terminators, one at each end, and many roboRIOs build one in, so the team only adds the far one. Each device also needs its own unique ID on the bus, and two devices sharing an ID is a classic head-scratcher. Why would the bus get confused if two motor controllers answered to the same number?</p>

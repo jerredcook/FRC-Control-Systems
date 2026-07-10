@@ -183,6 +183,11 @@
     </div>
   </section>
 
+    <div class="note amber shoptask">
+      <div class="nh">🔧 In the shop &middot; 10 minutes</div>
+      <p>With the robot off and the battery disconnected, trace the power chain with one finger: start at the battery connector, follow the fat wire to the main breaker, then on to the PDH, and stop at one motor controller's branch. Pass test: you never lift your finger, you name each stop out loud, and you can point at the exact fuse or breaker that protects the branch you ended on. Keep rings, watches, and metal tools away from the battery terminals the whole time. If you lose the wire inside a bundle, that is a routing problem worth telling your electrical lead about. No robot handy? Have an adult open your home's breaker panel with you and find the big main breaker plus the rows of branch breakers, the same layered protection living in your walls.</p>
+    </div>
+
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>The PDH does more than split power, it can report how many amps each branch is pulling back to your code over the data bus. That turns the power system into a sensor: software can watch a motor's current and notice it is climbing, which usually means the mechanism is jammed or stalling, and back off before anything overheats. This is real motor protection that goes beyond the breaker, and it is safer because it acts in software well before a fuse ever needs to blow. What might a sudden current spike on the intake branch be telling you?</p>

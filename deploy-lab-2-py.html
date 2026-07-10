@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deploy · Lab · Part 2 - First contact with the XRP (Python)</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(138,140,248,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--indigo);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:12.5px;line-height:1.85;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic} .code .kw{color:#ff9bbf} .code .ty{color:var(--teal)} .code .fn{color:var(--indigo)} .code .num{color:var(--amber)} .code .st{color:#9ce8b0}
+
+  ul.need{list-style:none;padding:0;margin:6px 0 0}
+  ul.need li{position:relative;padding:6px 0 6px 26px;color:var(--text);font-size:16px}
+  ul.need li::before{content:"›";position:absolute;left:6px;color:var(--indigo);font-weight:700}
+  ol.steps{margin:6px 0 0;padding-left:22px}
+  ol.steps li{margin:0 0 9px;color:var(--text)}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(138,140,248,.07)} .note.indigo .nh{color:var(--indigo)}
+  .note.green{border-color:var(--green);background:rgba(67,214,126,.07)} .note.green .nh{color:var(--green)}
+
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--panel);margin:6px 0 0}
+  table.trouble{width:100%;border-collapse:collapse;font-size:14.5px;min-width:560px}
+  .trouble th{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);text-align:left;padding:11px 14px;border-bottom:1px solid var(--line-2)}
+  .trouble td{padding:12px 14px;border-bottom:1px solid var(--line);color:var(--text);vertical-align:top}
+  .trouble td:first-child{color:var(--amber);font-weight:600}
+  .trouble tr:last-child td{border-bottom:none}
+
+  .cta-box{border:1px solid var(--indigo);border-radius:14px;background:radial-gradient(600px 240px at 50% 0%, rgba(138,140,248,.10), transparent 70%),linear-gradient(180deg,var(--panel),#11192B);padding:22px 22px;margin:24px 0}
+  .cta-box .ch{font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--indigo);margin-bottom:8px}
+  .cta-box p{font-size:16px;margin:0 0 12px}
+  .cta-box .links{display:flex;flex-wrap:wrap;gap:10px}
+  .cta-box a{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:11px 15px;color:var(--text);transition:.14s;word-break:break-word}
+  .cta-box a:hover{border-color:var(--indigo)} .cta-box a.primary{background:linear-gradient(180deg,#a8a7ff,var(--indigo));color:#0b1020;font-weight:700;border-color:transparent}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:120px;text-transform:uppercase} .gl span{color:var(--muted)}
+  .upnext{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:20px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .upnext .un-l{flex:1;min-width:220px}
+  .upnext .un-k{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);margin-bottom:5px}
+  .upnext .un-t{font-size:18px;font-weight:750}
+  .upnext .un-d{color:var(--muted);font-size:14.5px;margin-top:3px}
+  .upnext a{text-decoration:none;font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding:12px 18px;border-radius:9px;background:linear-gradient(180deg,#6ff0dd,var(--teal));color:#06121f;font-weight:700;white-space:nowrap}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)} .coursenav a.next-link{color:var(--teal);border-color:rgba(52,215,197,.4)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="code.html"><span class="dot"></span><span class="name">Deploy</span></a>
+    <div class="top-meta">Lab · Part 2 · First contact</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Lab · Part 2</b> First contact</div>
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:-6px 0 14px">Code shown in <b style="color:var(--indigo)">Python</b> &middot; <a href="deploy-lab-2.html" style="color:var(--muted)">switch to Java</a></div>
+    <div class="eyebrow">Hardware lab</div>
+    <h1>First contact with a<br><span class="accent">real robot</span>.</h1>
+    <p class="dek">You have the Python basics. Now prove that code you wrote can reach real hardware: blink an LED with a button press, then turn a wheel by hand and watch the encoder numbers stream back to your screen.</p>
+  </div>
+
+  <section>
+    <div class="kicker">The mission</div>
+    <h2>Two proofs, one little robot</h2>
+    <p class="lead">This lab is about closing the gap between "my code runs" and "my code moves electrons in the real world."</p>
+    <p>The robot is the <strong>XRP</strong>, the same low-cost robot the course capstone drives in Part 9. It costs roughly $35 to $70, so check the current price. Your program does not get copied onto it. It runs in WPILib <strong>simulation on your laptop</strong> with RobotPy, and a WiFi link carries commands out to the XRP and sensor readings back, many times per second.</p>
+    <p>You are going to collect two proofs:</p>
+    <ul class="need">
+      <li><strong>Output works:</strong> press the button on the XRP and your code blinks the onboard LED.</li>
+      <li><strong>Input works:</strong> turn a wheel by hand and your code prints the encoder counts to the console.</li>
+    </ul>
+    <p style="margin-top:16px">Once both directions of that link work, everything else in this course is a variation: bigger outputs (motors), richer inputs (gyros, cameras), smarter code in between.</p>
+  </section>
+
+  <section>
+    <div class="kicker">What you need</div>
+    <h2>Gather three things</h2>
+    <ul class="need">
+      <li>An <strong>XRP kit</strong>, assembled (the robot with its motors and sensors).</li>
+      <li><strong>Charged batteries</strong> in the XRP's own pack. Weak batteries are the number one cause of mystery problems, so start fresh.</li>
+      <li>A <strong>laptop with RobotPy and WPILib installed</strong>, which you set up back in Part 1.</li>
+    </ul>
+    <div class="note">
+      <div class="nh">Heads up</div>
+      <p>Your laptop will join the XRP's own WiFi network for this lab, which means no internet while you are connected to the robot. Run your installs and open this page and the official guide before you switch networks, or use a phone for lookups.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Step 1</div>
+    <h2>Create the XRP project</h2>
+    <p>Make a new folder for the project, something like <span class="k">first-contact</span>, and set up a RobotPy project in it the same way you did in Part 1, with a <span class="k">robot.py</span> and a <span class="k">pyproject.toml</span>. The XRP classes we use below, <span class="k">XRPMotor</span>, <span class="k">XRPGyro</span>, <span class="k">XRPOnBoardIO</span>, and <span class="k">XRPReflectanceSensor</span>, ship inside <span class="k">wpilib.xrp</span>, so a standard RobotPy install already has them.</p>
+    <p>When it is time to run, the <span class="k">--xrp</span> flag on <span class="k">robotpy sim</span> tells the simulator to connect to the robot at its address, <span class="k">192.168.42.1</span>, instead of running purely on the laptop.</p>
+    <div class="cta-box">
+      <div class="ch">Follow the official guide for the exact commands</div>
+      <p>We teach the idea here. Versions and commands change, so follow the official WPILib XRP guide for the exact, current setup, including the precise RobotPy commands. It is kept up to date by the people who make the tools.</p>
+      <div class="links">
+        <a class="primary" href="https://docs.wpilib.org/en/stable/docs/xrp-robot/index.html" target="_blank" rel="noopener">WPILib XRP guide ↗</a>
+      </div>
+    </div>
+    <div class="note green">
+      <div class="nh">What you should see</div>
+      <p>A project folder with <span class="k">robot.py</span> and <span class="k">pyproject.toml</span>, and <span class="k">robotpy sync</span> finishing without errors. No robot needed yet, this step is all on the laptop.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Step 2</div>
+    <h2>Power on and join the XRP's WiFi</h2>
+    <ol class="steps">
+      <li>Put the charged batteries in and flip the XRP's power switch on.</li>
+      <li>Give it about 30 seconds to boot.</li>
+      <li>On your laptop, open the WiFi list and join the network named <span class="k">XRP-XXXX</span> (the letters and digits differ per robot). The default password is <span class="k">xrp-wpilib</span>.</li>
+    </ol>
+    <p style="margin-top:16px">This works like pairing bluetooth headphones: the robot broadcasts its own network and your laptop connects to it directly. There is no router in the middle.</p>
+    <div class="note green">
+      <div class="nh">What you should see</div>
+      <p>A power light on the XRP, the <span class="k">XRP-XXXX</span> network in your WiFi list, and your laptop connected to it. Your laptop will probably warn "no internet." That is normal and correct, the XRP is a robot, not a router.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Step 3</div>
+    <h2>Paste the first-contact code</h2>
+    <p>Replace everything in <span class="k">robot.py</span> with the file below. It is complete, paste-ready, and uses the same XRP hardware map the capstone uses: motors on channels 0 and 1, encoders on DIO 4 and 5 and 6 and 7. Note that RobotPy keeps the WPILib method names, like <span class="k">getUserButton</span> and <span class="k">getAngle</span>.</p>
+    <div class="codewrap">
+      <div class="clabel">robot.py <span class="badge">python</span></div>
+<pre class="code"><span class="kw">import</span> wpilib
+<span class="kw">from</span> wpilib <span class="kw">import</span> Encoder, Timer
+<span class="kw">from</span> wpilib.xrp <span class="kw">import</span> XRPGyro, XRPMotor, XRPOnBoardIO, XRPReflectanceSensor
+
+
+<span class="kw">class</span> <span class="ty">MyRobot</span>(wpilib.TimedRobot):
+    <span class="kw">def</span> <span class="fn">robotInit</span>(self):
+        <span class="cm"># The USER button and LED on the XRP board, our first input and output</span>
+        self.io = <span class="ty">XRPOnBoardIO</span>()
+
+        <span class="cm"># Declared now to prove they construct; you drive them in the capstone</span>
+        self.left_motor = <span class="ty">XRPMotor</span>(<span class="num">0</span>)
+        self.right_motor = <span class="ty">XRPMotor</span>(<span class="num">1</span>)
+
+        <span class="cm"># The wheel encoders, on the same DIO channels the capstone uses</span>
+        self.left_enc = <span class="ty">Encoder</span>(<span class="num">4</span>, <span class="num">5</span>)
+        self.right_enc = <span class="ty">Encoder</span>(<span class="num">6</span>, <span class="num">7</span>)
+
+        self.gyro = <span class="ty">XRPGyro</span>()
+        self.reflectance = <span class="ty">XRPReflectanceSensor</span>()
+
+        self.last_print = <span class="num">0.0</span>
+
+    <span class="kw">def</span> <span class="fn">teleopPeriodic</span>(self):
+        <span class="cm"># Proof 1: hold the USER button and the LED blinks about twice a second</span>
+        pressed = self.io.<span class="fn">getUserButton</span>()
+        blink_on = int(<span class="ty">Timer</span>.<span class="fn">getFPGATimestamp</span>() * <span class="num">4</span>) % <span class="num">2</span> == <span class="num">0</span>
+        self.io.<span class="fn">setLed</span>(pressed <span class="kw">and</span> blink_on)
+
+        <span class="cm"># Proof 2: print the sensors twice a second; turn a wheel and watch</span>
+        now = <span class="ty">Timer</span>.<span class="fn">getFPGATimestamp</span>()
+        <span class="kw">if</span> now - self.last_print > <span class="num">0.5</span>:
+            self.last_print = now
+            print(
+                <span class="st">f"L={self.left_enc.get()}  R={self.right_enc.get()}"</span>
+                <span class="st">f"  gyro={self.gyro.getAngle():.0f}"</span>
+                <span class="st">f"  line={self.reflectance.getLeftReflectanceValue():.2f}"</span>
+                <span class="st">f"/{self.reflectance.getRightReflectanceValue():.2f}"</span>
+            )
+
+
+<span class="kw">if</span> __name__ == <span class="st">"__main__"</span>:
+    wpilib.<span class="fn">run</span>(<span class="ty">MyRobot</span>)</pre>
+    </div>
+    <p>Read it before you run it. <span class="k">teleopPeriodic</span> runs about 50 times per second while the robot is enabled in teleop. The blink line is Part 2 math: <span class="k">Timer.getFPGATimestamp()</span> is the seconds since the program started, multiplying by 4 and taking <span class="k">% 2</span> flips a boolean every quarter second. The LED only lights when the button is held <em>and</em> the blink boolean is true.</p>
+    <div class="note green">
+      <div class="nh">What you should see</div>
+      <p>No output yet, that is Step 4. If you want a dry check first, run <span class="k">robotpy sim</span> without the robot: the Simulation GUI should open, which proves the file has no typos.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Step 4</div>
+    <h2>Run it and blink the LED</h2>
+    <ol class="steps">
+      <li>Confirm your laptop is still on the <span class="k">XRP-XXXX</span> network.</li>
+      <li>In the project folder, run <span class="k">robotpy sim --xrp</span>. The Simulation GUI opens, and your program connects to the XRP over WiFi.</li>
+      <li>In the GUI, set the robot state to <strong>Teleop</strong>, then click <strong>Enable</strong>.</li>
+      <li>Press and hold the small pushbutton labeled <span class="k">USER</span> on the XRP's circuit board.</li>
+    </ol>
+    <div class="note green">
+      <div class="nh">What you should see</div>
+      <p>The onboard LED blinks about twice a second while the button is held, and goes dark the moment you let go. That single blink is the whole round trip: the button state streams from the XRP to your laptop, your code decides, and the LED command streams back, about 50 times a second.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Step 5</div>
+    <h2>Turn a wheel, read the encoders</h2>
+    <p>Leave the program running and enabled, and look at the terminal where you launched <span class="k">robotpy sim --xrp</span>. Every half second you get a line like <span class="k">L=0&nbsp;&nbsp;R=0&nbsp;&nbsp;gyro=0&nbsp;&nbsp;line=0.10/0.10</span>. Now, with the robot on the table:</p>
+    <ol class="steps">
+      <li>Slowly turn the <strong>left wheel</strong> one full turn forward by hand.</li>
+      <li>Turn it back the other way.</li>
+      <li>Spin the whole robot in place on the table.</li>
+      <li>Slide a piece of paper with a thick dark stripe under the sensors on the XRP's nose.</li>
+    </ol>
+    <p style="margin-top:16px">An encoder works like the sensor on a bike computer: it counts small, fixed slices of a wheel turn, and counting slices tells you how far the wheel has rotated. On the XRP, one full wheel revolution is about <strong>585 counts</strong>, the same number the capstone uses to convert counts into meters.</p>
+    <div class="note green">
+      <div class="nh">What you should see</div>
+      <p><span class="k">L</span> climbs by about 585 for one full forward turn of the left wheel, and counts back down when you reverse it. The right wheel moves <span class="k">R</span>. Spinning the robot moves the <span class="k">gyro</span> number, in degrees. The dark stripe pushes the <span class="k">line</span> readings toward 1.0. Every sensor on the robot is now streaming into your code.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">When it fights back</div>
+    <h2>Troubleshooting</h2>
+    <p>Three failures cover almost every first run:</p>
+    <div class="tablewrap">
+      <table class="trouble">
+        <tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr>
+        <tr>
+          <td>No XRP-XXXX network in the WiFi list</td>
+          <td>Dead batteries, or the robot is off or still booting</td>
+          <td>Fresh batteries, power switch on, wait about 30 seconds, then refresh the WiFi list.</td>
+        </tr>
+        <tr>
+          <td>Sim runs but nothing prints and the LED never blinks</td>
+          <td>Laptop hopped back to your usual WiFi, the <span class="k">--xrp</span> flag is missing, or the robot is still Disabled</td>
+          <td>Re-join XRP-XXXX, rerun <span class="k">robotpy sim --xrp</span>, then set Teleop and click Enable in the GUI.</td>
+        </tr>
+        <tr>
+          <td>Encoder counts stay at 0 while you turn</td>
+          <td>Turning the robot body instead of a wheel, or watching the wrong side</td>
+          <td>Spin one wheel slowly through a full turn and watch its own number; it should move by about 585.</td>
+        </tr>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>Make the code yours. Change the blink to once a second (what number replaces the 4?). Make the LED light only when the left reflectance sensor sees dark, an instant line detector. Use <span class="k">setDistancePerPulse</span> like the capstone's drivetrain does and print centimeters instead of raw counts. Or rotate the robot by hand until the gyro reads exactly 90 and check it against a corner of the table. Question to chew on: the button and the LED are half a meter of WiFi apart from the code that connects them, so what would happen to the blink if the WiFi link got slow or dropped for a second?</p>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">While the LED is blinking, where is your program actually running?</div>
+        <div class="opts">
+          <button class="opt">Flashed onto the Pico W inside the XRP, so the laptop could be turned off</button>
+          <button class="opt">In WPILib simulation on your laptop, connected to the XRP over the robot's own WiFi network</button>
+          <button class="opt">On the school's WiFi router, which relays it to the robot</button>
+        </div>
+        <div class="explain">With the XRP, "deploy" means run in simulation on the laptop. robotpy sim --xrp starts your program there, and a WebSocket link over the XRP's own WiFi carries commands out and sensor readings back. Close the laptop and the robot stops.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">You hold the USER button and the LED blinks. What did that actually prove?</div>
+        <div class="opts">
+          <button class="opt">Only that the LED works; the button is wired straight to the LED inside the XRP</button>
+          <button class="opt">That the XRP can run Python by itself</button>
+          <button class="opt">Both directions of the link work: the button state streams to your laptop, your code decides, and the LED command streams back</button>
+        </div>
+        <div class="explain">The button is not wired to the LED. The XRP sends the button reading to your program, teleopPeriodic computes pressed and blink_on, and the result travels back to the LED, about 50 times a second. One blink proves input, output, and your code in between.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">You turn the left wheel one full revolution by hand and L climbs by about 585. What is the encoder counting?</div>
+        <div class="opts">
+          <button class="opt">Small fixed slices of a wheel turn, 585 per full revolution, so the count measures how far the wheel has rotated</button>
+          <button class="opt">Milliseconds since the program started</button>
+          <button class="opt">How many times the motor has been powered on</button>
+        </div>
+        <div class="explain">An encoder ticks off tiny fractions of a revolution as the wheel turns, about 585 per full turn on the XRP. Divide counts by 585 and multiply by the wheel's circumference and you get distance, which is exactly what the capstone's setDistancePerPulse conversion does.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Lab · Part 2 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>XRP</b><span>Low-cost real robot, roughly $35 to $70.</span></div>
+        <div class="gl"><b>Run in sim</b><span>robotpy sim --xrp on the laptop, over WiFi.</span></div>
+        <div class="gl"><b>XRPOnBoardIO</b><span>The USER button and the onboard LED.</span></div>
+        <div class="gl"><b>Encoder</b><span>About 585 counts per wheel turn.</span></div>
+        <div class="gl"><b>XRPGyro</b><span>Heading of the robot, in degrees.</span></div>
+        <div class="gl"><b>Reflectance</b><span>Sees dark lines under the nose.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="upnext">
+      <div class="un-l">
+        <div class="un-k">Up next</div>
+        <div class="un-t">Part 2 checkpoint</div>
+        <div class="un-d">You just proved your Python can touch hardware. Now prove the fundamentals themselves: a cumulative checkpoint on everything from Part 2 before command-based robots begin.</div>
+      </div>
+      <a href="deploy-checkpoint-2.html">Take the checkpoint →</a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="deploy-lesson-10-py.html">← Part 2 · 05 · Collections &amp; Enums</a>
+    <a class="map" href="code.html">Course map</a>
+    <a class="next-link" href="deploy-checkpoint-2.html">Part 2 checkpoint →</a>
+  </nav>
+
+</div>
+
+<footer>Deploy · Programming an FRC robot</footer>
+
+<script>
+(function(){
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){
+      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
+    });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="deploy:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script src="account-config.js"></script>
+<script src="account.js"></script>
+</body>
+</html>

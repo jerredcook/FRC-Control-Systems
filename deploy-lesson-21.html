@@ -91,6 +91,12 @@
   .blank:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
   .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
   .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .wline{font-family:var(--mono);font-size:13px;width:100%;max-width:46ch;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:7px 10px;outline:none}
+  .wline:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .wline.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .wline.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .whint{display:none;margin-top:10px;font-size:14px;color:var(--muted);border-left:2px solid var(--amber);padding:4px 0 4px 12px}
+  .whint.show{display:block}
   .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
   .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
   .btn:hover{border-color:var(--indigo);color:var(--text)}
@@ -216,13 +222,28 @@ drive.<span class="fn">arcadeDrive</span>(fwd, rot);</pre>
 
     <div class="code-ex">
       <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
-      <div class="ctask">Ignore stick values within 8% of center so the robot doesn't drift at rest. Fill in the method.</div>
-<pre class="code"><span class="ty">double</span> y = <span class="ty">MathUtil</span>.<input class="blank" data-ans="applydeadband" aria-label="blank" autocomplete="off" spellcheck="false">(rawY, <span class="num">0.08</span>);</pre>
+      <div class="ctask">Shape the driver's stick top to bottom: read the axis flipped so up means forward, ignore the resting wobble near center, then square it for fine control. Fill in the blanks.</div>
+<pre class="code"><span class="ty">double</span> rawY = -driver.<input class="blank" data-ans="getlefty" data-reveal="getLeftY" aria-label="blank" autocomplete="off" spellcheck="false">();   <span class="cm">// forward reads negative, flip it</span>
+<span class="ty">double</span> y = <span class="ty">MathUtil</span>.<input class="blank" data-ans="applydeadband" data-reveal="applyDeadband" style="width:14ch" aria-label="blank" autocomplete="off" spellcheck="false">(rawY, <span class="num">0.08</span>);
+<span class="ty">double</span> fwd = <span class="ty">Math</span>.<input class="blank" data-ans="copysign" data-reveal="copySign" aria-label="blank" autocomplete="off" spellcheck="false">(y * y, y);   <span class="cm">// square it, keep the sign</span>
+drive.<span class="fn">arcadeDrive</span>(fwd, rot);   <span class="cm">// rot: same recipe on the X axis</span></pre>
       <div class="code-actions">
         <button class="btn" id="check">Check</button>
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+    </div>
+
+    <div class="code-ex" id="writeit">
+      <div class="chead"><span class="ic">&#9998;</span> Now you write it</div>
+      <div class="ctask">Now the X axis. rawX already holds the raw value; write the whole line that stores it in a double named x with the same 8% deadband applied.</div>
+      <div style="margin:0 0 14px"><input class="wline" id="wIn" data-ans='doublex=mathutil.applydeadband(rawx,0.08)|x=mathutil.applydeadband(rawx,0.08)|doublex=mathutil.applydeadband(rawx,.08)' aria-label="your line of code" autocomplete="off" spellcheck="false" placeholder="type the full line of Java"></div>
+      <div class="code-actions">
+        <button class="btn" id="wCheck">Check</button>
+        <button class="btn" id="wHint" style="display:none">Hint</button>
+        <span class="code-result" id="wRes"></span>
+      </div>
+      <div class="whint" id="wHintText">Hint: mirror the y line in the ladder: double x = MathUtil.applyDeadband(rawX, 0.08);</div>
     </div>
   </section>
 
@@ -420,9 +441,9 @@ drive.<span class="fn">arcadeDrive</span>(fwd, rot);</pre>
   document.getElementById('check').addEventListener('click',function(){
     var all=true;
     blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
-    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - applyDeadband'; res.className='code-result '+(all?'ok':'no');
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - fix the red blanks'; res.className='code-result '+(all?'ok':'no');
   });
-  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='applyDeadband';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
+  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value=b.getAttribute('data-reveal')||'';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
 
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
@@ -464,6 +485,27 @@ drive.<span class="fn">arcadeDrive</span>(fwd, rot);</pre>
     window.addEventListener('keydown',onRan,true);
   } else { ran=true; }
   opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(picked>=0)return; picked=i; opts.forEach(function(o){o.classList.add('locked');}); if(ran){ reveal(); } else { note.style.display='block'; } }); });
+})();
+</script>
+<script>
+(function(){
+try{
+  var inp=document.getElementById('wIn'); if(!inp)return;
+  var btn=document.getElementById('wCheck'), hb=document.getElementById('wHint'),
+      ht=document.getElementById('wHintText'), res=document.getElementById('wRes'), miss=0;
+  function wnorm(s){return s.toLowerCase().replace(/\s+/g,'').replace(/'/g,'"').replace(/;+$/,'');}
+  var ans=(inp.getAttribute('data-ans')||'').split('|');
+  function go(){
+    var ok=ans.indexOf(wnorm(inp.value))!==-1;
+    inp.classList.remove('ok','bad'); inp.classList.add(ok?'ok':'bad');
+    res.textContent=ok?'Correct \u2713':'Not yet - try again';
+    res.className='code-result '+(ok?'ok':'no');
+    if(!ok){ miss++; if(miss>=2){ hb.style.display=''; } }
+  }
+  btn.addEventListener('click',go);
+  inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); go(); } });
+  hb.addEventListener('click',function(){ ht.classList.add('show'); });
+}catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

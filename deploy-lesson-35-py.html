@@ -190,13 +190,32 @@ motor.<span class="fn">configurator</span>.<span class="fn">apply</span>(cfg)
 
     <div class="code-ex">
       <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
-      <div class="ctask">Cap how many amps this motor can pull from the battery so heavy load can't brown out the robot. Fill in the field.</div>
-<pre class="code">cfg.current_limits.<input class="blank" data-ans="supply_current_limit" aria-label="blank" autocomplete="off" spellcheck="false"> = <span class="num">40</span></pre>
+      <div class="ctask">Protect the robot top to bottom: create the config object, cap the supply draw, switch the cap on, then push it to the motor. Fill in the four blanks.</div>
+<pre class="code"><span class="cm"># declare: one config object holds every setting</span>
+cfg = <input class="blank" data-ans="talonfxconfiguration|talonfxconfiguration()" data-reveal="TalonFXConfiguration" aria-label="blank" autocomplete="off" spellcheck="false" style="width:22ch">()
+
+<span class="cm"># configure: cap the amps pulled from the battery, and turn the cap on</span>
+cfg.current_limits.<input class="blank" data-ans="supply_current_limit" data-reveal="supply_current_limit" aria-label="blank" autocomplete="off" spellcheck="false"> = <span class="num">40</span>
+cfg.current_limits.supply_current_limit_enable = <input class="blank" data-ans="true" data-reveal="True" aria-label="blank" autocomplete="off" spellcheck="false" style="width:7ch">
+
+<span class="cm"># use: push the finished config to the motor controller</span>
+motor.<span class="fn">configurator</span>.<input class="blank" data-ans="apply|apply(cfg)" data-reveal="apply" aria-label="blank" autocomplete="off" spellcheck="false" style="width:7ch">(cfg)</pre>
       <div class="code-actions">
         <button class="btn" id="check">Check</button>
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+    </div>
+
+    <div class="code-ex" id="writeit">
+      <div class="chead"><span class="ic">✎</span> Now you write it</div>
+      <div class="ctask">No scaffold this time. Write the line that caps this motor's supply draw at 40 amps.</div>
+      <input id="wiIn" data-ans="cfg.current_limits.supply_current_limit=40|cfg.current_limits.supply_current_limit=40.0" aria-label="your line of code" autocomplete="off" spellcheck="false" placeholder="type the full line here" style="font-family:var(--mono);font-size:13px;width:100%;max-width:52ch;background:var(--panel-2);border:1px solid var(--line-2);color:var(--text);border-radius:6px;padding:8px 10px;outline:none">
+      <div class="code-actions" style="margin-top:12px">
+        <button class="btn" id="wiCheck">Check</button>
+        <span class="code-result" id="wiRes"></span>
+      </div>
+      <div id="wiHint" style="display:none;margin-top:10px;font-size:13.5px;color:var(--muted);border-left:2px solid var(--amber);padding:2px 0 2px 12px">Hint: the config object is cfg, the group is current_limits, the field is supply_current_limit. Set it equal to 40.</div>
     </div>
   </section>
 
@@ -332,15 +351,38 @@ motor.<span class="fn">configurator</span>.<span class="fn">apply</span>(cfg)
   document.getElementById('check').addEventListener('click',function(){
     var all=true;
     blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
-    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - supply_current_limit'; res.className='code-result '+(all?'ok':'no');
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - fix the red boxes'; res.className='code-result '+(all?'ok':'no');
   });
-  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='supply_current_limit';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
+  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value=b.getAttribute('data-reveal')||'';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
 
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
     opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
   });
+})();
+</script>
+<script>
+(function(){
+  // "Now you write it" free-text exercise (isolated; a bug here cannot break the page)
+  try{
+    var inp=document.getElementById('wiIn'), btn=document.getElementById('wiCheck'), res=document.getElementById('wiRes'), hint=document.getElementById('wiHint');
+    if(!inp||!btn||!res||!hint) return;
+    var misses=0;
+    function wnorm(s){ return String(s).toLowerCase().replace(/\s+/g,'').replace(/;/g,''); }
+    function wcheck(){
+      var ans=(inp.getAttribute('data-ans')||'').split('|');
+      var ok=ans.indexOf(wnorm(inp.value))!==-1;
+      inp.style.borderColor=ok?'var(--green)':'var(--red)';
+      inp.style.color=ok?'var(--green)':'var(--red)';
+      res.textContent=ok?'Correct ✓':'Not quite - try again';
+      res.className='code-result '+(ok?'ok':'no');
+      if(!ok){ misses++; if(misses>=2) hint.style.display='block'; }
+    }
+    btn.addEventListener('click',wcheck);
+    inp.addEventListener('keydown',function(e){ if(e.key==='Enter') wcheck(); });
+    inp.addEventListener('input',function(){ inp.style.borderColor='var(--line-2)'; inp.style.color='var(--text)'; });
+  }catch(e){}
 })();
 </script>
 <script>

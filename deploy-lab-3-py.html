@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deploy · Part 3 - Lab: Drive the real robot (Python)</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(138,140,248,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:52ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .codewrap{margin:18px 0}
+  .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .codewrap .clabel .badge{color:var(--indigo);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
+  pre.code{font-family:var(--mono);font-size:12.5px;line-height:1.85;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
+  .code .cm{color:var(--faint);font-style:italic} .code .kw{color:#ff9bbf} .code .ty{color:var(--teal)} .code .fn{color:var(--indigo)} .code .num{color:var(--amber)} .code .st{color:#9ce8b0}
+
+  ul.need{list-style:none;padding:0;margin:6px 0 0}
+  ul.need li{position:relative;padding:6px 0 6px 26px;color:var(--text);font-size:16px}
+  ul.need li::before{content:"›";position:absolute;left:6px;color:var(--indigo);font-weight:700}
+  ol.steps{margin:6px 0 0;padding-left:22px}
+  ol.steps li{margin:0 0 9px;color:var(--text)}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.indigo{border-color:var(--indigo);background:rgba(138,140,248,.07)} .note.indigo .nh{color:var(--indigo)}
+  .note.green{border-color:var(--green);background:rgba(67,214,126,.07)} .note.green .nh{color:var(--green)}
+
+  .cta-box{border:1px solid var(--indigo);border-radius:14px;background:radial-gradient(600px 240px at 50% 0%, rgba(138,140,248,.10), transparent 70%),linear-gradient(180deg,var(--panel),#11192B);padding:22px 22px;margin:24px 0}
+  .cta-box .ch{font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--indigo);margin-bottom:8px}
+  .cta-box p{font-size:16px;margin:0 0 12px}
+  .cta-box .links{display:flex;flex-wrap:wrap;gap:10px}
+  .cta-box a{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:11px 15px;color:var(--text);transition:.14s;word-break:break-word}
+  .cta-box a:hover{border-color:var(--indigo)} .cta-box a.primary{background:linear-gradient(180deg,#a8a7ff,var(--indigo));color:#0b1020;font-weight:700;border-color:transparent}
+
+  table.ts{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 0;min-width:560px}
+  .ts th{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);text-align:left;padding:10px 12px;border-bottom:1px solid var(--line-2)}
+  .ts td{padding:10px 12px;border-bottom:1px solid var(--line);color:var(--text);vertical-align:top}
+  .ts tr:last-child td{border-bottom:none}
+  .ts td:first-child{color:var(--amber);font-family:var(--mono);font-size:13px}
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .upnext{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:20px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .upnext .un-l{flex:1;min-width:220px}
+  .upnext .un-k{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);margin-bottom:5px}
+  .upnext .un-t{font-size:18px;font-weight:750}
+  .upnext .un-d{color:var(--muted);font-size:14.5px;margin-top:3px}
+  .upnext a{text-decoration:none;font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding:12px 18px;border-radius:9px;background:linear-gradient(180deg,#6ff0dd,var(--teal));color:#06121f;font-weight:700;white-space:nowrap}
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)} .coursenav a.next-link{color:var(--teal);border-color:rgba(52,215,197,.4)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="code.html"><span class="dot"></span><span class="name">Deploy</span></a>
+    <div class="top-meta">Part 3 · Lab · Real hardware</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Lab · Part 3</b> Hands-on hardware</div>
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:-6px 0 14px">Code shown in <b style="color:var(--indigo)">Python</b> &middot; <a href="deploy-lab-3.html" style="color:var(--muted)">switch to Java</a></div>
+    <div class="eyebrow">Lab · Part 3</div>
+    <h1>Your commands, on<br><span class="accent">real wheels</span>.</h1>
+    <p class="dek">Part 3 gave you subsystems, commands, and default commands. This lab puts all three on the XRP, the roughly $60 real robot from the course capstone: drive it with a gamepad, then break a motor direction on purpose and fix it like a pro.</p>
+  </div>
+
+  <section>
+    <div class="kicker">Before you start</div>
+    <h2>What you need</h2>
+    <ul class="need">
+      <li>An <strong>XRP kit</strong>, assembled, with <strong>charged batteries</strong> in its pack. A tired pack causes weird, random problems, so start fresh.</li>
+      <li>A <strong>laptop with RobotPy and WPILib installed</strong>, which you set up back in Part 1, and a clear stretch of table or floor.</li>
+      <li>A <strong>gamepad</strong>, any Xbox-style USB controller. No gamepad? The Simulation GUI can map your keyboard to a virtual joystick, it is just less fun.</li>
+    </ul>
+    <p style="margin-top:18px">One mental model before you touch anything. Your robot program runs on <strong>your laptop</strong>, in WPILib <strong>simulation</strong>. The XRP creates its own <strong>WiFi network</strong>, your laptop joins it, and a <strong>WebSocket</strong> link carries your motor commands out to the XRP and streams its sensor readings back, many times per second. So "deploy" here means: run <span class="k">robotpy sim</span>, connected to the real robot over WiFi.</p>
+    <div class="note indigo">
+      <div class="nh">Why a lab</div>
+      <p>Code that only ever ran in a simulator can hide mistakes that real wheels and a real battery expose in seconds. This lab makes one of those mistakes on purpose, a motor spinning the wrong way, so the first time you meet it, it is in a lab where you already know the fix.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Step 1 · Connect</div>
+    <h2>Power up and connect</h2>
+    <ol class="steps">
+      <li>Make a new project from the <strong>RobotPy XRP example</strong>. The example brings the XRP support with it, so the XRP classes are ready to import.</li>
+      <li>Put charged batteries in the XRP and switch it on. It creates a WiFi network named something like <span class="k">XRP-XXXX</span>.</li>
+      <li>Join that network from your laptop. Your internet drops while you are on it, that is normal.</li>
+      <li>Run <span class="k">robotpy sim</span> from your project folder. This starts your program on the laptop and connects it to the XRP over WiFi.</li>
+    </ol>
+    <div class="note green">
+      <div class="nh">What you should see</div>
+      <p>The Simulation GUI opens on your laptop. Nothing moves yet, and nothing should: the robot is not enabled and you have not written the drivetrain. If the GUI opens and the XRP's power light is on, the link is up and you are ready for Step 2.</p>
+    </div>
+    <div class="cta-box">
+      <div class="ch">Follow the official guide for the exact commands</div>
+      <p>Versions and commands change. If any step here does not match your screen, the official WPILib XRP guide has the exact, current setup, including the precise RobotPy commands, kept up to date by the people who make the tools.</p>
+      <div class="links">
+        <a class="primary" href="https://docs.wpilib.org/en/stable/docs/xrp-robot/index.html" target="_blank" rel="noopener">WPILib XRP guide ↗</a>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Step 2 · Subsystem</div>
+    <h2>Paste the drivetrain subsystem</h2>
+    <p>This is the same <span class="k">commands2.Subsystem</span> shape from Part 3, filled with the XRP's real hardware: <span class="k">XRPMotor</span> on channels 0 (left) and 1 (right), <span class="k">Encoder</span> on DIO 4 and 5 (left) and 6 and 7 (right), the onboard <span class="k">XRPGyro</span>, and the <span class="k">XRPReflectanceSensor</span> line sensors under the nose. Note that RobotPy keeps the WPILib method names like <span class="k">setDistancePerPulse</span> and <span class="k">getDistance</span>. Replace the example's drivetrain with this file.</p>
+    <div class="codewrap">
+      <div class="clabel">drivetrain.py <span class="badge">python</span></div>
+<pre class="code"><span class="kw">from</span> wpilib.xrp <span class="kw">import</span> XRPMotor, XRPGyro, XRPReflectanceSensor
+<span class="kw">from</span> wpilib <span class="kw">import</span> Encoder, SmartDashboard
+<span class="kw">import</span> math
+<span class="kw">import</span> commands2
+
+
+<span class="kw">class</span> <span class="ty">Drivetrain</span>(commands2.Subsystem):
+    WHEEL_DIAMETER_M = <span class="num">0.060</span>   <span class="cm"># 60 mm wheels</span>
+    COUNTS_PER_REV = <span class="num">585.0</span>     <span class="cm"># from the XRP example</span>
+
+    <span class="kw">def</span> <span class="fn">__init__</span>(self):
+        super().<span class="fn">__init__</span>()
+        <span class="cm"># XRP drive motors live on channels 0 (left) and 1 (right)</span>
+        self.left = <span class="ty">XRPMotor</span>(<span class="num">0</span>)
+        self.right = <span class="ty">XRPMotor</span>(<span class="num">1</span>)
+        <span class="cm"># Wheel encoders are wired to these DIO channels</span>
+        self.left_enc = <span class="ty">Encoder</span>(<span class="num">4</span>, <span class="num">5</span>)
+        self.right_enc = <span class="ty">Encoder</span>(<span class="num">6</span>, <span class="num">7</span>)
+        self.gyro = <span class="ty">XRPGyro</span>()
+        self.reflectance = <span class="ty">XRPReflectanceSensor</span>()
+
+        meters_per_count = (math.pi * self.WHEEL_DIAMETER_M) / self.COUNTS_PER_REV
+        self.left_enc.<span class="fn">setDistancePerPulse</span>(meters_per_count)
+        self.right_enc.<span class="fn">setDistancePerPulse</span>(meters_per_count)
+        self.right.<span class="fn">setInverted</span>(<span class="kw">True</span>)   <span class="cm"># the right side is mirrored</span>
+        self.left_enc.<span class="fn">reset</span>()
+        self.right_enc.<span class="fn">reset</span>()
+
+    <span class="kw">def</span> <span class="fn">arcade_drive</span>(self, speed, rotation):
+        self.left.<span class="fn">set</span>(speed + rotation)
+        self.right.<span class="fn">set</span>(speed - rotation)
+
+    <span class="kw">def</span> <span class="fn">periodic</span>(self):
+        <span class="cm"># Runs every 20 ms - a live sensor dashboard for free</span>
+        <span class="ty">SmartDashboard</span>.<span class="fn">putNumber</span>(<span class="st">"Heading deg"</span>, self.gyro.<span class="fn">getAngle</span>())
+        <span class="ty">SmartDashboard</span>.<span class="fn">putNumber</span>(<span class="st">"Left m"</span>, self.left_enc.<span class="fn">getDistance</span>())
+        <span class="ty">SmartDashboard</span>.<span class="fn">putNumber</span>(<span class="st">"Right m"</span>, self.right_enc.<span class="fn">getDistance</span>())
+        <span class="ty">SmartDashboard</span>.<span class="fn">putNumber</span>(<span class="st">"Line left"</span>, self.reflectance.<span class="fn">getLeftReflectanceValue</span>())
+        <span class="ty">SmartDashboard</span>.<span class="fn">putNumber</span>(<span class="st">"Line right"</span>, self.reflectance.<span class="fn">getRightReflectanceValue</span>())</pre>
+    </div>
+    <p>Note the one line that already deals with direction: <span class="k">self.right.setInverted(True)</span>. The right motor is mounted mirror-image to the left, like the pedals on a bike, one crank arm points forward while the other points back. Inverting it once, here, makes "positive" mean "forward" on both sides.</p>
+    <p>Run <span class="k">robotpy sim</span> again. You do not need to enable the robot to test sensors, <span class="k">periodic()</span> runs regardless.</p>
+    <div class="note green">
+      <div class="nh">What you should see</div>
+      <p>Open the NetworkTables view in the Simulation GUI and find your five numbers. Now play: spin a wheel by hand and watch its distance count move. Turn the whole robot in your hand and watch the heading change. Hold it over something dark and the line values climb toward 1, over white paper they fall toward 0. Real sensors, live on your screen.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Step 3 · Default command</div>
+    <h2>Drive it with the gamepad</h2>
+    <p>Lesson 6 of this Part said a subsystem's <strong>default command</strong> runs whenever nothing else needs it. Teleop driving is the classic default command: whenever the drivetrain is free, feed the sticks to the wheels. Put this in your <span class="k">RobotContainer</span>, and keep the example's <span class="k">robot.py</span> shape, a <span class="k">commands2.TimedCommandRobot</span> that builds one <span class="k">RobotContainer</span>.</p>
+    <div class="codewrap">
+      <div class="clabel">robotcontainer.py <span class="badge">python</span></div>
+<pre class="code"><span class="kw">import</span> commands2.cmd <span class="kw">as</span> cmd
+<span class="kw">from</span> commands2.button <span class="kw">import</span> CommandXboxController
+
+<span class="kw">from</span> drivetrain <span class="kw">import</span> Drivetrain
+
+
+<span class="kw">class</span> <span class="ty">RobotContainer</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self):
+        self.drivetrain = <span class="ty">Drivetrain</span>()
+        self.controller = <span class="ty">CommandXboxController</span>(<span class="num">0</span>)
+
+        <span class="cm"># Default command: runs whenever nothing else needs the drivetrain</span>
+        self.drivetrain.<span class="fn">setDefaultCommand</span>(
+            cmd.<span class="fn">run</span>(
+                <span class="kw">lambda</span>: self.drivetrain.<span class="fn">arcade_drive</span>(
+                    -self.controller.<span class="fn">getLeftY</span>(),   <span class="cm"># stick forward reads negative, flip it</span>
+                    self.controller.<span class="fn">getRightX</span>(),
+                ),
+                self.drivetrain,
+            )
+        )</pre>
+    </div>
+    <div class="codewrap">
+      <div class="clabel">robot.py <span class="badge">python</span></div>
+<pre class="code"><span class="kw">import</span> commands2
+
+<span class="kw">from</span> robotcontainer <span class="kw">import</span> RobotContainer
+
+
+<span class="kw">class</span> <span class="ty">MyRobot</span>(commands2.TimedCommandRobot):
+    <span class="kw">def</span> <span class="fn">robotInit</span>(self):
+        self.container = <span class="ty">RobotContainer</span>()</pre>
+    </div>
+    <p>That minus sign is not a typo. Gamepads report the Y axis upside down: pushing the stick <em>forward</em> gives a <em>negative</em> number. The minus flips it so forward means forward. Now wire the controller in:</p>
+    <ol class="steps">
+      <li>Plug the gamepad into your laptop.</li>
+      <li>Run <span class="k">robotpy sim</span>. In the Simulation GUI, drag your controller from <strong>System Joysticks</strong> onto <strong>Joystick[0]</strong>.</li>
+      <li>Set the robot state to <strong>Teleop</strong> and click <strong>Enable</strong>.</li>
+    </ol>
+    <div class="note green">
+      <div class="nh">What you should see</div>
+      <p>Push the left stick forward and the XRP rolls forward. Right stick left and right spins it in place. Let go of everything and it stops, because the default command is still running and now writes zeros. If it drives backward when you push forward, or the turn feels mirrored, hold that thought, that is exactly what Steps 4 and 5 are about.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Step 4 · Break it</div>
+    <h2>Now break it on purpose</h2>
+    <p>Every team, sooner or later, wires or configures a motor so it runs backward. You are going to cause that bug deliberately, so you recognize it instantly for the rest of your life. Add one wrong line to the end of the <span class="k">Drivetrain</span> constructor:</p>
+    <div class="codewrap">
+      <div class="clabel">drivetrain.py · in __init__ <span class="badge">python</span></div>
+<pre class="code">        self.right.<span class="fn">setInverted</span>(<span class="kw">True</span>)   <span class="cm"># the right side is mirrored</span>
+        self.left.<span class="fn">setInverted</span>(<span class="kw">True</span>)    <span class="cm"># LAB: wrong on purpose. Watch what happens.</span>
+        self.left_enc.<span class="fn">reset</span>()
+        self.right_enc.<span class="fn">reset</span>()</pre>
+    </div>
+    <p>Restart <span class="k">robotpy sim</span>, re-drag the joystick, enable Teleop, and push the left stick straight forward.</p>
+    <div class="note green">
+      <div class="nh">What you should see</div>
+      <p>The XRP spins in place instead of rolling forward. Your code still says <span class="k">self.left.set(speed + rotation)</span>, but the inverted left motor now pushes its wheel backward while the right wheel drives forward. It is like paddling a canoe with one paddle stroking backward: pull hard on both and the boat pirouettes. Notice the lesson hiding here, the code reads correctly while the robot does something absurd. Only real wheels tell you.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Step 5 · Fix it right</div>
+    <h2>Fix it the right way</h2>
+    <p>There are two tempting bad fixes. Swap the motor wires, or sneak a minus sign into <span class="k">arcade_drive</span> for that one motor. Both make the robot drive today, and both plant a trap: the next person reads the subsystem, believes what it says, and gets burned. Direction is a fact about the hardware, so declare it where the hardware is set up, with <span class="k">setInverted</span> in the constructor:</p>
+    <div class="codewrap">
+      <div class="clabel">drivetrain.py · the honest fix <span class="badge">python</span></div>
+<pre class="code">        self.right.<span class="fn">setInverted</span>(<span class="kw">True</span>)   <span class="cm"># the right side is mirrored, flip it once, here</span>
+        self.left.<span class="fn">setInverted</span>(<span class="kw">False</span>)  <span class="cm"># the left side is not, and now the code says so</span></pre>
+    </div>
+    <p>On the XRP the left side is not mirrored, so <span class="k">False</span> is the truthful setting. Writing it explicitly, instead of deleting the line, documents that you thought about it. Restart, enable, and drive.</p>
+    <div class="note green">
+      <div class="nh">What you should see</div>
+      <p>Forward stick, straight roll. A slight drift over a long run is normal for $60 wheels, do not chase it today. The point sticks with you: one call, at the motor, in the constructor. On a full-size FRC robot the exact same rule holds, set inversion once in the subsystem's motor configuration and never scatter minus signs through your commands.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">When it misbehaves</div>
+    <h2>Troubleshooting</h2>
+    <div class="tablewrap">
+      <table class="ts">
+        <tr><th>You see</th><th>Likely cause</th><th>Fix</th></tr>
+        <tr><td>Nothing moves at all</td><td>Robot not enabled, or your laptop quietly hopped back to its usual WiFi</td><td>In the Simulation GUI pick Teleop and click Enable, and check you are still on the XRP-XXXX network</td></tr>
+        <tr><td>Forward stick drives it backward, or it spins in place</td><td>A motor inversion is wrong for that side</td><td>Fix it at the motor with setInverted in the constructor, never with minus signs in arcade_drive</td></tr>
+        <tr><td>Sluggish, veers hard, or the link drops mid-drive</td><td>Tired batteries, low pack voltage weakens motors and can reset the board</td><td>Swap in fresh, charged batteries and try again</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="note indigo">
+      <div class="nh">Going further &middot; optional</div>
+      <p>Three upgrades, in rising order of spice. One: bind a button to a half-speed mode using a Trigger from Lesson 5, hold the bumper and every stick value is scaled by 0.5, handy for tight spaces. Two: use the dashboard heading you already publish to hand-drive the straightest line you can, then check how many degrees you drifted. Three: tape a dark line on the floor and watch the two reflectance values as you push the robot across it by hand, then sketch, on paper only, how a command could steer toward whichever sensor sees the line. That sketch is a line follower, and you already have every ingredient.</p>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">You enable Teleop, push the left stick straight forward, and the XRP spins in place. What is the most likely cause?</div>
+        <div class="opts">
+          <button class="opt">The gamepad is broken and only sends turn values</button>
+          <button class="opt">One drive motor's inversion is wrong, so one wheel drives backward while the other drives forward</button>
+          <button class="opt">The WiFi link is too slow to deliver the forward command</button>
+        </div>
+        <div class="explain">Forward in arcade drive means both wheels forward. If one side's inversion is wrong, the forward stick sends one wheel forward and the other backward, like a canoe with one paddle stroking the wrong way, and the robot pirouettes. Spin-instead-of-roll points straight at a direction bug.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">A drive motor runs backward. What is the right fix?</div>
+        <div class="opts">
+          <button class="opt">Swap the motor's wires so the code can stay the same</button>
+          <button class="opt">Add a minus sign for that motor inside arcade_drive</button>
+          <button class="opt">Call setInverted on that motor where it is created in the subsystem, declaring direction once, at the motor</button>
+        </div>
+        <div class="explain">Swapped wires and scattered minus signs both work today and confuse everyone later. setInverted in the constructor states the truth about the hardware in one place, so every command that drives the subsystem gets the right direction for free.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">Why is gamepad driving written as the drivetrain's default command?</div>
+        <div class="opts">
+          <button class="opt">A default command runs whenever no other command needs the drivetrain, so stick input flows to the wheels any time the subsystem is free</button>
+          <button class="opt">Commands cannot read joysticks unless they are default commands</button>
+          <button class="opt">Default commands run faster than normal commands</button>
+        </div>
+        <div class="explain">From Lesson 6: a default command is the subsystem's "when nothing else is happening" behavior. The scheduler runs it whenever no other command requires the drivetrain, which is exactly what teleop driving wants, and it is why the robot stops the moment you let go, the default command keeps running and writes zeros.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="upnext">
+      <div class="un-l">
+        <div class="un-k">Up next</div>
+        <div class="un-t">Part 3 Checkpoint</div>
+        <div class="un-d">You have now seen subsystems, commands, and default commands run on real hardware. Prove the whole Part, and when you reach the Part 9 capstone, this same XRP drives a square on its own.</div>
+      </div>
+      <a href="deploy-checkpoint-3.html">Take the checkpoint →</a>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="deploy-lesson-16-py.html">← Part 3 · 06 · Default Commands</a>
+    <a class="map" href="code.html">Course map</a>
+    <a class="next-link" href="deploy-checkpoint-3.html">Part 3 Checkpoint →</a>
+  </nav>
+
+</div>
+
+<footer>Deploy · Programming an FRC robot</footer>
+
+<script>
+(function(){
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="deploy:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script src="account-config.js"></script>
+<script src="account.js"></script>
+</body>
+</html>
