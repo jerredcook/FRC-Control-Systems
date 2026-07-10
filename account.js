@@ -215,6 +215,102 @@
   } catch (e) {}
 })();
 
+/* FRC Academy - hub extras: review warm-up + team momentum.
+ *
+ * Injected onto the course hubs (any page with a .progress-card) with no hub
+ * file changes - the same trick as review capture and the PWA glue.
+ *  - Warm-up chip: reads the frc:review pool and, when questions are due,
+ *    offers a one-tap jump into review.html.
+ *  - Team strip: when accounts are configured, the student is signed in, and
+ *    they belong to a team, shows the team's collective progress in this
+ *    course (via the team_progress RPC). Collective momentum, never rankings.
+ * Both fail silent: no backend, no RPC, or no team just means no strip.
+ */
+(function () {
+  "use strict";
+  function onReady(fn) {
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", fn);
+    else fn();
+  }
+  onReady(function () {
+    try {
+      var card = document.querySelector(".progress-card");
+      if (!card) return;
+
+      var css = document.createElement("style");
+      css.textContent =
+        ".frc-extra{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:10px 0 0;" +
+        "border:1px solid rgba(70,214,160,0.35);background:rgba(70,214,160,0.06);border-radius:10px;" +
+        "padding:11px 15px;text-decoration:none}" +
+        ".frc-extra .xa{font-family:ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.16em;" +
+        "text-transform:uppercase;color:#46d6a0;font-weight:700;white-space:nowrap}" +
+        ".frc-extra .xw{font-size:14px;color:#aeb9d1}" +
+        ".frc-extra .xw b{color:#e8edf7}" +
+        "a.frc-extra:hover{border-color:#46d6a0}";
+      document.head.appendChild(css);
+
+      // ---- warm-up chip (pure localStorage, works offline) ----
+      var due = 0;
+      try {
+        var pool = JSON.parse(localStorage.getItem("frc:review")) || {};
+        var now = Date.now();
+        Object.keys(pool).forEach(function (k) {
+          var e = pool[k];
+          if (e && e.opts && (!e.due || e.due <= now)) due++;
+        });
+      } catch (e) {}
+      if (due > 0) {
+        var chip = document.createElement("a");
+        chip.className = "frc-extra";
+        chip.href = "review.html";
+        chip.innerHTML = '<span class="xa">🧠 Warm-up</span><span class="xw"><b>' + due +
+          "</b> question" + (due === 1 ? "" : "s") + " due for review - clear them while they're fresh</span>";
+        card.parentNode.insertBefore(chip, card.nextSibling);
+      }
+
+      // ---- team momentum strip (needs configured backend + team) ----
+      var courseKey = null;
+      var page = (location.pathname.split("/").pop() || "").toLowerCase();
+      if (page === "code.html") courseKey = "deploy";
+      else if (page === "build.html") courseKey = "build";
+      else if (page === "closing-the-loop.html") courseKey = "closing-the-loop";
+      else if (page === "systemcore.html") courseKey = "systemcore";
+      if (!courseKey) return;
+
+      function renderTeam() {
+        try {
+          var acct = window.FRCAccount;
+          if (!acct || !acct.enabled || !acct.user || !acct.profile || !acct.profile.team_id) return;
+          if (document.querySelector(".frc-team-strip")) return;
+          acct.raw().rpc("team_progress").then(function (res) {
+            try {
+              if (!res || res.error || !res.data || !res.data.length) return;
+              var rows = res.data;
+              var mine = null, total = 0;
+              rows.forEach(function (r) { total += r.items || 0; if (r.course === courseKey) mine = r; });
+              var members = rows[0].members || 0, name = rows[0].team_name || "your team";
+              if (members < 2) return; // momentum needs company
+              var strip = document.createElement("div");
+              strip.className = "frc-extra frc-team-strip";
+              var here = mine ? mine.items : 0;
+              strip.innerHTML = '<span class="xa">🏁 Team ' + String(name).replace(/[<>&]/g, "") + "</span>" +
+                '<span class="xw">together you have cleared <b>' + here + "</b> item" + (here === 1 ? "" : "s") +
+                " in this course and <b>" + total + "</b> across the academy (" + members + " members)</span>";
+              var chipEl = document.querySelector("a.frc-extra");
+              var anchor = chipEl || card;
+              anchor.parentNode.insertBefore(strip, anchor.nextSibling);
+            } catch (e) {}
+          }).catch(function () {});
+        } catch (e) {}
+      }
+      if (window.FRCAccount && window.FRCAccount.enabled) {
+        window.FRCAccount.ready.then(renderTeam).catch(function () {});
+        window.addEventListener("frc:authchange", renderTeam);
+      }
+    } catch (e) { /* extras must never break a hub */ }
+  });
+})();
+
 /* FRC Academy - PWA glue.
  *
  * Makes every page installable and offline-capable with no per-file change:

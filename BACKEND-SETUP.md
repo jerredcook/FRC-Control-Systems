@@ -27,6 +27,12 @@ Pages); the browser just talks to Supabase directly.
    **Run**. You should see "Success". This makes the `teams`, `profiles`, and
    `progress` tables, the row-level-security rules, and the helper functions.
 
+> **Already set up before?** The whole schema file is safe to re-run (everything is
+> `create or replace` / `drop policy if exists`). Re-run it whenever this repo adds a
+> new function - for example `team_progress()`, which powers the team momentum strip
+> on the course hubs. If the strip never appears for signed-in team members, this is
+> the step that was missed.
+
 ## 3. Connect the website to it
 
 1. In Supabase, open **Project Settings** (gear) -> **API**.

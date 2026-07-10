@@ -131,12 +131,62 @@ not counted in the lesson totals.
 Every lesson with a manipulable sim (canvas or slider, 118 pages counting `-py`
 twins) has a `<div class="quiz predict" id="predict">` block immediately **before**
 its `<div class="demo" ...>`: a single "Predict first" question (3 options,
-`data-correct`) tied to the sim's key dynamic. The student commits a guess, the
-answer reveals, then they run the sim. It is wired by a small isolated `<script>`
-(`querySelector('#predict .q')`) added just before `</body>`. The `#predict` id keeps
-it fully separate from the lesson's `#quiz` (predictions never affect completion),
-and it reveals on **any** click (formative, not mastery-gated). The `-py` twins share
-the identical block and handler.
+`data-correct`) tied to the sim's key dynamic. It is wired by a small isolated
+`<script>` (`querySelector('#predict .q')`) added just before `</body>`. The
+`#predict` id keeps it fully separate from the lesson's `#quiz` (predictions never
+affect completion). The first pick **locks in** the prediction ("Prediction locked
+in. Now run the sim...") and the reveal fires only on the first interaction with a
+`.demo` (pointerdown/input, or any keydown for keyboard sims) - the
+predict-observe-explain loop. Pages with no `.demo` keep immediate reveal. The `-py`
+twins share the identical block and handler.
+
+### The training layer (July 2026 campaign)
+
+A full-curriculum pedagogy audit ("train, don't just test") drove these additions.
+Patterns to preserve when adding lessons:
+
+- **Missions**: every manipulable sim has a `<div class="missions" id="missions">`
+  right after the `.demo` (or its caption): 2-3 machine-checked goals plus one
+  `.m-item.gold` stretch. The checker lives INSIDE the sim IIFE (reads real state
+  vars, usually a 200 ms `setInterval`), is **try/catch wrapped** so a missions bug
+  can never break the page, and persists under `frc:missions` / `frc:gold` keyed
+  `filename#slug`. Thresholds must be numerically validated against the sim physics
+  (reachable, not trivially true at defaults). Exemplar: `closing-the-loop-lesson-2.html`.
+- **Fault clinics** (lesson-5 pattern): symptom preset buttons secretly inject a
+  realistic fault; the student names it from a 3-option diagnosis, then fixes it with
+  the existing sliders against threshold detection. On `closing-the-loop-lesson-5`
+  (the original), 20-23, `deploy-lesson-17`, `deploy-lesson-29` (+ twins).
+- **Practice ladders**: Deploy code lessons carry a 3-4 blank `.code-ex` ladder plus
+  a "Now you write it" free-typing exercise (normalized answers, pipe alternatives,
+  hint after 2 misses).
+- **Cockpit sims**: `deploy-lesson-1..5` and `-11` open with interactive toolchain
+  simulators (code playground, mock VS Code, Driver Station fault panel, git graph,
+  docs hunt, scheduler stepper) instead of prose-only.
+- **Shop cards** (Build): every Build lesson has an "In the shop · 10 minutes"
+  `.note`-style card before the quiz: one real-parts task, a self-checkable pass
+  test, and a no-shop household fallback.
+- **XRP labs**: `deploy-lab-{2,3,4,6,7,8}.html` (+ `-py` twins) are hands-on
+  hardware labs; `code.html` renders a derived lab card after those parts'
+  checkpoints (same derived-card trick as checkpoints; not in `COURSE`, lesson
+  totals unchanged). They mark done in `deploy:done` under their own filenames.
+- **Checkpoint data-why**: wrong options on all 20 checkpoints carry a `data-why`
+  attribute; the handler shows it in a `.whyline` under the clicked option.
+- **Re-teaching links**: checkpoint explains, glossary term refs, worksheet field
+  hints, and the troubleshooting guide all link back to the teaching lesson.
+- **Hub momentum**: hubs have a Continue → button (first not-done lesson,
+  language-aware), `#continue` one-tap resume (index links use it), per-part n/m
+  counters, and boss-framed checkpoint cards (`.ready` glow when a Part is done).
+- **Spaced retrieval**: the `frc:review` entries carry `due`/`ivl`; wrong answers
+  are due immediately, first-try-correct schedules +3 days, review clears push
+  3 → 9 → 27 days then graduate (see the account.js capture block + `review.html`).
+- **account.js injections** (no lesson-file changes, ever): review capture,
+  completion toast (reads `.coursenav` links), hub extras (warm-up chip + team
+  momentum strip via the `team_progress()` RPC), PWA glue.
+- **design-challenge.html**: Build-course companion; spec-to-mechanism sizing
+  trainer graded against NEO physics; saves under `frc:design`.
+- **SystemCore drills**: each alpha lesson has a sort-the-statements widget whose
+  content lives in one per-lesson `CHIPS` array (cheap to re-author when 2027 facts
+  change).
 
 ### Accounts and progress sync (optional backend)
 

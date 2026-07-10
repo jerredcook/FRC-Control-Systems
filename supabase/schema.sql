@@ -112,6 +112,24 @@ begin
 end;
 $$;
 
+-- Team momentum: any signed-in team member can read their team's collective
+-- progress (per-course cleared-item counts, member count, team name). Python
+-- twins normalize to their Java lesson so one lesson never counts twice.
+create or replace function public.team_progress()
+  returns table(course text, items bigint, members bigint, team_name text)
+  language sql security definer set search_path = public as $$
+  select p.course,
+         count(distinct (p.user_id, replace(p.item_key, '-py.html', '.html'))) as items,
+         (select count(*) from public.profiles pr where pr.team_id = public.current_team()) as members,
+         (select t.name from public.teams t where t.id = public.current_team()) as team_name
+    from public.progress p
+    join public.profiles pf on pf.id = p.user_id
+   where pf.team_id = public.current_team()
+     and public.current_team() is not null
+     and p.done
+   group by p.course;
+$$;
+
 -- ---------------------------------------------------------------------------
 -- Admin RPCs (only role = 'admin' may call them).
 -- ---------------------------------------------------------------------------
