@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fabricate · Design Challenge</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:48px 0 18px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  h1{font-size:clamp(2.1rem,5vw,3.4rem);line-height:1.04;margin:.1em 0 .3em;letter-spacing:-.03em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(16px,2.2vw,19px);color:var(--text);max-width:60ch;margin-top:6px}
+  .dek b{color:var(--text)}
+  section{padding:26px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+
+  .challenge{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8);overflow:hidden;margin-top:14px}
+  .ch-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .ch-name{font-family:var(--mono);font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--text)}
+  .ch-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .ch-body{padding:16px}
+  .ch-body p{margin:0 0 14px;color:var(--text);font-size:16px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;border:1px solid var(--line-2);background:var(--panel-2);border-radius:7px;padding:6px 10px;color:var(--muted)}
+  .chip b{color:var(--amber);font-weight:600}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .btn.primary{background:linear-gradient(180deg,#FFB27A,var(--indigo));color:#2a1503;font-weight:700;border:none}
+
+  .builder{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8);margin-top:18px}
+  .builder-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .builder-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .builder-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .controls{padding:14px 16px;display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+  .ctl{display:flex;flex-direction:column;gap:6px;flex:1 1 200px;min-width:180px}
+  .ctl label{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between;gap:10px}
+  .ctl label span{color:var(--amber)}
+  .ctl input[type=range]{width:100%;accent-color:var(--indigo);height:22px;cursor:pointer}
+  .ctl input[type=range]:disabled{opacity:.45;cursor:default}
+  .readouts{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  @media(min-width:640px){.readouts{grid-template-columns:repeat(4,1fr)}}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:17px;font-weight:600;margin-top:3px;color:var(--muted)}
+  .ro .v.teal{color:var(--teal)} .ro .v.green{color:var(--green)} .ro .v.amber{color:var(--amber)} .ro .v.red{color:var(--red)}
+  .verdict{padding:13px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:12.5px;letter-spacing:.05em;color:var(--muted);display:flex;align-items:flex-start;gap:10px;line-height:1.55}
+  .verdict .dotv{width:9px;height:9px;border-radius:50%;background:var(--faint);flex:0 0 auto;margin-top:5px}
+  .verdict.good .dotv{background:var(--green);box-shadow:0 0 10px var(--green)} .verdict.good{color:var(--green)}
+  .verdict.warn .dotv{background:var(--amber);box-shadow:0 0 10px var(--amber)} .verdict.warn{color:var(--amber)}
+  .verdict.bad .dotv{background:var(--red);box-shadow:0 0 10px var(--red)} .verdict.bad{color:var(--red)}
+  details.mathd{border-top:1px solid var(--line);background:#0B1322}
+  details.mathd summary{cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:12px 16px;list-style:none}
+  details.mathd summary::-webkit-details-marker{display:none}
+  details.mathd summary::before{content:"▸ ";color:var(--indigo)}
+  details.mathd[open] summary::before{content:"▾ "}
+  details.mathd summary:hover{color:var(--text)}
+  .mlines{padding:0 16px 14px;overflow-x:auto}
+  .mline{font-family:var(--mono);font-size:12px;line-height:1.9;color:#cdd9ec;white-space:nowrap}
+  .mline b{color:var(--amber);font-weight:600}
+  .actions{display:flex;flex-wrap:wrap;gap:10px;padding:12px 16px;border-top:1px solid var(--line);align-items:center}
+  .savemsg{font-family:var(--mono);font-size:11px;color:var(--green);margin-left:auto}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:15.5px}
+  .note a{color:var(--teal);text-decoration:none;border-bottom:1px dotted rgba(52,215,197,.45)}
+  .note a:hover{border-bottom-style:solid}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="build.html"><span class="dot"></span><span class="name">Fabricate</span></a>
+    <div class="top-meta">Design Challenge</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Sizing trainer</div>
+    <h1>Design <span class="accent">challenge</span></h1>
+    <p class="dek">A spec walks in the door: lift <b>this much</b>, <b>this high</b>, <b>this fast</b>. You pick the motor count, the gear reduction, and the drum or wheel size, and the page grades your design against a real NEO's limits. It is the same trade as shifting gears on a bike, speed for push, except here a verdict tells you exactly what fails.</p>
+  </div>
+
+  <div class="challenge">
+    <div class="ch-head">
+      <span class="ch-name" id="chName">--</span>
+      <span class="ch-tag" id="chTag">challenge - / -</span>
+      <button class="btn primary" id="newBtn">🎲 New challenge</button>
+    </div>
+    <div class="ch-body">
+      <p id="chFlavor"></p>
+      <div class="chips" id="chChips"></div>
+    </div>
+  </div>
+
+  <div class="builder">
+    <div class="builder-head">
+      <span class="builder-title">Your design</span>
+      <span class="builder-tag">graded live</span>
+    </div>
+    <div class="controls">
+      <div class="ctl">
+        <label>Motors (NEO) <span id="lblMot">1</span></label>
+        <input type="range" id="mot" min="1" max="4" step="1" value="1" />
+      </div>
+      <div class="ctl">
+        <label>Gear reduction <span id="lblRatio">25 : 1</span></label>
+        <input type="range" id="ratio" min="2" max="40" step="1" value="25" />
+      </div>
+      <div class="ctl">
+        <label id="lblDiaName">Drum diameter <span id="lblDia">32 mm</span></label>
+        <input type="range" id="dia" min="20" max="60" step="2" value="32" />
+      </div>
+    </div>
+    <div class="readouts">
+      <div class="ro"><div class="k2" id="roAName">Lift time</div><div class="v" id="roA">--</div></div>
+      <div class="ro"><div class="k2" id="roBName">Rope speed</div><div class="v teal" id="roB">--</div></div>
+      <div class="ro"><div class="k2">Current / motor</div><div class="v" id="roC">--</div></div>
+      <div class="ro"><div class="k2">Torque used</div><div class="v" id="roD">--</div></div>
+    </div>
+    <div class="verdict" id="verdict"><span class="dotv"></span><span id="verdictTxt">--</span></div>
+    <details class="mathd" id="mathd">
+      <summary>Show the math</summary>
+      <div class="mlines" id="mlines"></div>
+    </details>
+    <div class="actions">
+      <button class="btn" id="resetBtn">Reset this design</button>
+      <span class="savemsg" id="savemsg"></span>
+    </div>
+  </div>
+
+  <div class="note">
+    <div class="nh">How this grades your design</div>
+    <p>It uses the standard first-order motor model. A NEO gives about <b>2.6 Nm</b> at stall, spins <b>5880 rpm</b> free, and its current climbs in a straight line from <b>1.8 A</b> free to <b>105 A</b> at stall, so the harder each motor pushes, the more amps it pulls. We charge 10 percent for gear friction and pad travel times 15 percent for spin-up, then check three things: does it move, does it hit the time or speed target, and does each motor stay under its <b>40 A</b> breaker. Real designs deserve <a href="https://www.reca.lc" target="_blank" rel="noopener">ReCalc's</a> exact curves; this page keeps every step of the arithmetic visible so you can follow it. New to sizing? Do <a href="build-lesson-44.html">the sizing lesson</a> first. Your last design for each challenge saves in this browser.</p>
+  </div>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="0">
+        <div class="qn">Question 1</div>
+        <div class="qt">Your lift design fails with "too slow". Which change actually speeds up the rope, assuming the motor still has torque to spare?</div>
+        <div class="opts">
+          <button class="opt">Less gear reduction or a bigger drum, then re-check torque and current</button>
+          <button class="opt">More gear reduction, because more torque always means more speed</button>
+          <button class="opt">A fresh battery, speed problems are always electrical</button>
+        </div>
+        <div class="explain">Rope speed is motor speed divided by the reduction, times the drum radius. Shrinking the reduction or growing the drum both raise the rope speed, exactly like shifting a bike into a higher gear. But both also demand more torque from the motor, which raises the current, so you re-check those two numbers before calling it fixed.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">The verdict says "breaker trip risk: 62 A per motor on a 40 A breaker". What actually fixes it?</div>
+        <div class="opts">
+          <button class="opt">Nothing, breakers only trip at exactly 40.0 A, so 62 A is fine for a moment</button>
+          <button class="opt">Less reduction, so the motor spins closer to free speed where current is low</button>
+          <button class="opt">More reduction, more motors, or a smaller drum, so each motor makes less torque and the current falls</button>
+        </div>
+        <div class="explain">On the NEO's line, current tracks torque: about 1.8 A when free, 105 A at stall. Anything that shrinks the torque each motor must produce, more reduction, sharing the load across more motors, or a smaller drum, slides you back down that line. Less reduction does the opposite: it loads each motor harder, which pushes it away from free speed and pulls even more current.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 3</div>
+        <div class="qt">A NEO is listed at 5880 rpm free speed and 2.6 Nm stall torque. What do those two numbers mean for a real mechanism?</div>
+        <div class="opts">
+          <button class="opt">You get both at once, 5880 rpm and 2.6 Nm together</button>
+          <button class="opt">They are the two ends of a line, and real jobs run in between: the harder the push, the slower the spin and the higher the current</button>
+          <button class="opt">They only matter for drivetrains, mechanisms use a different curve</button>
+        </div>
+        <div class="explain">Free speed happens at zero load and stall torque happens at zero speed, so a motor never delivers both at once. Every real job sits somewhere on the line between them, like pedaling a bike: spinning easy and fast, or grinding slow and hard, never both. Sizing means using gears to park the motor at a comfortable spot on that line.</div>
+      </div>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="build-lesson-44.html">&larr; The sizing lesson</a>
+    <a class="map" href="build.html">Course map</a>
+    <a href="glossary.html">Glossary &rarr;</a>
+  </nav>
+
+</div>
+
+<footer>Fabricate · Building an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  // ===MODEL===
+  // NEO brushless motor, the standard published constants.
+  var NEO = { stall: 2.6, freeRPM: 5880, stallA: 105, freeA: 1.8 };
+  var ETA = 0.9;        // gearbox efficiency, ~10% friction loss
+  var GRAV = 9.81;      // m/s^2
+  var SPINUP = 1.15;    // travel-time padding for spin-up
+  var BREAKER = 40;     // amps, one breaker per motor
+
+  var SCENARIOS = [
+    { id:"lift3", name:"Cargo elevator", type:"lift", mass:3, height:1.4, time:1.2, maxMotors:1,
+      flavor:"Your elevator carries a 3 kg carriage, grabber and game piece included, up to the high shelf. One NEO turns the winch drum.",
+      ratio:{min:2,max:40,step:1,def:25}, dia:{min:20,max:60,step:2,def:32} },
+    { id:"climb", name:"Endgame climb", type:"lift", mass:55, height:0.65, time:3.0, maxMotors:2,
+      flavor:"The buzzer is coming. A winch has to haul the whole 55 kg robot 0.65 m off the floor in 3 seconds, and you get up to two NEOs.",
+      ratio:{min:5,max:100,step:1,def:80}, dia:{min:15,max:50,step:1,def:40} },
+    { id:"fastclimb", name:"Buzzer-beater climb", type:"lift", mass:55, height:0.6, time:1.4, maxMotors:1,
+      flavor:"You left the climb late. One NEO, 1.4 seconds, 55 kg, 0.6 m of rope. It is possible, but only just, so watch the current.",
+      ratio:{min:5,max:40,step:1,def:5}, dia:{min:15,max:50,step:1,def:40} },
+    { id:"intake", name:"Floor intake", type:"roller", force:12, speed:2.0, maxMotors:1,
+      flavor:"A 240 g ball sits on the carpet and the robot drives at it at 1 m/s. Intake wheels should run about twice the approach speed so the ball gets pulled in instead of bulldozed: the wheel surface needs 2.0 m/s, with about 12 N of grip.",
+      ratio:{min:1,max:20,step:1,def:15}, dia:{min:50,max:150,step:2,def:76} },
+    { id:"feeder", name:"Shooter feed roller", type:"roller", force:15, speed:4.0, maxMotors:1,
+      flavor:"The feed wheel shoves each ball into the shooter. It needs 4.0 m/s at the surface and about 15 N of push, on one NEO.",
+      ratio:{min:1,max:20,step:1,def:12}, dia:{min:50,max:150,step:2,def:100} },
+    { id:"winch", name:"Ramp winch", type:"lift", mass:8, height:0.5, time:1.5, maxMotors:1,
+      flavor:"One NEO reels in 0.5 m of cable to pull an 8 kg ramp closed in 1.5 seconds, before an alliance partner drives onto it.",
+      ratio:{min:5,max:80,step:1,def:60}, dia:{min:15,max:50,step:1,def:25} },
+    { id:"tote", name:"Tote stack lift", type:"lift", mass:6, height:1.0, time:0.9, maxMotors:1,
+      flavor:"Cycle time is everything this season: a 6 kg stack has to rise a full meter in under 0.9 seconds, on one NEO.",
+      ratio:{min:2,max:40,step:1,def:20}, dia:{min:20,max:60,step:2,def:32} },
+    { id:"buddy", name:"Buddy climb", type:"lift", mass:110, height:0.5, time:1.5, maxMotors:4,
+      flavor:"Your robot lifts itself and a 55 kg partner, 110 kg total, 0.5 m in 1.5 seconds, before the buzzer. You get up to four NEOs on the winch, and one alone cannot make this much power.",
+      ratio:{min:10,max:100,step:1,def:100}, dia:{min:15,max:50,step:1,def:30} },
+    { id:"conveyor", name:"Ball conveyor", type:"roller", force:20, speed:1.5, maxMotors:1,
+      flavor:"A belt carries balls through the robot at 1.5 m/s against about 20 N of belt tension. One NEO drives the roller.",
+      ratio:{min:1,max:20,step:1,def:20}, dia:{min:30,max:100,step:2,def:40} }
+  ];
+
+  // Grade a design against a scenario. First-order motor model:
+  // torque and speed trade linearly, current tracks torque.
+  function grade(sc, mot, ratio, dia){
+    var r = dia / 2000;                                  // radius in meters
+    var F = sc.type === "lift" ? sc.mass * GRAV : sc.force;
+    var tauOut = F * r;                                  // torque at the drum/wheel
+    var tauM = tauOut / (ratio * mot * ETA);             // torque each motor must make
+    var frac = tauM / NEO.stall;                         // share of stall torque
+    var res = { F:F, r:r, tauOut:tauOut, tauM:tauM, frac:frac, fails:[], warns:[] };
+
+    if (frac >= 1){
+      res.rpm = 0; res.outRPM = 0; res.v = 0; res.amps = NEO.stallA; res.t = Infinity;
+      res.fails.push("stalls: needs " + tauM.toFixed(2) + " Nm from each NEO, stall is " + NEO.stall.toFixed(1) + " Nm");
+    } else {
+      res.rpm = NEO.freeRPM * (1 - frac);                // motor speed on the NEO line
+      var w = res.rpm / 60 * 2 * Math.PI;                // rad/s at the motor
+      res.outRPM = res.rpm / ratio;
+      res.v = w / ratio * r;                             // m/s at rope or wheel surface
+      res.amps = NEO.freeA + (NEO.stallA - NEO.freeA) * frac;
+      if (sc.type === "lift"){
+        res.t = SPINUP * sc.height / res.v;
+        if (res.t > sc.time) res.fails.push("too slow: " + res.t.toFixed(1) + " s (budget " + sc.time + " s)");
+        else if (res.t > 0.92 * sc.time) res.warns.push("time is tight: " + res.t.toFixed(2) + " s of a " + sc.time + " s budget");
+      } else {
+        if (res.v < sc.speed) res.fails.push("too slow: " + res.v.toFixed(1) + " m/s at the surface (need " + sc.speed.toFixed(1) + ")");
+        else if (res.v < 1.08 * sc.speed) res.warns.push("speed is tight: " + res.v.toFixed(2) + " m/s vs a " + sc.speed.toFixed(1) + " m/s target");
+      }
+      if (res.amps > BREAKER) res.fails.push("breaker trip risk: " + Math.round(res.amps) + " A per motor on a " + BREAKER + " A breaker");
+      else if (res.amps > 36) res.warns.push("current is close: " + Math.round(res.amps) + " A per motor on a " + BREAKER + " A breaker");
+    }
+    res.state = res.fails.length ? "fail" : (res.warns.length ? "warn" : "pass");
+    return res;
+  }
+  // ===END MODEL===
+
+  // ---- persistence ----
+  var STORE = "frc:design";
+  function loadAll(){ try{ return JSON.parse(localStorage.getItem(STORE)) || {}; }catch(e){ return {}; } }
+  function saveAll(d){ try{ localStorage.setItem(STORE, JSON.stringify(d)); }catch(e){} }
+  var saved = loadAll();
+
+  // ---- elements ----
+  var motEl = document.getElementById("mot"), ratioEl = document.getElementById("ratio"), diaEl = document.getElementById("dia");
+  var lblMot = document.getElementById("lblMot"), lblRatio = document.getElementById("lblRatio"), lblDia = document.getElementById("lblDia");
+  var lblDiaName = document.getElementById("lblDiaName");
+  var chName = document.getElementById("chName"), chTag = document.getElementById("chTag"), chFlavor = document.getElementById("chFlavor"), chChips = document.getElementById("chChips");
+  var roA = document.getElementById("roA"), roB = document.getElementById("roB"), roC = document.getElementById("roC"), roD = document.getElementById("roD");
+  var roAName = document.getElementById("roAName"), roBName = document.getElementById("roBName");
+  var verdict = document.getElementById("verdict"), verdictTxt = document.getElementById("verdictTxt");
+  var mlines = document.getElementById("mlines"), savemsg = document.getElementById("savemsg");
+
+  var sc = null, scIndex = 0, saveTimer = null;
+
+  function clamp(v, lo, hi){ v = parseInt(v, 10); if (isNaN(v)) v = lo; return Math.min(hi, Math.max(lo, v)); }
+
+  function chips(){
+    var out = "";
+    if (sc.type === "lift"){
+      out += '<span class="chip">Load <b>' + sc.mass + " kg</b></span>";
+      out += '<span class="chip">Lift height <b>' + sc.height + " m</b></span>";
+      out += '<span class="chip">Time budget <b>' + sc.time + " s</b></span>";
+    } else {
+      out += '<span class="chip">Surface speed <b>' + sc.speed.toFixed(1) + " m/s</b></span>";
+      out += '<span class="chip">Push force <b>' + sc.force + " N</b></span>";
+    }
+    out += '<span class="chip">Motor budget <b>' + sc.maxMotors + " NEO" + (sc.maxMotors > 1 ? "s" : "") + "</b></span>";
+    chChips.innerHTML = out;
+  }
+
+  function loadScenario(i){
+    scIndex = i; sc = SCENARIOS[i];
+    chName.textContent = sc.name;
+    chTag.textContent = "challenge " + (i + 1) + " / " + SCENARIOS.length;
+    chFlavor.textContent = sc.flavor;
+    chips();
+    lblDiaName.firstChild.textContent = (sc.type === "lift" ? "Drum diameter " : "Wheel diameter ");
+
+    motEl.min = 1; motEl.max = sc.maxMotors; motEl.disabled = (sc.maxMotors === 1);
+    ratioEl.min = sc.ratio.min; ratioEl.max = sc.ratio.max; ratioEl.step = sc.ratio.step;
+    diaEl.min = sc.dia.min; diaEl.max = sc.dia.max; diaEl.step = sc.dia.step;
+
+    var d = saved[sc.id] || {};
+    motEl.value = clamp(d.mot !== undefined ? d.mot : 1, 1, sc.maxMotors);
+    ratioEl.value = clamp(d.ratio !== undefined ? d.ratio : sc.ratio.def, sc.ratio.min, sc.ratio.max);
+    diaEl.value = clamp(d.dia !== undefined ? d.dia : sc.dia.def, sc.dia.min, sc.dia.max);
+
+    saved._last = sc.id; saveAll(saved);
+    update(false);
+  }
+
+  function mathHTML(mot, ratio, dia, res){
+    var L = [];
+    if (sc.type === "lift"){
+      L.push("load force: " + sc.mass + " kg x 9.81 = <b>" + res.F.toFixed(1) + " N</b>");
+      L.push("drum radius: " + dia + " mm / 2 = <b>" + res.r.toFixed(3) + " m</b>");
+      L.push("torque at the drum: " + res.F.toFixed(1) + " N x " + res.r.toFixed(3) + " m = <b>" + res.tauOut.toFixed(2) + " Nm</b>");
+    } else {
+      L.push("push force needed at the surface: <b>" + res.F.toFixed(1) + " N</b>");
+      L.push("wheel radius: " + dia + " mm / 2 = <b>" + res.r.toFixed(3) + " m</b>");
+      L.push("torque at the wheel: " + res.F.toFixed(1) + " N x " + res.r.toFixed(3) + " m = <b>" + res.tauOut.toFixed(2) + " Nm</b>");
+    }
+    L.push("each motor's share: " + res.tauOut.toFixed(2) + " / (" + ratio + " ratio x " + mot + " motor" + (mot > 1 ? "s" : "") + " x 0.90 eff) = <b>" + res.tauM.toFixed(3) + " Nm</b>");
+    L.push("share of NEO stall torque: " + res.tauM.toFixed(3) + " / 2.6 = <b>" + (res.frac * 100).toFixed(1) + "%</b>");
+    if (res.frac >= 1){
+      L.push("that is past 100% of stall, so the motor <b>cannot turn</b>. It sits there at ~105 A per motor, heating up.");
+    } else {
+      L.push("motor speed on the NEO line: 5880 rpm x (1 - " + res.frac.toFixed(3) + ") = <b>" + Math.round(res.rpm) + " rpm</b>");
+      var w = res.rpm / 60 * 2 * Math.PI;
+      L.push((sc.type === "lift" ? "drum" : "wheel") + " speed: " + Math.round(res.rpm) + " / " + ratio + " = <b>" + res.outRPM.toFixed(1) + " rpm</b> = " + (w / ratio).toFixed(1) + " rad/s");
+      L.push((sc.type === "lift" ? "rope" : "surface") + " speed: " + (w / ratio).toFixed(1) + " rad/s x " + res.r.toFixed(3) + " m = <b>" + res.v.toFixed(2) + " m/s</b>" + (sc.type === "roller" ? " (target " + sc.speed.toFixed(1) + " m/s)" : ""));
+      if (sc.type === "lift"){
+        L.push("lift time: " + sc.height + " m / " + res.v.toFixed(2) + " m/s x 1.15 spin-up = <b>" + res.t.toFixed(2) + " s</b> (budget " + sc.time + " s)");
+      }
+      L.push("current per motor: 1.8 + 103.2 x " + res.frac.toFixed(3) + " = <b>" + res.amps.toFixed(1) + " A</b> (breaker " + BREAKER + " A)");
+    }
+    return L.map(function(s){ return '<div class="mline">' + s + "</div>"; }).join("");
+  }
+
+  function update(save){
+    var mot = clamp(motEl.value, 1, sc.maxMotors);
+    var ratio = clamp(ratioEl.value, sc.ratio.min, sc.ratio.max);
+    var dia = clamp(diaEl.value, sc.dia.min, sc.dia.max);
+    lblMot.textContent = mot + (sc.maxMotors === 1 ? " (budget 1)" : " of " + sc.maxMotors);
+    lblRatio.textContent = ratio + " : 1";
+    lblDia.textContent = dia + " mm";
+
+    var res = grade(sc, mot, ratio, dia);
+
+    if (sc.type === "lift"){
+      roAName.textContent = "Lift time"; roBName.textContent = "Rope speed";
+      roA.textContent = isFinite(res.t) ? res.t.toFixed(2) + " s" : "never";
+      roA.className = "v " + (isFinite(res.t) && res.t <= sc.time ? (res.t > 0.92 * sc.time ? "amber" : "green") : "red");
+      roB.textContent = res.v.toFixed(2) + " m/s";
+    } else {
+      roAName.textContent = "Surface speed"; roBName.textContent = "Wheel speed";
+      roA.textContent = res.v.toFixed(2) + " m/s";
+      roA.className = "v " + (res.v >= sc.speed ? (res.v < 1.08 * sc.speed ? "amber" : "green") : "red");
+      roB.textContent = res.outRPM.toFixed(0) + " rpm";
+    }
+    roB.className = "v teal";
+    roC.textContent = res.amps.toFixed(1) + " A";
+    roC.className = "v " + (res.amps > BREAKER ? "red" : (res.amps > 0.7 * BREAKER ? "amber" : "green"));
+    roD.textContent = (res.frac * 100).toFixed(0) + "% of stall";
+    roD.className = "v " + (res.frac >= 1 ? "red" : (res.frac > 0.7 ? "amber" : "indigo"));
+
+    var cls, msg;
+    if (res.state === "fail"){ cls = "bad"; msg = "FAIL · " + res.fails.join(" · "); }
+    else if (res.state === "warn"){ cls = "warn"; msg = "PASSES, BARELY · " + res.warns.join(" · "); }
+    else {
+      cls = "good";
+      msg = sc.type === "lift"
+        ? "PASS · lifts it in " + res.t.toFixed(2) + " s at " + res.amps.toFixed(0) + " A per motor, with margin"
+        : "PASS · " + res.v.toFixed(1) + " m/s at the surface, " + res.amps.toFixed(0) + " A per motor, with margin";
+    }
+    verdict.className = "verdict " + cls;
+    verdictTxt.textContent = msg;
+    mlines.innerHTML = mathHTML(mot, ratio, dia, res);
+
+    if (save){
+      saved[sc.id] = { mot: mot, ratio: ratio, dia: dia };
+      saveAll(saved);
+      savemsg.textContent = "design saved";
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(function(){ savemsg.textContent = ""; }, 1400);
+    }
+  }
+
+  // ---- wiring ----
+  [motEl, ratioEl, diaEl].forEach(function(el){
+    el.addEventListener("input", function(){ update(true); });
+  });
+  document.getElementById("newBtn").addEventListener("click", function(){
+    var i;
+    do { i = Math.floor(Math.random() * SCENARIOS.length); } while (SCENARIOS.length > 1 && i === scIndex);
+    loadScenario(i);
+  });
+  document.getElementById("resetBtn").addEventListener("click", function(){
+    delete saved[sc.id]; saveAll(saved); loadScenario(scIndex);
+  });
+
+  var startIdx = 0;
+  if (saved._last){
+    SCENARIOS.forEach(function(s, i){ if (s.id === saved._last) startIdx = i; });
+  }
+  loadScenario(startIdx);
+})();
+</script>
+<script>
+(function(){
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="build:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script src="account-config.js"></script>
+<script src="account.js"></script>
+</body>
+</html>
