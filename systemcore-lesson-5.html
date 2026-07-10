@@ -75,6 +75,26 @@
   .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
   .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)} .coursenav a.next-link{color:var(--amber);border-color:rgba(255,176,32,.4)}
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  /* Sort-the-statements drill (shared widget) */
+  .sortdrill{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:18px;margin:18px 0}
+  .sd-status{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+  .sd-count{color:var(--amber)}
+  .sd-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+  .sd-chip{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--text);padding:9px 13px;border-radius:9px;cursor:pointer;font-size:14.5px;font-family:var(--sans);transition:.12s}
+  .sd-chip:hover{border-color:var(--muted)}
+  .sd-chip.sel{border-color:var(--amber);box-shadow:0 0 0 1px var(--amber)}
+  .sd-chip.bad{border-color:var(--red);background:rgba(255,107,107,.12)}
+  .sd-buckets{display:grid;gap:10px}
+  @media(min-width:560px){.sd-buckets{grid-auto-flow:column;grid-auto-columns:1fr}}
+  .sd-bucket{text-align:left;border:1px dashed var(--line-2);background:rgba(27,37,64,.35);border-radius:11px;padding:12px 13px;cursor:pointer;font-family:var(--sans);color:var(--text);transition:.12s}
+  .sd-bucket:hover{border-color:var(--amber)}
+  .sd-bucket b{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .sd-drop{display:flex;flex-wrap:wrap;gap:6px}
+  .sd-tag{font-size:12px;color:var(--green);border:1px solid rgba(67,214,126,.45);background:rgba(67,214,126,.08);border-radius:6px;padding:2px 8px}
+  .sd-why{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--red);padding:3px 0 3px 12px;display:none}
+  .sd-why.show{display:block}
+  .sd-doneline{margin-top:12px;font-size:14.5px;color:var(--green);display:none}
+  .sd-doneline.show{display:block}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -139,6 +159,84 @@
         <p style="margin-top:8px">The dividing line is whether the job needs a trained machine-learning model and needs it fast. Spotting a specific game piece in a cluttered scene, telling your robots from the other alliance, or sorting objects by shape or color are the kinds of learned tasks an AI chip handles well without slowing the main board. Jobs that follow fixed rules, like reading an AprilTag, finding a bright retroreflective target, or tracking a known color, run fine on the main board already and gain little from the extra chip. Most teams should start on the main board and only add the accelerator if a real task is too slow or too hard without it, and note this slot is an alpha detail to confirm against official sources.</p>
       </details>
     </div>
+
+    <div class="sortwrap" id="sortwrap" hidden>
+      <div class="kicker">Sort it out</div>
+      <h2>Sort the statements</h2>
+      <p>Before the quiz, try a quick drill. Tap a statement, then tap the bucket it belongs in. A right pick drops into its bucket in green. A wrong pick flashes red and tells you why.</p>
+      <div class="sortdrill">
+        <div class="sd-status"><span>Sorting drill</span><span class="sd-count" aria-live="polite"></span></div>
+        <div class="sd-chips"></div>
+        <div class="sd-buckets"></div>
+        <div class="sd-why" aria-live="polite"></div>
+        <div class="sd-doneline">All sorted. Nice work, now take the quick check below.</div>
+      </div>
+    </div>
+    <script>
+    (function(){
+      "use strict";
+      try{
+      // Re-verification only needs edits here: statement text, bucket index, and the one-line why.
+      const CHIPS=[
+        {t:"Vision processing that reads AprilTags", b:0, why:"Plug a USB camera into the board and it does the vision work. That is built in now."},
+        {t:"A gyro plus accelerometer for heading", b:0, why:"That is the onboard IMU, part of the board itself for heading, odometry, and localization."},
+        {t:"A dual-band WiFi link to the Driver Station", b:0, why:"The WiFi radio is integrated, so the link to the Driver Station comes with the board."},
+        {t:"A vision coprocessor you buy and configure", b:1, why:"A separate coprocessor is how vision usually worked before. SystemCore builds that in."},
+        {t:"A radio box with its own power and wiring", b:1, why:"The separate radio box is the old setup. On SystemCore it is gone."},
+        {t:"A Hailo-8 AI chip in the M.2 slot", b:2, why:"The Hailo-8 accelerator is an optional add-in for advanced ML vision. Most teams will not need it."}
+      ];
+      const BUCKETS=["Built into SystemCore","The old add-on way","Optional extra"];
+      var wrap=document.getElementById("sortwrap"); if(!wrap) return;
+      var tray=wrap.querySelector(".sd-chips"), rack=wrap.querySelector(".sd-buckets"),
+          count=wrap.querySelector(".sd-count"), why=wrap.querySelector(".sd-why"),
+          doneline=wrap.querySelector(".sd-doneline");
+      var sel=null, sorted=0, whyTimer=null, drops=[], chipEls=[];
+      BUCKETS.forEach(function(name,bi){
+        var b=document.createElement("button"); b.type="button"; b.className="sd-bucket";
+        var label=document.createElement("b"); label.textContent=name; b.appendChild(label);
+        var drop=document.createElement("span"); drop.className="sd-drop"; b.appendChild(drop);
+        drops.push(drop);
+        b.addEventListener("click",function(){ place(bi); });
+        rack.appendChild(b);
+      });
+      CHIPS.forEach(function(c,ci){
+        var el=document.createElement("button"); el.type="button"; el.className="sd-chip";
+        el.textContent=c.t; el.setAttribute("aria-pressed","false");
+        el.addEventListener("click",function(){
+          if(el.disabled) return;
+          if(sel===ci){ sel=null; el.classList.remove("sel"); el.setAttribute("aria-pressed","false"); return; }
+          if(sel!==null){ chipEls[sel].classList.remove("sel"); chipEls[sel].setAttribute("aria-pressed","false"); }
+          sel=ci; el.classList.add("sel"); el.setAttribute("aria-pressed","true");
+        });
+        chipEls.push(el); tray.appendChild(el);
+      });
+      function note(msg){
+        why.textContent=msg; why.classList.add("show");
+        if(whyTimer) clearTimeout(whyTimer);
+        whyTimer=setTimeout(function(){ why.classList.remove("show"); },5200);
+      }
+      function place(bi){
+        if(sel===null){ note("Pick a statement first, then tap a bucket."); return; }
+        var ci=sel, c=CHIPS[ci], el=chipEls[ci];
+        if(c.b===bi){
+          sel=null; el.classList.remove("sel","bad"); el.setAttribute("aria-pressed","false");
+          el.disabled=true; el.style.display="none";
+          var tag=document.createElement("span"); tag.className="sd-tag"; tag.textContent=c.t;
+          drops[bi].appendChild(tag);
+          sorted++; why.classList.remove("show");
+          if(sorted===CHIPS.length){ count.textContent="All "+CHIPS.length+" sorted"; doneline.classList.add("show"); }
+          else { count.textContent=sorted+" of "+CHIPS.length+" sorted"; }
+        } else {
+          el.classList.add("bad");
+          setTimeout(function(){ el.classList.remove("bad"); },900);
+          note(c.why);
+        }
+      }
+      count.textContent="0 of "+CHIPS.length+" sorted";
+      wrap.hidden=false;
+      }catch(e){}
+    })();
+    </script>
 
     <div class="kicker">Checkpoint</div>
     <h2>Quick check</h2>
