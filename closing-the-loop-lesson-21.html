@@ -252,6 +252,48 @@
       <div class="m-item" data-m="recover"><span class="m-st">○</span><span>Put <b>kV back to 0.90</b> and keep <b>kP at 3 or less</b>. Wait for at speed, hit <b>Shoot</b>, and be back <b>at speed within 0.9 s</b>. A gentle kP recovers fast when kV holds the base.</span></div>
       <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> rapid fire. Land <b>3 shots in 8 seconds</b>, each recovered within <b>0.9 s</b>, with kP still at <b>3 or less</b>.</span></div>
     </div>
+    <div class="missions" id="clinic" style="border-left-color:var(--amber)">
+      <div class="m-head" style="color:var(--amber)">🩺 Fault clinic <span class="m-sub">a drill, nothing is saved</span></div>
+      <p style="font-size:14px;color:var(--muted);margin:0 0 10px">Pick a symptom and the sim above quietly breaks. Read the scope and the readouts like a pit crew, name the fault, then repair it with the sliders.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <button class="btn" data-clinic="starved">Never quite reaches speed</button>
+        <button class="btn" data-clinic="sleepy">Slow to recover after a shot</button>
+        <button class="btn" data-clinic="hot">Runs hot, parks above target</button>
+      </div>
+      <div id="clinicCoach" style="display:none;font-size:13.5px;color:var(--muted);font-style:italic;margin:10px 0 0"></div>
+      <div class="q" data-clinic-q="starved" data-correct="0" style="display:none;padding:12px 0 0;border-bottom:none">
+        <div class="qn">Diagnose it</div>
+        <div class="qt" style="font-size:15.5px">The wheel climbs, flattens out just below the target, and parks there. At speed? never says yes. What broke?</div>
+        <div class="opts">
+          <button class="opt">kV is starved - the feedforward is not feeding enough volts for this speed</button>
+          <button class="opt">kP is too high and fights the feedforward</button>
+          <button class="opt">The target is set faster than the wheel can possibly spin</button>
+        </div>
+        <div class="explain">A steady gap below the target is a feedforward problem. kV predicts the volts a speed needs, and when it is starved, a gentle kP cannot make up the whole difference. Raise kV until At speed? says yes and stays.</div>
+      </div>
+      <div class="q" data-clinic-q="sleepy" data-correct="1" style="display:none;padding:12px 0 0;border-bottom:none">
+        <div class="qn">Diagnose it</div>
+        <div class="qt" style="font-size:15.5px">It holds the target speed fine, but after a shot the speed takes ages to climb back. What broke?</div>
+        <div class="opts">
+          <button class="opt">The wheel is too heavy, so it recovers slowly</button>
+          <button class="opt">kP is nearly zero, so almost nothing reacts when the speed dips</button>
+          <button class="opt">kV is too low to hold the target speed</button>
+        </div>
+        <div class="explain">kV holds the base voltage, but it never changes when a shot steals speed. Reacting to the dip is feedback's job, and with kP asleep the dip refills at the wheel's own slow pace. A gentle kP sees the error and adds volts right away.</div>
+      </div>
+      <div class="q" data-clinic-q="hot" data-correct="2" style="display:none;padding:12px 0 0;border-bottom:none">
+        <div class="qn">Diagnose it</div>
+        <div class="qt" style="font-size:15.5px">The wheel blows straight past the target and parks well above it. What broke?</div>
+        <div class="opts">
+          <button class="opt">kP is too low to pull the speed back down</button>
+          <button class="opt">The wheel lost its drag, so it coasts too fast</button>
+          <button class="opt">kV is too high - the feedforward feeds more volts than the target needs</button>
+        </div>
+        <div class="explain">Parking above the target is the mirror image of a starved kV. The feedforward overfeeds every loop, and a gentle kP cannot cancel a steady overdose. Lower kV until the base voltage matches the target again.</div>
+      </div>
+      <div id="clinicFix" style="display:none;font-size:14px;margin-top:10px"></div>
+      <div id="clinicDone" style="display:none;font-family:var(--mono);font-size:12.5px;letter-spacing:.08em;color:var(--green);margin-top:10px">Clinic clear ✓</div>
+    </div>
   </section>
 
   <section>
@@ -622,6 +664,91 @@ cfg.Slot0.kP = <span class="num">5.0</span>;    <span class="cm">// amps per rps
       opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
     });
   });
+
+  // ---- fault clinic (additive drill; wrapped so a clinic bug can never break the lesson) ----
+  try{
+  var cCoach=document.getElementById('clinicCoach'), cFix=document.getElementById('clinicFix'), cDone=document.getElementById('clinicDone');
+  var cBtns={}, cQs={}, cDiag={}, cFixed={};
+  Array.prototype.forEach.call(document.querySelectorAll('#clinic [data-clinic]'),function(b){ cBtns[b.getAttribute('data-clinic')]=b; });
+  Array.prototype.forEach.call(document.querySelectorAll('#clinic [data-clinic-q]'),function(q){ cQs[q.getAttribute('data-clinic-q')]=q; });
+  var CASES={
+    starved:{ tgt:0.7, kV:0.5, kP:1.5,
+      coach:'Fault injected. Watch the spin-up on the scope and the Error readout, then name the fault below.',
+      hint:'Diagnosis confirmed. Now repair it with the sliders: with the target at 0.5 or higher, get At speed? to a steady yes.',
+      fixed:'Fixed - kV was starving the feedforward. With kV back near 0.90 the base voltage matches the speed and kP only has to trim.' },
+    sleepy:{ tgt:0.7, kV:0.84, kP:0.2,
+      coach:'Fault injected. Wait for at speed, hit Shoot, and time the recovery. Then name the fault below.',
+      hint:'Diagnosis confirmed. Now repair it: set kP between 1.2 and 3, wait for at speed, then Shoot. Recover within 1.5 s and it counts.',
+      fixed:'Fixed - kP was nearly zero, so almost nothing reacted when the shot stole speed. A gentle kP snaps the recovery back.' },
+    hot:{ tgt:0.7, kV:1.4, kP:1.5,
+      coach:'Fault injected. Watch where the wheel parks compared to the target line, then name the fault below.',
+      hint:'Diagnosis confirmed. Now repair it with the sliders: with the target at 0.5 or higher, get At speed? to a steady yes.',
+      fixed:'Fixed - kV was overfeeding, so the wheel ran above the target. Feedforward should match the speed, not beat it.' }
+  };
+  var cActive=null, cHold=0, cShotT=-1, cShotKpOk=false;
+  function cInject(name){
+    var c=CASES[name]; if(!c) return;
+    cActive=name; cHold=0; cShotT=-1; cShotKpOk=false;
+    S.tgt=c.tgt; S.kV=c.kV; S.kP=c.kP; S.w=0;   // fresh spin-up so the symptom shows from the start
+    el.tgt.value=c.tgt; el.tgtVal.textContent=c.tgt.toFixed(2);
+    el.kv.value=c.kV; el.kvVal.textContent=c.kV.toFixed(2);
+    el.kp.value=c.kP; el.kpVal.textContent=c.kP.toFixed(1);
+    Object.keys(cQs).forEach(function(k){ cQs[k].style.display=(k===name)?'block':'none'; });
+    cCoach.textContent=c.coach; cCoach.style.display='block';
+    if(cFixed[name]){ cFix.textContent=c.fixed; cFix.style.color='var(--green)'; cFix.style.display='block'; }
+    else if(cDiag[name]){ cFix.textContent=c.hint; cFix.style.color='var(--muted)'; cFix.style.display='block'; }
+    else { cFix.style.display='none'; }
+  }
+  function cConfirm(name){
+    if(cFixed[name]) return;
+    cFixed[name]=true;
+    cFix.textContent=CASES[name].fixed; cFix.style.color='var(--green)'; cFix.style.display='block';
+    var b=cBtns[name];
+    if(b){ b.textContent='✓ '+b.textContent; b.style.borderColor='rgba(67,214,126,.55)'; b.style.color='var(--green)'; }
+    if(cFixed.starved && cFixed.sleepy && cFixed.hot) cDone.style.display='block';
+  }
+  Object.keys(cBtns).forEach(function(name){
+    cBtns[name].addEventListener('click',function(){ cInject(name); });
+  });
+  Object.keys(cQs).forEach(function(name){
+    var q=cQs[name], correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt'), explain=q.querySelector('.explain');
+    Array.prototype.forEach.call(opts,function(opt,i){
+      opt.addEventListener('click',function(){
+        if(cDiag[name]) return;
+        if(i===correct){
+          cDiag[name]=true;
+          Array.prototype.forEach.call(opts,function(o){o.classList.add('locked');});
+          opt.classList.add('correct'); explain.classList.add('show');
+          if(cActive===name && !cFixed[name]){ cHold=0; cShotT=-1; cFix.textContent=CASES[name].hint; cFix.style.color='var(--muted)'; cFix.style.display='block'; }
+        } else { opt.classList.add('wrong'); explain.classList.add('show'); }
+      });
+    });
+  });
+  el.shoot.addEventListener('click',function(){
+    // runs after the sim's own listener, so loadTimer===0.16 means this click really fired a shot
+    if(cActive!=='sleepy' || cFixed.sleepy || !cDiag.sleepy) return;
+    if(S.loadTimer>0.155 && cShotT<0 && S.tgt>=0.5 && Math.abs(S.tgt-S.w)<S.tol){
+      cShotT=performance.now()/1000; cShotKpOk=(S.kP>=1.15 && S.kP<=3.05);
+    }
+  });
+  setInterval(function(){
+    if(!cActive || cFixed[cActive] || !cDiag[cActive]) return;
+    var atSp=Math.abs(S.tgt-S.w)<S.tol && S.tgt>0.05;
+    if(cActive==='starved'){
+      if(atSp && S.tgt>=0.5 && S.kV>=0.7){ cHold+=0.1; if(cHold>=1.6) cConfirm('starved'); } else { cHold=0; }
+    } else if(cActive==='hot'){
+      if(atSp && S.tgt>=0.5 && S.kV<=0.95){ cHold+=0.1; if(cHold>=1.6) cConfirm('hot'); } else { cHold=0; }
+    } else if(cShotT>=0){
+      var since=performance.now()/1000-cShotT;
+      if(since>3){ cShotT=-1; }
+      else if(since>0.25 && atSp){
+        if(since<=1.5 && cShotKpOk && S.kP>=1.15 && S.kP<=3.05 && S.tgt>=0.5) cConfirm('sleepy');
+        cShotT=-1;
+      }
+    }
+  },100);
+  }catch(e){}
 })();
 </script>
 <script>
