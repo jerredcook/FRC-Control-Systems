@@ -162,6 +162,67 @@
       </div>
     </div>
     <p class="caption">A moderate kP slides the robot smoothly onto the tag and locks. Crank kP up and, with the camera's small delay, it overshoots and hunts back and forth, the exact same over-tuning you saw with mechanisms. The trace at the bottom is tx over time.</p>
+
+    <style>
+      /* fault clinic - additive styles only */
+      #clinic .btn.active{background:var(--indigo);border-color:var(--indigo);color:#0a0f24;font-weight:700}
+      #clinic .cq{display:none;border-top:1px solid var(--line)}
+      #clinic .cq.show{display:block}
+      #clinic .cq .q{border-bottom:none}
+      #clinic .fixline{display:none;margin:0 18px 18px;padding:11px 14px;border:1px dashed var(--line-2);border-radius:9px;font-size:14.5px;color:var(--muted)}
+      #clinic .fixline.show{display:block}
+      #clinic .fixline.done{border-style:solid;border-color:var(--green);color:var(--green)}
+    </style>
+    <div class="demo" id="clinic" style="margin-top:16px">
+      <div class="demo-head">
+        <span class="demo-title">Fault clinic · diagnose, then fix</span>
+        <span class="demo-tag" id="clinicTag">pick a symptom</span>
+      </div>
+      <div class="controls" style="border-top:none">
+        <span style="font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)">Load a symptom</span>
+        <button class="btn" data-fault="lowgain">Slow and lazy</button>
+        <button class="btn" data-fault="hunt">Overshoots every time</button>
+        <button class="btn" data-fault="drift">Never quite locks</button>
+      </div>
+      <div class="cq" data-cq="lowgain">
+        <div class="q" data-correct="1">
+          <div class="qn">Diagnose it</div>
+          <div class="qt">The robot creeps toward the tag and takes ages to arrive, even though the kP label reads 0.08. What is really wrong?</div>
+          <div class="opts">
+            <button class="opt" data-why="If tx were stuck at zero the robot would not move at all. It is moving, just weakly, so the error signal is alive and the output is what is starving.">The camera is broken and reports tx as zero</button>
+            <button class="opt" data-why="Right. The output is gain times error, and the effective gain here is a fraction of what the label claims, so every degree of error earns only a tiny nudge.">The effective turn gain is far lower than the label says</button>
+            <button class="opt" data-why="A P loop handles any starting offset. The offset size changes how long the move is, not how weakly the robot turns per degree of error.">The target offset is too large for a PID loop</button>
+          </div>
+          <div class="explain"></div>
+        </div>
+      </div>
+      <div class="cq" data-cq="hunt">
+        <div class="q" data-correct="0">
+          <div class="qn">Diagnose it</div>
+          <div class="qt">You press Aim and the robot whips past the tag, swings back, and hunts forever without settling. What is the fault?</div>
+          <div class="opts">
+            <button class="opt" data-why="Right. A big gain plus a camera that reports late means every correction lands too hard and too late, so the robot sails past center and swings back the other way.">The effective gain is far too high for a camera that reports late</button>
+            <button class="opt" data-why="The tag is bolted to the field. All the motion you see is the robot overcorrecting itself.">The tag keeps moving, so the robot can never catch it</button>
+            <button class="opt" data-why="A weak battery makes a robot slower and gentler, not more violent. This robot is turning too hard, which points at gain.">The battery is low, so the robot cannot stop in time</button>
+          </div>
+          <div class="explain"></div>
+        </div>
+      </div>
+      <div class="cq" data-cq="drift">
+        <div class="q" data-correct="2">
+          <div class="qn">Diagnose it</div>
+          <div class="qt">The robot swings on target quickly, then parks about a degree and a half off, and the status never reaches LOCKED. What is the fault?</div>
+          <div class="opts">
+            <button class="opt" data-why="A dirty lens adds noise or dropped targets, not a clean and steady offset. This error is stable and repeatable, which points at the loop itself.">A dirty camera lens keeps tx from reaching zero</button>
+            <button class="opt" data-why="The lock logic is fine. Watch the tx readout: the error really is parked outside the tolerance, so the problem is upstream of the status check.">The LOCKED check is broken, the aim is actually fine</button>
+            <button class="opt" data-why="Right. Something like a dragging wheel or a drifting gyro is steadily shoving the robot off, and a P-only loop parks with leftover error under a constant push. That leftover error shrinks as the gain grows.">A steady push is shoving the robot off target, and a P-only loop leaves leftover error against it</button>
+          </div>
+          <div class="explain"></div>
+        </div>
+      </div>
+      <div class="fixline" id="clinicFixline"></div>
+    </div>
+    <p class="caption">The clinic plants a hidden fault in the sim above, so the slider labels can lie to you. Read the behavior, name the fault, then fix it with the sliders until the status holds LOCKED.</p>
   </section>
 
   <section>
@@ -190,13 +251,32 @@
 
     <div class="code-ex">
       <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
-      <div class="ctask">Run the camera error through the PID controller to get a turn command. Fill in the method.</div>
-<pre class="code"><span class="ty">double</span> turn = aim.<input class="blank" data-ans="calculate" aria-label="blank" autocomplete="off" spellcheck="false">(tx, <span class="num">0</span>);</pre>
+      <div class="ctask">Wire the whole aim loop: declare the controller, turn the camera error into a command, then apply it as a turn in place. Fill in the blanks from top to bottom.</div>
+<pre class="code"><span class="cm">// 1 · declare the controller: gentle gains for a laggy camera</span>
+<span class="ty">PIDController</span> aim = <span class="kw">new</span> <input class="blank" data-ans="pidcontroller" data-fill="PIDController" style="width:15ch" aria-label="blank" autocomplete="off" spellcheck="false">(<span class="num">0.03</span>, <span class="num">0</span>, <span class="num">0.001</span>);
+
+<span class="cm">// 2 · each loop: turn the error into a command</span>
+<span class="ty">double</span> turn = aim.<input class="blank" data-ans="calculate" data-fill="calculate" aria-label="blank" autocomplete="off" spellcheck="false">(tx, <span class="num">0</span>);
+
+<span class="cm">// 3 · apply it as a turn in place</span>
+drive.<input class="blank" data-ans="arcadedrive" data-fill="arcadeDrive" style="width:13ch" aria-label="blank" autocomplete="off" spellcheck="false">(<span class="num">0</span>, turn);</pre>
       <div class="code-actions">
         <button class="btn" id="check">Check</button>
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+    </div>
+
+    <div class="code-ex" id="wex">
+      <div class="chead"><span class="ic">✎</span> Now you write it</div>
+      <div class="ctask">No scaffold this time. Write the <span class="k">isFinished()</span> body: return whether the camera's yaw is within <span class="k">1.0</span> degree of center.</div>
+      <input id="wex-in" data-ans="returnmath.abs(camera.getyaw())&lt;1.0|returnmath.abs(camera.getyaw())&lt;1|returnmath.abs(tx)&lt;1.0" aria-label="your line of code" autocomplete="off" spellcheck="false" placeholder="type the full line of Java here" style="font-family:var(--mono);font-size:13px;width:100%;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:8px 10px;outline:none;margin:0 0 14px">
+      <div class="code-actions">
+        <button class="btn" id="wex-check">Check</button>
+        <button class="btn" id="wex-hint" style="display:none">Hint</button>
+        <span class="code-result" id="wex-res"></span>
+      </div>
+      <div class="ctask" id="wex-hintbox" style="display:none;margin:12px 0 0">Hint: <span class="k">return Math.abs(...) &lt; 1.0;</span> with the camera's yaw inside the abs. Spacing, capitalization, and the semicolon are forgiven.</div>
     </div>
   </section>
 
@@ -343,15 +423,93 @@
   document.getElementById('check').addEventListener('click',function(){
     var all=true;
     blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
-    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - calculate'; res.className='code-result '+(all?'ok':'no');
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - check the red boxes'; res.className='code-result '+(all?'ok':'no');
   });
-  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='calculate';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
+  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value=b.getAttribute('data-fill')||(b.getAttribute('data-ans')||'').split('|')[0];b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
 
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
     opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
   });
+
+  // ---- fault clinic (additive) - injects hidden faults, watches for the fix ----
+  try{
+    var faultBtns=Array.prototype.slice.call(document.querySelectorAll('#clinic [data-fault]'));
+    var clinicTag=document.getElementById('clinicTag');
+    var clinicFixline=document.getElementById('clinicFixline');
+    if(faultBtns.length && clinicTag && clinicFixline){
+      var clinicFault=null, clinicArmed=false, clinicDone=false, clinicLockFrames=0;
+      var CLINIC_DRIFT=0.12; // constant push, degrees per frame, for the drift fault
+      var CLINIC_FIX={
+        lowgain:'Now fix it: raise kP until the robot turns with purpose and the status holds LOCKED for a couple of seconds.',
+        hunt:'Now fix it: bring kP down until the hunting dies away and the status holds LOCKED for a couple of seconds.',
+        drift:'Now fix it: the push is still there, so raise kP until the leftover error fits inside the tolerance and the status holds LOCKED. Push it too far and the latency hunting comes back.'
+      };
+      var CLINIC_DONE={
+        lowgain:'Fixed - that was an effective gain four times smaller than the label, so the loop was starving. A healthy kP gives every degree of error a real turn.',
+        hunt:'Fixed - that was an effective gain of 0.26 against a camera that reports late. A calmer kP lets each correction land before the next stale reading arrives.',
+        drift:'Fixed - a steady push was shoving the robot off target, and a P-only loop parks with leftover error against a constant push. Extra gain shrank that error inside the tolerance. On a real robot a pinch of kI erases it completely.'
+      };
+      var clinicInject=function(name){
+        clinicFault=name; clinicArmed=false; clinicDone=false; clinicLockFrames=0;
+        heading=0; out=0; txHist.length=0; trace.length=0;
+        targetBearing=28;
+        var tgS=document.getElementById('tg'), tgL=document.getElementById('tgv');
+        if(tgS)tgS.value=28; if(tgL)tgL.textContent='28°';
+        var kpS=document.getElementById('kp'), kpL=document.getElementById('kpv');
+        if(kpS)kpS.value=8; if(kpL)kpL.textContent='0.08';
+        kP = name==='lowgain'?0.02:(name==='hunt'?0.26:0.08);
+        if(!aiming){ aiming=true; var ab=document.getElementById('aim'); if(ab)ab.textContent='Stop'; }
+        faultBtns.forEach(function(b){b.classList.toggle('active',b.getAttribute('data-fault')===name);});
+        document.querySelectorAll('#clinic .cq').forEach(function(c){
+          c.classList.toggle('show',c.getAttribute('data-cq')===name);
+          c.querySelectorAll('.opt').forEach(function(o){o.classList.remove('correct','wrong','locked');});
+          var ex=c.querySelector('.explain'); if(ex){ex.classList.remove('show');ex.textContent='';}
+        });
+        clinicFixline.className='fixline'; clinicFixline.textContent='';
+        clinicTag.textContent='diagnose it';
+      };
+      faultBtns.forEach(function(b){ b.addEventListener('click',function(){ clinicInject(b.getAttribute('data-fault')); }); });
+      document.querySelectorAll('#clinic .cq .q').forEach(function(q){
+        var correct=parseInt(q.getAttribute('data-correct'),10);
+        var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain');
+        opts.forEach(function(opt,i){
+          opt.addEventListener('click',function(){
+            if(opt.classList.contains('locked'))return;
+            if(explain){ explain.textContent=opt.getAttribute('data-why')||''; explain.classList.add('show'); }
+            if(i===correct){
+              opts.forEach(function(o){o.classList.add('locked');});
+              opt.classList.add('correct');
+              clinicArmed=true; clinicLockFrames=0;
+              clinicFixline.textContent=CLINIC_FIX[clinicFault]||'';
+              clinicFixline.className='fixline show';
+              clinicTag.textContent='fix it with the sliders';
+            } else {
+              opt.classList.add('wrong');
+            }
+          });
+        });
+      });
+      (function clinicFrame(){
+        try{
+          if(clinicFault==='drift' && aiming){ heading-=CLINIC_DRIFT; }
+          if(clinicArmed && !clinicDone){
+            var lockedNow = aiming && Math.abs(tx())<1.2 && Math.abs(out)<0.5;
+            var gainOk = clinicFault==='lowgain' ? kP>=0.05 : (clinicFault==='hunt' ? kP<=0.16 : true);
+            if(lockedNow && gainOk){ clinicLockFrames++; } else { clinicLockFrames=0; }
+            if(clinicLockFrames>=110){
+              clinicDone=true;
+              clinicFixline.textContent=CLINIC_DONE[clinicFault]||'Fixed.';
+              clinicFixline.className='fixline show done';
+              clinicTag.textContent='fixed ✓';
+            }
+          }
+        }catch(e){}
+        requestAnimationFrame(clinicFrame);
+      })();
+    }
+  }catch(e){}
 })();
 </script>
 <script>
@@ -387,6 +545,38 @@
     window.addEventListener('keydown',onRan,true);
   } else { ran=true; }
   opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(picked>=0)return; picked=i; opts.forEach(function(o){o.classList.add('locked');}); if(ran){ reveal(); } else { note.style.display='block'; } }); });
+})();
+</script>
+<script>
+(function(){
+  // "Now you write it" - free-text exercise, fully isolated from the rest of the page
+  try{
+    var input=document.getElementById('wex-in'); if(!input) return;
+    var res=document.getElementById('wex-res'), hintBtn=document.getElementById('wex-hint'), hintBox=document.getElementById('wex-hintbox');
+    var misses=0;
+    function wnorm(s){return String(s).toLowerCase().replace(/\s+/g,'').replace(/;/g,'').replace(/'/g,'"');}
+    function paint(ok){
+      input.style.borderColor=ok?'var(--green)':'var(--red)';
+      input.style.color=ok?'var(--green)':'var(--red)';
+      input.style.background=ok?'rgba(67,214,126,.1)':'rgba(255,107,107,.1)';
+    }
+    function check(){
+      var ans=(input.getAttribute('data-ans')||'').split('|');
+      var ok=ans.indexOf(wnorm(input.value))!==-1;
+      paint(ok);
+      if(ok){ res.textContent='Correct ✓'; res.className='code-result ok'; }
+      else{
+        misses++;
+        if(misses>=2){ hintBtn.style.display=''; res.textContent='Not yet - try the hint'; }
+        else{ res.textContent='Not yet - compare with the walkthrough above'; }
+        res.className='code-result no';
+      }
+    }
+    document.getElementById('wex-check').addEventListener('click',check);
+    input.addEventListener('keydown',function(e){ if(e.key==='Enter'){ check(); } });
+    input.addEventListener('input',function(){ input.style.borderColor='var(--amber)'; input.style.color='var(--amber)'; input.style.background='var(--panel-2)'; });
+    hintBtn.addEventListener('click',function(){ hintBox.style.display=''; });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

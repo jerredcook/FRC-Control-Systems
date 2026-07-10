@@ -204,13 +204,36 @@ self.odometry.<span class="fn">resetPosition</span>(self.gyro.<span class="fn">g
 
     <div class="code-ex">
       <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
-      <div class="ctask">Every loop, advance the pose estimate with the newest gyro heading and wheel distances. Fill in the method.</div>
-<pre class="code">self.odometry.<input class="blank" data-ans="update" aria-label="blank" autocomplete="off" spellcheck="false">(self.gyro.<span class="fn">getRotation2d</span>(), left_dist, right_dist)</pre>
+      <div class="ctask">Assemble the whole odometry pipeline: anchor it to a known start, advance it every loop, read the pose back, then re-anchor on a fix. Fill in the blanks from top to bottom.</div>
+<pre class="code"><span class="cm"># 1 · declare it, anchored to a known starting pose</span>
+self.odometry = <span class="ty">DifferentialDriveOdometry</span>(
+    self.gyro.<input class="blank" data-ans="getrotation2d" data-fill="getRotation2d" style="width:15ch" aria-label="blank" autocomplete="off" spellcheck="false">(), left_dist, right_dist, start_pose)
+
+<span class="cm"># 2 · every loop: advance the estimate</span>
+self.odometry.<input class="blank" data-ans="update" data-fill="update" aria-label="blank" autocomplete="off" spellcheck="false">(self.gyro.<span class="fn">getRotation2d</span>(), left_dist, right_dist)
+
+<span class="cm"># 3 · read the pose back whenever you need it</span>
+pose = self.odometry.<input class="blank" data-ans="getposemeters" data-fill="getPoseMeters" style="width:15ch" aria-label="blank" autocomplete="off" spellcheck="false">()
+
+<span class="cm"># 4 · snap back to a known pose on a vision fix</span>
+self.odometry.<input class="blank" data-ans="resetposition" data-fill="resetPosition" style="width:15ch" aria-label="blank" autocomplete="off" spellcheck="false">(self.gyro.<span class="fn">getRotation2d</span>(), left_dist, right_dist, vision_pose)</pre>
       <div class="code-actions">
         <button class="btn" id="check">Check</button>
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+    </div>
+
+    <div class="code-ex" id="wex">
+      <div class="chead"><span class="ic">✎</span> Now you write it</div>
+      <div class="ctask">No scaffold this time. Write the line that reads the current pose into a variable named <span class="k">pose</span>.</div>
+      <input id="wex-in" data-ans="pose=self.odometry.getposemeters()|pose=odometry.getposemeters()" aria-label="your line of code" autocomplete="off" spellcheck="false" placeholder="type the full line of Python here" style="font-family:var(--mono);font-size:13px;width:100%;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:8px 10px;outline:none;margin:0 0 14px">
+      <div class="code-actions">
+        <button class="btn" id="wex-check">Check</button>
+        <button class="btn" id="wex-hint" style="display:none">Hint</button>
+        <span class="code-result" id="wex-res"></span>
+      </div>
+      <div class="ctask" id="wex-hintbox" style="display:none;margin:12px 0 0">Hint: start with <span class="k">pose = self.odometry.</span> then the method that returns the pose in meters. Spacing and capitalization are forgiven.</div>
     </div>
   </section>
 
@@ -418,9 +441,9 @@ self.odometry.<span class="fn">resetPosition</span>(self.gyro.<span class="fn">g
   document.getElementById('check').addEventListener('click',function(){
     var all=true;
     blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
-    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - update'; res.className='code-result '+(all?'ok':'no');
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - check the red boxes'; res.className='code-result '+(all?'ok':'no');
   });
-  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='update';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
+  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value=b.getAttribute('data-fill')||(b.getAttribute('data-ans')||'').split('|')[0];b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
 
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
@@ -462,6 +485,38 @@ self.odometry.<span class="fn">resetPosition</span>(self.gyro.<span class="fn">g
     window.addEventListener('keydown',onRan,true);
   } else { ran=true; }
   opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(picked>=0)return; picked=i; opts.forEach(function(o){o.classList.add('locked');}); if(ran){ reveal(); } else { note.style.display='block'; } }); });
+})();
+</script>
+<script>
+(function(){
+  // "Now you write it" - free-text exercise, fully isolated from the rest of the page
+  try{
+    var input=document.getElementById('wex-in'); if(!input) return;
+    var res=document.getElementById('wex-res'), hintBtn=document.getElementById('wex-hint'), hintBox=document.getElementById('wex-hintbox');
+    var misses=0;
+    function wnorm(s){return String(s).toLowerCase().replace(/\s+/g,'').replace(/;/g,'').replace(/'/g,'"');}
+    function paint(ok){
+      input.style.borderColor=ok?'var(--green)':'var(--red)';
+      input.style.color=ok?'var(--green)':'var(--red)';
+      input.style.background=ok?'rgba(67,214,126,.1)':'rgba(255,107,107,.1)';
+    }
+    function check(){
+      var ans=(input.getAttribute('data-ans')||'').split('|');
+      var ok=ans.indexOf(wnorm(input.value))!==-1;
+      paint(ok);
+      if(ok){ res.textContent='Correct ✓'; res.className='code-result ok'; }
+      else{
+        misses++;
+        if(misses>=2){ hintBtn.style.display=''; res.textContent='Not yet - try the hint'; }
+        else{ res.textContent='Not yet - compare with the walkthrough above'; }
+        res.className='code-result no';
+      }
+    }
+    document.getElementById('wex-check').addEventListener('click',check);
+    input.addEventListener('keydown',function(e){ if(e.key==='Enter'){ check(); } });
+    input.addEventListener('input',function(){ input.style.borderColor='var(--amber)'; input.style.color='var(--amber)'; input.style.background='var(--panel-2)'; });
+    hintBtn.addEventListener('click',function(){ hintBox.style.display=''; });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

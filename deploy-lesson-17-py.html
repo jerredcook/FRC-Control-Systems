@@ -124,6 +124,14 @@
   .write-ex .whint{display:none;margin-top:12px;font-size:14px;color:var(--muted);border-left:2px solid var(--amber);padding:2px 0 2px 12px;font-family:var(--mono)}
   .write-ex .whint.show{display:block}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+  /* fault clinic */
+  #clinic .btn.active{background:var(--indigo);border-color:var(--indigo);color:#0a0f24;font-weight:700}
+  #clinic .clinic-strip{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:11px 16px;border-bottom:1px solid var(--line);background:rgba(27,37,64,.25)}
+  #clinic .clinic-label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-right:4px}
+  #clinic .fixstep{display:none;margin-top:14px;border-top:1px dashed var(--line-2);padding-top:12px}
+  #clinic .fixhead{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--green);text-transform:uppercase;margin-bottom:6px}
+  #clinic .fixtext{font-size:14.5px;color:var(--muted)}
+  #clinic .fixdone{display:none;margin-top:10px;font-family:var(--mono);font-size:13px;color:var(--green)}
 </style>
 </head>
 <body>
@@ -185,6 +193,35 @@
       </div>
     </div>
     <p class="caption">In percent mode the output is your command times the battery, so it sags when the battery drops. In voltage mode it holds the volts you asked for until the battery physically can't supply them. Set the command to 0 to feel Brake (stops hard) versus Coast (spins down freely).</p>
+
+    <p style="margin-top:26px">Real robots do not announce their faults, they just act weird. Load a symptom below, name which setting is wrong, then fix it with the same controls you just used.</p>
+    <div class="demo" id="clinic">
+      <div class="demo-head"><span class="demo-title">Fault clinic · diagnose, then fix</span><span class="demo-tag" id="clinicTag">Pick a symptom</span></div>
+      <div class="clinic-strip">
+        <span class="clinic-label">Load a symptom</span>
+        <button class="btn" data-fault="sag">Fades late in the match</button>
+        <button class="btn" data-fault="coast">Rolls on after you let go</button>
+        <button class="btn" data-fault="ceiling">Asks for 11 V, gets 9</button>
+      </div>
+      <div id="clinicBody" style="display:none">
+        <div class="q">
+          <div class="qn">Step 1 · Name the fault</div>
+          <div class="qt" id="clinicQt"></div>
+          <div class="opts">
+            <button class="opt"></button>
+            <button class="opt"></button>
+            <button class="opt"></button>
+          </div>
+          <div class="explain" id="clinicWhy"></div>
+          <div class="fixstep" id="clinicFix">
+            <div class="fixhead">Step 2 · Fix it with the controls</div>
+            <div class="fixtext" id="clinicFixText"></div>
+            <div class="fixdone" id="clinicDone"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="caption">Nothing here is graded or saved. It is a pit crew drill: read the symptom, name the fault, prove the fix on the rig above.</p>
   </section>
 
   <section>
@@ -385,6 +422,122 @@ motor.<span class="fn">set_control</span>(<input class="blank" data-ans="voltage
   document.getElementById('bat').addEventListener('input',function(e){ bat=+e.target.value; document.getElementById('batv').textContent=(bat/10).toFixed(1)+' V'; });
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
   requestAnimationFrame(step);
+
+  // ---- fault clinic: load a symptom, name the fault, fix it (a drill, nothing saved) ----
+  try{
+    (function(){
+      var body=document.getElementById('clinicBody'); if(!body) return;
+      var tag=document.getElementById('clinicTag');
+      var qtEl=document.getElementById('clinicQt');
+      var whyEl=document.getElementById('clinicWhy');
+      var fixWrap=document.getElementById('clinicFix');
+      var fixText=document.getElementById('clinicFixText');
+      var doneEl=document.getElementById('clinicDone');
+      var optEls=Array.prototype.slice.call(body.querySelectorAll('.opt'));
+      var faultBtns=Array.prototype.slice.call(document.querySelectorAll('#clinic [data-fault]'));
+      function setCmd(v){ cmd=v; document.getElementById('cmd').value=v; document.getElementById('cmdv').textContent=v; }
+      function setBat(v){ bat=v; document.getElementById('bat').value=v; document.getElementById('batv').textContent=(v/10).toFixed(1)+' V'; }
+      var active=null, diagnosed=false, solved=false, kickT=0;
+      var FAULTS={
+        sag:{
+          qt:'Nobody touched the code, but the mechanism feels weak late in the match. The command is still 50, yet the output readout shows only 4.4 V. What is the fault?',
+          opts:[
+            'The motor is worn out and losing torque',
+            'The command is an open-loop DutyCycleOut, so it shrinks as the battery sags',
+            'Brake neutral mode is dragging the rotor down'
+          ],
+          correct:1,
+          why:[
+            'The motor is fine. The output readout shows the controller itself is sending fewer volts, so the loss happens before the motor.',
+            'Right. A DutyCycleOut command is a fraction of the live battery, and 50% of a tired 8.8 V battery is only 4.4 V.',
+            'Neutral mode only matters at zero output, and this command is 50%.'
+          ],
+          fix:'Fix it with the controls above: pick the command mode that holds its volts as the battery sags, and watch the output readout climb back to 6.0 V.',
+          inject:function(){ setMode('pct'); setNeutral('brake'); setCmd(50); setBat(88); },
+          fixed:function(){ return mode==='volt' && cmd>0; },
+          done:'Fixed - that was an open-loop DutyCycleOut command passing battery sag straight through. VoltageOut holds a real 6 V even on this tired battery.'
+        },
+        coast:{
+          qt:'You cut the command to zero, but the wheel keeps rolling long after it should have stopped. It gets a fresh push every few seconds so you can watch it happen. What is the fault?',
+          opts:[
+            'Neutral mode is Coast, so nothing resists the spin at zero output',
+            'The battery is overcharged and keeps pushing the motor',
+            'The command slider is secretly stuck above zero'
+          ],
+          correct:0,
+          why:[
+            'Right. Coast leaves the rotor free to spin down on its own, like a bike freewheeling with no brakes squeezed.',
+            'A battery never pushes a motor on its own. At zero command the controller sends no power at all.',
+            'Check the readouts: the command is 0 and the output is 0.0 V. The roll happens with no power going in.'
+          ],
+          fix:'Fix it with the controls above: pick the neutral mode that holds the mechanism at zero command, then watch the next push stop dead.',
+          inject:function(){ setMode('pct'); setNeutral('coast'); setCmd(0); setBat(120); spin=0.42; kickT=Date.now(); },
+          fixed:function(){ return neutral==='brake' && cmd<5; },
+          done:'Fixed - that was Coast neutral mode letting the rotor freewheel. Brake shorts the motor leads at zero output, so it stops hard and holds.'
+        },
+        ceiling:{
+          qt:'The code asks for about 11 V, but the output readout is stuck at 9.0 V and the mechanism is slower than it should be. What is the fault?',
+          opts:[
+            'VoltageOut is broken, DutyCycleOut would deliver the full 11 V',
+            'The command is above what the battery can supply, so it saturates at the battery ceiling',
+            'The controller rounds every command down to 9 V'
+          ],
+          correct:1,
+          why:[
+            'It is not broken, and DutyCycleOut cannot beat the battery either. Compare the output readout to the battery readout: they match exactly.',
+            'Right. The battery is sitting at 9.0 V, so a request for 11 V saturates and you silently get 9. No mode can command volts the battery does not have.',
+            'There is no rounding rule. That 9.0 V is not a magic number, it is exactly the battery voltage on the readout.'
+          ],
+          fix:'Fix it with the controls above: bring the command down under the battery ceiling, or give it a fresh battery, until the output matches what you asked for.',
+          inject:function(){ setMode('volt'); setNeutral('brake'); setCmd(92); setBat(90); },
+          fixed:function(){ return mode==='volt' && cmd>0 && (cmd/100*12)<=(bat/10)+0.01; },
+          done:'Fixed - the command now fits under the battery ceiling, so the motor gets every volt you asked for. Asking for more just saturates silently.'
+        }
+      };
+      function loadFault(name){
+        var f=FAULTS[name]; if(!f) return;
+        active=f; diagnosed=false; solved=false;
+        f.inject();
+        tag.textContent='Symptom loaded · name the fault';
+        qtEl.textContent=f.qt;
+        optEls.forEach(function(o,i){ o.textContent=f.opts[i]; o.classList.remove('correct','wrong','locked'); });
+        whyEl.textContent=''; whyEl.classList.remove('show');
+        fixWrap.style.display='none'; fixText.textContent='';
+        doneEl.style.display='none'; doneEl.textContent='';
+        body.style.display='block';
+        faultBtns.forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-fault')===name); });
+      }
+      faultBtns.forEach(function(b){ b.addEventListener('click',function(){ loadFault(b.getAttribute('data-fault')); }); });
+      optEls.forEach(function(o,i){
+        o.addEventListener('click',function(){
+          if(!active||diagnosed) return;
+          whyEl.textContent=active.why[i]; whyEl.classList.add('show');
+          if(i===active.correct){
+            diagnosed=true;
+            optEls.forEach(function(x){ x.classList.add('locked'); });
+            o.classList.add('correct');
+            fixText.textContent=active.fix; fixWrap.style.display='block';
+            tag.textContent='Diagnosed · now fix it';
+          } else {
+            o.classList.add('wrong');
+          }
+        });
+      });
+      setInterval(function(){
+        try{
+          if(!active) return;
+          if(active===FAULTS.coast && !solved && cmd<5 && Date.now()-kickT>2600){ spin=0.42; kickT=Date.now(); }
+          if(!diagnosed||solved) return;
+          if(active.fixed()){
+            solved=true;
+            if(active===FAULTS.coast){ spin=0.42; }
+            doneEl.textContent=active.done; doneEl.style.display='block';
+            tag.textContent='Fixed ✓';
+          }
+        }catch(e){}
+      },400);
+    })();
+  }catch(e){}
 
   var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
   function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'').replace(/\(\)$/,'');}

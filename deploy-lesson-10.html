@@ -88,6 +88,17 @@
   .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
   .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
 
+  .write-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .write-ex .chead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .write-ex .chead .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,176,32,.14);display:grid;place-items:center;color:var(--amber);font-size:13px}
+  .write-ex .ctask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .write-ex .wline{display:block;width:100%;max-width:56ch;font-family:var(--mono);font-size:13px;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:9px 11px;outline:none;margin:0 0 14px}
+  .write-ex .wline:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .write-ex .wline.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .write-ex .wline.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .write-ex .whint{margin-top:12px;font-size:14px;color:var(--muted);border-left:2px solid var(--amber);padding:4px 0 4px 13px}
+  .write-ex .whint code{font-family:var(--mono);color:var(--teal);font-size:12.5px}
+
   .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
   .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
   .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
@@ -185,13 +196,28 @@ autos.<span class="fn">add</span>(scoreThenLeave);              <span class="cm"
 
     <div class="code-ex">
       <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
-      <div class="ctask">Grab the <strong>first</strong> swerve module from the array. Fill in the index.</div>
-<pre class="code"><span class="ty">SwerveModule</span> first = modules[<input class="blank" data-ans="0" aria-label="blank" autocomplete="off" spellcheck="false">];</pre>
+      <div class="ctask">Grab the <strong>first</strong> swerve module from the array. Fill in the index. Then grab the last one, make a growable list, and add an auto routine to it.</div>
+<pre class="code"><span class="ty">SwerveModule</span>[] modules = { frontLeft, frontRight, backLeft, backRight };
+<span class="ty">SwerveModule</span> first = modules[<input class="blank" data-ans="0" data-reveal="0" aria-label="blank" autocomplete="off" spellcheck="false">];
+<span class="ty">SwerveModule</span> last  = modules[<input class="blank" data-ans="3|modules.length-1" data-reveal="3" aria-label="blank" autocomplete="off" spellcheck="false">];   <span class="cm">// four modules - the LAST index</span>
+<span class="ty">List</span>&lt;<span class="ty">Command</span>&gt; autos = <span class="kw">new</span> <input class="blank" data-ans="arraylist" data-reveal="ArrayList" aria-label="blank" autocomplete="off" spellcheck="false" style="width:11ch">&lt;&gt;();   <span class="cm">// the growable kind</span>
+autos.<input class="blank" data-ans="add" data-reveal="add" aria-label="blank" autocomplete="off" spellcheck="false" style="width:5ch">(scoreThenLeave);   <span class="cm">// put a routine in</span></pre>
       <div class="code-actions">
         <button class="btn" id="check">Check</button>
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+    </div>
+
+    <div class="write-ex" id="writeit">
+      <div class="chead"><span class="ic">✎</span> Now you write it</div>
+      <div class="ctask">No blanks this time. Write the whole line that adds the routine <code style="font-family:var(--mono);color:var(--teal)">scoreThenLeave</code> to the <code style="font-family:var(--mono);color:var(--teal)">autos</code> list.</div>
+      <input class="wline" id="winput" data-ans="autos.add(scorethenleave)" placeholder="type the full line of Java" autocomplete="off" spellcheck="false" aria-label="your line of code">
+      <div class="code-actions">
+        <button class="btn" id="wcheck">Check</button>
+        <span class="code-result" id="wres"></span>
+      </div>
+      <div class="whint" id="whint" hidden>Hint: list dot method, with the routine's name in the parentheses. The List method that adds one item is <code>add</code>.</div>
     </div>
   </section>
 
@@ -350,15 +376,33 @@ autos.<span class="fn">add</span>(scoreThenLeave);              <span class="cm"
   document.getElementById('check').addEventListener('click',function(){
     var all=true;
     blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
-    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓ → the first one':'Not quite - the first index is 0'; res.className='code-result '+(all?'ok':'no');
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓ - the whole fragment works':'Not quite - fix the red boxes'; res.className='code-result '+(all?'ok':'no');
   });
-  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='0';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
+  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value=b.getAttribute('data-reveal')||(b.getAttribute('data-ans')||'').split('|')[0];b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
 
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,idx2){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
   });
+})();
+</script>
+<script>
+(function(){
+try{
+  var inp=document.getElementById('winput'); if(!inp) return;
+  var res=document.getElementById('wres'), hint=document.getElementById('whint'), misses=0;
+  function wnorm(s){ return String(s||'').toLowerCase().replace(/\s+/g,'').replace(/;/g,''); }
+  function wcheck(){
+    var ans=(inp.getAttribute('data-ans')||'').split('|');
+    var ok=ans.indexOf(wnorm(inp.value))!==-1;
+    inp.classList.remove('ok','bad'); inp.classList.add(ok?'ok':'bad');
+    if(ok){ res.textContent='Correct ✓ - you wrote the whole line'; res.className='code-result ok'; }
+    else{ misses++; if(misses>=2&&hint) hint.hidden=false; res.textContent=misses>=2?'Not yet - hint unlocked below':'Not yet - try again'; res.className='code-result no'; }
+  }
+  var btn=document.getElementById('wcheck'); if(btn) btn.addEventListener('click',wcheck);
+  inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); wcheck(); } });
+}catch(e){}
 })();
 </script>
 <script>

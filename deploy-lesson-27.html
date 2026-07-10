@@ -195,13 +195,32 @@ chooser.<span class="fn">addOption</span>(<span class="st">"Four Piece"</span>, 
 
     <div class="code-ex">
       <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
-      <div class="ctask">Run drive-to-goal, then score, then drive-to-pickup, one after another. Fill in the composition (it's the one from Part 3).</div>
-<pre class="code"><span class="ty">Commands</span>.<input class="blank" data-ans="sequence" aria-label="blank" autocomplete="off" spellcheck="false">(driveToGoal, score, driveToPickup);</pre>
+      <div class="ctask">Build the routine: sequence the steps, overlap the spin-up with the drive, then offer it to the drive team. Fill in the blanks from top to bottom (the first one is from Part 3).</div>
+<pre class="code"><span class="cm">// 1 · run the steps one after another</span>
+<span class="ty">Commands</span>.<input class="blank" data-ans="sequence" data-fill="sequence" aria-label="blank" autocomplete="off" spellcheck="false">(driveToGoal, score, driveToPickup);
+
+<span class="cm">// 2 · save time: spin up the shooter WHILE driving</span>
+driveToGoal.<input class="blank" data-ans="alongwith" data-fill="alongWith" aria-label="blank" autocomplete="off" spellcheck="false">(shooter.<span class="fn">spinUp</span>());
+
+<span class="cm">// 3 · offer the routine on the dashboard chooser</span>
+chooser.<input class="blank" data-ans="addoption" data-fill="addOption" aria-label="blank" autocomplete="off" spellcheck="false">(<span class="st">"Four Piece"</span>, fourPieceAuto());</pre>
       <div class="code-actions">
         <button class="btn" id="check">Check</button>
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+    </div>
+
+    <div class="code-ex" id="wex">
+      <div class="chead"><span class="ic">✎</span> Now you write it</div>
+      <div class="ctask">No scaffold this time. Write the line that publishes <span class="k">chooser</span> to the dashboard so the drive team can pick an auto.</div>
+      <input id="wex-in" data-ans="smartdashboard.putdata(chooser)|smartdashboard.putdata(&quot;autochooser&quot;,chooser)" aria-label="your line of code" autocomplete="off" spellcheck="false" placeholder="type the full line of Java here" style="font-family:var(--mono);font-size:13px;width:100%;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:8px 10px;outline:none;margin:0 0 14px">
+      <div class="code-actions">
+        <button class="btn" id="wex-check">Check</button>
+        <button class="btn" id="wex-hint" style="display:none">Hint</button>
+        <span class="code-result" id="wex-res"></span>
+      </div>
+      <div class="ctask" id="wex-hintbox" style="display:none;margin:12px 0 0">Hint: it is a <span class="k">SmartDashboard</span> call, the one that puts data. Pass it the chooser. Spacing, capitalization, and the semicolon are forgiven.</div>
     </div>
   </section>
 
@@ -384,9 +403,9 @@ chooser.<span class="fn">addOption</span>(<span class="st">"Four Piece"</span>, 
   document.getElementById('check').addEventListener('click',function(){
     var all=true;
     blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
-    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - sequence'; res.className='code-result '+(all?'ok':'no');
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - check the red boxes'; res.className='code-result '+(all?'ok':'no');
   });
-  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='sequence';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
+  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value=b.getAttribute('data-fill')||(b.getAttribute('data-ans')||'').split('|')[0];b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
 
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
@@ -428,6 +447,38 @@ chooser.<span class="fn">addOption</span>(<span class="st">"Four Piece"</span>, 
     window.addEventListener('keydown',onRan,true);
   } else { ran=true; }
   opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(picked>=0)return; picked=i; opts.forEach(function(o){o.classList.add('locked');}); if(ran){ reveal(); } else { note.style.display='block'; } }); });
+})();
+</script>
+<script>
+(function(){
+  // "Now you write it" - free-text exercise, fully isolated from the rest of the page
+  try{
+    var input=document.getElementById('wex-in'); if(!input) return;
+    var res=document.getElementById('wex-res'), hintBtn=document.getElementById('wex-hint'), hintBox=document.getElementById('wex-hintbox');
+    var misses=0;
+    function wnorm(s){return String(s).toLowerCase().replace(/\s+/g,'').replace(/;/g,'').replace(/'/g,'"');}
+    function paint(ok){
+      input.style.borderColor=ok?'var(--green)':'var(--red)';
+      input.style.color=ok?'var(--green)':'var(--red)';
+      input.style.background=ok?'rgba(67,214,126,.1)':'rgba(255,107,107,.1)';
+    }
+    function check(){
+      var ans=(input.getAttribute('data-ans')||'').split('|');
+      var ok=ans.indexOf(wnorm(input.value))!==-1;
+      paint(ok);
+      if(ok){ res.textContent='Correct ✓'; res.className='code-result ok'; }
+      else{
+        misses++;
+        if(misses>=2){ hintBtn.style.display=''; res.textContent='Not yet - try the hint'; }
+        else{ res.textContent='Not yet - compare with the walkthrough above'; }
+        res.className='code-result no';
+      }
+    }
+    document.getElementById('wex-check').addEventListener('click',check);
+    input.addEventListener('keydown',function(e){ if(e.key==='Enter'){ check(); } });
+    input.addEventListener('input',function(){ input.style.borderColor='var(--amber)'; input.style.color='var(--amber)'; input.style.background='var(--panel-2)'; });
+    hintBtn.addEventListener('click',function(){ hintBox.style.display=''; });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

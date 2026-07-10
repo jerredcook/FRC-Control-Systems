@@ -88,6 +88,17 @@
   .missions .m-item.cleared .m-st{color:var(--green)}
   .missions .m-item.gold .m-st{color:var(--amber)}
 
+  .clinic{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--red);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .clinic .c-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--red);margin-bottom:9px}
+  .clinic .c-head .c-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .clinic .c-btns{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .clinic .c-btns .c-label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-right:4px}
+  .clinic .btn.cleared{border-color:var(--green);color:var(--green)}
+  .clinic .c-q{font-size:15px;color:var(--text);margin:12px 0 10px}
+  .clinic .c-why{font-size:13.5px;color:var(--muted);font-style:italic;margin-top:10px}
+  .clinic .c-fix{font-family:var(--mono);font-size:12.5px;color:var(--amber);margin-top:8px}
+  .clinic .c-fix.ok{color:var(--green)}
+
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
   .note p{margin:0;color:var(--text);font-size:16px}
@@ -230,6 +241,22 @@
       <div class="m-item" data-m="rate"><span class="m-st">○</span><span>Turn rate is kP times tx. Push the <b>Turn rate</b> readout past <b>8.0</b>. You need a big error and a <b>big kP</b> at the same moment.</span></div>
       <div class="m-item" data-m="track"><span class="m-st">○</span><span>Sweep the target a full <b>40°</b> without ever losing <b>locked on</b>. Drag slow and steady, the aim is always chasing you.</span></div>
       <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> do the 40° locked sweep with <b>kP at 2.0 or less</b>. A weak gain can only follow a target that crawls.</span></div>
+    </div>
+    <div class="clinic" id="clinic">
+      <div class="c-head">🩺 Fault clinic <span class="c-sub">load a symptom, name the fault, then fix it</span></div>
+      <div class="c-btns">
+        <span class="c-label">Symptom</span>
+        <button class="btn" type="button" data-fault="lazy">Crawls to the target</button>
+        <button class="btn" type="button" data-fault="dead">Sees it, never turns</button>
+        <button class="btn" type="button" data-fault="drift">Locks on, then drags off</button>
+        <button class="btn" type="button" id="clinicReset">Reset sim</button>
+      </div>
+      <div id="clinicBody" hidden>
+        <div class="c-q" id="clinicQ"></div>
+        <div class="opts" id="clinicOpts"></div>
+        <div class="c-why" id="clinicWhy"></div>
+        <div class="c-fix" id="clinicFix"></div>
+      </div>
     </div>
   </section>
 
@@ -411,6 +438,123 @@ self.drive.<span class="fn">drive</span>(<span class="num">0</span>, <span class
     requestAnimationFrame(mTick);
   }
   requestAnimationFrame(mTick);
+  }catch(e){}
+
+  // ---- fault clinic (wrapped so a clinic bug can never break the lesson) ----
+  try{
+  var cBody=document.getElementById('clinicBody'), cQ=document.getElementById('clinicQ'),
+      cOpts=document.getElementById('clinicOpts'), cWhy=document.getElementById('clinicWhy'),
+      cFix=document.getElementById('clinicFix');
+  var cBtns={};
+  Array.prototype.forEach.call(document.querySelectorAll('#clinic [data-fault]'),function(b){ cBtns[b.getAttribute('data-fault')]=b; });
+  function cSetKp(v){ el.kp.value=v; el.kp.dispatchEvent(new Event('input')); }
+  function cSetAim(on){ if(S.aim!==on) el.aim.click(); }
+  function cKick(){ S.heading=S.targetBearing-22*RAD; }
+  var CASES={
+    lazy:{
+      q:'Symptom loaded. The robot sees the tag and tx is big, but it only creeps toward it. Name the fault.',
+      opts:[
+        {t:'The camera has lost the target, so tx is stale',
+         why:'Watch the readout. tx is live and slowly shrinking, so the camera is doing its job.'},
+        {t:'The aim gain kP is starved, so the turn command is tiny for any tx',ok:true,
+         why:'Right. Turn rate is kP times tx, so with kP on the floor even a big error buys almost no turn.'},
+        {t:'The target sits outside what the camera can see',
+         why:'The tag is in view and tx reads fine. The sensing side is healthy, the command side is weak.'}
+      ],
+      fix:'Now fix it with the controls above: push kP to 3.5 or more, then watch the robot snap onto the tag and hold.',
+      confirm:'Fixed - that was a starved kP. Turn rate is kP times tx, so a weak gain can only crawl. Real gain, real turn.',
+      inject:function(){ cSetAim(true); cSetKp(0.5); cKick(); },
+      pre:function(){ return S.aim && S.kP>=3.5; },
+      kick:true, hold:0.6
+    },
+    dead:{
+      q:'Symptom loaded. tx reads over 20 degrees and holds, yet the turn rate sits at exactly 0.0. Name the fault.',
+      opts:[
+        {t:'kP is zero, so the command multiplies out to nothing',
+         why:'Check the slider. kP reads a healthy 4.0, and it cannot even go below 0.5 here.'},
+        {t:'The aim loop is switched off, so no turn command is ever sent',ok:true,
+         why:'Right. Sensor fine, gain fine, but a controller that never runs corrects nothing.'},
+        {t:'The camera lost the target, so there is no tx to act on',
+         why:'tx is right there on the readout. The camera sees the tag fine, the command side is silent.'}
+      ],
+      fix:'Now fix it with the controls above: switch auto-aim back on and let the loop drive tx to zero.',
+      confirm:'Fixed - the loop was simply switched off. Every gain in the world does nothing until the controller actually runs.',
+      inject:function(){ cSetAim(false); cSetKp(4); cKick(); },
+      pre:function(){ return S.aim; },
+      kick:true, hold:0.6
+    },
+    drift:{
+      q:'Symptom loaded. The robot aims, but parks a few degrees off center and just sits there, like holding your bike line in a steady crosswind. Name the fault.',
+      opts:[
+        {t:'The tag moved, so the target bearing is wrong',
+         why:'The target bearing slider has not changed. The miss is on the control side.'},
+        {t:'kP is too high, so the aim overshoots',
+         why:'Overshoot swings past center and hunts back and forth. This robot sits calmly on one side, the opposite signature.'},
+        {t:'A steady outside push, and a P-only loop must keep a standing error to fight it',ok:true,
+         why:'Right. P only turns while tx is nonzero, so it settles where the correction exactly cancels the push, a few degrees off center.'}
+      ],
+      fix:'Now fix it with the controls above: the push stays on, so raise kP until the standing miss shrinks inside the lock zone and holds.',
+      confirm:'Fixed - against a steady push, a P-only loop keeps a standing miss of about 10 degrees divided by kP. More gain squeezed the miss under the lock threshold.',
+      inject:function(){ cSetAim(true); cSetKp(2); },
+      pre:function(){ return S.aim; },
+      kick:false, hold:1.2
+    }
+  };
+  var cCur=null,cDiag=false,cSolved=false,cLockAt=0,cPreWas=false,cDrift=false;
+  function cLoad(id){
+    cCur=id; cDiag=false; cSolved=false; cLockAt=0; cPreWas=false; cDrift=(id==='drift');
+    Object.keys(cBtns).forEach(function(k){ cBtns[k].classList.toggle('active',k===id); });
+    var c=CASES[id]; c.inject();
+    cBody.hidden=false; cQ.textContent=c.q;
+    cWhy.textContent=''; cFix.textContent=''; cFix.className='c-fix';
+    cOpts.innerHTML='';
+    c.opts.forEach(function(o){
+      var b=document.createElement('button'); b.type='button'; b.className='opt'; b.textContent=o.t;
+      b.addEventListener('click',function(){
+        if(cDiag) return;
+        if(o.ok){
+          cDiag=true; b.classList.add('correct');
+          Array.prototype.forEach.call(cOpts.querySelectorAll('.opt'),function(x){ x.classList.add('locked'); });
+          cWhy.textContent=o.why; cFix.textContent=c.fix;
+        } else { b.classList.add('wrong'); cWhy.textContent=o.why; }
+      });
+      cOpts.appendChild(b);
+    });
+  }
+  Object.keys(cBtns).forEach(function(id){ cBtns[id].addEventListener('click',function(){ cLoad(id); }); });
+  document.getElementById('clinicReset').addEventListener('click',function(){
+    cCur=null; cDrift=false; cBody.hidden=true;
+    Object.keys(cBtns).forEach(function(k){ cBtns[k].classList.remove('active'); });
+    cSetAim(true); cSetKp(4); S.heading=0;
+  });
+  function cSolve(){
+    cSolved=true; cDrift=false;
+    cFix.textContent=CASES[cCur].confirm; cFix.className='c-fix ok';
+    var cb=cBtns[cCur]; cb.classList.remove('active'); cb.classList.add('cleared');
+    if(cb.textContent.indexOf('✓')!==0) cb.textContent='✓ '+cb.textContent;
+  }
+  var cLast=0;
+  function cTick(ts){
+    try{
+      var t=ts/1000, dtc=cLast?Math.min(0.05,t-cLast):0.016; cLast=t;
+      if(cDrift && !cSolved){
+        S.heading-=0.6*dtc;
+        if(S.heading<-1.2)S.heading=-1.2; if(S.heading>1.2)S.heading=1.2;
+      }
+      if(cCur && cDiag && !cSolved){
+        var c=CASES[cCur], pre=false;
+        try{ pre=!!c.pre(); }catch(e){}
+        if(pre && !cPreWas && c.kick){ cKick(); cLockAt=0; }
+        cPreWas=pre;
+        if(pre && Math.abs((S.targetBearing-S.heading)*DEG)<1.5){
+          if(!cLockAt) cLockAt=t;
+          if(t-cLockAt>=c.hold) cSolve();
+        } else { cLockAt=0; }
+      }
+    }catch(e){}
+    requestAnimationFrame(cTick);
+  }
+  requestAnimationFrame(cTick);
   }catch(e){}
 
   function draw(){

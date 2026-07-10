@@ -207,13 +207,34 @@
 
     <div class="code-ex">
       <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
-      <div class="ctask">Read how far left or right of center the target is, the value you'll aim with. Fill in the method.</div>
-<pre class="code"><span class="ty">double</span> tx = target.<input class="blank" data-ans="getyaw" aria-label="blank" autocomplete="off" spellcheck="false">();</pre>
+      <div class="ctask">Go from a camera name to an aiming number: declare the camera, grab the newest result, check it actually sees a tag, then read the yaw. Fill in the blanks from top to bottom.</div>
+<pre class="code"><span class="cm">// 1 · declare the camera by its configured name</span>
+<span class="ty">PhotonCamera</span> camera = <span class="kw">new</span> <input class="blank" data-ans="photoncamera" data-fill="PhotonCamera" style="width:14ch" aria-label="blank" autocomplete="off" spellcheck="false">(<span class="st">"frontCam"</span>);
+
+<span class="cm">// 2 · grab the newest result, and only act if it sees a tag</span>
+<span class="kw">var</span> result = camera.<input class="blank" data-ans="getlatestresult" data-fill="getLatestResult" style="width:17ch" aria-label="blank" autocomplete="off" spellcheck="false">();
+<span class="kw">if</span> (result.<input class="blank" data-ans="hastargets" data-fill="hasTargets" aria-label="blank" autocomplete="off" spellcheck="false">()) {
+  <span class="kw">var</span> target = result.<span class="fn">getBestTarget</span>();
+  <span class="cm">// 3 · read the aiming error</span>
+  <span class="ty">double</span> tx = target.<input class="blank" data-ans="getyaw" data-fill="getYaw" aria-label="blank" autocomplete="off" spellcheck="false">();
+}</pre>
       <div class="code-actions">
         <button class="btn" id="check">Check</button>
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+    </div>
+
+    <div class="code-ex" id="wex">
+      <div class="chead"><span class="ic">✎</span> Now you write it</div>
+      <div class="ctask">No scaffold this time. Write the line that reads the best target's AprilTag ID into an <span class="k">int</span> named <span class="k">id</span>.</div>
+      <input id="wex-in" data-ans="intid=target.getfiducialid()|varid=target.getfiducialid()|id=target.getfiducialid()" aria-label="your line of code" autocomplete="off" spellcheck="false" placeholder="type the full line of Java here" style="font-family:var(--mono);font-size:13px;width:100%;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:8px 10px;outline:none;margin:0 0 14px">
+      <div class="code-actions">
+        <button class="btn" id="wex-check">Check</button>
+        <button class="btn" id="wex-hint" style="display:none">Hint</button>
+        <span class="code-result" id="wex-res"></span>
+      </div>
+      <div class="ctask" id="wex-hintbox" style="display:none;margin:12px 0 0">Hint: type and name first, <span class="k">int id =</span>, then ask <span class="k">target</span> for its fiducial ID. Spacing, capitalization, and the semicolon are forgiven.</div>
     </div>
   </section>
 
@@ -397,9 +418,9 @@
   document.getElementById('check').addEventListener('click',function(){
     var all=true;
     blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
-    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - getYaw'; res.className='code-result '+(all?'ok':'no');
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - check the red boxes'; res.className='code-result '+(all?'ok':'no');
   });
-  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='getYaw';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
+  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value=b.getAttribute('data-fill')||(b.getAttribute('data-ans')||'').split('|')[0];b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
 
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
@@ -441,6 +462,38 @@
     window.addEventListener('keydown',onRan,true);
   } else { ran=true; }
   opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(picked>=0)return; picked=i; opts.forEach(function(o){o.classList.add('locked');}); if(ran){ reveal(); } else { note.style.display='block'; } }); });
+})();
+</script>
+<script>
+(function(){
+  // "Now you write it" - free-text exercise, fully isolated from the rest of the page
+  try{
+    var input=document.getElementById('wex-in'); if(!input) return;
+    var res=document.getElementById('wex-res'), hintBtn=document.getElementById('wex-hint'), hintBox=document.getElementById('wex-hintbox');
+    var misses=0;
+    function wnorm(s){return String(s).toLowerCase().replace(/\s+/g,'').replace(/;/g,'').replace(/'/g,'"');}
+    function paint(ok){
+      input.style.borderColor=ok?'var(--green)':'var(--red)';
+      input.style.color=ok?'var(--green)':'var(--red)';
+      input.style.background=ok?'rgba(67,214,126,.1)':'rgba(255,107,107,.1)';
+    }
+    function check(){
+      var ans=(input.getAttribute('data-ans')||'').split('|');
+      var ok=ans.indexOf(wnorm(input.value))!==-1;
+      paint(ok);
+      if(ok){ res.textContent='Correct ✓'; res.className='code-result ok'; }
+      else{
+        misses++;
+        if(misses>=2){ hintBtn.style.display=''; res.textContent='Not yet - try the hint'; }
+        else{ res.textContent='Not yet - compare with the walkthrough above'; }
+        res.className='code-result no';
+      }
+    }
+    document.getElementById('wex-check').addEventListener('click',check);
+    input.addEventListener('keydown',function(e){ if(e.key==='Enter'){ check(); } });
+    input.addEventListener('input',function(){ input.style.borderColor='var(--amber)'; input.style.color='var(--amber)'; input.style.background='var(--panel-2)'; });
+    hintBtn.addEventListener('click',function(){ hintBox.style.display=''; });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

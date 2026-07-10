@@ -110,6 +110,17 @@
   .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
   .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
 
+  .write-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .write-ex .chead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .write-ex .chead .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,176,32,.14);display:grid;place-items:center;color:var(--amber);font-size:13px}
+  .write-ex .ctask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .write-ex .wline{display:block;width:100%;max-width:56ch;font-family:var(--mono);font-size:13px;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:9px 11px;outline:none;margin:0 0 14px}
+  .write-ex .wline:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .write-ex .wline.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .write-ex .wline.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .write-ex .whint{margin-top:12px;font-size:14px;color:var(--muted);border-left:2px solid var(--amber);padding:4px 0 4px 13px}
+  .write-ex .whint code{font-family:var(--mono);color:var(--teal);font-size:12.5px}
+
   .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
   .q{padding:18px 18px;border-bottom:1px solid var(--line)}
   .q:last-child{border-bottom:none}
@@ -219,14 +230,28 @@
 
     <div class="code-ex">
       <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
-      <div class="ctask">Compute the average of two integer sensor readings <em>without</em> losing the decimal. Fill the blank so <code style="font-family:var(--mono);color:var(--teal)">avg</code> is 2.5 when the readings are 2 and 3.</div>
+      <div class="ctask">Compute the average of two integer sensor readings <em>without</em> losing the decimal. Fill the blank so <code style="font-family:var(--mono);color:var(--teal)">avg</code> is 2.5 when the readings are 2 and 3. Then finish the fragment: pick the right type for each new line and print the result.</div>
 <pre class="code"><span class="ty">int</span> r1 = <span class="num">2</span>, r2 = <span class="num">3</span>;
-<span class="ty">double</span> avg = (r1 + r2) / <input class="blank" data-ans="2.0|(double)2|2d" aria-label="blank" autocomplete="off" spellcheck="false">;   <span class="cm">// want 2.5</span></pre>
+<span class="ty">double</span> avg = (r1 + r2) / <input class="blank" data-ans="2.0|(double)2|2d" data-reveal="2.0" aria-label="blank" autocomplete="off" spellcheck="false">;   <span class="cm">// want 2.5</span>
+<input class="blank" data-ans="double" data-reveal="double" aria-label="blank" autocomplete="off" spellcheck="false" style="width:8ch"> speed = avg * <span class="num">2</span>;                <span class="cm">// 5.0 - decimals need this type</span>
+<input class="blank" data-ans="boolean" data-reveal="boolean" aria-label="blank" autocomplete="off" spellcheck="false" style="width:9ch"> tooFast = speed &gt; <span class="num">3.0</span>;      <span class="cm">// true - a yes/no answer needs this type</span>
+<span class="ty">System</span>.out.<span class="fn">println</span>(<input class="blank" data-ans="speed" data-reveal="speed" aria-label="blank" autocomplete="off" spellcheck="false" style="width:8ch">);        <span class="cm">// use it: print the decimal, not the flag</span></pre>
       <div class="code-actions">
         <button class="btn" id="check">Check</button>
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+    </div>
+
+    <div class="write-ex" id="writeit">
+      <div class="chead"><span class="ic">✎</span> Now you write it</div>
+      <div class="ctask">No blanks this time. Write the whole line that declares a <code style="font-family:var(--mono);color:var(--teal)">double</code> named <code style="font-family:var(--mono);color:var(--teal)">maxSpeed</code> holding 3.0.</div>
+      <input class="wline" id="winput" data-ans="doublemaxspeed=3.0|doublemaxspeed=3|doublemaxspeed=3.00" placeholder="type the full line of Java" autocomplete="off" spellcheck="false" aria-label="your line of code">
+      <div class="code-actions">
+        <button class="btn" id="wcheck">Check</button>
+        <span class="code-result" id="wres"></span>
+      </div>
+      <div class="whint" id="whint" hidden>Hint: type first, then the name, then = and the value. Decimals use the type <code>double</code>, and Java lines end with a semicolon.</div>
     </div>
   </section>
 
@@ -362,11 +387,11 @@
       var ok=ans.indexOf(norm(b.value))!==-1;
       b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false;
     });
-    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓ → 2.5':'Not quite - make one side a double';
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓ - the whole fragment works':'Not quite - fix the red boxes';
     res.className='code-result '+(all?'ok':'no');
   });
   document.getElementById('reveal').addEventListener('click',function(){
-    blanks.forEach(function(b){b.value='2.0';b.classList.remove('bad');b.classList.add('ok');});
+    blanks.forEach(function(b){b.value=b.getAttribute('data-reveal')||(b.getAttribute('data-ans')||'').split('|')[0];b.classList.remove('bad');b.classList.add('ok');});
     document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok';
   });
 
@@ -377,6 +402,24 @@
       opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
     });
   });
+})();
+</script>
+<script>
+(function(){
+try{
+  var inp=document.getElementById('winput'); if(!inp) return;
+  var res=document.getElementById('wres'), hint=document.getElementById('whint'), misses=0;
+  function wnorm(s){ return String(s||'').toLowerCase().replace(/\s+/g,'').replace(/;/g,''); }
+  function wcheck(){
+    var ans=(inp.getAttribute('data-ans')||'').split('|');
+    var ok=ans.indexOf(wnorm(inp.value))!==-1;
+    inp.classList.remove('ok','bad'); inp.classList.add(ok?'ok':'bad');
+    if(ok){ res.textContent='Correct ✓ - you wrote the whole line'; res.className='code-result ok'; }
+    else{ misses++; if(misses>=2&&hint) hint.hidden=false; res.textContent=misses>=2?'Not yet - hint unlocked below':'Not yet - try again'; res.className='code-result no'; }
+  }
+  var btn=document.getElementById('wcheck'); if(btn) btn.addEventListener('click',wcheck);
+  inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); wcheck(); } });
+}catch(e){}
 })();
 </script>
 <script>

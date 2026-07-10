@@ -95,6 +95,19 @@
   .missions .m-item.cleared .m-st{color:var(--green)}
   .missions .m-item.gold .m-st{color:var(--amber)}
 
+  .clinic{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--red);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .clinic .c-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--red);margin-bottom:9px}
+  .clinic .c-head .c-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .clinic .c-btns{display:flex;flex-wrap:wrap;gap:8px}
+  .clinic .c-btns .btn.active{background:var(--red);border-color:var(--red);color:#1c0d12;font-weight:700}
+  .clinic .c-sym{font-size:14px;color:var(--muted);margin:12px 0 10px}
+  .clinic .c-sym b{color:var(--text)}
+  .clinic .c-diag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-bottom:8px}
+  .clinic .c-why{display:none;margin-top:10px;font-size:14px;color:var(--muted);border-left:2px solid var(--red);padding:3px 0 3px 12px}
+  .clinic .c-why.show{display:block}
+  .clinic .c-status{margin-top:12px;font-family:var(--mono);font-size:12.5px;color:var(--faint)}
+  .clinic .c-status.fixed{color:var(--green)}
+
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
   .note p{margin:0;color:var(--text);font-size:16px}
@@ -247,6 +260,21 @@
       <div class="m-item" data-m="ff25"><span class="m-st">○</span><span>Comp back <b>on</b>, kG <b>0.50</b>. First compute the hold voltage at 60°: kG × cos 60° = 0.50 × 0.5. Then set the target to <b>60°</b> and confirm Feedforward reads <b>0.25 V</b>.</span></div>
       <div class="m-item" data-m="sag"><span class="m-st">○</span><span>Comp on, target <b>45°</b>. Starve the arm: drop <b>kG to 0.25</b>, half the true gravity. It parks about <b>3° low</b>. Feedback tries to cover for the weak feedforward but never quite can.</span></div>
       <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> comp <b>off</b>, target <b>90°</b>. Find the <b>kG</b> that holds it there with <b>0° error</b>. Think: how hard does gravity twist an arm that points straight up?</span></div>
+    </div>
+    <div class="clinic" id="clinic">
+      <div class="c-head">🩺 Fault clinic <span class="c-sub">load a symptom, name the fault, then cure it with the controls above</span></div>
+      <div class="c-btns">
+        <button class="btn" data-case="sag">Sags at every angle</button>
+        <button class="btn" data-case="drift">Sails past up high</button>
+        <button class="btn" data-case="float">Floats above the line</button>
+      </div>
+      <div class="c-case" id="clinicCase" style="display:none">
+        <div class="c-sym" id="clinicSym"></div>
+        <div class="c-diag">Name the fault</div>
+        <div class="opts" id="clinicOpts"></div>
+        <div class="c-why" id="clinicWhy"></div>
+        <div class="c-status" id="clinicStatus"></div>
+      </div>
     </div>
   </section>
 
@@ -489,6 +517,98 @@ cfg.slot0.gravity_type = <span class="ty">GravityTypeValue</span>.<input class="
     mSteady('ff25', S.cos && Math.abs(S.kG-0.5)<0.006 && tgtD===60 && still && Math.abs(errD)<1 && Math.abs(S.ffv-0.25)<0.01);
     mSteady('sag', S.cos && Math.abs(S.kG-0.25)<0.006 && tgtD===45 && still && errD>1.8 && errD<4.6);
     mSteady('gold', !S.cos && tgtD===90 && S.kG<0.05 && still && Math.abs(errD)<0.5);
+  },200);
+  }catch(e){}
+
+  // ---- fault clinic (wrapped so a clinic bug can never break the lesson) ----
+  try{
+  var cCaseBox=document.getElementById('clinicCase'), cSym=document.getElementById('clinicSym'),
+      cOptsBox=document.getElementById('clinicOpts'), cWhy=document.getElementById('clinicWhy'),
+      cStatus=document.getElementById('clinicStatus');
+  function cSetKG(v){ S.kG=v; el.kg.value=v; el.kgVal.textContent=v.toFixed(2); }
+  function cSetTgt(d){ S.target=d*DEG; el.tgt.value=d; el.tgtVal.textContent=d+'°'; }
+  function cSetCos(on){ if(S.cos!==on){ S.cos=on; el.cos.textContent='Cosine comp: '+(on?'on':'off'); el.cos.classList.toggle('active',on); } }
+  var CASES={
+    sag:{
+      sym:'Symptom: whatever target you pick below vertical, the arm parks a few degrees <b>low</b>. The sag is worst near horizontal and almost gone near vertical.',
+      opts:[
+        {t:'kG is starved. Feedforward holds up less than gravity pulls down, and feedback needs error before it can cover the gap.', ok:true,
+         why:'Right. kG got knocked down to 0.15 when this arm needs about 0.50. A P term only pushes when there is error, so the arm rides low. The sag fades near vertical because cos(angle) shrinks the gravity load there anyway.'},
+        {t:'Cosine compensation is off, so the hold voltage no longer tracks the angle.',
+         why:'Comp is still on. Watch the Feedforward readout fade as the arm rises. A flat kG would shove the arm high near vertical, not park it low everywhere.'},
+        {t:'The target slider reports the wrong angle.',
+         why:'The amber ghost arm draws exactly where the slider points, and the readouts agree. The measurement is honest. The arm just is not held up hard enough.'}
+      ],
+      inject:function(){ cSetCos(true); cSetKG(0.15); cSetTgt(30); },
+      fixed:function(errD,still){ return S.cos && Math.abs(S.kG-0.5)<=0.05 && still && Math.abs(errD)<1.5; },
+      fixMsg:'Fixed - that was a starved kG. Back near 0.50, feedforward carries gravity on its own and the error collapses to zero.'
+    },
+    drift:{
+      sym:'Symptom: aim high and the arm sails <b>past</b> the target. The closer to vertical you aim, the further past it parks. Near horizontal it behaves fine.',
+      opts:[
+        {t:'kG is too small, so gravity drags the arm past the target.',
+         why:'Too little kG makes an arm sag low, it never flings it high. Gravity never pushes an arm up.'},
+        {t:'Cosine compensation is off. A flat kG is only honest at horizontal, so up high it overdrives the lighter load.', ok:true,
+         why:'Right. With comp off, feedforward keeps pushing the full horizontal hold voltage while the real gravity load fades toward zero. The leftover voltage shoves the arm past the target. Click the comp button back on.'},
+        {t:'The loop is oscillating because the gains are too aggressive.',
+         why:'An oscillation rings back and forth before it settles. This arm settles calmly, just in the wrong place, and only up high. That points at feedforward, not feedback.'}
+      ],
+      inject:function(){ cSetKG(0.5); cSetTgt(80); cSetCos(false); },
+      fixed:function(errD,still){ return S.cos && Math.abs(S.kG-0.5)<=0.1 && still && Math.abs(errD)<1.5; },
+      fixMsg:'Fixed - cosine comp was switched off. With cos(angle) back in the loop, the hold voltage fades exactly as the gravity load does.'
+    },
+    float:{
+      sym:'Symptom: the arm parks a few degrees <b>high</b> of every target. Worst near horizontal, nearly gone pointing straight up.',
+      opts:[
+        {t:'Cosine compensation is off, so the hold voltage ignores the angle.',
+         why:'Comp is on. The Feedforward readout still fades as the arm rises, so the shape of the hold voltage is right. The size of it is not.'},
+        {t:'kG is too big. Feedforward holds up more than gravity pulls down, so the arm floats past the target.', ok:true,
+         why:'Right. kG is cranked to 0.85 when this arm needs about 0.50. Feedforward should match gravity, not beat it, and feedback needs error before it can push back down. Slide kG back to 0.50.'},
+        {t:'The scope is plotting the wrong signal.',
+         why:'The drawing, the readouts, and the scope all agree: the arm really parks high. The instruments are fine. The tune is not.'}
+      ],
+      inject:function(){ cSetCos(true); cSetKG(0.85); cSetTgt(35); },
+      fixed:function(errD,still){ return S.cos && Math.abs(S.kG-0.5)<=0.05 && still && Math.abs(errD)<1.5; },
+      fixMsg:'Fixed - that was an overfed kG. At 0.50 the feedforward matches gravity instead of beating it, and the float disappears.'
+    }
+  };
+  var cActive=null, cSolved=false, cDone=false, cHold=0;
+  function cLoad(id){
+    var c=CASES[id]; if(!c)return;
+    cActive=id; cSolved=false; cDone=false; cHold=0;
+    c.inject();
+    Array.prototype.forEach.call(document.querySelectorAll('#clinic [data-case]'),function(b){
+      b.classList.toggle('active', b.getAttribute('data-case')===id);
+    });
+    cSym.innerHTML=c.sym;
+    cWhy.textContent=''; cWhy.classList.remove('show');
+    cStatus.textContent='Fault injected. Name it below, then cure it with the controls above.';
+    cStatus.classList.remove('fixed');
+    while(cOptsBox.firstChild) cOptsBox.removeChild(cOptsBox.firstChild);
+    c.opts.forEach(function(o){
+      var b=document.createElement('button'); b.type='button'; b.className='opt'; b.textContent=o.t;
+      b.addEventListener('click',function(){
+        if(cSolved)return;
+        cWhy.textContent=o.why; cWhy.classList.add('show');
+        if(o.ok){
+          cSolved=true; b.classList.add('correct');
+          Array.prototype.forEach.call(cOptsBox.children,function(x){ x.classList.add('locked'); });
+          cStatus.textContent='Diagnosis confirmed. Now cure it with the controls above.';
+        } else { b.classList.add('wrong'); }
+      });
+      cOptsBox.appendChild(b);
+    });
+    cCaseBox.style.display='block';
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('#clinic [data-case]'),function(b){
+    b.addEventListener('click',function(){ cLoad(b.getAttribute('data-case')); });
+  });
+  setInterval(function(){
+    if(!cActive||!cSolved||cDone)return;
+    var c=CASES[cActive];
+    var errD=(S.target-S.theta)/DEG, still=Math.abs(S.omega)<0.02;
+    if(c.fixed(errD,still)){ cHold++; if(cHold>=5){ cDone=true; cStatus.textContent=c.fixMsg; cStatus.classList.add('fixed'); } }
+    else { cHold=0; }
   },200);
   }catch(e){}
 

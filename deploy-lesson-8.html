@@ -95,6 +95,17 @@
   .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
   .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
 
+  .write-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
+  .write-ex .chead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .write-ex .chead .ic{width:22px;height:22px;border-radius:6px;background:rgba(255,176,32,.14);display:grid;place-items:center;color:var(--amber);font-size:13px}
+  .write-ex .ctask{color:var(--muted);font-size:14.5px;margin-bottom:14px}
+  .write-ex .wline{display:block;width:100%;max-width:56ch;font-family:var(--mono);font-size:13px;background:var(--panel-2);border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:9px 11px;outline:none;margin:0 0 14px}
+  .write-ex .wline:focus{box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+  .write-ex .wline.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
+  .write-ex .wline.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
+  .write-ex .whint{margin-top:12px;font-size:14px;color:var(--muted);border-left:2px solid var(--amber);padding:4px 0 4px 13px}
+  .write-ex .whint code{font-family:var(--mono);color:var(--teal);font-size:12.5px}
+
   .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
   .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
   .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
@@ -199,13 +210,27 @@
 
     <div class="code-ex">
       <div class="chead"><span class="ic">&lt;/&gt;</span> Code exercise</div>
-      <div class="ctask">Create a Motor object named <code style="font-family:var(--mono);color:var(--teal)">intake</code> on CAN id 5. Fill the blank with the keyword that builds an object.</div>
-<pre class="code"><span class="ty">Motor</span> intake = <input class="blank" data-ans="new" aria-label="blank" autocomplete="off" spellcheck="false"> <span class="ty">Motor</span>(<span class="str">"Intake"</span>, <span class="num">5</span>);</pre>
+      <div class="ctask">Create a Motor object named <code style="font-family:var(--mono);color:var(--teal)">intake</code> on CAN id 5. Fill the blank with the keyword that builds an object. Then stamp out a second Motor, call a method on one, and read a field from the other.</div>
+<pre class="code"><span class="ty">Motor</span> intake = <input class="blank" data-ans="new" data-reveal="new" aria-label="blank" autocomplete="off" spellcheck="false"> <span class="ty">Motor</span>(<span class="str">"Intake"</span>, <span class="num">5</span>);
+<span class="ty">Motor</span> shooter = <span class="kw">new</span> <input class="blank" data-ans="motor" data-reveal="Motor" aria-label="blank" autocomplete="off" spellcheck="false">(<span class="str">"Shooter"</span>, <span class="num">6</span>);   <span class="cm">// same blueprint, another object</span>
+intake.<input class="blank" data-ans="describe" data-reveal="describe" aria-label="blank" autocomplete="off" spellcheck="false" style="width:10ch">();   <span class="cm">// ask intake to introduce itself</span>
+<span class="ty">int</span> id = shooter.<input class="blank" data-ans="canid" data-reveal="canId" aria-label="blank" autocomplete="off" spellcheck="false">;   <span class="cm">// read shooter's field -&gt; 6</span></pre>
       <div class="code-actions">
         <button class="btn" id="check">Check</button>
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+    </div>
+
+    <div class="write-ex" id="writeit">
+      <div class="chead"><span class="ic">✎</span> Now you write it</div>
+      <div class="ctask">No blanks this time. Write the whole line that creates a <code style="font-family:var(--mono);color:var(--teal)">TalonFX</code> object named <code style="font-family:var(--mono);color:var(--teal)">motor</code> on CAN id 10.</div>
+      <input class="wline" id="winput" data-ans="talonfxmotor=newtalonfx(10)|varmotor=newtalonfx(10)|motor=newtalonfx(10)" placeholder="type the full line of Java" autocomplete="off" spellcheck="false" aria-label="your line of code">
+      <div class="code-actions">
+        <button class="btn" id="wcheck">Check</button>
+        <span class="code-result" id="wres"></span>
+      </div>
+      <div class="whint" id="whint" hidden>Hint: the pattern is Type name = new Type(canId); and here the type is <code>TalonFX</code> with CAN id 10.</div>
     </div>
   </section>
 
@@ -380,15 +405,33 @@
   document.getElementById('check').addEventListener('click',function(){
     var all=true;
     blanks.forEach(function(b){ var ans=(b.getAttribute('data-ans')||'').split('|'); var ok=ans.indexOf(norm(b.value))!==-1; b.classList.remove('ok','bad');b.classList.add(ok?'ok':'bad'); if(!ok)all=false; });
-    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓':'Not quite - the keyword is new'; res.className='code-result '+(all?'ok':'no');
+    var res=document.getElementById('cres'); res.textContent=all?'Correct ✓ - the whole fragment works':'Not quite - fix the red boxes'; res.className='code-result '+(all?'ok':'no');
   });
-  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value='new';b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
+  document.getElementById('reveal').addEventListener('click',function(){ blanks.forEach(function(b){b.value=b.getAttribute('data-reveal')||(b.getAttribute('data-ans')||'').split('|')[0];b.classList.remove('bad');b.classList.add('ok');}); document.getElementById('cres').textContent='Revealed'; document.getElementById('cres').className='code-result ok'; });
 
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
     opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
   });
+})();
+</script>
+<script>
+(function(){
+try{
+  var inp=document.getElementById('winput'); if(!inp) return;
+  var res=document.getElementById('wres'), hint=document.getElementById('whint'), misses=0;
+  function wnorm(s){ return String(s||'').toLowerCase().replace(/\s+/g,'').replace(/;/g,''); }
+  function wcheck(){
+    var ans=(inp.getAttribute('data-ans')||'').split('|');
+    var ok=ans.indexOf(wnorm(inp.value))!==-1;
+    inp.classList.remove('ok','bad'); inp.classList.add(ok?'ok':'bad');
+    if(ok){ res.textContent='Correct ✓ - you wrote the whole line'; res.className='code-result ok'; }
+    else{ misses++; if(misses>=2&&hint) hint.hidden=false; res.textContent=misses>=2?'Not yet - hint unlocked below':'Not yet - try again'; res.className='code-result no'; }
+  }
+  var btn=document.getElementById('wcheck'); if(btn) btn.addEventListener('click',wcheck);
+  inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); wcheck(); } });
+}catch(e){}
 })();
 </script>
 <script>

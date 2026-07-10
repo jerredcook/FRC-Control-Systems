@@ -87,6 +87,20 @@
   .missions .m-item.cleared{color:var(--text)}
   .missions .m-item.cleared .m-st{color:var(--green)}
   .missions .m-item.gold .m-st{color:var(--amber)}
+  .clinic{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--amber);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .clinic .c-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:9px}
+  .clinic .c-head .c-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .clinic .c-intro{font-size:14px;color:var(--muted);margin:0 0 12px}
+  .clinic .c-btns{display:flex;flex-wrap:wrap;gap:8px}
+  .clinic .c-btns .btn.active{background:var(--amber);border-color:var(--amber);color:#1a1206}
+  .clinic .c-case{border-top:1px solid var(--line);margin-top:14px;padding-top:14px}
+  .clinic .c-case[hidden]{display:none}
+  .clinic .c-qt{font-size:15px;color:var(--text);margin-bottom:12px}
+  .clinic .c-fix{margin-top:12px;font-size:14.5px;color:var(--text);border-left:2px solid var(--amber);padding:4px 0 4px 13px}
+  .clinic .c-fix[hidden]{display:none}
+  .clinic .c-fix .c-watch{color:var(--faint);font-style:italic}
+  .clinic .c-done{margin-top:12px;font-size:14.5px;color:var(--green);border-left:2px solid var(--green);padding:4px 0 4px 13px;font-weight:600}
+  .clinic .c-done[hidden]{display:none}
 
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
@@ -217,6 +231,48 @@
       <div class="m-item" data-m="fieldfwd"><span class="m-st">○</span><span>Spin until <b>Heading reads 45°</b> or more, put Rotate back to 0, then push only <b>Forward to 0.40</b>. The robot still slides straight up the field - watch the wheels twist so "forward" stays field-forward.</span></div>
       <div class="m-item" data-m="blend"><span class="m-st">○</span><span>Blend: hold <b>Forward 0.40</b> and <b>Rotate 1.00</b> together for one full spin. The FL speed swings between about <b>1.8</b> and <b>1.0</b> - a corner spins fastest when its share of the turn points the same way as the slide.</span></div>
       <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> park in the top-right corner (<b>Pose X and Y at least 0.85</b>) facing the top wall (<b>Heading 90° ± 10°</b>), then bring all three sliders back to zero.</span></div>
+    </div>
+    <div class="clinic" id="clinic">
+      <div class="c-head">🩺 Fault clinic <span class="c-sub">load a symptom, name the fault, then fix it with the sliders</span></div>
+      <p class="c-intro">Real swerve bugs rarely announce themselves. Each button below secretly breaks the sim in one realistic way. Watch how the robot misbehaves, name the fault, then work around it from the driver seat. Click the same button again to clear the fault.</p>
+      <div class="c-btns">
+        <button class="btn" data-clinic="spin">Spins at rest</button>
+        <button class="btn" data-clinic="gyro">Forward walks diagonal</button>
+        <button class="btn" data-clinic="flip">Turns the wrong way</button>
+      </div>
+      <div class="c-case" data-case="spin" data-correct="0" hidden>
+        <div class="c-qt"><b>Diagnose it.</b> All three sliders read zero, yet the robot slowly pirouettes and the wheels hold the pinwheel. What is the fault?</div>
+        <div class="opts">
+          <button class="opt">A small rotate command is leaking in, like a stick that never quite re-centers, with no deadband to ignore it</button>
+          <button class="opt">A steer encoder lost its zero, so one wheel points the wrong way</button>
+          <button class="opt">The kinematics is mixing forward speed into rotation</button>
+        </div>
+        <div class="explain">A clean pinwheel is exactly what a real rotate command draws, so the leak is on the command side. A lost steer zero would skew one wheel out of the pattern, and there is no forward command to mix in.</div>
+        <div class="c-fix" hidden><b>Now fix it from the driver seat:</b> use the Rotate slider to cancel the leak until the Heading readout holds still for two full seconds. <span class="c-watch">Watching the sim...</span></div>
+        <div class="c-done" hidden>Fixed - that was a +0.30 rotate command leaking from a stick that never re-centers. You cancelled it by hand; in code the cure is a joystick deadband.</div>
+      </div>
+      <div class="c-case" data-case="gyro" data-correct="1" hidden>
+        <div class="c-qt"><b>Diagnose it.</b> Push only Forward and the robot slides up and to the left, all four wheels leaning the same wrong way. What is the fault?</div>
+        <div class="opts">
+          <button class="opt">The drive wheels are worn and slipping</button>
+          <button class="opt">The gyro was zeroed while the robot faced the wrong way, so every field-oriented command comes out rotated</button>
+          <button class="opt">The Strafe slider is stuck on</button>
+        </div>
+        <div class="explain">All four wheels agree with each other, they just agree on the wrong direction - that is the field-oriented math rotating every command by a bad gyro zero. Slipping would look ragged and uneven, and the Strafe readout still shows 0.00.</div>
+        <div class="c-fix" hidden><b>Now fix it from the driver seat:</b> blend Forward and Strafe until the robot climbs straight up the field for about two seconds. Hit Reset pose if you run out of room, the fault stays. <span class="c-watch">Watching the sim...</span></div>
+        <div class="c-done" hidden>Fixed - the gyro zero was 40 degrees off, and you mixed in strafe to cancel the rotation. The real repair is re-zeroing the gyro while the robot squarely faces field-forward.</div>
+      </div>
+      <div class="c-case" data-case="flip" data-correct="2" hidden>
+        <div class="c-qt"><b>Diagnose it.</b> Push Rotate to +1.0 and the Heading readout counts down instead of up. What is the fault?</div>
+        <div class="opts">
+          <button class="opt">The Rotate slider is sending random values</button>
+          <button class="opt">The battery is low, so the robot turns the easier way</button>
+          <button class="opt">A sign flip - the code treats clockwise as positive, so every turn command comes out mirrored</button>
+        </div>
+        <div class="explain">The response is smooth, exact, and always exactly backwards. Random values or a weak battery would look messy or slow, not perfectly mirrored. WPILib treats counterclockwise as positive; one flipped sign on the gyro or on omega mirrors every turn.</div>
+        <div class="c-fix" hidden><b>Now fix it from the driver seat:</b> get the Heading readout to +60° or beyond. Think in opposites. <span class="c-watch">Watching the sim...</span></div>
+        <div class="c-done" hidden>Fixed - you commanded the opposite sign to get the turn you wanted. The lasting repair is one sign change in code, keeping counterclockwise positive, so the driver never has to think backwards.</div>
+      </div>
     </div>
   </section>
 
@@ -409,6 +465,101 @@
     }
     if(f0&&s0&&r0&&S.x>=0.85&&S.y>=0.85&&Math.abs(hd-90)<=10) mClear('gold');
   },200);
+  }catch(e){}
+
+  // ---- fault clinic (wrapped so a clinic bug can never break the lesson) ----
+  try{
+  (function(){
+    var SPIN=0.30, GERR=40*Math.PI/180, GC=Math.cos(GERR), GS=Math.sin(GERR);
+    var cRoot=document.getElementById('clinic'); if(!cRoot) return;
+    var cBtns=Array.prototype.slice.call(cRoot.querySelectorAll('[data-clinic]'));
+    var cCases={};
+    Array.prototype.forEach.call(cRoot.querySelectorAll('.c-case'),function(n){
+      cCases[n.getAttribute('data-case')]={
+        box:n, correct:parseInt(n.getAttribute('data-correct'),10),
+        opts:Array.prototype.slice.call(n.querySelectorAll('.opt')),
+        explain:n.querySelector('.explain'),
+        fix:n.querySelector('.c-fix'), done:n.querySelector('.c-done'),
+        diagnosed:false
+      };
+    });
+    var cActive=null, cHold=0, cTrail=[];
+    function cReset(){ if(el.reset) el.reset.click(); }
+    function cShow(name){ Object.keys(cCases).forEach(function(k){ cCases[k].box.hidden=(k!==name); }); }
+    function cPaint(){ cBtns.forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-clinic')===cActive); }); }
+    function cActivate(name){
+      cActive=name; cHold=0; cTrail=[];
+      var C=cCases[name]; if(!C){ cActive=null; return; }
+      C.done.hidden=true; C.fix.hidden=!C.diagnosed;
+      cShow(name); cPaint(); cReset();
+    }
+    function cDeactivate(){ cActive=null; cHold=0; cTrail=[]; cShow(null); cPaint(); cReset(); }
+    cBtns.forEach(function(b){
+      b.addEventListener('click',function(){
+        var name=b.getAttribute('data-clinic');
+        if(cActive===name) cDeactivate(); else cActivate(name);
+      });
+    });
+    el.reset.addEventListener('click',function(){ cHold=0; cTrail=[]; });
+    // diagnosis questions - same feel as the lesson quiz, nothing is saved anywhere
+    Object.keys(cCases).forEach(function(name){
+      var C=cCases[name];
+      C.opts.forEach(function(opt,i){
+        opt.addEventListener('click',function(){
+          if(C.diagnosed) return;
+          if(i===C.correct){
+            C.diagnosed=true;
+            C.opts.forEach(function(o){o.classList.add('locked');});
+            opt.classList.add('correct'); C.explain.classList.add('show');
+            if(cActive===name){ C.fix.hidden=false; cHold=0; cTrail=[]; }
+          } else { opt.classList.add('wrong'); C.explain.classList.add('show'); }
+        });
+      });
+    });
+    // enforce the active fault on top of whatever the sliders command
+    function cEnforce(){
+      try{
+        if(cActive){
+          var rf=parseFloat(el.fwd.value)||0, rs=parseFloat(el.str.value)||0, rr=parseFloat(el.rot.value)||0;
+          if(cActive==='spin'){ S.fwd=rf; S.str=rs; S.rot=rr+SPIN; }
+          else if(cActive==='gyro'){ S.str=rs*GC-rf*GS; S.fwd=rs*GS+rf*GC; S.rot=rr; }
+          else if(cActive==='flip'){ S.fwd=rf; S.str=rs; S.rot=-rr; }
+        }
+      }catch(e){}
+      requestAnimationFrame(cEnforce);
+    }
+    requestAnimationFrame(cEnforce);
+    function cFixed(name){
+      var C=cCases[name];
+      C.done.hidden=false; C.fix.hidden=true;
+      cBtns.forEach(function(b){
+        if(b.getAttribute('data-clinic')===name && b.textContent.indexOf('✓')!==0) b.textContent='✓ '+b.textContent;
+      });
+      cActive=null; cPaint(); cReset();
+    }
+    setInterval(function(){
+      try{
+        if(!cActive) return;
+        var C=cCases[cActive];
+        if(!C||!C.diagnosed||!C.done.hidden) return;
+        var rr=parseFloat(el.rot.value)||0;
+        if(cActive==='spin'){
+          if(Math.abs(rr+SPIN)<0.03) cHold+=0.15; else cHold=0;
+          if(cHold>=2) cFixed('spin');
+        } else if(cActive==='gyro'){
+          cTrail.push({x:S.x,y:S.y});
+          if(cTrail.length>13) cTrail.shift();
+          if(cTrail.length===13){
+            var dy=S.y-cTrail[0].y, dx=S.x-cTrail[0].x;
+            if(dy>=0.10 && Math.abs(dx)<=0.035) cFixed('gyro');
+          }
+        } else if(cActive==='flip'){
+          var hd=(S.h*DEG)%360; if(hd>180)hd-=360; if(hd<-180)hd+=360;
+          if(rr<-0.1 && hd>=60 && hd<=120) cFixed('flip');
+        }
+      }catch(e){}
+    },150);
+  })();
   }catch(e){}
 
   function draw(){
