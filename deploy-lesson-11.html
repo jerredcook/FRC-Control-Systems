@@ -106,6 +106,38 @@
   .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
   .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  /* ---- cockpit stepper + missions (Part 3.1 addition) ---- */
+  .ckflow{padding:22px 16px 14px;display:flex;flex-direction:column;gap:6px;align-items:center}
+  .cbox{width:100%;max-width:460px;border:1px solid var(--line-2);border-radius:11px;background:#0B1322;padding:10px 14px;cursor:pointer;text-align:left;transition:.12s;font-family:var(--sans);color:var(--text)}
+  .cbox span{display:block}
+  .cbox .cls{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .cbox .call{font-family:var(--mono);font-size:14px;color:var(--text);margin-top:2px}
+  .cbox .cnote{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .cbox:hover{border-color:var(--muted)}
+  .cbox.on{border-color:var(--indigo);background:rgba(142,140,248,.12);box-shadow:0 0 22px -8px var(--indigo)}
+  .cbox.on .cls{color:var(--indigo)}
+  .cbox.guess{outline:2px dashed var(--amber);outline-offset:2px}
+  .ckarrow{color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.08em;line-height:1.2}
+  .ckgroup{width:100%;max-width:460px;border-left:2px solid var(--line-2);padding:6px 0 6px 14px;display:flex;flex-direction:column;gap:6px}
+  .ckgroup .cklabel{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .ckqueue{width:100%;max-width:460px;margin-top:8px;border:1px dashed var(--line-2);border-radius:10px;padding:9px 12px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+  .ckqueue b{color:var(--amber)}
+  .cklog{padding:11px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:12.5px;line-height:1.6;color:var(--muted);min-height:44px}
+  .cklog b{color:var(--text)}
+  #cockpit .ro .v{font-size:14px;line-height:1.5}
+  .ckcheck{display:flex;flex-wrap:wrap;gap:9px;align-items:center;padding:12px 16px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
+  .ckcheck input{width:74px;background:var(--panel-2);border:1px solid var(--line-2);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:14px;padding:8px 10px}
+  .ckcheck .ok{color:var(--green);font-family:var(--mono);font-size:12.5px}
+  .ckcheck .no{color:var(--red);font-family:var(--mono);font-size:12.5px}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--indigo);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -180,6 +212,56 @@
     <div class="note indigo">
       <div class="nh">Why command-based at all?</div>
       <p>You <em>could</em> stuff everything into <span class="k">teleopPeriodic</span> with a wall of if-statements. Command-based instead splits the robot into named subsystems and reusable commands the scheduler coordinates - so two mechanisms can act at once, actions compose, and your code stays readable as the robot grows. The rest of this part builds those pieces.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Drive it</div>
+    <h2>Now you be the clock</h2>
+    <p>The sim above runs by itself, like watching someone else ride. This one moves only when you press <span class="k">Step</span>. Each press runs the next thing the robot would run, in the order the real <span class="k">run()</span> uses: every subsystem's <span class="k">periodic()</span> first, then the scheduled commands. Stay one step ahead - click the box you think runs next, then press Step to check yourself.</p>
+    <p>Then press <span class="k">Schedule RaiseElevator</span> in the middle of a loop and watch the queue. The scheduler does not drop everything for it. It finishes the pass it is on and picks the command up on its <em>next</em> pass. Catch the loop number where its execute() first runs - a mission below asks for it.</p>
+
+    <div class="demo" id="cockpit">
+      <div class="demo-head"><span class="demo-title">You drive the scheduler</span><span class="demo-tag"><span class="live" id="ckLive"></span> <span id="ckStatus">your move</span></span></div>
+      <div class="ckflow">
+        <button type="button" class="cbox" data-s="0"><span class="cls">Robot.java</span><span class="call">robotPeriodic()</span><span class="cnote">the 20 ms heartbeat - fires no matter what</span></button>
+        <div class="ckarrow">↓ calls</div>
+        <button type="button" class="cbox" data-s="1"><span class="cls">CommandScheduler</span><span class="call">run()</span><span class="cnote">one full pass of the engine</span></button>
+        <div class="ckarrow">↓ which runs, in order</div>
+        <div class="ckgroup">
+          <div class="cklabel">inside run()</div>
+          <button type="button" class="cbox" data-s="2"><span class="cls">Elevator · subsystem</span><span class="call">periodic()</span></button>
+          <button type="button" class="cbox" data-s="3"><span class="cls">Intake · subsystem</span><span class="call">periodic()</span></button>
+          <button type="button" class="cbox" data-s="4"><span class="cls">Scheduled commands</span><span class="call">execute() each one</span><span class="cnote">whatever the queue holds right now</span></button>
+        </div>
+        <div class="ckqueue" id="ckQueue">Command queue: <b>empty</b></div>
+      </div>
+      <div class="cklog" id="ckLog">Press <b>Step</b> to run the first thing, or click a box first to predict what runs next.</div>
+      <div class="controls">
+        <button class="btn primary" id="ckStep">Step ▸</button>
+        <button class="btn" id="ckSched">Schedule RaiseElevator</button>
+        <button class="btn" id="ckCancel">Cancel it</button>
+        <button class="btn" id="ckReset">Reset</button>
+      </div>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Loop</div><div class="v indigo" id="ckLoop">1</div></div>
+        <div class="ro"><div class="k2">Just ran</div><div class="v amber" id="ckRan">-</div></div>
+        <div class="ro"><div class="k2">Predict streak</div><div class="v teal" id="ckStreak">0</div></div>
+      </div>
+      <div class="ckcheck">
+        <span>Mission check: RaiseElevator first runs execute() on loop</span>
+        <input id="ckFt" type="number" min="1" inputmode="numeric" />
+        <button class="btn" id="ckFtBtn">Check</button>
+        <span id="ckFtMsg"></span>
+      </div>
+    </div>
+    <p class="caption">Five boxes, one heartbeat. Nothing runs unless this chain reaches it - and the chain runs top to bottom, every 20 ms, forever.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the stepper above</span></div>
+      <div class="m-item" data-m="predict3"><span class="m-st">○</span><span>Click the box you think runs <b>next</b>, then press Step. Get <b>3 predictions in a row</b>.</span></div>
+      <div class="m-item" data-m="firsttick"><span class="m-st">○</span><span><b>Schedule RaiseElevator</b> mid-loop, then type the <b>loop number</b> its execute() first runs into the checker. You can answer before or after you see it run.</span></div>
+      <div class="m-item" data-m="cancelmid"><span class="m-st">○</span><span><b>Cancel</b> RaiseElevator while it is running, then step to the command phase and watch the queue come up <b>empty</b>.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> a streak of <b>5 correct predictions</b>, with RaiseElevator scheduled during the streak.</span></div>
     </div>
   </section>
 
@@ -295,6 +377,138 @@
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  "use strict";
+  try{
+    var NAMES=['robotPeriodic()','run()','Elevator.periodic()','Intake.periodic()','the command phase'];
+    var boxes={};
+    Array.prototype.forEach.call(document.querySelectorAll('#cockpit .cbox'),function(b){ boxes[parseInt(b.getAttribute('data-s'),10)]=b; });
+    var el={ step:document.getElementById('ckStep'), sched:document.getElementById('ckSched'), cancel:document.getElementById('ckCancel'),
+      reset:document.getElementById('ckReset'), loop:document.getElementById('ckLoop'), ran:document.getElementById('ckRan'),
+      streak:document.getElementById('ckStreak'), log:document.getElementById('ckLog'), queue:document.getElementById('ckQueue'),
+      live:document.getElementById('ckLive'), status:document.getElementById('ckStatus'),
+      ft:document.getElementById('ckFt'), ftBtn:document.getElementById('ckFtBtn'), ftMsg:document.getElementById('ckFtMsg') };
+    var C={tick:1, step:-1, guess:null, streak:0, streakCmd:false};
+    var cmd={in:false, ready:0, ran:false};
+    var lastFirst=null, cancelledActive=false;
+
+    // ---- missions (wrapped so a missions bug can never break the lesson) ----
+    var mClear=function(){};
+    try{
+      var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+      var mSaved={}, mGold={};
+      try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+      try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+      var mItems={};
+      Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+      var mMark=function(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; };
+      mClear=function(id){
+        var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+        mMark(n);
+        var gold=n.classList.contains('gold');
+        var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+        map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+      };
+      Object.keys(mItems).forEach(function(id){
+        if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+      });
+    }catch(e){}
+
+    function log(html){ el.log.innerHTML=html; }
+    function paint(){
+      Object.keys(boxes).forEach(function(k){
+        var i=parseInt(k,10);
+        boxes[k].classList.toggle('on', i===C.step);
+        boxes[k].classList.toggle('guess', C.guess!==null&&i===C.guess);
+      });
+      el.loop.textContent=String(C.tick);
+      el.ran.textContent=C.step<0?'-':NAMES[C.step];
+      el.streak.textContent=String(C.streak);
+      el.live.classList.toggle('on', cmd.in&&cmd.ran);
+      el.status.textContent=C.step<0?'your move':('loop '+C.tick+' · step '+(C.step+1)+'/5');
+      if(!cmd.in){ el.queue.innerHTML='Command queue: <b>empty</b>'; }
+      else if(cmd.ran){ el.queue.innerHTML='Command queue: <b>RaiseElevator</b> - running, execute() every loop'; }
+      else { el.queue.innerHTML='Command queue: <b>RaiseElevator</b> - queued, waiting for the scheduler\'s next full pass'; }
+    }
+    Object.keys(boxes).forEach(function(k){
+      boxes[k].addEventListener('click',function(){
+        C.guess=parseInt(k,10); paint();
+        log('Prediction locked: <b>'+NAMES[C.guess]+'</b>. Press Step to see if you are right.');
+      });
+    });
+    el.step.addEventListener('click',function(){
+      var idx=(C.step+1)%5;
+      if(C.step===4) C.tick++;
+      var verdict='';
+      if(C.guess!==null){
+        if(C.guess===idx){
+          C.streak++; if(cmd.in) C.streakCmd=true; verdict='<b>Correct.</b> ';
+          if(C.streak>=3) mClear('predict3');
+          if(C.streak>=5&&C.streakCmd) mClear('gold');
+        } else {
+          verdict='<b>Miss</b> - you picked '+NAMES[C.guess]+'. Streak resets. ';
+          C.streak=0; C.streakCmd=false;
+        }
+        C.guess=null;
+      }
+      C.step=idx;
+      var msg='';
+      if(idx===0) msg='<b>robotPeriodic()</b> fired - the 20 ms heartbeat. Its one job: call the scheduler.';
+      else if(idx===1) msg='<b>run()</b> starts its pass: update every subsystem, then run the queue.';
+      else if(idx===2) msg='<b>Elevator.periodic()</b> ran - the subsystem read its sensors and updated its state.';
+      else if(idx===3) msg='<b>Intake.periodic()</b> ran - same deal, every subsystem gets a turn every loop.';
+      else {
+        if(cmd.in&&C.tick>=cmd.ready){
+          if(!cmd.ran){ cmd.ran=true; lastFirst=C.tick; msg='<b>RaiseElevator.execute()</b> ran for the first time. Note the loop number, a mission wants it. Loop '+C.tick+' done.'; }
+          else msg='<b>RaiseElevator.execute()</b> ran again. Loop '+C.tick+' done.';
+        } else if(cmd.in){
+          msg='Command phase: RaiseElevator arrived mid-pass, so this pass skips it. It executes next loop. Loop '+C.tick+' done.';
+        } else {
+          msg='Command phase: the queue is empty, nothing to execute. Loop '+C.tick+' done.';
+          if(cancelledActive){ mClear('cancelmid'); cancelledActive=false; }
+        }
+      }
+      log(verdict+msg);
+      paint();
+    });
+    el.sched.addEventListener('click',function(){
+      if(cmd.in){ log('RaiseElevator is already scheduled - the scheduler will not add it twice.'); return; }
+      cmd.in=true; cmd.ran=false;
+      cmd.ready=(C.step===-1)?C.tick:C.tick+1;
+      log((C.step===-1)
+        ? '<b>schedule(RaiseElevator)</b> called before the loop started. The very first pass will pick it up.'
+        : '<b>schedule(RaiseElevator)</b> called mid-loop. initialize() runs now; execute() starts on the scheduler\'s next full pass.');
+      paint();
+    });
+    el.cancel.addEventListener('click',function(){
+      if(!cmd.in){ log('Nothing to cancel - the queue is empty.'); return; }
+      var hadRun=cmd.ran; cmd.in=false; cmd.ran=false;
+      if(hadRun){ cancelledActive=true; log('<b>cancel()</b> called mid-action. RaiseElevator\'s end() ran and it left the queue. Step to the command phase and see what is left.'); }
+      else log('<b>cancel()</b> called. RaiseElevator left the queue before it ever executed.');
+      paint();
+    });
+    el.reset.addEventListener('click',function(){
+      C.tick=1; C.step=-1; C.guess=null; C.streak=0; C.streakCmd=false;
+      cmd.in=false; cmd.ran=false; cancelledActive=false;
+      log('Reset. Press <b>Step</b> to run the first thing, or click a box to predict it.');
+      paint();
+    });
+    el.ftBtn.addEventListener('click',function(){
+      var v=parseInt(el.ft.value,10);
+      if(cmd.in&&!cmd.ran){
+        if(v===cmd.ready){ el.ftMsg.className='ok'; el.ftMsg.textContent='Right - and you called it before it even ran. Step to the command phase to watch.'; mClear('firsttick'); }
+        else { el.ftMsg.className='no'; el.ftMsg.textContent='Not that loop. When was it scheduled, and when is the scheduler\'s next full pass?'; }
+        return;
+      }
+      if(lastFirst===null){ el.ftMsg.className='no'; el.ftMsg.textContent='It has not executed yet - schedule it, then step to the command phase.'; return; }
+      if(v===lastFirst){ el.ftMsg.className='ok'; el.ftMsg.textContent='Correct - scheduled mid-pass, picked up on the next one.'; mClear('firsttick'); }
+      else { el.ftMsg.className='no'; el.ftMsg.textContent='Not that loop. Cancel, re-schedule, and watch the Loop readout when its box lights.'; }
+    });
+    paint();
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

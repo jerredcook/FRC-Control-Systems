@@ -135,6 +135,27 @@
   .coursenav a:hover{border-color:var(--indigo);color:var(--text)}
   .coursenav a.map{border-color:transparent;color:var(--teal)}
 
+  /* ---- DS cockpit (read the lights) ---- */
+  .cockpit{padding:16px;background:#0B1322;display:grid;gap:14px}
+  @media(min-width:640px){.cockpit{grid-template-columns:1.05fr 1fr}}
+  .cp-col{display:flex;flex-direction:column;gap:12px;min-width:0}
+  .lights{display:flex;flex-direction:column;gap:8px}
+  .light{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--line-2);border-radius:9px;padding:10px 12px;background:#080d16}
+  .light .ln{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .light .lv{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--red);display:flex;align-items:center;gap:7px}
+  .light .lv i{width:9px;height:9px;border-radius:50%;background:var(--red);box-shadow:0 0 8px var(--red);flex:0 0 auto}
+  .light.on .lv{color:var(--green)}
+  .light.on .lv i{background:var(--green);box-shadow:0 0 8px var(--green)}
+  .fixhead{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint)}
+  .fixes{display:flex;flex-direction:column;gap:8px}
+  .fixbtn{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:10px 13px;border-radius:9px;cursor:pointer;font-size:14.5px;font-family:var(--sans);transition:.12s}
+  .fixbtn:hover{border-color:var(--muted);color:var(--text)}
+  .fixbtn.good{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .fixbtn.bad{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .dslog{background:#080d16;border:1px solid var(--line-2);border-radius:9px;padding:10px 12px;font-family:var(--mono);font-size:12px;line-height:1.6;color:var(--faint);flex:1;min-height:96px;max-height:190px;overflow-y:auto}
+  .dslog div{margin-bottom:4px}
+  .dslog .ok{color:var(--green)} .dslog .warn{color:var(--amber)} .dslog .err{color:var(--red)}
+
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
 </style>
@@ -220,6 +241,75 @@
   </section>
 
   <section>
+    <div class="kicker">The cockpit</div>
+    <h2>Read the lights</h2>
+    <p>At every competition, some robot sits dead while its team stares at the Driver Station. The three status lights tell you which layer broke. <strong>Communications</strong>: can the laptop reach the roboRIO at all? <strong>Robot Code</strong>: is a program running on it? <strong>Joysticks</strong>: does the Driver Station see your controller? Each red light points at a different fix, and reading them fast is a real skill. Prove you can.</p>
+
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="1">
+        <div class="qn">Predict first</div>
+        <div class="qt">The code on the robot is running fine, but the laptop cannot reach the robot at all (Communications red). What does the Robot Code light show?</div>
+        <div class="opts">
+          <button class="opt">Green - the code really is running, and the light reports the truth</button>
+          <button class="opt">Red - the Driver Station cannot see code on a robot it cannot reach</button>
+          <button class="opt">It blinks between red and green until comms come back</button>
+        </div>
+        <div class="explain">Every light on the Driver Station is built from what the robot reports back. No comms means no reports, so Robot Code goes red even though the program never stopped. That is why you fix Communications first: a comms failure takes other lights down with it. Try it below - throw Fault 1 and watch two lights drop at once.</div>
+      </div>
+    </div>
+
+    <div class="demo" id="cockpitDemo">
+      <div class="demo-head">
+        <span class="demo-title">Driver Station cockpit</span>
+        <span class="demo-tag">read the lights · pick the fix</span>
+      </div>
+      <div class="cockpit">
+        <div class="cp-col">
+          <div class="lights">
+            <div class="light" id="ltComms"><span class="ln">Communications</span><span class="lv"><i></i><span class="lt">RED</span></span></div>
+            <div class="light" id="ltCode"><span class="ln">Robot Code</span><span class="lv"><i></i><span class="lt">RED</span></span></div>
+            <div class="light" id="ltJoy"><span class="ln">Joysticks</span><span class="lv"><i></i><span class="lt">RED</span></span></div>
+          </div>
+          <div class="ds-status"><span class="chip on"><i></i> Battery 12.6 V</span></div>
+          <div class="state" id="cpState">
+            <div class="lbl">Robot state</div>
+            <div class="big" id="cpStateBig">DISABLED</div>
+          </div>
+          <div class="enbtns">
+            <button class="enable" id="cpEnable" disabled>Enable</button>
+            <button class="disable" id="cpDisable">Disable</button>
+          </div>
+        </div>
+        <div class="cp-col">
+          <div class="fixhead">Pick the fix</div>
+          <div class="fixes">
+            <button class="fixbtn" data-fix="joy">Re-plug the joystick and rescan USB</button>
+            <button class="fixbtn" data-fix="team">Set the right team number in DS setup</button>
+            <button class="fixbtn" data-fix="battery">Swap in a fresh battery</button>
+            <button class="fixbtn" data-fix="deploy">Re-deploy the code</button>
+          </div>
+          <div class="fixhead">DS log</div>
+          <div class="dslog" id="cpLog"></div>
+        </div>
+      </div>
+      <div class="controls">
+        <button class="btn primary" id="cpDeploy">Deploy code ▸</button>
+        <button class="btn" data-fault="team">Fault 1</button>
+        <button class="btn" data-fault="crash">Fault 2</button>
+        <button class="btn" data-fault="joy">Fault 3</button>
+        <button class="btn" id="cpReset">Cold start ↺</button>
+      </div>
+    </div>
+    <p class="caption">When two lights are red at once, start with Comms - the Robot Code light is built from the robot's reports, so it cannot be green while Comms is red. Fix the network and the code light often comes back for free.</p>
+    <div class="missions" id="missionsDS">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the cockpit above</span></div>
+      <div class="m-item" data-m="coldstart"><span class="m-st">○</span><span><b>Cold start.</b> All three lights begin red. Get every light green, then press <b>Enable</b>. Order matters - a deploy fails while Comms is red.</span></div>
+      <div class="m-item" data-m="diagnose"><span class="m-st">○</span><span><b>Pit crew.</b> Press a <b>Fault</b> button, read the lights, and pick the correct fix on your <b>first try</b>. Do it for <b>2 different faults</b>.</span></div>
+      <div class="m-item gold" data-m="dsgold"><span class="m-st">★</span><span><b>Gold:</b> field tech. First-try all <b>3 faults</b>. That is the teammate everyone wants at the field when a robot dies with two minutes on the clock.</span></div>
+    </div>
+  </section>
+
+  <section>
     <div class="note indigo">
       <div class="nh">Going further &middot; optional</div>
       <p>A full deploy rebuilds and resends everything, which is slow when you only tweaked one number. Look up "deploy without rebuild" and live tuning for FRC, plus how teams tune constants live from a dashboard instead of redeploying. Here is a question to chew on: why is shrinking the deploy loop, like shrinking the time between trying a bike gear and feeling the result, worth so much during a build season?</p>
@@ -275,6 +365,8 @@
         <div class="gl"><b>Robot Code light</b><span>Green once a deploy is running.</span></div>
         <div class="gl"><b>Disabled</b><span>Code runs; motors forced to zero.</span></div>
         <div class="gl"><b>E-Stop</b><span>Spacebar - kills the robot instantly.</span></div>
+        <div class="gl"><b>Comms light</b><span>Can the laptop reach the roboRIO? Red drags Robot Code red too.</span></div>
+        <div class="gl"><b>Joysticks light</b><span>Does the DS see your controller?</span></div>
       </div>
       <a class="next" href="deploy-lesson-4-py.html">
         <div class="n-eyebrow">Up next · Part 1 · 04</div>
@@ -397,6 +489,173 @@
       opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
     });
   });
+})();
+</script>
+<script>
+(function(){
+  "use strict";
+  try{
+  // ---- DS cockpit: read the lights, pick the fix ----
+  var ltComms=document.getElementById("ltComms"), ltCode=document.getElementById("ltCode"), ltJoy=document.getElementById("ltJoy");
+  var cpState=document.getElementById("cpState"), cpBig=document.getElementById("cpStateBig");
+  var cpEnable=document.getElementById("cpEnable"), cpDisable=document.getElementById("cpDisable");
+  var cpDeploy=document.getElementById("cpDeploy"), cpReset=document.getElementById("cpReset"), cpLog=document.getElementById("cpLog");
+  if(!ltComms||!ltCode||!ltJoy||!cpState||!cpBig||!cpEnable||!cpDisable||!cpDeploy||!cpReset||!cpLog) return;
+
+  // team: DS has the right team number (comms). running: a program is on the rio. joy: controller plugged in.
+  var C={team:false,running:false,joy:false,enabled:false,busy:false,fault:null,picked:false,coldPath:true,solved:{}};
+  var FIXFOR={team:"team",crash:"deploy",joy:"joy"};
+  var DELAY=(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches)?0:1;
+
+  // ---- missions (wrapped so a missions bug can never break the cockpit) ----
+  var clearMission=function(){};
+  try{
+    var MKEY="frc:missions", GKEY="frc:gold", mPage=location.pathname.split("/").pop();
+    var mSaved={}, mGold={};
+    try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+    try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+    var mItems={};
+    Array.prototype.forEach.call(document.querySelectorAll("#missionsDS .m-item"),function(n){ mItems[n.getAttribute("data-m")]=n; });
+    var mMark=function(n){ n.classList.add("cleared"); n.querySelector(".m-st").textContent=n.classList.contains("gold")?"★":"✓"; };
+    clearMission=function(id){
+      var n=mItems[id]; if(!n||n.classList.contains("cleared"))return;
+      mMark(n);
+      var gold=n.classList.contains("gold");
+      var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+      // the sim's missions script shares this key, so re-read the stored map and
+      // merge it in before writing - never overwrite it with a stale load-time snapshot
+      try{
+        var fresh=JSON.parse(localStorage.getItem(key))||{};
+        Object.keys(fresh).forEach(function(k){ map[k]=fresh[k]; });
+      }catch(e){}
+      map[mPage+"#"+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+    };
+    Object.keys(mItems).forEach(function(id){
+      if((mItems[id].classList.contains("gold")?mGold:mSaved)[mPage+"#"+id]) mMark(mItems[id]);
+    });
+  }catch(e){}
+
+  function log(html){ var d=document.createElement("div"); d.innerHTML=html; cpLog.appendChild(d); while(cpLog.children.length>30) cpLog.removeChild(cpLog.firstChild); cpLog.scrollTop=cpLog.scrollHeight; }
+  function comms(){ return C.team; }
+  function codeLight(){ return C.team&&C.running; }
+  function setLight(el,on){ el.classList.toggle("on",on); var t=el.querySelector(".lt"); if(t) t.textContent=on?"GREEN":"RED"; }
+  function paint(){
+    setLight(ltComms,comms()); setLight(ltCode,codeLight()); setLight(ltJoy,C.joy);
+    if(C.enabled){ cpState.classList.add("enabled"); cpBig.textContent="TELEOP · ENABLED"; }
+    else{ cpState.classList.remove("enabled"); cpBig.textContent="DISABLED"; }
+    var ready=comms()&&codeLight()&&!C.enabled&&!C.busy;
+    cpEnable.classList.toggle("armed",ready);
+    cpEnable.disabled=!ready;
+  }
+  function flash(btn,good){ if(!btn||!btn.classList||!btn.classList.contains("fixbtn")) return; var c=good?"good":"bad"; btn.classList.add(c); setTimeout(function(){ btn.classList.remove("good","bad"); },900); }
+  function faultFixed(){
+    if(!C.fault) return;
+    var fixed = C.fault==="joy" ? C.joy : C.fault==="team" ? comms() : codeLight();
+    if(fixed){ C.fault=null; log('<span class="ok">Fault cleared.</span> Enable when ready.'); }
+  }
+  function pick(fix,btn){
+    if(C.fault&&!C.picked){
+      C.picked=true;
+      if(fix===FIXFOR[C.fault]){
+        if(!C.solved[C.fault]){
+          C.solved[C.fault]=true;
+          var n=0,k; for(k in C.solved) n++;
+          log('<span class="ok">✓ First-try diagnosis ('+n+' of 3 faults).</span>');
+          if(n>=2) clearMission("diagnose");
+          if(n>=3) clearMission("dsgold");
+        }
+      } else {
+        log('<span class="warn">Not the first thing to try - the lights pointed elsewhere. Throw a fault again for another shot.</span>');
+      }
+    }
+    applyFix(fix,btn);
+  }
+  function applyFix(fix,btn){
+    if(fix==="team"){
+      if(!C.team){ C.team=true; flash(btn,true); log('<span class="ok">✓ Team number set. Comms up.</span>'+(C.running?" The code was running the whole time - its light comes back with comms.":" Still no code on the robot, though.")); }
+      else{ flash(btn,false); log("The team number was already right. Not it."); }
+    } else if(fix==="joy"){
+      if(!C.joy){ C.joy=true; flash(btn,true); log('<span class="ok">✓ DS sees Controller 0.</span>'); }
+      else{ flash(btn,false); log("The joystick was already plugged in. Not it."); }
+    } else if(fix==="battery"){
+      flash(btn,false); log('The battery already reads <span class="warn">12.6 V</span>. A fresh one changes nothing here.');
+    } else if(fix==="deploy"){
+      if(!comms()){ flash(btn,false); log('<span class="err">✗ Deploy failed: no roboRIO found at 10.TE.AM.2.</span> No comms means nothing to copy to.'); }
+      else if(C.running){ flash(btn,false); log("Re-deployed, but the code was already running fine. Not it."); }
+      else if(!C.busy){
+        flash(btn,true); C.busy=true; paint(); log('<span class="warn">Deploying…</span>');
+        setTimeout(function(){ C.busy=false; C.running=true; log('<span class="ok">✓ Robot Code running.</span>'); paint(); faultFixed(); },900*DELAY);
+      }
+    }
+    paint(); faultFixed();
+  }
+  Array.prototype.forEach.call(document.querySelectorAll("#cockpitDemo .fixbtn"),function(b){
+    b.addEventListener("click",function(){ pick(b.getAttribute("data-fix"),b); });
+  });
+  cpDeploy.addEventListener("click",function(){ pick("deploy",null); });
+  Array.prototype.forEach.call(document.querySelectorAll("#cockpitDemo [data-fault]"),function(b){
+    b.addEventListener("click",function(){
+      if(C.busy) return;
+      C.team=true; C.running=true; C.joy=true; C.enabled=false; C.coldPath=false;
+      C.fault=b.getAttribute("data-fault"); C.picked=false;
+      if(C.fault==="team") C.team=false;
+      else if(C.fault==="crash") C.running=false;
+      else C.joy=false;
+      log('<span class="err">⚠ Fault thrown.</span> A working robot just broke. Read the lights, then pick one fix.');
+      paint();
+    });
+  });
+  cpEnable.addEventListener("click",function(){
+    if(!(comms()&&codeLight())||C.enabled||C.busy) return;
+    C.enabled=true;
+    log(C.joy?'<span class="ok">▶ Enabled. Motors live.</span>':'<span class="warn">▶ Enabled, but the DS sees no joystick - the sticks do nothing.</span>');
+    paint();
+    if(C.joy&&C.coldPath) clearMission("coldstart");
+  });
+  cpDisable.addEventListener("click",function(){ if(!C.enabled) return; C.enabled=false; log("■ Disabled. Motors off."); paint(); });
+  // spacebar E-stop, same rule as the sim above: only intercepts Space while this robot is enabled
+  document.addEventListener("keydown",function(e){
+    if(e.code!=="Space"&&e.key!==" ") return;
+    if(!C.enabled) return;
+    e.preventDefault();
+    C.enabled=false; log('<span class="err">⛔ E-STOP (spacebar). Robot killed instantly.</span>'); paint();
+  });
+  function coldStart(){
+    C.team=false; C.running=false; C.joy=false; C.enabled=false; C.busy=false; C.fault=null; C.picked=false; C.coldPath=true;
+    cpLog.innerHTML="";
+    log("- cold start - the laptop just booted, the robot just powered on -");
+    log("Three red lights. Get every one green, then Enable.");
+    paint();
+  }
+  cpReset.addEventListener("click",coldStart);
+  coldStart();
+  }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then run the sim
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain');
+  var picked=-1, revealed=false, ran=false;
+  var demos=document.querySelectorAll('.demo');
+  var note=document.createElement('div');
+  note.textContent='Prediction locked in. Now run the sim and see if you were right.';
+  note.style.cssText='display:none;font-size:13px;color:#92A2BE;margin-top:10px;font-style:italic';
+  q.appendChild(note);
+  function reveal(){ if(revealed||picked<0) return; revealed=true; note.style.display='none';
+    if(picked===correct){opts[picked].classList.add('correct');} else {opts[picked].classList.add('wrong'); opts[correct].classList.add('correct');}
+    explain.classList.add('show'); }
+  function onRan(){ ran=true; if(picked>=0) reveal(); }
+  if(demos.length){
+    Array.prototype.forEach.call(demos,function(d){
+      d.addEventListener('pointerdown',onRan,true);
+      d.addEventListener('input',onRan,true);
+    });
+    window.addEventListener('keydown',onRan,true);
+  } else { ran=true; }
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(picked>=0)return; picked=i; opts.forEach(function(o){o.classList.add('locked');}); if(ran){ reveal(); } else { note.style.display='block'; } }); });
 })();
 </script>
 <script>

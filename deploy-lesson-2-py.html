@@ -112,6 +112,52 @@
   .coursenav a:hover{border-color:var(--indigo);color:var(--text)}
   .coursenav a.map{border-color:transparent;color:var(--teal)}
 
+  /* ---- mock cockpit + missions ---- */
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .controls{padding:12px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .btn.primary{background:linear-gradient(180deg,#a7adff,var(--indigo));color:#0a0f24;font-weight:700;border:none}
+  .ck-screen{background:#0B1322;padding:18px 16px;min-height:340px;display:flex;flex-direction:column}
+  .ck-stage{flex:1;display:flex;flex-direction:column}
+  .ck-center{max-width:560px;margin:22px auto 0;text-align:center}
+  .ck-sub{font-size:14.5px;color:var(--muted);margin:0 0 18px;line-height:1.6}
+  .ck-kbd{display:inline-flex;gap:8px;align-items:center;border:1px solid var(--line-2);background:var(--panel-2);border-radius:10px;padding:12px 16px;cursor:pointer;transition:.12s;font-family:var(--mono);font-size:13px;color:var(--text)}
+  .ck-kbd:hover{border-color:var(--indigo)}
+  .ck-kbd .key{border:1px solid var(--line-2);border-bottom-width:2px;border-radius:6px;padding:2px 8px;background:var(--ink);font-size:12px;color:var(--indigo)}
+  .ck-kbd .lbl{margin-left:4px;color:var(--muted)}
+  .ck-ghost{margin-top:14px}
+  .ck-ghost button{background:none;border:none;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.06em;cursor:pointer;text-decoration:underline dotted;padding:4px}
+  .ck-ghost button:hover{color:var(--muted)}
+  .ck-pal{max-width:560px;width:100%;margin:0 auto;border:1px solid var(--line-2);border-radius:10px;background:var(--panel-2);overflow:hidden;box-shadow:0 18px 40px -20px rgba(0,0,0,.9)}
+  .ck-q{font-family:var(--mono);font-size:12.5px;color:var(--faint);padding:11px 13px;border-bottom:1px solid var(--line)}
+  .ck-q b{color:var(--text);font-weight:600}
+  .ck-pi{display:block;width:100%;text-align:left;border:none;border-bottom:1px solid var(--line);background:transparent;color:var(--muted);font-family:var(--mono);font-size:13px;padding:11px 13px;cursor:pointer;transition:.1s}
+  .ck-pi:last-child{border-bottom:none}
+  .ck-pi:hover{background:rgba(138,140,248,.1);color:var(--text)}
+  .ck-pi.bad{background:rgba(255,107,107,.12);color:var(--red)}
+  .ck-inrow{display:flex;gap:8px;padding:12px 13px}
+  .ck-input{flex:1;min-width:0;background:var(--ink);border:1px solid var(--line-2);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:14px;padding:9px 12px;outline:none}
+  .ck-input:focus{border-color:var(--indigo)}
+  .ck-sum{padding:12px 13px;font-family:var(--mono);font-size:12.5px;color:var(--muted);border-bottom:1px solid var(--line);display:grid;gap:6px}
+  .ck-sum b{color:var(--teal);font-weight:600}
+  .ck-msg{margin:14px auto 0;max-width:560px;width:100%;font-size:13.5px;line-height:1.55;border-left:2px solid var(--line-2);padding:2px 0 2px 12px;color:var(--muted);min-height:24px}
+  .ck-msg.bad{border-color:var(--red);color:var(--text)}
+  .ck-msg.ok{border-color:var(--green);color:var(--text)}
+  .ck-treewrap{max-width:560px;width:100%;margin:0 auto;border:1px solid var(--line-2);border-radius:10px;overflow:hidden}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--indigo);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
 </style>
@@ -142,6 +188,48 @@
       <div class="stp"><div class="num">1</div><div><h4>Install RobotPy</h4><p>From a terminal, run <code>pip install robotpy</code>. That pulls in WPILib for Python plus the <code>robotpy</code> command line tool. Use any editor you like - VS Code, PyCharm, even a plain text editor.</p></div></div>
       <div class="stp"><div class="num">2</div><div><h4>Create a project</h4><p>Make an empty folder, then run <code>robotpy init</code> inside it. Pick the <em>command-based</em> example as your starting point and fill in your team number when it asks.</p></div></div>
       <div class="stp"><div class="num">3</div><div><h4>Open it</h4><p>That's it - you have a full, runnable robot project. No blank files, nothing missing. Now let's see what's inside.</p></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Do it</div>
+    <h2>Fly the cockpit</h2>
+    <p>Reading the steps is not the same as doing them. Below is a mock of the RobotPy terminal flow - same command, same choices, nothing to install. Pilots log hours in a simulator before they touch a real plane; give yourself one safe lap here. Wrong picks cannot break anything - the mock shows you what would really happen, then lets you try again.</p>
+
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="1">
+        <div class="qn">Predict first</div>
+        <div class="qt">In the mock below, suppose you run <em>robotpy deploy</em> before <em>robotpy init</em>. What happens?</div>
+        <div class="opts">
+          <button class="opt">It deploys an empty project so the robot at least boots</button>
+          <button class="opt">It fails - there is no robot.py to deploy until a project exists</button>
+          <button class="opt">It creates the project for you first, then deploys it</button>
+        </div>
+        <div class="explain">The robotpy commands act on the project in the current folder. An empty folder has no robot.py, so deploy stops with an error. Order matters: init first, then deploy. Try it in the cockpit - wrong picks are safe here.</div>
+      </div>
+    </div>
+
+    <div class="demo" id="cockpit">
+      <div class="demo-head">
+        <span class="demo-title">Mock cockpit · RobotPy terminal</span>
+        <span class="demo-tag" id="ckStep">step 1 of 5</span>
+      </div>
+      <div class="ck-screen">
+        <div class="ck-stage" id="ckBody"></div>
+        <div class="ck-msg" id="ckMsg"></div>
+      </div>
+      <div class="controls">
+        <button class="btn" id="ckReset">Start over</button>
+        <span class="demo-tag" id="ckWrong">wrong picks: 0</span>
+      </div>
+    </div>
+    <p class="caption">A practice panel, not the real tool - but the sequence you just flew is exactly the one you will use in a real terminal.</p>
+
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them in the cockpit above</span></div>
+      <div class="m-item" data-m="create"><span class="m-st">○</span><span><b>Create the project:</b> open the terminal, run <b>robotpy init</b>, pick <b>command-based</b>, enter team <b>1234</b>, and hit Generate.</span></div>
+      <div class="m-item" data-m="find"><span class="m-st">○</span><span>In the tree it generates, <b>find and click robot.py</b> - the lifecycle class from Lesson 1.1.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> fly the whole sequence with <b>zero wrong picks</b>. Already missed one? Hit Start over and fly it clean.</span></div>
     </div>
   </section>
 
@@ -296,11 +384,205 @@
 </script>
 <script>
 (function(){
+  "use strict";
+  // ---- mock cockpit (isolated; a bug here can never break the lesson) ----
+  try{
+  var body=document.getElementById('ckBody'); if(!body) return;
+  var stepEl=document.getElementById('ckStep'), msgEl=document.getElementById('ckMsg'), wrongEl=document.getElementById('ckWrong');
+
+  var CFG={
+    stepNames:['open the terminal','pick the command','pick the example','team number','generate','explore the tree'],
+    intro:{
+      sub:'RobotPy is installed (pip install robotpy) and a terminal is open in an empty folder named MyRobot. Every RobotPy job is one command typed at the prompt.',
+      btn:'<span class="key">MyRobot $ ▌</span><span class="lbl">Click the prompt to start typing</span>',
+      ghost:'or look for a New Project menu?',
+      ghostWhy:'There is no wizard or menu for RobotPy - your editor stays a plain editor. The terminal is the tool: one command stamps out the project. Click the prompt above.'
+    },
+    stages:[
+      {q:'MyRobot $ <b>robotpy</b> · pick a command',
+       opts:[
+        {t:'robotpy deploy', why:'deploy looked for robot.py in this folder and found nothing - there is no project to send yet. You want robotpy init.'},
+        {t:'pip install robotpy', why:'Already done - that installed the tools themselves. Running it again does not create a project. You want robotpy init.'},
+        {t:'robotpy init', ok:true},
+        {t:'robotpy sim', why:'sim runs a project\'s code on your laptop. The folder is empty, so there is nothing to run. You want robotpy init.'},
+        {t:'robotpy test', why:'test runs a project\'s test suite. No project means no tests. You want robotpy init.'}
+       ]},
+      {q:'robotpy init · pick an example to start from',
+       opts:[
+        {t:'timed robot (bare-bones)', why:'That would generate fine, but it is the bare-bones flavor: robot.py with empty methods and nothing else. This course (and most teams) builds command-based. Pick command-based.'},
+        {t:'command-based', ok:true},
+        {t:'physics simulation demo', why:'A fun demo, but it is someone else\'s robot. You want your own clean starting point. Pick command-based.'}
+       ]}
+    ],
+    team:{
+      q:'robotpy init · enter your team number',
+      hint:'Your pretend team number is <b>1234</b>. On a real team you would type your own.',
+      empty:'Type a team number first - digits only.',
+      notNum:'Team numbers are digits only - no letters, no spaces.',
+      wrong:'That is a real-looking team number, but it is not yours. robotpy deploy searches the network for your number - get it wrong and it never finds your robot. Enter 1234.',
+      correct:'1234'
+    },
+    gen:{
+      sum:'<div>Example <b>command-based</b></div><div>Team number <b>1234</b></div><div>Folder <b>MyRobot/</b></div>',
+      btn:'Generate project',
+      done:'Project generated - complete and runnable, no blank files. One mission left: find robot.py in the tree.'
+    },
+    tree:[
+      {dir:1,d:0,n:'MyRobot/'},
+      {d:1,n:'pyproject.toml',why:'the project config and dependency list. Scaffolding, not the lifecycle class.'},
+      {d:1,n:'robot.py',target:1},
+      {d:1,n:'robotcontainer.py',why:'where the robot gets assembled - you will live here later. The lifecycle class is its neighbor above.'},
+      {dir:1,d:1,n:'subsystems/'},
+      {dir:1,d:1,n:'commands/'},
+      {dir:1,d:1,n:'tests/'},
+      {d:2,n:'pyfrc_test.py',why:'the starter test file that robotpy test runs. Not the one.'}
+    ],
+    found:'Found it. robot.py is the lifecycle class from Lesson 1.1 - the roboRIO runs it as the program. The tour below walks every file in this tree.'
+  };
+
+  var wrong=0;
+  function setMsg(t,kind){ msgEl.className='ck-msg'+(kind?' '+kind:''); msgEl.innerHTML=t||''; }
+  function setStep(i){ stepEl.textContent=(i<5?'step '+(i+1)+' of 5 · ':'done · ')+CFG.stepNames[i]; }
+  function miss(why){ wrong++; wrongEl.textContent='wrong picks: '+wrong; setMsg(why,'bad'); }
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  var mClear=function(){};
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  mClear=function(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  };
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  }catch(e){}
+
+  function introStage(){
+    var c=document.createElement('div'); c.className='ck-center';
+    c.innerHTML='<p class="ck-sub">'+CFG.intro.sub+'</p><button class="ck-kbd" id="ckOpen">'+CFG.intro.btn+'</button><div class="ck-ghost"><button id="ckGhost">'+CFG.intro.ghost+'</button></div>';
+    body.innerHTML=''; body.appendChild(c);
+    document.getElementById('ckOpen').addEventListener('click',function(){ setMsg(''); show(1); });
+    document.getElementById('ckGhost').addEventListener('click',function(){ miss(CFG.intro.ghostWhy); });
+  }
+  function choiceStage(idx){
+    var st=CFG.stages[idx];
+    var pal=document.createElement('div'); pal.className='ck-pal';
+    pal.innerHTML='<div class="ck-q">'+st.q+'</div>';
+    st.opts.forEach(function(o){
+      var b=document.createElement('button'); b.className='ck-pi'; b.textContent=o.t;
+      b.addEventListener('click',function(){
+        if(o.ok){ setMsg(''); show(idx+2); }
+        else { b.classList.add('bad'); setTimeout(function(){ b.classList.remove('bad'); },900); miss(o.why); }
+      });
+      pal.appendChild(b);
+    });
+    body.innerHTML=''; body.appendChild(pal);
+  }
+  function teamStage(){
+    var pal=document.createElement('div'); pal.className='ck-pal';
+    pal.innerHTML='<div class="ck-q">'+CFG.team.q+'</div><div class="ck-inrow"><input class="ck-input" id="ckTeam" inputmode="numeric" autocomplete="off" placeholder="team number" /><button class="btn" id="ckTeamGo">OK</button></div>';
+    body.innerHTML=''; body.appendChild(pal);
+    setMsg(CFG.team.hint);
+    var inp=document.getElementById('ckTeam');
+    function go(){
+      var v=inp.value.trim();
+      if(!v){ setMsg(CFG.team.empty,'bad'); return; }
+      if(!/^\d+$/.test(v)){ miss(CFG.team.notNum); return; }
+      if(v!==CFG.team.correct){ miss(CFG.team.wrong); return; }
+      setMsg(''); show(4);
+    }
+    document.getElementById('ckTeamGo').addEventListener('click',go);
+    inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){ go(); } });
+  }
+  function genStage(){
+    var pal=document.createElement('div'); pal.className='ck-pal';
+    pal.innerHTML='<div class="ck-q">Everything is set - review, then generate</div><div class="ck-sum">'+CFG.gen.sum+'</div><div class="ck-inrow"><button class="btn primary" id="ckGen" style="flex:1">'+CFG.gen.btn+'</button></div>';
+    body.innerHTML=''; body.appendChild(pal);
+    document.getElementById('ckGen').addEventListener('click',function(){
+      show(5); setMsg(CFG.gen.done,'ok');
+      mClear('create'); if(wrong===0) mClear('gold');
+    });
+  }
+  function treeStage(){
+    var wrapEl=document.createElement('div'); wrapEl.className='ck-treewrap';
+    var tr=document.createElement('div'); tr.className='tree';
+    CFG.tree.forEach(function(f){
+      var row=document.createElement('div');
+      row.className='row '+(f.dir?'dir':'file');
+      row.style.paddingLeft=(8+f.d*15)+'px';
+      var ic=document.createElement('span'); ic.className='ic'; ic.textContent=f.dir?'▸':'·';
+      var nm=document.createElement('span'); nm.textContent=f.n;
+      row.appendChild(ic); row.appendChild(nm);
+      if(!f.dir){
+        row.addEventListener('click',function(){
+          Array.prototype.forEach.call(tr.querySelectorAll('.row.file'),function(r){ r.classList.remove('active'); });
+          row.classList.add('active');
+          if(f.target){ setMsg(CFG.found,'ok'); mClear('find'); }
+          else { setMsg('<b>'+f.n+'</b> is '+f.why,'bad'); }
+        });
+      }
+      tr.appendChild(row);
+    });
+    wrapEl.appendChild(tr);
+    body.innerHTML=''; body.appendChild(wrapEl);
+  }
+  function show(i){
+    setStep(i);
+    if(i===0) introStage();
+    else if(i===1) choiceStage(0);
+    else if(i===2) choiceStage(1);
+    else if(i===3) teamStage();
+    else if(i===4) genStage();
+    else treeStage();
+  }
+  document.getElementById('ckReset').addEventListener('click',function(){ wrong=0; wrongEl.textContent='wrong picks: 0'; setMsg(''); show(0); });
+  show(0);
+  }catch(e){}
+})();
+</script>
+<script>
+(function(){
   var KEY="deploy:done", file=location.pathname.split("/").pop();
   function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then run the sim
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain');
+  var picked=-1, revealed=false, ran=false;
+  var demos=document.querySelectorAll('.demo');
+  var note=document.createElement('div');
+  note.textContent='Prediction locked in. Now fly the cockpit and see if you were right.';
+  note.style.cssText='display:none;font-size:13px;color:#92A2BE;margin-top:10px;font-style:italic';
+  q.appendChild(note);
+  function reveal(){ if(revealed||picked<0) return; revealed=true; note.style.display='none';
+    if(picked===correct){opts[picked].classList.add('correct');} else {opts[picked].classList.add('wrong'); opts[correct].classList.add('correct');}
+    explain.classList.add('show'); }
+  function onRan(){ ran=true; if(picked>=0) reveal(); }
+  if(demos.length){
+    Array.prototype.forEach.call(demos,function(d){
+      d.addEventListener('pointerdown',onRan,true);
+      d.addEventListener('input',onRan,true);
+    });
+    window.addEventListener('keydown',onRan,true);
+  } else { ran=true; }
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(picked>=0)return; picked=i; opts.forEach(function(o){o.classList.add('locked');}); if(ran){ reveal(); } else { note.style.display='block'; } }); });
 })();
 </script>
 <script src="account-config.js"></script>

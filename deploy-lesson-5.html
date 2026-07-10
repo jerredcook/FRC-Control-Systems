@@ -129,6 +129,46 @@
 
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+
+  /* ---- cockpit + docs scavenger hunt (additions) ---- */
+  .ck{padding:16px}
+  .ck-crumb{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:10px}
+  .ck-crumb b{color:var(--green);font-weight:600}
+  .ck-prompt{font-size:15.5px;color:var(--text);margin-bottom:12px}
+  .ck-opts{display:flex;flex-direction:column;gap:8px}
+  .ck-opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:10px 13px;border-radius:9px;cursor:pointer;font-family:var(--mono);font-size:13.5px;transition:.12s;overflow-wrap:anywhere}
+  .ck-opt:hover{border-color:var(--muted);color:var(--text)}
+  .ck-opt:disabled{cursor:default;opacity:.55}
+  .ck-opt.good{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .ck-opt.good:disabled{opacity:1}
+  .ck-opt.bad{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .ck-feed{margin-top:12px;font-size:14px;color:var(--muted);border-left:2px solid var(--red);padding:2px 0 2px 12px;display:none}
+  .ck-feed.show{display:block}
+  .ck-feed.ok{border-color:var(--green)}
+  .ck-win{border:1px solid rgba(67,214,126,.4);background:rgba(67,214,126,.06);border-radius:10px;padding:13px 15px;font-family:var(--mono);font-size:12.5px}
+  .ck-win .wl{padding:2px 0;color:var(--teal)}
+  .ck-win .wl .b{color:var(--faint)}
+  .ck-win .wl.code{color:#cdd9ec;margin-top:6px}
+  .ck-restart{margin-top:12px;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;padding:9px 14px;border-radius:9px;cursor:pointer;transition:.12s}
+  .ck-restart:hover{border-color:var(--muted);color:var(--text)}
+  .hunts{padding:6px 16px 14px}
+  .hunt{padding:14px 0;border-bottom:1px solid var(--line)}
+  .hunt:last-child{border-bottom:none}
+  .hunt-q{font-size:15.5px;color:var(--text);margin-bottom:10px;display:flex;gap:9px;align-items:baseline}
+  .hunt-q .hunt-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .hunt.found .hunt-st{color:var(--green)}
+  .docx{border:1px solid var(--line-2);border-radius:10px;background:#0B1322;overflow:hidden}
+  .docx-url{font-family:var(--mono);font-size:11px;color:var(--faint);padding:8px 13px;border-bottom:1px solid var(--line);background:var(--panel-2);letter-spacing:.04em}
+  .docx-body{padding:12px 14px;font-size:14.5px;color:var(--muted);line-height:1.7}
+  .docx-body .dl{padding:2px 0}
+  .docx-body code{font-family:var(--mono);font-size:13px;color:#cdd9ec}
+  .hx{display:inline;border:none;background:none;padding:0;margin:0;font:inherit;color:var(--text);border-bottom:1px dashed var(--faint);cursor:pointer;transition:.12s}
+  .hx:hover{color:var(--indigo);border-bottom-color:var(--indigo)}
+  .hx.good{color:var(--green);border-bottom:1px solid var(--green);cursor:default}
+  .hx.bad{color:var(--red);border-bottom-color:var(--red)}
+  .hunt-feed{margin-top:10px;font-size:14px;color:var(--muted);border-left:2px solid var(--red);padding:2px 0 2px 12px;display:none}
+  .hunt-feed.show{display:block}
+  .hunt-feed.ok{border-color:var(--green)}
 </style>
 </head>
 <body>
@@ -172,6 +212,25 @@
       <div class="m-item" data-m="neo"><span class="m-st">○</span><span>New season: <b>NEO drive</b> plus <b>AprilTag vision</b>, autos written by hand. Swap the list to exactly what this robot needs.</span></div>
       <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> a robot with <b>Falcon drive</b>, a <b>Pigeon 2 gyro</b>, and <b>AprilTag vision</b>. Read each card's fine print. Exactly <b>two</b> libraries cover all three.</span></div>
     </div>
+
+    <p style="margin-top:26px">You just picked the right libraries. Now do the actual install. The cockpit below is the exact click path in the real WPILib VS Code, and a wrong turn here costs nothing, so poke around.</p>
+    <div class="demo" id="ckdemo">
+      <div class="demo-head">
+        <span class="demo-title">Cockpit · Install the vendordep</span>
+        <span class="demo-tag">MyRobot · WPILib VS Code</span>
+      </div>
+      <div class="ck">
+        <div class="ck-crumb" id="ckCrumb"></div>
+        <div class="ck-prompt" id="ckPrompt"></div>
+        <div class="ck-opts" id="ckOpts"></div>
+        <div class="ck-feed" id="ckFeed"></div>
+      </div>
+    </div>
+    <div class="missions" id="missions-vlib">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them in the cockpit above</span></div>
+      <div class="m-item" data-m="vlib"><span class="m-st">○</span><span>Install <b>Phoenix 6</b> into MyRobot: make it through all four screens to the green installed panel.</span></div>
+      <div class="m-item gold" data-m="vgold"><span class="m-st">★</span><span><b>Gold:</b> finish a full run with <b>zero</b> wrong clicks. Fumbled? "Run it again" resets the counter.</span></div>
+    </div>
   </section>
 
   <section>
@@ -187,6 +246,54 @@
     <div class="note indigo">
       <div class="nh">How to read a Javadoc</div>
       <p>An API page lists a class's <strong>methods</strong>: each has a name, what you pass it (parameters), and what it gives back (return type). To find "how do I set a motor's speed?", open the class and scan for a method like <span class="k">setVoltage(double)</span>. Your editor helps too - type a dot after an object and it lists everything you can call.</p>
+    </div>
+
+    <p style="margin-top:26px">Time to practice the real skill. Each question below hides its answer inside a short excerpt from the actual docs. Read the excerpt and <strong>click the answer text itself</strong> - the words with a dashed underline are clickable.</p>
+    <div class="demo" id="huntdemo">
+      <div class="demo-head">
+        <span class="demo-title">Docs scavenger hunt</span>
+        <span class="demo-tag" id="huntCount">0 / 3 found</span>
+      </div>
+      <div class="hunts">
+        <div class="hunt">
+          <div class="hunt-q"><span class="hunt-st">○</span><span><b>Hunt 1.</b> The Krakens arrived. Which Phoenix 6 class do you construct to control one?</span></div>
+          <div class="docx">
+            <div class="docx-url">v6.docs.ctr-electronics.com · API reference · hardware</div>
+            <div class="docx-body">
+              <div class="dl"><code><button class="hx" type="button" data-feed="An encoder measures rotation, it does not drive a motor. Keep scanning for the words motor controller.">CANcoder</button></code> - a rotary magnetic sensor for precise position measurement.</div>
+              <div class="dl"><code><button class="hx" type="button" data-feed="That is the gyro. It reports which way the robot is facing, it does not spin anything. Keep reading.">Pigeon2</button></code> - an IMU that measures the robot's heading.</div>
+              <div class="dl"><code><button class="hx" type="button" data-ok="1" data-feed="Found it. One TalonFX object per motor, and the same class covers the Falcon 500 and the Kraken.">TalonFX</button></code> - the motor controller integrated into the Falcon 500 and the Kraken X60 / X44.</div>
+            </div>
+          </div>
+          <div class="hunt-feed"></div>
+        </div>
+        <div class="hunt">
+          <div class="hunt-q"><span class="hunt-st">○</span><span><b>Hunt 2.</b> You have a motor object and want half speed forward: <span class="k">motor.____(0.5)</span>. Which method?</span></div>
+          <div class="docx">
+            <div class="docx-url">docs.wpilib.org · Java API · MotorController</div>
+            <div class="docx-body">
+              <div class="dl"><code>double <button class="hx" type="button" data-feed="get reads the current output back. It does not change anything.">get</button>()</code> - returns the most recently set output.</div>
+              <div class="dl"><code>void <button class="hx" type="button" data-ok="1" data-feed="Found it. set takes a fraction: -1.0 is full reverse, +1.0 is full forward, so 0.5 is half speed.">set</button>(double speed)</code> - sets the output as a fraction from -1.0 to +1.0.</div>
+              <div class="dl"><code>void <button class="hx" type="button" data-feed="Close, but this one takes volts, like 6.0. The question hands you 0.5, a fraction.">setVoltage</button>(double volts)</code> - sets the output in volts.</div>
+              <div class="dl"><code>void <button class="hx" type="button" data-feed="That stops the motor. You want half speed, not zero.">stopMotor</button>()</code> - stops the motor.</div>
+            </div>
+          </div>
+          <div class="hunt-feed"></div>
+        </div>
+        <div class="hunt">
+          <div class="hunt-q"><span class="hunt-st">○</span><span><b>Hunt 3.</b> CTRE says to flash fresh firmware onto every device before the season. Which tool does the flashing?</span></div>
+          <div class="docx">
+            <div class="docx-url">v6.docs.ctr-electronics.com · Getting started · Hardware setup</div>
+            <div class="docx-body">Every CTRE device ships with updatable firmware. Assigning <button class="hx" type="button" data-feed="A CAN ID is the address you give a device on the bus, not a tool.">CAN IDs</button>, flashing firmware, and running a quick self-test all happen in <button class="hx" type="button" data-ok="1" data-feed="Found it. Tuner X is the companion app: CAN IDs, firmware, self-tests, all in one place.">Tuner X</button>, the companion app for your laptop or phone. Your robot code then talks to each configured device through the <button class="hx" type="button" data-feed="Phoenix 6 is the code library your program imports. The flashing tool is named just before it, read again.">Phoenix 6</button> API.</div>
+          </div>
+          <div class="hunt-feed"></div>
+        </div>
+      </div>
+    </div>
+    <div class="missions" id="missions-hunt">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the hunt above</span></div>
+      <div class="m-item" data-m="hunt"><span class="m-st">○</span><span>Find all <b>3</b> answers hiding in the doc excerpts.</span></div>
+      <div class="m-item gold" data-m="hgold"><span class="m-st">★</span><span><b>Gold:</b> all 3 with <b>zero</b> wrong guesses. Missed one? Reload the page for a fresh run.</span></div>
     </div>
   </section>
 
@@ -343,6 +450,131 @@
       opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
     });
   });
+})();
+</script>
+<script>
+(function(){
+  "use strict";
+  // ---- cockpit + docs scavenger hunt (isolated; a bug here can never break the lesson) ----
+  try{
+
+  // ---- missions (same pattern as the missions wave) ----
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions-vlib .m-item, #missions-hunt .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+
+  // ---- part a: the Manage Vendor Libraries click path ----
+  try{
+  var STAGES=[
+    {label:"W icon", prompt:"Mission: the team just bought Krakens. Get Phoenix 6 into the MyRobot project. Where do you start?", opts:[
+      {t:"File → New File…", feed:"That creates an empty file. A library is not something you type in, the build system pulls it in for you. Look for WPILib's own entry point."},
+      {t:"Extensions panel → search Phoenix", feed:"The Extensions store installs VS Code add-ons, not robot libraries. Phoenix 6 arrives as a vendordep, through WPILib's own menu."},
+      {t:"Click the WPILib logo (the W in the top-right corner)", ok:true, feed:"The W opens the command palette with every WPILib command ready. Ctrl/Cmd+Shift+P and typing WPILib works too."},
+      {t:"Download Phoenix6.jar and drag it into the project", feed:"No files by hand. Once the vendordep is in place, GradleRIO downloads the exact right build for you."}
+    ]},
+    {label:"Manage Vendor Libraries", prompt:"The command palette opens, filtered to WPILib commands. Which one?", opts:[
+      {t:"WPILib: Build Robot Code", feed:"Build compiles what you already have. Phoenix 6 is not in the project yet, so building now changes nothing."},
+      {t:"WPILib: Deploy Robot Code", feed:"Deploy sends compiled code to the robot. There is nothing new to send yet."},
+      {t:"WPILib: Manage Vendor Libraries", ok:true, feed:"The vendordep control room. Everything about vendor libraries lives behind this command."},
+      {t:"WPILib: Set Team Number", feed:"You set the team number when you created MyRobot. It has nothing to do with libraries."}
+    ]},
+    {label:"Install new (online)", prompt:"Manage Vendor Libraries asks what you want to do. Pick one.", opts:[
+      {t:"Manage current libraries", feed:"That lists libraries already in the project. Phoenix 6 is not installed yet, so it will not be in that list."},
+      {t:"Check for updates (online)", feed:"Updates only bump libraries you already have. You cannot update something that is not there yet."},
+      {t:"Install new libraries (offline)", feed:"Offline only offers the libraries bundled inside the WPILib installer. Phoenix 6 comes straight from CTRE, so you need online."},
+      {t:"Install new libraries (online)", ok:true, feed:"Online install fetches the vendordep JSON from the vendor's URL. This is the normal way to add Phoenix 6."}
+    ]},
+    {label:"Phoenix6 JSON", prompt:"VS Code asks for the vendordep URL. Three URLs sit in your clipboard history. Paste the right one.", opts:[
+      {t:"https://v6.docs.ctr-electronics.com/", feed:"That is the documentation homepage, made for humans to read. The installer needs a machine-readable JSON file."},
+      {t:"https://maven.ctr-electronics.com/release/…/Phoenix6-frc2026-latest.json", ok:true, feed:"A .json straight from the vendor, which is exactly what a vendordep is. WPILib drops it into vendordeps/."},
+      {t:"https://software-metadata.revrobotics.com/REVLib-2026.json", feed:"That is REVLib, the library for SparkMax and NEO. Krakens are CTRE hardware, so you want the Phoenix 6 JSON."}
+    ]}
+  ];
+  var ckStage=0, ckWrong=0;
+  var ckCrumb=document.getElementById('ckCrumb'), ckPrompt=document.getElementById('ckPrompt'),
+      ckOpts=document.getElementById('ckOpts'), ckFeed=document.getElementById('ckFeed');
+  function ckLabels(n){ var out=[]; for(var i=0;i<n;i++) out.push(STAGES[i].label); return out.join(' → '); }
+  function ckRender(){
+    ckFeed.className='ck-feed'; ckFeed.textContent='';
+    if(ckStage>=STAGES.length){
+      ckCrumb.innerHTML='<b>Installed ✓</b> · '+ckLabels(STAGES.length);
+      ckPrompt.textContent='Phoenix 6 is in. These are the exact clicks you will make in the real WPILib VS Code.';
+      ckOpts.innerHTML='<div class="ck-win">'
+        +'<div class="wl"><span class="b">vendordeps/</span></div>'
+        +'<div class="wl"><span class="b">·</span> WPILibNewCommands.json <span class="b">(built in)</span></div>'
+        +'<div class="wl"><span class="b">·</span> Phoenix6.json <span class="b">← just landed</span></div>'
+        +'<div class="wl code">import com.ctre.phoenix6.hardware.TalonFX; <span class="b">// now resolves</span></div>'
+        +'</div>'
+        +'<button class="ck-restart" type="button">Run it again</button>';
+      ckOpts.querySelector('.ck-restart').addEventListener('click',function(){ ckStage=0; ckWrong=0; ckRender(); });
+      mClear('vlib'); if(ckWrong===0) mClear('vgold');
+      return;
+    }
+    var st=STAGES[ckStage];
+    ckCrumb.textContent='Step '+(ckStage+1)+' of '+STAGES.length+(ckStage>0?' · '+ckLabels(ckStage)+' →':'');
+    ckPrompt.textContent=st.prompt;
+    ckOpts.innerHTML='';
+    st.opts.forEach(function(o){
+      var b=document.createElement('button'); b.type='button'; b.className='ck-opt'; b.textContent=o.t;
+      b.addEventListener('click',function(){
+        if(b.disabled) return;
+        if(o.ok){
+          b.classList.add('good');
+          ckFeed.className='ck-feed show ok'; ckFeed.textContent=o.feed;
+          Array.prototype.forEach.call(ckOpts.querySelectorAll('.ck-opt'),function(x){ x.disabled=true; });
+          setTimeout(function(){ ckStage++; ckRender(); },1400);
+        } else {
+          ckWrong++;
+          b.classList.add('bad'); setTimeout(function(){ b.classList.remove('bad'); },900);
+          ckFeed.className='ck-feed show'; ckFeed.textContent=o.feed;
+        }
+      });
+      ckOpts.appendChild(b);
+    });
+  }
+  ckRender();
+  }catch(e){}
+
+  // ---- part b: docs scavenger hunt ----
+  try{
+  var found=0, huntWrong=0;
+  var huntCount=document.getElementById('huntCount');
+  Array.prototype.forEach.call(document.querySelectorAll('#huntdemo .hunt'),function(h){
+    var feed=h.querySelector('.hunt-feed'), st=h.querySelector('.hunt-st'), got=false;
+    Array.prototype.forEach.call(h.querySelectorAll('.hx'),function(x){
+      x.addEventListener('click',function(){
+        if(got) return;
+        if(x.getAttribute('data-ok')){
+          got=true; found++;
+          x.classList.add('good'); h.classList.add('found'); st.textContent='✓';
+          feed.className='hunt-feed show ok'; feed.textContent=x.getAttribute('data-feed')||'Found it.';
+          if(huntCount) huntCount.textContent=found+' / 3 found';
+          if(found>=3){ mClear('hunt'); if(huntWrong===0) mClear('hgold'); }
+        } else {
+          huntWrong++;
+          x.classList.add('bad'); setTimeout(function(){ x.classList.remove('bad'); },900);
+          feed.className='hunt-feed show'; feed.textContent=x.getAttribute('data-feed')||'Not that one, keep reading.';
+        }
+      });
+    });
+  });
+  }catch(e){}
+
+  }catch(e){}
 })();
 </script>
 <script>

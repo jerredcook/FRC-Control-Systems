@@ -124,6 +124,43 @@
   .coursenav a:hover{border-color:var(--indigo);color:var(--text)}
   .coursenav a.map{border-color:transparent;color:var(--teal)}
 
+  /* ---- cockpit: drive-it-now playground ---- */
+  .dl-steps{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .dl-step{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);border:1px solid var(--line-2);border-radius:6px;padding:5px 10px;transition:.15s}
+  .dl-step.active{color:var(--indigo);border-color:var(--indigo);background:rgba(142,140,248,.08);box-shadow:0 0 10px rgba(142,140,248,.3)}
+  .dl-arrow{color:var(--faint);font-size:12px}
+  .cockpit-grid{display:grid;gap:1px;background:var(--line)}
+  @media(min-width:700px){.cockpit-grid{grid-template-columns:1.05fr 1fr}}
+  .ck-pane{background:#0B1322;padding:14px 16px;min-width:0}
+  .ck-label{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-bottom:8px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+  .ck-prog{font-family:var(--mono);font-size:13px;line-height:1.95;min-height:120px;color:#cdd9ec}
+  .ck-prog .pl{display:flex;gap:12px}
+  .ck-prog .pl .ln{color:var(--faint);min-width:16px;text-align:right;user-select:none}
+  .ck-prog .pl .tx{color:#cdd9ec}
+  .prog-empty{color:var(--faint);font-style:italic;font-size:12.5px}
+  .ck-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .cmdchip{font-family:var(--mono);font-size:12px;border:1px solid var(--line-2);background:var(--panel-2);color:var(--teal);border-radius:7px;padding:7px 10px;cursor:pointer;transition:.12s}
+  .cmdchip:hover{border-color:var(--teal);color:var(--text)}
+  .ck-inrow{display:flex;align-items:center;gap:8px;margin-top:10px;border:1px solid var(--line-2);border-radius:8px;background:var(--ink);padding:8px 10px}
+  .ck-inrow .pr{font-family:var(--mono);color:var(--indigo);font-size:13px}
+  .ck-in{flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--mono);font-size:13px}
+  .ck-in::placeholder{color:var(--faint)}
+  canvas.ckfield{display:block;width:100%;height:236px;border:1px solid var(--line);border-radius:8px;background:#0A101F}
+  .ck-log{margin-top:10px;font-family:var(--mono);font-size:11.5px;line-height:1.75;height:96px;overflow-y:auto;color:var(--muted);border-top:1px dashed var(--line);padding-top:8px}
+  .ck-log .in{color:var(--teal)}
+  .ck-log .err{color:var(--red)}
+  .ck-log .ok{color:var(--green)}
+  .ck-log .sys{color:var(--indigo)}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--indigo);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
 </style>
@@ -146,6 +183,63 @@
     <h1>Code that lives<br>on a <span class="accent">robot</span>.</h1>
     <p class="dek">Before any Python: where your code actually runs, how it gets there, and the loop you'll repeat a few hundred times this season.</p>
   </div>
+
+  <section>
+    <div class="kicker">Try it first</div>
+    <h2>Drive a robot, right now</h2>
+    <p>Before any theory, take the controls. Below is a tiny robot cockpit: a program editor and terminal on the left, a robot on a little field on the right. Click a command (or type one and press enter) and the robot obeys immediately. Every command also becomes a line of your program, so once you have a few lines, press <strong>Deploy</strong> to ship the program to the robot and watch it run the whole thing by itself. <strong>Your mission: make the robot drive a square.</strong></p>
+
+    <div class="demo" id="cockpit">
+      <div class="demo-head">
+        <span class="demo-title">Robot cockpit · your first program</span>
+        <span class="demo-tag"><span class="live" id="ckLive"></span> <span id="ckState">idle</span></span>
+      </div>
+      <div class="dl-steps">
+        <span class="dl-step active" id="ckStEdit">1 · Edit</span>
+        <span class="dl-arrow">→</span>
+        <span class="dl-step" id="ckStDeploy">2 · Deploy</span>
+        <span class="dl-arrow">→</span>
+        <span class="dl-step" id="ckStRun">3 · Robot runs</span>
+      </div>
+      <div class="cockpit-grid">
+        <div class="ck-pane">
+          <div class="ck-label"><span>Your program · my_program.py</span><span id="ckLines">0 lines</span></div>
+          <div class="ck-prog" id="ckProg"><div class="prog-empty" id="ckEmpty"># empty - send a command below and it becomes line 1</div></div>
+          <div class="ck-chips">
+            <button class="cmdchip" data-cmd="drive.forward()">drive.forward()</button>
+            <button class="cmdchip" data-cmd="drive.turn(90)">drive.turn(90)</button>
+            <button class="cmdchip" data-cmd="intake.run()">intake.run()</button>
+            <button class="cmdchip" data-cmd="stop()">stop()</button>
+          </div>
+          <div class="ck-inrow"><span class="pr">&gt;</span><input class="ck-in" id="ckIn" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="or type one, e.g. drive.turn(-90)" aria-label="type a robot command" /></div>
+        </div>
+        <div class="ck-pane">
+          <div class="ck-label"><span>The robot</span><span>field cam · top view</span></div>
+          <canvas class="ckfield" id="ckField"></canvas>
+          <div class="ck-log" id="ckLog" aria-live="polite"></div>
+        </div>
+      </div>
+      <div class="controls">
+        <button class="btn primary" id="ckDeploy">Deploy ▸</button>
+        <button class="btn" id="ckReset">Reset field</button>
+        <button class="btn" id="ckClear">Clear program</button>
+      </div>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Commands sent</div><div class="v teal" id="ckRoSent">0</div></div>
+        <div class="ro"><div class="k2">Program lines</div><div class="v indigo" id="ckRoLines">0</div></div>
+        <div class="ro"><div class="k2">Deploys</div><div class="v amber" id="ckRoDeploys">0</div></div>
+      </div>
+    </div>
+    <p class="caption">Live commands are you steering by hand. Deploy is the real thing: the program leaves your laptop and the robot runs it on its own. The command names are friendly stand-ins, but the edit, deploy, run loop is exactly the one real teams live in.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them in the cockpit above</span></div>
+      <div class="m-item" data-m="first"><span class="m-st">○</span><span>Send your <b>first command</b> - click <b>drive.forward()</b> or type it - and watch the robot obey.</span></div>
+      <div class="m-item" data-m="pickup"><span class="m-st">○</span><span>Turn the intake on with <b>intake.run()</b>, then drive over the <b>orange game piece</b> to collect it.</span></div>
+      <div class="m-item" data-m="deploy"><span class="m-st">○</span><span>Build a program of at least <b>3 lines</b>, press <b>Deploy</b>, and watch the robot run it all by itself.</span></div>
+      <div class="m-item" data-m="square"><span class="m-st">○</span><span><b>The mission:</b> deploy a program that drives a full <b>square</b> - forward then turn(90), four times - ending back at START.</span></div>
+      <div class="m-item gold" data-m="goldrun"><span class="m-st">★</span><span><b>Gold:</b> one deployed program that drives the square <b>and</b> collects the game piece on the way around.</span></div>
+    </div>
+  </section>
 
   <section>
     <p class="lead">A robot program isn't an app on your laptop.</p>
@@ -412,6 +506,303 @@
     window.addEventListener('keydown',onRan,true);
   } else { ran=true; }
   opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(picked>=0)return; picked=i; opts.forEach(function(o){o.classList.add('locked');}); if(ran){ reveal(); } else { note.style.display='block'; } }); });
+})();
+</script>
+<script>
+(function(){
+  "use strict";
+  // cockpit playground: live commands + the edit-deploy-run loop.
+  // isolated and try/catch wrapped so a bug here can never break the lesson.
+  try{
+    var cv=document.getElementById('ckField'); if(!cv) return;
+    var ctx=cv.getContext('2d'), W=0, H=0;
+    function fit(){
+      var r=cv.getBoundingClientRect(); if(!r.width) return;
+      var dpr=window.devicePixelRatio||1;
+      cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr);
+      ctx.setTransform(dpr,0,0,dpr,0,0); W=r.width; H=r.height;
+    }
+    fit();
+    var rsz; window.addEventListener('resize',function(){ clearTimeout(rsz); rsz=setTimeout(fit,120); });
+
+    var el={
+      state:document.getElementById('ckState'), live:document.getElementById('ckLive'),
+      prog:document.getElementById('ckProg'), empty:document.getElementById('ckEmpty'),
+      lines:document.getElementById('ckLines'), logBox:document.getElementById('ckLog'),
+      input:document.getElementById('ckIn'),
+      deploy:document.getElementById('ckDeploy'), reset:document.getElementById('ckReset'), clearBtn:document.getElementById('ckClear'),
+      roSent:document.getElementById('ckRoSent'), roLines:document.getElementById('ckRoLines'), roDeploys:document.getElementById('ckRoDeploys'),
+      stEdit:document.getElementById('ckStEdit'), stDeploy:document.getElementById('ckStDeploy'), stRun:document.getElementById('ckStRun')
+    };
+
+    // ---- missions (wrapped so a missions bug can never break the sim) ----
+    var mClear=function(){};
+    try{
+      var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+      var mSaved={}, mGold={};
+      try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+      try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+      var mItems={};
+      Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+      var mMark=function(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; };
+      mClear=function(id){
+        var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+        mMark(n);
+        var gold=n.classList.contains('gold');
+        var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+        map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+      };
+      Object.keys(mItems).forEach(function(id){
+        if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+      });
+    }catch(e){}
+
+    // ---- world ----
+    var FW=360, FH=280, MARGIN=26, STEP=62, TAU=Math.PI*2;
+    var START={x:110,y:210,h:-90};
+    var R={x:START.x,y:START.y,h:START.h,intake:false,carrying:false};
+    var ball={x:110,y:172,live:true};
+    var queue=[], anim=null, trail=[];
+    var mode='edit', program=[], sent=0, deploys=0, bumped=false, deployP=0;
+    var runStats=null;
+
+    function setStep(s){
+      el.stEdit.classList.toggle('active',s==='edit');
+      el.stDeploy.classList.toggle('active',s==='deploy');
+      el.stRun.classList.toggle('active',s==='run');
+    }
+    function setState(txt,on){ el.state.textContent=txt; el.live.classList.toggle('on',!!on); }
+    function log(msg,cls){
+      var d=document.createElement('div'); if(cls) d.className=cls; d.textContent=msg;
+      el.logBox.appendChild(d);
+      while(el.logBox.childNodes.length>60) el.logBox.removeChild(el.logBox.firstChild);
+      el.logBox.scrollTop=el.logBox.scrollHeight;
+    }
+    function renderProg(){
+      el.prog.textContent='';
+      if(!program.length){ el.prog.appendChild(el.empty); }
+      program.forEach(function(line,i){
+        var row=document.createElement('div'); row.className='pl';
+        var ln=document.createElement('span'); ln.className='ln'; ln.textContent=String(i+1);
+        var tx=document.createElement('span'); tx.className='tx'; tx.textContent=line;
+        row.appendChild(ln); row.appendChild(tx); el.prog.appendChild(row);
+      });
+      el.lines.textContent=program.length+(program.length===1?' line':' lines');
+      el.roLines.textContent=String(program.length);
+    }
+
+    function parse(s){
+      var c=s.replace(/\s+/g,'').replace(/;$/,'').toLowerCase();
+      if(c==='drive.forward()') return {t:'fwd', src:'drive.forward()'};
+      if(c==='drive.back()'||c==='drive.backward()') return {t:'back', src:'drive.back()'};
+      var m=c.match(/^drive\.turn\((-?\d+)\)$/);
+      if(m){ var v=parseInt(m[1],10); if(v===90||v===-90) return {t:'turn', v:v, src:'drive.turn('+v+')'}; return {t:'bad', why:'this little robot only knows turn(90) and turn(-90)'}; }
+      if(c==='intake.run()') return {t:'intake', src:'intake.run()'};
+      if(c==='stop()') return {t:'stop', src:'stop()'};
+      return null;
+    }
+
+    function ease(p){ return p<0.5 ? 2*p*p : 1-Math.pow(-2*p+2,2)/2; }
+    function apply(a){
+      var e=ease(a.p);
+      if(a.t==='fwd'||a.t==='back'){ R.x=a.x0+(a.x1-a.x0)*e; R.y=a.y0+(a.y1-a.y0)*e; }
+      else if(a.t==='turn'){ R.h=a.h0+(a.h1-a.h0)*e; }
+    }
+    function beginAnim(cmd){
+      if(cmd.t==='fwd'||cmd.t==='back'){
+        var dir=(cmd.t==='fwd')?1:-1;
+        var rad=R.h*Math.PI/180;
+        var tx=R.x+Math.cos(rad)*STEP*dir, ty=R.y+Math.sin(rad)*STEP*dir;
+        var cx=Math.max(MARGIN,Math.min(FW-MARGIN,tx)), cy=Math.max(MARGIN,Math.min(FH-MARGIN,ty));
+        bumped=(Math.abs(cx-tx)>0.5||Math.abs(cy-ty)>0.5);
+        anim={t:cmd.t,x0:R.x,y0:R.y,x1:cx,y1:cy,p:0,dur:0.8};
+      } else if(cmd.t==='turn'){
+        anim={t:'turn',h0:R.h,h1:R.h+cmd.v,p:0,dur:0.5};
+      } else if(cmd.t==='intake'){
+        R.intake=true; log('robot: intake spinning.');
+        anim={t:'wait',p:0,dur:0.25};
+      } else if(cmd.t==='stop'){
+        queue.length=0; R.intake=false;
+        log('robot: stop(). all motors off.');
+        anim={t:'wait',p:0,dur:0.2};
+      }
+    }
+    function finishAnim(a){
+      if(a.t==='fwd'||a.t==='back'){
+        R.x=a.x1; R.y=a.y1;
+        if(bumped){ log('bump - the wall stopped the robot.','err'); bumped=false; }
+        if(mode==='running'&&runStats&&a.t==='fwd') runStats.fwd++;
+      } else if(a.t==='turn'){
+        R.h=a.h1;
+        if(mode==='running'&&runStats) runStats.turnNet+=(a.h1-a.h0);
+      }
+    }
+
+    function endRun(){
+      if(mode!=='running') return;
+      mode='edit'; setStep('edit'); setState('idle',false);
+      el.deploy.disabled=false;
+      var st=runStats; runStats=null;
+      log('program finished. robot is idle again.','sys');
+      log('edit your program and deploy again - that is the loop.','sys');
+      if(st){
+        if(st.progLen>=3) mClear('deploy');
+        var dx=R.x-st.sx, dy=R.y-st.sy;
+        var closed=Math.sqrt(dx*dx+dy*dy)<=24;
+        if(st.fwd>=4&&Math.abs(st.turnNet)>=359&&closed){ mClear('square'); if(st.collected) mClear('goldrun'); }
+      }
+    }
+
+    function resetField(){
+      R.x=START.x; R.y=START.y; R.h=START.h; R.intake=false; R.carrying=false;
+      ball.live=true; trail.length=0; queue.length=0; anim=null; bumped=false;
+    }
+
+    function send(raw){
+      if(mode!=='edit'){ log('hold on - the robot is mid-deploy. press Reset field to cancel.','err'); return; }
+      var cmd=parse(raw);
+      if(!cmd){
+        log('unknown command: '+raw,'err');
+        log('try: drive.forward() · drive.back() · drive.turn(90) · drive.turn(-90) · intake.run() · stop()');
+        return;
+      }
+      if(cmd.t==='bad'){ log(cmd.why,'err'); return; }
+      log('> '+cmd.src,'in');
+      sent++; el.roSent.textContent=String(sent);
+      if(cmd.t==='stop'){ queue.length=0; anim=null; R.intake=false; log('robot: stop(). all motors off.'); }
+      else queue.push(cmd);
+      if(program.length>=16){ log('program is full (16 lines). press Clear program to start fresh.','err'); }
+      else { program.push(cmd.src); renderProg(); }
+      mClear('first');
+    }
+
+    Array.prototype.forEach.call(document.querySelectorAll('#cockpit .cmdchip'),function(b){
+      b.addEventListener('click',function(){ send(b.getAttribute('data-cmd')); });
+    });
+    el.input.addEventListener('keydown',function(ev){
+      if(ev.key!=='Enter') return;
+      var v=el.input.value.trim(); if(!v) return;
+      el.input.value=''; send(v);
+    });
+
+    el.deploy.addEventListener('click',function(){
+      if(mode!=='edit') return;
+      if(!program.length){ log('nothing to deploy - your program has no lines yet.','err'); return; }
+      mode='deploying'; deployP=0; setStep('deploy'); setState('deploying',true);
+      el.deploy.disabled=true;
+      resetField();
+      log('> deploy','in');
+      log('building program... ok','sys');
+      setTimeout(function(){ try{ if(mode==='deploying') log('shipping '+program.length+' line'+(program.length===1?'':'s')+' to the robot...','sys'); }catch(e){} },450);
+      setTimeout(function(){ try{
+        if(mode!=='deploying') return;
+        log('deploy complete. the robot is running YOUR code.','ok');
+        deploys++; el.roDeploys.textContent=String(deploys);
+        mode='running'; setStep('run'); setState('robot running program',true);
+        runStats={fwd:0,turnNet:0,collected:false,sx:R.x,sy:R.y,progLen:program.length};
+        program.forEach(function(line){ var c=parse(line); if(c&&c.t&&c.t!=='bad') queue.push(c); });
+      }catch(e){} },1100);
+    });
+
+    el.reset.addEventListener('click',function(){
+      var busy=(mode!=='edit');
+      mode='edit'; setStep('edit'); el.deploy.disabled=false; runStats=null;
+      resetField(); setState('idle',false);
+      log(busy?'run cancelled. field reset.':'field reset.','sys');
+    });
+    el.clearBtn.addEventListener('click',function(){
+      if(mode!=='edit'){ log('wait for the run to finish, or press Reset field first.','err'); return; }
+      program.length=0; renderProg(); log('program cleared.','sys');
+    });
+
+    // ---- drawing ----
+    function rr(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+    function draw(){
+      if(!W||!H) return;
+      ctx.clearRect(0,0,W,H);
+      var s=Math.min(W/FW,H/FH), ox=(W-FW*s)/2, oy=(H-FH*s)/2;
+      ctx.save(); ctx.translate(ox,oy); ctx.scale(s,s);
+      ctx.fillStyle='#0A101F'; ctx.fillRect(0,0,FW,FH);
+      ctx.strokeStyle='rgba(120,140,180,0.08)'; ctx.lineWidth=1;
+      for(var gx=31;gx<FW;gx+=31){ ctx.beginPath(); ctx.moveTo(gx,0); ctx.lineTo(gx,FH); ctx.stroke(); }
+      for(var gy=31;gy<FH;gy+=31){ ctx.beginPath(); ctx.moveTo(0,gy); ctx.lineTo(FW,gy); ctx.stroke(); }
+      ctx.strokeStyle='#33415e'; ctx.lineWidth=2; ctx.strokeRect(1,1,FW-2,FH-2);
+      ctx.setLineDash([4,4]); ctx.strokeStyle='rgba(146,162,190,0.4)'; ctx.lineWidth=1;
+      ctx.strokeRect(START.x-20,START.y-20,40,40); ctx.setLineDash([]);
+      ctx.textAlign='center';
+      ctx.fillStyle='#5E6F8E'; ctx.font='9px ui-monospace,Menlo,monospace';
+      ctx.fillText('START',START.x,START.y+34);
+      for(var i=0;i<trail.length;i++){
+        var p=trail[i];
+        ctx.fillStyle=p.run?'rgba(142,140,248,0.55)':'rgba(146,162,190,0.25)';
+        ctx.beginPath(); ctx.arc(p.x,p.y,1.6,0,TAU); ctx.fill();
+      }
+      if(ball.live){
+        ctx.save(); ctx.shadowColor='#FFB020'; ctx.shadowBlur=10;
+        ctx.fillStyle='#FFB020'; ctx.beginPath(); ctx.arc(ball.x,ball.y,8,0,TAU); ctx.fill(); ctx.restore();
+      }
+      var lpx=34, lpy=26;
+      ctx.font='14px ui-monospace,Menlo,monospace';
+      ctx.fillText('💻',lpx,lpy+5);
+      ctx.fillStyle='#5E6F8E'; ctx.font='8px ui-monospace,Menlo,monospace'; ctx.fillText('LAPTOP',lpx,lpy+18);
+      if(mode==='deploying'){
+        ctx.setLineDash([3,5]); ctx.strokeStyle='rgba(142,140,248,0.5)'; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.moveTo(lpx,lpy); ctx.lineTo(R.x,R.y); ctx.stroke(); ctx.setLineDash([]);
+        var pp=Math.min(1,deployP);
+        var px=lpx+(R.x-lpx)*pp, py=lpy+(R.y-lpy)*pp;
+        ctx.save(); ctx.shadowColor='#8E8CF8'; ctx.shadowBlur=12; ctx.fillStyle='#a7adff';
+        ctx.fillRect(px-5,py-4,10,8); ctx.restore();
+      }
+      ctx.save(); ctx.translate(R.x,R.y); ctx.rotate((R.h+90)*Math.PI/180);
+      ctx.fillStyle='#141d33'; ctx.strokeStyle=(mode==='running')?'#8E8CF8':'#4a5a7d'; ctx.lineWidth=2;
+      rr(-22,-24,44,48,7); ctx.fill(); ctx.stroke();
+      ctx.fillStyle='#0B1322';
+      ctx.fillRect(-27,-20,6,14); ctx.fillRect(21,-20,6,14); ctx.fillRect(-27,6,6,14); ctx.fillRect(21,6,6,14);
+      ctx.fillStyle=R.intake?'#34D7C5':'#33415e';
+      ctx.fillRect(-16,-31,32,7);
+      if(R.intake){
+        ctx.fillStyle='#0A101F';
+        var off=(performance.now()/60)%8;
+        for(var sx=-16+off;sx<16;sx+=8){ ctx.fillRect(sx,-31,2,7); }
+      }
+      ctx.fillStyle='#92A2BE'; ctx.beginPath(); ctx.moveTo(0,-14); ctx.lineTo(6,-4); ctx.lineTo(-6,-4); ctx.closePath(); ctx.fill();
+      if(R.carrying){ ctx.fillStyle='#FFB020'; ctx.beginPath(); ctx.arc(0,7,7,0,TAU); ctx.fill(); }
+      ctx.restore();
+      ctx.restore();
+    }
+
+    var last=0;
+    function frame(ts){
+      try{
+        var t=ts/1000, dt=last?Math.min(0.05,t-last):0.016; last=t;
+        if(mode==='deploying') deployP=Math.min(1,deployP+dt/1.0);
+        if(anim){
+          anim.p+=dt/anim.dur;
+          if(anim.p>=1){ anim.p=1; apply(anim); var a=anim; anim=null; finishAnim(a); }
+          else apply(anim);
+        }
+        if(!anim&&queue.length) beginAnim(queue.shift());
+        if(!anim&&!queue.length&&mode==='running') endRun();
+        if(ball.live&&R.intake){
+          var dx=R.x-ball.x, dy=R.y-ball.y;
+          if(dx*dx+dy*dy<576){
+            ball.live=false; R.carrying=true;
+            log('game piece collected!','ok'); mClear('pickup');
+            if(mode==='running'&&runStats) runStats.collected=true;
+          }
+        }
+        if(anim&&(anim.t==='fwd'||anim.t==='back')){ trail.push({x:R.x,y:R.y,run:mode==='running'}); if(trail.length>900) trail.shift(); }
+        if(mode==='edit') setState((anim||queue.length)?'driving':'idle', !!(anim||queue.length));
+        draw();
+      }catch(e){}
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+
+    renderProg();
+    log('cockpit ready. the robot is listening.','sys');
+    log('click a command on the left - it runs right away.');
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

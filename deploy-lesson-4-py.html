@@ -112,6 +112,26 @@
   .coursenav a.map{border-color:transparent;color:var(--teal)}
 
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--indigo);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+
+  .gitstat{padding:12px 16px;border-top:1px solid var(--line);background:#0B1322;font-family:var(--mono)}
+  .gitstat .gs-top{display:flex;gap:16px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin-bottom:7px}
+  .gitstat .gs-top b{color:var(--teal);font-weight:600}
+  .gitstat .gs-out{font-size:13px;line-height:1.6;color:#cdd9ec;min-height:1.6em;white-space:pre-wrap}
+  .gitstat .gs-out.err{color:var(--red)}
+  .gitstat .gs-out.warn{color:var(--amber)}
+  .gitmsg{flex:1 1 150px;min-width:130px;background:var(--ink);border:1px solid var(--line-2);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:13px;padding:9px 11px;outline:none}
+  .gitmsg::placeholder{color:var(--faint)}
+  .gitmsg:focus{border-color:var(--indigo)}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -182,6 +202,44 @@
     <div class="note indigo">
       <div class="nh">Two habits that save seasons</div>
       <p><strong>Pull before you push</strong> so you build on the team's latest, not an old copy. And <strong>never commit secrets or huge files</strong> - the generated <span class="k">.gitignore</span> already skips build output, but keep passwords and binaries out of the repo entirely.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Your turn</div>
+    <h2>Drive git yourself</h2>
+    <p>Watching the flow is one thing. Now you drive. Below is a tiny pretend repo with one file, <span class="k">robot.py</span>, and the same moves you just learned. Every button answers in real git vocabulary in the status line, so the words will already feel familiar when you type them for real. (Push and pull need GitHub, so this little repo skips them - everything else is the real thing.)</p>
+    <p class="sub">Heads up: the moment you commit on your own branch, a teammate lands a commit on <span class="k">main</span>, exactly what happens on a real build night. Your job is to get <em>both</em> changes onto main without losing either.</p>
+    <div class="demo" id="playdemo">
+      <div class="demo-head">
+        <span class="demo-title">Git playground - a tiny repo you control</span>
+        <span class="demo-tag">six moves, one file</span>
+      </div>
+      <canvas class="graph" id="playGraph"></canvas>
+      <div class="gitstat" id="gitStat">
+        <div class="gs-top"><span id="gsBranch"></span><span id="gsFile"></span></div>
+        <div class="gs-out" id="gsOut"></div>
+      </div>
+      <div class="controls">
+        <button class="btn" id="gEdit">Edit robot.py</button>
+        <button class="btn" id="gAdd">git add .</button>
+        <input class="gitmsg" id="gMsg" type="text" maxlength="40" placeholder="commit message" />
+        <button class="btn primary" id="gCommit">git commit -m</button>
+      </div>
+      <div class="controls">
+        <button class="btn" id="gBranch">git checkout -b intake</button>
+        <button class="btn" id="gSwitch">git checkout main</button>
+        <button class="btn" id="gMerge">git merge intake</button>
+        <button class="btn" id="gReset" style="margin-left:auto">Reset</button>
+      </div>
+    </div>
+    <p class="caption">Wrong order? Git says no and tells you why - that is half of learning git. Read the status line like you would read a message from a teammate.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the playground above</span></div>
+      <div class="m-item" data-m="first"><span class="m-st">○</span><span>Make your <b>first commit</b>: edit the file, stage it with <b>git add</b>, type a message, and commit.</span></div>
+      <div class="m-item" data-m="branch"><span class="m-st">○</span><span>Create the <b>intake</b> branch and commit on it. Watch what your teammate does to <b>main</b> the moment you do.</span></div>
+      <div class="m-item" data-m="rescue"><span class="m-st">○</span><span><b>The rescue:</b> switch back to <b>main</b> and merge, so main ends up holding <b>both</b> your commit and your teammate's.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> a clean run. Press <b>Reset</b> and finish the whole rescue with <b>zero rejected commands</b> - git never says no.</span></div>
     </div>
   </section>
 
@@ -382,6 +440,172 @@
     window.addEventListener('keydown',onRan,true);
   } else { ran=true; }
   opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(picked>=0)return; picked=i; opts.forEach(function(o){o.classList.add('locked');}); if(ran){ reveal(); } else { note.style.display='block'; } }); });
+})();
+</script>
+<script>
+(function(){
+try{
+  // ---- git playground (isolated; a bug here can never break the lesson) ----
+  var TAU=Math.PI*2;
+  var cv=document.getElementById('playGraph'); if(!cv) return;
+  var ctx=cv.getContext('2d'); var PG={w:0,h:0};
+  function fit(){ var r=cv.getBoundingClientRect(); if(!r.width)return; var dpr=window.devicePixelRatio||1;
+    cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr); ctx.setTransform(dpr,0,0,dpr,0,0); PG.w=r.width; PG.h=r.height; }
+  fit();
+
+  var gsBranch=document.getElementById('gsBranch'), gsFile=document.getElementById('gsFile'), gsOut=document.getElementById('gsOut');
+  var gMsg=document.getElementById('gMsg'), gSwitch=document.getElementById('gSwitch');
+
+  function hash(){ return Math.random().toString(16).slice(2,8); }
+  function fresh(){
+    var root={id:hash(),msg:'robot v1',lane:0,parents:[]};
+    return { commits:[root], branches:{main:root.id}, head:'main', feat:null, file:'clean', teammate:false, merged:false, errs:0 };
+  }
+  var P=fresh();
+
+  // ---- missions (wrapped so a missions bug can never break the playground) ----
+  var mClear=function(){};
+  try{
+    var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+    var mSaved={}, mGold={};
+    try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+    try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+    var mItems={};
+    Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+    var mMark=function(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; };
+    mClear=function(id){
+      var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+      mMark(n);
+      var gold=n.classList.contains('gold');
+      var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+      map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+    };
+    Object.keys(mItems).forEach(function(id){
+      if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+    });
+  }catch(e){}
+
+  function out(msg,kind){ gsOut.textContent=msg; gsOut.className='gs-out'+(kind?' '+kind:''); }
+  function rejected(msg){ P.errs++; out(msg,'err'); }
+  function ancestors(id){
+    var seen={}, stack=[id], byId={};
+    P.commits.forEach(function(c){ byId[c.id]=c; });
+    while(stack.length){ var cur=stack.pop(); if(!cur||seen[cur])continue; seen[cur]=true;
+      var c=byId[cur]; if(c)(c.parents||[]).forEach(function(p){ stack.push(p); }); }
+    return seen;
+  }
+
+  function draw(){
+    var W=PG.w,H=PG.h; ctx.clearRect(0,0,W,H);
+    var mainY=H*0.66, featY=H*0.28;
+    var n=P.commits.length, left=64, right=W-36;
+    var gap=n>1?Math.min(90,(right-left)/(n-1)):0;
+    var byId={};
+    P.commits.forEach(function(c,i){ c._x=left+i*gap; c._y=(c.lane===0?mainY:featY); byId[c.id]=c; });
+    ctx.fillStyle='#5E6F8E'; ctx.font='10px ui-monospace,Menlo,monospace'; ctx.textAlign='left';
+    ctx.fillText('main',12,mainY+4);
+    if(P.feat) ctx.fillText(P.feat,12,featY+4);
+    P.commits.forEach(function(c){
+      (c.parents||[]).forEach(function(pid){
+        var p=byId[pid]; if(!p) return;
+        ctx.strokeStyle=(p.lane===0&&c.lane===0)?'#34D7C5':'#8E8CF8';
+        ctx.lineWidth=3; ctx.globalAlpha=.85; ctx.beginPath();
+        if(p.lane===c.lane){ ctx.moveTo(p._x,p._y); ctx.lineTo(c._x,c._y); }
+        else { ctx.moveTo(p._x,p._y); ctx.bezierCurveTo((p._x+c._x)/2,p._y,(p._x+c._x)/2,c._y,c._x,c._y); }
+        ctx.stroke(); ctx.globalAlpha=1;
+      });
+    });
+    P.commits.forEach(function(c,i){
+      var col=c.merge?'#43D67E':(c.who==='teammate'?'#FFB020':(c.lane===0?'#34D7C5':'#8E8CF8'));
+      ctx.beginPath(); ctx.arc(c._x,c._y,7,0,TAU); ctx.fillStyle=col; ctx.strokeStyle=col; ctx.lineWidth=2; ctx.fill(); ctx.stroke();
+      var lbl=c.msg.length>11?c.msg.slice(0,10)+'…':c.msg;
+      ctx.fillStyle=(c.who==='teammate')?'#FFB020':'#92A2BE';
+      ctx.font='10px ui-monospace,Menlo,monospace'; ctx.textAlign='center';
+      var ly=(c.lane===0)?(i%2?36:22):(i%2?-26:-14);
+      ctx.fillText(lbl,c._x,c._y+ly);
+    });
+    var tip=byId[P.branches[P.head]];
+    if(tip){
+      ctx.beginPath(); ctx.arc(tip._x,tip._y,11,0,TAU); ctx.strokeStyle='#E7ECF6'; ctx.lineWidth=1.5; ctx.stroke();
+      ctx.fillStyle='#E7ECF6'; ctx.font='700 9px ui-monospace,Menlo,monospace'; ctx.textAlign='left';
+      ctx.fillText('HEAD',tip._x+15,tip._y+3);
+    }
+  }
+  function render(){
+    gsBranch.innerHTML='on branch <b>'+P.head+'</b>';
+    gsFile.textContent='robot.py: '+(P.file==='clean'?'clean':(P.file==='modified'?'modified (not staged)':'staged (ready to commit)'));
+    gSwitch.textContent='git checkout '+((P.feat&&P.head==='main')?P.feat:'main');
+    draw();
+  }
+
+  document.getElementById('gEdit').addEventListener('click',function(){
+    if(P.file==='staged'){ P.file='modified'; out('You edited robot.py again after staging. New edits are not staged - run git add again.'); }
+    else { P.file='modified'; out('You changed robot.py. git status: modified, not staged for commit.'); }
+    render();
+  });
+  document.getElementById('gAdd').addEventListener('click',function(){
+    if(P.file==='clean'){ rejected('nothing to add - the working tree is clean. Edit the file first.'); }
+    else if(P.file==='staged'){ out('Already staged. git status: changes to be committed: robot.py.'); }
+    else { P.file='staged'; out('Staged robot.py. git status: changes to be committed.'); }
+    render();
+  });
+  document.getElementById('gCommit').addEventListener('click',function(){
+    var msg=gMsg.value.trim();
+    if(P.file!=='staged'){ rejected('nothing staged - a commit only saves staged changes. Use git add first.'); render(); return; }
+    if(!msg){ rejected('aborting commit: empty message. Type a short message in the box.'); render(); return; }
+    if(P.commits.length>=13){ out('The graph is full. Press Reset for a fresh repo.'); render(); return; }
+    var id=hash();
+    P.commits.push({id:id,msg:msg,lane:(P.head==='main'?0:1),parents:[P.branches[P.head]]});
+    P.branches[P.head]=id; P.file='clean'; gMsg.value='';
+    mClear('first');
+    if(P.head!=='main') mClear('branch');
+    if(P.head!=='main'&&!P.teammate){
+      P.teammate=true;
+      var tid=hash();
+      P.commits.push({id:tid,msg:'fix deadband',lane:0,parents:[P.branches.main],who:'teammate'});
+      P.branches.main=tid;
+      out('['+P.head+' '+id+'] '+msg+'\nHeads up: a teammate just committed "fix deadband" on main while you worked. Get BOTH changes onto main without losing either.','warn');
+    } else {
+      out('['+P.head+' '+id+'] '+msg+' - 1 file changed.');
+    }
+    render();
+  });
+  document.getElementById('gBranch').addEventListener('click',function(){
+    if(P.feat){ rejected("fatal: a branch named 'intake' already exists."); render(); return; }
+    P.feat='intake'; P.branches.intake=P.branches[P.head]; P.head='intake';
+    out("Switched to a new branch 'intake'. Commits now land on your branch - main stays safe.");
+    render();
+  });
+  gSwitch.addEventListener('click',function(){
+    if(!P.feat){ out("Already on 'main'. There is no other branch yet - make one with git checkout -b."); render(); return; }
+    if(P.file!=='clean'){ rejected('error: you have uncommitted changes. Commit them before you switch branches, so nothing is left behind.'); render(); return; }
+    P.head=(P.head==='main')?P.feat:'main';
+    var note=(P.head==='main'&&P.teammate&&!P.merged)?" Notice: your branch commits are NOT here. They wait on 'intake' until you merge.":'';
+    out("Switched to branch '"+P.head+"'."+note);
+    render();
+  });
+  document.getElementById('gMerge').addEventListener('click',function(){
+    if(!P.feat){ rejected('merge: there is no other branch to merge yet.'); render(); return; }
+    if(P.head!=='main'){ rejected('You merge INTO the branch you are on. Switch to main first: git checkout main.'); render(); return; }
+    if(ancestors(P.branches.main)[P.branches[P.feat]]){ out('Already up to date - main has everything from intake.'); render(); return; }
+    var id=hash();
+    P.commits.push({id:id,msg:'merge intake',lane:0,parents:[P.branches.main,P.branches[P.feat]],merge:true});
+    P.branches.main=id; P.merged=true;
+    out("Merge branch 'intake' into main. Both lines of history are now in main - your work AND your teammate's. Nothing lost.");
+    if(P.teammate){ mClear('rescue'); if(P.errs===0) mClear('gold'); }
+    render();
+  });
+  document.getElementById('gReset').addEventListener('click',function(){
+    P=fresh(); gMsg.value='';
+    out('Fresh repo: one commit on main, working tree clean. Run the rescue: branch, commit, checkout main, merge.');
+    render();
+  });
+  gMsg.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); document.getElementById('gCommit').click(); } });
+
+  var rt; window.addEventListener('resize',function(){ clearTimeout(rt); rt=setTimeout(function(){ fit(); draw(); },120); });
+  out('A tiny pretend repo: one commit on main, one file. Edit robot.py to start.');
+  render();
+}catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>
