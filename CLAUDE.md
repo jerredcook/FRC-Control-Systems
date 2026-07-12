@@ -233,11 +233,18 @@ build step, no dependencies.
   (`/FRC-Control-Systems/`); absolute `/` paths would break. `icons/` holds the PNGs,
   generated from `icons/icon.svg` (the glowing loop + three pillar dots).
 - `service-worker.js` precaches an app **shell** (home, hubs, companions, scripts,
-  icons, `offline.html`) and then **runtime-caches** every other same-origin page the
-  first time it is opened (stale-while-revalidate). So a lesson works offline after
-  one online visit. It **never intercepts cross-origin** requests, so the Supabase
-  library (`esm.sh`) and external doc links are untouched and can't break offline use.
-  Bump `VERSION` to ship a new shell and evict the old cache.
+  icons, `offline.html`) on install, then **warms the entire site in the background**
+  from `precache-manifest.js` (a generated list of every page): after one visit to
+  any page, all ~230 files cache in small chunks, skip-if-cached, resumable (every
+  page load posts a `frc-warm` message so an interrupted warm continues). So the
+  whole academy works offline right after install. Runtime fetches stay
+  stale-while-revalidate. It **never intercepts cross-origin** requests, so the
+  Supabase library (`esm.sh`) and external doc links are untouched and can't break
+  offline use. Bump `VERSION` to ship a new shell and evict the old cache.
+- **After adding any page, regenerate `precache-manifest.js`** (new pages still work
+  online and runtime-cache regardless; they just miss the pre-warm until added):
+  glob `*.html` + `icons/*.png` + `manifest.webmanifest` + the two account scripts
+  into `self.FRC_PRECACHE = [...]` - a python one-liner; keep the file's header.
 - **No per-file change**: `account.js` (already on every page) injects the manifest
   link, theme-color, apple-touch icon/metas, and registers the service worker - the
   same "don't touch the 200+ lesson files" trick used for review capture. New pages

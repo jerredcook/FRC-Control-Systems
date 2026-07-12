@@ -9,9 +9,17 @@
  * external documentation links go straight to the network, so accounts still
  * work online and can never break the offline experience.
  *
+ * Full offline: precache-manifest.js (a generated list of every page) is
+ * warmed in the background after activation, in small chunks, skipping
+ * anything already cached - so the entire academy works offline right after
+ * install, and an interrupted warm resumes on the next page visit (account.js
+ * posts a "frc-warm" message on load).
+ *
  * Bump VERSION to ship a new shell and evict the old cache.
  */
-var VERSION = "frc-academy-v2";
+var VERSION = "frc-academy-v3";
+
+try { importScripts("precache-manifest.js"); } catch (e) { /* manifest optional */ }
 
 var SHELL = [
   "index.html",
@@ -34,6 +42,33 @@ self.addEventListener("install", function (e) {
   );
 });
 
+// Warm the full-site list in the background: fetch anything not yet cached,
+// a few files at a time, each failure swallowed. Idempotent, so it can be
+// re-triggered any time to resume where an interrupted warm left off.
+var warming = false;
+function warmAll() {
+  var list = (self.FRC_PRECACHE || []).slice();
+  if (!list.length || warming) return Promise.resolve();
+  warming = true;
+  return caches.open(VERSION).then(function (cache) {
+    var i = 0, CHUNK = 5;
+    function next() {
+      var batch = list.slice(i, i + CHUNK);
+      if (!batch.length) return Promise.resolve();
+      i += CHUNK;
+      return Promise.all(batch.map(function (u) {
+        return cache.match(u).then(function (hit) {
+          if (hit) return;
+          return fetch(u).then(function (res) {
+            if (res && res.status === 200 && res.type === "basic") return cache.put(u, res);
+          }).catch(function () {});
+        });
+      })).then(next);
+    }
+    return next();
+  }).then(function () { warming = false; }, function () { warming = false; });
+}
+
 self.addEventListener("activate", function (e) {
   e.waitUntil(
     caches.keys().then(function (keys) {
@@ -41,7 +76,15 @@ self.addEventListener("activate", function (e) {
         if (k !== VERSION) return caches.delete(k);
       }));
     }).then(function () { return self.clients.claim(); })
+      .then(function () { return warmAll(); })
   );
+});
+
+self.addEventListener("message", function (e) {
+  if (e.data && e.data.type === "frc-warm") {
+    if (e.waitUntil) e.waitUntil(warmAll());
+    else warmAll();
+  }
 });
 
 self.addEventListener("fetch", function (e) {

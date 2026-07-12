@@ -344,6 +344,17 @@
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", function () {
         navigator.serviceWorker.register("service-worker.js").catch(function () {});
+        // nudge the worker to warm (or resume warming) the full offline set,
+        // once the page is idle so it never competes with lesson load
+        var nudge = function () {
+          try {
+            navigator.serviceWorker.ready.then(function (reg) {
+              if (reg && reg.active) reg.active.postMessage({ type: "frc-warm" });
+            }).catch(function () {});
+          } catch (e) {}
+        };
+        if ("requestIdleCallback" in window) requestIdleCallback(nudge, { timeout: 8000 });
+        else setTimeout(nudge, 4000);
       });
     }
   } catch (e) { /* never break a page over install glue */ }
