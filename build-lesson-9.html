@@ -334,14 +334,25 @@
   var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain');
   var picked=-1, revealed=false, ran=false;
   var demos=document.querySelectorAll('.demo');
+  var style=document.createElement('style');
+  style.textContent='#predict .opt.picked{border-color:var(--teal,#34D7C5);box-shadow:0 0 0 2px rgba(52,215,197,.22)}';
+  document.head.appendChild(style);
   var note=document.createElement('div');
-  note.textContent='Prediction locked in. Now run the sim and see if you were right.';
   note.style.cssText='display:none;font-size:13px;color:#92A2BE;margin-top:10px;font-style:italic';
   q.appendChild(note);
-  function reveal(){ if(revealed||picked<0) return; revealed=true; note.style.display='none';
-    if(picked===correct){opts[picked].classList.add('correct');} else {opts[picked].classList.add('wrong'); opts[correct].classList.add('correct');}
+  function optText(i){ var t=(opts[i].textContent||'').trim(); return t.length>70 ? t.slice(0,67)+'...' : t; }
+  function reveal(){ if(revealed||picked<0) return; revealed=true;
+    opts.forEach(function(o){o.classList.add('locked');});
+    if(picked===correct){
+      opts[picked].classList.add('correct');
+      note.textContent='You called it. "'+optText(picked)+'" is exactly what happens. Here is why:';
+    } else {
+      opts[picked].classList.add('wrong'); opts[correct].classList.add('correct');
+      note.textContent='You predicted "'+optText(picked)+'". The sim went a different way - the green answer is what really happens, and the surprise is the part worth remembering. Here is why:';
+    }
+    note.style.display='block';
     explain.classList.add('show'); }
-  function onRan(){ ran=true; if(picked>=0) reveal(); }
+  function onRan(ev){ if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#predict')) return; ran=true; if(picked>=0) reveal(); }
   if(demos.length){
     Array.prototype.forEach.call(demos,function(d){
       d.addEventListener('pointerdown',onRan,true);
@@ -349,7 +360,9 @@
     });
     window.addEventListener('keydown',onRan,true);
   } else { ran=true; }
-  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(picked>=0)return; picked=i; opts.forEach(function(o){o.classList.add('locked');}); if(ran){ reveal(); } else { note.style.display='block'; } }); });
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(revealed)return; picked=i;
+    opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
+    if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
 })();
 </script>
 <script src="account-config.js"></script>
