@@ -142,6 +142,12 @@
   .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
   .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
   .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
 
   /* quiz */
   .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
@@ -267,11 +273,11 @@
     </div>
     <p class="caption">Low kP and the carriage gives up far below the line. Crank it up and it races there - then overshoots and rings.</p>
     <div class="missions" id="missions">
-      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
-      <div class="m-item" data-m="droop"><span class="m-st">○</span><span>Set <b>kP to exactly 3.0</b>, press Step, and let it settle - it parks about <b>0.15 m short</b>. That gap is g/kP: 0.45 / 3.</span></div>
-      <div class="m-item" data-m="overshoot"><span class="m-st">○</span><span>Raise <b>kP</b> until the carriage <b>sails past the line</b> before settling. Find where overshoot begins.</span></div>
-      <div class="m-item" data-m="park"><span class="m-st">○</span><span>Park within <b>0.05 m</b> of the line and hold it there for <b>2 seconds</b>.</span></div>
-      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> settle within <b>0.03 m</b>. Feel what that gain costs on the way in.</span></div>
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
+      <div class="m-item" data-m="droop"><span class="m-st">○</span><span>Set <b>kP to exactly 3.0</b>, press Step, and give it a moment to settle. See where it parks - about <b>0.15 m short</b> of the line? That gap is no accident. It is g divided by kP: 0.45 over 3. You just watched the formula happen.</span></div>
+      <div class="m-item" data-m="overshoot"><span class="m-st">○</span><span>Now nudge <b>kP</b> higher, bit by bit, until the carriage <b>sails right past the line</b> before settling. Somewhere in there is the exact gain where overshoot begins - see if you can find it.</span></div>
+      <div class="m-item" data-m="park"><span class="m-st">○</span><span>Bring it home: park within <b>0.05 m</b> of the line and hold it steady for <b>2 seconds</b>. Take your time - smooth beats fast here.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> settle within <b>0.03 m</b>. You can do it, but notice what that much gain costs you on the way in.</span></div>
     </div>
   </section>
 
@@ -337,6 +343,15 @@ self.motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="out
         <button class="btn" id="check">Check</button>
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
+      </div>
+      <div class="walkme">
+        <button class="btn wm-btn" id="wmBtn">🧭 Walk me through it</button>
+        <ol class="wm-steps" id="wmSteps">
+          <li hidden>Start with the first line. The error is the gap between where you want to be and where you actually are. The "want to be" part is already written: setpoint. So the blank is the "actually are" part - the number that comes straight from the sensor. We gave it a name earlier in the lesson. What was it?</li>
+          <li hidden>Second line. Proportional control in one sentence: push harder the further you are from the target. kP is the "how hard". The blank is the "how far" - and you built exactly that value one line above.</li>
+          <li hidden>Last line. The controller's answer is a voltage, and it is sitting in the variable you just made on line two. That whole variable goes inside setVoltage( ).</li>
+          <li hidden>Putting it together, top to bottom: measurement, error, output. Type them in and press Check. If any step felt shaky, scroll back to the "output = kP × error" section - it will read differently now that you have built it yourself.</li>
+        </ol>
       </div>
     </div>
   </section>
@@ -651,6 +666,21 @@ self.motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="out
   opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(revealed)return; picked=i;
     opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
     if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
+})();
+</script>
+<script>
+(function(){
+  try{
+    var btn=document.getElementById("wmBtn"), steps=document.getElementById("wmSteps");
+    if(!btn||!steps) return;
+    var items=steps.querySelectorAll("li"), shown=0;
+    btn.addEventListener("click",function(){
+      if(shown===0) steps.classList.add("on");
+      if(shown<items.length){ items[shown].hidden=false; shown++; }
+      if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+      else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

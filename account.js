@@ -181,8 +181,8 @@
       box.className = "frc-toast";
       box.setAttribute("role", "status");
       var eyebrow = isCheckpoint ? "Checkpoint cleared" : "Lesson complete";
-      var msg = isCheckpoint ? "★ You proved this whole Part." : "✓ Every question answered correctly.";
-      var sub = isCheckpoint ? "Cumulative mastery, on the record." : "This lesson is now marked done on your map.";
+      var msg = isCheckpoint ? "★ You just proved the whole Part - every question, cold." : "✓ You got every one right. This lesson is yours now.";
+      var sub = isCheckpoint ? "That is real mastery, and it is on the record." : "It is saved on your map. Whenever you are ready, the next one is waiting.";
       var row = "";
       if (nav.next) row += '<a class="t-next" href="' + nav.next.getAttribute("href") + '">Next lesson →</a>';
       if (nav.map) row += '<a class="t-map" href="' + nav.map.getAttribute("href") + '">Course map</a>';
