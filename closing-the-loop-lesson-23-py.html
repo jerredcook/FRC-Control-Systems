@@ -236,11 +236,11 @@
     </div>
     <p class="caption">The amber wedge is the camera's view of the offset; the teal line is where the robot points. Auto-aim closes the gap - pure proportional control.</p>
     <div class="missions" id="missions">
-      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
-      <div class="m-item" data-m="lock"><span class="m-st">○</span><span>Turn <b>auto-aim off</b>, drag the target until <b>tx reads 35°</b> or more, then flip aim back on. Watch the loop drive the error to zero.</span></div>
-      <div class="m-item" data-m="rate"><span class="m-st">○</span><span>Turn rate is kP times tx. Push the <b>Turn rate</b> readout past <b>8.0</b>. You need a big error and a <b>big kP</b> at the same moment.</span></div>
-      <div class="m-item" data-m="track"><span class="m-st">○</span><span>Sweep the target a full <b>40°</b> without ever losing <b>locked on</b>. Drag slow and steady, the aim is always chasing you.</span></div>
-      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> do the 40° locked sweep with <b>kP at 2.0 or less</b>. A weak gain can only follow a target that crawls.</span></div>
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
+      <div class="m-item" data-m="lock"><span class="m-st">○</span><span>Turn <b>auto-aim off</b>, drag the target until <b>tx reads 35°</b> or more, then flip aim back on. Watch the loop wake up and reel that big error down to zero - it never gets old.</span></div>
+      <div class="m-item" data-m="rate"><span class="m-st">○</span><span>Turn rate is kP times tx, so think like the formula: push the <b>Turn rate</b> readout past <b>8.0</b>. You need a big error and a <b>big kP</b> at the same moment - set up the miss first, then let the loop loose.</span></div>
+      <div class="m-item" data-m="track"><span class="m-st">○</span><span>Sweep the target a full <b>40°</b> without ever losing <b>locked on</b>. Drag slow and steady - the aim is always a beat behind you, so give it a pace it can hold. Patience wins this one.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> do the 40° locked sweep again, this time with <b>kP at 2.0 or less</b>. A weak gain can only follow a target that crawls - how slow and smooth can your hand get?</span></div>
     </div>
     <div class="clinic" id="clinic">
       <div class="c-head">🩺 Fault clinic <span class="c-sub">load a symptom, name the fault, then fix it</span></div>
@@ -452,33 +452,33 @@ self.drive.<span class="fn">drive</span>(<span class="num">0</span>, <span class
   function cKick(){ S.heading=S.targetBearing-22*RAD; }
   var CASES={
     lazy:{
-      q:'Symptom loaded. The robot sees the tag and tx is big, but it only creeps toward it. Name the fault.',
+      q:'Symptom loaded. The robot sees the tag and tx is big, but it only creeps toward it. Something is turning a loud error into a whisper of a turn. Name the fault.',
       opts:[
         {t:'The camera has lost the target, so tx is stale',
-         why:'Watch the readout. tx is live and slowly shrinking, so the camera is doing its job.'},
+         why:'Good thought, but watch the readout - tx is live and slowly shrinking, so the camera is doing its job. Keep hunting.'},
         {t:'The aim gain kP is starved, so the turn command is tiny for any tx',ok:true,
-         why:'Right. Turn rate is kP times tx, so with kP on the floor even a big error buys almost no turn.'},
+         why:'Right - turn rate is kP times tx, so with kP on the floor even a big error buys almost no turn. You read that straight off the readouts.'},
         {t:'The target sits outside what the camera can see',
-         why:'The tag is in view and tx reads fine. The sensing side is healthy, the command side is weak.'}
+         why:'Worth checking, but the tag is in view and tx reads fine. The sensing side is healthy - it is the command side that is weak.'}
       ],
-      fix:'Now fix it with the controls above: push kP to 3.5 or more, then watch the robot snap onto the tag and hold.',
-      confirm:'Fixed - that was a starved kP. Turn rate is kP times tx, so a weak gain can only crawl. Real gain, real turn.',
+      fix:'Now fix it with the controls above: push kP to 3.5 or more, then watch the robot remember how to hustle - it should snap onto the tag and hold.',
+      confirm:'There it is - a starved kP. Turn rate is kP times tx, so a weak gain can only crawl. Real gain, real turn - feel the difference.',
       inject:function(){ cSetAim(true); cSetKp(0.5); cKick(); },
       pre:function(){ return S.aim && S.kP>=3.5; },
       kick:true, hold:0.6
     },
     dead:{
-      q:'Symptom loaded. tx reads over 20 degrees and holds, yet the turn rate sits at exactly 0.0. Name the fault.',
+      q:'Symptom loaded. tx reads over 20 degrees and holds, yet the turn rate sits at exactly 0.0. Exactly zero is a clue all by itself. Name the fault.',
       opts:[
         {t:'kP is zero, so the command multiplies out to nothing',
-         why:'Check the slider. kP reads a healthy 4.0, and it cannot even go below 0.5 here.'},
+         why:'Reasonable guess, but check the slider - kP reads a healthy 4.0, and it cannot even go below 0.5 here. Look for what could zero the whole command.'},
         {t:'The aim loop is switched off, so no turn command is ever sent',ok:true,
-         why:'Right. Sensor fine, gain fine, but a controller that never runs corrects nothing.'},
+         why:'Right - sensor fine, gain fine, but a controller that never runs corrects nothing. Sometimes the fault really is the off switch.'},
         {t:'The camera lost the target, so there is no tx to act on',
-         why:'tx is right there on the readout. The camera sees the tag fine, the command side is silent.'}
+         why:'Look again - tx is right there on the readout. The camera sees the tag fine; it is the command side that has gone silent.'}
       ],
-      fix:'Now fix it with the controls above: switch auto-aim back on and let the loop drive tx to zero.',
-      confirm:'Fixed - the loop was simply switched off. Every gain in the world does nothing until the controller actually runs.',
+      fix:'Now fix it with the controls above: switch auto-aim back on and let the loop do what it has been waiting to do - drive tx to zero.',
+      confirm:'There it is - the loop was simply switched off. Every gain in the world does nothing until the controller actually runs. Check the simple things first, always.',
       inject:function(){ cSetAim(false); cSetKp(4); cKick(); },
       pre:function(){ return S.aim; },
       kick:true, hold:0.6
@@ -487,14 +487,14 @@ self.drive.<span class="fn">drive</span>(<span class="num">0</span>, <span class
       q:'Symptom loaded. The robot aims, but parks a few degrees off center and just sits there, like holding your bike line in a steady crosswind. Name the fault.',
       opts:[
         {t:'The tag moved, so the target bearing is wrong',
-         why:'The target bearing slider has not changed. The miss is on the control side.'},
+         why:'Fair suspicion, but the target bearing slider has not changed. The miss lives on the control side.'},
         {t:'kP is too high, so the aim overshoots',
-         why:'Overshoot swings past center and hunts back and forth. This robot sits calmly on one side, the opposite signature.'},
+         why:'Good eye for symptoms, but overshoot swings past center and hunts back and forth. This robot sits calmly on one side - the opposite signature.'},
         {t:'A steady outside push, and a P-only loop must keep a standing error to fight it',ok:true,
-         why:'Right. P only turns while tx is nonzero, so it settles where the correction exactly cancels the push, a few degrees off center.'}
+         why:'Right - P only turns while tx is nonzero, so it settles where the correction exactly cancels the push, a few degrees off center. The standing miss is the loop straining against the wind.'}
       ],
-      fix:'Now fix it with the controls above: the push stays on, so raise kP until the standing miss shrinks inside the lock zone and holds.',
-      confirm:'Fixed - against a steady push, a P-only loop keeps a standing miss of about 10 degrees divided by kP. More gain squeezed the miss under the lock threshold.',
+      fix:'Now fix it with the controls above: the push stays on, so raise kP until the standing miss shrinks inside the lock zone and holds. You are not removing the wind, just leaning harder into it.',
+      confirm:'There it is - against a steady push, a P-only loop keeps a standing miss of about 10 degrees divided by kP. Your extra gain squeezed the miss under the lock threshold, and LOCKED finally stuck.',
       inject:function(){ cSetAim(true); cSetKp(2); },
       pre:function(){ return S.aim; },
       kick:false, hold:1.2

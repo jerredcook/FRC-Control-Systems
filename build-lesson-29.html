@@ -156,11 +156,11 @@
     </div>
     <p class="caption">Break the link after the roboRIO and almost the whole robot goes silent. Break it near the end and you lose just the last device. Either way, everything <em>downstream</em> of the break stops talking, which is exactly why one loose connector is so dangerous.</p>
     <div class="missions" id="missions">
-      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
-      <div class="m-item" data-m="blackout"><span class="m-st">○</span><span>Break the <b>first link</b>, right after the roboRIO. One bad connector and all 5 downstream devices go dark: <b>1 / 6</b> online.</span></div>
-      <div class="m-item" data-m="term"><span class="m-st">○</span><span>Reconnect all, then break <b>only the last link</b>. Just the <b>120 Ω</b> terminator drops, the smallest outage, but a real bus with no terminator gets garbled everywhere.</span></div>
-      <div class="m-item" data-m="three"><span class="m-st">○</span><span>Pit report: exactly <b>3 / 6</b> devices are answering. Recreate that symptom with a <b>single break</b>. Which link has to be the loose one?</span></div>
-      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> break <b>two different links</b>, then get back to <b>6 / 6</b> by clicking the links, no Reconnect button. Fixing the first break only reveals the second.</span></div>
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
+      <div class="m-item" data-m="blackout"><span class="m-st">○</span><span>Break the <b>first link</b>, right after the roboRIO, and watch the dominoes fall. One bad connector and all 5 downstream devices go dark: <b>1 / 6</b> online. One loose plug did all of that.</span></div>
+      <div class="m-item" data-m="term"><span class="m-st">○</span><span>Reconnect all, then break <b>only the last link</b>. Just the <b>120 Ω</b> terminator drops - the smallest outage on the board - but keep in mind a real bus with no terminator gets garbled everywhere.</span></div>
+      <div class="m-item" data-m="three"><span class="m-st">○</span><span>Here comes a real pit report: exactly <b>3 / 6</b> devices are answering. Recreate that symptom with a <b>single break</b>. Which link has to be the loose one? Reason it out before you click.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> break <b>two different links</b>, then get back to <b>6 / 6</b> by clicking the links, no Reconnect button. Fixing the first break only reveals the second - which is exactly how real debugging feels, one layer at a time.</span></div>
     </div>
   </section>
 
@@ -182,7 +182,7 @@
 
     <div class="note amber shoptask">
       <div class="nh">🔧 In the shop &middot; 10 minutes</div>
-      <p>With the robot powered off, put one finger on the roboRIO's CAN port and follow the yellow and green twisted pair device to device all the way to the end of the chain, counting devices and giving each CAN connector a gentle wiggle as you pass it. Pass test: you reach the terminator without ever losing the pair, your count matches the device list your programmers see in their tuner software, and no connector moved. Any connector that wiggles gets a piece of tape as a flag and a report to your electrical lead. No robot? Chain two extension cords into a lamp and unplug the middle connection: everything downstream goes dead, which is exactly why you wiggle-tested every link.</p>
+      <p>With the robot powered off, put one finger on the roboRIO's CAN port and follow the yellow and green twisted pair device to device, all the way to the end of the chain. Count devices as you go, and give each CAN connector a gentle wiggle as you pass it. Pass test: you reach the terminator without ever losing the pair, your count matches the device list your programmers see in their tuner software, and no connector moved. Any connector that wiggles gets a piece of tape as a flag and a report to your electrical lead - you may have just prevented a mid-match blackout. No robot? Chain two extension cords into a lamp and unplug the middle connection: everything downstream goes dead, which is exactly why you wiggle-tested every link.</p>
     </div>
 
     <div class="note indigo">

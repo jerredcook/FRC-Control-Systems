@@ -132,8 +132,8 @@
         <div class="qn">Question 1</div>
         <div class="qt">You must carry a flat tray of game pieces outward to a scoring shelf and keep the tray dead level the whole way. Which archetype is built for that?</div>
         <div class="opts">
-          <button class="opt" data-why="A single arm rotates whatever it carries; the tray would tilt through the whole swing unless a wrist actively fought it.">A single arm on one pivot</button>
-          <button class="opt" data-why="An elevator keeps the tray level but only moves vertically; this job needs to carry the tray outward to the shelf.">An elevator that only goes straight up</button>
+          <button class="opt" data-why="A single arm is the simplest build, but it rotates whatever it carries; the tray would tilt through the whole swing unless a wrist actively fought it.">A single arm on one pivot</button>
+          <button class="opt" data-why="Half right - an elevator keeps the tray level, but it only moves vertically, and this job needs to carry the tray outward to the shelf.">An elevator that only goes straight up</button>
           <button class="opt">A parallel four-bar linkage</button>
         </div>
         <div class="explain">A parallel four-bar keeps two equal arms parallel, so the coupler forms a parallelogram and never tilts. The tray stays level through the whole motion, set by geometry, not software. A single arm would rotate the tray as it swings. <a class="ref" href="build-lesson-17.html">Review: Lesson 4.2 · Linkages &amp; Four-Bars</a></div>
@@ -145,7 +145,7 @@
         <div class="opts">
           <button class="opt" data-why="Straight up feels like the hardest hold, but the load sits directly over the pivot, so the moment arm and the needed torque are near zero.">Pointed straight up, with the load over the pivot</button>
           <button class="opt">Held level, sticking straight out to the side</button>
-          <button class="opt" data-why="Torque follows the horizontal distance from pivot to load, and that distance changes with angle, so the load on the motor changes too.">Anywhere; the torque is the same at every angle</button>
+          <button class="opt" data-why="It would be simpler if it were, but torque follows the horizontal distance from pivot to load, and that distance changes with angle, so the load on the motor changes too.">Anywhere; the torque is the same at every angle</button>
         </div>
         <div class="explain">Holding torque follows the moment arm, the horizontal distance from pivot to load. It is longest when the arm is level (torque peaks, scaling with the cosine of the angle) and drops to zero when the arm points straight up and the load sits over the pivot. <a class="ref" href="build-lesson-19.html">Review: Lesson 4.4 · Arms &amp; Wrists</a></div>
       </div>
@@ -155,8 +155,8 @@
         <div class="qt">Your floor intake spins against a game piece but it keeps slipping out instead of being pulled in. The most likely fix is to:</div>
         <div class="opts">
           <button class="opt">Lower the rollers a bit so they compress the piece more for grip</button>
-          <button class="opt" data-why="No contact means no grip at all; an intake only works because the rollers press into the piece.">Raise the rollers far above the piece so they never touch it</button>
-          <button class="opt" data-why="Backward is the outtake direction; the rollers would throw the piece away from the robot instead of pulling it in.">Spin the rollers backward, away from the robot</button>
+          <button class="opt" data-why="Protecting the piece sounds kind, but no contact means no grip at all; an intake only works because the rollers press into the piece.">Raise the rollers far above the piece so they never touch it</button>
+          <button class="opt" data-why="Easy to flip - backward is the outtake direction, so the rollers would throw the piece away from the robot instead of pulling it in.">Spin the rollers backward, away from the robot</button>
         </div>
         <div class="explain">Intakes grip by compression, the rollers sit a little closer to the floor than the piece is tall, so they squeeze it and drag it in. Slipping means too little squeeze. You find the sweet spot by prototyping, since too much compression jams instead. <a class="ref" href="build-lesson-20.html">Review: Lesson 4.5 · Intakes &amp; Rollers</a></div>
       </div>
@@ -165,8 +165,8 @@
         <div class="qn">Question 4</div>
         <div class="qt">A flywheel shooter lands every shot in a slightly different spot. Connecting to control ideas, the most likely cause is:</div>
         <div class="opts">
-          <button class="opt" data-why="A bolted hood does not move on its own; blaming hardware that stays put skips the thing that really changes between shots, wheel speed.">The hood angle randomly changes between shots on its own</button>
-          <button class="opt" data-why="Color changes nothing about mass or bounce; the physics of a shot only cares about exit speed and angle.">The game pieces are different colors</button>
+          <button class="opt" data-why="Blaming the hood is natural, but a bolted hood does not move on its own; the thing that really changes between shots is wheel speed.">The hood angle randomly changes between shots on its own</button>
+          <button class="opt" data-why="A fun theory, but color changes nothing about mass or bounce; the physics of a shot only cares about exit speed and angle.">The game pieces are different colors</button>
           <button class="opt">The flywheel RPM sags after each shot, so exit speed and range vary; hold a steady RPM with a velocity loop</button>
         </div>
         <div class="explain">Range depends directly on flywheel speed, so if RPM sags between shots, every shot lands somewhere different. A velocity loop with strong feedforward holds the wheel at a steady RPM and recovers fast after each piece, tightening the grouping. <a class="ref" href="build-lesson-21.html">Review: Lesson 4.6 · Shooters &amp; End Effectors</a></div>
@@ -176,9 +176,9 @@
         <div class="qn">Question 5</div>
         <div class="qt">Connecting back to the speed-versus-torque trade from power transmission: a 2-stage cascade elevator moves the carriage twice as fast as the cable. Compared with simple one-to-one rigging, what is the cost?</div>
         <div class="opts">
-          <button class="opt" data-why="Nothing in power transmission is free; doubling the carriage speed has to cost force, the same trade gears make.">It lifts with twice the force for free</button>
+          <button class="opt" data-why="Free force would be wonderful, but nothing in power transmission is free; doubling the carriage speed has to cost force, the same trade gears make.">It lifts with twice the force for free</button>
           <button class="opt">It has about half the lifting force and puts more tension on the cable and pulleys</button>
-          <button class="opt" data-why="Speed and force are two ends of the same lever; you cannot double one without roughly halving the other.">It changes nothing about force, only speed</button>
+          <button class="opt" data-why="Partly true - the speed does change, but speed and force are two ends of the same lever; you cannot double one without roughly halving the other.">It changes nothing about force, only speed</button>
         </div>
         <div class="explain">Cascade rigging multiplying carriage speed is the same speed-versus-torque trade as gears, wearing a different hat. Twice the speed means about half the lifting force and higher cable tension, so you pick cascade for light, fast loads and continuous rigging for heavy ones. <a class="ref" href="build-lesson-18.html">Review: Lesson 4.3 · Elevators &amp; Lifts</a></div>
       </div>

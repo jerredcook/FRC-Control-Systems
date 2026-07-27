@@ -237,11 +237,11 @@
     </div>
     <p class="caption">Your roboRIO sent one number - the target. Everything you see the motor doing to reach it happened on the Kraken.</p>
     <div class="missions" id="missions">
-      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
-      <div class="m-item" data-m="droop"><span class="m-st">○</span><span>Do the math first: gravity takes <b>0.45 V</b> and kP is <b>5.0</b>, so the droop is 0.45 / 5 = <b>0.09</b>. Drag <b>kG to 0</b> and watch the Error readout settle on your number.</span></div>
-      <div class="m-item" data-m="restore"><span class="m-st">○</span><span>Now drag <b>kG back to 0.45</b>. Same kP, but the droop vanishes and Error returns to <b>0.00</b>. Feedforward holds gravity for free.</span></div>
-      <div class="m-item" data-m="ring"><span class="m-st">○</span><span>Raise <b>kP</b> until the carriage <b>sails past the target line</b> and rings before settling. Find where overshoot begins.</span></div>
-      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> with <b>kG at 0</b>, squeeze the Error to <b>0.03 or less</b> and hold it for <b>2 seconds</b> using kP muscle alone. Feel what brute force costs on the way in.</span></div>
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
+      <div class="m-item" data-m="droop"><span class="m-st">○</span><span>Do the math before you touch a slider: gravity takes <b>0.45 V</b> and kP is <b>5.0</b>, so the droop should be 0.45 / 5 = <b>0.09</b>. Now drag <b>kG to 0</b> and watch the Error readout settle right on your number. You called it before the sim did.</span></div>
+      <div class="m-item" data-m="restore"><span class="m-st">○</span><span>Now drag <b>kG back to 0.45</b> and enjoy this one: same kP, but the droop vanishes and Error returns to <b>0.00</b>. Feedforward just lifted gravity off the loop's shoulders, for free.</span></div>
+      <div class="m-item" data-m="ring"><span class="m-st">○</span><span>Ease <b>kP</b> upward until the carriage <b>sails past the target line</b> and rings before settling. See if you can find the exact gain where overshoot begins.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> with <b>kG at 0</b>, squeeze the Error to <b>0.03 or less</b> and hold it for <b>2 seconds</b> on kP muscle alone. You can get there - just notice what brute force costs you on the way in.</span></div>
     </div>
   </section>
 

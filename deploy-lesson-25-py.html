@@ -170,11 +170,11 @@
     </div>
     <p class="caption">The dashed ghost is what the robot <em>thinks</em> its pose is. After enough driving it lags the real robot, that's accumulated drift. "Reset pose" snaps the estimate back onto the truth, exactly what a vision fix or a known start does.</p>
     <div class="missions" id="missions">
-      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
-      <div class="m-item" data-m="drift"><span class="m-st">○</span><span>Drive a <b>full lap</b> around the field. Tiny per-loop errors pile up: push <b>Drift from truth</b> past <b>0.30 m</b>.</span></div>
-      <div class="m-item" data-m="bend"><span class="m-st">○</span><span>Spin in place <b>3 full turns</b>, then drive straight. A crooked heading bends the whole trail: Drift jumps another <b>0.50 m</b> in about one meter.</span></div>
-      <div class="m-item" data-m="fix"><span class="m-st">○</span><span>Let Drift build past <b>0.50 m</b>, then press <b>Reset pose</b>. That snap is exactly what a vision fix or a known start does.</span></div>
-      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> rack up <b>10 m</b> of driving and <b>2 full turns</b> while Drift never touches <b>0.15 m</b>. Reset pose is your vision fix, use it early and often.</span></div>
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
+      <div class="m-item" data-m="drift"><span class="m-st">○</span><span>Drive a <b>full lap</b> around the field and watch tiny per-loop errors pile up. Push <b>Drift from truth</b> past <b>0.30 m</b> - quicker than you might expect.</span></div>
+      <div class="m-item" data-m="bend"><span class="m-st">○</span><span>Spin in place <b>3 full turns</b>, then drive straight and watch closely. A crooked heading bends the whole trail: Drift jumps another <b>0.50 m</b> in about one meter. Heading error is the expensive kind.</span></div>
+      <div class="m-item" data-m="fix"><span class="m-st">○</span><span>Let Drift build past <b>0.50 m</b>, then press <b>Reset pose</b> and enjoy the snap back to truth. That correction is exactly what a vision fix or a known start gives a real robot.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> rack up <b>10 m</b> of driving and <b>2 full turns</b> while Drift never touches <b>0.15 m</b>. Reset pose is your vision fix - use it early and often, and keep your lines smooth.</span></div>
     </div>
   </section>
 

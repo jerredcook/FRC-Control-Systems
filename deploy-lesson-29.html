@@ -187,11 +187,11 @@
       <div class="cq" data-cq="lowgain">
         <div class="q" data-correct="1">
           <div class="qn">Diagnose it</div>
-          <div class="qt">The robot creeps toward the tag and takes ages to arrive, even though the kP label reads 0.08. What is really wrong?</div>
+          <div class="qt">The robot creeps toward the tag and takes ages to arrive, even though the kP label reads 0.08. The label says one thing, the robot says another. What is really wrong?</div>
           <div class="opts">
-            <button class="opt" data-why="If tx were stuck at zero the robot would not move at all. It is moving, just weakly, so the error signal is alive and the output is what is starving.">The camera is broken and reports tx as zero</button>
-            <button class="opt" data-why="Right. The output is gain times error, and the effective gain here is a fraction of what the label claims, so every degree of error earns only a tiny nudge.">The effective turn gain is far lower than the label says</button>
-            <button class="opt" data-why="A P loop handles any starting offset. The offset size changes how long the move is, not how weakly the robot turns per degree of error.">The target offset is too large for a PID loop</button>
+            <button class="opt" data-why="A reasonable place to start, but if tx were stuck at zero the robot would not move at all. It is moving, just weakly - the error signal is alive, and the output is what is starving. Look one step downstream.">The camera is broken and reports tx as zero</button>
+            <button class="opt" data-why="Right - the output is gain times error, and the effective gain here is a fraction of what the label claims, so every degree of error earns only a tiny nudge. You trusted the behavior over the label. Keep doing that.">The effective turn gain is far lower than the label says</button>
+            <button class="opt" data-why="Not this time - a P loop handles any starting offset. The offset size changes how long the move is, not how weakly the robot turns per degree of error. The weakness per degree is the real clue.">The target offset is too large for a PID loop</button>
           </div>
           <div class="explain"></div>
         </div>
@@ -199,11 +199,11 @@
       <div class="cq" data-cq="hunt">
         <div class="q" data-correct="0">
           <div class="qn">Diagnose it</div>
-          <div class="qt">You press Aim and the robot whips past the tag, swings back, and hunts forever without settling. What is the fault?</div>
+          <div class="qt">You press Aim and the robot whips past the tag, swings back, and hunts forever without settling. Watch a full swing or two before you answer. What is the fault?</div>
           <div class="opts">
-            <button class="opt" data-why="Right. A big gain plus a camera that reports late means every correction lands too hard and too late, so the robot sails past center and swings back the other way.">The effective gain is far too high for a camera that reports late</button>
-            <button class="opt" data-why="The tag is bolted to the field. All the motion you see is the robot overcorrecting itself.">The tag keeps moving, so the robot can never catch it</button>
-            <button class="opt" data-why="A weak battery makes a robot slower and gentler, not more violent. This robot is turning too hard, which points at gain.">The battery is low, so the robot cannot stop in time</button>
+            <button class="opt" data-why="Right - a big gain plus a camera that reports late means every correction lands too hard and too late, so the robot sails past center and swings back the other way. You have seen this movie before with mechanisms; vision just adds the delay.">The effective gain is far too high for a camera that reports late</button>
+            <button class="opt" data-why="Easy to check: the tag is bolted to the field. All the motion you see is the robot overcorrecting itself - which tells you exactly where to look next.">The tag keeps moving, so the robot can never catch it</button>
+            <button class="opt" data-why="Good thought, but a weak battery makes a robot slower and gentler, not more violent. This robot is turning too hard, which points straight at gain.">The battery is low, so the robot cannot stop in time</button>
           </div>
           <div class="explain"></div>
         </div>
@@ -211,18 +211,18 @@
       <div class="cq" data-cq="drift">
         <div class="q" data-correct="2">
           <div class="qn">Diagnose it</div>
-          <div class="qt">The robot swings on target quickly, then parks about a degree and a half off, and the status never reaches LOCKED. What is the fault?</div>
+          <div class="qt">The robot swings on target quickly, then parks about a degree and a half off, and the status never reaches LOCKED. So close, and yet it will sit there all day. What is the fault?</div>
           <div class="opts">
-            <button class="opt" data-why="A dirty lens adds noise or dropped targets, not a clean and steady offset. This error is stable and repeatable, which points at the loop itself.">A dirty camera lens keeps tx from reaching zero</button>
-            <button class="opt" data-why="The lock logic is fine. Watch the tx readout: the error really is parked outside the tolerance, so the problem is upstream of the status check.">The LOCKED check is broken, the aim is actually fine</button>
-            <button class="opt" data-why="Right. Something like a dragging wheel or a drifting gyro is steadily shoving the robot off, and a P-only loop parks with leftover error under a constant push. That leftover error shrinks as the gain grows.">A steady push is shoving the robot off target, and a P-only loop leaves leftover error against it</button>
+            <button class="opt" data-why="A dirty lens is a real pit problem, but it adds noise or dropped targets, not a clean and steady offset. This error is stable and repeatable, which points at the loop itself.">A dirty camera lens keeps tx from reaching zero</button>
+            <button class="opt" data-why="Always verify the instrument before you blame it - and here the lock logic is fine. Watch the tx readout: the error really is parked outside the tolerance, so the problem is upstream of the status check.">The LOCKED check is broken, the aim is actually fine</button>
+            <button class="opt" data-why="Right - something like a dragging wheel or a drifting gyro is steadily shoving the robot off, and a P-only loop parks with leftover error under a constant push. That leftover error shrinks as the gain grows. Nice, patient diagnosis.">A steady push is shoving the robot off target, and a P-only loop leaves leftover error against it</button>
           </div>
           <div class="explain"></div>
         </div>
       </div>
       <div class="fixline" id="clinicFixline"></div>
     </div>
-    <p class="caption">The clinic plants a hidden fault in the sim above, so the slider labels can lie to you. Read the behavior, name the fault, then fix it with the sliders until the status holds LOCKED.</p>
+    <p class="caption">The clinic plants a hidden fault in the sim above, so the slider labels can lie to you. Trust the behavior over the labels - the robot always tells the truth about itself. Name the fault, then fix it with the sliders until the status holds LOCKED.</p>
   </section>
 
   <section>
@@ -442,14 +442,14 @@ drive.<input class="blank" data-ans="arcadedrive" data-fill="arcadeDrive" style=
       var clinicFault=null, clinicArmed=false, clinicDone=false, clinicLockFrames=0;
       var CLINIC_DRIFT=0.12; // constant push, degrees per frame, for the drift fault
       var CLINIC_FIX={
-        lowgain:'Now fix it: raise kP until the robot turns with purpose and the status holds LOCKED for a couple of seconds.',
-        hunt:'Now fix it: bring kP down until the hunting dies away and the status holds LOCKED for a couple of seconds.',
-        drift:'Now fix it: the push is still there, so raise kP until the leftover error fits inside the tolerance and the status holds LOCKED. Push it too far and the latency hunting comes back.'
+        lowgain:'Now fix it: raise kP until the robot turns with purpose and the status holds LOCKED for a couple of seconds. You will feel the moment it comes alive.',
+        hunt:'Now fix it: bring kP down until the hunting dies away and the status holds LOCKED for a couple of seconds. Calm hands - you are tuning for smooth, not fast.',
+        drift:'Now fix it: the push is still there, so raise kP until the leftover error fits inside the tolerance and the status holds LOCKED. Push it too far and the latency hunting comes back - there is a sweet spot in the middle, and it is yours to find.'
       };
       var CLINIC_DONE={
-        lowgain:'Fixed - that was an effective gain four times smaller than the label, so the loop was starving. A healthy kP gives every degree of error a real turn.',
-        hunt:'Fixed - that was an effective gain of 0.26 against a camera that reports late. A calmer kP lets each correction land before the next stale reading arrives.',
-        drift:'Fixed - a steady push was shoving the robot off target, and a P-only loop parks with leftover error against a constant push. Extra gain shrank that error inside the tolerance. On a real robot a pinch of kI erases it completely.'
+        lowgain:'There it is - an effective gain four times smaller than the label, so the loop was starving. A healthy kP gives every degree of error a real turn. Feel how it moves with purpose now.',
+        hunt:'There it is - an effective gain of 0.26 against a camera that reports late. A calmer kP lets each correction land before the next stale reading arrives. Smooth beats fast here too.',
+        drift:'There it is - a steady push was shoving the robot off target, and a P-only loop parks with leftover error against a constant push. Your extra gain squeezed that error inside the tolerance. On a real robot a pinch of kI erases it completely.'
       };
       var clinicInject=function(name){
         clinicFault=name; clinicArmed=false; clinicDone=false; clinicLockFrames=0;

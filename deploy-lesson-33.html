@@ -184,11 +184,11 @@
     </div>
     <p class="caption">There is no motor here. The spinning rotor and the measured RPM both come from the sim's physics, and your PID closes the loop against them just like it would on the real flywheel. Inertia and spin-up time are modeled, so the feel is real.</p>
     <div class="missions" id="missions">
-      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
-      <div class="m-item" data-m="sensor"><span class="m-st">○</span><span>Command <b>3500 rpm</b> and let the measured RPM climb past <b>3000</b>. Hardware says disconnected, so every rpm you see is the model talking.</span></div>
-      <div class="m-item" data-m="baseline"><span class="m-st">○</span><span>Time a spin-up: with <b>rotor inertia at 1.0x</b>, press <b>Stop</b>, let it wind down, then press <b>3500 rpm</b>. The stopwatch below clocks 0 to 85% of the target.</span></div>
-      <div class="m-item" data-m="heavy"><span class="m-st">○</span><span>Drag <b>rotor inertia to 2.0x</b> or more and repeat the same spin-up. Same code, same gains, about twice the wait, like getting a loaded bike trailer up to speed.</span></div>
-      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> run the mismatch experiment. Clock a <b>1.0x</b> spin-up, then crank inertia to <b>4.0x</b> and clock that one. The heavy run must take at least <b>3x</b> longer. A wrong FlywheelSim constant lies to your tuning exactly like this.</span></div>
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
+      <div class="m-item" data-m="sensor"><span class="m-st">○</span><span>Command <b>3500 rpm</b> and let the measured RPM climb past <b>3000</b>. Notice the hardware says disconnected - every rpm you are watching is the model talking. That is the quiet magic of sim.</span></div>
+      <div class="m-item" data-m="baseline"><span class="m-st">○</span><span>Time a spin-up: with <b>rotor inertia at 1.0x</b>, press <b>Stop</b>, let it wind down, then press <b>3500 rpm</b>. The stopwatch below clocks 0 to 85% of the target. Keep your number handy - you will compare against it next.</span></div>
+      <div class="m-item" data-m="heavy"><span class="m-st">○</span><span>Drag <b>rotor inertia to 2.0x</b> or more and repeat the exact same spin-up. Same code, same gains, about twice the wait - like getting a loaded bike trailer up to speed. Only the physics changed.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> run the mismatch experiment like a scientist. Clock a <b>1.0x</b> spin-up, then crank inertia to <b>4.0x</b> and clock that one. The heavy run must take at least <b>3x</b> longer. Sit with that gap - a wrong FlywheelSim constant lies to your tuning exactly like this.</span></div>
       <div class="m-lab">
         <label for="mInertia">Rotor inertia</label>
         <input type="range" id="mInertia" min="1" max="4" step="0.1" value="1">

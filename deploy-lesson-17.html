@@ -193,7 +193,7 @@
     </div>
     <p class="caption">In percent mode the output is your command times the battery, so it sags when the battery drops. In voltage mode it holds the volts you asked for until the battery physically can't supply them. Set the command to 0 to feel Brake (stops hard) versus Coast (spins down freely).</p>
 
-    <p style="margin-top:26px">Real robots do not announce their faults, they just act weird. Load a symptom below, name which setting is wrong, then fix it with the same controls you just used.</p>
+    <p style="margin-top:26px">Real robots do not announce their faults, they just act weird - and someone in the pit has to work out why. Today that someone is you. Load a symptom below, name which setting is wrong, then fix it with the same controls you just used.</p>
     <div class="demo" id="clinic">
       <div class="demo-head"><span class="demo-title">Fault clinic · diagnose, then fix</span><span class="demo-tag" id="clinicTag">Pick a symptom</span></div>
       <div class="clinic-strip">
@@ -220,7 +220,7 @@
         </div>
       </div>
     </div>
-    <p class="caption">Nothing here is graded or saved. It is a pit crew drill: read the symptom, name the fault, prove the fix on the rig above.</p>
+    <p class="caption">Nothing here is graded or saved, so guess freely. It is a pit crew drill: read the symptom, name the fault, prove the fix on the rig above. Wrong guesses cost nothing and teach plenty.</p>
   </section>
 
   <section>
@@ -433,7 +433,7 @@ motor.<input class="blank" data-ans="setvoltage" aria-label="blank" autocomplete
       var active=null, diagnosed=false, solved=false, kickT=0;
       var FAULTS={
         sag:{
-          qt:'Nobody touched the code, but the mechanism feels weak late in the match. The command is still 50, yet the output readout shows only 4.4 V. What is the fault?',
+          qt:'Nobody touched the code, but the mechanism feels weak late in the match. The command is still 50, yet the output readout shows only 4.4 V. Where did the missing volts go?',
           opts:[
             'The motor is worn out and losing torque',
             'The command is open-loop percent, so it shrinks as the battery sags',
@@ -441,17 +441,17 @@ motor.<input class="blank" data-ans="setvoltage" aria-label="blank" autocomplete
           ],
           correct:1,
           why:[
-            'The motor is fine. The output readout shows the controller itself is sending fewer volts, so the loss happens before the motor.',
-            'Right. A percent command is a fraction of the live battery, and 50% of a tired 8.8 V battery is only 4.4 V.',
-            'Neutral mode only matters at zero output, and this command is 50%.'
+            'Fair guess, but the motor is fine. The output readout shows the controller itself is sending fewer volts, so the loss happens upstream of the motor.',
+            'Right - a percent command is a fraction of the live battery, and 50% of a tired 8.8 V battery is only 4.4 V. The code never changed; the battery under it did.',
+            'Worth ruling out, but neutral mode only matters at zero output, and this command is 50%. Keep watching where the volts shrink.'
           ],
-          fix:'Fix it with the controls above: pick the command mode that holds its volts as the battery sags, and watch the output readout climb back to 6.0 V.',
+          fix:'You named it - now fix it with the controls above: pick the command mode that holds its volts as the battery sags, and watch the output readout climb right back to 6.0 V.',
           inject:function(){ setMode('pct'); setNeutral('brake'); setCmd(50); setBat(88); },
           fixed:function(){ return mode==='volt' && cmd>0; },
-          done:'Fixed - that was an open-loop percent command passing battery sag straight through. setVoltage holds a real 6 V even on this tired battery.'
+          done:'There it is - an open-loop percent command passing battery sag straight through. setVoltage holds a real 6 V even on this tired battery. Same robot, steadier push, all match long.'
         },
         coast:{
-          qt:'You cut the command to zero, but the wheel keeps rolling long after it should have stopped. It gets a fresh push every few seconds so you can watch it happen. What is the fault?',
+          qt:'You cut the command to zero, but the wheel keeps rolling long after it should have stopped. It gets a fresh push every few seconds so you can watch it happen. Nothing is powering it, so what lets it keep rolling?',
           opts:[
             'Neutral mode is Coast, so nothing resists the spin at zero output',
             'The battery is overcharged and keeps pushing the motor',
@@ -459,17 +459,17 @@ motor.<input class="blank" data-ans="setvoltage" aria-label="blank" autocomplete
           ],
           correct:0,
           why:[
-            'Right. Coast leaves the rotor free to spin down on its own, like a bike freewheeling with no brakes squeezed.',
-            'A battery never pushes a motor on its own. At zero command the controller sends no power at all.',
-            'Check the readouts: the command is 0 and the output is 0.0 V. The roll happens with no power going in.'
+            'Right - Coast leaves the rotor free to spin down on its own, like a bike freewheeling with no brakes squeezed. You spotted a fault that only shows itself at zero.',
+            'Interesting theory, but a battery never pushes a motor on its own. At zero command the controller sends no power at all. The clue is in what happens after the power stops.',
+            'Good instinct to distrust a slider, but check the readouts: the command is 0 and the output is 0.0 V. The roll happens with no power going in at all.'
           ],
-          fix:'Fix it with the controls above: pick the neutral mode that holds the mechanism at zero command, then watch the next push stop dead.',
+          fix:'You named it - now fix it with the controls above: pick the neutral mode that holds the mechanism at zero command, then watch the next push stop dead.',
           inject:function(){ setMode('pct'); setNeutral('coast'); setCmd(0); setBat(120); spin=0.42; kickT=Date.now(); },
           fixed:function(){ return neutral==='brake' && cmd<5; },
-          done:'Fixed - that was Coast neutral mode letting the rotor freewheel. Brake shorts the motor leads at zero output, so it stops hard and holds.'
+          done:'There it is - Coast neutral mode letting the rotor freewheel, like a bike with the brakes untouched. Brake shorts the motor leads at zero output, so it stops hard and holds. Watch the next push die instantly.'
         },
         ceiling:{
-          qt:'The code asks for about 11 V, but the output readout is stuck at 9.0 V and the mechanism is slower than it should be. What is the fault?',
+          qt:'The code asks for about 11 V, but the output readout is stuck at 9.0 V and the mechanism is slower than it should be. Two volts have gone missing - where?',
           opts:[
             'setVoltage is broken, percent mode would deliver the full 11 V',
             'The command is above what the battery can supply, so it saturates at the battery ceiling',
@@ -477,14 +477,14 @@ motor.<input class="blank" data-ans="setvoltage" aria-label="blank" autocomplete
           ],
           correct:1,
           why:[
-            'It is not broken, and percent mode cannot beat the battery either. Compare the output readout to the battery readout: they match exactly.',
-            'Right. The battery is sitting at 9.0 V, so a request for 11 V saturates and you silently get 9. No mode can command volts the battery does not have.',
-            'There is no rounding rule. That 9.0 V is not a magic number, it is exactly the battery voltage on the readout.'
+            'It is not broken, and percent mode cannot beat the battery either. Compare the output readout to the battery readout - they match exactly, and that is no coincidence.',
+            'Right - the battery is sitting at 9.0 V, so a request for 11 V saturates and you silently get 9. No mode can command volts the battery does not have. You cannot out-code physics.',
+            'A fun theory, but there is no rounding rule. That 9.0 V is not a magic number - it is exactly the battery voltage on the readout. Numbers that match are trying to tell you something.'
           ],
-          fix:'Fix it with the controls above: bring the command down under the battery ceiling, or give it a fresh battery, until the output matches what you asked for.',
+          fix:'You named it - now fix it with the controls above: bring the command down under the battery ceiling, or give it a fresh battery, until the output matches what you asked for.',
           inject:function(){ setMode('volt'); setNeutral('brake'); setCmd(92); setBat(90); },
           fixed:function(){ return mode==='volt' && cmd>0 && (cmd/100*12)<=(bat/10)+0.01; },
-          done:'Fixed - the command now fits under the battery ceiling, so the motor gets every volt you asked for. Asking for more just saturates silently.'
+          done:'There it is - the command now fits under the battery ceiling, so the motor gets every volt you asked for. Ask for more than the battery has and it saturates silently, no error, no warning. Now you know to watch for it.'
         }
       };
       function loadFault(name){

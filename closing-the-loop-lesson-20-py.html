@@ -255,11 +255,11 @@
     </div>
     <p class="caption">Watch the gravity factor: near horizontal it's ~1 (needs the most hold), near vertical it falls toward 0. Cosine comp tracks that; a flat kG can't.</p>
     <div class="missions" id="missions">
-      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
-      <div class="m-item" data-m="drift"><span class="m-st">○</span><span>Switch <b>cosine comp off</b>, keep <b>kG 0.50</b>, and send the target to <b>90°</b>. Let it settle and read the Error: flat kG shoves the arm about <b>10° past</b> straight up.</span></div>
-      <div class="m-item" data-m="ff25"><span class="m-st">○</span><span>Comp back <b>on</b>, kG <b>0.50</b>. First compute the hold voltage at 60°: kG × cos 60° = 0.50 × 0.5. Then set the target to <b>60°</b> and confirm Feedforward reads <b>0.25 V</b>.</span></div>
-      <div class="m-item" data-m="sag"><span class="m-st">○</span><span>Comp on, target <b>45°</b>. Starve the arm: drop <b>kG to 0.25</b>, half the true gravity. It parks about <b>3° low</b>. Feedback tries to cover for the weak feedforward but never quite can.</span></div>
-      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> comp <b>off</b>, target <b>90°</b>. Find the <b>kG</b> that holds it there with <b>0° error</b>. Think: how hard does gravity twist an arm that points straight up?</span></div>
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
+      <div class="m-item" data-m="drift"><span class="m-st">○</span><span>Break it on purpose: switch <b>cosine comp off</b>, keep <b>kG 0.50</b>, and send the target to <b>90°</b>. Let it settle, then read the Error - the flat kG shoves the arm about <b>10° past</b> straight up. That miss is the whole lesson in one number.</span></div>
+      <div class="m-item" data-m="ff25"><span class="m-st">○</span><span>Comp back <b>on</b>, kG <b>0.50</b>. Do the math before the sim does: the hold voltage at 60° is kG × cos 60° = 0.50 × 0.5. Now set the target to <b>60°</b> and watch Feedforward read <b>0.25 V</b> - you predicted the robot's arithmetic before it happened.</span></div>
+      <div class="m-item" data-m="sag"><span class="m-st">○</span><span>Comp on, target <b>45°</b>. Now starve the arm: drop <b>kG to 0.25</b>, half the true gravity, and watch it park about <b>3° low</b>. Feedback is doing its best to cover for the weak feedforward - it just never quite can.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> comp <b>off</b>, target <b>90°</b>. Find the <b>kG</b> that holds it there with <b>0° error</b>. Before you touch the slider, ask yourself: how hard does gravity twist an arm that points straight up? Trust that answer.</span></div>
     </div>
     <div class="clinic" id="clinic">
       <div class="c-head">🩺 Fault clinic <span class="c-sub">load a symptom, name the fault, then cure it with the controls above</span></div>
@@ -530,46 +530,46 @@ cfg.slot0.gravity_type = <span class="ty">GravityTypeValue</span>.<input class="
   function cSetCos(on){ if(S.cos!==on){ S.cos=on; el.cos.textContent='Cosine comp: '+(on?'on':'off'); el.cos.classList.toggle('active',on); } }
   var CASES={
     sag:{
-      sym:'Symptom: whatever target you pick below vertical, the arm parks a few degrees <b>low</b>. The sag is worst near horizontal and almost gone near vertical.',
+      sym:'Symptom: whatever target you pick below vertical, the arm parks a few degrees <b>low</b>. The sag is worst near horizontal and almost gone near vertical. That pattern is a fingerprint - study it.',
       opts:[
         {t:'kG is starved. Feedforward holds up less than gravity pulls down, and feedback needs error before it can cover the gap.', ok:true,
-         why:'Right. kG got knocked down to 0.15 when this arm needs about 0.50. A P term only pushes when there is error, so the arm rides low. The sag fades near vertical because cos(angle) shrinks the gravity load there anyway.'},
+         why:'Right - kG got knocked down to 0.15 when this arm needs about 0.50. A P term only pushes when there is error, so the arm rides low. The sag fades near vertical because cos(angle) shrinks the gravity load there anyway. You read the pattern exactly right.'},
         {t:'Cosine compensation is off, so the hold voltage no longer tracks the angle.',
-         why:'Comp is still on. Watch the Feedforward readout fade as the arm rises. A flat kG would shove the arm high near vertical, not park it low everywhere.'},
+         why:'Good instinct, but comp is still on - watch the Feedforward readout fade as the arm rises. A flat kG would shove the arm high near vertical, not park it low everywhere. Keep looking.'},
         {t:'The target slider reports the wrong angle.',
-         why:'The amber ghost arm draws exactly where the slider points, and the readouts agree. The measurement is honest. The arm just is not held up hard enough.'}
+         why:'Fair check, but the amber ghost arm draws exactly where the slider points, and the readouts agree. The measurement is honest. The arm just is not held up hard enough - look at who is doing the holding.'}
       ],
       inject:function(){ cSetCos(true); cSetKG(0.15); cSetTgt(30); },
       fixed:function(errD,still){ return S.cos && Math.abs(S.kG-0.5)<=0.05 && still && Math.abs(errD)<1.5; },
-      fixMsg:'Fixed - that was a starved kG. Back near 0.50, feedforward carries gravity on its own and the error collapses to zero.'
+      fixMsg:'There it is - a starved kG. Back near 0.50, feedforward carries gravity on its own and the error just melts away. Feel how little work feedback has to do now.'
     },
     drift:{
-      sym:'Symptom: aim high and the arm sails <b>past</b> the target. The closer to vertical you aim, the further past it parks. Near horizontal it behaves fine.',
+      sym:'Symptom: aim high and the arm sails <b>past</b> the target. The closer to vertical you aim, the further past it parks. Near horizontal it behaves fine. Notice where it misbehaves - that is half the diagnosis.',
       opts:[
         {t:'kG is too small, so gravity drags the arm past the target.',
-         why:'Too little kG makes an arm sag low, it never flings it high. Gravity never pushes an arm up.'},
+         why:'Tempting, but too little kG makes an arm sag low, it never flings it high. Gravity never pushes an arm up - something else is doing the shoving.'},
         {t:'Cosine compensation is off. A flat kG is only honest at horizontal, so up high it overdrives the lighter load.', ok:true,
-         why:'Right. With comp off, feedforward keeps pushing the full horizontal hold voltage while the real gravity load fades toward zero. The leftover voltage shoves the arm past the target. Click the comp button back on.'},
+         why:'Right - with comp off, feedforward keeps pushing the full horizontal hold voltage while the real gravity load fades toward zero. The leftover voltage shoves the arm past the target. Click the comp button back on and watch the shove disappear.'},
         {t:'The loop is oscillating because the gains are too aggressive.',
-         why:'An oscillation rings back and forth before it settles. This arm settles calmly, just in the wrong place, and only up high. That points at feedforward, not feedback.'}
+         why:'Worth ruling out, but an oscillation rings back and forth before it settles. This arm settles calmly, just in the wrong place, and only up high. That calm, angled miss points at feedforward, not feedback.'}
       ],
       inject:function(){ cSetKG(0.5); cSetTgt(80); cSetCos(false); },
       fixed:function(errD,still){ return S.cos && Math.abs(S.kG-0.5)<=0.1 && still && Math.abs(errD)<1.5; },
-      fixMsg:'Fixed - cosine comp was switched off. With cos(angle) back in the loop, the hold voltage fades exactly as the gravity load does.'
+      fixMsg:'There it is - cosine comp was switched off. With cos(angle) back in the loop, the hold voltage fades exactly as the gravity load does, and the arm lands right on the line. Feel how much calmer that is.'
     },
     float:{
-      sym:'Symptom: the arm parks a few degrees <b>high</b> of every target. Worst near horizontal, nearly gone pointing straight up.',
+      sym:'Symptom: the arm parks a few degrees <b>high</b> of every target. Worst near horizontal, nearly gone pointing straight up. Sound familiar? It is the sag case in a mirror.',
       opts:[
         {t:'Cosine compensation is off, so the hold voltage ignores the angle.',
-         why:'Comp is on. The Feedforward readout still fades as the arm rises, so the shape of the hold voltage is right. The size of it is not.'},
+         why:'Close, but comp is on. The Feedforward readout still fades as the arm rises, so the shape of the hold voltage is right. The size of it is not - and size points at a different knob.'},
         {t:'kG is too big. Feedforward holds up more than gravity pulls down, so the arm floats past the target.', ok:true,
-         why:'Right. kG is cranked to 0.85 when this arm needs about 0.50. Feedforward should match gravity, not beat it, and feedback needs error before it can push back down. Slide kG back to 0.50.'},
+         why:'Right - kG is cranked to 0.85 when this arm needs about 0.50. Feedforward should match gravity, not beat it, and feedback needs error before it can push back down. Slide kG back to 0.50 and let the two make peace.'},
         {t:'The scope is plotting the wrong signal.',
-         why:'The drawing, the readouts, and the scope all agree: the arm really parks high. The instruments are fine. The tune is not.'}
+         why:'Always worth asking, but the drawing, the readouts, and the scope all agree: the arm really parks high. The instruments are fine. The tune is not - trust what all three are telling you.'}
       ],
       inject:function(){ cSetCos(true); cSetKG(0.85); cSetTgt(35); },
       fixed:function(errD,still){ return S.cos && Math.abs(S.kG-0.5)<=0.05 && still && Math.abs(errD)<1.5; },
-      fixMsg:'Fixed - that was an overfed kG. At 0.50 the feedforward matches gravity instead of beating it, and the float disappears.'
+      fixMsg:'There it is - an overfed kG. At 0.50 the feedforward matches gravity instead of beating it, and the float disappears. Matching always beats muscling.'
     }
   };
   var cActive=null, cSolved=false, cDone=false, cHold=0;
@@ -582,7 +582,7 @@ cfg.slot0.gravity_type = <span class="ty">GravityTypeValue</span>.<input class="
     });
     cSym.innerHTML=c.sym;
     cWhy.textContent=''; cWhy.classList.remove('show');
-    cStatus.textContent='Fault injected. Name it below, then cure it with the controls above.';
+    cStatus.textContent='The fault is in. Let the arm show you what is wrong, then name it below and cure it with the controls above.';
     cStatus.classList.remove('fixed');
     while(cOptsBox.firstChild) cOptsBox.removeChild(cOptsBox.firstChild);
     c.opts.forEach(function(o){
@@ -593,7 +593,7 @@ cfg.slot0.gravity_type = <span class="ty">GravityTypeValue</span>.<input class="
         if(o.ok){
           cSolved=true; b.classList.add('correct');
           Array.prototype.forEach.call(cOptsBox.children,function(x){ x.classList.add('locked'); });
-          cStatus.textContent='Diagnosis confirmed. Now cure it with the controls above.';
+          cStatus.textContent='Good eye - that is the one. Now cure it with the controls above and watch the error let go.';
         } else { b.classList.add('wrong'); }
       });
       cOptsBox.appendChild(b);

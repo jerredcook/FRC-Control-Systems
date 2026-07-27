@@ -155,11 +155,11 @@
     </div>
     <p class="caption">Overload one branch and just that branch's fuse pops, the rest of the robot keeps running. Short the main and the whole robot shuts down to protect itself. That layered protection is the entire point of the power chain.</p>
     <div class="missions" id="missions">
-      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
-      <div class="m-item" data-m="onebranch"><span class="m-st">○</span><span>Power on, then press <b>Overload a branch</b> once. Read the symptoms: one box goes dark, System says <b>partial</b>, and the main breaker still says <b>closed</b>. A branch fuse fired, the main never noticed.</span></div>
-      <div class="m-item" data-m="brain"><span class="m-st">○</span><span>Press <b>Overload a branch</b> again. The second fuse feeds the <b>roboRIO</b>, the robot's brain. The robot is now blind, yet System still reads <b>partial</b>. Same layer fired: a fuse, not the main.</span></div>
-      <div class="m-item" data-m="maintrip"><span class="m-st">○</span><span>Press <b>Short the main</b> and compare: every box goes dark at once and the breaker reads <b>TRIPPED</b>. A whole-robot blackout is the main's signature. Then press <b>Reset</b> and get System back to <b>running</b>.</span></div>
-      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> blow <b>all three</b> branch fuses without ever tripping the main. Every load is dead, yet System reads <b>partial</b> and the breaker stays <b>closed</b>. The fuses did their job, so the main never had to.</span></div>
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
+      <div class="m-item" data-m="onebranch"><span class="m-st">○</span><span>Power on, then press <b>Overload a branch</b> once and read the symptoms the way a pit crew would: one box goes dark, System says <b>partial</b>, and the main breaker still says <b>closed</b>. A branch fuse fired and the main never even noticed - that is the layering doing its job.</span></div>
+      <div class="m-item" data-m="brain"><span class="m-st">○</span><span>Press <b>Overload a branch</b> again. This second fuse feeds the <b>roboRIO</b>, the robot's brain. The robot is now blind, yet System still reads <b>partial</b>. Notice the same layer fired: a fuse, not the main. The symptom tells you where to look.</span></div>
+      <div class="m-item" data-m="maintrip"><span class="m-st">○</span><span>Now press <b>Short the main</b> and compare: every box goes dark at once and the breaker reads <b>TRIPPED</b>. A whole-robot blackout is the main's signature - once you have seen it, you will never mix the two up. Press <b>Reset</b> and bring System back to <b>running</b>.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> blow <b>all three</b> branch fuses without ever tripping the main. Every load is dead, yet System reads <b>partial</b> and the breaker stays <b>closed</b>. The fuses each did their job, so the main never had to - the whole design philosophy in one picture.</span></div>
     </div>
   </section>
 
@@ -185,7 +185,7 @@
 
     <div class="note amber shoptask">
       <div class="nh">🔧 In the shop &middot; 10 minutes</div>
-      <p>With the robot off and the battery disconnected, trace the power chain with one finger: start at the battery connector, follow the fat wire to the main breaker, then on to the PDH, and stop at one motor controller's branch. Pass test: you never lift your finger, you name each stop out loud, and you can point at the exact fuse or breaker that protects the branch you ended on. Keep rings, watches, and metal tools away from the battery terminals the whole time. If you lose the wire inside a bundle, that is a routing problem worth telling your electrical lead about. No robot handy? Have an adult open your home's breaker panel with you and find the big main breaker plus the rows of branch breakers, the same layered protection living in your walls.</p>
+      <p>This one is a finger walk. With the robot off and the battery disconnected, trace the power chain with one finger: start at the battery connector, follow the fat wire to the main breaker, then on to the PDH, and stop at one motor controller's branch. Pass test: you never lift your finger, you name each stop out loud, and you can point at the exact fuse or breaker that protects the branch you ended on. Keep rings, watches, and metal tools away from the battery terminals the whole time. If you lose the wire inside a bundle, good eye - that is a routing problem worth telling your electrical lead about. No robot handy? Have an adult open your home's breaker panel with you and find the big main breaker plus the rows of branch breakers. It is the same layered protection, living in your walls.</p>
     </div>
 
     <div class="note indigo">

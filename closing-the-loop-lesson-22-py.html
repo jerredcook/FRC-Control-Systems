@@ -227,52 +227,52 @@
     </div>
     <p class="caption">Rotate alone and the wheels form a circle - each points tangent to its corner. Add forward and they all lean the same way. Kinematics figures out the blend.</p>
     <div class="missions" id="missions">
-      <div class="m-head">🎯 Missions <span class="m-sub">clear them with the sim above</span></div>
-      <div class="m-item" data-m="tangent"><span class="m-st">○</span><span>Zero Forward and Strafe, then set <b>Rotate to +1.00</b>. The Front-left readout shows <b>135° · 1.4</b> - the wheel points tangent to its corner, like one blade of a pinwheel.</span></div>
-      <div class="m-item" data-m="fieldfwd"><span class="m-st">○</span><span>Spin until <b>Heading reads 45°</b> or more, put Rotate back to 0, then push only <b>Forward to 0.40</b>. The robot still slides straight up the field - watch the wheels twist so "forward" stays field-forward.</span></div>
-      <div class="m-item" data-m="blend"><span class="m-st">○</span><span>Blend: hold <b>Forward 0.40</b> and <b>Rotate 1.00</b> together for one full spin. The FL speed swings between about <b>1.8</b> and <b>1.0</b> - a corner spins fastest when its share of the turn points the same way as the slide.</span></div>
-      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> park in the top-right corner (<b>Pose X and Y at least 0.85</b>) facing the top wall (<b>Heading 90° ± 10°</b>), then bring all three sliders back to zero.</span></div>
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
+      <div class="m-item" data-m="tangent"><span class="m-st">○</span><span>Start with a pure spin: zero Forward and Strafe, then set <b>Rotate to +1.00</b>. The Front-left readout shows <b>135° · 1.4</b> - the wheel points tangent to its corner, like one blade of a pinwheel. Every corner is doing the same dance at its own angle.</span></div>
+      <div class="m-item" data-m="fieldfwd"><span class="m-st">○</span><span>Now for the magic trick: spin until <b>Heading reads 45°</b> or more, put Rotate back to 0, then push only <b>Forward to 0.40</b>. The robot still slides straight up the field - watch the wheels quietly twist so "forward" stays field-forward, no matter where the nose points.</span></div>
+      <div class="m-item" data-m="blend"><span class="m-st">○</span><span>Blend them: hold <b>Forward 0.40</b> and <b>Rotate 1.00</b> together for one full spin, and keep an eye on the FL speed. It swings between about <b>1.8</b> and <b>1.0</b> - a corner spins fastest when its share of the turn points the same way as the slide. Watch it breathe through the whole spin.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> your driving test. Park in the top-right corner (<b>Pose X and Y at least 0.85</b>) facing the top wall (<b>Heading 90° ± 10°</b>), then bring all three sliders back to zero. Small, patient inputs beat big corrections - smooth beats fast here too.</span></div>
     </div>
     <div class="clinic" id="clinic">
       <div class="c-head">🩺 Fault clinic <span class="c-sub">load a symptom, name the fault, then fix it with the sliders</span></div>
-      <p class="c-intro">Real swerve bugs rarely announce themselves. Each button below secretly breaks the sim in one realistic way. Watch how the robot misbehaves, name the fault, then work around it from the driver seat. Click the same button again to clear the fault.</p>
+      <p class="c-intro">Real swerve bugs rarely announce themselves - they just make the robot feel wrong. Each button below secretly breaks the sim in one realistic way. Watch closely and let the misbehavior tell you its story, name the fault, then work around it from the driver seat. Click the same button again to clear the fault.</p>
       <div class="c-btns">
         <button class="btn" data-clinic="spin">Spins at rest</button>
         <button class="btn" data-clinic="gyro">Forward walks diagonal</button>
         <button class="btn" data-clinic="flip">Turns the wrong way</button>
       </div>
       <div class="c-case" data-case="spin" data-correct="0" hidden>
-        <div class="c-qt"><b>Diagnose it.</b> All three sliders read zero, yet the robot slowly pirouettes and the wheels hold the pinwheel. What is the fault?</div>
+        <div class="c-qt"><b>Diagnose it.</b> All three sliders read zero, yet the robot slowly pirouettes and the wheels hold the pinwheel. Nobody is asking for that spin - or is somebody? What is the fault?</div>
         <div class="opts">
           <button class="opt">A small rotate command is leaking in, like a stick that never quite re-centers, with no deadband to ignore it</button>
           <button class="opt">A steer encoder lost its zero, so one wheel points the wrong way</button>
           <button class="opt">The kinematics is mixing forward speed into rotation</button>
         </div>
-        <div class="explain">A clean pinwheel is exactly what a real rotate command draws, so the leak is on the command side. A lost steer zero would skew one wheel out of the pattern, and there is no forward command to mix in.</div>
-        <div class="c-fix" hidden><b>Now fix it from the driver seat:</b> use the Rotate slider to cancel the leak until the Heading readout holds still for two full seconds. <span class="c-watch">Watching the sim...</span></div>
-        <div class="c-done" hidden>Fixed - that was a +0.30 rotate command leaking from a stick that never re-centers. You cancelled it by hand; in code the cure is a joystick deadband.</div>
+        <div class="explain">A clean pinwheel is exactly what a real rotate command draws, so the leak is on the command side. A lost steer zero would skew one wheel out of the pattern, and there is no forward command to mix in. The tidiness of the fault is the clue.</div>
+        <div class="c-fix" hidden><b>Now fix it from the driver seat:</b> use the Rotate slider to cancel the leak until the Heading readout holds still for two full seconds. Tiny moves - you are hunting a small number. <span class="c-watch">Watching the sim...</span></div>
+        <div class="c-done" hidden>There it is - a +0.30 rotate command leaking from a stick that never re-centers. You cancelled it by hand, which takes a steady touch. In code the cure is a joystick deadband, so no driver ever has to.</div>
       </div>
       <div class="c-case" data-case="gyro" data-correct="1" hidden>
-        <div class="c-qt"><b>Diagnose it.</b> Push only Forward and the robot slides up and to the left, all four wheels leaning the same wrong way. What is the fault?</div>
+        <div class="c-qt"><b>Diagnose it.</b> Push only Forward and the robot slides up and to the left, all four wheels leaning the same wrong way. Four wheels, one shared opinion. What is the fault?</div>
         <div class="opts">
           <button class="opt">The drive wheels are worn and slipping</button>
           <button class="opt">The gyro was zeroed while the robot faced the wrong way, so every field-oriented command comes out rotated</button>
           <button class="opt">The Strafe slider is stuck on</button>
         </div>
-        <div class="explain">All four wheels agree with each other, they just agree on the wrong direction - that is the field-oriented math rotating every command by a bad gyro zero. Slipping would look ragged and uneven, and the Strafe readout still shows 0.00.</div>
-        <div class="c-fix" hidden><b>Now fix it from the driver seat:</b> blend Forward and Strafe until the robot climbs straight up the field for about two seconds. Hit Reset pose if you run out of room, the fault stays. <span class="c-watch">Watching the sim...</span></div>
-        <div class="c-done" hidden>Fixed - the gyro zero was 40 degrees off, and you mixed in strafe to cancel the rotation. The real repair is re-zeroing the gyro while the robot squarely faces field-forward.</div>
+        <div class="explain">All four wheels agree with each other, they just agree on the wrong direction - that is the field-oriented math rotating every command by a bad gyro zero. Slipping would look ragged and uneven, and the Strafe readout still shows 0.00. When everything is consistent but wrong, suspect the reference.</div>
+        <div class="c-fix" hidden><b>Now fix it from the driver seat:</b> blend Forward and Strafe until the robot climbs straight up the field for about two seconds. It will feel like riding your bike in a steady crosswind - lean into it. Hit Reset pose if you run out of room, the fault stays. <span class="c-watch">Watching the sim...</span></div>
+        <div class="c-done" hidden>There it is - the gyro zero was 40 degrees off, and you mixed in strafe to cancel the rotation. Clever driving. The real repair is re-zeroing the gyro while the robot squarely faces field-forward, so the math and the field agree again.</div>
       </div>
       <div class="c-case" data-case="flip" data-correct="2" hidden>
-        <div class="c-qt"><b>Diagnose it.</b> Push Rotate to +1.0 and the Heading readout counts down instead of up. What is the fault?</div>
+        <div class="c-qt"><b>Diagnose it.</b> Push Rotate to +1.0 and the Heading readout counts down instead of up. Smooth, confident, and exactly backwards. What is the fault?</div>
         <div class="opts">
           <button class="opt">The Rotate slider is sending random values</button>
           <button class="opt">The battery is low, so the robot turns the easier way</button>
           <button class="opt">A sign flip - the code treats clockwise as positive, so every turn command comes out mirrored</button>
         </div>
-        <div class="explain">The response is smooth, exact, and always exactly backwards. Random values or a weak battery would look messy or slow, not perfectly mirrored. WPILib treats counterclockwise as positive; one flipped sign on the gyro or on omega mirrors every turn.</div>
-        <div class="c-fix" hidden><b>Now fix it from the driver seat:</b> get the Heading readout to +60° or beyond. Think in opposites. <span class="c-watch">Watching the sim...</span></div>
-        <div class="c-done" hidden>Fixed - you commanded the opposite sign to get the turn you wanted. The lasting repair is one sign change in code, keeping counterclockwise positive, so the driver never has to think backwards.</div>
+        <div class="explain">Perfectly mirrored is the giveaway. Random values or a weak battery would look messy or slow, never this precise. WPILib treats counterclockwise as positive; one flipped sign on the gyro or on omega mirrors every turn the robot makes.</div>
+        <div class="c-fix" hidden><b>Now fix it from the driver seat:</b> get the Heading readout to +60° or beyond. Think in opposites - if you want left, ask for right. <span class="c-watch">Watching the sim...</span></div>
+        <div class="c-done" hidden>There it is - you commanded the opposite sign to get the turn you wanted, thinking in mirrors the whole way. The lasting repair is one sign change in code, keeping counterclockwise positive, so no driver ever has to think backwards again.</div>
       </div>
     </div>
   </section>
