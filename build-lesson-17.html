@@ -391,6 +391,7 @@
   function optText(i){ var t=(opts[i].textContent||'').trim(); return t.length>70 ? t.slice(0,67)+'...' : t; }
   function reveal(){ if(revealed||picked<0) return; revealed=true;
     opts.forEach(function(o){o.classList.add('locked');});
+    try{var pr=JSON.parse(localStorage.getItem('frc:predict'))||{r:0,w:0};if(picked===correct){pr.r++;}else{pr.w++;}localStorage.setItem('frc:predict',JSON.stringify(pr));}catch(e){}
     if(picked===correct){
       opts[picked].classList.add('correct');
       note.textContent='You called it. "'+optText(picked)+'" is exactly what happens. Here is why:';

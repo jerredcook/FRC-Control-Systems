@@ -64,6 +64,7 @@
   .pill.now{color:var(--amber);border-color:rgba(255,180,84,.4);background:rgba(255,180,84,.08)}
   .pill.chip-continue{color:var(--accent,var(--teal));border-color:var(--accent,var(--teal));background:transparent;cursor:pointer}
   .pill.chip-continue:hover{background:rgba(255,255,255,0.06)}
+  @media(max-width:640px){.pill.chip-continue{padding:10px 14px;font-size:11px}}
   .go{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);display:inline-flex;gap:6px;align-items:center}
   .course.planned .go{color:var(--muted)}
   .course .bar{height:5px;border-radius:5px;background:var(--line-bright);overflow:hidden;margin-top:12px}
@@ -95,7 +96,7 @@
   <div class="hero">
     <div class="eyebrow">Free · interactive · hands-on</div>
     <h1>Learn to<br>build <span class="accent">robots</span>.</h1>
-    <p class="dek">Three courses that take you from never having touched a robot to <b>designing, programming, and tuning</b> a competition FRC machine. Every lesson is interactive, in your browser, and starts from zero.</p>
+    <p class="dek">Three courses that take you from never having touched a robot to <b>designing, programming, and tuning</b> a competition FRC machine. Every lesson is interactive, in your browser, and starts from zero. FRC is the FIRST Robotics Competition - a worldwide league where high-school teams build hundred-pound robots in six weeks. This academy is free, runs in your browser, and works offline once you install it.</p>
     <div class="pillars"><span><b>Build</b> the robot</span><span><b>Code</b> the robot</span><span><b>Control</b> the robot</span></div>
   </div>
 
@@ -107,7 +108,7 @@
       <h3>Deploy</h3>
       <div class="sub">Programming an FRC robot</div>
       <div class="desc">From your first line of Java to a full command-based robot - the toolchain, hardware, autonomous, vision, and the pro practices that win.</div>
-      <div class="foot"><span class="pill done" id="codePill">37 lessons · Complete</span><span class="pill chip-continue" id="codeChip" data-href="code.html#continue" hidden>Continue →</span><span class="go">Enter →</span></div>
+      <div class="foot"><span class="pill" id="codePill">37 lessons</span><span class="pill chip-continue" id="codeChip" data-href="code.html#continue" hidden>Continue →</span><span class="go">Enter →</span></div>
       <div class="bar"><i id="codeBar"></i></div>
     </a>
 
@@ -117,7 +118,7 @@
       <h3>Fabricate</h3>
       <div class="sub">Building an FRC robot</div>
       <div class="desc">The shop, materials, gears and mechanisms, the drivetrain, electrical, pneumatics, CAD, and the build season - the physical machine, end to end.</div>
-      <div class="foot"><span class="pill done" id="bldPill">44 lessons · Complete</span><span class="pill chip-continue" id="bldChip" data-href="build.html#continue" hidden>Continue →</span><span class="go">Enter →</span></div>
+      <div class="foot"><span class="pill" id="bldPill">44 lessons</span><span class="pill chip-continue" id="bldChip" data-href="build.html#continue" hidden>Continue →</span><span class="go">Enter →</span></div>
       <div class="bar"><i id="bldBar"></i></div>
     </a>
 
@@ -127,7 +128,7 @@
       <h3>Closing the Loop</h3>
       <div class="sub">Control systems for FRC</div>
       <div class="desc">The complete control course - feedback, PID, feedforward, real WPILib code, CTRE Phoenix 6, tuned mechanisms, swerve, vision, and state-space.</div>
-      <div class="foot"><span class="pill done" id="ctlPill">24 lessons · Complete</span><span class="pill chip-continue" id="ctlChip" data-href="closing-the-loop.html#continue" hidden>Continue →</span><span class="go">Enter →</span></div>
+      <div class="foot"><span class="pill" id="ctlPill">24 lessons</span><span class="pill chip-continue" id="ctlChip" data-href="closing-the-loop.html#continue" hidden>Continue →</span><span class="go">Enter →</span></div>
       <div class="bar"><i id="ctlBar"></i></div>
     </a>
 
@@ -161,24 +162,52 @@
 (function(){
   "use strict";
   // reflect each course's saved progress on its card
-  function reflect(key, total, pillId, barId, chipId){
+  function reflect(key, re, total, pillId, barId, chipId){
+    var done=0;
     try{
       var d=JSON.parse(localStorage.getItem(key))||{};
-      var done=Object.keys(d).filter(function(k){return !!d[k];}).length;
+      // count real lessons only (no checkpoints or labs), and a -py twin
+      // counts as its Java lesson - same normalization the certificate uses
+      var seen={};
+      Object.keys(d).forEach(function(k){
+        if(!d[k] || !re.test(k)) return;
+        seen[k.replace(/-py\.html$/,".html")]=true;
+      });
+      done=Math.min(Object.keys(seen).length, total);
       var pct=Math.min(100,Math.round(done/total*100));
       var bar=document.getElementById(barId); if(bar) bar.style.width=pct+"%";
       var chip=chipId?document.getElementById(chipId):null;
       if(chip) chip.hidden=!(done>0 && done<total);
-      var pill=document.getElementById(pillId); if(!pill) return;
+      var pill=document.getElementById(pillId); if(!pill) return done;
       if(done>0 && done<total){ pill.textContent=done+" / "+total+" done"; pill.className="pill now"; }
       else if(done>=total){ pill.textContent="✓ Complete · "+total+" lessons"; pill.className="pill done"; }
-      // done===0 keeps the default "N lessons · Complete" label
+      else { pill.textContent=total+" lessons"; pill.className="pill"; }
+    }catch(e){}
+    return done;
+  }
+  function firstVisitNudge(){
+    try{
+      if(document.getElementById("startHerePill")) return;
+      var foot=document.querySelector("#cCode .foot"); if(!foot) return;
+      var s=document.createElement("span");
+      s.className="pill now"; s.id="startHerePill"; s.textContent="Start here";
+      foot.insertBefore(s, foot.firstChild);
+      var pillars=document.querySelector(".pillars");
+      if(pillars && !document.getElementById("newHereLine")){
+        var p=document.createElement("p");
+        p.id="newHereLine";
+        p.style.cssText="margin:14px 0 0;font-size:14.5px;color:var(--ink-dim)";
+        p.innerHTML='New here? <b style="color:var(--ink)">Start with Deploy</b> - it assumes nothing and gets you moving a robot fast.';
+        pillars.parentNode.insertBefore(p, pillars.nextSibling);
+      }
     }catch(e){}
   }
   function renderProgress(){
-    reflect("deploy:done", 37, "codePill", "codeBar", "codeChip");
-    reflect("build:done", 44, "bldPill", "bldBar", "bldChip");
-    reflect("closing-the-loop:done", 24, "ctlPill", "ctlBar", "ctlChip");
+    var a=reflect("deploy:done", /^deploy-lesson-\d+(-py)?\.html$/, 37, "codePill", "codeBar", "codeChip");
+    var b=reflect("build:done", /^build-lesson-\d+\.html$/, 44, "bldPill", "bldBar", "bldChip");
+    var c=reflect("closing-the-loop:done", /^closing-the-loop-lesson-\d+(-py)?\.html$/, 24, "ctlPill", "ctlBar", "ctlChip");
+    if((a+b+c)===0) firstVisitNudge();
+    else { var sp=document.getElementById("startHerePill"); if(sp) sp.remove(); var nl=document.getElementById("newHereLine"); if(nl) nl.remove(); }
   }
   renderProgress();
   window.addEventListener("frc:progresssynced", renderProgress);

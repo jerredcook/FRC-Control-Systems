@@ -181,8 +181,14 @@
       box.className = "frc-toast";
       box.setAttribute("role", "status");
       var eyebrow = isCheckpoint ? "Checkpoint cleared" : "Lesson complete";
-      var msg = isCheckpoint ? "★ You just proved the whole Part - every question, cold." : "✓ You got every one right. This lesson is yours now.";
-      var sub = isCheckpoint ? "That is real mastery, and it is on the record." : "It is saved on your map. Whenever you are ready, the next one is waiting.";
+      var who = "";
+      try { who = (localStorage.getItem("frc:name") || "").trim().split(" ")[0]; } catch (e) {}
+      var msg = isCheckpoint
+        ? "\u2605 You just proved the whole Part - every question, cold."
+        : "\u2713 " + (who ? who + ", you" : "You") + " got every one right. This lesson is yours now.";
+      var sub = isCheckpoint
+        ? "Before it fades: explain one of those questions to a teammate in your own words. Teaching it locks it in."
+        : "It is saved on your map. Whenever you are ready, the next one is waiting.";
       var row = "";
       if (nav.next) row += '<a class="t-next" href="' + nav.next.getAttribute("href") + '">Next lesson →</a>';
       if (nav.map) row += '<a class="t-map" href="' + nav.map.getAttribute("href") + '">Course map</a>';
@@ -209,7 +215,15 @@
       if (before === null) return;
       try {
         var after = JSON.parse(v) || {};
-        if (after[here] && !before[here]) celebrate();
+        if (after[here] && !before[here]) {
+          try {
+            var lg = JSON.parse(localStorage.getItem("frc:log")) || [];
+            lg.push({ f: here, c: String(k).replace(/:done$/, ""), ts: Date.now() });
+            if (lg.length > 400) lg = lg.slice(lg.length - 400);
+            prev.call(localStorage, "frc:log", JSON.stringify(lg));
+          } catch (e2) {}
+          celebrate();
+        }
       } catch (e) {}
     };
   } catch (e) {}
@@ -228,6 +242,13 @@
  */
 (function () {
   "use strict";
+  var installEvt = null;
+  try {
+    window.addEventListener("beforeinstallprompt", function (e) {
+      e.preventDefault();
+      installEvt = e;
+    });
+  } catch (e) {}
   function onReady(fn) {
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", fn);
     else fn();
@@ -267,6 +288,70 @@
           "</b> question" + (due === 1 ? "" : "s") + " due for review - clear them while they're fresh</span>";
         card.parentNode.insertBefore(chip, card.nextSibling);
       }
+
+      // ---- milestone + this-week strip (reads the write-only reward keys) ----
+      try {
+        var page2 = (location.pathname.split("/").pop() || "").toLowerCase();
+        var prefix = page2 === "code.html" ? "deploy-" : page2 === "build.html" ? "build-"
+          : page2 === "closing-the-loop.html" ? "closing-the-loop-" : page2 === "systemcore.html" ? "systemcore-" : null;
+        if (prefix) {
+          function countKeys(storeKey) {
+            try {
+              var m2 = JSON.parse(localStorage.getItem(storeKey)) || {};
+              return Object.keys(m2).filter(function (k) { return k.indexOf(prefix) === 0; }).length;
+            } catch (e) { return 0; }
+          }
+          var golds = countKeys("frc:gold"), missions = countKeys("frc:missions");
+          var week = 0;
+          try {
+            var log = JSON.parse(localStorage.getItem("frc:log")) || [];
+            var cutoff = Date.now() - 7 * 86400000;
+            var courseId = prefix.slice(0, -1);
+            week = log.filter(function (e) { return e && e.ts > cutoff && e.c === courseId; }).length;
+          } catch (e) {}
+          var pr = null;
+          try { pr = JSON.parse(localStorage.getItem("frc:predict")); } catch (e) {}
+          var bits = [];
+          if (golds > 0) bits.push("\u2605 <b>" + golds + "</b> gold");
+          if (missions > 0) bits.push("<b>" + missions + "</b> missions cleared");
+          if (week > 0) bits.push("<b>" + week + "</b> lesson" + (week === 1 ? "" : "s") + " this week");
+          if (pr && (pr.r + pr.w) >= 5) bits.push("prediction record <b>" + pr.r + "/" + (pr.r + pr.w) + "</b>");
+          if (bits.length) {
+            var ms = document.createElement("div");
+            ms.className = "frc-extra";
+            ms.innerHTML = '<span class="xa">\ud83c\udfc5 Your record</span><span class="xw">' + bits.join(" \u00b7 ") + "</span>";
+            card.parentNode.insertBefore(ms, card.nextSibling);
+          }
+        }
+      } catch (e) {}
+
+      // ---- install chip: surface the offline superpower ----
+      try {
+        var standalone = window.matchMedia && window.matchMedia("(display-mode: standalone)").matches;
+        if (!standalone) {
+          if (installEvt) {
+            var ic = document.createElement("a");
+            ic.className = "frc-extra";
+            ic.href = "#";
+            ic.innerHTML = '<span class="xa">\ud83d\udcf2 Install</span><span class="xw">Put the academy on your home screen - <b>every lesson works offline</b>, even in the pit</span>';
+            ic.addEventListener("click", function (ev) {
+              ev.preventDefault();
+              try { installEvt.prompt(); } catch (e) {}
+            });
+            card.parentNode.insertBefore(ic, card.nextSibling);
+          } else if (/iPhone|iPad/.test(navigator.userAgent) && !localStorage.getItem("frc:iostip")) {
+            var it = document.createElement("div");
+            it.className = "frc-extra";
+            it.innerHTML = '<span class="xa">\ud83d\udcf2 Tip</span><span class="xw">Add the academy to your home screen (Share \u2192 Add to Home Screen) - <b>it works offline</b> <a href="#" style="color:#75829e;margin-left:8px">dismiss</a></span>';
+            it.querySelector("a").addEventListener("click", function (ev) {
+              ev.preventDefault();
+              try { localStorage.setItem("frc:iostip", "1"); } catch (e) {}
+              it.remove();
+            });
+            card.parentNode.insertBefore(it, card.nextSibling);
+          }
+        }
+      } catch (e) {}
 
       // ---- team momentum strip (needs configured backend + team) ----
       var courseKey = null;
@@ -309,6 +394,53 @@
       }
     } catch (e) { /* extras must never break a hub */ }
   });
+})();
+
+/* FRC Academy - mobile comfort.
+ *
+ * One injected stylesheet + a code-wrap toggle, so phones get comfortable
+ * touch targets and readable code without editing any lesson file. The
+ * coarse-pointer rules keep the thin desktop look everywhere else.
+ */
+(function () {
+  "use strict";
+  try {
+    var css = document.createElement("style");
+    css.textContent =
+      "@media (pointer:coarse){" +
+        "input[type=range]{height:28px;background:linear-gradient(var(--line-2,#33415e) 0 0) center/100% 5px no-repeat}" +
+        "input[type=range]::-webkit-slider-thumb{width:26px;height:26px}" +
+        ".blank,input[type=text],input[type=email],input[type=password]{font-size:16px}" +
+        "summary{padding:8px 0}" +
+      "}" +
+      "@media (max-width:480px){pre.code{padding:12px}}" +
+      "pre.frc-wrap{white-space:pre-wrap!important;overflow-wrap:anywhere}" +
+      ".frc-wrapbtn{display:block;margin:0 0 5px auto;font-family:ui-monospace,Menlo,monospace;" +
+      "font-size:10px;letter-spacing:.06em;padding:5px 9px;border-radius:7px;" +
+      "border:1px solid #33415e;background:rgba(11,19,34,.85);color:#92a2be;cursor:pointer}";
+    document.head.appendChild(css);
+
+    function addWrapChips() {
+      try {
+        if (window.innerWidth > 560) return;
+        var pres = document.querySelectorAll("pre.code");
+        Array.prototype.forEach.call(pres, function (p) {
+          if (p.scrollWidth <= p.clientWidth + 8) return; // nothing hidden
+          if (p.previousElementSibling && p.previousElementSibling.className === "frc-wrapbtn") return;
+          var b = document.createElement("button");
+          b.className = "frc-wrapbtn";
+          b.textContent = "\u2194 wrap lines";
+          b.addEventListener("click", function () {
+            var on = p.classList.toggle("frc-wrap");
+            b.textContent = on ? "\u2192 scroll instead" : "\u2194 wrap lines";
+          });
+          p.parentNode.insertBefore(b, p);
+        });
+      } catch (e) {}
+    }
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", addWrapChips);
+    else addWrapChips();
+  } catch (e) {}
 })();
 
 /* FRC Academy - PWA glue.

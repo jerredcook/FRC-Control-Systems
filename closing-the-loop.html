@@ -216,12 +216,13 @@
       </div>
       <button class="reset-btn" id="resetBtn" title="Clear saved progress on this device">Reset</button>
     </div>
-    <p class="howto">Work through the lessons in order. Answer a lesson's quiz correctly (or tap its circle) to mark it done; a wrong answer turns red, so try again. Your progress is saved in this browser.</p>
+    <p class="howto">Work through the lessons in order. Answer a lesson's quiz correctly (or tap its circle) to mark it done; a wrong answer turns red, so try again. Your progress is saved in this browser. On a school computer or private tab it can be wiped when you log out, so use the same browser profile each time - or sign in to sync.</p>
     <div class="langsel" role="group" aria-label="Code language">
       <span class="langsel-label">Code in</span>
       <button class="langbtn" id="langJava" data-lang="java">Java</button>
       <button class="langbtn" id="langPython" data-lang="python">Python</button>
     </div>
+    <p style="font-size:13px;color:var(--muted);margin:8px 0 0;font-style:italic">Not sure? Stay on Java - it is what most FRC teams run. Pick Python if you already use it at school. You can switch anytime, and each language keeps its own progress.</p>
   </div>
 
   <!-- COURSE renders here -->
@@ -397,7 +398,7 @@
       var cpFile="closing-the-loop-checkpoint-"+CP_MAP[part.code]+".html";
       var cpDone=!!done[cpFile], cpReady=!cpDone && pAvail>0 && pDone===pAvail;
       var cpPill=cpReady?'<span class="pill ready">Checkpoint ready - prove it</span>':'<span class="pill">Checkpoint</span>';
-      var cpHint=(!cpDone && !cpReady)?'<p class="cp-hint">Best after finishing Part '+part.code+'.</p>':'';
+      var cpHint=(!cpDone && !cpReady)?'<p class="cp-hint">Best after finishing Part '+part.code+' - or, already know this? Clear the checkpoint and skip ahead.</p>':'';
       var cp=document.createElement("a"); cp.className="card checkpoint"+(cpDone?" done":"")+(cpReady?" ready":""); cp.href=cpFile; cp.innerHTML='<div class="card-num">★</div><div class="card-body"><div class="card-title">Part '+part.code+' Checkpoint</div><p class="card-desc">A short cumulative quiz over this part and what came before. Answer them all correctly to clear it.</p>'+cpHint+'<div class="card-foot">'+cpPill+'<span class="open-link">Start →</span></div></div>'; sec.appendChild(cp);
       courseEl.appendChild(sec);
     });
@@ -425,6 +426,8 @@
   function nextUp(){
     var started = false, next = null;
     COURSE.forEach(function(part){
+      // test-out: a cleared checkpoint proves the Part - skip its lessons
+      if(done["closing-the-loop-checkpoint-" + CP_MAP[part.code] + ".html"]){ started = true; return; }
       part.lessons.forEach(function(L){
         if(!L.file) return;
         var af = activeFile(L);

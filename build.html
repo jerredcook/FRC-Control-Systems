@@ -137,7 +137,7 @@
       </div>
       <button class="reset-btn" id="resetBtn" title="Clear saved progress on this device">Reset</button>
     </div>
-    <p class="howto">Lessons are meant in order. Answer a lesson's quiz correctly and it marks itself done; a wrong answer turns red, so try again. Progress is saved in this browser.</p>
+    <p class="howto">Lessons are meant in order. Answer a lesson's quiz correctly and it marks itself done; a wrong answer turns red, so try again. Progress is saved in this browser. On a school computer or private tab it can be wiped when you log out, so use the same browser profile each time - or sign in to sync.</p>
   </div>
 
   <main id="course"></main>
@@ -295,7 +295,7 @@
       var cpFile="build-checkpoint-"+part.code+".html";
       var cpDone=!!done[cpFile], cpReady=!cpDone && pAvail>0 && pDone===pAvail;
       var cpPill=cpReady?'<span class="pill ready">Checkpoint ready - prove it</span>':'<span class="pill">Checkpoint</span>';
-      var cpHint=(!cpDone && !cpReady)?'<p class="cp-hint">Best after finishing Part '+part.code+'.</p>':'';
+      var cpHint=(!cpDone && !cpReady)?'<p class="cp-hint">Best after finishing Part '+part.code+' - or, already know this? Clear the checkpoint and skip ahead.</p>':'';
       var cp=document.createElement("a"); cp.className="card checkpoint"+(cpDone?" done":"")+(cpReady?" ready":""); cp.href=cpFile; cp.innerHTML='<div class="card-num">★</div><div class="card-body"><div class="card-title">Part '+part.code+' Checkpoint</div><p class="card-desc">A short cumulative quiz over this part and what came before. Answer them all correctly to clear it.</p>'+cpHint+'<div class="card-foot">'+cpPill+'<span class="open-link">Start →</span></div></div>'; sec.appendChild(cp);
       courseEl.appendChild(sec);
     });
@@ -319,6 +319,8 @@
   function nextUp(){
     var started=false, next=null;
     COURSE.forEach(function(part){
+      // test-out: a cleared checkpoint proves the Part - skip its lessons
+      if(done["build-checkpoint-"+part.code+".html"]){ started=true; return; }
       part.lessons.forEach(function(L){
         if(!L.file) return;
         if(done[L.file]){ started=true; }
