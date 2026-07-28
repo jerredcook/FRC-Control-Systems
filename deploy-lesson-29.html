@@ -83,6 +83,12 @@
   .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
   .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
   .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
 
   .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
   .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
@@ -265,6 +271,15 @@ drive.<input class="blank" data-ans="arcadedrive" data-fill="arcadeDrive" style=
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Line 1: the type to the left of the equals sign names the class, and new is followed by that same name. Nothing camera-flavored here - it is the plain controller you met in the Control course, the one with P, I, and D in its name.</li>
+          <li hidden>Line 2: every loop you hand the controller a measurement and a setpoint and it does the math. Its workhorse method is named for exactly that - doing the calculation. Here tx is the measurement and 0 is the setpoint, because centered means zero yaw.</li>
+          <li hidden>Line 3: turning in place on this drivetrain is arcade drive with zero forward speed and turn as the rotation. The method is named after that drive style.</li>
+          <li hidden>Top to bottom: PIDController, calculate, arcadeDrive. Press Check, then reread "It really is just a PIDController" - the whole aim loop lives in that block.</li>
+        </ol>
+      </div>
     </div>
 
     <div class="code-ex" id="wex">
@@ -277,6 +292,15 @@ drive.<input class="blank" data-ans="arcadedrive" data-fill="arcadeDrive" style=
         <span class="code-result" id="wex-res"></span>
       </div>
       <div class="ctask" id="wex-hintbox" style="display:none;margin:12px 0 0">Hint: <span class="k">return Math.abs(...) &lt; 1.0;</span> with the camera's yaw inside the abs. Spacing, capitalization, and the semicolon are forgiven.</div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>"Within 1.0 degree of center" counts both sides: a yaw of -0.5 is just as locked on as +0.5. The tool that throws away the minus sign is absolute value - Math.abs in Java.</li>
+          <li hidden>What goes inside the abs? The camera's yaw, camera.getYaw(), the same tx you fed the controller all lesson.</li>
+          <li hidden>isFinished() returns a boolean, so do not reach for an if. Just return the comparison itself: is that distance from center less than 1.0?</li>
+          <li hidden>Full line: return Math.abs(camera.getYaw()) &lt; 1.0; (semicolon forgiven). It is the "locked on" line at the end of the command in "It really is just a PIDController".</li>
+        </ol>
+      </div>
     </div>
   </section>
 
@@ -589,6 +613,23 @@ drive.<input class="blank" data-ans="arcadedrive" data-fill="arcadeDrive" style=
     input.addEventListener('keydown',function(e){ if(e.key==='Enter'){ check(); } });
     input.addEventListener('input',function(){ input.style.borderColor='var(--amber)'; input.style.color='var(--amber)'; input.style.background='var(--panel-2)'; });
     hintBtn.addEventListener('click',function(){ hintBox.style.display=''; });
+  }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
   }catch(e){}
 })();
 </script>

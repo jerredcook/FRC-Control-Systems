@@ -93,6 +93,12 @@
   .btn:hover{border-color:var(--indigo);color:var(--text)}
   .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
   .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
 
   .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
   .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
@@ -214,6 +220,15 @@ git <input class="blank" data-ans="tag" data-reveal="tag" aria-label="blank" aut
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Read the comment above each blank - it is the English version of the command below it. "Stage every changed file": git's staging verb is the same word as putting items in a shopping basket before checkout, three letters, and the -A after it means all of them.</li>
+          <li hidden>"Commit the snapshot" - look at that comment again, it already uses git's own verb. Git's words tend to say exactly what they do.</li>
+          <li hidden>"Back it up off the robot laptop" means sending your commits up to GitHub - the verb is the opposite of pull. And "mark the exact code that ran" is like the paper label a bike shop ties to your handlebars while it is in for repair - git uses the same little word for a label on a commit.</li>
+          <li hidden>In order: add, commit, push, tag. That is the whole pre-event ritual from "Deploy hygiene" above - say it out loud once, add, commit, push, tag, and it will still be there when the pit gets loud.</li>
+        </ol>
+      </div>
     </div>
 
     <div class="code-ex" id="writeit">
@@ -223,6 +238,14 @@ git <input class="blank" data-ans="tag" data-reveal="tag" aria-label="blank" aut
       <div class="code-actions" style="margin-top:12px">
         <button class="btn" id="wiCheck">Check</button>
         <span class="code-result" id="wiRes"></span>
+      </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Find the line of the ritual whose comment says "back it up off the robot laptop" in the "Deploy hygiene" sample - this is that command.</li>
+          <li hidden>It is two words: git, then the verb for sending your commits up to GitHub. Think of it as the opposite of pull.</li>
+          <li hidden>Answer: git push - and git push origin main counts too. It is the third line of the ritual in "Deploy hygiene", the one that means a crashed laptop can no longer lose your season.</li>
+        </ol>
       </div>
       <div id="wiHint" style="display:none;margin-top:10px;font-size:13.5px;color:var(--muted);border-left:2px solid var(--amber);padding:2px 0 2px 12px">Hint: it is a two-word git command. The verb is what you do to send your commits to GitHub.</div>
     </div>
@@ -437,6 +460,23 @@ git <input class="blank" data-ans="tag" data-reveal="tag" aria-label="blank" aut
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

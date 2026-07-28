@@ -91,6 +91,12 @@
   .btn:hover{border-color:var(--indigo);color:var(--text)}
   .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
   .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
 
   .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
   .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
@@ -226,6 +232,15 @@ self.state = <span class="ty">State</span>.<input class="blank" data-ans="idle|s
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Start at the top: where does the machine wake up? At power-on nothing is pressed and nothing is held, so ask which of the four states means "everything off, just waiting". The sim above starts highlighted on that exact node.</li>
+          <li hidden>Next line is the intake button's guard: it may only fire from IDLE. Pressing intake starts the rollers pulling a piece in, so picture the flow diagram and ask which state that arrow points to.</li>
+          <li hidden>The LOADED guard is the shoot button. In the diagram LOADED has exactly one arrow out - the state where the feeder runs the piece into the shooter. And the last line runs when shot_done() is true: the piece is gone, so the machine should return to the same quiet state it woke up in.</li>
+          <li hidden>Top to bottom the blanks are IDLE, INTAKING, SHOOTING, IDLE. If any of those routes felt fuzzy, replay the sim at the top and re-read "An enum and an if/elif" - every transition here is one you can press.</li>
+        </ol>
+      </div>
     </div>
 
     <div class="code-ex" id="writeit">
@@ -235,6 +250,15 @@ self.state = <span class="ty">State</span>.<input class="blank" data-ans="idle|s
       <div class="code-actions" style="margin-top:12px">
         <button class="btn" id="wiCheck">Check</button>
         <span class="code-result" id="wiRes"></span>
+      </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Say the rule in plain English first: "only while holding a piece may the shoot button do anything". In Python that is one if statement - a comparison, a colon, then a single assignment.</li>
+          <li hidden>The condition compares self.state against the one state that is allowed: two equals signs, because you are asking a question, not setting a value. And the state name always wears its State. prefix.</li>
+          <li hidden>After the colon comes the action: assign the new state to self.state with a single equals sign - now you are setting, not asking. The state you assign is the one the shoot button leads to.</li>
+          <li hidden>Whole line: if self.state == State.LOADED: self.state = State.SHOOTING - exactly the body of on_shoot_button() in "An enum and an if/elif" above. Compare them and it should read like your own handwriting.</li>
+        </ol>
       </div>
       <div id="wiHint" style="display:none;margin-top:10px;font-size:13.5px;color:var(--muted);border-left:2px solid var(--amber);padding:2px 0 2px 12px">Hint: it is one if statement. Compare self.state to State.LOADED, then after the colon assign State.SHOOTING to self.state. Spacing does not matter.</div>
     </div>
@@ -437,6 +461,23 @@ self.state = <span class="ty">State</span>.<input class="blank" data-ans="idle|s
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

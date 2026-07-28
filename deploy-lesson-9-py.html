@@ -124,6 +124,13 @@
   .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
 </style>
 </head>
 <body>
@@ -214,6 +221,15 @@ arm = <input class="blank" data-ans="arm" data-reveal="Arm" aria-label="blank" a
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>First blank: Arm becomes a subsystem by naming its parent inside the parentheses. The commands2. part is written for you - what follows is the library's base class for subsystems, capital S.</li>
+          <li hidden>Second blank: the comment says "run the parent's setup first". Python has one built-in for reaching up to your parent class - you call it, then call .__init__() on what it hands you. "Subclassing and overriding" above introduces it.</li>
+          <li hidden>Last blank: arm = ____() stamps out one Arm. In Python you build an object by calling the class by name, the same move as Lesson 2.3.</li>
+          <li hidden>Answers: Subsystem, super, Arm. Fill them in and press Check. If super() still feels like magic, re-read "Subclassing and overriding" - it just means "do my parent's setup before mine".</li>
+        </ol>
+      </div>
     </div>
 
     <div class="write-ex" id="writeit">
@@ -223,6 +239,14 @@ arm = <input class="blank" data-ans="arm" data-reveal="Arm" aria-label="blank" a
       <div class="code-actions">
         <button class="btn" id="wcheck">Check</button>
         <span class="code-result" id="wres"></span>
+      </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Copy the bones of Arm's first line above, changing only the name. In words: a class named Elevator whose parent is commands2.Subsystem.</li>
+          <li hidden>Python's shape for that: the word class, your name for it, the parent in parentheses, then a colon. The colon is the piece everyone forgets.</li>
+          <li hidden>The line is class Elevator(commands2.Subsystem): - the same skeleton as Arm in "Subclassing and overriding", new name. That is inheritance's whole pitch: new class, borrowed machinery.</li>
+        </ol>
       </div>
       <div class="whint" id="whint" hidden>Hint: <code>class Elevator</code> with the parent in parentheses, ending with a colon. The parent is <code>commands2.Subsystem</code>.</div>
     </div>
@@ -363,6 +387,23 @@ try{
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

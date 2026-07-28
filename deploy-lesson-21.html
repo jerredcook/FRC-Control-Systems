@@ -98,6 +98,12 @@
   .whint{display:none;margin-top:10px;font-size:14px;color:var(--muted);border-left:2px solid var(--amber);padding:4px 0 4px 12px}
   .whint.show{display:block}
   .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
   .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
   .btn:hover{border-color:var(--indigo);color:var(--text)}
   .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
@@ -232,6 +238,15 @@ drive.<span class="fn">arcadeDrive</span>(fwd, rot);   <span class="cm">// rot: 
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>First blank: you are reading the forward-back axis of the driver's left stick. Controller getters are named get, then which stick, then which axis letter. The minus sign is already written for you, because forward reads negative on a joystick.</li>
+          <li hidden>Second blank: "ignore the resting wobble near center" is exactly the job of a deadband, and MathUtil's helper is named apply plus the thing it applies. Notice it already takes 0.08, the 8% threshold, as its second argument.</li>
+          <li hidden>Third blank: y * y throws away the sign, because a negative times itself comes out positive. Math has a helper that copies the sign from its second argument onto the first, and its name says exactly that.</li>
+          <li hidden>Top to bottom: getLeftY, applyDeadband, copySign. Fill them in and press Check. The full recipe - flip, deadband, square - is the "Deadband, then curve" code block above.</li>
+        </ol>
+      </div>
     </div>
 
     <div class="code-ex" id="writeit">
@@ -244,6 +259,15 @@ drive.<span class="fn">arcadeDrive</span>(fwd, rot);   <span class="cm">// rot: 
         <span class="code-result" id="wRes"></span>
       </div>
       <div class="whint" id="wHintText">Hint: mirror the y line in the ladder: double x = MathUtil.applyDeadband(rawX, 0.08);</div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Good news: this line already exists one row up in the exercise, just for the other axis. Same recipe, new ingredients - like making the second pancake after the first one worked.</li>
+          <li hidden>Left of the equals: the task asks for a double named x. Right of the equals: MathUtil's deadband helper, the same one you just used on the y axis.</li>
+          <li hidden>It takes two arguments: the raw reading, which is rawX this time, and the 8% threshold written as a decimal.</li>
+          <li hidden>So: double x = MathUtil.applyDeadband(rawX, 0.08); - if any piece did not click, reread "Deadband, then curve," where the x line is printed right under the y line.</li>
+        </ol>
+      </div>
     </div>
   </section>
 
@@ -519,6 +543,23 @@ try{
   inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); go(); } });
   hb.addEventListener('click',function(){ ht.classList.add('show'); });
 }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

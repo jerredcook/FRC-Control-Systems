@@ -91,6 +91,12 @@
   .whint{display:none;margin-top:10px;font-size:14px;color:var(--muted);border-left:2px solid var(--amber);padding:4px 0 4px 12px}
   .whint.show{display:block}
   .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
   .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
   .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
 
@@ -219,6 +225,15 @@ heading = gyro.<input class="blank" data-ans="get_rotation2d" data-reveal="get_r
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Start at the top: in Python you create the gyro object by calling its class like a function, no new keyword. The class is the IMU this lesson imports from phoenix6.hardware and puts on CAN id 20.</li>
+          <li hidden>Second line, and the comment gives it away: "this heading is now zero." You are not reading anything here, you are telling the gyro something. It is the call the lesson uses to define down-field at the start of a match, snake_case and starting with set_.</li>
+          <li hidden>The last two lines read the heading two ways. The degrees version is chained with .value, so its blank is the plain yaw getter. The Rotation2d version is the kinematics-friendly getter, and its snake_case name literally says which type it hands back.</li>
+          <li hidden>All together, top to bottom: Pigeon2, set_yaw, get_yaw, get_rotation2d. Type them in and press Check. If any felt fuzzy, scroll up to the "Read the heading, set the zero" code block - it is this exact sequence.</li>
+        </ol>
+      </div>
     </div>
 
     <div class="code-ex" id="writeit">
@@ -231,6 +246,15 @@ heading = gyro.<input class="blank" data-ans="get_rotation2d" data-reveal="get_r
         <span class="code-result" id="wRes"></span>
       </div>
       <div class="whint" id="wHintText">Hint: one call on the gyro object, the same method the ladder uses to define down-field, with 0 as the argument.</div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>First decide who does the work. The heading lives in the gyro, so the line starts with the gyro object and a dot, just like every call in the exercise above.</li>
+          <li hidden>Now the verb. "Make the current heading the new zero" means you are writing a value into the gyro, not reading one out. It is the same set_ method the lesson uses to define down-field.</li>
+          <li hidden>Last, the argument: what should the yaw become right now? Zero. One number inside the parentheses, and you are done.</li>
+          <li hidden>Put together: gyro.set_yaw(0) - the same call as the "this heading is now zero" line above. If the set-versus-get choice felt shaky, reread "Read the heading, set the zero."</li>
+        </ol>
+      </div>
     </div>
   </section>
 
@@ -484,6 +508,23 @@ try{
   inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); go(); } });
   hb.addEventListener('click',function(){ ht.classList.add('show'); });
 }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

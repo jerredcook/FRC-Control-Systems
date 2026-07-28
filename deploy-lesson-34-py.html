@@ -98,6 +98,12 @@
   .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
   .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
   .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
 
   .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
   .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
@@ -215,6 +221,15 @@
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>First blank is an import, and the comment above it names the reason: this tool gives you approx for float-safe compares. It is the test framework itself - the same name you type in the terminal to run your tests.</li>
+          <li hidden>Second blank is Python's built-in keyword for "this must be true or the test fails". No library needed - pytest tests lean on this one plain keyword.</li>
+          <li hidden>Third blank: floats wobble in their last decimal places, so you never compare a computed 6.283 with a bare ==. pytest wraps the expected value in a helper whose name is short for approximately.</li>
+          <li hidden>Answers: pytest, assert, approx. All three are visible in tests/test_conversions.py in "assert, and that's most of it" - compare your file to it line by line.</li>
+        </ol>
+      </div>
     </div>
 
     <div class="code-ex" id="writeit">
@@ -224,6 +239,15 @@
       <div class="code-actions" style="margin-top:12px">
         <button class="btn" id="wiCheck">Check</button>
         <span class="code-result" id="wiRes"></span>
+      </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Work out the expected number before any code: 25 motor turns into a 5:1 gearbox. The gearbox divides turns down, so 25 / 5 = 5.0 mechanism turns.</li>
+          <li hidden>Now the shape, straight from the sample: assert your-call == pytest.approx(expected). The approx wrapper keeps float wobble from failing an honest answer.</li>
+          <li hidden>Your call is to_mech_rotations(25, 5) - the same helper the sample tests with 40 and 10.</li>
+          <li hidden>Assembled: assert to_mech_rotations(25, 5) == pytest.approx(5.0) - a mirror of test_mechanism_rotations() in "assert, and that's most of it", just with your numbers.</li>
+        </ol>
       </div>
       <div id="wiHint" style="display:none;margin-top:10px;font-size:13.5px;color:var(--muted);border-left:2px solid var(--amber);padding:2px 0 2px 12px">Hint: start with the assert keyword, call to_mech_rotations(25, 5), and compare with == to pytest.approx(5.0).</div>
     </div>
@@ -427,6 +451,23 @@
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

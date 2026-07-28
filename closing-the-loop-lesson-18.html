@@ -114,6 +114,12 @@
   .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
   .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
   .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
   .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
   .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
 
@@ -281,6 +287,15 @@ cfg.Slot0.kP = <span class="num">12</span>;     <span class="cm">// then tune kP
         <button class="btn" id="check">Check</button>
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
+      </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Start to the left of the arrow. volts -&gt; ... is a tiny function the SysId routine calls over and over, and each call hands it exactly one thing: the voltage to apply this instant. That incoming value already has a name, written right before the arrow.</li>
+          <li hidden>Now remember the mechanism's one job during characterization: apply exactly the voltage the routine asks for, nothing more, nothing less. It's a science experiment - if you sneak in your own number, the data lies and the fitted gains come out wrong.</li>
+          <li hidden>The .in(Volts) part unwraps that measure into a plain number, so the blank has to be the measure the routine handed you. You never made a new variable here - you pass through the one you were given.</li>
+          <li hidden>The answer is volts, the lambda's own parameter. Fill it in and press Check, then reread "A SysId routine in Phoenix 6": the routine drives, SignalLogger records, and your line of code is just the honest messenger in between.</li>
+        </ol>
       </div>
     </div>
   </section>
@@ -598,6 +613,23 @@ cfg.Slot0.kP = <span class="num">12</span>;     <span class="cm">// then tune kP
   opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(revealed)return; picked=i;
     opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
     if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

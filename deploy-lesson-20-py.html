@@ -82,6 +82,12 @@
   .whint{display:none;margin-top:10px;font-size:14px;color:var(--muted);border-left:2px solid var(--amber);padding:4px 0 4px 12px}
   .whint.show{display:block}
   .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
   .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
   .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
 
@@ -212,6 +218,15 @@ self.elevator.<input class="blank" data-ans="setposition" data-reveal="setPositi
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>First line: in Python you construct the switch object by calling its class like a function. A limit switch plugged into a DIO port is a digital input, and the class this lesson imports from wpilib is named exactly that.</li>
+          <li hidden>Second line reads the switch. Every one of these objects has one tiny method that hands you the raw True or False. The not in front is already doing the inverting for you, so the blank is just the plain read.</li>
+          <li hidden>Now the homing moves. "Creep down, slow" with -1.0 is pushing volts into the motor, so it is the voltage-setting call. And the last blank is the payoff: you are not reading the position, you are declaring "this spot is 0," so it is the set version of position.</li>
+          <li hidden>Top to bottom: DigitalInput, get, setVoltage, setPosition. Fill them in and press Check. The whole routine is the homing_periodic block in "One bit, two jobs" if you want to see it again in one piece.</li>
+        </ol>
+      </div>
     </div>
 
     <div class="code-ex" id="writeit">
@@ -224,6 +239,14 @@ self.elevator.<input class="blank" data-ans="setposition" data-reveal="setPositi
         <span class="code-result" id="wRes"></span>
       </div>
       <div class="whint" id="wHintText">Hint: it mirrors the bottom_limit line in the ladder: self.beam_break = DigitalInput(1)</div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>You already wrote this line once, almost. Look at the bottom_limit line at the top of the exercise above: self dot name, equals, class, port number. Your line has the exact same skeleton, like swapping one bolt for another of the same size.</li>
+          <li hidden>Now swap in the new details: the task names it self.beam_break, and this sensor is plugged into DIO port 1 instead of 0. Everything else stays word-for-word the same.</li>
+          <li hidden>So the whole line is: self.beam_break = DigitalInput(1) - no new keyword in Python, calling the class builds the object. That pattern is the second construction line of the "One bit, two jobs" code block.</li>
+        </ol>
+      </div>
     </div>
   </section>
 
@@ -455,6 +478,23 @@ try{
   inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); go(); } });
   hb.addEventListener('click',function(){ ht.classList.add('show'); });
 }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

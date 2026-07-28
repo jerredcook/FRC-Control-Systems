@@ -124,6 +124,13 @@
   .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
 </style>
 </head>
 <body>
@@ -213,6 +220,15 @@
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>First blank: the task says Arm becomes a subsystem by building on the WPILib base class. The word extends is already written, so the blank is the parent's name - WPILib's base class for every subsystem, and its name says exactly that.</li>
+          <li hidden>Second blank sits right above getName(). Its comment says "compiler-checked: this replaces a parent method" - and periodic(), a few lines up, wears exactly the marker you need.</li>
+          <li hidden>Last blank: Arm arm = ____ Arm(); stamps out one Arm object. That is the same object-building keyword you used all through Lesson 2.3.</li>
+          <li hidden>Answers: SubsystemBase, @Override, new. Fill them in and press Check. The "extends and @Override" section above is this exercise in slow motion - worth a re-read if the annotation's job still feels fuzzy.</li>
+        </ol>
+      </div>
     </div>
 
     <div class="write-ex" id="writeit">
@@ -222,6 +238,14 @@
       <div class="code-actions">
         <button class="btn" id="wcheck">Check</button>
         <span class="code-result" id="wres"></span>
+      </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Model it on Arm's first line in the fragment above - only the class name changes. In words: a public class named Elevator that builds on WPILib's subsystem base.</li>
+          <li hidden>Java's order is fixed: public class, then your name for it, then extends, then the parent class. Finish with the opening brace.</li>
+          <li hidden>The line is public class Elevator extends SubsystemBase { - the same bones as Arm's first line in "extends and @Override", with just the name swapped. That is inheritance's whole pitch: new class, borrowed machinery.</li>
+        </ol>
       </div>
       <div class="whint" id="whint" hidden>Hint: <code>public class Elevator extends</code> the WPILib base class every subsystem builds on, then an opening brace.</div>
     </div>
@@ -362,6 +386,23 @@ try{
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

@@ -83,6 +83,12 @@
   .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
   .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
   .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
 
   .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
   .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
@@ -210,6 +216,15 @@ driver.<span class="fn">x</span>().<input class="blank" data-ans="whiletrue" dat
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>First blank: it lives in a command's constructor and declares the subsystem the command needs. You have written this line before - it was the very first thing RunIntakeUntilLoaded did back in Lesson 3.3, and this lesson's opening paragraph names it too.</li>
+          <li hidden>Second blank: the comment says "fallback... whenever nothing else claims Drive". In the sim, when you ended the Drive command, TeleopDrive resumed all by itself, because someone gave Drive a default. The method that hands a subsystem its fallback is named exactly like what it does.</li>
+          <li hidden>Third blank: "hold X" and "resumes... the instant X is released". Held-until-release is the binding from Lesson 3.5 that runs while the condition is true and ends when it stops being true.</li>
+          <li hidden>Top to bottom: addRequirements, setDefaultCommand, whileTrue. Fill them in and press Check. The whole story - require, fall back, take over - is the code block in "setDefaultCommand + requirements", and the sim above acts it out.</li>
+        </ol>
+      </div>
     </div>
 
     <div class="write-ex" id="writeit">
@@ -219,6 +234,14 @@ driver.<span class="fn">x</span>().<input class="blank" data-ans="whiletrue" dat
       <div class="code-actions" style="margin-top:12px">
         <button class="btn" id="wcheck">Check</button>
         <span class="code-result" id="wres"></span>
+      </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>"Whenever nothing else is using it" is the exact job description of a default command. The code block above gave the drivetrain its fallback with one line - your line has the same shape, different subsystem.</li>
+          <li hidden>The skeleton is subsystem.setDefaultCommand(theCommand). Here the subsystem is intake and the fallback command is intake.idle() - like a phone going back to its home screen whenever you close an app.</li>
+          <li hidden>The line is intake.setDefaultCommand(intake.idle()); - a mirror of the drive.setDefaultCommand(...) line in the RobotContainer block. End a command in the sim and watch the default snap back in; that is the moment this line creates.</li>
+        </ol>
       </div>
       <div class="whint" id="whint">Hint: same shape as the drivetrain line: subsystem.setDefaultCommand(theCommand);</div>
     </div>
@@ -395,6 +418,23 @@ driver.<span class="fn">x</span>().<input class="blank" data-ans="whiletrue" dat
     btn.addEventListener('click',judge);
     input.addEventListener('keydown',function(e){ if(e.key==='Enter'){ judge(); } });
     input.addEventListener('input',function(){ input.classList.remove('ok','bad'); });
+  }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
   }catch(e){}
 })();
 </script>

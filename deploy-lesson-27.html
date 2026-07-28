@@ -81,6 +81,12 @@
   .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
   .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
   .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
 
   .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
   .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
@@ -209,6 +215,15 @@ chooser.<input class="blank" data-ans="addoption" data-fill="addOption" aria-lab
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Line 1 runs the steps one after another, like a relay race: one runner finishes before the next starts. Part 3 gave the Commands factory a name for exactly that idea - the everyday word for things happening in order.</li>
+          <li hidden>Line 2 runs two things side by side: keep driving while the shooter spins up, the way you can pedal and ring your bike bell at the same time. The decorator's name literally means "together with".</li>
+          <li hidden>Line 3 gives the drive team a menu entry: a label to read plus the command it stands for. The chooser's method is add-a-something, and the something is what one entry in a menu of choices is called.</li>
+          <li hidden>Top to bottom: sequence, alongWith, addOption. Press Check, then reread "An auto is a command group" - the four-piece routine there uses all three in one breath.</li>
+        </ol>
+      </div>
     </div>
 
     <div class="code-ex" id="wex">
@@ -221,6 +236,14 @@ chooser.<input class="blank" data-ans="addoption" data-fill="addOption" aria-lab
         <span class="code-result" id="wex-res"></span>
       </div>
       <div class="ctask" id="wex-hintbox" style="display:none;margin:12px 0 0">Hint: it is a <span class="k">SmartDashboard</span> call, the one that puts data. Pass it the chooser. Spacing, capitalization, and the semicolon are forgiven.</div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>First ask: who does the publishing? Not the chooser - it just holds the options. The dashboard class does the talking, so the line starts SmartDashboard.</li>
+          <li hidden>A chooser is not a bare number or a piece of text, it is a whole interactive widget. SmartDashboard's method for publishing whole objects is the one that puts data.</li>
+          <li hidden>Full line: SmartDashboard.putData(chooser); (semicolon forgiven). It is the last line of the code block in "An auto is a command group".</li>
+        </ol>
+      </div>
     </div>
   </section>
 
@@ -491,6 +514,23 @@ chooser.<input class="blank" data-ans="addoption" data-fill="addOption" aria-lab
     input.addEventListener('keydown',function(e){ if(e.key==='Enter'){ check(); } });
     input.addEventListener('input',function(){ input.style.borderColor='var(--amber)'; input.style.color='var(--amber)'; input.style.background='var(--panel-2)'; });
     hintBtn.addEventListener('click',function(){ hintBox.style.display=''; });
+  }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
   }catch(e){}
 })();
 </script>

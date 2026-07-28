@@ -98,6 +98,12 @@
   .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
   .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
   .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
 
   .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
   .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
@@ -215,6 +221,15 @@
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>First blank is the marker that tells JUnit "run this method as a test". The lesson intro says a test is a method marked with an annotation - one four-letter word that names what the method is.</li>
+          <li hidden>Second blank is the checking call. You want to say "assert these two are equal", and JUnit's method name is exactly those words glued together in camelCase. Its shape is (expected, actual, tolerance).</li>
+          <li hidden>Third blank is math you can do on paper: 2 drum turns on a 1.0 inch drum. One turn travels the circumference, pi times diameter, about 3.1416 inches - so double it. It is the same number the red test in the sim was expecting.</li>
+          <li hidden>Answers: Test, assertEquals, 6.283 (that is 2 times pi). Check them against ConversionsTest.java in "assertEquals, and that's most of it" - the file you just completed is that sample.</li>
+        </ol>
+      </div>
     </div>
 
     <div class="code-ex" id="writeit">
@@ -224,6 +239,15 @@
       <div class="code-actions" style="margin-top:12px">
         <button class="btn" id="wiCheck">Check</button>
         <span class="code-result" id="wiRes"></span>
+      </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Work out the expected number before any code: 25 motor turns into a 5:1 gearbox. The gearbox divides turns down, so 25 / 5 = 5.0 mechanism turns.</li>
+          <li hidden>Now the shape: assertEquals(expected, actual, tolerance). Your expected is the 5.0 you just computed, and the tolerance is given in the task, 1e-6.</li>
+          <li hidden>The actual is a real call into your code: Conversions.toMechRotations(25, 5) - the same helper the sample tests with 40 and 10.</li>
+          <li hidden>Assembled: assertEquals(5.0, Conversions.toMechRotations(25, 5), 1e-6); - a mirror of mechanismRotations() in "assertEquals, and that's most of it", just with your numbers.</li>
+        </ol>
       </div>
       <div id="wiHint" style="display:none;margin-top:10px;font-size:13.5px;color:var(--muted);border-left:2px solid var(--amber);padding:2px 0 2px 12px">Hint: the shape is assertEquals(expected, actual, tolerance). The actual value is Conversions.toMechRotations(25, 5).</div>
     </div>
@@ -427,6 +451,23 @@
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

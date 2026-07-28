@@ -80,6 +80,12 @@
   .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
   .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
   .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
 
   .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
   .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
@@ -206,6 +212,15 @@ self.estimator.<input class="blank" data-ans="addvisionmeasurement" data-fill="a
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Line 1: the class describes itself in order: a swerve drive, then a pose estimator. One RobotPy twist - the number of swerve modules is baked right into the class name, and this drivetrain has four of them.</li>
+          <li hidden>Line 2 is the "always" half of the section title "update() always, addVisionMeasurement() sometimes": every loop, gyro and wheels advance the estimate, using the very same verb odometry used back in Lesson 6.3.</li>
+          <li hidden>Line 3 is the "sometimes" half: when the camera actually sees a tag, you fold in the absolute fix by adding a vision measurement, along with the timestamp of the frame it came from.</li>
+          <li hidden>Top to bottom: SwerveDrive4PoseEstimator (note the 4), update, addVisionMeasurement. Press Check, then look back at "update() always, addVisionMeasurement() sometimes" - the section title alone hands you two of the three.</li>
+        </ol>
+      </div>
     </div>
 
     <div class="code-ex" id="wex">
@@ -218,6 +233,14 @@ self.estimator.<input class="blank" data-ans="addvisionmeasurement" data-fill="a
         <span class="code-result" id="wex-res"></span>
       </div>
       <div class="ctask" id="wex-hintbox" style="display:none;margin:12px 0 0">Hint: start with <span class="k">pose = self.estimator.</span> then the method that returns the estimated position. Spacing and capitalization are forgiven.</div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Python keeps it short: name, equals, value, so the left half is pose =. The estimator belongs to this subsystem, so you reach it through self.</li>
+          <li hidden>Careful, the method is not getPoseMeters this time. An estimator does not report a raw measurement, it reports its best blended guess, so the getter is named for the estimated position (camelCase kept from WPILib).</li>
+          <li hidden>Full line: pose = self.estimator.getEstimatedPosition() - it is the last line of the fusion code block in "update() always, addVisionMeasurement() sometimes".</li>
+        </ol>
+      </div>
     </div>
   </section>
 
@@ -468,6 +491,23 @@ self.estimator.<input class="blank" data-ans="addvisionmeasurement" data-fill="a
     input.addEventListener('keydown',function(e){ if(e.key==='Enter'){ check(); } });
     input.addEventListener('input',function(){ input.style.borderColor='var(--amber)'; input.style.color='var(--amber)'; input.style.background='var(--panel-2)'; });
     hintBtn.addEventListener('click',function(){ hintBox.style.display=''; });
+  }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
   }catch(e){}
 })();
 </script>

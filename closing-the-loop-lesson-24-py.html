@@ -123,6 +123,12 @@
   .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
   .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
   .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
   .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
   .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
 
@@ -304,6 +310,15 @@ volts = lqr.<span class="fn">calculate</span>(x, reference)[<span class="num">0<
         <button class="btn" id="check">Check</button>
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
+      </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>The comment at the end of the line is your map: the reference is (position, velocity) - the complete state you want the elevator to finish in. The first slot is already filled with goal_meters, the height.</li>
+          <li hidden>So the blank is the velocity you want at the moment you arrive. Picture rolling up to a bike rack: reaching the rack is only half the goal - you also want to arrive stopped, not still coasting past it.</li>
+          <li hidden>Now say "stopped" as a number a velocity slot can hold. That's the whole blank.</li>
+          <li hidden>The answer is 0 (0.0 works too) - arrive at goal_meters with zero velocity, so the controller aims to stop there instead of blowing through at speed. Press Check, then look back at "LQR chooses the gains for you": u = K (reference - x) steers the whole state to that pair.</li>
+        </ol>
       </div>
     </div>
   </section>
@@ -652,6 +667,23 @@ volts = lqr.<span class="fn">calculate</span>(x, reference)[<span class="num">0<
   opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(revealed)return; picked=i;
     opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
     if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

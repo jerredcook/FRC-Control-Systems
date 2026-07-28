@@ -96,6 +96,12 @@
   .whint{display:none;margin-top:10px;font-size:14px;color:var(--muted);border-left:2px solid var(--amber);padding:4px 0 4px 12px}
   .whint.show{display:block}
   .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
   .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
   .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
 
@@ -224,6 +230,15 @@ states = <span class="ty">SwerveDrive4Kinematics</span>.<input class="blank" dat
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>First blank: you want ChassisSpeeds that treat the stick as field-relative, and the factory method is named from + where the speeds are measured + Speeds. It cannot rotate your command without knowing which way the robot faces, which is why self.gyro shows up as the last argument.</li>
+          <li hidden>Second blank: the gyro call from Lesson 4.3 that hands back a Rotation2d, the type kinematics wants. Its name literally says what it returns.</li>
+          <li hidden>Two to go, and both names read like sentences. Kinematics converting chassis speeds into one state per module is to + what it produces. Then, when one wheel would exceed MAX_SPEED, the call that scales all four down together is named for un-saturating the wheel speeds.</li>
+          <li hidden>In order: fromFieldRelativeSpeeds, getRotation2d, toSwerveModuleStates, desaturateWheelSpeeds. Fill them in and press Check. It is the same four-step pipeline as "Kinematics does the trig," top to bottom.</li>
+        </ol>
+      </div>
     </div>
 
     <div class="code-ex" id="writeit">
@@ -236,6 +251,15 @@ states = <span class="ty">SwerveDrive4Kinematics</span>.<input class="blank" dat
         <span class="code-result" id="wRes"></span>
       </div>
       <div class="whint" id="wHintText">Hint: robot-relative skips fromFieldRelativeSpeeds. It is the plain constructor: speeds = ChassisSpeeds(vx, vy, omega)</div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Robot-relative means no gyro, so no factory method this time. In Python you build the ChassisSpeeds directly by calling the class itself, no new keyword.</li>
+          <li hidden>Left of the equals: the name the task asks for, speeds.</li>
+          <li hidden>The constructor takes the three chassis numbers in the order you have seen all lesson: forward, sideways, spin - vx, vy, omega.</li>
+          <li hidden>So: speeds = ChassisSpeeds(vx, vy, omega) - compare it with the field-relative version in "Kinematics does the trig" to see exactly what the gyro was buying you.</li>
+        </ol>
+      </div>
     </div>
   </section>
 
@@ -497,6 +521,23 @@ try{
   inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); go(); } });
   hb.addEventListener('click',function(){ ht.classList.add('show'); });
 }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

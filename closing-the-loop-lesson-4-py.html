@@ -131,6 +131,12 @@
   .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
   .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
   .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
   .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
   .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
 
@@ -337,6 +343,15 @@ self.motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="out
         <button class="btn" id="check">Check</button>
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
+      </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Start with the derivative line. A rate of change is always 'how much it moved, divided by how long that took'. The 'how much it moved' part is the error now minus the error one loop ago. 'Now' is already written - the blank is the saved copy from last loop, and the very next line refreshes that copy, so its name is sitting right below the blank.</li>
+          <li hidden>Now the big sum. kP rides the gap, kI rides the built-up memory, and kD rides the speed of the gap - the value you computed two lines up. Reuse that variable's name.</li>
+          <li hidden>Last line. All three terms were folded into one number on the line above. That single variable is what setVoltage( ) wants - nothing more.</li>
+          <li hidden>The answers, top to bottom: self.prev_error, derivative, output. Fill them in and press Check, then revisit 'Completing the PID' above - the code will read like a sentence now that you have built each term yourself.</li>
+        </ol>
       </div>
     </div>
   </section>
@@ -634,6 +649,23 @@ self.motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="out
   opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(revealed)return; picked=i;
     opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
     if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

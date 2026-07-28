@@ -117,6 +117,12 @@
   .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
   .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
   .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
   .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
   .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
 
@@ -287,6 +293,14 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(cf
         <button class="btn" id="check">Check</button>
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
+      </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>The request object already knows its gain slot; withPosition( ) is where you tell it the target. So the real question is: where does the target live inside setGoal? Look at the method's parameter list - the caller hands the target in right there.</li>
+          <li hidden>No conversion needed this time: the parameter already arrives in rotations, the unit the motor's onboard loop speaks. Pass it straight through - this line is a mail carrier, not a calculator.</li>
+          <li hidden>The answer: rotations. Fill it in and press Check, then re-read 'Gains in Slot0, a request to move' - the request carries the goal down to the motor, and this line is where the goal climbs aboard.</li>
+        </ol>
       </div>
     </div>
   </section>
@@ -589,6 +603,23 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(cf
   opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(revealed)return; picked=i;
     opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
     if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

@@ -83,6 +83,12 @@
   .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
   .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
   .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
   .write-ex{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:26px 0}
   .write-ex .whead{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:6px}
   .write-ex .whead .ic{width:22px;height:22px;border-radius:6px;background:rgba(52,215,197,.14);display:grid;place-items:center;color:var(--teal);font-size:13px}
@@ -295,6 +301,15 @@ self.left.<span class="fn">set</span>(<input class="blank" data-ans="speed+rotat
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>First blank: you are constructing the left drive motor on channel 0. It is the XRP's own motor class - the platform name plus Motor, straight from the imports at the top of drivetrain.py.</li>
+          <li hidden>Second blank: "the right side is mirrored, so flip it". In __init__ there is exactly one call on self.right that takes True - its name says set-the-motor-inverted in camelCase (RobotPy keeps WPILib's camelCase names).</li>
+          <li hidden>Third blank teaches the encoder its scale: how far one pulse travels. The method name is literally that phrase - set, distance, per, pulse. And the last blank is arcade drive's left wheel: the comment says it in English, forward speed plus the turn - two variables joined by a plus.</li>
+          <li hidden>In order: XRPMotor, setInverted, setDistancePerPulse, speed + rotation. Every one is sitting in drivetrain.py above - __init__ for the first three, arcade_drive() for the last.</li>
+        </ol>
+      </div>
     </div>
 
     <div class="write-ex" id="writeit">
@@ -304,6 +319,14 @@ self.left.<span class="fn">set</span>(<input class="blank" data-ans="speed+rotat
       <div class="code-actions" style="margin-top:12px">
         <button class="btn" id="wcheck">Check</button>
         <span class="code-result" id="wres"></span>
+      </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Start from the line you already have: self.left.set(speed + rotation). The right side is its mirror image.</li>
+          <li hidden>Two things change in a mirror. The motor becomes self.right - and the sign on the turn flips. To turn, one wheel speeds up while the other slows down, like paddling harder on one side of a canoe - so the right wheel subtracts the turn.</li>
+          <li hidden>Full line: self.right.set(speed - rotation) - the second line of arcade_drive() in drivetrain.py above. Plus on the left, minus on the right, and the robot carves the turn.</li>
+        </ol>
       </div>
       <div class="whint" id="whint">Hint: mirror the left line with a minus: self.right.set(speed - rotation)</div>
     </div>
@@ -759,6 +782,23 @@ self.left.<span class="fn">set</span>(<input class="blank" data-ans="speed+rotat
     btn.addEventListener('click',judge);
     input.addEventListener('keydown',function(e){ if(e.key==='Enter'){ judge(); } });
     input.addEventListener('input',function(){ input.classList.remove('ok','bad'); });
+  }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
   }catch(e){}
 })();
 </script>

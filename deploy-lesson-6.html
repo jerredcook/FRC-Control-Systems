@@ -156,6 +156,13 @@
 
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
 </style>
 </head>
 <body>
@@ -241,6 +248,15 @@
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Start with the avg line. r1 + r2 is 5, and dividing by a plain 2 would be int divided by int - Java keeps the whole number and throws the .5 away. The blank is the divisor, so write the 2 in a way that makes the division decimal math. One little dot is enough.</li>
+          <li hidden>Next line down. speed will be avg times 2, which is 5.0 - a number with a decimal in it. The blank is the type in front. Scroll up to the four types at the top of the lesson: which box is made for decimals?</li>
+          <li hidden>Two left. tooFast asks a yes or no question - is speed above 3.0? True-or-false answers get their own type from that same table. And the print line wants "the decimal, not the flag": of the two variables you just declared, the decimal lives in the first one.</li>
+          <li hidden>Answers, top to bottom: 2.0, double, boolean, speed. Type them in and press Check. If the divisor surprised you, re-read "int math throws away the decimal" above - one side written as a decimal is all it takes to keep the .5.</li>
+        </ol>
+      </div>
     </div>
 
     <div class="write-ex" id="writeit">
@@ -250,6 +266,14 @@
       <div class="code-actions">
         <button class="btn" id="wcheck">Check</button>
         <span class="code-result" id="wres"></span>
+      </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Say the line in plain words first: make a box for a decimal, name it maxSpeed, put 3.0 inside. Java writes those pieces in that exact order - type, name, equals sign, value.</li>
+          <li hidden>Which type? 3.0 has a decimal point, and the type table at the top of the lesson has exactly one row built for decimals. Then finish the statement the way Java finishes every statement.</li>
+          <li hidden>The full line is double maxSpeed = 3.0; and the very first example in this lesson, double speed = 2.4; , is the same shape with a different name and value. Match it and press Check.</li>
+        </ol>
       </div>
       <div class="whint" id="whint" hidden>Hint: type first, then the name, then = and the value. Decimals use the type <code>double</code>, and Java lines end with a semicolon.</div>
     </div>
@@ -429,6 +453,23 @@ try{
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

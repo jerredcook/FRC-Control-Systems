@@ -111,6 +111,12 @@
   .whint{display:none;margin-top:10px;font-size:14px;color:var(--muted);border-left:2px solid var(--amber);padding:4px 0 4px 12px}
   .whint.show{display:block}
   .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
   .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
   .btn:hover{border-color:var(--indigo);color:var(--text)}
   .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
@@ -263,6 +269,15 @@ rpmPub.<span class="fn">set</span>(shooter.<span class="fn">getRPM</span>());</p
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Sort out the direction first. The first two lines push robot values out to the dashboard, so they are put calls. RPM is a plain number, so the first blank is put plus the kind of value it carries.</li>
+          <li hidden>Second line: same direction, different cargo. hasNote answers true or false, so it is the true/false flavor of the very same call.</li>
+          <li hidden>Third line flows the other way: the robot reads a value the dashboard sends back, so the call starts with get instead of put. Its second argument is the fallback used until the dashboard supplies one, and the task tells you the code default to use.</li>
+          <li hidden>All four: putNumber, putBoolean, getNumber, 0.18. Fill them in and press Check. The two-way traffic is laid out line by line in the Telemetry block under "Publish out, read back."</li>
+        </ol>
+      </div>
     </div>
 
     <div class="code-ex" id="writeit">
@@ -275,6 +290,15 @@ rpmPub.<span class="fn">set</span>(shooter.<span class="fn">getRPM</span>());</p
         <span class="code-result" id="wRes"></span>
       </div>
       <div class="whint" id="wHintText">Hint: same shape as the RPM line in the ladder: SmartDashboard.putNumber("Arm/angleDeg", arm.getAngle());</div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Direction check first: the angle travels robot to dashboard, so this is a put line, and it starts with SmartDashboard, the class that owns those calls.</li>
+          <li hidden>An angle in degrees is a plain number, so pick the number flavor of put. It takes two things, in order: the name the dashboard will show, in quotes, then the live value.</li>
+          <li hidden>The task hands you both ingredients: the name is "Arm/angleDeg" and the value is whatever arm.getAngle() returns right now.</li>
+          <li hidden>So: SmartDashboard.putNumber("Arm/angleDeg", arm.getAngle()); - the exact skeleton of the RPM line above it. "Publish out, read back" shows all three put lines side by side.</li>
+        </ol>
+      </div>
     </div>
   </section>
 
@@ -526,6 +550,23 @@ try{
   inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); go(); } });
   hb.addEventListener('click',function(){ ht.classList.add('show'); });
 }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

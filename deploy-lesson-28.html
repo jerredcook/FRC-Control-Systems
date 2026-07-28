@@ -93,6 +93,12 @@
   .btn:hover{border-color:var(--indigo);color:var(--text)}
   .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
   .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
 
   .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
   .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
@@ -223,6 +229,15 @@
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Line 1: after new comes a constructor, and a constructor's name is always its class name. The type on the left of the equals sign has already spelled it out for you - copy it.</li>
+          <li hidden>Line 2 has two blanks. First, ask the camera for its freshest frame: the method name says get the latest result. Then the if guard: never act on an empty frame. The result can tell you whether it actually has targets, and since that is a yes-or-no question, the method reads like one.</li>
+          <li hidden>Last blank: the aiming error is the sideways angle to the tag, the number this lesson calls tx. In PhotonVision that sideways angle is the target's yaw, so you ask the target to get it.</li>
+          <li hidden>Top to bottom: PhotonCamera, getLatestResult, hasTargets, getYaw. Press Check, then reread "Read the target off the camera" - this exercise is that code block rebuilt from memory.</li>
+        </ol>
+      </div>
     </div>
 
     <div class="code-ex" id="wex">
@@ -235,6 +250,14 @@
         <span class="code-result" id="wex-res"></span>
       </div>
       <div class="ctask" id="wex-hintbox" style="display:none;margin:12px 0 0">Hint: type and name first, <span class="k">int id =</span>, then ask <span class="k">target</span> for its fiducial ID. Spacing, capitalization, and the semicolon are forgiven.</div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Left half: the task gives you the type and the name, so the line opens int id =.</li>
+          <li hidden>The ID belongs to the target you already picked out, so the right half asks target for it. One more piece of vision vocabulary: libraries call an AprilTag a fiducial, a trusted reference marker, and the getter is named after that word.</li>
+          <li hidden>Full line: int id = target.getFiducialId(); (semicolon forgiven). You can see it working in the camera code block in "Read the target off the camera".</li>
+        </ol>
+      </div>
     </div>
   </section>
 
@@ -506,6 +529,23 @@
     input.addEventListener('keydown',function(e){ if(e.key==='Enter'){ check(); } });
     input.addEventListener('input',function(){ input.style.borderColor='var(--amber)'; input.style.color='var(--amber)'; input.style.background='var(--panel-2)'; });
     hintBtn.addEventListener('click',function(){ hintBox.style.display=''; });
+  }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
   }catch(e){}
 })();
 </script>

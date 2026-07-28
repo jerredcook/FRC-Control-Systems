@@ -130,6 +130,13 @@
   .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
 </style>
 </head>
 <body>
@@ -207,6 +214,15 @@
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>First blank, inside the if. When x is inside the band, the method's work is done - it should hand 0.0 back to whoever called it. Look one line down: the keyword that hands a value back is already used there.</li>
+          <li hidden>Second blank is the loop's keep-going test. You want i to run 0, 1, 2, 3 - four passes - and the loop keeps going while i is less than the blank. Count the modules on a swerve drivetrain.</li>
+          <li hidden>Last blank: you are calling the method you just finished, and a call is simply the method's name with inputs in parentheses. The name is sitting at the top of the fragment.</li>
+          <li hidden>Answers: return, 4, deadband. Fill them in and press Check. If the loop bound felt like it should be 3, walk through "Loops do a thing N times" again - starting at 0 and stopping below 4 gives exactly four passes.</li>
+        </ol>
+      </div>
     </div>
 
     <div class="write-ex" id="writeit">
@@ -216,6 +232,14 @@
       <div class="code-actions">
         <button class="btn" id="wcheck">Check</button>
         <span class="code-result" id="wres"></span>
+      </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Split the line in half at the equals sign. The right half is the call: deadband's name with its two inputs in parentheses, x first, then 0.1, comma between them.</li>
+          <li hidden>The left half stores the result. deadband hands back a double, so declare a double named speed and point it at the call with an equals sign.</li>
+          <li hidden>The full line is double speed = deadband(x, 0.1); with the semicolon on the end. The exercise above made the same call with 0.20 and 0.10 - and the opening of this lesson is where the call-it-by-name idea lives.</li>
+        </ol>
       </div>
       <div class="whint" id="whint" hidden>Hint: <code>double speed =</code> then the method's name, then its two inputs in parentheses, separated by a comma. End with a semicolon.</div>
     </div>
@@ -395,6 +419,23 @@ try{
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

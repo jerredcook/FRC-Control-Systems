@@ -97,6 +97,12 @@
   .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
   .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
   .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
 
   .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
   .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
@@ -239,6 +245,15 @@ motorSim.<span class="fn">setRotorVelocity</span>(sim.<input class="blank" data-
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>First blank: you are calling new to build the physics model, and the type you construct is already written earlier on that very line as the variable's type. It is WPILib's simulated flywheel - the class name says exactly what it models.</li>
+          <li hidden>The middle two blanks are the sim loop's heartbeat. First you hand the model the voltage your code commanded - the method name says set-the-input-voltage in camelCase. Then you push time forward: the comment says "advance the physics one 20 ms step", and the method is the single everyday word for bringing something up to the present.</li>
+          <li hidden>Last blank reads the model's motion back out. You need its spinning speed, and the / 60.0 beside it hints at the units the getter returns: RPM. The getter's name lists the quantity in full - get, angular velocity, RPM.</li>
+          <li hidden>In order: FlywheelSim, setInputVoltage, update, getAngularVelocityRPM. They are the same four calls in "simulationPeriodic feeds the model" above - voltage in, physics forward, sensor value out.</li>
+        </ol>
+      </div>
     </div>
 
     <div class="code-ex" id="writeit">
@@ -248,6 +263,14 @@ motorSim.<span class="fn">setRotorVelocity</span>(sim.<input class="blank" data-
       <div class="code-actions" style="margin-top:12px">
         <button class="btn" id="wiCheck">Check</button>
         <span class="code-result" id="wiRes"></span>
+      </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Only one number matters here: the robot loop runs every 20 ms, and written in seconds that is 0.020. That number is the entire argument list.</li>
+          <li hidden>The object is sim, and the method is the one from the third blank above - the single word that advances the physics one step.</li>
+          <li hidden>Put together: sim.update(0.020); - the exact middle line of simulationPeriodic() in the sample. Voltage goes in before it, the sensor reads out after it.</li>
+        </ol>
       </div>
       <div id="wiHint" style="display:none;margin-top:10px;font-size:13.5px;color:var(--muted);border-left:2px solid var(--amber);padding:2px 0 2px 12px">Hint: call update on the sim object and pass the loop time in seconds, 0.020. The semicolon is optional here.</div>
     </div>
@@ -524,6 +547,23 @@ motorSim.<span class="fn">setRotorVelocity</span>(sim.<input class="blank" data-
   opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(revealed)return; picked=i;
     opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
     if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

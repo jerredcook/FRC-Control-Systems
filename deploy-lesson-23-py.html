@@ -96,6 +96,12 @@
   .whint{display:none;margin-top:10px;font-size:14px;color:var(--muted);border-left:2px solid var(--amber);padding:4px 0 4px 12px}
   .whint.show{display:block}
   .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
   .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
   .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
 
@@ -229,6 +235,15 @@ self.drive.<input class="blank" data-ans="tankdrive" data-reveal="tankDrive" ari
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>First blank: you are building the drivetrain by calling its class like a function, the same class this lesson imports from wpilib.drive. Two motor groups go in, one drivetrain object comes out.</li>
+          <li hidden>Second blank, read the comment: "one stick, mixed for you." Which driving style from the sim takes fwd and turn and does the left/right math itself? That style's name plus Drive is the method.</li>
+          <li hidden>Third blank: the arguments are (left, right), each side commanded directly. That is the other style from the sim, the one named after treads, plus Drive again.</li>
+          <li hidden>Top to bottom: DifferentialDrive, arcadeDrive, tankDrive. Fill them in and press Check. The "WPILib does the mixing" block shows all three, with the left = fwd + turn mixing spelled out in the comments.</li>
+        </ol>
+      </div>
     </div>
 
     <div class="code-ex" id="writeit">
@@ -241,6 +256,15 @@ self.drive.<input class="blank" data-ans="tankdrive" data-reveal="tankDrive" ari
         <span class="code-result" id="wRes"></span>
       </div>
       <div class="whint" id="wHintText">Hint: tankDrive takes left then right. Half speed on both sides is self.drive.tankDrive(0.5, 0.5)</div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>"Both sides at 0.5" means you are commanding left and right directly, so this is the tank-style call, made on self.drive, the same object the exercise above just used.</li>
+          <li hidden>That method takes two numbers: left side first, then right side. Think of rowing a boat with two oars - one number per oar.</li>
+          <li hidden>Driving straight means the two sides match, and half speed makes each of them 0.5.</li>
+          <li hidden>So: self.drive.tankDrive(0.5, 0.5) - and if you want to double-check the argument order, it is the tank method in "WPILib does the mixing."</li>
+        </ol>
+      </div>
     </div>
   </section>
 
@@ -545,6 +569,23 @@ try{
   inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); go(); } });
   hb.addEventListener('click',function(){ ht.classList.add('show'); });
 }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

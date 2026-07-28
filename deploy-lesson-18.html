@@ -97,6 +97,12 @@
   .btn:hover{border-color:var(--indigo);color:var(--text)}
   .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
   .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
 
   .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
   .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
@@ -239,6 +245,15 @@ motor.<input class="blank" data-ans="setposition|setposition()" data-reveal="set
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>First blank: the config that bakes the 10:1 gearbox into the controller. Its name literally spells out what it converts between - the sensor's turns and the mechanism's turns. Find it on the second line of the "Let the config do the division" code block.</li>
+          <li hidden>Second blank: a config does nothing until you hand it over. The finishing move is motor.getConfigurator(). followed by a one-word verb with cfg inside - the same verb every Phoenix 6 config ends with.</li>
+          <li hidden>The last two blanks are twins. Reading where the mechanism is now is the getter; declaring "zero is right here" is its setter. The comments above each line tell you which job is which.</li>
+          <li hidden>Top to bottom: SensorToMechanismRatio, apply, getPosition, setPosition. Fill them in and press Check. If the divide-by-ratio idea is still settling, drag the gear ratio slider in the sim - same motor turns, less mechanism motion - then reread "Let the config do the division".</li>
+        </ol>
+      </div>
     </div>
 
     <div class="write-ex" id="writeit">
@@ -248,6 +263,14 @@ motor.<input class="blank" data-ans="setposition|setposition()" data-reveal="set
       <div class="code-actions" style="margin-top:12px">
         <button class="btn" id="wcheck">Check</button>
         <span class="code-result" id="wres"></span>
+      </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>The elevator is resting at its bottom hard stop, and you want your code to call that exact spot zero. The "Let the config do the division" code block ends with this very move - "define zero wherever the mechanism sits right now".</li>
+          <li hidden>It is the setter twin of getPosition, and the value you hand it is 0 - like zeroing a kitchen scale with the empty bowl already sitting on it.</li>
+          <li hidden>The line is motor.setPosition(0); - from now on, every height the encoder reports is measured up from that hard stop.</li>
+        </ol>
       </div>
       <div class="whint" id="whint">Hint: it's the setter twin of getPosition: motor.setPosition(0);</div>
     </div>
@@ -509,6 +532,23 @@ motor.<input class="blank" data-ans="setposition|setposition()" data-reveal="set
     btn.addEventListener('click',judge);
     input.addEventListener('keydown',function(e){ if(e.key==='Enter'){ judge(); } });
     input.addEventListener('input',function(){ input.classList.remove('ok','bad'); });
+  }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
   }catch(e){}
 })();
 </script>

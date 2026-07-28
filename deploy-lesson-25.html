@@ -89,6 +89,12 @@
   .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
   .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
   .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
 
   .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
   .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
@@ -222,6 +228,15 @@ odometry.<input class="blank" data-ans="resetposition" data-fill="resetPosition"
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Start at line 1. The constructor wants to know three things about the starting moment: which way the robot faces, how far each wheel has rolled, and the pose you trust. Two are already typed in. The missing piece is the facing, and facing always comes from the gyro. Peek at the "Update it every loop" block above - every line there asks the gyro this same question.</li>
+          <li hidden>Line 2 is the bike computer move: every loop, fold the newest gyro and wheel readings into the running total, the way a bike computer adds each wheel turn to your trip distance. Odometry has one method whose whole job is advancing the estimate, and its name is the plainest verb in this lesson.</li>
+          <li hidden>Line 3 reads the estimate back out: you want the pose, and this class reports it in meters, so the method name says both of those words. Line 4 is the snap-back you practiced in the sim: a vision fix hands you the truth, and you reset the position to it.</li>
+          <li hidden>Top to bottom: getRotation2d, update, getPoseMeters, resetPosition. Type them in and press Check. If any felt shaky, reread the "Update it every loop" code block - this exercise is that block, rebuilt from memory.</li>
+        </ol>
+      </div>
     </div>
 
     <div class="code-ex" id="wex">
@@ -234,6 +249,15 @@ odometry.<input class="blank" data-ans="resetposition" data-fill="resetPosition"
         <span class="code-result" id="wex-res"></span>
       </div>
       <div class="ctask" id="wex-hintbox" style="display:none;margin:12px 0 0">Hint: start with the type and name, <span class="k">Pose2d pose =</span>, then ask <span class="k">odometry</span> for its pose in meters. Spacing, capitalization, and the semicolon are forgiven.</div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Every Java line that creates a variable has the same shape: type, name, equals, value. The task hands you the first two - the type is Pose2d and the name is pose - so the left half writes itself.</li>
+          <li hidden>Now the right half. Who actually knows the pose? The odometry object you have been feeding every loop. So the value is a question asked of odometry, written odometry.something().</li>
+          <li hidden>The something is the same method as blank 3 in the exercise above: the one that reports the pose, in meters. Say it out loud and you have almost typed it.</li>
+          <li hidden>Full line: Pose2d pose = odometry.getPoseMeters(); (the semicolon is forgiven). It is the "read the pose back" line of the "Update it every loop" block, word for word.</li>
+        </ol>
+      </div>
     </div>
   </section>
 
@@ -529,6 +553,23 @@ odometry.<input class="blank" data-ans="resetposition" data-fill="resetPosition"
     input.addEventListener('keydown',function(e){ if(e.key==='Enter'){ check(); } });
     input.addEventListener('input',function(){ input.style.borderColor='var(--amber)'; input.style.color='var(--amber)'; input.style.background='var(--panel-2)'; });
     hintBtn.addEventListener('click',function(){ hintBox.style.display=''; });
+  }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
   }catch(e){}
 })();
 </script>

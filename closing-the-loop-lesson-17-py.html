@@ -118,6 +118,12 @@
   .blank.ok{border-color:var(--green);color:var(--green);background:rgba(67,214,126,.1)}
   .blank.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.1)}
   .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
   .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
   .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
 
@@ -277,6 +283,15 @@ motor.<span class="fn">set_control</span>(self.request.<span class="fn">with_pos
         <button class="btn" id="check">Check</button>
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
+      </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Read the shape of the line: self.request = ____(0).with_slot(0). The blank is called with parentheses right after it, so it's a class name - the kind of request object you're building. Which request runs a profiled move?</li>
+          <li hidden>The task says the profile runs on board. That rules out a plain PositionVoltage request, which hands over the target in one jump. You want the request that makes the device build the ramp-cruise-ramp shape itself, using the cruise velocity and acceleration you configured.</li>
+          <li hidden>One more nudge: the next line sends self.request.with_position(target_rotations). So the object you build here is the position-flavored Motion Magic request, and its name says exactly that.</li>
+          <li hidden>The answer is MotionMagicVoltage. Type it and press Check, then reread "Three numbers and a request": the config sets cruise, acceleration, and jerk, and this one request tells the device to build and track the profile.</li>
+        </ol>
       </div>
     </div>
   </section>
@@ -617,6 +632,23 @@ motor.<span class="fn">set_control</span>(self.request.<span class="fn">with_pos
   opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(revealed)return; picked=i;
     opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
     if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

@@ -115,6 +115,13 @@
   .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
 </style>
 </head>
 <body>
@@ -191,6 +198,15 @@ intake.<input class="blank" data-ans="set_goal" data-reveal="set_goal" aria-labe
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>First blank: Intake becomes a subsystem by naming its parent. The commands2. part is written for you, and what follows is the library's base class for subsystems, capital S - the same parent from Lesson 2.4.</li>
+          <li hidden>Second blank: the comment on that line says "every method takes this first". Every Python method receives the object itself as its first parameter, under one conventional name - the other methods in this class already use it.</li>
+          <li hidden>Two left. The task's first sentence asks it straight: which method does the scheduler call on every subsystem every 20 ms? The comment under that blank says "runs once per loop, always". Then on the last line a command asks through the public door - the goal-setting method defined a few lines up, in snake_case.</li>
+          <li hidden>Answers: Subsystem, self, periodic, set_goal. Fill them in and press Check. All four live in "The subsystem owns its hardware" above - hardware kept inside, one public door in, periodic ticking every loop.</li>
+        </ol>
+      </div>
     </div>
 
     <div class="write-ex" id="writeit">
@@ -200,6 +216,14 @@ intake.<input class="blank" data-ans="set_goal" data-reveal="set_goal" aria-labe
       <div class="code-actions">
         <button class="btn" id="wcheck">Check</button>
         <span class="code-result" id="wres"></span>
+      </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>A command never touches the motor - it knocks on the subsystem's public door. In the fragment above, that door is the method set_goal.</li>
+          <li hidden>So the shape is object dot method with the value in parentheses. The object is intake, and the goal being asked for is 2.0.</li>
+          <li hidden>The full line is intake.set_goal(2.0) - the exercise's last line with a new number. "The subsystem owns its hardware" explains why the ask goes through the door instead of straight to the motor.</li>
+        </ol>
       </div>
       <div class="whint" id="whint" hidden>Hint: object dot method with the value in parentheses. The public method in the fragment above is <code>set_goal</code>.</div>
     </div>
@@ -339,6 +363,23 @@ try{
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

@@ -83,6 +83,12 @@
   .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
   .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
   .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
 
   .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
   .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
@@ -205,6 +211,15 @@
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Line 1: in the GUI you saved the path under a name, and that name became a file shipped with your robot code. So this method's job is to build a path from that path file - and its name says exactly that, starting with the word from.</li>
+          <li hidden>Line 2: a path is only data, like a route sketched on a map before a bike ride. To actually ride it you need a Command, and AutoBuilder's wrapper is named for what the command does to the path: it follows it.</li>
+          <li hidden>Line 3: a whole routine is different - you do not load it through a method, you construct one with new. The class is the library's own auto type, so its name is just the library's name plus Auto.</li>
+          <li hidden>Top to bottom: fromPathFile, followPath, PathPlannerAuto. Press Check, then reread "Design in a GUI, follow in one line" - all three answers are sitting in that code block.</li>
+        </ol>
+      </div>
     </div>
 
     <div class="code-ex" id="wex">
@@ -217,6 +232,15 @@
         <span class="code-result" id="wex-res"></span>
       </div>
       <div class="ctask" id="wex-hintbox" style="display:none;margin:12px 0 0">Hint: type and name first, <span class="k">PathPlannerPath path =</span>, then the class's <span class="k">fromPathFile</span> method with the name in quotes. Spacing, capitalization, and the semicolon are forgiven.</div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Left half first: type, name, equals. The task gives you both, so the line opens PathPlannerPath path =.</li>
+          <li hidden>Now the right half. No path object exists yet, so there is nothing to call a method on - you ask the class itself to do the loading. That is why it reads PathPlannerPath.something(...), the class acting as its own loader.</li>
+          <li hidden>The something is the same loader as blank 1 in the exercise above, and its argument is the exact name you saved in the GUI, in quotes: "ToGoal".</li>
+          <li hidden>Full line: PathPlannerPath path = PathPlannerPath.fromPathFile("ToGoal"); (semicolon forgiven). It mirrors the first line of the code block in "Design in a GUI, follow in one line".</li>
+        </ol>
+      </div>
     </div>
   </section>
 
@@ -553,6 +577,23 @@
     input.addEventListener('keydown',function(e){ if(e.key==='Enter'){ check(); } });
     input.addEventListener('input',function(){ input.style.borderColor='var(--amber)'; input.style.color='var(--amber)'; input.style.background='var(--panel-2)'; });
     hintBtn.addEventListener('click',function(){ hintBox.style.display=''; });
+  }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
   }catch(e){}
 })();
 </script>

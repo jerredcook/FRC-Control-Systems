@@ -125,6 +125,13 @@
   .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)} .coursenav a.next-link{color:var(--teal);border-color:rgba(52,215,197,.4)}
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
 </style>
 </head>
 <body>
@@ -212,6 +219,15 @@ autos.<input class="blank" data-ans="append" data-reveal="append" aria-label="bl
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>First blank: Python lists number their slots starting from zero, like a building where the ground floor is floor 0. front_left went into the list first - so which slot is it sitting in?</li>
+          <li hidden>Second blank: four modules, but the counting started at 0, so the last slot is not number 4. Count them out: 0, 1, 2, and the last one is... (the comment also hints at Python's back-of-the-list shortcut, which works here too).</li>
+          <li hidden>Two left. How do you write a brand-new list with nothing in it yet? You just watched modules get built with square brackets - now do the empty version. Then to put a routine in, use the list method whose name means "attach to the end".</li>
+          <li hidden>Answers: 0, 3 (or -1), [], append. Fill them in and press Check. The lists section at the top of the lesson replays every one of these moves if the 0-versus-3 dance still trips you.</li>
+        </ol>
+      </div>
     </div>
 
     <div class="write-ex" id="writeit">
@@ -221,6 +237,14 @@ autos.<input class="blank" data-ans="append" data-reveal="append" aria-label="bl
       <div class="code-actions">
         <button class="btn" id="wcheck">Check</button>
         <span class="code-result" id="wres"></span>
+      </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>The pattern is object dot method, with the input in parentheses. The object is the autos list, and the method is the same one you used on the exercise's last line.</li>
+          <li hidden>Inside the parentheses goes the thing being added: the routine's name, score_then_leave, spelled exactly in snake_case - it is a variable, so no quotes.</li>
+          <li hidden>The full line is autos.append(score_then_leave) - the same move as the exercise above. append is the growable list's whole superpower: contents arrive one at a time.</li>
+        </ol>
       </div>
       <div class="whint" id="whint" hidden>Hint: list dot method, with the routine's name in the parentheses. The list method that adds one item is <code>append</code>.</div>
     </div>
@@ -416,6 +440,23 @@ try{
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

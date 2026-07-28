@@ -81,6 +81,12 @@
   .code-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
   .code-result{font-family:var(--mono);font-size:13px;margin-left:auto}
   .code-result.ok{color:var(--green)} .code-result.no{color:var(--red)}
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
 
   .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
   .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
@@ -222,6 +228,15 @@
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Start with the __init__ blank. The comment next to it says "declare: I need the Intake". Scroll up to the full RunIntakeUntilLoaded class - its __init__ has exactly one line whose whole job is telling the scheduler which subsystem this command needs. That method, called on self, is your first blank (RobotPy keeps the camelCase name).</li>
+          <li hidden>Now the two def blanks in the middle. Think back to the stepper sim: two methods run every single loop. One does the work (its body runs the intake), and one answers "done yet?" (its body returns True or False). The worker comes first; the question is the one returning has_game_piece().</li>
+          <li hidden>Last blank. It runs once when the command stops, and the comment says "clean up, always". It is the method that even an interruption cannot skip - that is exactly why it takes that interrupted argument.</li>
+          <li hidden>Top to bottom: addRequirements, execute, isFinished, end. Type them in and press Check. If the order still feels fuzzy, step the lifecycle sim at the top one more time, then reread "The four methods - and the easy way" - the class there is this exercise with the answers filled in.</li>
+        </ol>
+      </div>
     </div>
 
     <div class="write-ex" id="writeit">
@@ -231,6 +246,14 @@
       <div class="code-actions" style="margin-top:12px">
         <button class="btn" id="wcheck">Check</button>
         <span class="code-result" id="wres"></span>
+      </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>You just filled this exact line in the exercise above - the __init__ line with the "declare: I need the Intake" comment. Same line, but this time you type all of it.</li>
+          <li hidden>Shape first: it is an ordinary method call on self - self, a dot, the method's name, then parentheses with the thing it needs inside. The thing this command needs is the intake subsystem.</li>
+          <li hidden>The line is self.addRequirements(intake). It is the first line of nearly every command you will ever write - the full class in "The four methods - and the easy way" shows it sitting right in __init__.</li>
+        </ol>
       </div>
       <div class="whint" id="whint">Hint: the method is addRequirements on self, and the thing it needs is intake: self.name(argument)</div>
     </div>
@@ -389,6 +412,23 @@
     btn.addEventListener('click',judge);
     input.addEventListener('keydown',function(e){ if(e.key==='Enter'){ judge(); } });
     input.addEventListener('input',function(){ input.classList.remove('ok','bad'); });
+  }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
   }catch(e){}
 })();
 </script>

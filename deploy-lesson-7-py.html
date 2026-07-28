@@ -130,6 +130,13 @@
   .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
 </style>
 </head>
 <body>
@@ -206,6 +213,15 @@ speed = <input class="blank" data-ans="deadband" data-reveal="deadband" aria-lab
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>First blank, inside the if. When x is inside the band, the function's work is done - it hands 0.0 straight back to whoever called it. Peek at the last line of the function: the keyword you need is already used there.</li>
+          <li hidden>Second blank drives the loop. In Python, "do this for i = 0, 1, 2, 3" uses the built-in that counts up to, but never including, a number. Four modules - so what should i loop over?</li>
+          <li hidden>Last blank: you are calling the function you just finished, by name, with 0.20 and 0.10 as its inputs. The name is on the def line at the top of the fragment.</li>
+          <li hidden>Answers: return, range(4), deadband. Fill them in and press Check. If range tripped you, re-read "Loops do a thing N times" - range(4) hands out 0, 1, 2, 3 and stops before 4.</li>
+        </ol>
+      </div>
     </div>
 
     <div class="write-ex" id="writeit">
@@ -215,6 +231,14 @@ speed = <input class="blank" data-ans="deadband" data-reveal="deadband" aria-lab
       <div class="code-actions">
         <button class="btn" id="wcheck">Check</button>
         <span class="code-result" id="wres"></span>
+      </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Split the line in half at the equals sign. The right half is the call: deadband's name with its two inputs in parentheses, x first, then 0.1, comma between them.</li>
+          <li hidden>The left half stores the result under a name: speed, then the equals sign. Python needs no type word in front and nothing at the end.</li>
+          <li hidden>The full line is speed = deadband(x, 0.1) - the same shape as the exercise's last line, just with x in place of 0.20. The opening of this lesson is where the call-it-by-name idea lives.</li>
+        </ol>
       </div>
       <div class="whint" id="whint" hidden>Hint: <code>speed =</code> then the method's name, then its two inputs in parentheses, separated by a comma.</div>
     </div>
@@ -393,6 +417,23 @@ try{
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

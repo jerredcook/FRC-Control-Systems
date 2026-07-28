@@ -132,6 +132,13 @@
   .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
 </style>
 </head>
 <body>
@@ -220,6 +227,15 @@ intake.<input class="blank" data-ans="describe" data-reveal="describe" aria-labe
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>First blank: Motor is the blueprint, and you need the one keyword that stamps a real object out of a blueprint. The second line of the fragment already uses it, so the answer is on screen.</li>
+          <li hidden>Second blank is the same pattern with the other half missing. This time new is written for you, so the blank is the blueprint's name - and both motors come from the same class.</li>
+          <li hidden>Now the last two. intake.____() asks intake to introduce itself - look at the Motor class at the top of the lesson for the method that prints the name and CAN id. And shooter.____ reads the field that stores the CAN id; the comment says 6 should come back.</li>
+          <li hidden>Answers in order: new, Motor, describe, canId. Press Check. If blueprint versus object still feels slippery, re-read "One class, many objects" - the class is the blueprint, and new stamps one real thing out of it.</li>
+        </ol>
+      </div>
     </div>
 
     <div class="write-ex" id="writeit">
@@ -229,6 +245,14 @@ intake.<input class="blank" data-ans="describe" data-reveal="describe" aria-labe
       <div class="code-actions">
         <button class="btn" id="wcheck">Check</button>
         <span class="code-result" id="wres"></span>
+      </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>This is the exact pattern you just practiced: Type name = new Type(inputs); - here the type is TalonFX and the name you want is motor.</li>
+          <li hidden>What goes in the parentheses? The CAN id, 10. Just like Motor("Intake", 5) took its setup values, a TalonFX takes the address it lives at on the CAN bus.</li>
+          <li hidden>The full line is TalonFX motor = new TalonFX(10); with the semicolon. This is the line "Objects model hardware" builds toward: one Java object for one physical device.</li>
+        </ol>
       </div>
       <div class="whint" id="whint" hidden>Hint: the pattern is Type name = new Type(canId); and here the type is <code>TalonFX</code> with CAN id 10.</div>
     </div>
@@ -441,6 +465,23 @@ try{
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

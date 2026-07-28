@@ -132,6 +132,13 @@
   .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
 </style>
 </head>
 <body>
@@ -215,6 +222,15 @@ can = shooter.<input class="blank" data-ans="can_id" data-reveal="can_id" aria-l
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>First blank: in Python you build an object by calling the class like a function. The blueprint here is named Motor - and the very next line builds the shooter the same way, so the pattern is right below the blank.</li>
+          <li hidden>Next, intake.____() asks intake to introduce itself. Look at the Motor class at the top of the lesson for the method that prints the name and CAN id.</li>
+          <li hidden>Last blank: shooter.____ reads the attribute that stores the CAN id - the comment says 6 should come back. Python spells multi-word names in snake_case.</li>
+          <li hidden>Answers in order: Motor, describe, can_id. Press Check. If blueprint versus object still feels slippery, re-read "One class, many objects" - the class is the blueprint, and calling it stamps one real thing out.</li>
+        </ol>
+      </div>
     </div>
 
     <div class="write-ex" id="writeit">
@@ -224,6 +240,14 @@ can = shooter.<input class="blank" data-ans="can_id" data-reveal="can_id" aria-l
       <div class="code-actions">
         <button class="btn" id="wcheck">Check</button>
         <span class="code-result" id="wres"></span>
+      </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Same stamp you just practiced: call the class like a function and store what comes out. The class is TalonFX, and the name to store it under is motor.</li>
+          <li hidden>Inside the parentheses goes the CAN id, 10 - just like Motor("Intake", 5) took its setup values, a TalonFX takes the address it lives at on the CAN bus.</li>
+          <li hidden>The full line is motor = TalonFX(10) - no extra keyword needed, calling the class does the building. This is the line "Objects model hardware" builds toward: one object for one physical device.</li>
+        </ol>
       </div>
       <div class="whint" id="whint" hidden>Hint: call the class like a function with the CAN id inside the parentheses, and store it under the name <code>motor</code>.</div>
     </div>
@@ -436,6 +460,23 @@ try{
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

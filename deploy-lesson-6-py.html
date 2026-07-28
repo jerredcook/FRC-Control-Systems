@@ -156,6 +156,13 @@
 
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+
+  .walkme{margin-top:12px}
+  .wm-btn{font-size:12px}
+  .wm-btn[disabled]{opacity:.6;cursor:default}
+  .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
+  .wm-steps.on{display:block}
+  .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
 </style>
 </head>
 <body>
@@ -242,6 +249,15 @@ too_fast = avg <input class="blank" data-ans=">|>=" data-reveal=">" aria-label="
         <button class="btn" id="reveal">Reveal</button>
         <span class="code-result" id="cres"></span>
       </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Start with the avg line. r1 + r2 is 5, and you want 2.5, so you need the divide that keeps the fraction. Python has two divide operators - a single-symbol one and a double-symbol one - and only one of them keeps the decimal.</li>
+          <li hidden>The whole line wants 2, the floored version of that same division. That is the other divide operator - the double-symbol one from the "// throws away the decimal" section above.</li>
+          <li hidden>Two left. too_fast asks a yes or no question: is avg bigger than 2.0? Use the same greater-than symbol you know from math class. And the print line wants the decimal 2.5 - which of your variables is holding it?</li>
+          <li hidden>Answers, top to bottom: /, //, &gt;, avg. Type them in and press Check. If the two divides still blur together, re-read "// throws away the decimal" - / keeps the fraction, // floors it, every time.</li>
+        </ol>
+      </div>
     </div>
 
     <div class="write-ex" id="writeit">
@@ -251,6 +267,14 @@ too_fast = avg <input class="blank" data-ans=">|>=" data-reveal=">" aria-label="
       <div class="code-actions">
         <button class="btn" id="wcheck">Check</button>
         <span class="code-result" id="wres"></span>
+      </div>
+      <div class="walkme">
+        <button class="btn wm-btn">🧭 Walk me through it</button>
+        <ol class="wm-steps">
+          <li hidden>Say the line in plain words first: make a variable named max_speed holding 3.0. Python keeps this short - no type word in front, no semicolon at the end.</li>
+          <li hidden>So the shape is just name, equals sign, value. The name is given in the task: max_speed. The value is 3.0.</li>
+          <li hidden>The full line is max_speed = 3.0 and that really is all of it. The opening section of the lesson shows why: Python reads the value and works the type out on its own. Type it and press Check.</li>
+        </ol>
       </div>
       <div class="whint" id="whint" hidden>Hint: just the name, an equals sign, and the value. Python needs no type in front and no semicolon.</div>
     </div>
@@ -430,6 +454,23 @@ try{
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll(".walkme"),function(w){
+      var btn=w.querySelector(".wm-btn"), steps=w.querySelector(".wm-steps");
+      if(!btn||!steps) return;
+      var items=steps.querySelectorAll("li"), shown=0;
+      btn.addEventListener("click",function(){
+        if(shown===0) steps.classList.add("on");
+        if(shown<items.length){ items[shown].hidden=false; shown++; }
+        if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
+        else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>
