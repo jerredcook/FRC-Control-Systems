@@ -60,6 +60,18 @@
   .log .h{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:6px}
   .log .l{color:var(--muted)} .log .l .on{color:var(--amber)} .log .l .wt{color:var(--teal)} .log .l .off{color:var(--faint)}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  /* can-do goals + closing check (added) */
+  .cando{border-left:3px solid var(--indigo);background:rgba(138,140,248,.07);border-radius:0 10px 10px 0;padding:12px 16px;margin:16px 0 4px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);display:block;margin-bottom:6px}
+  .cando ul{margin:0;padding-left:20px}
+  .cando li{color:var(--muted);font-size:15px;line-height:1.5;margin:3px 0}
+  .cando-check{margin-top:18px;display:grid;gap:8px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:flex-start;min-height:28px;padding:7px 11px;border:1px solid var(--line-2);border-radius:9px;background:var(--panel-2);cursor:pointer;font-size:15px;color:var(--muted);transition:.12s}
+  .cando-check .cc-row:hover{border-color:var(--indigo)}
+  .cando-check .cc-row .cc-box{flex:0 0 auto;width:19px;height:19px;border-radius:50%;border:2px solid var(--faint);color:transparent;display:grid;place-items:center;font-size:12px;line-height:1;margin-top:1px}
+  .cando-check .cc-row.on{color:var(--text);border-color:var(--green)}
+  .cando-check .cc-row.on .cc-box{border-color:var(--green);background:rgba(67,214,126,.15);color:var(--green)}
 
   .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--indigo);border-radius:12px;background:var(--panel);padding:14px 16px}
   .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:9px}
@@ -70,6 +82,8 @@
   .missions .m-item.cleared{color:var(--text)}
   .missions .m-item.cleared .m-st{color:var(--green)}
   .missions .m-item.gold .m-st{color:var(--amber)}
+  .missions .m-item{flex-wrap:wrap}
+  .missions .m-hint{flex:0 0 100%;margin:6px 0 0 22px;font-size:13px;color:var(--indigo);border-left:2px solid var(--line-2);padding-left:10px;font-style:italic}
 
   .codewrap{margin:18px 0}
   .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
@@ -161,6 +175,8 @@
     <div class="eyebrow">Triggers &amp; Button Bindings</div>
     <h1>Press a button,<br><span class="accent">fire</span> a command.</h1>
     <p class="dek">Bindings connect the controller to your commands. A button press starts an action - once, or for as long as you hold it. Try the gamepad.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Tell onTrue from whileTrue - onTrue fires once on the press, while whileTrue runs only while the button is held and ends the instant you let go.</li><li>Wire a button to a command in RobotContainer's configure_bindings(), the one place bindings live.</li><li>Explain that a Trigger is any boolean, so you can fire a command from a sensor with Trigger(...), not just from a button.</li></ul></div>
   </div>
 
   <section>
@@ -180,10 +196,10 @@
     </div>
     <div class="missions" id="missions">
       <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
-      <div class="m-item" data-m="mash"><span class="m-st">○</span><span>Mash <b>A</b> three times in <b>2 seconds</b> - really go for it. Watch the log: <b>onTrue</b> fires once per press, and nothing sticks in the running list.</span></div>
-      <div class="m-item" data-m="both"><span class="m-st">○</span><span>Hold <b>X</b> and <b>LB</b> together so <b>Aim</b> and <b>Slow mode</b> run at the same time. See that? Two <b>whileTrue</b> commands sharing the loop, no drama.</span></div>
-      <div class="m-item" data-m="endone"><span class="m-st">○</span><span>With both running, tap <b>X</b> to release it. Notice how <b>Aim</b> ends the instant you let go, while <b>Slow mode</b> never flinches. Each trigger minds its own command.</span></div>
-      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> with <b>Aim</b> and <b>Slow mode</b> both running, tap <b>A</b>. Three commands alive at once, and the scheduler juggles them all without dropping one.</span></div>
+      <div class="m-item" data-m="mash"><span class="m-st">○</span><span>Mash <b>A</b> three times in <b>2 seconds</b> - really go for it. Watch the log: <b>onTrue</b> fires once per press, and nothing sticks in the running list.</span><div class="m-hint" hidden>Stuck? A is the green "press" button. Click it three times fast, inside about two seconds - the log fills with three onTrue lines and the running list stays empty.</div></div>
+      <div class="m-item" data-m="both"><span class="m-st">○</span><span>Hold <b>X</b> and <b>LB</b> together so <b>Aim</b> and <b>Slow mode</b> run at the same time. See that? Two <b>whileTrue</b> commands sharing the loop, no drama.</span><div class="m-hint" hidden>Stuck? Tap X (it lights up and stays lit) and tap LB too. Both are "hold" buttons, so Aim and Slow mode sit in the Running now list together.</div></div>
+      <div class="m-item" data-m="endone"><span class="m-st">○</span><span>With both running, tap <b>X</b> to release it. Notice how <b>Aim</b> ends the instant you let go, while <b>Slow mode</b> never flinches. Each trigger minds its own command.</span><div class="m-hint" hidden>Stuck? With X and LB both lit, tap X again to release it. Aim drops off the running list while Slow mode stays - each trigger owns just its own command.</div></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> with <b>Aim</b> and <b>Slow mode</b> both running, tap <b>A</b>. Three commands alive at once, and the scheduler juggles them all without dropping one.</span><div class="m-hint" hidden>Stuck? Light up X and LB first so Aim and Slow mode are both running, then tap A. A's onTrue fires a third command while the two held ones keep going.</div></div>
     </div>
   </section>
 
@@ -321,6 +337,12 @@ self.driver.<span class="fn">x</span>().<input class="blank" data-ans="whiletrue
         <div class="gl"><b>From a sensor</b><span>Trigger(intake.has_game_piece).</span></div>
         <div class="gl"><b>Where</b><span>RobotContainer.configure_bindings().</span></div>
       </div>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Can you do these now? Tap each one you own.</div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Tell onTrue from whileTrue - onTrue fires once on the press, while whileTrue runs only while the button is held and ends the instant you let go.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Wire a button to a command in RobotContainer's configure_bindings(), the one place bindings live.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Explain that a Trigger is any boolean, so you can fire a command from a sensor with Trigger(...), not just from a button.</span></div>
+      </div>
       <a class="next" href="deploy-lesson-16-py.html">
         <div class="n-eyebrow">Up next · Part 3 · 06 · Finale</div>
         <h3>Default Commands &amp; Requirements</h3>
@@ -411,6 +433,17 @@ self.driver.<span class="fn">x</span>().<input class="blank" data-ans="whiletrue
       mPrevBoth=both;
     });
   });
+  // stuck hints: after ~150s of active interaction on an uncleared mission, reveal its hint
+  var mStuck={}, mInteracted=false;
+  try{ var mDemoEl=document.getElementById('demo'); if(mDemoEl){ mDemoEl.addEventListener('pointerdown',function(){mInteracted=true;},true); mDemoEl.addEventListener('input',function(){mInteracted=true;},true); } }catch(e){}
+  setInterval(function(){ try{
+    if(!mInteracted) return;
+    Object.keys(mItems).forEach(function(id){
+      var n=mItems[id]; if(!n||n.classList.contains('cleared')) return;
+      mStuck[id]=(mStuck[id]||0)+0.2;
+      if(mStuck[id]>=150){ var h=n.querySelector('.m-hint'); if(h&&h.hasAttribute('hidden')) h.removeAttribute('hidden'); }
+    });
+  }catch(e){} },200);
   }catch(e){}
 
   var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
@@ -478,6 +511,22 @@ self.driver.<span class="fn">x</span>().<input class="blank" data-ans="whiletrue
     });
   }catch(e){}
 })();
+</script>
+<script>
+(function(){try{
+  var KEY="frc:cando", file=location.pathname.split("/").pop();
+  var map={}; try{map=JSON.parse(localStorage.getItem(KEY))||{};}catch(e){}
+  var rows=document.querySelectorAll("#candoCheck .cc-row");
+  Array.prototype.forEach.call(rows,function(row,i){
+    var k=file+"#"+i;
+    if(map[k]) row.classList.add("on");
+    row.addEventListener("click",function(){
+      var on=row.classList.toggle("on");
+      if(on){map[k]=true;}else{delete map[k];}
+      try{localStorage.setItem(KEY,JSON.stringify(map));}catch(e){}
+    });
+  });
+}catch(e){}})();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>

@@ -61,6 +61,18 @@
   input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--indigo);cursor:pointer;box-shadow:0 0 10px -1px var(--indigo)}
   input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  /* can-do goals + closing check (added) */
+  .cando{border-left:3px solid var(--indigo);background:rgba(138,140,248,.07);border-radius:0 10px 10px 0;padding:12px 16px;margin:16px 0 4px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);display:block;margin-bottom:6px}
+  .cando ul{margin:0;padding-left:20px}
+  .cando li{color:var(--muted);font-size:15px;line-height:1.5;margin:3px 0}
+  .cando-check{margin-top:18px;display:grid;gap:8px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:flex-start;min-height:28px;padding:7px 11px;border:1px solid var(--line-2);border-radius:9px;background:var(--panel-2);cursor:pointer;font-size:15px;color:var(--muted);transition:.12s}
+  .cando-check .cc-row:hover{border-color:var(--indigo)}
+  .cando-check .cc-row .cc-box{flex:0 0 auto;width:19px;height:19px;border-radius:50%;border:2px solid var(--faint);color:transparent;display:grid;place-items:center;font-size:12px;line-height:1;margin-top:1px}
+  .cando-check .cc-row.on{color:var(--text);border-color:var(--green)}
+  .cando-check .cc-row.on .cc-box{border-color:var(--green);background:rgba(67,214,126,.15);color:var(--green)}
 
   .codewrap{margin:18px 0}
   .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
@@ -156,6 +168,8 @@
     <div class="eyebrow">Motors &amp; Controllers</div>
     <h1>Command a<br><span class="accent">motor</span>.</h1>
     <p class="dek">Your code never touches a motor directly. It talks to a motor controller, and how you ask, percent or volts, decides whether the robot behaves the same on a full battery and a tired one.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Explain why setVoltage beats set(percent) - a percent command fades as the battery sags, while setVoltage holds real volts from the first match to the last.</li><li>Pick the right neutral mode for a job - Brake to stop hard and hold, Coast to roll freely to a stop.</li><li>Say what a motor controller does - it takes your code's command over CAN and turns it into the power the motor actually gets.</li></ul></div>
   </div>
 
   <section>
@@ -369,6 +383,12 @@ motor.<input class="blank" data-ans="setvoltage" aria-label="blank" autocomplete
         <div class="gl"><b>setVoltage(v)</b><span>Real volts, sag-compensated.</span></div>
         <div class="gl"><b>Neutral mode</b><span>Brake holds; coast spins free.</span></div>
         <div class="gl"><b>Configuration</b><span>Inverted, limits, gains, more.</span></div>
+      </div>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Can you do these now? Tap each one you own.</div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Explain why setVoltage beats set(percent) - a percent command fades as the battery sags, while setVoltage holds real volts from the first match to the last.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Pick the right neutral mode for a job - Brake to stop hard and hold, Coast to roll freely to a stop.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Say what a motor controller does - it takes your code's command over CAN and turns it into the power the motor actually gets.</span></div>
       </div>
       <a class="next" href="deploy-lesson-18.html">
         <div class="n-eyebrow">Up next · Part 4 · 02</div>
@@ -670,6 +690,22 @@ motor.<input class="blank" data-ans="setvoltage" aria-label="blank" autocomplete
     });
   }catch(e){}
 })();
+</script>
+<script>
+(function(){try{
+  var KEY="frc:cando", file=location.pathname.split("/").pop();
+  var map={}; try{map=JSON.parse(localStorage.getItem(KEY))||{};}catch(e){}
+  var rows=document.querySelectorAll("#candoCheck .cc-row");
+  Array.prototype.forEach.call(rows,function(row,i){
+    var k=file+"#"+i;
+    if(map[k]) row.classList.add("on");
+    row.addEventListener("click",function(){
+      var on=row.classList.toggle("on");
+      if(on){map[k]=true;}else{delete map[k];}
+      try{localStorage.setItem(KEY,JSON.stringify(map));}catch(e){}
+    });
+  });
+}catch(e){}})();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>

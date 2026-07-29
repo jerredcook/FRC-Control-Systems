@@ -59,6 +59,29 @@
   .btn:hover{border-color:var(--indigo);color:var(--text)}
   .btn.ghost{color:var(--faint)} .btn.ghost:hover{border-color:var(--muted);color:var(--text)}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  /* can-do goals + closing check (added) */
+  .cando{border-left:3px solid var(--indigo);background:rgba(138,140,248,.07);border-radius:0 10px 10px 0;padding:12px 16px;margin:16px 0 4px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);display:block;margin-bottom:6px}
+  .cando ul{margin:0;padding-left:20px}
+  .cando li{color:var(--muted);font-size:15px;line-height:1.5;margin:3px 0}
+  .cando-check{margin-top:18px;display:grid;gap:8px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:flex-start;min-height:28px;padding:7px 11px;border:1px solid var(--line-2);border-radius:9px;background:var(--panel-2);cursor:pointer;font-size:15px;color:var(--muted);transition:.12s}
+  .cando-check .cc-row:hover{border-color:var(--indigo)}
+  .cando-check .cc-row .cc-box{flex:0 0 auto;width:19px;height:19px;border-radius:50%;border:2px solid var(--faint);color:transparent;display:grid;place-items:center;font-size:12px;line-height:1;margin-top:1px}
+  .cando-check .cc-row.on{color:var(--text);border-color:var(--green)}
+  .cando-check .cc-row.on .cc-box{border-color:var(--green);background:rgba(67,214,126,.15);color:var(--green)}
+  /* missions + stuck hints (added) */
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--indigo);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+  .missions .m-hint{flex:0 0 100%;margin:6px 0 0 22px;font-size:13px;color:var(--indigo);border-left:2px solid var(--line-2);padding-left:10px;font-style:italic}
 
   .codewrap{margin:18px 0}
   .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
@@ -151,6 +174,8 @@
     <div class="eyebrow">Default Commands &amp; Requirements</div>
     <h1>One owner per<br><span class="accent">mechanism</span>.</h1>
     <p class="dek">The scheduler's killer feature: two commands can never fight over the same subsystem. And a default command keeps a mechanism doing something useful when nothing else asks.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Explain the one-owner rule - addRequirements tells the scheduler which subsystem a command needs, and only one command can own a subsystem at a time.</li><li>Predict what happens when a new command wants a subsystem another command already holds - the newcomer interrupts the old one.</li><li>Give a subsystem a fallback with setDefaultCommand and say when it runs - whenever nothing else requires that subsystem.</li></ul></div>
   </div>
 
   <section>
@@ -179,6 +204,13 @@
       </div>
     </div>
     <p class="caption">Schedule Aim then FollowPath - FollowPath <em>interrupts</em> Aim, because both need Drive. RunIntake never disturbs Drive; different requirement. End the Drive command and its default, TeleopDrive, resumes on its own.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
+      <div class="m-item" data-m="interrupt"><span class="m-st">○</span><span>Schedule <b>Aim</b>, then schedule <b>FollowPath</b>. Watch FollowPath shove Aim off the Drive box - two commands wanted the same subsystem, and the newcomer wins.<div class="m-hint" hidden>Stuck? Click <b>Schedule Aim</b> first, then <b>Schedule FollowPath</b>. The log reads "FollowPath interrupts AimAtTarget" and the Drive owner flips to FollowPath.</div></span></div>
+      <div class="m-item" data-m="coexist"><span class="m-st">○</span><span>With a real command on Drive, click <b>Schedule RunIntake</b>. Notice Drive never flinches - RunIntake needs a different subsystem, so each mechanism keeps its own owner at once.<div class="m-hint" hidden>Stuck? Schedule Aim or FollowPath on Drive first, then click <b>Schedule RunIntake</b>. The Drive box stays put while the Intake box switches to RunIntake.</div></span></div>
+      <div class="m-item" data-m="resume"><span class="m-st">○</span><span>Now press <b>End Drive cmd</b>. Watch <b>TeleopDrive</b>, the default, slide back into the Drive box on its own the instant nothing else needs Drive.<div class="m-hint" hidden>Stuck? You need a non-default command on Drive first (Schedule Aim or FollowPath), then click <b>End Drive cmd</b>. The default TeleopDrive resumes by itself.</div></span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> tell the whole story in one run without pressing Reset - interrupt a Drive command, keep RunIntake alive alongside it, then hand Drive back to its default.<div class="m-hint" hidden>Stuck? Do it in this order, all before touching Reset: Schedule Aim, Schedule FollowPath (the interrupt), Schedule RunIntake (the coexist), then End Drive cmd (the resume).</div></span></div>
+    </div>
   </section>
 
   <section>
@@ -327,6 +359,12 @@ driver.<span class="fn">x</span>().<input class="blank" data-ans="whiletrue" dat
         <div class="gl"><b>Default command</b><span>Runs when nothing else requires it.</span></div>
         <div class="gl"><b>setDefaultCommand</b><span>Usually teleop driving.</span></div>
       </div>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Can you do these now? Tap each one you own.</div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Explain the one-owner rule - addRequirements tells the scheduler which subsystem a command needs, and only one command can own a subsystem at a time.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Predict what happens when a new command wants a subsystem another command already holds - the newcomer interrupts the old one.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Give a subsystem a fallback with setDefaultCommand and say when it runs - whenever nothing else requires that subsystem.</span></div>
+      </div>
       <a class="next" href="code.html">
         <div class="n-eyebrow">Part 3 complete · Command-Based Robots</div>
         <h3>On to Part 4 - Talking to Hardware →</h3>
@@ -382,6 +420,55 @@ driver.<span class="fn">x</span>().<input class="blank" data-ans="whiletrue" dat
     });
   });
   logLine('<span class="dft">- schedule commands and watch the owners -</span>'); render();
+
+  // ---- missions + stuck hints (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  // These listeners attach after the sim's own, so they read the updated state{}.
+  // mCurDrive holds the previous Drive owner so we can spot an interrupt (one non-default
+  // command replaced by a different non-default one). Flags reset only on the Reset button,
+  // so Gold demands the whole story - interrupt, coexist, resume - in one uninterrupted run.
+  var mCurDrive=state.drive, mSawInterrupt=false, mSawCoexist=false, mSawResume=false;
+  var mInteracted=false, mStuck={};
+  Array.prototype.forEach.call(document.querySelectorAll('.controls .btn'),function(b){
+    b.addEventListener('click',function(){
+      try{
+        mInteracted=true;
+        var act=b.getAttribute('data-act'), prevDrive=mCurDrive, nowDrive=state.drive;
+        if(act==='reset'){ mSawInterrupt=false; mSawCoexist=false; mSawResume=false; mCurDrive=state.drive; return; }
+        if(prevDrive!==DEFAULTS.drive && nowDrive!==DEFAULTS.drive && nowDrive!==prevDrive){ mSawInterrupt=true; mClear('interrupt'); }
+        if(nowDrive!==DEFAULTS.drive && state.intake!==DEFAULTS.intake){ mSawCoexist=true; mClear('coexist'); }
+        if(act==='endDrive' && prevDrive!==DEFAULTS.drive && nowDrive===DEFAULTS.drive){ mSawResume=true; mClear('resume'); }
+        if(mSawInterrupt && mSawCoexist && mSawResume){ mClear('gold'); }
+        mCurDrive=nowDrive;
+      }catch(e){}
+    });
+  });
+  setInterval(function(){ try{
+    if(!mInteracted) return;
+    Object.keys(mItems).forEach(function(id){
+      var n=mItems[id]; if(!n||n.classList.contains('cleared')) return;
+      mStuck[id]=(mStuck[id]||0)+0.2;
+      if(mStuck[id]>=150){ var h=n.querySelector('.m-hint'); if(h&&h.hasAttribute('hidden')) h.removeAttribute('hidden'); }
+    });
+  }catch(e){} },200);
+  }catch(e){}
 
   var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
   function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'').replace(/\(\)$/,'');}
@@ -448,6 +535,22 @@ driver.<span class="fn">x</span>().<input class="blank" data-ans="whiletrue" dat
     });
   }catch(e){}
 })();
+</script>
+<script>
+(function(){try{
+  var KEY="frc:cando", file=location.pathname.split("/").pop();
+  var map={}; try{map=JSON.parse(localStorage.getItem(KEY))||{};}catch(e){}
+  var rows=document.querySelectorAll("#candoCheck .cc-row");
+  Array.prototype.forEach.call(rows,function(row,i){
+    var k=file+"#"+i;
+    if(map[k]) row.classList.add("on");
+    row.addEventListener("click",function(){
+      var on=row.classList.toggle("on");
+      if(on){map[k]=true;}else{delete map[k];}
+      try{localStorage.setItem(KEY,JSON.stringify(map));}catch(e){}
+    });
+  });
+}catch(e){}})();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>
