@@ -304,12 +304,17 @@
             } catch (e) { return 0; }
           }
           var golds = countKeys("frc:gold"), missions = countKeys("frc:missions");
-          var week = 0;
+          var week = 0, weeksActive = 0, courseTotal = 0;
           try {
             var log = JSON.parse(localStorage.getItem("frc:log")) || [];
             var cutoff = Date.now() - 7 * 86400000;
             var courseId = prefix.slice(0, -1);
-            week = log.filter(function (e) { return e && e.ts > cutoff && e.c === courseId; }).length;
+            var mine = log.filter(function (e) { return e && e.ts && e.c === courseId; });
+            week = mine.filter(function (e) { return e.ts > cutoff; }).length;
+            courseTotal = mine.length;
+            var wset = {};
+            mine.forEach(function (e) { wset[Math.floor(e.ts / 604800000)] = 1; });
+            weeksActive = Object.keys(wset).length;
           } catch (e) {}
           var pr = null;
           try { pr = JSON.parse(localStorage.getItem("frc:predict")); } catch (e) {}
@@ -317,6 +322,7 @@
           if (golds > 0) bits.push("\u2605 <b>" + golds + "</b> gold");
           if (missions > 0) bits.push("<b>" + missions + "</b> missions cleared");
           if (week > 0) bits.push("<b>" + week + "</b> lesson" + (week === 1 ? "" : "s") + " this week");
+          if (weeksActive > 1) bits.push("<b>" + courseTotal + "</b> over <b>" + weeksActive + "</b> weeks - steady wins");
           if (pr && (pr.r + pr.w) >= 5) bits.push("prediction record <b>" + pr.r + "/" + (pr.r + pr.w) + "</b>");
           if (bits.length) {
             var ms = document.createElement("div");

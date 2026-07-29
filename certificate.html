@@ -76,6 +76,29 @@
   .backlink:hover{border-color:var(--teal);color:var(--text)}
   footer{padding:24px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
 
+  .cert .pchip{opacity:.45;transition:.2s}
+  .cert .pchip.earned{opacity:1}
+  .cert .pchip.earned::before{content:"\2713 ";color:var(--cert)}
+
+  .resume-stage{padding:8px 0 30px}
+  .resume{--cert:#6FE0D8;position:relative;border:2px solid var(--cert);border-radius:16px;background:linear-gradient(180deg,#0f1830,#0b1322);padding:34px 40px}
+  .resume h2{font-size:clamp(1.5rem,4vw,2.1rem);margin:0 0 2px;letter-spacing:-.02em;font-weight:850}
+  .resume .rsub{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-bottom:22px}
+  .resume .rsec{margin-top:22px}
+  .resume .rsec-h{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--cert);margin-bottom:10px}
+  .resume .rrow{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:7px 0;border-bottom:1px solid var(--line-2)}
+  .resume .rrow:last-child{border-bottom:none}
+  .resume .rrow .rl{color:var(--text);font-size:15px}
+  .resume .rrow .rr{font-family:var(--mono);font-size:13px;color:var(--muted)}
+  .resume .rbadge{color:#06121f;background:var(--cert);border-radius:20px;padding:2px 9px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;font-weight:700}
+  .resume .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+  .resume .rchip{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--text);border:1px solid var(--line-2);border-radius:20px;padding:6px 11px}
+  .resume .weeks{display:flex;gap:5px;align-items:flex-end;height:52px;margin-top:8px}
+  .resume .wk{flex:1;background:var(--cert);border-radius:3px 3px 0 0;min-height:3px;opacity:.85}
+  .resume .wklab{display:flex;gap:5px;margin-top:5px;font-family:var(--mono);font-size:9px;color:var(--faint)}
+  .resume .wklab span{flex:1;text-align:center}
+  .resume .rempty{color:var(--faint);font-style:italic;font-size:14px}
+
   @media print{
     @page{size:landscape;margin:0.5in}
     body{background:#fff;color:#111;background-image:none}
@@ -89,6 +112,12 @@
     .cert .pchip{color:#067;border-color:#bbb}
     .cert .who{border-color:#999}
     .cert .sig .nm{color:#111}
+    .resume{border-color:#0a8;background:#fff}
+    .resume h2,.resume .rrow .rl{color:#111}
+    .resume .rsub,.resume .rrow .rr,.resume .rchip{color:#444;border-color:#bbb}
+    .resume .rsec-h{color:#067}
+    .resume .rbadge{background:#067;color:#fff}
+    .resume .wk{background:#067}
   }
   @media (prefers-reduced-motion: reduce){*{transition:none!important}}
 </style>
@@ -110,6 +139,7 @@
     <button class="tab" data-course="build">🔧 Build</button>
     <button class="tab" data-course="gamesense">🧠 Game Sense</button>
     <button class="tab" data-course="academy">🏅 Academy</button>
+    <button class="tab" data-course="resume">🎒 Robot Résumé</button>
   </div>
 
   <div class="controls no-print">
@@ -144,6 +174,10 @@
     </div>
   </div>
 
+  <div class="resume-stage" id="resumeStage" style="display:none">
+    <div class="resume" id="resume"></div>
+  </div>
+
   <a class="backlink no-print" id="backlink" href="index.html">← Back to the academy</a>
 </div>
 
@@ -158,6 +192,7 @@
       seal:"Closing the Loop", sub:"A control systems course for FRC",
       accent:"#34D7C5", hub:"closing-the-loop.html", key:"closing-the-loop:done", total:24,
       lessonRe:/^closing-the-loop-lesson-\d+(-py)?\.html$/,
+      cps:["closing-the-loop-checkpoint-1.html","closing-the-loop-checkpoint-2.html","closing-the-loop-checkpoint-3.html","closing-the-loop-checkpoint-4.html","closing-the-loop-checkpoint-5.html"],
       forText:"has completed all 24 lessons - from feedback fundamentals through PID, feedforward, real WPILib code, CTRE Phoenix 6, tuned mechanisms, and state-space control.",
       parts:["I · The Idea","II · From Math to Code","III · CTRE Phoenix 6","IV · Tune a Real Mechanism","V · Beyond"]
     },
@@ -165,6 +200,7 @@
       seal:"Deploy", sub:"Programming an FRC robot",
       accent:"#8E8CF8", hub:"code.html", key:"deploy:done", total:37,
       lessonRe:/^deploy-lesson-\d+(-py)?\.html$/,
+      cps:["deploy-checkpoint-1.html","deploy-checkpoint-2.html","deploy-checkpoint-3.html","deploy-checkpoint-4.html",null,"deploy-checkpoint-6.html","deploy-checkpoint-7.html","deploy-checkpoint-8.html",null],
       forText:"has completed all 37 lessons - from the toolchain and just-enough Java through command-based robots, hardware, driving and autonomous, vision, pro practices, and a real-robot capstone.",
       parts:["1 · Toolchain","2 · Just-Enough Java","3 · Command-Based","4 · Talking to Hardware","5 · Make It Move","6 · Driving & Autonomous","7 · Seeing & Thinking","8 · Pro Practices","9 · Capstone"]
     },
@@ -172,6 +208,7 @@
       seal:"Fabricate", sub:"Building an FRC robot",
       accent:"#FFB020", hub:"build.html", key:"build:done", total:44,
       lessonRe:/^build-lesson-\d+\.html$/,
+      cps:["build-checkpoint-1.html","build-checkpoint-2.html","build-checkpoint-3.html","build-checkpoint-4.html","build-checkpoint-5.html","build-checkpoint-6.html","build-checkpoint-7.html","build-checkpoint-8.html"],
       forText:"has completed all 44 lessons - from shop safety and materials through power transmission, mechanisms, drivetrains, electrical and pneumatics, design and CAD, and a full build season.",
       parts:["1 · The Shop","2 · Materials & Stock","3 · Power Transmission","4 · Mechanisms","5 · The Drivetrain","6 · Electrical & Pneumatics","7 · Design & CAD","8 · Build Season"]
     },
@@ -179,6 +216,7 @@
       seal:"Game Sense", sub:"Reading and playing the game",
       accent:"#ff8fb5", hub:"gamesense.html", key:"gamesense:done", total:7,
       lessonRe:/^gamesense-lesson-\d+\.html$/,
+      cps:["gamesense-checkpoint-1.html","gamesense-checkpoint-2.html"],
       forText:"has completed all 7 lessons - reading a game and its manual, scoring math, ranking points, robot roles, alliance selection, and match strategy, using the ORBIT practice game.",
       parts:["1 · Read the Game","2 · Play the Game"]
     },
@@ -212,9 +250,25 @@
     return Math.min(Object.keys(seen).length, c.total);
   }
 
-  function chipHTML(p){
-    if(typeof p==="string") return '<span class="pchip">'+esc(p)+'</span>';
-    return '<span class="pchip" style="color:'+p.c+';border-color:'+p.c+'55">'+esc(p.t)+'</span>';
+  function doneMapOf(key){ try{ return JSON.parse(localStorage.getItem(key))||{}; }catch(e){ return {}; } }
+  function chipHTML(p, earned){
+    var cls="pchip"+(earned?" earned":"");
+    if(typeof p==="string") return '<span class="'+cls+'">'+esc(p)+'</span>';
+    return '<span class="'+cls+'" style="color:'+p.c+';border-color:'+p.c+'55">'+esc(p.t)+'</span>';
+  }
+  // a Part chip lights when its checkpoint is done; parts without one (or the
+  // academy course chips) light when that whole course is complete.
+  function partEarned(courseKey, i){
+    try{
+      if(courseKey==="academy"){
+        var order=["build","deploy","control","gamesense"];
+        var k=order[i]; if(!k) return false;
+        return countDone(COURSES[k])>=COURSES[k].total;
+      }
+      var c=COURSES[courseKey]; if(!c) return false;
+      if(c.cps && c.cps[i]) return !!doneMapOf(c.key)[c.cps[i]];
+      return countDone(c)>=c.total;
+    }catch(e){ return false; }
   }
 
   function progressText(courseKey){
@@ -232,8 +286,20 @@
   }
 
   var current="control";
+  var certStage=document.querySelector(".cert-stage"), resumeStage=document.getElementById("resumeStage");
   function render(courseKey){
     current=courseKey;
+    Array.prototype.forEach.call(tabsEl.querySelectorAll(".tab"), function(t){
+      t.classList.toggle("active", t.getAttribute("data-course")===courseKey);
+    });
+    if(courseKey==="resume"){
+      certStage.style.display="none"; resumeStage.style.display="block";
+      tabsEl.style.setProperty("--sel", "#6FE0D8");
+      backEl.setAttribute("href","index.html"); backEl.textContent="← Back to the academy";
+      renderResume();
+      return;
+    }
+    certStage.style.display="block"; resumeStage.style.display="none";
     var c=COURSES[courseKey];
     certEl.style.setProperty("--cert", c.accent);
     tabsEl.style.setProperty("--sel", c.accent);
@@ -241,13 +307,65 @@
     subEl.textContent=c.sub;
     forEl.textContent=c.forText;
     signmEl.textContent=c.seal;
-    partsEl.innerHTML=c.parts.map(chipHTML).join("");
+    partsEl.innerHTML=c.parts.map(function(p,i){ return chipHTML(p, partEarned(courseKey,i)); }).join("");
     backEl.setAttribute("href", c.hub);
     backEl.textContent = courseKey==="academy" ? "← Back to the academy" : "← Back to the course map";
     progEl.innerHTML=progressText(courseKey);
-    Array.prototype.forEach.call(tabsEl.querySelectorAll(".tab"), function(t){
-      t.classList.toggle("active", t.getAttribute("data-course")===courseKey);
+  }
+
+  // ---- Robot Résumé: one printable record of everything earned ----
+  function renderResume(){
+    var el=document.getElementById("resume"); if(!el) return;
+    var name=(nameEl.value.trim()||"Your Name");
+    function esc2(s){ return esc(s); }
+    // courses
+    var courseRows="";
+    [["control","🎯 Closing the Loop"],["deploy","🎮 Deploy"],["build","🔧 Fabricate"],["gamesense","🧠 Game Sense"]].forEach(function(pair){
+      var c=COURSES[pair[0]], n=countDone(c);
+      var badge = n>=c.total ? '<span class="rbadge">complete</span>' : '';
+      courseRows+='<div class="rrow"><span class="rl">'+pair[1]+'</span><span class="rr">'+n+' / '+c.total+' '+badge+'</span></div>';
     });
+    // parts cleared across all courses
+    var partsCleared=0, partsTotal=0;
+    ["control","deploy","build","gamesense"].forEach(function(k){
+      var c=COURSES[k];
+      c.parts.forEach(function(p,i){ if(c.cps && c.cps[i]!==undefined){ partsTotal++; if(partEarned(k,i)) partsCleared++; } });
+    });
+    // highlights
+    function keyCount(key,re){ var m=doneMapOf(key), n=0; Object.keys(m).forEach(function(x){ if(m[x]&&(!re||re.test(x))) n++; }); return n; }
+    var golds=keyCount("frc:gold"), missions=keyCount("frc:missions");
+    var labs=keyCount("deploy:done", /^deploy-lab-/);
+    // companions used
+    var comps=[["frc:scout","Scout"],["frc:drivelab","Drive Lab"],["frc:design","Design Challenge"],["frc:firstpowerup","First Power-Up"],["frc:pitclinic","Pit Clinic"],["frc:prreview","PR Review"],["frc:seasonmap","Season Map"],["frc:robotmap","Robot Map"],["frc:pitch","Pitch Clinic"],["frc:cad","CAD Depth"],["frc:print","Print & CNC"],["frc:leadership","Leadership"]];
+    var used=comps.filter(function(c){ try{ var v=localStorage.getItem(c[0]); return v && v!=="{}" && v!=="null"; }catch(e){ return false; } }).map(function(c){ return c[1]; });
+    var hi='<div class="chips">';
+    if(golds)hi+='<span class="rchip">★ '+golds+' gold</span>';
+    if(missions)hi+='<span class="rchip">'+missions+' missions</span>';
+    if(partsCleared)hi+='<span class="rchip">'+partsCleared+' parts cleared</span>';
+    if(labs)hi+='<span class="rchip">'+labs+' XRP labs</span>';
+    used.forEach(function(u){ hi+='<span class="rchip">'+esc2(u)+'</span>'; });
+    hi+='</div>';
+    if(!golds && !missions && !partsCleared && !labs && !used.length) hi='<div class="rempty">Start clearing missions, checkpoints, and labs and they will show up here.</div>';
+    // activity: last 8 weeks from frc:log
+    var weeks="", act='<div class="rempty">Finish a few lessons and your weekly activity will appear here.</div>';
+    try{
+      var log=JSON.parse(localStorage.getItem("frc:log"))||[];
+      if(log.length){
+        var WEEK=604800000, now=Date.now(), buckets=[0,0,0,0,0,0,0,0];
+        log.forEach(function(e){ if(!e||!e.ts) return; var w=Math.floor((now-e.ts)/WEEK); if(w>=0&&w<8) buckets[7-w]++; });
+        var mx=Math.max.apply(null,buckets)||1;
+        var bars=buckets.map(function(v){ return '<div class="wk" style="height:'+Math.round(v/mx*100)+'%" title="'+v+' this week"></div>'; }).join("");
+        var total=buckets.reduce(function(a,b){return a+b;},0);
+        weeks='<div class="weeks">'+bars+'</div><div class="wklab"><span>8 wks ago</span><span></span><span></span><span></span><span></span><span></span><span></span><span>now</span></div>';
+        act=weeks+'<div class="rr" style="margin-top:8px;font-family:var(--mono);font-size:12px;color:var(--muted)">'+total+' lesson'+(total===1?"":"s")+' finished in the last 8 weeks</div>';
+      }
+    }catch(e){}
+    el.innerHTML=
+      '<h2>'+esc2(name)+'</h2><div class="rsub">FRC Academy · Robot Résumé</div>'+
+      '<div class="rsec"><div class="rsec-h">Courses</div>'+courseRows+'</div>'+
+      '<div class="rsec"><div class="rsec-h">Highlights</div>'+hi+'</div>'+
+      '<div class="rsec"><div class="rsec-h">Recent activity</div>'+act+'</div>';
+    el.style.setProperty("--cert","#6FE0D8");
   }
 
   // pick the most relevant tab to open on: all three done -> academy;
