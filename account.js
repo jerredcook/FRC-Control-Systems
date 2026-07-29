@@ -40,6 +40,7 @@
     if (f.indexOf("deploy") === 0) return "deploy";
     if (f.indexOf("build") === 0) return "build";
     if (f.indexOf("systemcore") === 0) return "systemcore";
+    if (f.indexOf("gamesense") === 0) return "gamesense";
     return "other";
   }
   function load() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } }
@@ -293,7 +294,8 @@
       try {
         var page2 = (location.pathname.split("/").pop() || "").toLowerCase();
         var prefix = page2 === "code.html" ? "deploy-" : page2 === "build.html" ? "build-"
-          : page2 === "closing-the-loop.html" ? "closing-the-loop-" : page2 === "systemcore.html" ? "systemcore-" : null;
+          : page2 === "closing-the-loop.html" ? "closing-the-loop-" : page2 === "systemcore.html" ? "systemcore-"
+          : page2 === "gamesense.html" ? "gamesense-" : null;
         if (prefix) {
           function countKeys(storeKey) {
             try {

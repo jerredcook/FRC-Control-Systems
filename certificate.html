@@ -108,6 +108,7 @@
     <button class="tab" data-course="control">🎯 Control</button>
     <button class="tab" data-course="deploy">🎮 Code</button>
     <button class="tab" data-course="build">🔧 Build</button>
+    <button class="tab" data-course="gamesense">🧠 Game Sense</button>
     <button class="tab" data-course="academy">🏅 Academy</button>
   </div>
 
@@ -174,14 +175,21 @@
       forText:"has completed all 44 lessons - from shop safety and materials through power transmission, mechanisms, drivetrains, electrical and pneumatics, design and CAD, and a full build season.",
       parts:["1 · The Shop","2 · Materials & Stock","3 · Power Transmission","4 · Mechanisms","5 · The Drivetrain","6 · Electrical & Pneumatics","7 · Design & CAD","8 · Build Season"]
     },
+    gamesense:{
+      seal:"Game Sense", sub:"Reading and playing the game",
+      accent:"#ff8fb5", hub:"gamesense.html", key:"gamesense:done", total:7,
+      lessonRe:/^gamesense-lesson-\d+\.html$/,
+      forText:"has completed all 7 lessons - reading a game and its manual, scoring math, ranking points, robot roles, alliance selection, and match strategy, using the ORBIT practice game.",
+      parts:["1 · Read the Game","2 · Play the Game"]
+    },
     academy:{
-      seal:"FRC Academy", sub:"Build · Code · Control",
+      seal:"FRC Academy", sub:"Build · Code · Control · Strategy",
       accent:"#6FE0D8", hub:"index.html",
-      forText:"has completed all three courses of the FRC Academy - Fabricate, Deploy, and Closing the Loop - every one of the 105 lessons that turn a beginner into someone who can build, code, and control an FRC robot.",
-      parts:[{t:"🔧 Fabricate · 44",c:"#FFB020"},{t:"🎮 Deploy · 37",c:"#8E8CF8"},{t:"🎯 Closing the Loop · 24",c:"#34D7C5"}]
+      forText:"has completed all four courses of the FRC Academy - Fabricate, Deploy, Closing the Loop, and Game Sense - every one of the 112 lessons that turn a beginner into someone who can build, code, control, and strategize an FRC robot.",
+      parts:[{t:"🔧 Fabricate · 44",c:"#FFB020"},{t:"🎮 Deploy · 37",c:"#8E8CF8"},{t:"🎯 Closing the Loop · 24",c:"#34D7C5"},{t:"🧠 Game Sense · 7",c:"#ff8fb5"}]
     }
   };
-  var GRAND=24+37+44;
+  var GRAND=24+37+44+7;
 
   var nameEl=document.getElementById("name"), whoEl=document.getElementById("who");
   var dateEl=document.getElementById("date"), progEl=document.getElementById("progress");
@@ -211,11 +219,11 @@
 
   function progressText(courseKey){
     if(courseKey==="academy"){
-      var cc=countDone(COURSES.control), dc=countDone(COURSES.deploy), bc=countDone(COURSES.build);
-      var tot=cc+dc+bc;
-      var mini='🔧 Fabricate '+bc+'/44 &nbsp;·&nbsp; 🎮 Deploy '+dc+'/37 &nbsp;·&nbsp; 🎯 Control '+cc+'/24';
-      if(cc>=24 && dc>=37 && bc>=44)
-        return '<b>✓ All three courses complete - '+GRAND+' lessons.</b> You have finished the entire academy. Print it and hang it up.<br>'+mini;
+      var cc=countDone(COURSES.control), dc=countDone(COURSES.deploy), bc=countDone(COURSES.build), gc=countDone(COURSES.gamesense);
+      var tot=cc+dc+bc+gc;
+      var mini='🔧 Fabricate '+bc+'/44 &nbsp;·&nbsp; 🎮 Deploy '+dc+'/37 &nbsp;·&nbsp; 🎯 Control '+cc+'/24 &nbsp;·&nbsp; 🧠 Game Sense '+gc+'/7';
+      if(cc>=24 && dc>=37 && bc>=44 && gc>=7)
+        return '<b>✓ All four courses complete - '+GRAND+' lessons.</b> You have finished the entire academy. Print it and hang it up.<br>'+mini;
       return 'Academy progress: <b>'+tot+' / '+GRAND+'</b> lessons.<br>'+mini;
     }
     var c=COURSES[courseKey], n=countDone(c);
@@ -245,7 +253,7 @@
   // pick the most relevant tab to open on: all three done -> academy;
   // otherwise the course the student is furthest along in.
   function defaultCourse(){
-    var keys=["control","deploy","build"];
+    var keys=["control","deploy","build","gamesense"];
     if(keys.every(function(k){ return countDone(COURSES[k])>=COURSES[k].total; })) return "academy";
     var best="control", bestRatio=-1;
     keys.forEach(function(k){

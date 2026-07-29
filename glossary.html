@@ -83,7 +83,7 @@
   <div class="hero">
     <div class="eyebrow">Reference</div>
     <h1>Every term, <span class="accent">one page</span></h1>
-    <p class="dek">The vocabulary of the whole academy - Build, Code, and Control - in one place. Search it, or filter by course and topic. A quick refresher when a word slips your mind.</p>
+    <p class="dek">The vocabulary of the whole academy - Build, Code, Control, and Game Sense - in one place. Search it, or filter by course and topic. A quick refresher when a word slips your mind.</p>
   </div>
 
   <div class="tools">
@@ -98,13 +98,13 @@
   <a class="backlink" href="index.html">← Back to the academy</a>
 </div>
 
-<footer>FRC Academy · Build · Code · Control</footer>
+<footer>FRC Academy · Build · Code · Control · Strategy</footer>
 
 <script>
 (function(){
   "use strict";
-  var COURSE_ACCENT={Control:"#34D7C5",Code:"#8E8CF8",Build:"#FFB020"};
-  var COURSE_LABEL={Control:"🎯 Control",Code:"🎮 Code",Build:"🔧 Build"};
+  var COURSE_ACCENT={Control:"#34D7C5",Code:"#8E8CF8",Build:"#FFB020",Strategy:"#ff8fb5"};
+  var COURSE_LABEL={Control:"🎯 Control",Code:"🎮 Code",Build:"🔧 Build",Strategy:"🧠 Strategy"};
   var CAT_COURSE={
     // Control (Closing the Loop)
     "Concepts":"Control","Gains":"Control","Tuning & SysId":"Control","Motion":"Control",
@@ -112,7 +112,9 @@
     // Code (Deploy)
     "Toolchain & Deploy":"Code","Java Basics":"Code","Command-Based":"Code","Hardware I/O":"Code","Drive & Auto":"Code","Vision & Logic":"Code","Pro Practices":"Code",
     // Build (Fabricate)
-    "The Shop":"Build","Materials & Stock":"Build","Power Transmission":"Build","Mechanism Design":"Build","Drivetrain":"Build","Electrical & Pneumatics":"Build","Design & CAD":"Build","Build Season":"Build"
+    "The Shop":"Build","Materials & Stock":"Build","Power Transmission":"Build","Mechanism Design":"Build","Drivetrain":"Build","Electrical & Pneumatics":"Build","Design & CAD":"Build","Build Season":"Build",
+    // Strategy (Game Sense)
+    "Competition":"Strategy"
   };
   function courseOf(cat){ return CAT_COURSE[cat]||"Control"; }
   function catAccent(cat){ return COURSE_ACCENT[courseOf(cat)]||"#34D7C5"; }
@@ -147,6 +149,10 @@
       "6":[27,28,29,30,31,41,42,43],
       "7":[32,33,34,35],
       "8":[36,37,38,39,40]
+    }},
+    Strategy:{prefix:"gamesense-lesson-", parts:{
+      "1":[1,2,3,4],
+      "2":[5,6,7]
     }}
   };
   function lessonFile(course, ref){
@@ -375,7 +381,20 @@
     {c:"Build Season",t:"Build season",d:"The six intense weeks to design and build the competition robot.",r:"8.1"},
     {c:"Build Season",t:"Mill / Lathe",d:"Machine tools that cut precise metal parts.",r:"8.2"},
     {c:"Build Season",t:"Inspection",d:"The pre-competition check that a robot is legal and safe.",r:"8.5"},
-    {c:"Build Season",t:"The pit",d:"Your team's work area at a competition.",r:"8.5"}
+    {c:"Build Season",t:"The pit",d:"Your team's work area at a competition.",r:"8.5"},
+
+    // ================= GAME SENSE (Strategy) =================
+    {c:"Competition",t:"Alliance",d:"The team of three robots on one side of a match. You win and lose together.",r:"1.1"},
+    {c:"Competition",t:"Qualification match",d:"The round-robin matches that set the rankings; every team plays the same number.",r:"1.1"},
+    {c:"Competition",t:"Ranking point (RP)",d:"The points that decide seeding - some for winning, more for special accomplishments.",r:"1.4"},
+    {c:"Competition",t:"Alliance selection",d:"After qualifications, the top seeds take turns picking partners for the playoffs, in snake order.",r:"2.2"},
+    {c:"Competition",t:"Snake draft",d:"The pick order that reverses each round (1,2,3...3,2,1) so seeding stays fair.",r:"2.2"},
+    {c:"Competition",t:"Pick list",d:"A scouting-built ranking of every team, ready before alliance selection starts.",r:"2.2"},
+    {c:"Competition",t:"Scouting",d:"Watching matches and recording what each robot can do, so your picks and strategy are based on data.",r:"2.2"},
+    {c:"Competition",t:"OPR",d:"Offensive power rating - a stats estimate of the points a team adds to its alliance per match.",r:"1.4"},
+    {c:"Competition",t:"Cycle",d:"One full trip from picking up a game piece to scoring it. Points per cycle is the heart of match math.",r:"1.3"},
+    {c:"Competition",t:"Drive team",d:"The students at the field during a match: driver, operator, and coach.",r:"2.1"},
+    {c:"Competition",t:"Coopertition",d:"FIRST's word for helping opponents when it helps everyone - fierce play and real kindness at once.",r:"2.3"}
   ];
 
   var CATS=[];
@@ -403,7 +422,7 @@
   // course chips (primary filter)
   var allCourse=document.createElement("button"); allCourse.className="chip active"; allCourse.textContent="All courses"; allCourse.setAttribute("data-course","");
   courseChipsEl.appendChild(allCourse);
-  ["Control","Code","Build"].forEach(function(cs){ var b=document.createElement("button"); b.className="chip"; b.textContent=COURSE_LABEL[cs]; b.setAttribute("data-course",cs); courseChipsEl.appendChild(b); });
+  ["Control","Code","Build","Strategy"].forEach(function(cs){ var b=document.createElement("button"); b.className="chip"; b.textContent=COURSE_LABEL[cs]; b.setAttribute("data-course",cs); courseChipsEl.appendChild(b); });
   courseChipsEl.querySelectorAll(".chip").forEach(function(b){
     b.addEventListener("click",function(){
       activeCourse=b.getAttribute("data-course")||null;

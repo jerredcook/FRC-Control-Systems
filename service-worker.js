@@ -17,7 +17,7 @@
  *
  * Bump VERSION to ship a new shell and evict the old cache.
  */
-var VERSION = "frc-academy-v3";
+var VERSION = "frc-academy-v4";
 
 try { importScripts("precache-manifest.js"); } catch (e) { /* manifest optional */ }
 
@@ -25,6 +25,7 @@ var SHELL = [
   "index.html",
   "closing-the-loop.html", "code.html", "build.html", "systemcore.html",
   "glossary.html", "review.html", "certificate.html", "worksheet.html",
+  "gamesense.html", "scout.html", "drivelab.html", "gamesense-data.js",
   "account-config.js", "account.js",
   "manifest.webmanifest", "offline.html",
   "icons/icon-192.png", "icons/icon-512.png",

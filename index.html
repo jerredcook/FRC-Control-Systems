@@ -132,6 +132,16 @@
       <div class="bar"><i id="ctlBar"></i></div>
     </a>
 
+    <a class="course live" id="cGameSense" href="gamesense.html" style="--accent:#ff8fb5">
+      <div class="ic">🧠</div>
+      <div class="pillar">Strategy · the game</div>
+      <h3>Game Sense</h3>
+      <div class="sub">Reading and playing the game</div>
+      <div class="desc">The game half of FRC - reading a manual, scoring math, ranking points, robot roles, alliance selection, and match strategy. Built on an evergreen practice game. No code, no shop - the day-one path for anyone on the team.</div>
+      <div class="foot"><span class="pill" id="gsPill">7 lessons</span><span class="pill chip-continue" id="gsChip" data-href="gamesense.html#continue" hidden>Continue →</span><span class="go">Enter →</span></div>
+      <div class="bar"><i id="gsBar"></i></div>
+    </a>
+
     <a class="course live" id="cSystemCore" href="systemcore.html" style="--accent:#ff7a7a;grid-column:1 / -1">
       <div class="ic">🆕</div>
       <div class="pillar" style="color:#ff7a7a">Looking ahead · 2027</div>
@@ -206,7 +216,8 @@
     var a=reflect("deploy:done", /^deploy-lesson-\d+(-py)?\.html$/, 37, "codePill", "codeBar", "codeChip");
     var b=reflect("build:done", /^build-lesson-\d+\.html$/, 44, "bldPill", "bldBar", "bldChip");
     var c=reflect("closing-the-loop:done", /^closing-the-loop-lesson-\d+(-py)?\.html$/, 24, "ctlPill", "ctlBar", "ctlChip");
-    if((a+b+c)===0) firstVisitNudge();
+    var g=reflect("gamesense:done", /^gamesense-lesson-\d+\.html$/, 7, "gsPill", "gsBar", "gsChip");
+    if((a+b+c+g)===0) firstVisitNudge();
     else { var sp=document.getElementById("startHerePill"); if(sp) sp.remove(); var nl=document.getElementById("newHereLine"); if(nl) nl.remove(); }
   }
   renderProgress();
