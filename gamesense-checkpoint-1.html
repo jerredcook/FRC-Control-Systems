@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Game Sense · Part 1 - Checkpoint</title>
+<script src="gamesense-data.js"></script>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --rose:#ff8fb5;    /* Game Sense accent */
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,143,181,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(142,140,248,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--rose);box-shadow:0 0 12px var(--rose)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--rose)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--rose),var(--indigo));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:54ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--rose);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  .k{font-family:var(--mono);color:var(--rose);font-weight:600;font-size:.94em}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--rose);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s;min-height:44px}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--rose);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+  .explain a.ref{display:inline-block;margin-top:8px;font-family:var(--mono);font-size:12px;letter-spacing:.05em;color:var(--teal);text-decoration:none;border:1px solid var(--line-2);border-radius:7px;padding:4px 10px;transition:.12s}
+  .explain a.ref:hover{border-color:var(--teal);color:var(--text)}
+  .whyline{margin:2px 0 4px;font-size:13.5px;color:var(--muted);border-left:2px solid var(--red);background:rgba(255,107,107,.05);padding:5px 12px;border-radius:0 8px 8px 0}
+
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--rose);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--indigo)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="gamesense.html"><span class="dot"></span><span class="name">Game Sense</span></a>
+    <div class="top-meta">Part 1 &middot; Checkpoint &middot; Read the Game</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 1 &middot; Checkpoint</b> Read the Game</div>
+    <div class="eyebrow">Checkpoint</div>
+    <h1>Part 1<br><span class="accent">checkpoint</span>.</h1>
+    <p class="dek">A short cumulative check over Read the Game - the match clock, the manual, the scoring math, and ranking points. Answer every question correctly to clear it; a wrong answer turns red, so try again.</p>
+  </div>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Show what stuck</h2>
+    <p>Pick an answer. Get them all right to clear the checkpoint.</p>
+    <div class="quiz" id="quiz">
+
+      <div class="q" data-correct="0">
+        <div class="qn">Question 1</div>
+        <div class="qt">Which picture of an ORBIT match's clock is correct?</div>
+        <div class="opts">
+          <button class="opt">Auto runs the first <span data-o="autoSec"></span> s with ring points doubled, then teleop runs to the buzzer, and the endgame is just the final <span data-o="endgameSec"></span> s of teleop</button>
+          <button class="opt" data-why="Equal thirds feels tidy, but the clock is lopsided on purpose - auto is a short {autoSec} s sprint and the endgame is a countdown living inside teleop, not its own period.">Three separate periods of equal length: auto, then teleop, then endgame</button>
+          <button class="opt" data-why="It is easy to talk about endgame like a fresh period, but no new whistle blows - and the doubling belongs to auto, not the final seconds.">Endgame starts with a fresh whistle after teleop, and it is the stretch where ring points double</button>
+        </div>
+        <div class="explain">A match is one continuous <span data-o="totalSec"></span> seconds: <span data-o="autoSec"></span> of auto with every ring paying double, then teleop until the buzzer. The final <span data-o="endgameSec"></span> seconds of teleop are called the endgame because the platform awards switch on, but no fresh period ever starts. <a class="ref" href="gamesense-lesson-1.html">Review: Part 1.1 &middot; Anatomy of a Match</a></div>
+      </div>
+
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">Chasing a loose <span data-o="piece"></span>, your robot drifts into the opponent's loading bay and bumps a robot standing inside it. What happens on the scoreboard?</div>
+        <div class="opts">
+          <button class="opt" data-why="It feels like a fine you pay, but the manual runs it the other way: the points are added to your opponents, which nets the same but reads differently while the match is live.">Your alliance's score drops by <span data-o="tech"></span> points</button>
+          <button class="opt" data-why="Chasing a {piece} is not a free pass - the loading bay is a protected zone, so contact inside it is a penalty no matter why you drifted in.">Nothing - you were only chasing a <span data-o="piece"></span>, not playing defense</button>
+          <button class="opt">The other alliance gains <span data-o="tech"></span> points - contact inside a protected loading bay is a tech foul</button>
+        </div>
+        <div class="explain">Rule O207 makes contact inside the loading bay a TECH FOUL: <span data-o="tech"></span> points handed to your opponents. Penalties are always a gift to the other alliance - <span data-o="foul"></span> for a foul, <span data-o="tech"></span> for a tech foul - never a subtraction from your own score, and a protected zone does not care why you were there. <a class="ref" href="gamesense-lesson-2.html">Review: Part 1.2 &middot; Reading the Manual</a></div>
+      </div>
+
+      <div class="q" data-correct="1">
+        <div class="qn">Question 3</div>
+        <div class="qt">Teleop is <span data-o="tele"></span> s. Robot A cycles the high ring (<span data-o="highTele"></span> pts) every <span data-o="cycA"></span> s. Robot B cycles the low ring (<span data-o="lowTele"></span> pts) every <span data-o="cycB"></span> s. Ignore the endgame - who scores more in teleop?</div>
+        <div class="opts">
+          <button class="opt" data-why="Robot B really does finish more trips, which is exactly why the answer feels wrong - but each low-ring trip pays so little that rate, not trip count, decides the total.">Robot B - it finishes <span data-o="cyclesB"></span> trips to A's <span data-o="cyclesA"></span>, and more trips means more points</button>
+          <button class="opt">Robot A, <span data-o="totA"></span> to <span data-o="totB"></span> - <span data-o="highTele"></span> points every <span data-o="cycA"></span> s beats <span data-o="lowTele"></span> every <span data-o="cycB"></span> s on rate</button>
+          <button class="opt" data-why="It looks symmetric, but do the division: A earns {rateA} points a second to B's {rateB}, so A doubles B rather than tying it.">A tie - the faster lap cancels out the bigger ring</button>
+        </div>
+        <div class="explain">Rate is the referee. Robot A earns about <span data-o="rateA"></span> points a second and Robot B only <span data-o="rateB"></span>, so A banks <span data-o="totA"></span> to B's <span data-o="totB"></span> - even though B finished <span data-o="cyclesB"></span> trips to A's <span data-o="cyclesA"></span>. Cycles always round down, and a cheap ring fed fast still loses to a better points-per-second. <a class="ref" href="gamesense-lesson-3.html">Review: Part 1.3 &middot; Scoring Math</a></div>
+      </div>
+
+      <div class="q" data-correct="0">
+        <div class="qn">Question 4</div>
+        <div class="qt">Your alliance loses a qualification match, but you scored enough for the Energized bonus and all three robots balanced for Harmony. How many ranking points do you walk away with?</div>
+        <div class="opts">
+          <button class="opt"><span data-o="lossBoth"></span> RP - a loss with both bonuses ties a plain win</button>
+          <button class="opt" data-why="The scoreboard says you lost, so zero feels right - but the bonuses never look at the scoreboard, which is the whole reason a lost match can still bank real RP.">0 RP - a loss earns nothing, and bonuses only pay in a win</button>
+          <button class="opt" data-why="Two bonuses sounds like a big pile, but each one adds just {bonus} RP, so together they add 2 - landing you level with a plain win, not above it.">4 RP - the loss plus two bonuses stacked on top</button>
+        </div>
+        <div class="explain">The loss pays <span data-o="lossRP"></span>, Energized adds <span data-o="bonus"></span>, Harmony adds <span data-o="bonus"></span>: <span data-o="lossBoth"></span> RP, identical to a plain win at <span data-o="winRP"></span>. That quiet arithmetic is why a team can lose matches and still climb, because your seed - not your win count - decides who picks playoff partners first. <a class="ref" href="gamesense-lesson-4.html">Review: Part 1.4 &middot; Ranking Points</a></div>
+      </div>
+
+      <div class="q" data-correct="2">
+        <div class="qn">Question 5 &middot; Putting it together</div>
+        <div class="qt">It is the final <span data-o="endgameSec"></span> seconds and your alliance is losing by a lot - the win is gone. You sit at <span data-o="q5Start"></span> Reactor points, <span data-o="q5Gap"></span> short of the <span data-o="enThresh"></span> needed for Energized, and your fastest robot can either grab one more high-ring <span data-o="piece"></span> or drive home to balance. What is the sharpest play?</div>
+        <div class="opts">
+          <button class="opt" data-why="Balance really is the fattest single match score at {balance}, which is why it tempts - but the match is already lost, so those points change nothing in the standings while the Energized ranking point still would.">Balance - <span data-o="balance"></span> match points is the biggest single score, so always take it</button>
+          <button class="opt" data-why="It feels over, but the whole idea of ranking points is that a lost match still pays; the bonuses ignore the scoreboard entirely.">Neither matters - once a match is lost there is nothing left to play for</button>
+          <button class="opt">Score the high-ring <span data-o="piece"></span> - <span data-o="highTele"></span> points pushes you to <span data-o="q5After"></span>, clearing the <span data-o="enThresh"></span>-point Energized line and banking a ranking point even in the loss</button>
+        </div>
+        <div class="explain">In a lost match the standings currency is all that is left, and Energized (<span data-o="enThresh"></span>+ Reactor points, win or lose) sits just <span data-o="q5Gap"></span> points away. One high-ring <span data-o="piece"></span> is worth <span data-o="highTele"></span>, lifting you to <span data-o="q5After"></span> and over the line. Scoring math says the <span data-o="piece"></span> is reachable in the window, and the ranking-point rules say it is worth more than a balance the scoreboard will ignore. <a class="ref" href="gamesense-lesson-4.html">Review: Part 1.4 &middot; Ranking Points</a></div>
+      </div>
+
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a class="map" href="gamesense.html">&larr; Back to the Game Sense course map</a>
+  </nav>
+
+</div>
+
+<footer>Game Sense &middot; Reading and playing the FRC game</footer>
+
+<script>
+(function(){
+  "use strict";
+  // inject ORBIT values into the prose so a rebalance edits one file
+  try{
+    var O=window.ORBIT, M=O.match, R=O.scoring.rings, EG=O.scoring.endgame, RP=O.rp, F=O.fouls;
+    var tele=M.teleopSec, highT=R.high.tele, lowT=R.low.tele;
+    var cycA=16, cycB=8;   // scenario cycle times for Q3 - a free choice, not an ORBIT rule
+    var cyclesA=Math.floor(tele/cycA), cyclesB=Math.floor(tele/cycB);
+    var q5Start=RP.energized.threshold-5;   // five Reactor points short of the Energized line
+    var VALS={
+      piece:O.piece, piecePlural:O.piecePlural,
+      autoSec:M.autoSec, endgameSec:M.endgameSec, totalSec:M.totalSec, tele:tele,
+      foul:F.foul, tech:F.tech,
+      highTele:highT, lowTele:lowT,
+      cycA:cycA, cycB:cycB, cyclesA:cyclesA, cyclesB:cyclesB,
+      totA:cyclesA*highT, totB:cyclesB*lowT,
+      rateA:(highT/cycA).toFixed(2), rateB:(lowT/cycB).toFixed(2),
+      winRP:RP.win, lossRP:RP.loss, bonus:RP.bonus, lossBoth:RP.loss+2*RP.bonus,
+      enThresh:RP.energized.threshold, balance:EG.balance.pts,
+      q5Start:q5Start, q5Gap:RP.energized.threshold-q5Start, q5After:q5Start+highT
+    };
+    document.querySelectorAll('[data-o]').forEach(function(n){
+      var k=n.getAttribute('data-o');
+      if(VALS[k]!==undefined) n.textContent=VALS[k];
+    });
+    // resolve {token} placeholders inside data-why so the whyline shows real numbers
+    document.querySelectorAll('[data-why]').forEach(function(n){
+      var w=n.getAttribute('data-why');
+      if(w&&w.indexOf('{')!==-1){
+        n.setAttribute('data-why', w.replace(/\{(\w+)\}/g,function(m,k){ return VALS[k]!==undefined?VALS[k]:m; }));
+      }
+    });
+  }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  "use strict";
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');
+      try{ var why=opt.getAttribute('data-why');
+        if(why){ var wl=opt.nextElementSibling; if(!wl||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.insertAdjacentElement('afterend',wl); } wl.textContent=why; }
+      }catch(e){} } }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  // auto-mark this checkpoint complete in the hub once every question is right
+  var KEY="gamesense:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script src="account-config.js"></script>
+<script src="account.js"></script>
+</body></html>

@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Game Sense · Drive Lab - Driver practice on ORBIT</title>
+<script src="gamesense-data.js"></script>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --rose:#ff8fb5;    /* course accent - Game Sense / the robot */
+    --amber:#FFB020;   /* platform / endgame */
+    --teal:#34D7C5;    /* reactor */
+    --indigo:#8E8CF8;  /* loading bay */
+    --red:#FF6B6B;     /* wrong / off */
+    --green:#43D67E;   /* correct / cleared */
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ink); color:var(--text);
+    font-family:var(--sans); font-size:17px; line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(900px 500px at 80% -10%, rgba(255,143,181,.07), transparent 60%),
+      radial-gradient(700px 500px at -10% 10%, rgba(142,140,248,.05), transparent 55%);
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--rose);box-shadow:0 0 12px var(--rose)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--rose)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--rose),var(--indigo));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:48ch;margin-top:6px}
+
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--rose);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  p .sub,.sub{color:var(--muted)}
+  .lead{font-size:19px}
+  em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--rose);font-weight:600;font-size:.94em}
+
+  .terms{display:grid;gap:12px;margin:22px 0 6px}
+  @media(min-width:560px){.terms{grid-template-columns:repeat(3,1fr)}}
+  .term{border:1px solid var(--line);border-radius:10px;padding:14px 15px;background:var(--panel);border-top:2px solid var(--accent,var(--rose))}
+  .term h4{margin:0 0 4px;font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent,var(--rose))}
+  .term p{margin:0;font-size:14.5px;color:var(--muted);line-height:1.45}
+  .term p b{color:var(--text)}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;gap:6px;align-items:center}
+  .demo-tag .live{width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 8px var(--red)}
+  .demo-tag .live.on{background:var(--green);box-shadow:0 0 8px var(--green)}
+  .demo-stage{background:var(--line)}
+  .stage-cell{background:#0B1322;position:relative}
+  .stage-cell .cell-label{position:absolute;top:8px;left:10px;z-index:2;font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);pointer-events:none}
+  canvas.world{display:block;width:100%;height:auto;outline:none;touch-action:none}
+  canvas.world:focus{box-shadow:inset 0 0 0 2px rgba(255,143,181,.7)}
+
+  .legend{display:flex;flex-wrap:wrap;gap:16px;padding:11px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+
+  .feed{padding:10px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:12.5px;color:var(--muted);min-height:40px;display:flex;align-items:center}
+  .feed b{color:var(--rose)}
+
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .drill-row{display:flex;flex-wrap:wrap;gap:8px;width:100%}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;padding:11px 14px;border-radius:8px;cursor:pointer;transition:.12s;min-height:40px}
+  .btn:hover{border-color:var(--rose);color:var(--text)}
+  .btn.active{background:var(--rose);border-color:var(--rose);color:#1f0612;font-weight:700}
+  .ctl-hint{font-size:12.5px;color:var(--faint);font-style:italic;flex:1 1 100%}
+
+  .readouts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  @media(min-width:560px){.readouts{grid-template-columns:repeat(6,1fr)}}
+  .ro{background:#0B1322;padding:11px 12px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:18px;font-weight:600;margin-top:3px}
+  .ro .v.rose{color:var(--rose)} .ro .v.amber{color:var(--amber)} .ro .v.teal{color:var(--teal)} .ro .v.indigo{color:var(--indigo)} .ro .v.red{color:var(--red)} .ro .v.ink{color:var(--text)} .ro .v.green{color:var(--green)}
+
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--rose);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--rose);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.rose{border-color:var(--rose);background:rgba(255,143,181,.06)} .note.rose .nh{color:var(--rose)}
+  .note.indigo{border-color:var(--indigo);background:rgba(142,140,248,.06)} .note.indigo .nh{color:var(--indigo)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)}
+  .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--rose);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s;min-height:28px}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7}
+  .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .whyline{margin:2px 0 4px;font-size:13.5px;color:var(--muted);border-left:2px solid var(--red);background:rgba(255,107,107,.05);padding:5px 12px;border-radius:0 8px 8px 0}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--rose);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px}
+  @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px}
+  .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--rose);min-width:120px;text-transform:uppercase}
+  .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(255,143,181,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--rose);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--rose)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)}
+  .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+
+  footer{padding:40px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--rose);color:var(--text)}
+  .coursenav a.map{border-color:transparent;color:var(--indigo)}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="gamesense.html"><span class="dot"></span><span class="name">Game Sense</span></a>
+    <div class="top-meta">Companion · Driver Practice</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Drive Lab</b> Driver Practice</div>
+    <div class="eyebrow">Game Sense · Companion</div>
+    <h1>Drive it till it's<br><span class="accent">muscle memory</span></h1>
+    <p class="dek">A real robot has weight, so it does not stop the instant you do. Practice that feel here on the <strong>ORBIT</strong> field: three timed drills, best times that stick, and a robot that carries its momentum just like the real thing.</p>
+    <div class="note rose" style="margin-top:22px">
+      <div class="nh">Keyboard or controller</div>
+      <p>The keyboard works fine - drive with <span class="k">WASD</span> or the arrow keys. But if you plug in a game controller, the lab will find it and switch to the left stick, and a real controller feels a lot more like driving the real thing: push a little for a little speed, push all the way for full speed.</p>
+    </div>
+  </div>
+
+  <section>
+    <p class="lead">Driving is a skill you practice, not a thing you're born knowing.</p>
+    <p>The best drive teams log hours on the practice field before a competition, because the robot never does exactly what your thumbs expect. It has mass, so it keeps rolling after you let go, and it takes a moment to get up to speed. The only way to make that feel automatic is repetition - and repetition is a lot more fun with a clock running.</p>
+    <p>This lab drops you on a top-down <strong>ORBIT</strong> field. The <span style="color:var(--teal)">Reactor</span> tower sits at center, your <span style="color:var(--indigo)">loading bay</span> is on the left wall, and your <span style="color:var(--amber)">platform</span> waits in the corner. Three drills train three different driving skills: weaving, cycling, and stopping on a dime. Beat your own times, then beat the tight ones.</p>
+
+    <div class="terms">
+      <div class="term" style="--accent:var(--rose)">
+        <h4>Slalom</h4>
+        <p>Weave through <b>five markers</b> in order. Trains smooth, committed steering - the thing defenders make hard.</p>
+      </div>
+      <div class="term" style="--accent:var(--indigo)">
+        <h4>Cycle Run</h4>
+        <p>Loading bay to <b>Reactor and back, three times</b>. Trains the round trip that scores every point in a real match.</p>
+      </div>
+      <div class="term" style="--accent:var(--amber)">
+        <h4>Precision Park</h4>
+        <p>Stop fully inside the <b>platform box, three times</b>. Trains the endgame park, where hurrying costs you.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Try it</div>
+    <h2>Take the wheel</h2>
+    <p>Click the field so it has focus, then drive with <span class="k">WASD</span> or the arrow keys (a plugged-in controller takes over the moment you nudge the stick). Pick a drill below to start its clock. The timer begins on your first move and stops the instant you finish, and your best run for each drill is saved on this device.</p>
+
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="1">
+        <div class="qn">Predict first</div>
+        <div class="qt">You're driving at full speed straight toward the loading bay, then you let go of the stick completely. What does the robot do?</div>
+        <div class="opts">
+          <button class="opt">Stops dead the instant you release, right where it was</button>
+          <button class="opt">Keeps gliding forward a moment, slowing down, before it settles</button>
+          <button class="opt">Snaps into reverse and rolls back the way it came</button>
+        </div>
+        <div class="explain">A robot has mass, and mass means momentum: when you stop asking for speed, the robot coasts to a halt instead of freezing in place. That glide is exactly what makes precise stopping hard, and it is why the Precision Park drill exists. Drive at full tilt, release, and watch how far it drifts before the speed readout reaches zero.</div>
+      </div>
+    </div>
+
+    <div class="demo" id="demo">
+      <div class="demo-head">
+        <span class="demo-title">ORBIT · Practice field</span>
+        <span class="demo-tag"><span class="live" id="live"></span> <span id="status">Keyboard</span></span>
+      </div>
+      <div class="demo-stage">
+        <div class="stage-cell"><span class="cell-label">Top-down field</span><canvas class="world" id="world" tabindex="0" aria-label="Top-down ORBIT practice field. Click to focus, then drive with WASD or the arrow keys."></canvas></div>
+      </div>
+      <div class="legend">
+        <span><i style="background:var(--rose)"></i> Your robot</span>
+        <span><i style="background:var(--teal)"></i> Reactor</span>
+        <span><i style="background:var(--indigo)"></i> Loading bay</span>
+        <span><i style="background:var(--amber)"></i> Platform</span>
+      </div>
+      <div class="feed" id="feed"></div>
+      <div class="controls">
+        <div class="drill-row">
+          <button class="btn" id="dSlalom" data-drill="slalom">▸ Slalom</button>
+          <button class="btn" id="dCycle" data-drill="cycle">▸ Cycle Run</button>
+          <button class="btn" id="dPark" data-drill="park">▸ Precision Park</button>
+          <button class="btn" id="dFree" style="margin-left:auto">⟲ Free drive</button>
+        </div>
+        <div class="ctl-hint">Tip: on a phone or tablet, a plugged-in controller is the way to go - the drills are built for a thumbstick.</div>
+      </div>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Drill</div><div class="v ink" id="roDrill">Free drive</div></div>
+        <div class="ro"><div class="k2">Time</div><div class="v rose" id="roTime">0.0 s</div></div>
+        <div class="ro"><div class="k2">Slalom best</div><div class="v teal" id="roSlalom">--</div></div>
+        <div class="ro"><div class="k2">Cycle best</div><div class="v teal" id="roCycle">--</div></div>
+        <div class="ro"><div class="k2">Park best</div><div class="v teal" id="roPark">--</div></div>
+        <div class="ro"><div class="k2">Speed</div><div class="v indigo" id="roSpeed">0.0</div></div>
+      </div>
+    </div>
+    <p class="caption">The robot accelerates and coasts like a real one - about 4 m/s flat out. Markers you still need glow rose; ones you've cleared turn green. Gold hunters: the tight times only count as gold when a controller is doing the driving.</p>
+
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this lab - take them at your own pace</span></div>
+      <div class="m-item" data-m="first"><span class="m-st">○</span><span>Get one clean run: <b>finish any single drill</b>, start to finish. Just feel out the controls first.</span></div>
+      <div class="m-item" data-m="all"><span class="m-st">○</span><span>Complete <b>all three drills</b> at least once - Slalom, Cycle Run, and Precision Park.</span></div>
+      <div class="m-item" data-m="target"><span class="m-st">○</span><span>Beat the <b>target time</b> on every drill: Slalom under <b>12 s</b>, Cycle Run under <b>22 s</b>, Precision Park under <b>15 s</b>. These come with a little practice.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> with a <b>controller connected</b>, beat a tight time on any one drill - Slalom <b>8 s</b>, Cycle Run <b>14 s</b>, or Precision Park <b>9 s</b>. This is where the analog stick earns its keep.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">What you're training</div>
+    <h2>Every drill is a real match habit</h2>
+    <p>These aren't arcade games for their own sake. Each one drills a moment you'll actually live in a real match, and the ORBIT scoreboard rewards all three.</p>
+    <p>The <strong>Cycle Run</strong> is the whole sport in miniature. Points only land when the robot travels from where it picks up <span data-o="piecePlural">Cells</span> to where it scores them and comes back for more. Shave a second off each round trip and, over a two-and-a-half minute match, you fit in an extra cycle or two - which can be the difference on the scoreboard. The flat stretches where you're just driving are pure cost, so the fastest, cleanest path wins.</p>
+    <p><strong>Precision Park</strong> is the endgame. On ORBIT, settling your robot onto its platform is worth up to <span data-o="scoring.endgame.balance.pts">20</span> points - as much as a whole handful of cycles - but only if you actually stop inside the box before the buzzer. Overcook it and slide off the edge and you get nothing. That is why stopping cleanly, against the robot's momentum, is a skill worth drilling until it's boring.</p>
+    <div class="note indigo">
+      <div class="nh">Read the glide</div>
+      <p>Watch the speed readout as you practice Precision Park. The trick is not to brake hard at the box - it is to <em>ease off early</em> and let the robot's own momentum carry it to a stop right on the mark. A good driver plans the stop a full robot-length before they get there, the same way you coast a bike up to a stop sign instead of slamming the brakes.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="note rose">
+      <div class="nh">Going further · optional</div>
+      <p>Here is a puzzle to chew on before you peek. On the keyboard, a key is either fully pressed or fully released - there is no in-between. On a controller, the stick reads every position from a feather-touch to all the way over. Why does that analog range make precise driving, especially the Precision Park stop, noticeably easier? Think about what your options are for slowing down with each input.</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">With the keyboard you only have two speeds: full throttle or coasting. To slow down, your only real move is to let go and drift, or tap the opposite key to lurch backward - both are blunt. The analog stick gives you the whole middle. You can hold the robot at one meter per second and creep the last few centimeters into the box, or feather the throttle down as you approach so the momentum bleeds off exactly at the line. More choices between "go" and "stop" means finer control, which is why almost every FRC drive team uses a gamepad or joysticks, not a keyboard, and why the gold times here are set with a controller in mind.</p>
+      </details>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="2">
+        <div class="qn">Question 1</div>
+        <div class="qt">In the lab, when you release the stick at full speed the robot keeps rolling for a moment before it stops. What is that modeling?</div>
+        <div class="opts">
+          <button class="opt" data-why="A laggy connection would feel like a delay before the robot responds at all, not a smooth coast to a stop. This glide happens even with instant, perfect controls.">A delay in the wireless connection between you and the robot</button>
+          <button class="opt" data-why="A weak battery mostly limits top speed and can cause a brownout, but it does not create the coast. Even a fully-charged robot carries its momentum after you let go.">A low battery that can't stop the motors fast enough</button>
+          <button class="opt">The robot's momentum - it has mass, so it carries its speed and coasts to a halt</button>
+        </div>
+        <div class="explain">A real robot weighs tens of kilograms, and mass carries momentum. When you stop asking for speed, that momentum keeps it rolling until friction and braking bleed it off. The lab copies that on purpose, because learning to plan around the glide is most of what makes a driver precise.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 2 · From the drills</div>
+        <div class="qt">The Cycle Run has you drive the loading bay to the Reactor and back three times. In a real match, what does driving a shorter, cleaner path between those two spots buy your alliance?</div>
+        <div class="opts">
+          <button class="opt">More completed cycles in the same match, which means more points scored</button>
+          <button class="opt" data-why="Ring values are fixed by the manual - a mid-ring Cell is worth the same no matter how fast you drove to it. Speed changes how many you score, not the price of each one.">Each scored Cell is suddenly worth more points</button>
+          <button class="opt" data-why="A tidy path is easier on the robot, sure, but the real prize is time. The match clock is the hard limit, and shorter trips fit more scoring into it.">Nothing on the scoreboard - it just looks tidier to spectators</button>
+        </div>
+        <div class="explain">A match is a fixed length, so every second you save on the round trip is a second you can spend on another cycle. Points only land when the robot completes that bay-to-Reactor-and-back loop, so a faster, cleaner path directly means more Cells scored before the buzzer. That is why drive teams obsess over their routes.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 3</div>
+        <div class="qt">The lab says a real controller feels closer to driving the actual robot than the keyboard does. Why?</div>
+        <div class="opts">
+          <button class="opt" data-why="Controllers are comfy, but that is not the reason the lab points to. The real difference is in the signal the stick sends, not the shape of the grip.">A controller is simply more comfortable to hold for a long match</button>
+          <button class="opt">The stick is analog - it sends every speed from a feather-touch to full - while a key is only on or off</button>
+          <button class="opt" data-why="Both a controller and a keyboard talk to the same robot over the same link, so neither is faster to respond. The difference is how finely you can ask for speed, not how quickly.">A controller sends its signal to the robot faster than a keyboard can</button>
+        </div>
+        <div class="explain">A keyboard key has two states: pressed or not, full speed or coasting. A thumbstick reports its full range, so you can ask for a crawl, a cruise, or a sprint and anything between. That fine control is exactly what real robots give their drivers, and it is why easing the stick down for a clean Precision Park stop is so much easier than stabbing keys.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Drive Lab · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Momentum</b><span>The robot's mass carries its speed; it coasts to a stop, not on a dime.</span></div>
+        <div class="gl"><b>Cycle</b><span>One round trip from pickup to scoring and back; faster cycles score more.</span></div>
+        <div class="gl"><b>Precision stop</b><span>Easing off early so momentum settles the robot on the mark.</span></div>
+        <div class="gl"><b>Analog stick</b><span>Reports every speed between stop and full, unlike an on/off key.</span></div>
+        <div class="gl"><b>Slalom</b><span>Weaving through markers - smooth, committed steering.</span></div>
+        <div class="gl"><b>Platform park</b><span>The endgame stop worth up to <span data-o="scoring.endgame.balance.pts">20</span> points on ORBIT.</span></div>
+      </div>
+      <a class="next" href="gamesense.html">
+        <div class="n-eyebrow">Back to the course</div>
+        <h3>Game Sense map →</h3>
+        <p>Now that your thumbs know the field, head back to the strategy lessons - reading the manual, the scoring math, and building a pick list. Driving and thinking are the two halves of the same sport.</p>
+      </a>
+    </div>
+  </section>
+
+</div>
+
+<nav class="coursenav">
+  <a href="gamesense.html">← Game Sense hub</a>
+  <a class="map" href="gamesense.html">Course map</a>
+  <a href="gamesense-lesson-1.html">Lesson 01 · Anatomy of a Match →</a>
+</nav>
+
+<footer>Game Sense · Reading and playing the FRC game</footer>
+
+<script>
+(function(){
+  "use strict";
+  // Fill every [data-o] span from window.ORBIT so a rebalance edits one file.
+  try{
+    var O=window.ORBIT; if(!O) return;
+    var nodes=document.querySelectorAll('[data-o]');
+    Array.prototype.forEach.call(nodes,function(el){
+      var p=el.getAttribute('data-o');
+      var v=p.split('.').reduce(function(a,k){ return (a==null)?a:a[k]; },O);
+      if(v!==undefined&&v!==null) el.textContent=v;
+    });
+  }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  "use strict";
+  var O=window.ORBIT||{};
+  var clamp=function(x,a,b){return x<a?a:(x>b?b:x);};
+
+  // ---- physics constants (mirrored by the feasibility sim) ----
+  var FW=16, FH=8;          // field metres, 2:1
+  var V=4.0;                // max speed m/s
+  var ACCEL=9.0;            // m/s^2 driving
+  var DECEL=7.0;            // m/s^2 coasting
+  var RAD=0.4;              // robot collision radius m
+  var DEAD=0.15;            // gamepad deadzone
+
+  // ---- field furniture ----
+  var reactor={x:8,y:4}, reactR=1.9;
+  var bay={x0:0.4,y0:2.8,x1:2.6,y1:5.2, px:1.6, py:4.0, r:1.1};
+  var plat={x0:12.5,y0:5.5,x1:15.0,y1:7.5};
+  var MARKS=[[4,2.5],[6,5.5],[8,2.5],[10,5.5],[12,2.5]];
+  var MRC=0.7;
+  var START={slalom:{x:2,y:4}, cycle:{x:bay.px,y:bay.py}, park:{x:8,y:4}, free:{x:8,y:4}};
+  var DN={slalom:'Slalom', cycle:'Cycle Run', park:'Precision Park', free:'Free drive'};
+
+  // ---- thresholds (validated: machine-optimal ~5.6 / 10.1 / 6.7 s) ----
+  var TARGET={slalom:12, cycle:22, park:15};
+  var TIGHT ={slalom:8,  cycle:14, park:9};
+
+  // ---- best times persist under frc:drivelab ----
+  var DKEY='frc:drivelab';
+  var best={slalom:null, cycle:null, park:null};
+  try{ var raw=JSON.parse(localStorage.getItem(DKEY))||{};
+    ['slalom','cycle','park'].forEach(function(d){ if(typeof raw[d]==='number') best[d]=raw[d]; });
+  }catch(e){}
+  function saveBest(){ try{ localStorage.setItem(DKEY,JSON.stringify(best)); }catch(e){} }
+
+  // ---- state ----
+  var s={x:8,y:4,vx:0,vy:0};
+  var heading=0;
+  var activeDrill=null, drillStarted=false, startT=0, liveTime=0;
+  var usedGamepadRun=false, connected=false;
+  var drillResult='Pick a drill to start its clock, or just free-drive to get a feel for the robot.';
+  // drill progress
+  var slNext=0, cySeq=0, pkDone=0, pkArmed=false;
+
+  var el={
+    live:document.getElementById('live'), status:document.getElementById('status'),
+    feed:document.getElementById('feed'),
+    roDrill:document.getElementById('roDrill'), roTime:document.getElementById('roTime'),
+    roSlalom:document.getElementById('roSlalom'), roCycle:document.getElementById('roCycle'),
+    roPark:document.getElementById('roPark'), roSpeed:document.getElementById('roSpeed')
+  };
+
+  // ---- canvas ----
+  var cv=document.getElementById('world');
+  var ctx=cv.getContext('2d');
+  var W=0,H=0,scale=1;
+  function fit(){
+    var parent=cv.parentNode, rect=parent.getBoundingClientRect();
+    var cssW=rect.width; if(!cssW) return;
+    var cssH=Math.round(cssW/2);
+    cv.style.height=cssH+'px';
+    var dpr=window.devicePixelRatio||1;
+    cv.width=Math.round(cssW*dpr); cv.height=Math.round(cssH*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    W=cssW; H=cssH; scale=W/FW;
+  }
+  fit();
+  function X(fx){ return fx*scale; }
+  function Y(fy){ return fy*scale; }
+  var MONO='ui-monospace,"SF Mono",Menlo,Consolas,monospace';
+  function roundRect(x,y,w,h,r){ ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath(); }
+
+  // ---- input ----
+  var KEYS={};
+  var DRIVE=['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright'];
+  function isDrive(k){ return DRIVE.indexOf(k)>=0; }
+  window.addEventListener('keydown',function(e){
+    var k=(e.key||'').toLowerCase();
+    if(isDrive(k)){ KEYS[k]=true; if(document.activeElement===cv && k.indexOf('arrow')===0){ e.preventDefault(); } }
+  });
+  window.addEventListener('keyup',function(e){ var k=(e.key||'').toLowerCase(); if(isDrive(k)) KEYS[k]=false; });
+  cv.addEventListener('pointerdown',function(){ try{ cv.focus(); }catch(e){} });
+  // release keys if focus leaves so the robot doesn't run away
+  cv.addEventListener('blur',function(){ KEYS={}; });
+
+  function readInput(){
+    var ix=0, iy=0, gpMag=0;
+    // gamepad first
+    var gp=null;
+    try{ var pads=navigator.getGamepads?navigator.getGamepads():[];
+      for(var i=0;i<pads.length;i++){ if(pads[i]&&pads[i].connected){ gp=pads[i]; break; } }
+    }catch(e){}
+    connected=!!gp;
+    if(gp && gp.axes && gp.axes.length>=2){
+      var gx=gp.axes[0]||0, gy=gp.axes[1]||0;
+      gpMag=Math.hypot(gx,gy);
+      if(gpMag>DEAD){ ix=gx; iy=gy; }
+    }
+    if(ix===0 && iy===0){
+      ix=(KEYS['d']||KEYS['arrowright']?1:0)-(KEYS['a']||KEYS['arrowleft']?1:0);
+      iy=(KEYS['s']||KEYS['arrowdown']?1:0)-(KEYS['w']||KEYS['arrowup']?1:0);
+    }
+    var mag=Math.hypot(ix,iy);
+    if(mag>1){ ix/=mag; iy/=mag; mag=1; }
+    return {ix:ix, iy:iy, mag:mag, gpMag:gpMag};
+  }
+
+  // ---- missions (wrapped so a bug can never break the lab) ----
+  var mClear=function(){};
+  try{
+    var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+    var mSaved={}, mGold={};
+    try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+    try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+    var mItems={};
+    Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+    var mMark=function(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; };
+    mClear=function(id){
+      var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+      mMark(n);
+      var gold=n.classList.contains('gold');
+      var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+      map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+    };
+    Object.keys(mItems).forEach(function(id){
+      if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+    });
+    setInterval(function(){
+      try{
+        var n=0; ['slalom','cycle','park'].forEach(function(d){ if(best[d]!=null) n++; });
+        if(n>=1) mClear('first');
+        if(n===3) mClear('all');
+        if(best.slalom!=null && best.slalom<=TARGET.slalom &&
+           best.cycle!=null  && best.cycle<=TARGET.cycle &&
+           best.park!=null   && best.park<=TARGET.park) mClear('target');
+      }catch(e){}
+    },200);
+  }catch(e){}
+
+  // ---- drills ----
+  function arm(drill){
+    activeDrill=drill; drillStarted=false; liveTime=0; usedGamepadRun=false;
+    slNext=0; cySeq=0; pkDone=0; pkArmed=false;
+    var st=START[drill]||START.free;
+    s.x=st.x; s.y=st.y; s.vx=0; s.vy=0;
+    if(drill==='free'){ activeDrill=null; drillResult='Free drive - roam the field. Pick a drill when you want a clock.'; }
+    else { drillResult=DN[drill]+' armed. Make your first move to start the clock.'; }
+    try{ cv.focus(); }catch(e){}
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('[data-drill]'),function(b){
+    b.addEventListener('click',function(){ arm(b.getAttribute('data-drill')); syncBtns(); });
+  });
+  document.getElementById('dFree').addEventListener('click',function(){ arm('free'); syncBtns(); });
+  function syncBtns(){
+    document.getElementById('dSlalom').classList.toggle('active',activeDrill==='slalom');
+    document.getElementById('dCycle').classList.toggle('active',activeDrill==='cycle');
+    document.getElementById('dPark').classList.toggle('active',activeDrill==='park');
+  }
+
+  function dist(ax,ay,bx,by){ return Math.hypot(ax-bx,ay-by); }
+  function fullyInPlat(){ return s.x>=plat.x0+RAD && s.x<=plat.x1-RAD && s.y>=plat.y0+RAD && s.y<=plat.y1-RAD; }
+  function outsidePlat(){ return s.x<plat.x0 || s.x>plat.x1 || s.y<plat.y0 || s.y>plat.y1; }
+
+  function completeDrill(drill){
+    var t=liveTime;
+    var msg=DN[drill]+' complete: '+t.toFixed(1)+' s';
+    if(best[drill]==null || t<best[drill]){ best[drill]=t; saveBest(); msg+=' - new best!'; }
+    else { msg+=' (best '+best[drill].toFixed(1)+' s)'; }
+    if(t<=TIGHT[drill] && usedGamepadRun){ try{ mClear('gold'); }catch(e){} msg+=' · GOLD run ★'; }
+    else if(t<=TIGHT[drill]){ msg+=' · tight time! plug in a controller to bank it as gold.'; }
+    drillResult=msg;
+    activeDrill=null; drillStarted=false;
+    syncBtns();
+  }
+
+  function progress(){
+    if(!activeDrill || !drillStarted) return;
+    if(activeDrill==='slalom'){
+      if(slNext<MARKS.length && dist(s.x,s.y,MARKS[slNext][0],MARKS[slNext][1])<MRC){ slNext++; }
+      if(slNext>=MARKS.length) completeDrill('slalom');
+    } else if(activeDrill==='cycle'){
+      var toReactor=(cySeq%2===0);
+      if(toReactor){ if(dist(s.x,s.y,reactor.x,reactor.y)<reactR) cySeq++; }
+      else { if(dist(s.x,s.y,bay.px,bay.py)<bay.r) cySeq++; }
+      if(cySeq>=6) completeDrill('cycle');
+    } else if(activeDrill==='park'){
+      var spd=Math.hypot(s.vx,s.vy);
+      if(outsidePlat()) pkArmed=true;
+      if(pkArmed && fullyInPlat() && spd<0.15){ pkDone++; pkArmed=false; }
+      if(pkDone>=3) completeDrill('park');
+    }
+  }
+
+  // ---- integrate + draw ----
+  function stepPhysics(inp,dt){
+    var dvx=inp.ix*V - s.vx, dvy=inp.iy*V - s.vy;
+    var rate=(inp.mag>0.05)?ACCEL:DECEL;
+    var dl=Math.hypot(dvx,dvy), st=rate*dt;
+    if(dl<=st){ s.vx=inp.ix*V; s.vy=inp.iy*V; }
+    else { s.vx+=dvx/dl*st; s.vy+=dvy/dl*st; }
+    s.x+=s.vx*dt; s.y+=s.vy*dt;
+    if(s.x<RAD){s.x=RAD; if(s.vx<0)s.vx=0;} if(s.x>FW-RAD){s.x=FW-RAD; if(s.vx>0)s.vx=0;}
+    if(s.y<RAD){s.y=RAD; if(s.vy<0)s.vy=0;} if(s.y>FH-RAD){s.y=FH-RAD; if(s.vy>0)s.vy=0;}
+    if(Math.hypot(s.vx,s.vy)>0.25) heading=Math.atan2(s.vy,s.vx);
+  }
+
+  function drawField(){
+    ctx.clearRect(0,0,W,H);
+    // floor
+    ctx.fillStyle='#0B1322'; ctx.fillRect(0,0,W,H);
+    // grid
+    ctx.strokeStyle='rgba(120,140,180,0.08)'; ctx.lineWidth=1;
+    for(var gx=1;gx<FW;gx++){ ctx.beginPath();ctx.moveTo(X(gx),0);ctx.lineTo(X(gx),H);ctx.stroke(); }
+    for(var gy=1;gy<FH;gy++){ ctx.beginPath();ctx.moveTo(0,Y(gy));ctx.lineTo(W,Y(gy));ctx.stroke(); }
+    // border
+    ctx.strokeStyle='rgba(146,162,190,0.4)'; ctx.lineWidth=2; ctx.strokeRect(1,1,W-2,H-2);
+    // centre line
+    ctx.strokeStyle='rgba(146,162,190,0.14)'; ctx.setLineDash([5,6]); ctx.beginPath();ctx.moveTo(X(8),0);ctx.lineTo(X(8),H);ctx.stroke(); ctx.setLineDash([]);
+
+    // loading bay
+    var bactive=(activeDrill==='cycle' && cySeq%2===1);
+    ctx.fillStyle='rgba(142,140,248,'+(bactive?0.28:0.14)+')';
+    ctx.fillRect(X(bay.x0),Y(bay.y0),X(bay.x1)-X(bay.x0),Y(bay.y1)-Y(bay.y0));
+    ctx.strokeStyle=bactive?'#8E8CF8':'rgba(142,140,248,0.5)'; ctx.lineWidth=bactive?2.5:1.5;
+    ctx.strokeRect(X(bay.x0),Y(bay.y0),X(bay.x1)-X(bay.x0),Y(bay.y1)-Y(bay.y0));
+    label('LOADING BAY', X((bay.x0+bay.x1)/2), Y(bay.y1)+12, '#8E8CF8');
+
+    // platform
+    var pactive=(activeDrill==='park');
+    var pcol = pactive ? (pkArmed?'#ff8fb5':'#FFB020') : 'rgba(255,176,32,0.6)';
+    ctx.fillStyle='rgba(255,176,32,'+(pactive?0.20:0.12)+')';
+    ctx.fillRect(X(plat.x0),Y(plat.y0),X(plat.x1)-X(plat.x0),Y(plat.y1)-Y(plat.y0));
+    ctx.strokeStyle=pcol; ctx.lineWidth=pactive?2.5:1.5;
+    ctx.strokeRect(X(plat.x0),Y(plat.y0),X(plat.x1)-X(plat.x0),Y(plat.y1)-Y(plat.y0));
+    // inner "fully inside" guide when parking
+    if(pactive){
+      ctx.setLineDash([4,4]); ctx.strokeStyle='rgba(255,176,32,0.45)'; ctx.lineWidth=1;
+      ctx.strokeRect(X(plat.x0+RAD),Y(plat.y0+RAD),X(plat.x1-plat.x0-2*RAD),Y(plat.y1-plat.y0-2*RAD));
+      ctx.setLineDash([]);
+    }
+    label('PLATFORM', X((plat.x0+plat.x1)/2), Y(plat.y0)-6, '#FFB020');
+
+    // reactor
+    var ractive=(activeDrill==='cycle' && cySeq%2===0);
+    if(ractive){ ctx.setLineDash([4,5]); ctx.strokeStyle='rgba(52,215,197,0.4)'; ctx.lineWidth=1;
+      ctx.beginPath();ctx.arc(X(reactor.x),Y(reactor.y),reactR*scale,0,7);ctx.stroke(); ctx.setLineDash([]); }
+    ctx.save(); ctx.translate(X(reactor.x),Y(reactor.y));
+    var rr=1.05*scale;
+    ctx.beginPath();
+    for(var i=0;i<6;i++){ var a=Math.PI/6+i*Math.PI/3; var xx=Math.cos(a)*rr, yy=Math.sin(a)*rr; if(i===0)ctx.moveTo(xx,yy); else ctx.lineTo(xx,yy); }
+    ctx.closePath();
+    ctx.fillStyle='rgba(52,215,197,0.14)'; ctx.fill();
+    ctx.strokeStyle=ractive?'#34D7C5':'rgba(52,215,197,0.65)'; ctx.lineWidth=ractive?2.5:1.8; ctx.stroke();
+    ctx.fillStyle=ractive?'#34D7C5':'rgba(52,215,197,0.8)';
+    ctx.font='700 '+Math.max(9,Math.round(0.9*scale))+'px '+MONO; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('◈', 0, 0);
+    ctx.restore();
+    label('REACTOR', X(reactor.x), Y(reactor.y)+rr+12, '#34D7C5');
+
+    // slalom markers
+    if(activeDrill==='slalom'){
+      for(var m=0;m<MARKS.length;m++){
+        var mx=X(MARKS[m][0]), my=Y(MARKS[m][1]);
+        var cleared=m<slNext, isNext=(m===slNext);
+        var col=cleared?'#43D67E':(isNext?'#ff8fb5':'rgba(255,143,181,0.4)');
+        if(isNext){ ctx.shadowColor='#ff8fb5'; ctx.shadowBlur=12; }
+        ctx.beginPath(); ctx.arc(mx,my,MRC*scale,0,7);
+        ctx.fillStyle=cleared?'rgba(67,214,126,0.18)':(isNext?'rgba(255,143,181,0.18)':'rgba(255,143,181,0.06)'); ctx.fill();
+        ctx.lineWidth=isNext?2.5:1.5; ctx.strokeStyle=col; ctx.stroke();
+        ctx.shadowBlur=0;
+        ctx.fillStyle=col; ctx.font='700 '+Math.max(10,Math.round(0.8*scale))+'px '+MONO;
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText(cleared?'✓':String(m+1), mx, my);
+      }
+    }
+
+    drawRobot();
+  }
+
+  function label(txt,x,y,col){
+    ctx.fillStyle=col; ctx.font='9px '+MONO; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.globalAlpha=0.85; ctx.fillText(txt,x,y); ctx.globalAlpha=1;
+  }
+
+  function drawRobot(){
+    var hs=0.44*scale;
+    ctx.save(); ctx.translate(X(s.x),Y(s.y)); ctx.rotate(heading);
+    ctx.shadowColor='#ff8fb5'; ctx.shadowBlur=14;
+    roundRect(-hs,-hs,hs*2,hs*2,Math.max(3,hs*0.35));
+    ctx.fillStyle='#2a0f1b'; ctx.fill();
+    ctx.strokeStyle='#ff8fb5'; ctx.lineWidth=2; ctx.stroke();
+    ctx.shadowBlur=0;
+    // heading triangle (front)
+    ctx.beginPath(); ctx.moveTo(hs*0.35,-hs*0.5); ctx.lineTo(hs*1.05,0); ctx.lineTo(hs*0.35,hs*0.5); ctx.closePath();
+    ctx.fillStyle='#ff8fb5'; ctx.fill();
+    ctx.restore();
+  }
+
+  function fmt(t){ return t==null?"--":(t.toFixed(1)+' s'); }
+
+  function updateUI(){
+    // controller status
+    el.status.textContent = connected ? 'Controller ✓' : 'Keyboard';
+    el.status.style.color = connected ? 'var(--green)' : 'var(--faint)';
+    el.live.classList.toggle('on', connected);
+    // readouts
+    var dname = activeDrill?DN[activeDrill]:'Free drive';
+    if(activeDrill==='cycle' && drillStarted){ dname='Cycle '+Math.min(3,Math.floor(cySeq/2)+1)+'/3'; }
+    if(activeDrill==='slalom' && drillStarted){ dname='Slalom '+Math.min(5,slNext+1)+'/5'; }
+    if(activeDrill==='park' && drillStarted){ dname='Park '+Math.min(3,pkDone+1)+'/3'; }
+    el.roDrill.textContent=dname;
+    el.roTime.textContent=liveTime.toFixed(1)+' s';
+    el.roSlalom.textContent=fmt(best.slalom);
+    el.roCycle.textContent=fmt(best.cycle);
+    el.roPark.textContent=fmt(best.park);
+    el.roSpeed.textContent=Math.hypot(s.vx,s.vy).toFixed(1);
+    // colour best cells that have beaten the tight time
+    el.roSlalom.className='v '+(best.slalom!=null&&best.slalom<=TIGHT.slalom?'amber':(best.slalom!=null?'green':'teal'));
+    el.roCycle.className='v '+(best.cycle!=null&&best.cycle<=TIGHT.cycle?'amber':(best.cycle!=null?'green':'teal'));
+    el.roPark.className='v '+(best.park!=null&&best.park<=TIGHT.park?'amber':(best.park!=null?'green':'teal'));
+    el.feed.innerHTML=drillResult;
+  }
+
+  var last=0;
+  function frame(ts){
+    if(!W) fit();
+    var t=ts/1000, dt=last?Math.min(0.05,t-last):0.016; last=t;
+    var inp=readInput();
+    // start the clock on first input after arming
+    if(activeDrill && !drillStarted && inp.mag>0.06){ drillStarted=true; startT=t; }
+    if(activeDrill && drillStarted){
+      liveTime=t-startT;
+      if(connected && inp.gpMag>DEAD) usedGamepadRun=true;
+    }
+    stepPhysics(inp,dt);
+    progress();
+    drawField();
+    updateUI();
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  var rt; window.addEventListener('resize',function(){ clearTimeout(rt); rt=setTimeout(fit,120); });
+  // announce gamepad connections in the feed
+  window.addEventListener('gamepadconnected',function(){ if(!activeDrill) drillResult='Controller detected. Nudge the left stick to drive, and pick a drill for a clock.'; });
+
+  syncBtns();
+  updateUI();
+})();
+</script>
+<script>
+(function(){
+  "use strict";
+  // quiz - mastery handler, (opt,i) param version with data-why whyline
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lab showed you, then try another answer.'; } }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  // auto-mark this page complete in the hub once its quiz is finished
+  var KEY="gamesense:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then run the sim
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain');
+  var picked=-1, revealed=false, ran=false;
+  var demos=document.querySelectorAll('.demo');
+  var style=document.createElement('style');
+  style.textContent='#predict .opt.picked{border-color:var(--teal,#34D7C5);box-shadow:0 0 0 2px rgba(52,215,197,.22)}';
+  document.head.appendChild(style);
+  var note=document.createElement('div');
+  note.style.cssText='display:none;font-size:13px;color:#92A2BE;margin-top:10px;font-style:italic';
+  q.appendChild(note);
+  function optText(i){ var t=(opts[i].textContent||'').trim(); return t.length>70 ? t.slice(0,67)+'...' : t; }
+  function reveal(){ if(revealed||picked<0) return; revealed=true;
+    opts.forEach(function(o){o.classList.add('locked');});
+    try{var pr=JSON.parse(localStorage.getItem('frc:predict'))||{r:0,w:0};if(picked===correct){pr.r++;}else{pr.w++;}localStorage.setItem('frc:predict',JSON.stringify(pr));}catch(e){}
+    if(picked===correct){
+      opts[picked].classList.add('correct');
+      note.textContent='You called it. "'+optText(picked)+'" is exactly what happens. Here is why:';
+    } else {
+      opts[picked].classList.add('wrong'); opts[correct].classList.add('correct');
+      note.textContent='You predicted "'+optText(picked)+'". The sim went a different way - the green answer is what really happens, and the surprise is the part worth remembering. Here is why:';
+    }
+    note.style.display='block';
+    explain.classList.add('show'); }
+  function onRan(ev){ if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#predict')) return; ran=true; if(picked>=0) reveal(); }
+  if(demos.length){
+    Array.prototype.forEach.call(demos,function(d){
+      d.addEventListener('pointerdown',onRan,true);
+      d.addEventListener('input',onRan,true);
+    });
+    window.addEventListener('keydown',onRan,true);
+  } else { ran=true; }
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(revealed)return; picked=i;
+    opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
+    if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
+})();
+</script>
+<script src="account-config.js"></script>
+<script src="account.js"></script>
+</body>
+</html>

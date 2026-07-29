@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Game Sense · Part 2 - Checkpoint</title>
+<script src="gamesense-data.js"></script>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --rose:#ff8fb5;    /* Game Sense accent */
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,143,181,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(142,140,248,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--rose);box-shadow:0 0 12px var(--rose)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--rose)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--rose),var(--indigo));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:54ch;margin-top:6px}
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--rose);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  .k{font-family:var(--mono);color:var(--rose);font-weight:600;font-size:.94em}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--rose);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s;min-height:44px}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--rose);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+  .explain a.ref{display:inline-block;margin-top:8px;font-family:var(--mono);font-size:12px;letter-spacing:.05em;color:var(--teal);text-decoration:none;border:1px solid var(--line-2);border-radius:7px;padding:4px 10px;transition:.12s}
+  .explain a.ref:hover{border-color:var(--teal);color:var(--text)}
+  .whyline{margin:2px 0 4px;font-size:13.5px;color:var(--muted);border-left:2px solid var(--red);background:rgba(255,107,107,.05);padding:5px 12px;border-radius:0 8px 8px 0}
+
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--rose);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--indigo)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="gamesense.html"><span class="dot"></span><span class="name">Game Sense</span></a>
+    <div class="top-meta">Part 2 &middot; Checkpoint &middot; Play the Game</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 2 &middot; Checkpoint</b> Play the Game</div>
+    <div class="eyebrow">Checkpoint</div>
+    <h1>Part 2<br><span class="accent">checkpoint</span>.</h1>
+    <p class="dek">A short cumulative check over Play the Game - roles, the draft, and the huddle - plus one look back at reading the game. Answer every question correctly to clear it; a wrong answer turns red, so try again.</p>
+  </div>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Show what stuck</h2>
+    <p>Pick an answer. Get them all right to clear the checkpoint.</p>
+    <div class="quiz" id="quiz">
+
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">An alliance fields one Scorer and two Feeders. On the scoreboard the two Feeders barely register. What makes that lineup so dangerous?</div>
+        <div class="opts">
+          <button class="opt" data-why="A Feeder's own stat line is the smallest on the field. The Cells it collects show up in the Scorer's column, not its own, so you are not adding three scorers, you are adding two multipliers.">Three robots collecting at once means three times the Cells scored</button>
+          <button class="opt">Each Feeder keeps the Scorer's hopper full, so its cycle time nearly halves and one robot scores like two</button>
+          <button class="opt" data-why="Nothing in that lineup dodges defense. One Defender shadowing the star collapses the whole plan, since every point lives in that one robot.">Feeding on three different rings at once makes them impossible to defend</button>
+        </div>
+        <div class="explain">Fed cycles multiply, they do not add. Two Feeders shrink the Scorer's lap until one robot delivers Cells like two, which is why the whole alliance total lives in a single robot - and why one Defender can unravel it. <a class="ref" href="gamesense-lesson-5.html">Review: Part 2.1 &middot; Robot Roles</a></div>
+      </div>
+
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">You chased the Harmony ranking point all through qualifications. Ranking points stop existing in the playoffs, so why would you still spend a pick on a team that Balances almost every match?</div>
+        <div class="opts">
+          <button class="opt" data-why="One Balance is worth about the same as several Cells in a single move. Walking away from the platform leaves those easy points sitting on the floor.">You would not - smart playoff alliances skip the platform and just keep cycling Cells</button>
+          <button class="opt" data-why="Ranking points really are gone once the bracket starts. What is left is only the plain match points printed next to Balance in the scoring table.">The refs quietly hand out a ranking point for it in the playoffs too</button>
+          <button class="opt">Balance is worth <span data-o="balPts"></span> match points and the Harmony bonus adds <span data-o="hbPts"></span> more each, and playoff matches are decided by match points alone</button>
+        </div>
+        <div class="explain">Ranking points only ever decided seeding, and seeding is frozen. Balance (<span data-o="balPts"></span>) and the Harmony bonus (<span data-o="hbPts"></span> each when partners climb together) are ordinary match points, so a near-certain climb often beats a couple of flashy Cells. That is why a reliable balancer with a low Reactor score - the sleeper everyone scrolls past - can be your best pick. <a class="ref" href="gamesense-lesson-6.html">Review: Part 2.2 &middot; Alliance Selection</a></div>
+      </div>
+
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">Your two best robots both cycle the high ring fastest, so the huddle opens with both of them there. Sliding one down to the mid ring, which pays fewer points per Cell, actually raises your projected score. Why?</div>
+        <div class="opts">
+          <button class="opt">Two robots on one ring share a single lane and loading bay, so both laps stretch - spread out they deliver more Cells than they can stacked up</button>
+          <button class="opt" data-why="Check the scoring table: high pays more per Cell than mid. The win comes from fitting in more laps, not a hidden pay raise on the mid ring.">The mid ring secretly pays more per Cell than the high ring</button>
+          <button class="opt" data-why="The gain shows up in your own scoring column, not in fouls. Splitting the rings simply lets both robots run full laps instead of queuing behind each other.">Moving down opens the high ring for a foul-free defender</button>
+        </div>
+        <div class="explain">High pays the most per Cell (<span data-o="highTele"></span> against <span data-o="midTele"></span> on mid), but two robots stacked on one ring jam the same lane and the same loading bay, so both laps grow. Split across two rings and the extra Cells delivered beat the higher per-Cell value - the same jam the draft lesson warned about when two scorers crowd one loading bay. <a class="ref" href="gamesense-lesson-7.html">Review: Part 2.3 &middot; The Strategy Huddle</a></div>
+      </div>
+
+      <div class="q" data-correct="2">
+        <div class="qn">Question 4</div>
+        <div class="qt">You swap a scoring robot for a Defender that collects zero Cells. Your own total drops, and yet the projection flips from a loss to a win. What is the general lesson?</div>
+        <div class="opts">
+          <button class="opt" data-why="Flip the matchup and the answer flips. Against an alliance with no single star worth shadowing, a Defender removes almost nothing and the scoring robot wins the argument.">Defense always beats offense, so field a Defender every match</button>
+          <button class="opt" data-why="The scoreboard shows a difference between two totals. Points you delete from their column move that difference exactly as much as points you add to yours.">A robot that scores zero Cells contributes zero to the result</button>
+          <button class="opt">Judge a job by the swing it makes in the gap between the two totals, not by its own stat line</button>
+        </div>
+        <div class="explain">The scoreboard only ever shows a difference. A Defender scores nothing itself but can erase far more than the offense you gave up, and a careless one hands back only <span data-o="foulPts"></span> points per foul. Weigh a role by how it moves the margin, then run the numbers fresh every match. <a class="ref" href="gamesense-lesson-7.html">Review: Part 2.3 &middot; The Strategy Huddle</a></div>
+      </div>
+
+      <div class="q" data-correct="1">
+        <div class="qn">Question 5 &middot; From Part 1</div>
+        <div class="qt">Back to the scoring math from Part 1. Robot A brings home 6 Cells on the high ring; Robot B brings home 10 Cells on the mid ring. Which one scored more, and what is the lesson?</div>
+        <div class="opts">
+          <button class="opt" data-why="High does pay the most per Cell, but six of them still trail ten on the mid ring. Per-Cell value is half the story; the count is the other half.">Robot A - the high ring is worth the most per Cell, so the high total always wins</button>
+          <button class="opt">Robot B - 10 mid Cells is <span data-o="bTot"></span> points to Robot A's <span data-o="aTot"></span>, because points are count times ring value, not vibes</button>
+          <button class="opt" data-why="The rings pay different amounts: high is worth more per Cell than mid. Where a Cell lands changes its value, so you have to do the multiplication.">It is a tie - a Cell is a Cell wherever it lands</button>
+        </div>
+        <div class="explain">Count times ring value, every time. Robot A: 6 &times; <span data-o="highTele"></span> = <span data-o="aTot"></span>. Robot B: 10 &times; <span data-o="midTele"></span> = <span data-o="bTot"></span>. The steady mid-ring robot edges out the flashy high-ring one, which is the whole point of scoring math - the cooler-looking shot is not automatically the higher score. <a class="ref" href="gamesense-lesson-3.html">Review: Part 1.3 &middot; Scoring Math</a></div>
+      </div>
+
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a class="map" href="gamesense.html">&larr; Back to the Game Sense course map</a>
+  </nav>
+
+</div>
+
+<footer>Game Sense &middot; Reading and playing the FRC game</footer>
+
+<script>
+(function(){
+  "use strict";
+  // inject ORBIT values into the prose so a rebalance edits one file
+  try{
+    var O=window.ORBIT, R=O.scoring.rings, EG=O.scoring.endgame;
+    var high=R.high.tele, mid=R.mid.tele;
+    var VALS={
+      balPts:EG.balance.pts,
+      hbPts:EG.harmonyBonusEach,
+      parkPts:EG.park.pts,
+      highTele:high,
+      midTele:mid,
+      foulPts:O.fouls.foul,
+      aTot:6*high,
+      bTot:10*mid
+    };
+    document.querySelectorAll('[data-o]').forEach(function(n){
+      var k=n.getAttribute('data-o');
+      if(VALS[k]!==undefined) n.textContent=VALS[k];
+    });
+  }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  "use strict";
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');
+      try{ var why=opt.getAttribute('data-why');
+        if(why){ var wl=opt.nextElementSibling; if(!wl||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.insertAdjacentElement('afterend',wl); } wl.textContent=why; }
+      }catch(e){} } }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  // auto-mark this checkpoint complete in the hub once every question is right
+  var KEY="gamesense:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script src="account-config.js"></script>
+<script src="account.js"></script>
+</body></html>

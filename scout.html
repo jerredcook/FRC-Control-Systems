@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Game Sense · Scout Trainer</title>
+<script src="gamesense-data.js"></script>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --rose:#ff8fb5;    /* course accent */
+    --amber:#FFB020;   /* values / highlights */
+    --teal:#34D7C5;    --indigo:#8E8CF8;
+    --red:#FF6B6B;     --green:#43D67E;
+    --blue:#6aa8ff;    --redbot:#ff7a7a;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ink); color:var(--text);
+    font-family:var(--sans); font-size:17px; line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(900px 500px at 80% -10%, rgba(255,143,181,.07), transparent 60%),
+      radial-gradient(700px 500px at -10% 10%, rgba(142,140,248,.05), transparent 55%);
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--rose);box-shadow:0 0 12px var(--rose)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:48px 0 18px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  h1{font-size:clamp(2.1rem,5vw,3.6rem);line-height:1.04;margin:.1em 0 .3em;letter-spacing:-.03em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--rose),var(--indigo));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(16px,2.3vw,20px);color:var(--text);max-width:58ch;margin-top:6px}
+  .dek b{color:var(--text)}
+
+  section{padding:26px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--rose);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  .kicker .num{color:var(--faint)}
+  h2{font-size:clamp(1.6rem,3.4vw,2.4rem);line-height:1.1;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  .lead{font-size:19px}
+  em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  /* interactive panels (drill 1 uses .demo, drills 2 & 3 use .board - same styling) */
+  .demo,.board{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;gap:6px;align-items:center;text-align:right}
+  .demo-tag .live{width:7px;height:7px;border-radius:50%;background:var(--faint);flex:0 0 auto}
+  .demo-tag .live.on{background:var(--green);box-shadow:0 0 8px var(--green)}
+
+  .assign{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line);background:#0B1322}
+  .assign .a-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .assign .a-who{font-family:var(--mono);font-size:15px;color:var(--rose);font-weight:700}
+  .assign .a-hint{font-size:13px;color:var(--muted)}
+
+  .matchbar{height:5px;background:var(--line-2)}
+  .matchbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--rose),var(--indigo));transition:width .12s linear}
+  canvas.field{display:block;width:100%;height:300px;background:#0A1120}
+  @media(max-width:430px){canvas.field{height:260px}}
+  .fieldlegend{display:flex;flex-wrap:wrap;gap:14px;padding:10px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
+  .fieldlegend span{display:inline-flex;align-items:center;gap:6px}
+  .fieldlegend i{width:11px;height:11px;border-radius:50%;display:inline-block}
+
+  .tallybtns{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:14px 16px}
+  @media(max-width:520px){.tallybtns{grid-template-columns:repeat(2,1fr)}}
+  .tbtn{min-height:66px;border:1px solid var(--line-2);background:var(--panel-2);border-radius:11px;cursor:pointer;padding:8px 6px 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;transition:.1s;color:var(--muted)}
+  .tbtn:disabled{opacity:.4;cursor:default}
+  .tbtn:not(:disabled):hover{border-color:var(--muted);color:var(--text)}
+  .tbtn:not(:disabled):active{transform:scale(.96)}
+  .tbtn .tlbl{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase}
+  .tbtn .tval{font-family:var(--mono);font-size:9.5px;color:var(--faint)}
+  .tbtn .tcount{font-family:var(--mono);font-size:26px;font-weight:700;line-height:1;color:var(--text);margin-top:2px}
+  .tbtn.low{border-top:2px solid var(--indigo)} .tbtn.low .tcount{color:var(--indigo)}
+  .tbtn.mid{border-top:2px solid var(--teal)} .tbtn.mid .tcount{color:var(--teal)}
+  .tbtn.high{border-top:2px solid var(--amber)} .tbtn.high .tcount{color:var(--amber)}
+  .tbtn.miss{border-top:2px solid var(--red)} .tbtn.miss .tcount{color:var(--red)}
+  .tallybar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:0 16px 14px}
+
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s;min-height:36px}
+  .btn:hover{border-color:var(--rose);color:var(--text)}
+  .btn:disabled{opacity:.4;cursor:default}
+  .btn:disabled:hover{border-color:var(--line-2);color:var(--muted)}
+  .btn.primary{background:linear-gradient(180deg,#ffc0d6,var(--rose));color:#2a0d18;font-weight:700;border:none}
+  .btn.small{padding:7px 11px;font-size:10.5px;min-height:30px}
+  .ctl-hint{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.04em}
+
+  .verdict{padding:14px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--muted);display:flex;align-items:flex-start;gap:10px;line-height:1.55}
+  .verdict .dotv{width:9px;height:9px;border-radius:50%;background:var(--faint);flex:0 0 auto;margin-top:5px}
+  .verdict.good .dotv{background:var(--green);box-shadow:0 0 10px var(--green)} .verdict.good{color:var(--green)}
+  .verdict.warn .dotv{background:var(--amber);box-shadow:0 0 10px var(--amber)} .verdict.warn{color:var(--amber)}
+  .verdict.bad .dotv{background:var(--red);box-shadow:0 0 10px var(--red)} .verdict.bad{color:var(--red)}
+  .verdict b{color:var(--text)}
+
+  .truthgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  .tg{background:#0B1322;padding:10px 12px;text-align:center}
+  .tg .tgk{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+  .tg .tgv{font-family:var(--mono);font-size:13px;margin-top:4px;color:var(--muted)}
+  .tg .tgv b{font-size:17px;color:var(--text)}
+  .tg .tgv .ok{color:var(--green)} .tg .tgv .off{color:var(--red)}
+  .timeline{padding:10px 16px 14px;border-top:1px solid var(--line);display:none}
+  .timeline.show{display:block}
+  .timeline .tl-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-bottom:8px}
+  .tl-seq{display:flex;flex-wrap:wrap;gap:5px}
+  .tl-seq .ev{font-family:var(--mono);font-size:11px;width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line-2);color:var(--text)}
+  .tl-seq .ev.low{border-color:var(--indigo);color:var(--indigo)}
+  .tl-seq .ev.mid{border-color:var(--teal);color:var(--teal)}
+  .tl-seq .ev.high{border-color:var(--amber);color:var(--amber)}
+  .tl-seq .ev.miss{border-color:var(--red);color:var(--red)}
+
+  /* scout data table */
+  .tblwrap{overflow-x:auto}
+  table.scout{width:100%;min-width:560px;border-collapse:collapse;font-size:13.5px}
+  table.scout th{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);font-weight:500;white-space:nowrap}
+  table.scout td{padding:9px 10px;border-bottom:1px solid var(--line);color:var(--muted);white-space:nowrap}
+  table.scout td.tname{color:var(--text);font-family:var(--mono);font-size:12.5px}
+  table.scout td.num{font-family:var(--mono)}
+  table.scout .rk{color:var(--amber)}
+  table.scout .balhi{color:var(--teal)}
+  table.scout tbody tr{transition:.1s}
+  table.scout tbody tr.pick{cursor:pointer}
+  table.scout tbody tr.pick:hover{background:rgba(255,143,181,.06)}
+  table.scout tbody tr.rightrow{background:rgba(67,214,126,.14)}
+  table.scout tbody tr.rightrow td.tname{color:var(--green)}
+  table.scout tbody tr.wrongrow{background:rgba(255,107,107,.13)}
+  .dataq{padding:14px 16px;border-top:1px solid var(--line)}
+  .dataq .dq-n{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--rose);margin-bottom:6px}
+  .dataq .dq-t{font-size:15.5px;color:var(--text)}
+  .dataq .dq-fb{margin-top:10px;font-size:13.5px;color:var(--muted);border-left:2px solid var(--rose);padding:4px 0 4px 12px;display:none}
+  .dataq .dq-fb.show{display:block}
+  .dataq .dq-fb.wrong{border-color:var(--red)}
+  .dataprog{padding:10px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.06em}
+  .dataprog b{color:var(--rose)}
+
+  /* pick list */
+  .brief{padding:14px 16px;border-bottom:1px solid var(--line);background:#0B1322}
+  .brief .b-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-bottom:5px}
+  .brief p{margin:0;font-size:15px;color:var(--text)}
+  .brief .captain{font-family:var(--mono);color:var(--rose)}
+  .picklist{padding:8px 12px 4px}
+  .pl-row{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;background:var(--panel-2);padding:8px 10px;margin:7px 0}
+  .pl-row.idealtop{border-color:rgba(67,214,126,.5)}
+  .pl-rank{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--rose);width:22px;text-align:center;flex:0 0 auto}
+  .pl-body{flex:1 1 auto;min-width:0}
+  .pl-team{font-family:var(--mono);font-size:13px;color:var(--text);font-weight:600}
+  .pl-stats{font-family:var(--mono);font-size:10.5px;color:var(--faint);letter-spacing:.02em;margin-top:2px}
+  .pl-stats .hi{color:var(--amber)}
+  .pl-move{display:flex;flex-direction:column;gap:4px;flex:0 0 auto}
+  .pl-move button{width:32px;height:29px;border:1px solid var(--line-2);background:var(--panel);color:var(--rose);border-radius:6px;cursor:pointer;font-size:12px;line-height:1;transition:.1s;padding:0}
+  .pl-move button:hover:not(:disabled){border-color:var(--rose);color:var(--text)}
+  .pl-move button:disabled{opacity:.28;cursor:default;color:var(--muted)}
+  .pl-ideal{font-family:var(--mono);font-size:10px;color:var(--green);margin-top:3px;display:none}
+  .pl-row.showideal .pl-ideal{display:block}
+  .pickbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 16px 14px}
+
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .bests{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.04em}
+  .bests b{color:var(--rose)}
+
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--rose);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--rose);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0 0 10px;color:var(--text);font-size:16px}
+  .note p:last-child{margin-bottom:0}
+  .note.rose{border-color:var(--rose);background:rgba(255,143,181,.06)} .note.rose .nh{color:var(--rose)}
+  .note a{color:var(--teal);text-decoration:none;border-bottom:1px dotted rgba(52,215,197,.45)}
+  .note a:hover{border-bottom-style:solid}
+  details.reveal{margin-top:12px}
+  details.reveal summary{cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  details.reveal summary:hover{color:var(--text)}
+  details.reveal p{margin-top:8px}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)}
+  .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7}
+  .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .whyline{margin:2px 0 4px;font-size:13.5px;color:var(--muted);border-left:2px solid var(--red);background:rgba(255,107,107,.05);padding:5px 12px;border-radius:0 8px 8px 0}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--rose);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--rose);color:var(--text)}
+  .coursenav a.map{border-color:transparent;color:var(--indigo)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="gamesense.html"><span class="dot"></span><span class="name">Game Sense</span></a>
+    <div class="top-meta">Scout Trainer</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Companion · scouting</div>
+    <h1>Be the team's <span class="accent">eyes</span>.</h1>
+    <p class="dek">A robot wins or loses on the field, but the plan is built in the stands. <b>Scouting</b> is the job of watching every match, writing down what really happened, and turning a pile of numbers into one good decision. Three drills here train the whole loop: <b>watch and tally</b> a live match, <b>read the sheet</b> of gathered data, and <b>build a pick list</b> from a strategy brief. It all runs on <b>ORBIT</b>, so the skill sticks even when next January's game is nothing like this one.</p>
+  </div>
+
+  <!-- ============ DRILL 1: WATCH AND TALLY ============ -->
+  <section>
+    <div class="kicker"><span class="num">Drill 1 / 3</span> Watch and tally</div>
+    <h2>Count one robot</h2>
+    <p>The first scouting job is the humblest: watch a match and write down what one robot did. Not the whole alliance, just <em>your</em> robot. You will be handed a single robot to follow. Every time it scores, tap the ring it hit. Every time it drives up and comes away empty, tap <span class="k">Missed</span>. Keep your eyes on the glowing rose dot and let the other five blur into traffic.</p>
+
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="1">
+        <div class="qn">Predict first</div>
+        <div class="qt">Before you watch: with one robot to follow and five others moving, what actually trips up a new scout the most?</div>
+        <div class="opts">
+          <button class="opt">Nothing tricky - following one robot is easy</button>
+          <button class="opt">Telling a made shot from a miss, and reading which ring it hit, while all six robots move at once</button>
+          <button class="opt">Just remembering your robot's team number</button>
+        </div>
+        <div class="explain">Following the dot is the easy part. The hard part is the split second the Cell arrives: did it land on a ring or bounce off, and was it the inner, middle, or outer ring? At speed those calls blur together, and a miss counted as a make quietly wrecks the sheet. Run it and see how tight your count comes out.</div>
+      </div>
+    </div>
+
+    <div class="demo" id="demo">
+      <div class="demo-head">
+        <span class="demo-title">ORBIT · qualification match</span>
+        <span class="demo-tag"><span class="live" id="live"></span> <span id="status">Press Scout a match</span></span>
+      </div>
+      <div class="assign">
+        <span class="a-lbl">Your assignment</span>
+        <span class="a-who" id="assignWho">press start to get a robot</span>
+        <span class="a-hint" id="assignHint">You tally this robot only. The rest are there to test your focus.</span>
+      </div>
+      <div class="matchbar"><i id="matchFill"></i></div>
+      <canvas class="field" id="field"></canvas>
+      <div class="fieldlegend">
+        <span><i style="background:var(--rose);box-shadow:0 0 8px var(--rose)"></i> Your robot</span>
+        <span><i style="background:var(--blue)"></i> Your alliance</span>
+        <span><i style="background:var(--redbot)"></i> Opponents</span>
+        <span>Rings: inner = High, middle = Mid, outer = Low</span>
+      </div>
+      <div class="tallybtns">
+        <button class="tbtn low" data-cat="low" disabled><span class="tlbl">Low ring</span><span class="tval" data-o="lowv"></span><span class="tcount" id="cLow">0</span></button>
+        <button class="tbtn mid" data-cat="mid" disabled><span class="tlbl">Mid ring</span><span class="tval" data-o="midv"></span><span class="tcount" id="cMid">0</span></button>
+        <button class="tbtn high" data-cat="high" disabled><span class="tlbl">High ring</span><span class="tval" data-o="highv"></span><span class="tcount" id="cHigh">0</span></button>
+        <button class="tbtn miss" data-cat="miss" disabled><span class="tlbl">Missed</span><span class="tval">no score</span><span class="tcount" id="cMiss">0</span></button>
+      </div>
+      <div class="tallybar">
+        <button class="btn primary" id="startBtn">Scout a match ▸</button>
+        <button class="btn small" id="undoBtn" disabled>↶ Undo last</button>
+        <span class="ctl-hint" id="tallyHint">Tap a ring the moment your robot scores. Tap Missed when it comes up empty.</span>
+      </div>
+      <div class="truthgrid" id="truthGrid" style="display:none">
+        <div class="tg"><div class="tgk">Low · you / real</div><div class="tgv" id="tgLow">-</div></div>
+        <div class="tg"><div class="tgk">Mid · you / real</div><div class="tgv" id="tgMid">-</div></div>
+        <div class="tg"><div class="tgk">High · you / real</div><div class="tgv" id="tgHigh">-</div></div>
+        <div class="tg"><div class="tgk">Miss · you / real</div><div class="tgv" id="tgMiss">-</div></div>
+      </div>
+      <div class="verdict" id="tallyVerdict"><span class="dotv"></span><span id="tallyVerdictTxt">Your accuracy shows up here after the buzzer.</span></div>
+      <div class="timeline" id="timeline">
+        <div class="tl-lbl">What your robot actually did, in order</div>
+        <div class="tl-seq" id="tlSeq"></div>
+      </div>
+    </div>
+    <p class="caption bests">Session best tally accuracy: <b id="bestTally">--</b>. Every match is a fresh seed, so no two are the same.</p>
+  </section>
+
+  <!-- ============ DRILL 2: READ THE DATA ============ -->
+  <section>
+    <div class="kicker"><span class="num">Drill 2 / 3</span> Read the data</div>
+    <h2>Read the sheet</h2>
+    <p>By the last day of qualifications the scouts have a full sheet: every team's average <b>Cells per match</b>, which <b>ring</b> they feed, how often they <b>Balance</b>, and their <b>best and worst</b> match so you can see how steady they are. The skill now is reading it right. The biggest number in a column is not always the answer, and the quietest column often decides a match. Answer each question by clicking the team's row.</p>
+
+    <div class="board" id="dataBoard">
+      <div class="demo-head">
+        <span class="demo-title">Event scouting sheet · 8 teams</span>
+        <span class="demo-tag" id="dataTag">Question 1 of 3</span>
+      </div>
+      <div class="tblwrap">
+        <table class="scout" aria-label="Scouting data for eight teams">
+          <thead>
+            <tr><th>Team</th><th>Cells / match</th><th>Ring</th><th>Reactor pts</th><th>Balance</th><th>Range (worst-best)</th></tr>
+          </thead>
+          <tbody id="dataBody"></tbody>
+        </table>
+      </div>
+      <div class="dataq" id="dataQ">
+        <div class="dq-n" id="dqN">Question 1 of 3</div>
+        <div class="dq-t" id="dqT">--</div>
+        <div class="dq-fb" id="dqFb"></div>
+      </div>
+      <div class="dataprog" id="dataProg">Solved <b>0</b> of 3 - click the row you would pick.</div>
+    </div>
+    <p class="caption bests">Session best: <b id="bestData">--</b> of 3 solved on the first click.</p>
+  </section>
+
+  <!-- ============ DRILL 3: BUILD A PICK LIST ============ -->
+  <section>
+    <div class="kicker"><span class="num">Drill 3 / 3</span> Build a pick list</div>
+    <h2>Rank the six</h2>
+    <p>Alliance selection is minutes away. You are a captain with one job left: put six teams in the order you would pick them. The catch is the one from the lessons - value depends on who is asking. A team is not just good or bad, it is good or bad <em>for your alliance</em>. Read the brief, then use the arrows to order the list best pick at the top. Grade it when you are happy.</p>
+
+    <div class="board" id="pickBoard">
+      <div class="demo-head">
+        <span class="demo-title">Pick list · rank 1 to 6</span>
+        <span class="demo-tag">graded against a defensible order</span>
+      </div>
+      <div class="brief">
+        <div class="b-lbl">The brief</div>
+        <p id="briefText">--</p>
+      </div>
+      <div class="picklist" id="pickList"></div>
+      <div class="pickbar">
+        <button class="btn primary" id="gradeBtn">Grade my list ▸</button>
+        <button class="btn small" id="shuffleBtn">↻ Shuffle</button>
+        <span class="ctl-hint" id="pickHint">Best pick at the top. Think value to your alliance, not flashiest robot.</span>
+      </div>
+      <div class="verdict" id="pickVerdict"><span class="dotv"></span><span id="pickVerdictTxt">Your list gets a verdict here.</span></div>
+    </div>
+    <p class="caption bests">Session best list quality: <b id="bestPick">--</b>.</p>
+  </section>
+
+  <!-- ============ MISSIONS ============ -->
+  <div class="missions" id="missions">
+    <div class="m-head">🎯 Scout missions <span class="m-sub">prove the whole skill - take them in any order</span></div>
+    <div class="m-item" data-m="tally"><span class="m-st">○</span><span>Finish a <b>Watch and tally</b> match with <b>80 percent accuracy or better</b>. Watch only the rose dot and trust your count.</span></div>
+    <div class="m-item" data-m="data"><span class="m-st">○</span><span>Solve <b>all three Read the sheet questions</b>. Remember the traps: ring value beats raw Cell count, and the steadiest scorer is not always the biggest one.</span></div>
+    <div class="m-item" data-m="pick"><span class="m-st">○</span><span>Build a pick list the verdict calls <b>defensible</b> - within a swap or two of the strong order. Re-read the brief before you grade.</span></div>
+    <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> land a <b>perfect tally</b> - every ring and every miss exactly right - on a match with at least four made shots. Scout of the match.</span></div>
+  </div>
+
+  <!-- ============ GOING FURTHER ============ -->
+  <div class="note rose">
+    <div class="nh">Going further · optional</div>
+    <p>Real scouting has a step this trainer hides from you: <b>trust</b>. One scout watching one robot will slip - a miscounted miss, a match they zoned out for. Good teams fix that by having two or three people scout the same robot and then comparing sheets, throwing out the numbers that do not agree. They also track things a single number cannot hold: did the robot break down, did it play defense well, was it fast at the loading bay. Here is a question worth chewing on before you peek.</p>
+    <p>Two teams both average 8 Cells a match. One ranges from 7 to 9, the other from 1 to 15. Their averages are identical. Which one do you want on your alliance for a playoff match, and why might the answer flip if you were the underdog with nothing to lose?</p>
+    <details class="reveal">
+      <summary>Show the thinking</summary>
+      <p>For a normal playoff match you almost always want the steady 7-to-9 team. Playoffs are best-of-three against a known opponent, so you are planning a score you can count on, and a robot that might give you 1 is a robot that loses you a match you had planned to win. The wild 1-to-15 team adds risk you cannot control. But flip the seats: if you are the low seed facing an alliance that will beat you on any average day, a steady team just loses steadily. Now you <em>want</em> variance - you need the 15-Cell match to show up and the favorite to have an off day at the same time. Underdogs buy lottery tickets on purpose. The same number, consistency, is an asset or a liability depending entirely on whether you are ahead or behind. That is the deepest idea in scouting: a stat only means something once you know what job you are asking it to do.</p>
+    </details>
+  </div>
+
+  <!-- ============ QUIZ ============ -->
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">Why does a scout tally one assigned robot instead of trying to watch the whole alliance at once?</div>
+        <div class="opts">
+          <button class="opt" data-why="It feels efficient to cover everyone, but a person watching six robots catches none of them cleanly - you end up with six blurry guesses instead of one number you can trust.">Watching all six at once gathers six times the data</button>
+          <button class="opt">One robot watched closely gives numbers you can trust; six watched loosely gives a blur</button>
+          <button class="opt" data-why="Team assignments do get shared out so every robot is covered, but that is the result, not the reason - the reason is that focus is what makes any single number accurate.">Because the rules say each scout may only look at one robot</button>
+        </div>
+        <div class="explain">Accuracy comes from focus. A scout locked onto one robot catches every score and every miss; a scout sweeping all six misses half of each. The team covers all robots by handing each scout a different one, so every robot gets watched closely by somebody.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">One team on your sheet logs the most Cells per match, but you rank a different team higher for scoring. What are you seeing that the Cell count hides?</div>
+        <div class="opts">
+          <button class="opt" data-why="Balance is a real tiebreaker, but this question is about scoring - the fix is in the scoring column itself, not the endgame.">The big-Cell team never balances, so it loses on the endgame</button>
+          <button class="opt" data-why="A boom-or-bust range matters for trust, but even at its steady average the low-ring team is out-scored - the ring is doing the work here, not the spread.">The big-Cell team is boom-or-bust, so its average is a lie</button>
+          <button class="opt">Ring value: a high-ring Cell is worth <span data-o="highv"></span> and a low-ring Cell only <span data-o="lowv"></span>, so fewer high Cells can out-score many low ones</button>
+        </div>
+        <div class="explain">Reactor points are Cells times ring value, not raw Cells. A high-ring Cell pays <span data-o="highv"></span> points and a low-ring Cell pays <span data-o="lowv"></span>, so a team firing 7 high-ring Cells out-scores one dumping 13 low-ring ones. The count column is a decoy; the points column is the truth.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">Your captain is a great high-ring scorer who almost never balances. Two teams are on the board: a huge high-ring scorer, and a steady mid-ring team that balances 90 percent of the time. Why might the smaller scorer be the better pick?</div>
+        <div class="opts">
+          <button class="opt">A second high scorer fights your captain for the high ring and the loading bay, while the balancer fills your real gap and adds near-certain endgame points</button>
+          <button class="opt" data-why="More scoring sounds strictly better, but two robots aiming at the same ring and the same loading bay get in each other's way - the paper points do not all show up on the field.">The biggest scorer is always the best pick; more points can only help</button>
+          <button class="opt" data-why="Balance is worth real points either way, but its value here is bigger than that - it fixes a weakness your captain already has, which is worth more than piling on a strength.">Balancing is worth more points than scoring no matter who your captain is</button>
+        </div>
+        <div class="explain">Value depends on who is asking. Next to a captain who already owns the high ring, a second high scorer overlaps - they crowd the same ring and the same loading bay, so the extra Cells do not all land. The balancer overlaps nobody and patches the captain's one weakness, adding a near-certain <span data-o="balv"></span>-point climb every match. Pick the robot that raises your worst number, not the one that pads your best.</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<nav class="coursenav">
+  <a href="gamesense-lesson-6.html">&larr; Alliance Selection</a>
+  <a class="map" href="gamesense.html">Course map</a>
+  <a href="glossary.html">Glossary &rarr;</a>
+</nav>
+
+<footer>Game Sense &middot; Reading and playing the FRC game</footer>
+
+<script>
+(function(){
+  "use strict";
+  var O = window.ORBIT || {};
+  var RING = (O.scoring && O.scoring.rings) ? {
+    low: O.scoring.rings.low.tele, mid: O.scoring.rings.mid.tele, high: O.scoring.rings.high.tele
+  } : { low:2, mid:5, high:8 };
+  var BALP = (O.scoring && O.scoring.endgame) ? O.scoring.endgame.balance.pts : 20;
+  var PARKP = (O.scoring && O.scoring.endgame) ? O.scoring.endgame.park.pts : 5;
+  var clamp = function(x,a,b){ return x<a?a:(x>b?b:x); };
+
+  /* ---- inject ORBIT values into prose/labels ---- */
+  try{
+    var VALS = {
+      lowv:  RING.low + " pts", midv: RING.mid + " pts", highv: RING.high + " pts",
+      balv:  BALP
+    };
+    document.querySelectorAll('[data-o]').forEach(function(n){
+      var k = n.getAttribute('data-o');
+      if (VALS[k] !== undefined) n.textContent = VALS[k];
+    });
+  }catch(e){}
+
+  /* ---- shared bests (frc:scout) ---- */
+  var SKEY = "frc:scout";
+  var bests = {};
+  try{ bests = JSON.parse(localStorage.getItem(SKEY)) || {}; }catch(e){ bests = {}; }
+  function saveBests(){ try{ localStorage.setItem(SKEY, JSON.stringify(bests)); }catch(e){} }
+  function renderBests(){
+    document.getElementById('bestTally').textContent = (bests.tally != null) ? bests.tally + "%" : "--";
+    document.getElementById('bestData').textContent  = (bests.data != null) ? bests.data : "--";
+    document.getElementById('bestPick').textContent  = (bests.pick != null) ? bests.pick + "%" : "--";
+  }
+
+  /* ---- mission state (read by the checker below) ---- */
+  var MS = { tallyBest:0, goldHit:false, dataSolved:0, dataTotal:3, pickSubmitted:false, pickQuality:0 };
+
+  /* =========================================================
+     DRILL 1 - WATCH AND TALLY
+     ========================================================= */
+  function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; var t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+
+  var MATCH_SEC = 88;
+  var ARCH_CYCLE = {}; var ARCH_RING = {};
+  (O.archetypes || []).forEach(function(a){ ARCH_CYCLE[a.key]=a.cycleSec; ARCH_RING[a.key]=a.ring; });
+  // fall back if ORBIT missing
+  if (ARCH_CYCLE.scorer == null) { ARCH_CYCLE={scorer:14,allround:18,feeder:10,defender:0}; ARCH_RING={scorer:"high",allround:"mid",feeder:"low",defender:null}; }
+  var WEIGHTS = {
+    high: { high:0.62, mid:0.18, low:0.05, miss:0.15 },
+    mid:  { high:0.14, mid:0.58, low:0.16, miss:0.12 },
+    low:  { high:0.03, mid:0.20, low:0.62, miss:0.15 }
+  };
+  var BLUE_NAMES = ["Comets","Otters","Herons","Foxes","Kites","Larks"];
+  var RED_NAMES  = ["Vipers","Mules","Ravens","Perch","Wolves","Reeds"];
+
+  function sampleOutcome(rng, base){
+    var w = WEIGHTS[base]; var r = rng(); var order=["high","mid","low","miss"];
+    for (var i=0;i<order.length;i++){ if (r < w[order[i]]) return order[i]; r -= w[order[i]]; }
+    return "miss";
+  }
+  function genCycles(rng, arch){
+    var base = ARCH_RING[arch]; var cyc = ARCH_CYCLE[arch];
+    var t = 1.5 + rng()*2.5; var cycles=[];
+    if (arch === "defender" || !base) return cycles; // defenders never score
+    while (t < MATCH_SEC - 3){
+      var len = cyc + (rng()*3 - 1.5);
+      var scoreT = t + len*0.5;
+      if (scoreT > MATCH_SEC - 1) break;
+      cycles.push({ scoreT:scoreT, outcome: sampleOutcome(rng, base), flashed:false, t0:t, t1:t+len });
+      t += len;
+    }
+    return cycles;
+  }
+  function countMade(cycles){ var m=0; cycles.forEach(function(c){ if(c.outcome!=="miss") m++; }); return m; }
+
+  // canvas helper (from lesson design system)
+  function makeCanvas(cv){
+    var ctx=cv.getContext('2d'); var o={cv:cv,ctx:ctx,w:0,h:0};
+    function fit(){
+      var r=cv.getBoundingClientRect(); if(!r.width) return;
+      var dpr=window.devicePixelRatio||1;
+      cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr);
+      ctx.setTransform(dpr,0,0,dpr,0,0); o.w=r.width; o.h=r.height;
+    }
+    o.fit=fit; fit(); return o;
+  }
+
+  var field = makeCanvas(document.getElementById('field'));
+  var elD = {
+    live:document.getElementById('live'), status:document.getElementById('status'),
+    matchFill:document.getElementById('matchFill'),
+    assignWho:document.getElementById('assignWho'),
+    start:document.getElementById('startBtn'), undo:document.getElementById('undoBtn'),
+    hint:document.getElementById('tallyHint'),
+    cLow:document.getElementById('cLow'), cMid:document.getElementById('cMid'),
+    cHigh:document.getElementById('cHigh'), cMiss:document.getElementById('cMiss'),
+    truthGrid:document.getElementById('truthGrid'),
+    tgLow:document.getElementById('tgLow'), tgMid:document.getElementById('tgMid'),
+    tgHigh:document.getElementById('tgHigh'), tgMiss:document.getElementById('tgMiss'),
+    verdict:document.getElementById('tallyVerdict'), verdictTxt:document.getElementById('tallyVerdictTxt'),
+    timeline:document.getElementById('timeline'), tlSeq:document.getElementById('tlSeq'),
+    btns: Array.prototype.slice.call(document.querySelectorAll('.tbtn'))
+  };
+
+  var robots = [];         // all six
+  var assigned = null;     // robot object being scouted
+  var running = false, matchStart = 0, clock = 0;
+  var flashes = [];        // active cell animations
+  var tally = { low:0, mid:0, high:0, miss:0 };
+  var tapStack = [];
+
+  function newRoster(seed){
+    var rng = mulberry32(seed);
+    // blue = your alliance (scorer/allround/feeder), red = opponents (incl. a defender)
+    var blueArch = shuffle(["scorer","allround","feeder"], rng);
+    var redArch  = shuffle(["scorer","defender","allround"], rng);
+    var bn = shuffle(BLUE_NAMES.slice(), rng), rn = shuffle(RED_NAMES.slice(), rng);
+    robots = [];
+    var i;
+    for (i=0;i<3;i++){
+      robots.push(makeRobot(0, i, blueArch[i], rng, bn[i]));
+    }
+    for (i=0;i<3;i++){
+      robots.push(makeRobot(1, i, redArch[i], rng, rn[i]));
+    }
+    return rng;
+  }
+  function shuffle(arr, rng){
+    for (var i=arr.length-1;i>0;i--){ var j=Math.floor(rng()*(i+1)); var t=arr[i];arr[i]=arr[j];arr[j]=t; }
+    return arr;
+  }
+  function makeRobot(alliance, idx, arch, rng, name){
+    var num = 1000 + Math.floor(rng()*8000);
+    return {
+      alliance:alliance, idx:idx, arch:arch, name:name, num:num,
+      color: alliance===0 ? '#6aa8ff' : '#ff7a7a',
+      homeXn: alliance===0 ? 0 : 1,
+      homeYn: 0.28 + idx*0.22,
+      angle: (alliance===0 ? Math.PI : 0) + (idx-1)*0.42,
+      cycles: [],
+      assigned:false
+    };
+  }
+
+  function startMatch(){
+    var seed = Math.floor(Math.random()*1e9);
+    // pick which blue robot the student scouts (never a defender)
+    var tries = 0;
+    while (tries < 40){
+      var rng = newRoster(seed);
+      // generate cycles for every robot with the same rng stream
+      robots.forEach(function(rb){ rb.cycles = genCycles(rng, rb.arch); });
+      // choose assignment among blue non-defenders
+      var pool = robots.filter(function(rb){ return rb.alliance===0 && rb.arch!=="defender"; });
+      assigned = pool[Math.floor(mulberry32(seed+7)()*pool.length)];
+      var made = countMade(assigned.cycles);
+      if (made >= 4 && assigned.cycles.length >= 5) break;
+      seed++; tries++;
+    }
+    robots.forEach(function(rb){ rb.assigned = (rb === assigned); });
+
+    tally = { low:0, mid:0, high:0, miss:0 }; tapStack = [];
+    flashes = [];
+    updateCounts();
+    running = true; matchStart = performance.now(); clock = 0;
+    elD.truthGrid.style.display = 'none';
+    elD.timeline.classList.remove('show');
+    elD.verdict.className = 'verdict';
+    elD.verdictTxt.textContent = 'Watching... tap your robot\'s shots as they happen.';
+    elD.start.disabled = true; elD.start.textContent = 'Watching...';
+    elD.undo.disabled = false;
+    elD.btns.forEach(function(b){ b.disabled = false; });
+    elD.live.classList.add('on'); elD.status.textContent = 'Live';
+    var slot = assigned.alliance===0 ? 'BLUE' : 'RED';
+    elD.assignWho.textContent = slot + ' robot ' + (assigned.idx+1) + ' · ' + assigned.num + ' ' + assigned.name;
+    elD.hint.textContent = 'Tap a ring the moment your robot scores. Tap Missed when it comes up empty.';
+  }
+
+  function endMatch(){
+    running = false;
+    elD.live.classList.remove('on'); elD.status.textContent = 'Final';
+    elD.matchFill.style.width = '100%';
+    elD.start.disabled = false; elD.start.textContent = 'Scout a new match ↺';
+    elD.undo.disabled = true;
+    elD.btns.forEach(function(b){ b.disabled = true; });
+    gradeTally();
+  }
+
+  function gradeTally(){
+    var truth = { low:0, mid:0, high:0, miss:0 };
+    assigned.cycles.forEach(function(c){ truth[c.outcome]++; });
+    var made = truth.low + truth.mid + truth.high;
+    var total = made + truth.miss;
+    var errLow = Math.abs(tally.low-truth.low), errMid = Math.abs(tally.mid-truth.mid);
+    var errHigh = Math.abs(tally.high-truth.high), errMiss = Math.abs(tally.miss-truth.miss);
+    var err = errLow + errMid + errHigh + errMiss;
+    var acc = Math.round(clamp(1 - err/(total||1), 0, 1) * 100);
+    var perfect = (err === 0);
+
+    // truth grid
+    function cell(you, real){
+      var ok = (you===real);
+      return you + ' / <b>' + real + '</b> <span class="'+(ok?'ok':'off')+'">'+(ok?'✓':(you>real?'+':'')+(you-real))+'</span>';
+    }
+    elD.tgLow.innerHTML  = cell(tally.low, truth.low);
+    elD.tgMid.innerHTML  = cell(tally.mid, truth.mid);
+    elD.tgHigh.innerHTML = cell(tally.high, truth.high);
+    elD.tgMiss.innerHTML = cell(tally.miss, truth.miss);
+    elD.truthGrid.style.display = 'grid';
+
+    // timeline
+    elD.tlSeq.innerHTML = assigned.cycles.map(function(c){
+      var lbl = c.outcome==='miss' ? '·' : c.outcome.charAt(0).toUpperCase();
+      return '<span class="ev '+c.outcome+'" title="'+c.outcome+'">'+lbl+'</span>';
+    }).join('');
+    elD.timeline.classList.add('show');
+
+    var cls, msg;
+    if (perfect){
+      cls='good'; msg='Perfect tally. Every ring, every miss, exactly right. That is scout-of-the-match work - the plan is only as good as sheets like this.';
+    } else if (acc >= 80){
+      cls='good'; msg='Sharp - '+acc+'% accurate, off by '+err+' tap'+(err===1?'':'s')+' across the whole match. A real scouting lead would trust this sheet.';
+    } else if (acc >= 55){
+      cls='warn'; msg='Close - '+acc+'% accurate, off by '+err+'. The usual culprits are a miss logged as a make, or the mid and high rings looking alike at speed. Run it again and watch the radius.';
+    } else {
+      cls='bad'; msg='That one got away - '+acc+'% accurate. Losing your robot in the traffic is normal at first. Next match, watch only the glowing rose dot and ignore everything else.';
+    }
+    elD.verdict.className = 'verdict '+cls;
+    elD.verdictTxt.innerHTML = msg;
+
+    // mission + bests state
+    MS.tallyBest = Math.max(MS.tallyBest, acc);
+    if (perfect && made >= 4) MS.goldHit = true;
+    if (bests.tally == null || acc > bests.tally){ bests.tally = acc; saveBests(); }
+    renderBests();
+  }
+
+  function updateCounts(){
+    elD.cLow.textContent = tally.low; elD.cMid.textContent = tally.mid;
+    elD.cHigh.textContent = tally.high; elD.cMiss.textContent = tally.miss;
+  }
+  elD.btns.forEach(function(b){
+    b.addEventListener('click', function(){
+      if (!running) return;
+      var cat = b.getAttribute('data-cat');
+      tally[cat]++; tapStack.push(cat); updateCounts();
+    });
+  });
+  elD.undo.addEventListener('click', function(){
+    if (!running || !tapStack.length) return;
+    var cat = tapStack.pop(); if (tally[cat]>0) tally[cat]--; updateCounts();
+  });
+  elD.start.addEventListener('click', startMatch);
+
+  /* ---- field drawing ---- */
+  function geom(){
+    var W=field.w, H=field.h, cx=W/2, cy=H/2;
+    var R3 = Math.min(W,H)*0.22, R2 = Math.min(W,H)*0.148, R1 = Math.min(W,H)*0.082;
+    return { W:W,H:H,cx:cx,cy:cy,R1:R1,R2:R2,R3:R3, appr:R3+15 };
+  }
+  function ringRadius(g, ring){ return ring==='high'?g.R1:(ring==='mid'?g.R2:g.R3); }
+  function robotPos(rb, g){
+    var hx = rb.homeXn ? g.W-24 : 24, hy = rb.homeYn*g.H;
+    var ax = g.cx + g.appr*Math.cos(rb.angle), ay = g.cy + g.appr*Math.sin(rb.angle);
+    // find current cycle
+    var cur=null;
+    for (var i=0;i<rb.cycles.length;i++){ var c=rb.cycles[i]; if (clock>=c.t0 && clock<=c.t1){ cur=c; break; } }
+    if (!cur) return { x:hx, y:hy };
+    var p = (clock - cur.t0)/(cur.t1 - cur.t0);
+    if (p < 0.42){ var f=p/0.42; return { x:hx+(ax-hx)*f, y:hy+(ay-hy)*f }; }
+    if (p < 0.58){ return { x:ax, y:ay }; }
+    var g2=(p-0.58)/0.42; return { x:ax+(hx-ax)*g2, y:ay+(hy-ay)*g2 };
+  }
+  function draw(){
+    var ctx=field.ctx, g=geom(); if(!g.W) return;
+    ctx.clearRect(0,0,g.W,g.H);
+    // field border + center line
+    ctx.strokeStyle='#1a2740'; ctx.lineWidth=1;
+    ctx.strokeRect(6,6,g.W-12,g.H-12);
+    ctx.beginPath(); ctx.moveTo(g.cx,8); ctx.lineTo(g.cx,g.H-8); ctx.stroke();
+    // loading bays
+    ctx.fillStyle='rgba(106,168,255,0.10)'; ctx.fillRect(6,g.cy-26,10,52);
+    ctx.fillStyle='rgba(255,122,122,0.10)'; ctx.fillRect(g.W-16,g.cy-26,10,52);
+    // platforms (corners)
+    ctx.fillStyle='rgba(106,168,255,0.07)'; ctx.fillRect(10,g.H-34,40,24);
+    ctx.fillStyle='rgba(255,122,122,0.07)'; ctx.fillRect(g.W-50,10,40,24);
+    // reactor rings
+    var rings=[['low',g.R3],['mid',g.R2],['high',g.R1]];
+    rings.forEach(function(r){
+      ctx.beginPath(); ctx.arc(g.cx,g.cy,r[1],0,7);
+      ctx.strokeStyle='rgba(146,162,190,0.30)'; ctx.lineWidth=2; ctx.stroke();
+    });
+    // ring flash highlight
+    flashes.forEach(function(f){
+      var age=clock-f.t0;
+      if (f.outcome!=='miss' && age>=0.4 && age<0.6){
+        ctx.beginPath(); ctx.arc(g.cx,g.cy, ringRadius(g,f.outcome),0,7);
+        ctx.strokeStyle=f.assigned?'#ff8fb5':f.color; ctx.globalAlpha=0.5*(1-(age-0.4)/0.2); ctx.lineWidth=4; ctx.stroke(); ctx.globalAlpha=1;
+      }
+    });
+    // reactor hub
+    ctx.beginPath(); ctx.arc(g.cx,g.cy,4,0,7); ctx.fillStyle='#33415e'; ctx.fill();
+
+    // robots
+    robots.forEach(function(rb){
+      var pos=robotPos(rb,g);
+      if (rb.assigned){
+        ctx.beginPath(); ctx.arc(pos.x,pos.y,13,0,7);
+        ctx.strokeStyle='#ff8fb5'; ctx.lineWidth=2.5; ctx.shadowColor='#ff8fb5'; ctx.shadowBlur=12; ctx.stroke(); ctx.shadowBlur=0;
+      }
+      ctx.beginPath(); ctx.arc(pos.x,pos.y,8.5,0,7);
+      ctx.fillStyle=rb.color; ctx.fill();
+      ctx.fillStyle='#0A1120'; ctx.font='bold 10px ui-sans-serif,system-ui,sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(String(rb.idx+1), pos.x, pos.y+0.5);
+      if (rb.assigned){
+        ctx.fillStyle='#ff8fb5'; ctx.font='700 8px ui-monospace,monospace';
+        ctx.fillText('SCOUT', pos.x, pos.y-19);
+      }
+      rb.lastPos = pos;
+    });
+
+    // cells in flight
+    for (var i=flashes.length-1;i>=0;i--){
+      var f=flashes[i]; var age=clock-f.t0;
+      if (age>0.62){ flashes.splice(i,1); continue; }
+      var trav=clamp(age/0.4,0,1);
+      var tr = ringRadius(g, f.outcome==='miss'?'low':f.outcome);
+      var ex=g.cx+tr*Math.cos(f.angle), ey=g.cy+tr*Math.sin(f.angle);
+      var x=f.x0+(ex-f.x0)*trav, y=f.y0+(ey-f.y0)*trav;
+      if (f.outcome==='miss' && age>0.4){ var d=(age-0.4)*90; x+=Math.cos(f.angle)*d*0.4; y+=d; }
+      ctx.beginPath(); ctx.arc(x,y,4.2,0,7);
+      if (f.assigned){ ctx.fillStyle='#ff8fb5'; ctx.shadowColor='#ff8fb5'; ctx.shadowBlur=10; }
+      else { ctx.fillStyle=f.color; ctx.globalAlpha=0.55; }
+      if (f.outcome==='miss'){ ctx.globalAlpha=(f.assigned?0.8:0.45)*(1-clamp((age-0.4)/0.22,0,1)); }
+      ctx.fill(); ctx.shadowBlur=0; ctx.globalAlpha=1;
+    }
+  }
+
+  function frame(now){
+    if (running){
+      clock = (now - matchStart)/1000;
+      if (clock >= MATCH_SEC){ clock = MATCH_SEC; endMatch(); }
+      elD.matchFill.style.width = (clock/MATCH_SEC*100).toFixed(1)+'%';
+      // spawn flashes when a robot crosses its scoreT
+      robots.forEach(function(rb){
+        rb.cycles.forEach(function(c){
+          if (!c.flashed && clock >= c.scoreT){
+            c.flashed = true;
+            var pos = rb.lastPos || {x:rb.homeXn?field.w-24:24, y:rb.homeYn*field.h};
+            flashes.push({ t0:clock, x0:pos.x, y0:pos.y, angle:rb.angle, outcome:c.outcome, color:rb.color, assigned:rb.assigned });
+          }
+        });
+      });
+    }
+    draw();
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  var rt; window.addEventListener('resize', function(){ clearTimeout(rt); rt=setTimeout(function(){ field.fit(); }, 120); });
+
+  /* =========================================================
+     DRILL 2 - READ THE DATA
+     ========================================================= */
+  var DATA = [
+    { num:"4611", name:"Foxes",  cells:7,  ring:"high", bal:55, lo:4, hi:10 },
+    { num:"2230", name:"Otters", cells:9,  ring:"mid",  bal:70, lo:7, hi:11 },
+    { num:"6817", name:"Larks",  cells:6,  ring:"high", bal:40, lo:2, hi:9 },
+    { num:"1990", name:"Bison",  cells:13, ring:"low",  bal:60, lo:9, hi:16 },
+    { num:"5044", name:"Pines",  cells:8,  ring:"mid",  bal:92, lo:6, hi:10 },
+    { num:"3388", name:"Kites",  cells:8,  ring:"mid",  bal:65, lo:7, hi:9 },
+    { num:"7215", name:"Moles",  cells:5,  ring:"high", bal:50, lo:1, hi:8 },
+    { num:"8903", name:"Reeds",  cells:11, ring:"low",  bal:75, lo:8, hi:14 }
+  ];
+  DATA.forEach(function(t){ t.pts = t.cells*RING[t.ring]; t.spread = t.hi-t.lo; });
+  function ringName(r){ return r.charAt(0).toUpperCase()+r.slice(1); }
+  function teamByName(n){ for (var i=0;i<DATA.length;i++) if (DATA[i].name===n) return DATA[i].num; return null; }
+
+  var DQ = [
+    { q:"Which team puts up the most Reactor points in a typical match? Click their row.",
+      ansName:"Foxes",
+      right:"Foxes. Reactor points are Cells times ring value, not raw Cells. Their 7 high-ring Cells make "+(7*RING.high)+" points, more than any bigger low-ring pile on the sheet.",
+      whys:{ Bison:"Bison logs the most Cells, but every one is low-ring, worth only "+RING.low+" each - "+(13*RING.low)+" points total. Foxes' high-ring Cells are worth "+RING.high+" apiece, so fewer Cells add up to more. Check the Reactor pts column, not the Cells column.",
+             Reeds:"Reeds pile up Cells too, but they are low-ring at "+RING.low+" each. Read the Reactor pts column - the ring is doing the scoring, not the count." } },
+    { q:"Which team balances most reliably? Click their row.",
+      ansName:"Pines",
+      right:"Pines, at 92 percent. On a pick list a near-certain climb is worth a lot, because it is points you can plan on every single match.",
+      whys:{ Reeds:"Reeds balance often, 75 percent, but Pines are the clear top of the Balance column at 92. When you want a guaranteed climb, take the highest rate on the sheet.",
+             Otters:"Otters are decent at 70, but scan the whole Balance column - one team sits well above the rest." } },
+    { q:"You want the most consistent scorer, a team whose output barely moves match to match. Click their row.",
+      ansName:"Kites",
+      right:"Kites. Their range is 7 to 9 Cells, a spread of just 2 - the tightest on the sheet. You can pencil in their score before the match even starts.",
+      whys:{ Bison:"Bison average the most, but their 9 to 16 range is huge - that is boom-or-bust, the opposite of consistent. Consistency lives in the Range column, and you want the smallest gap.",
+             Pines:"Pines are steady too, 6 to 10, but Kites' 7 to 9 is tighter still. Read the Range column and find the smallest gap between worst and best.",
+             Otters:"Otters are fairly steady at 7 to 11, but Kites' 7 to 9 range is tighter. Smallest spread wins this one." } }
+  ];
+  var dqIndex = 0, dqSolved = 0, dqFirstTry = 0, dqAttemptedWrong = false;
+  var dataBody = document.getElementById('dataBody');
+  var dqNameToNum = {};
+
+  function renderData(){
+    var html='';
+    DATA.forEach(function(t){
+      dqNameToNum[t.name]=t.num;
+      html += '<tr class="pick" data-num="'+t.num+'" data-name="'+t.name+'">'+
+        '<td class="tname">'+t.num+' '+t.name+'</td>'+
+        '<td class="num">'+t.cells+'</td>'+
+        '<td>'+ringName(t.ring)+'</td>'+
+        '<td class="num"><span class="rk">'+t.pts+'</span></td>'+
+        '<td class="num"><span class="'+(t.bal>=80?'balhi':'')+'">'+t.bal+'%</span></td>'+
+        '<td class="num">'+t.lo+' - '+t.hi+'</td>'+
+      '</tr>';
+    });
+    dataBody.innerHTML = html;
+  }
+  function showDQ(){
+    var d = DQ[dqIndex]; dqAttemptedWrong=false;
+    document.getElementById('dqN').textContent = 'Question '+(dqIndex+1)+' of '+DQ.length;
+    document.getElementById('dataTag').textContent = 'Question '+(dqIndex+1)+' of '+DQ.length;
+    document.getElementById('dqT').textContent = d.q;
+    var fb=document.getElementById('dqFb'); fb.className='dq-fb'; fb.textContent='';
+    // clear row marks
+    Array.prototype.forEach.call(dataBody.querySelectorAll('tr'), function(tr){ tr.classList.remove('rightrow','wrongrow','pick'); tr.classList.add('pick'); });
+    updateDataProg();
+  }
+  function updateDataProg(){
+    document.getElementById('dataProg').innerHTML = 'Solved <b>'+dqSolved+'</b> of '+DQ.length+(dqSolved>=DQ.length?' - sheet mastered.':' - click the row you would pick.');
+  }
+  dataBody.addEventListener('click', function(e){
+    var tr = e.target.closest('tr.pick'); if (!tr) return;
+    if (dqIndex >= DQ.length) return;
+    var d = DQ[dqIndex];
+    var name = tr.getAttribute('data-name');
+    var fb = document.getElementById('dqFb');
+    if (name === d.ansName){
+      tr.classList.remove('pick'); tr.classList.add('rightrow');
+      Array.prototype.forEach.call(dataBody.querySelectorAll('tr'), function(x){ x.classList.remove('pick'); });
+      fb.className='dq-fb show'; fb.textContent = d.right;
+      dqSolved++;
+      if (!dqAttemptedWrong) dqFirstTry++;
+      MS.dataSolved = dqSolved;
+      if (bests.data == null || dqFirstTry > bests.data){ bests.data = dqFirstTry; saveBests(); }
+      renderBests();
+      setTimeout(function(){
+        dqIndex++;
+        if (dqIndex < DQ.length){ showDQ(); }
+        else {
+          document.getElementById('dqN').textContent = 'Sheet mastered';
+          document.getElementById('dataTag').textContent = 'All 3 solved';
+          document.getElementById('dqT').textContent = 'You read every column right - ring value, balance rate, and consistency. That is the whole skill of a scouting lead on the last night of quals.';
+          fb.className='dq-fb'; updateDataProg();
+        }
+      }, 1500);
+    } else {
+      dqAttemptedWrong = true;
+      tr.classList.add('wrongrow');
+      setTimeout(function(){ tr.classList.remove('wrongrow'); }, 500);
+      fb.className='dq-fb show wrong';
+      fb.textContent = (d.whys[name]) || 'Not that one - look again at the column the question is really about, then try another row.';
+    }
+  });
+  renderData(); showDQ();
+
+  /* =========================================================
+     DRILL 3 - BUILD A PICK LIST
+     ========================================================= */
+  var OVERLAP = 0.55;
+  var PICK = [
+    { num:"8120", name:"Ravens",  cells:10, ring:"mid",  bal:50 },
+    { num:"5810", name:"Herons",  cells:8,  ring:"mid",  bal:92 },
+    { num:"6519", name:"Wolves",  cells:11, ring:"high", bal:25 },
+    { num:"4488", name:"Cranes",  cells:7,  ring:"mid",  bal:82 },
+    { num:"3007", name:"Falcons", cells:9,  ring:"high", bal:40 },
+    { num:"2075", name:"Perch",   cells:13, ring:"low",  bal:65 }
+  ];
+  function allianceValue(t){
+    var off = t.cells*RING[t.ring]*(t.ring==='high'?OVERLAP:1);
+    var end = PARKP + (BALP-PARKP)*(t.bal/100);
+    return off + end;
+  }
+  PICK.forEach(function(t){ t.val = allianceValue(t); t.rawOff = t.cells*RING[t.ring]; });
+  var IDEAL = PICK.slice().sort(function(a,b){ return b.val-a.val; }).map(function(t){ return t.name; });
+
+  document.getElementById('briefText').innerHTML =
+    'You captain <span class="captain">Alliance 2</span>. Your own robot is a <b>great high-ring scorer</b> that <b>almost never balances</b> - your climb is your weakness. You have the first pick. Rank these six by how much each <b>raises your alliance</b>, not by who looks best on paper. A '+BALP+'-point balance you can count on may be worth more than Cells that fight your own robot for the high ring.';
+
+  var order = PICK.slice(); // current order (array of team objects)
+  var pickListEl = document.getElementById('pickList');
+  var graded = false;
+
+  function shufflePick(){
+    for (var i=order.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=order[i];order[i]=order[j];order[j]=t; }
+    graded = false;
+    document.getElementById('pickVerdict').className='verdict';
+    document.getElementById('pickVerdictTxt').textContent='Your list gets a verdict here.';
+    renderPick();
+  }
+  function renderPick(){
+    var html='';
+    order.forEach(function(t, i){
+      html += '<div class="pl-row" data-name="'+t.name+'">'+
+        '<div class="pl-rank">'+(i+1)+'</div>'+
+        '<div class="pl-body">'+
+          '<div class="pl-team">'+t.num+' '+t.name+'</div>'+
+          '<div class="pl-stats">'+t.cells+' Cells · <span class="hi">'+ringName(t.ring)+'</span> ring · '+t.bal+'% balance</div>'+
+          '<div class="pl-ideal"></div>'+
+        '</div>'+
+        '<div class="pl-move">'+
+          '<button data-dir="-1" '+(i===0?'disabled':'')+' aria-label="move up">▲</button>'+
+          '<button data-dir="1" '+(i===order.length-1?'disabled':'')+' aria-label="move down">▼</button>'+
+        '</div>'+
+      '</div>';
+    });
+    pickListEl.innerHTML = html;
+  }
+  pickListEl.addEventListener('click', function(e){
+    var btn = e.target.closest('button[data-dir]'); if (!btn) return;
+    var row = btn.closest('.pl-row'); var name = row.getAttribute('data-name');
+    var i = order.map(function(t){return t.name;}).indexOf(name);
+    var dir = parseInt(btn.getAttribute('data-dir'),10);
+    var j = i+dir;
+    if (j<0 || j>=order.length) return;
+    var tmp=order[i]; order[i]=order[j]; order[j]=tmp;
+    graded=false;
+    document.getElementById('pickVerdict').className='verdict';
+    document.getElementById('pickVerdictTxt').textContent='Your list gets a verdict here.';
+    renderPick();
+  });
+
+  function inversions(names){
+    var idx = names.map(function(n){ return IDEAL.indexOf(n); });
+    var inv=0;
+    for (var i=0;i<idx.length;i++) for (var j=i+1;j<idx.length;j++) if (idx[i]>idx[j]) inv++;
+    return inv;
+  }
+  document.getElementById('gradeBtn').addEventListener('click', function(){
+    var names = order.map(function(t){ return t.name; });
+    var inv = inversions(names);
+    var maxInv = order.length*(order.length-1)/2;
+    var quality = 1 - inv/maxInv;
+    var qpct = Math.round(quality*100);
+    graded = true;
+    MS.pickSubmitted = true; MS.pickQuality = quality;
+    if (bests.pick == null || qpct > bests.pick){ bests.pick = qpct; saveBests(); }
+    renderBests();
+
+    // reveal the ideal top pick + why on the rows
+    var topName = IDEAL[0];
+    Array.prototype.forEach.call(pickListEl.querySelectorAll('.pl-row'), function(row){
+      var nm = row.getAttribute('data-name');
+      var rank = IDEAL.indexOf(nm)+1;
+      row.querySelector('.pl-ideal').textContent = 'strong-order rank: '+rank;
+      row.classList.add('showideal');
+      if (nm===topName) row.classList.add('idealtop');
+    });
+
+    var v = document.getElementById('pickVerdict'), vt=document.getElementById('pickVerdictTxt');
+    var topT = PICK.filter(function(t){return t.name===topName;})[0];
+    var wolves = PICK.filter(function(t){return t.name==='Wolves';})[0];
+    var whyTop = topT.num+' '+topName+' tops the strong order: a '+ringName(topT.ring)+'-ring scorer that does not fight your captain for the high ring, with enough balance to matter. ';
+    var whyOverlap = 'Notice '+wolves.num+' Wolves, the biggest raw scorer, slides down - stacking a second high-ring robot overlaps your captain and never fixes your climb.';
+    if (inv<=2){
+      v.className='verdict good';
+      vt.innerHTML='<b>Defensible list, '+qpct+'%.</b> '+(inv===0?'That is the strong order dead-on. ':'Off by just '+inv+' swap'+(inv===1?'':'s')+', both of them fair calls. ')+whyTop+whyOverlap;
+    } else if (inv<=5){
+      v.className='verdict warn';
+      vt.innerHTML='<b>Solid, '+qpct+'% - a few swaps from the strong order.</b> '+whyTop+whyOverlap+' Re-read the brief and try again.';
+    } else {
+      v.className='verdict bad';
+      vt.innerHTML='<b>Rework it, '+qpct+'%.</b> This looks ranked by raw scoring. '+whyTop+whyOverlap;
+    }
+  });
+  document.getElementById('shuffleBtn').addEventListener('click', shufflePick);
+  shufflePick();
+
+  /* =========================================================
+     MISSIONS (checker inside the same IIFE, try/catch wrapped)
+     ========================================================= */
+  try{
+    var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+    var mSaved={}, mGold={};
+    try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+    try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+    var mItems={};
+    Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'), function(n){ mItems[n.getAttribute('data-m')]=n; });
+    function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+    function mClear(id){
+      var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+      mMark(n);
+      var gold=n.classList.contains('gold');
+      var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+      map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+    }
+    Object.keys(mItems).forEach(function(id){
+      if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+    });
+    setInterval(function(){
+      if (MS.tallyBest >= 80) mClear('tally');
+      if (MS.dataSolved >= MS.dataTotal) mClear('data');
+      if (MS.pickSubmitted && MS.pickQuality >= 0.86) mClear('pick'); // <=2 inversions on 6 teams
+      if (MS.goldHit) mClear('gold');
+    }, 200);
+  }catch(e){}
+
+  renderBests();
+
+  /* =========================================================
+     QUIZ (mastery handler with data-why)
+     ========================================================= */
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain'); var done=false;
+    opts.forEach(function(opt,i){
+      opt.addEventListener('click',function(){
+        if(done)return;
+        if(i===correct){ done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show'); }
+        else { opt.classList.add('wrong');
+          var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling;
+          if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); }
+          wl.textContent=w||'Not quite - look again at what the drills showed you, then try another answer.';
+        }
+      });
+    });
+  });
+})();
+</script>
+<script>
+(function(){
+  // auto-mark this companion complete in the Game Sense hub once its quiz is finished
+  var KEY="gamesense:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then run the sim
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain');
+  var picked=-1, revealed=false, ran=false;
+  var demos=document.querySelectorAll('.demo');
+  var style=document.createElement('style');
+  style.textContent='#predict .opt.picked{border-color:var(--teal,#34D7C5);box-shadow:0 0 0 2px rgba(52,215,197,.22)}';
+  document.head.appendChild(style);
+  var note=document.createElement('div');
+  note.style.cssText='display:none;font-size:13px;color:#92A2BE;margin-top:10px;font-style:italic';
+  q.appendChild(note);
+  function optText(i){ var t=(opts[i].textContent||'').trim(); return t.length>70 ? t.slice(0,67)+'...' : t; }
+  function reveal(){ if(revealed||picked<0) return; revealed=true;
+    opts.forEach(function(o){o.classList.add('locked');});
+    try{var pr=JSON.parse(localStorage.getItem('frc:predict'))||{r:0,w:0};if(picked===correct){pr.r++;}else{pr.w++;}localStorage.setItem('frc:predict',JSON.stringify(pr));}catch(e){}
+    if(picked===correct){
+      opts[picked].classList.add('correct');
+      note.textContent='You called it. "'+optText(picked)+'" is exactly what happens. Here is why:';
+    } else {
+      opts[picked].classList.add('wrong'); opts[correct].classList.add('correct');
+      note.textContent='You predicted "'+optText(picked)+'". The sim went a different way - the green answer is what really happens, and the surprise is the part worth remembering. Here is why:';
+    }
+    note.style.display='block';
+    explain.classList.add('show'); }
+  function onRan(ev){ if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#predict')) return; ran=true; if(picked>=0) reveal(); }
+  if(demos.length){
+    Array.prototype.forEach.call(demos,function(d){
+      d.addEventListener('pointerdown',onRan,true);
+      d.addEventListener('input',onRan,true);
+    });
+    window.addEventListener('keydown',onRan,true);
+  } else { ran=true; }
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(revealed)return; picked=i;
+    opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
+    if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
+})();
+</script>
+<script src="account-config.js"></script>
+<script src="account.js"></script>
+</body>
+</html>
