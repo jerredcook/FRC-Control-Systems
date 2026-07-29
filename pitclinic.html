@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fabricate · Pit Clinic</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:48px 0 18px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  h1{font-size:clamp(2.1rem,5vw,3.4rem);line-height:1.04;margin:.1em 0 .3em;letter-spacing:-.03em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(16px,2.2vw,19px);color:var(--text);max-width:60ch;margin-top:6px}
+  .dek b{color:var(--text)}
+  section{padding:26px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  .lead{font-size:19px}
+  em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  /* the four suspects */
+  .suspects{display:grid;gap:12px;margin:20px 0 6px}
+  @media(min-width:560px){.suspects{grid-template-columns:repeat(2,1fr)}}
+  .susp{border:1px solid var(--line);border-radius:11px;padding:14px 15px;background:var(--panel);border-top:2px solid var(--accent,var(--teal))}
+  .susp h4{margin:0 0 4px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent,var(--teal))}
+  .susp p{margin:0;font-size:14.5px;color:var(--muted);line-height:1.5}
+
+  /* method steps */
+  .steps{counter-reset:s;list-style:none;padding:0;margin:18px 0}
+  .steps li{position:relative;padding:12px 16px 12px 52px;margin-bottom:10px;border:1px solid var(--line);border-radius:10px;background:var(--panel);font-size:15.5px;color:var(--muted)}
+  .steps li b{color:var(--text);font-weight:650}
+  .steps li::before{counter-increment:s;content:counter(s,decimal-leading-zero);position:absolute;left:14px;top:12px;font-family:var(--mono);font-size:12px;color:var(--amber);font-weight:700;letter-spacing:.05em}
+
+  /* the clinic panel */
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8);margin-top:14px}
+  .demo-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .clock{font-family:var(--mono);font-size:22px;font-weight:700;letter-spacing:.04em;color:var(--green);display:flex;align-items:center;gap:8px}
+  .clock .lbl{font-size:9.5px;letter-spacing:.16em;color:var(--faint);text-transform:uppercase}
+  .clock.warn{color:var(--amber)} .clock.crit{color:var(--red)}
+
+  .report{border-left:3px solid var(--indigo);background:rgba(255,138,76,.07);padding:12px 16px;margin:0}
+  .report .rh{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:5px}
+  .report .rt{color:var(--text);font-size:15.5px;line-height:1.5}
+  .report .raff{margin-top:7px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+  .report .raff b{color:var(--amber);font-weight:600}
+
+  .panel{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  @media(min-width:600px){.panel{grid-template-columns:1fr 1fr}}
+  .pcell{background:#0B1322;padding:13px 15px}
+  .pcell .plabel{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-bottom:9px}
+
+  .dslights{display:flex;flex-direction:column;gap:7px}
+  .dsl{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:12.5px;letter-spacing:.05em;color:var(--muted)}
+  .dsl .lamp{width:13px;height:13px;border-radius:50%;background:var(--faint);flex:0 0 auto;box-shadow:0 0 0 2px rgba(255,255,255,.04)}
+  .dsl.g .lamp{background:var(--green);box-shadow:0 0 9px var(--green)} .dsl.g{color:var(--text)}
+  .dsl.r .lamp{background:var(--red);box-shadow:0 0 9px var(--red)} .dsl.r{color:var(--text)}
+  .dsl.a .lamp{background:var(--amber);box-shadow:0 0 9px var(--amber);animation:blink 1s steps(2) infinite} .dsl.a{color:var(--text)}
+  .dsl .st{margin-left:auto;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  @keyframes blink{50%{opacity:.35}}
+
+  .mainbrk{margin-top:12px;display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:12px;color:var(--muted);border-top:1px dashed var(--line);padding-top:11px}
+  .mainbrk .mb{width:11px;height:11px;border-radius:3px;background:var(--green);box-shadow:0 0 8px var(--green);flex:0 0 auto}
+
+  .gauge-wrap{display:flex;flex-direction:column;align-items:center}
+  canvas.gauge{display:block;width:100%;height:150px;max-width:340px}
+
+  .bank{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+  .bk{border:1px solid var(--line-2);border-radius:6px;background:var(--panel-2);padding:6px 3px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--faint);position:relative;min-height:30px;display:flex;align-items:center;justify-content:center}
+  .bk.ok{border-color:rgba(67,214,126,.5);color:var(--green)}
+  .bk.trip{border-color:var(--red);background:rgba(255,107,107,.14);color:var(--red);box-shadow:0 0 10px -2px var(--red)}
+  .bk.aff{outline:2px solid var(--amber);outline-offset:1px}
+  .bk .cn{font-weight:700}
+  .banknote{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-top:8px;line-height:1.4}
+  .banknote b{color:var(--amber)}
+
+  /* probes */
+  .probes-wrap{padding:14px 16px;border-top:1px solid var(--line)}
+  .probes-head{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+  .probes{display:grid;gap:8px}
+  @media(min-width:560px){.probes{grid-template-columns:1fr 1fr}}
+  .probe{display:flex;align-items:center;gap:10px;text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--text);padding:10px 13px;border-radius:9px;cursor:pointer;font-family:var(--sans);font-size:14.5px;transition:.12s;min-height:44px}
+  .probe:hover{border-color:var(--teal)}
+  .probe .cost{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--teal);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;flex:0 0 auto}
+  .probe:disabled,.probe.used{cursor:default;opacity:.5}
+  .probe.used{border-color:var(--line);opacity:.6}
+  .probe.used .cost{color:var(--faint)}
+
+  .plog{padding:0 16px 4px}
+  .plog-item{border-left:2px solid var(--line-2);padding:8px 0 8px 13px;margin:10px 0;font-size:14.5px;color:var(--muted);line-height:1.5}
+  .plog-item .pl-h{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-bottom:3px}
+  .plog-item.good{border-color:var(--green)} .plog-item.good .pl-h{color:var(--green)}
+  .plog-item.warn{border-color:var(--amber)} .plog-item.warn .pl-h{color:var(--amber)}
+  .plog-item.bad{border-color:var(--red)} .plog-item.bad .pl-h{color:var(--red)}
+  .plog-item.sys{border-color:var(--indigo);color:var(--text);font-style:italic}
+
+  /* diagnosis */
+  .diag-wrap{padding:14px 16px;border-top:1px solid var(--line)}
+  .diag-head{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+  .diags{display:grid;gap:8px}
+  @media(min-width:560px){.diags{grid-template-columns:1fr 1fr}}
+  .dopt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s;min-height:44px}
+  .dopt:hover{border-color:var(--muted)}
+  .dopt.sel{border-color:var(--indigo);color:var(--text);box-shadow:0 0 0 2px rgba(255,138,76,.22)}
+  .dopt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .dopt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .dopt.locked{cursor:default}
+  .commit-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px}
+
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;padding:11px 15px;border-radius:8px;cursor:pointer;transition:.12s;min-height:42px}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .btn:disabled{opacity:.5;cursor:default}
+  .btn.primary{background:linear-gradient(180deg,#FFB27A,var(--indigo));color:#2a1503;font-weight:700;border:none}
+  .btn.teal{border-color:var(--teal);color:var(--teal)}
+
+  .verdict{padding:14px 16px;border-top:1px solid var(--line);font-size:14.5px;line-height:1.55;color:var(--muted);display:flex;align-items:flex-start;gap:10px}
+  .verdict .dotv{width:9px;height:9px;border-radius:50%;background:var(--faint);flex:0 0 auto;margin-top:6px}
+  .verdict.good .dotv{background:var(--green);box-shadow:0 0 10px var(--green)} .verdict.good{color:var(--green)}
+  .verdict.warn .dotv{background:var(--amber);box-shadow:0 0 10px var(--amber)} .verdict.warn{color:var(--amber)}
+  .verdict.bad .dotv{background:var(--red);box-shadow:0 0 10px var(--red)} .verdict.bad{color:var(--red)}
+
+  .readouts{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  @media(min-width:560px){.readouts{grid-template-columns:repeat(4,1fr)}}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:18px;font-weight:600;margin-top:3px;color:var(--muted)}
+  .ro .v.teal{color:var(--teal)} .ro .v.green{color:var(--green)} .ro .v.amber{color:var(--amber)} .ro .v.red{color:var(--red)}
+  .actions{display:flex;flex-wrap:wrap;gap:10px;padding:12px 16px;border-top:1px solid var(--line);align-items:center}
+
+  /* missions */
+  .missions{margin-top:16px;border:1px solid var(--line-2);border-left:3px solid var(--indigo);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:15.5px}
+  .note a{color:var(--teal);text-decoration:none;border-bottom:1px dotted rgba(52,215,197,.45)}
+  .note a:hover{border-bottom-style:solid}
+  .note.teal{border-color:var(--teal);background:rgba(52,215,197,.06)} .note.teal .nh{color:var(--teal)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s;min-height:42px}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .whyline{margin:6px 2px 2px;font-size:13.5px;color:var(--amber);line-height:1.5;padding-left:11px;border-left:2px solid var(--amber)}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="build.html"><span class="dot"></span><span class="name">Fabricate</span></a>
+    <div class="top-meta">Pit Clinic</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Electrical triage</div>
+    <h1>The <span class="accent">eight-minute</span> pit</h1>
+    <p class="dek">A robot rolls back from the field with something dead. You have one battery, a driver's account of what happened, and a countdown before your alliance is called again. Triage is <b>looking before you leap</b>: read the panel, form a hunch, and spend your seconds only where they buy an answer. This clinic drops a real electrical fault into a robot and lets you practice that read, safely, as many times as you want.</p>
+  </div>
+
+  <section>
+    <div class="kicker">The read</div>
+    <h2>What the panel is telling you</h2>
+    <p>Almost every "it just died" in the pit is one of a handful of electrical faults, and each leaves a signature you can learn to spot at a glance.</p>
+    <p>The <strong>Driver Station lights</strong> are your first look. <span class="k">Comms</span> is the radio link between the laptop and the robot. <span class="k">Code</span> is the robot program actually running. <span class="k">Joysticks</span> is your controllers being seen. Next to them sits the <strong>battery voltmeter</strong>, and inside the robot the <strong>main breaker</strong> (the big 120 A switch) and a bank of <strong>branch breakers</strong>, one small Snap-Action per motor controller.</p>
+
+    <div class="suspects">
+      <div class="susp" style="--accent:var(--amber)"><h4>Tripped breaker</h4><p>A branch Snap-Action popped mid-match and killed power to one controller. Everything else runs. The breaker is warm and its button is out.</p></div>
+      <div class="susp" style="--accent:var(--indigo)"><h4>Dead PDH channel</h4><p>Looks just like a tripped breaker - one subsystem dark - but the breaker is fine. The channel itself stopped passing power. Move the device to a spare channel and it wakes up.</p></div>
+      <div class="susp" style="--accent:var(--teal)"><h4>Loose CAN connection</h4><p>The controller still has power and its LED is lit, but it fell off the CAN bus. It blinks a fault pattern and vanishes from the device scan. Wiggle the connector and it flickers back.</p></div>
+      <div class="susp" style="--accent:var(--red)"><h4>Sagged battery</h4><p>Not one subsystem - the <em>whole</em> robot browns out and reboots under load. The pack can read okay at rest and still collapse the instant you draw current.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">The method</div>
+    <h2>Spend seconds to buy answers</h2>
+    <p>You cannot pull every wire in eight minutes, and yanking connectors at random usually makes things worse. Triage is a loop:</p>
+    <ol class="steps">
+      <li><b>Read the panel and the driver's report.</b> Lights, voltmeter, and what the driver felt tell you a lot before you touch anything.</li>
+      <li><b>Form a hunch.</b> A dead single subsystem points at a power path. A whole-robot brownout points at the battery. A device that shows up in code as disconnected points at CAN.</li>
+      <li><b>Probe to confirm or rule out.</b> Each probe below costs pit-time. Pick the one that separates your top two suspects, not the one that just repeats what the panel already shows.</li>
+      <li><b>Commit the call before the clock runs out.</b> A confident, mostly-right read beats a perfect read that arrives after the buzzer.</li>
+    </ol>
+  </section>
+
+  <section>
+    <div class="kicker">Try it</div>
+    <h2>Run the clinic</h2>
+    <p>A case loads with a fault already injected. Read the panel, run the probes you need, then commit your diagnosis. Get it wrong and nothing breaks - you just see the tell and reset. Work the deck at your own pace.</p>
+
+    <div class="demo" id="clinic">
+      <div class="demo-head">
+        <span class="demo-title">Pit bench · Case <span id="caseNo">1</span></span>
+        <span class="clock" id="clock"><span class="lbl">Pit clock</span><span id="clockT">8:00</span></span>
+      </div>
+
+      <div class="report">
+        <div class="rh">Driver's report</div>
+        <div class="rt" id="report">--</div>
+        <div class="raff" id="affected"></div>
+      </div>
+
+      <div class="panel">
+        <div class="pcell">
+          <div class="plabel">Driver Station</div>
+          <div class="dslights" id="dslights">
+            <div class="dsl g" data-l="comms"><span class="lamp"></span> Comms <span class="st" id="stComms">Linked</span></div>
+            <div class="dsl g" data-l="code"><span class="lamp"></span> Code <span class="st" id="stCode">Running</span></div>
+            <div class="dsl g" data-l="joy"><span class="lamp"></span> Joysticks <span class="st">Seen</span></div>
+          </div>
+          <div class="mainbrk"><span class="mb"></span> 120 A main breaker <span style="margin-left:auto;color:var(--green)">seated</span></div>
+        </div>
+        <div class="pcell">
+          <div class="plabel">Battery voltmeter (at rest)</div>
+          <div class="gauge-wrap">
+            <canvas class="gauge" id="gauge" aria-label="battery voltmeter"></canvas>
+          </div>
+        </div>
+        <div class="pcell" style="grid-column:1/-1">
+          <div class="plabel">PDH branch breakers</div>
+          <div class="bank" id="bank"></div>
+          <div class="banknote" id="banknote">Breakers read <b>unchecked</b> - from across the table you cannot tell a popped Snap-Action from a good one. Scan them to see.</div>
+        </div>
+      </div>
+
+      <div class="probes-wrap">
+        <div class="probes-head">Probes · each spends pit-time</div>
+        <div class="probes" id="probes"></div>
+      </div>
+
+      <div class="plog" id="plog"></div>
+
+      <div class="diag-wrap">
+        <div class="diag-head">Your diagnosis</div>
+        <div class="diags" id="diags">
+          <button class="dopt" data-d="0">Tripped branch breaker</button>
+          <button class="dopt" data-d="1">Dead PDH channel</button>
+          <button class="dopt" data-d="2">Loose CAN connection</button>
+          <button class="dopt" data-d="3">Sagged / low battery</button>
+        </div>
+        <div class="commit-row">
+          <button class="btn primary" id="commit" disabled>Commit the call</button>
+          <button class="btn teal" id="newCase">Next case &#8594;</button>
+        </div>
+      </div>
+
+      <div class="verdict" id="verdict" style="display:none"><span class="dotv"></span><span id="verdictTxt">--</span></div>
+
+      <div class="readouts">
+        <div class="ro"><div class="k2">Pit clock</div><div class="v" id="roClock">8:00</div></div>
+        <div class="ro"><div class="k2">Probes this case</div><div class="v teal" id="roProbes">0</div></div>
+        <div class="ro"><div class="k2">Time spent</div><div class="v" id="roSpent">0:00</div></div>
+        <div class="ro"><div class="k2">Cases solved</div><div class="v green" id="roSolved">0</div></div>
+      </div>
+    </div>
+
+    <div class="missions" id="missions">
+      <div class="m-head">&#127919; Missions <span class="m-sub">work the deck at your own pace</span></div>
+      <div class="m-item" data-m="beatclock"><span class="m-st">&#9675;</span><span>Make the right call with time <b>still on the clock</b> on two different cases. Reading the panel before you spend a probe is how you keep seconds in the bank.</span></div>
+      <div class="m-item" data-m="allfour"><span class="m-st">&#9675;</span><span>Correctly name <b>all four faults</b> at least once - tripped breaker, dead channel, loose CAN, and sagged battery. Each one has its own tell.</span></div>
+      <div class="m-item" data-m="tricky"><span class="m-st">&#9675;</span><span>Separate a <b>tripped breaker from a dead channel</b> - they look identical on the panel. Use a breaker scan, a channel-current read, or a spare-channel swap to break the tie, then call it right.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">&#9733;</span><span><b>Gold:</b> land a correct diagnosis using <b>three probes or fewer</b>. Every probe you skip is a tell you read straight off the panel.</span></div>
+    </div>
+  </section>
+
+  <div class="note">
+    <div class="nh">How the pit clock works</div>
+    <p>You start each case with a fictional <b>8:00</b> pit window. It ticks down in real time, and every probe you run spends a chunk of it - a quick Driver Station read is cheap, hauling a device onto a spare channel is not. That is the real trade in a pit: information costs time, so you buy only what moves your decision. A tripped breaker and a dead channel look identical on the panel, so those cases are the ones that reward a smart probe. Nothing here is graded harshly - a wrong call just shows you the tell and lets you reset. Your progress saves in this browser.</p>
+  </div>
+
+  <div class="note teal">
+    <div class="nh">Safety - this is real current</div>
+    <p>On an actual robot, the battery and the Power Distribution Hub carry enough current to burn skin, melt wire, and start a fire. Always work on the electrical system <b>with your mentor</b>, disconnect the battery before touching wiring, and never reset a breaker that keeps popping without finding out what is stalling behind it. This clinic is for the read - the hands-on fixes belong on a powered-down robot.</p>
+  </div>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">The robot drives fine, comms and code are both green, and the battery load-tests healthy - but the intake is dead. What is the first thing to check?</div>
+        <div class="opts">
+          <button class="opt" data-why="The battery already load-tested healthy, and a sagging pack browns out the whole robot, not one intake. When everything else runs, suspect that one channel's power path.">Swap to a fresh battery, since a dead subsystem usually means low voltage</button>
+          <button class="opt">Scan that channel's branch breaker for a popped, warm Snap-Action</button>
+          <button class="opt" data-why="Code cannot push power through an open breaker or a dead channel. A subsystem that died mid-match is almost always a power-path problem, not a software setting.">Raise the intake motor's output in code</button>
+        </div>
+        <div class="explain">With comms, code, and battery all good but one mechanism dead, the power path to that single controller is the prime suspect - and a tripped Snap-Action breaker is the most common cause. Check the breaker first.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">A tripped breaker and a dead PDH channel look identical on the panel - one subsystem dead, everything else green. How do you tell them apart?</div>
+        <div class="opts">
+          <button class="opt" data-why="Both faults leave the bus voltage normal, so the voltmeter cannot separate them. You have to look at the power path itself.">Read the Driver Station voltage</button>
+          <button class="opt" data-why="Comms is the radio link and stays green for both. It says nothing about a single dead channel.">Check the comms light</button>
+          <button class="opt">Look at the breaker (popped or seated) and try the device on a spare channel</button>
+        </div>
+        <div class="explain">A tripped Snap-Action is popped and warm; a dead channel's breaker is seated and cool. The clincher is moving the device to a spare channel - if it wakes up with a good breaker still on the original, the channel itself was dead.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">A motor controller's LED is lit but blinking a fault pattern, and the device is missing from the CAN scan. What is going on?</div>
+        <div class="opts">
+          <button class="opt">A loose CAN connection - it has power but fell off the bus</button>
+          <button class="opt" data-why="A tripped breaker kills power, so the controller would be completely dark with no LED at all. A lit-but-blinking LED means power is fine and the CAN link is not.">A tripped branch breaker</button>
+          <button class="opt" data-why="A tired battery browns out the whole robot, not one lit controller. A single device blinking a CAN-fault pattern points straight at its CAN wiring.">A sagged battery</button>
+        </div>
+        <div class="explain">Power reaching the controller (LED lit) plus a CAN-fault blink and a missing device on the scan is the signature of a loose CAN wire. Wiggle the connector and it usually flickers back onto the bus.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 4</div>
+        <div class="qt">The battery reads about 11.8 V at rest, but the robot browns out and reboots whenever the driver accelerates hard. Best move?</div>
+        <div class="opts">
+          <button class="opt" data-why="The resting reading looks fine, but a tired pack collapses under load. A robot that reboots on hard pushes is browning out, and that is a battery to retire.">Nothing - 11.8 V is a normal reading</button>
+          <button class="opt">Swap to a freshly charged battery - a tired pack sags under load</button>
+          <button class="opt" data-why="Current limits can mask the symptom, but the root cause is a pack whose internal resistance has climbed. Swap it out and charge or retire the old one, always with a mentor.">Lower the drivetrain current limits and leave the battery in</button>
+        </div>
+        <div class="explain">A resting voltage can look fine while a worn battery collapses the moment you draw current, causing brownouts and reboots. The fix is a fresh, fully charged pack - and set the tired one aside with your mentor.</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<nav class="coursenav">
+  <a href="build.html">&larr; Fabricate map</a>
+  <a class="map" href="build.html">Course map</a>
+  <a href="glossary.html">Glossary &rarr;</a>
+</nav>
+
+<footer>Fabricate · Building an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  function clamp(x,a,b){return x<a?a:(x>b?b:x);}
+
+  var BUDGET=480; // 8:00 pit window, seconds
+
+  // ---- case deck ----
+  // fault: breaker | channel | can | battery
+  // code light: 'ok' green, 'amber' flickering (brownout reboots)
+  var CASES=[
+    {id:"intake", fault:"breaker", sub:"Intake", chan:6, canId:14,
+      report:"The intake rollers quit halfway through the last match. Drive, shooter, everything else kept running fine.",
+      code:"ok", restV:12.5, loadV:11.8},
+    {id:"leftdrive", fault:"breaker", sub:"Left drive", chan:3, canId:2,
+      report:"One side of the drivetrain went dead mid-match and the robot started dragging in a circle.",
+      code:"ok", restV:12.4, loadV:11.7},
+    {id:"climber", fault:"channel", sub:"Climber", chan:9, canId:31,
+      report:"The climber motor went dead near the endgame and never came back, even after we rebooted the robot.",
+      code:"ok", restV:12.6, loadV:11.9},
+    {id:"feeder", fault:"channel", sub:"Feeder", chan:5, canId:22,
+      report:"The feeder stopped, and swapping the SPARK for a spare on the same channel did not bring it back.",
+      code:"ok", restV:12.5, loadV:11.8},
+    {id:"shooter", fault:"can", sub:"Shooter", chan:12, canId:12,
+      report:"Code says the shooter controller is disconnected, but it was fine on the bench ten minutes ago.",
+      code:"ok", restV:12.4, loadV:11.8},
+    {id:"armenc", fault:"can", sub:"Arm encoder", chan:8, canId:21,
+      report:"The arm's encoder keeps dropping off the bus, then popping back when we drive over a bump.",
+      code:"ok", restV:12.5, loadV:11.8},
+    {id:"brownA", fault:"battery", sub:"Whole robot", chan:null, canId:null,
+      report:"Everything browns out when the driver floors it, and the robot keeps rebooting on hard pushes.",
+      code:"amber", restV:11.6, loadV:9.3},
+    {id:"brownB", fault:"battery", sub:"Whole robot", chan:null, canId:null,
+      report:"The bot feels sluggish all match and the status lights flicker every time we accelerate.",
+      code:"amber", restV:11.4, loadV:9.5}
+  ];
+
+  var CORRECT={breaker:0, channel:1, can:2, battery:3};
+  var FAULTS={
+    breaker:{name:"tripped branch breaker", tell:"a Snap-Action breaker had popped and gone warm, cutting power to just that one controller"},
+    channel:{name:"dead PDH channel", tell:"the breaker was fine but the channel itself was dead - the device woke up the moment you moved it to a spare channel"},
+    can:{name:"loose CAN connection", tell:"the controller still had power and a lit LED, but it fell off the CAN bus and blinked back when you wiggled the connector"},
+    battery:{name:"sagged battery", tell:"the pack looked okay at rest but collapsed under load and browned out the whole robot, not one subsystem"}
+  };
+
+  var PROBES=[
+    {id:"ds",   label:"Read the Driver Station log", cost:20},
+    {id:"batt", label:"Load-test the battery",       cost:45},
+    {id:"scan", label:"Scan the branch breakers",    cost:35},
+    {id:"amps", label:"Read the PDH channel currents",cost:40},
+    {id:"can",  label:"Inspect the CAN chain & LEDs", cost:50},
+    {id:"swap", label:"Swap device to a spare channel",cost:70}
+  ];
+
+  // reveal text per probe, per fault. tone: info|good|warn|bad
+  function reveal(pid, c){
+    var s=c.sub, ch=c.chan, cid=c.canId, rv=c.restV.toFixed(1), lv=c.loadV.toFixed(1), f=c.fault;
+    if(pid==="ds"){
+      if(f==="battery") return {t:"Comms green, code light flickering. The log is full of 'Brownout' and 'roboRIO rebooted,' with bus voltage dipping to 6.9 V under load.", tone:"bad"};
+      if(f==="can") return {t:"Comms green, code green. Log: 'CAN device "+cid+" not present.' It was there at boot and blips back for a frame whenever the robot gets jostled.", tone:"warn"};
+      return {t:"Comms green, code green. Log: '"+s+" controller not present on CAN,' and it dropped mid-match, not at boot. Something cut its power.", tone:"warn"};
+    }
+    if(pid==="batt"){
+      if(f==="battery") return {t:"Rest reads "+rv+" V, not terrible - but it collapses to about "+lv+" V the instant you draw current. Internal resistance is way up. This pack is cooked.", tone:"bad"};
+      return {t:"Rest "+rv+" V, and it holds "+lv+" V under a hard pull. This battery is healthy - the problem is somewhere else.", tone:"good"};
+    }
+    if(pid==="scan"){
+      if(f==="breaker") return {t:"One 40 A Snap-Action, on the "+s+" channel (PDH "+ch+"), is popped and warm to the touch. Every other breaker is seated and cool.", tone:"bad"};
+      if(f==="channel") return {t:"Every branch breaker is seated and cool, including the "+s+" channel's (PDH "+ch+"). Nothing tripped.", tone:"good"};
+      return {t:"All branch breakers seated and cool. No breaker tripped.", tone:"good"};
+    }
+    if(pid==="amps"){
+      if(f==="breaker") return {t:"The "+s+" channel (PDH "+ch+") reads 0 A, and its breaker is open - no power is reaching the controller at all.", tone:"warn"};
+      if(f==="channel") return {t:"The "+s+" channel (PDH "+ch+") reads 0 A even though its breaker is good and the wires are tight. The channel is not passing power.", tone:"bad"};
+      if(f==="can") return {t:"The "+s+" channel (PDH "+ch+") shows a normal idle draw - the controller has power. It just is not receiving CAN commands.", tone:"warn"};
+      return {t:"Channel draws look normal, but total bus voltage dips hard every time a big load kicks in.", tone:"warn"};
+    }
+    if(pid==="can"){
+      if(f==="can") return {t:"The "+s+" controller is lit but blinking the CAN-fault pattern. Wiggle the connector and it flickers green - a loose CAN wire.", tone:"bad"};
+      if(f==="battery") return {t:"Every controller is lit and present on the bus. CAN looks healthy.", tone:"good"};
+      return {t:"The "+s+" controller is completely dark - no LED at all. That is a power loss, not a CAN fault.", tone:"warn"};
+    }
+    if(pid==="swap"){
+      if(f==="breaker") return {t:"Moved to a spare channel with a fresh breaker and it powers right up. The original breaker had tripped.", tone:"bad"};
+      if(f==="channel") return {t:"Moved to a spare channel and it powers up instantly. The original channel is dead.", tone:"bad"};
+      if(f==="can") return {t:"Moved to a spare channel - still dead. Power was never the problem here.", tone:"warn"};
+      return {t:"Swapping one device changes nothing; the whole robot still browns out under load.", tone:"warn"};
+    }
+    return {t:"", tone:"info"};
+  }
+
+  // ---- persistence ----
+  var PKEY="frc:pitclinic";
+  function loadPit(){
+    var p; try{ p=JSON.parse(localStorage.getItem(PKEY))||{}; }catch(e){ p={}; }
+    p.wins=p.wins||[]; p.faults=p.faults||{}; p.solved=p.solved||0; p.attempts=p.attempts||0;
+    if(p.bestProbes===undefined) p.bestProbes=null;
+    return p;
+  }
+  function savePit(p){ try{ localStorage.setItem(PKEY, JSON.stringify(p)); }catch(e){} }
+
+  // ---- missions ----
+  var MKEY="frc:missions", GKEY="frc:gold", mPage=location.pathname.split("/").pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll("#missions .m-item"),function(n){ mItems[n.getAttribute("data-m")]=n; });
+  function mMark(n){ n.classList.add("cleared"); n.querySelector(".m-st").textContent=n.classList.contains("gold")?"★":"✓"; }
+  function clearMission(id){
+    var n=mItems[id]; if(!n||n.classList.contains("cleared")) return;
+    mMark(n);
+    var gold=n.classList.contains("gold");
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+"#"+id]=true; try{ localStorage.setItem(key, JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains("gold")?mGold:mSaved)[mPage+"#"+id]) mMark(mItems[id]);
+  });
+
+  // ---- elements ----
+  var el={
+    caseNo:document.getElementById("caseNo"),
+    clock:document.getElementById("clock"), clockT:document.getElementById("clockT"),
+    report:document.getElementById("report"), affected:document.getElementById("affected"),
+    dslights:document.getElementById("dslights"),
+    stCode:document.getElementById("stCode"),
+    bank:document.getElementById("bank"), banknote:document.getElementById("banknote"),
+    probes:document.getElementById("probes"), plog:document.getElementById("plog"),
+    diags:document.getElementById("diags"),
+    commit:document.getElementById("commit"), newCase:document.getElementById("newCase"),
+    verdict:document.getElementById("verdict"), verdictTxt:document.getElementById("verdictTxt"),
+    roClock:document.getElementById("roClock"), roProbes:document.getElementById("roProbes"),
+    roSpent:document.getElementById("roSpent"), roSolved:document.getElementById("roSolved")
+  };
+  var dopts=Array.prototype.slice.call(el.diags.querySelectorAll(".dopt"));
+
+  // ---- gauge canvas ----
+  var gaugeCv=document.getElementById("gauge");
+  var gctx=gaugeCv.getContext("2d"), gW=0, gH=0;
+  function fitGauge(){
+    var r=gaugeCv.getBoundingClientRect(); if(!r.width) return;
+    var dpr=window.devicePixelRatio||1;
+    gaugeCv.width=Math.round(r.width*dpr); gaugeCv.height=Math.round(r.height*dpr);
+    gctx.setTransform(dpr,0,0,dpr,0,0); gW=r.width; gH=r.height;
+  }
+  function ctxAngle(v){ return Math.PI + ((clamp(v,6,14)-6)/8)*Math.PI; }
+  function drawGauge(v){
+    var ctx=gctx, W=gW, H=gH; ctx.clearRect(0,0,W,H);
+    var cx=W/2, cy=H-16, R=Math.min(W/2-16, H-30);
+    if(R<12) return;
+    // zone arcs
+    function zone(lo,hi,col){ ctx.beginPath(); ctx.lineWidth=12; ctx.strokeStyle=col; ctx.lineCap="butt";
+      ctx.arc(cx,cy,R, ctxAngle(lo), ctxAngle(hi), false); ctx.stroke(); }
+    zone(6,10.5,"#FF6B6B");
+    zone(10.5,11.5,"#FFB020");
+    zone(11.5,14,"#43D67E");
+    // ticks + labels
+    ctx.fillStyle="#5E6F8E"; ctx.font="10px "+"ui-monospace, monospace"; ctx.textAlign="center"; ctx.textBaseline="middle";
+    var marks=[6,8,10,12,14];
+    for(var i=0;i<marks.length;i++){
+      var a=ctxAngle(marks[i]);
+      var x1=cx+Math.cos(a)*(R-7), y1=cy+Math.sin(a)*(R-7);
+      var x2=cx+Math.cos(a)*(R+2), y2=cy+Math.sin(a)*(R+2);
+      ctx.strokeStyle="#33415e"; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+      var lx=cx+Math.cos(a)*(R-20), ly=cy+Math.sin(a)*(R-20);
+      ctx.fillText(String(marks[i]), lx, ly);
+    }
+    // needle
+    var na=ctxAngle(v);
+    var nx=cx+Math.cos(na)*(R-6), ny=cy+Math.sin(na)*(R-6);
+    var col = v>=11.5 ? "#43D67E" : (v>=10.5 ? "#FFB020" : "#FF6B6B");
+    ctx.strokeStyle=col; ctx.lineWidth=3; ctx.lineCap="round";
+    ctx.shadowColor=col; ctx.shadowBlur=8;
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(nx,ny); ctx.stroke();
+    ctx.shadowBlur=0;
+    ctx.fillStyle="#1B2540"; ctx.strokeStyle=col; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.arc(cx,cy,6,0,7); ctx.fill(); ctx.stroke();
+    // value text
+    ctx.fillStyle=col; ctx.font="700 16px ui-monospace, monospace"; ctx.textBaseline="alphabetic";
+    ctx.fillText(v.toFixed(1)+" V", cx, cy-14);
+  }
+
+  // ---- render helpers ----
+  function fmt(sec){ sec=Math.max(0,Math.round(sec)); var m=Math.floor(sec/60), s=sec%60; return m+":"+(s<10?"0":"")+s; }
+
+  function renderBank(c, scanned){
+    var html="";
+    for(var i=1;i<=12;i++){
+      var cls="bk";
+      if(scanned){ cls += (c.fault==="breaker" && i===c.chan) ? " trip" : " ok"; }
+      if(c.chan && i===c.chan) cls += " aff";
+      var lbl = (c.chan && i===c.chan && scanned && c.fault==="breaker") ? "OUT" : String(i);
+      html += '<div class="'+cls+'"><span class="cn">'+lbl+'</span></div>';
+    }
+    el.bank.innerHTML=html;
+  }
+
+  function renderDS(c){
+    var codeRow=el.dslights.querySelector('[data-l="code"]');
+    codeRow.classList.remove("g","a","r");
+    if(c.code==="amber"){ codeRow.classList.add("a"); el.stCode.textContent="Rebooting"; }
+    else { codeRow.classList.add("g"); el.stCode.textContent="Running"; }
+  }
+
+  function appendLog(head, text, tone){
+    var d=document.createElement("div");
+    d.className="plog-item "+(tone||"info");
+    d.innerHTML='<div class="pl-h">'+head+'</div>'+text;
+    el.plog.appendChild(d);
+  }
+  function appendSys(text){
+    var d=document.createElement("div");
+    d.className="plog-item sys";
+    d.textContent=text;
+    el.plog.appendChild(d);
+  }
+
+  function renderProbes(){
+    el.probes.innerHTML="";
+    PROBES.forEach(function(p){
+      var b=document.createElement("button");
+      b.className="probe"; b.setAttribute("data-p", p.id);
+      b.innerHTML='<span>'+p.label+'</span><span class="cost">'+p.cost+' s</span>';
+      b.addEventListener("click", function(){ runProbe(p, b); });
+      el.probes.appendChild(b);
+    });
+  }
+
+  // ---- state ----
+  var idx=0, c=null, remaining=BUDGET, running=false, committed=false;
+  var selected=-1, probesUsed=0, probeIds=[], timedOut=false;
+
+  function updateReadouts(){
+    el.clockT.textContent=fmt(remaining);
+    el.roClock.textContent=fmt(remaining);
+    el.roProbes.textContent=String(probesUsed);
+    el.roSpent.textContent=fmt(BUDGET-remaining);
+    var cls="clock"; if(remaining<=60) cls+=" crit"; else if(remaining<=120) cls+=" warn";
+    el.clock.className=cls;
+    var P=loadPit();
+    el.roSolved.textContent=String(P.solved);
+  }
+
+  function onTimeout(){
+    if(timedOut) return; timedOut=true; running=false;
+    appendSys("The pit clock hit zero and the ref is waving your alliance to the field. You can still make a call, or load the next case and try the read a little faster.");
+  }
+
+  function runProbe(p, btn){
+    if(committed) return;
+    if(probeIds.indexOf(p.id)>=0) return;
+    probeIds.push(p.id); probesUsed++;
+    if(running){
+      remaining-=p.cost; if(remaining<=0){ remaining=0; }
+    }
+    btn.classList.add("used"); btn.disabled=true;
+    var r=reveal(p.id, c);
+    appendLog(p.label, r.t, r.tone);
+    if(p.id==="scan"){
+      renderBank(c, true);
+      el.banknote.innerHTML = (c.fault==="breaker")
+        ? 'Scanned. The <b>'+c.sub+'</b> channel breaker is popped (marked OUT). The rest are seated.'
+        : 'Scanned. Every breaker is seated and cool.';
+    }
+    if(remaining===0) onTimeout();
+    updateReadouts();
+  }
+
+  function selectDiag(i){
+    if(committed) return;
+    selected=i;
+    dopts.forEach(function(o,j){ o.classList.toggle("sel", j===i); });
+    el.commit.disabled=false;
+  }
+
+  function commit(){
+    if(committed || selected<0) return;
+    committed=true; running=false;
+    var correct = (selected===CORRECT[c.fault]);
+    var timeLeft=remaining;
+    var F=FAULTS[c.fault];
+
+    dopts.forEach(function(o){ o.classList.add("locked"); });
+    dopts[selected].classList.add(correct?"correct":"wrong");
+    if(!correct) dopts[CORRECT[c.fault]].classList.add("correct");
+    el.commit.disabled=true;
+
+    // disable remaining probes
+    Array.prototype.forEach.call(el.probes.querySelectorAll(".probe"), function(b){ b.disabled=true; });
+
+    var cls, msg;
+    if(correct){
+      if(timeLeft>0){
+        cls="good";
+        msg="Nailed it - that was a "+F.name+". Called with "+fmt(timeLeft)+" left and "+probesUsed+" probe"+(probesUsed===1?"":"s")+"."+(probesUsed<=3?" Clean read.":"");
+      } else {
+        cls="warn";
+        msg="Right call - a "+F.name+" - but the ref was already waving your alliance out. Same read, a few seconds sooner next time.";
+      }
+    } else {
+      cls="bad";
+      msg="Not this time - it was a "+F.name+". The tell: "+F.tell+". Reset and this exact pattern will jump out at you. No harm done, that is what a practice pit is for.";
+    }
+    el.verdict.style.display="";
+    el.verdict.className="verdict "+cls;
+    el.verdictTxt.textContent=msg;
+
+    evalMissions(correct, timeLeft, probesUsed, probeIds, c);
+    updateReadouts();
+  }
+
+  function evalMissions(correct, timeLeft, pUsed, pIds, cc){
+    try{
+      var P=loadPit();
+      P.attempts=(P.attempts||0)+1;
+      if(correct){
+        P.solved=(P.solved||0)+1;
+        P.faults[cc.fault]=true;
+        if(timeLeft>0 && P.wins.indexOf(cc.id)<0) P.wins.push(cc.id);
+        if(P.bestProbes===null || pUsed<P.bestProbes) P.bestProbes=pUsed;
+      }
+      savePit(P);
+      if(P.wins.length>=2) clearMission("beatclock");
+      if(P.faults.breaker && P.faults.channel && P.faults.can && P.faults.battery) clearMission("allfour");
+      var usedDisc = (pIds.indexOf("scan")>=0 || pIds.indexOf("amps")>=0 || pIds.indexOf("swap")>=0);
+      if(correct && (cc.fault==="breaker" || cc.fault==="channel") && usedDisc) clearMission("tricky");
+      if(correct && pUsed<=3) clearMission("gold");
+    }catch(e){}
+  }
+
+  function loadCase(i){
+    idx=i; c=CASES[i];
+    remaining=BUDGET; running=true; committed=false; timedOut=false;
+    selected=-1; probesUsed=0; probeIds=[];
+    el.caseNo.textContent=String(i+1);
+    el.report.textContent=c.report;
+    if(c.chan){
+      el.affected.innerHTML='Focus: <b>'+c.sub+'</b>'+(c.fault==="can" ? ' (CAN device '+c.canId+', PDH '+c.chan+')' : ' (PDH channel '+c.chan+')');
+    } else {
+      el.affected.innerHTML='Focus: <b>whole robot</b>, no single subsystem';
+    }
+    renderDS(c);
+    renderBank(c, false);
+    el.banknote.innerHTML='Breakers read <b>unchecked</b> - from across the table you cannot tell a popped Snap-Action from a good one. Scan them to see.';
+    el.plog.innerHTML="";
+    renderProbes();
+    dopts.forEach(function(o){ o.classList.remove("sel","correct","wrong","locked"); });
+    el.commit.disabled=true;
+    el.verdict.style.display="none";
+    fitGauge(); drawGauge(c.restV);
+    updateReadouts();
+  }
+
+  // ---- wiring ----
+  dopts.forEach(function(o){ o.addEventListener("click", function(){ selectDiag(parseInt(o.getAttribute("data-d"),10)); }); });
+  el.commit.addEventListener("click", commit);
+  el.newCase.addEventListener("click", function(){
+    var i; do { i=Math.floor(Math.random()*CASES.length); } while(CASES.length>1 && i===idx);
+    loadCase(i);
+  });
+
+  // ---- clock loop ----
+  var last=0;
+  function frame(ts){
+    var t=ts/1000, dt=last?Math.min(0.1, t-last):0; last=t;
+    if(running && !committed){
+      remaining-=dt;
+      if(remaining<=0){ remaining=0; onTimeout(); }
+      el.clockT.textContent=fmt(remaining);
+      el.roClock.textContent=fmt(remaining);
+      el.roSpent.textContent=fmt(BUDGET-remaining);
+      var cls="clock"; if(remaining<=60) cls+=" crit"; else if(remaining<=120) cls+=" warn";
+      el.clock.className=cls;
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  var rt; window.addEventListener("resize", function(){ clearTimeout(rt); rt=setTimeout(function(){ fitGauge(); if(c) drawGauge(c.restV); },120); });
+
+  // start
+  loadCase(Math.floor(Math.random()*CASES.length));
+})();
+</script>
+<script>
+(function(){
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the clinic showed you, then try another answer.'; } }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY="build:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script src="account-config.js"></script>
+<script src="account.js"></script>
+</body>
+</html>

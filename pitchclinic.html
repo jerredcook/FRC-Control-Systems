@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FRC Academy · Pitch Clinic</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,176,32,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--amber);box-shadow:0 0 12px var(--amber)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:48px 0 18px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  h1{font-size:clamp(2.1rem,5vw,3.4rem);line-height:1.04;margin:.1em 0 .3em;letter-spacing:-.03em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--amber),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(16px,2.2vw,19px);color:var(--text);max-width:60ch;margin-top:6px}
+  .dek b{color:var(--text)}
+  section{padding:26px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--teal);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  .lead{font-size:19px}
+  em{color:var(--text);font-style:normal;font-weight:600}
+
+  .trio{display:grid;gap:12px;margin:20px 0 6px}
+  @media(min-width:640px){.trio{grid-template-columns:repeat(3,1fr)}}
+  .tcard{border:1px solid var(--line);border-radius:11px;background:var(--panel);border-top:2px solid var(--amber);padding:14px 15px}
+  .tcard h4{margin:0 0 5px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber)}
+  .tcard p{margin:0;font-size:14.5px;color:var(--muted);line-height:1.5}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:15.5px}
+  .note a{color:var(--teal);text-decoration:none;border-bottom:1px dotted rgba(52,215,197,.45)}
+  .note a:hover{border-bottom-style:solid}
+  .note.teal{border-color:var(--teal);background:rgba(52,215,197,.06)} .note.teal .nh{color:var(--teal)}
+
+  .builder{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8);margin-top:18px}
+  .builder-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .builder-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .builder-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .pbody{padding:16px}
+
+  .judge-ask{font-size:17px;color:var(--text);margin:0 0 14px;border-left:3px solid var(--amber);padding:9px 0 9px 14px;background:rgba(255,176,32,.05);border-radius:0 8px 8px 0}
+  .judge-ask .who{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber);margin-bottom:4px}
+
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s;line-height:1.45}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .whyline{margin-top:8px;font-size:14px;color:var(--muted);border-left:2px solid var(--red);padding:4px 0 4px 12px;line-height:1.5}
+  .landnote{margin-top:13px;border-left:3px solid var(--green);background:rgba(67,214,126,.08);border-radius:0 9px 9px 0;padding:10px 14px;font-size:14.5px;color:var(--text);line-height:1.5}
+  .landnote b{color:var(--green)}
+
+  .actions{display:flex;flex-wrap:wrap;gap:10px;padding:14px 16px;border-top:1px solid var(--line);align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;padding:11px 15px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--amber);color:var(--text)}
+  .btn.primary{background:linear-gradient(180deg,#FFD27A,var(--amber));color:#2a1a03;font-weight:700;border:none}
+  .btn:disabled{opacity:.5;cursor:default}
+  .savemsg{font-family:var(--mono);font-size:11px;color:var(--muted);margin-left:auto}
+  .dots{display:flex;gap:6px;align-items:center}
+  .dots i{width:9px;height:9px;border-radius:50%;background:var(--line-2);display:inline-block}
+  .dots i.on{background:var(--green);box-shadow:0 0 8px var(--green)}
+  .dots i.here{outline:2px solid var(--amber);outline-offset:2px}
+
+  .picks{display:grid;gap:9px;padding:14px 16px}
+  @media(min-width:620px){.picks{grid-template-columns:1fr 1fr}}
+  .pick{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);border-radius:10px;padding:11px 13px 11px 42px;position:relative;cursor:pointer;font-size:14.5px;font-family:var(--sans);line-height:1.42;transition:.12s;min-height:44px}
+  .pick:hover{border-color:var(--muted)}
+  .pick::before{content:"+";position:absolute;left:12px;top:11px;width:20px;height:20px;border-radius:6px;border:1px solid var(--line-2);color:var(--faint);display:grid;place-items:center;font-size:15px;line-height:1}
+  .pick.on{border-color:var(--amber);background:rgba(255,176,32,.08);color:var(--text)}
+  .pick.on::before{content:"\2713";background:rgba(255,176,32,.16);border-color:var(--amber);color:var(--amber)}
+
+  .readouts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:18px;font-weight:600;margin-top:3px;color:var(--muted)}
+  .ro .v.teal{color:var(--teal)} .ro .v.green{color:var(--green)} .ro .v.amber{color:var(--amber)} .ro .v.red{color:var(--red)}
+  .verdict{padding:13px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:12.5px;letter-spacing:.03em;color:var(--muted);display:flex;align-items:flex-start;gap:10px;line-height:1.55}
+  .verdict .dotv{width:9px;height:9px;border-radius:50%;background:var(--faint);flex:0 0 auto;margin-top:5px}
+  .verdict.good .dotv{background:var(--green);box-shadow:0 0 10px var(--green)} .verdict.good{color:var(--green)}
+  .verdict.warn .dotv{background:var(--amber);box-shadow:0 0 10px var(--amber)} .verdict.warn{color:var(--amber)}
+  .verdict.bad .dotv{background:var(--red);box-shadow:0 0 10px var(--red)} .verdict.bad{color:var(--red)}
+
+  .rfield{margin:0 0 16px}
+  .rfield:last-child{margin-bottom:0}
+  .rfield label{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;line-height:1.4}
+  .rfield textarea{width:100%;min-height:62px;resize:vertical;background:var(--panel-2);border:1px solid var(--line-2);border-radius:9px;color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.5;padding:10px 12px;outline:none}
+  .rfield textarea:focus{border-color:var(--amber);box-shadow:0 0 0 3px rgba(255,176,32,.18)}
+  .rfield .rsaved{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--green);margin-top:4px;min-height:13px}
+
+  .missions{margin-top:16px;border:1px solid var(--line-2);border-left:3px solid var(--teal);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14.5px;color:var(--muted);padding:5px 0;line-height:1.5}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--teal);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--amber);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><span class="name">FRC Academy</span></a>
+    <div class="top-meta">Pitch Clinic</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">The business half</div>
+    <h1>Pitch <span class="accent">clinic</span></h1>
+    <p class="dek">A robot wins matches. A <b>team</b> wins awards, sponsors, and the room. This is the half of FRC that happens off the field: talking to judges, asking a business for help, and telling your story. Good news for the quiet folks - this is exactly where you find out that <b>you contribute too</b>, and that your steady behind-the-scenes job is worth just as much as the loudest voice.</p>
+  </div>
+
+  <section>
+    <div class="kicker">Before you practice</div>
+    <h2>Three rooms, one skill</h2>
+    <p class="lead">The business half of FRC lives in three rooms, and the same skill wins all three: <em>say something specific and true, in your own voice, and stop.</em></p>
+    <div class="trio">
+      <div class="tcard" style="border-top-color:var(--amber)"><h4>Judges</h4><p>At every event, judges walk the pits and ask questions. Awards like Impact and Engineering Inspiration are decided here, not on the field. They are listening for real people doing real things.</p></div>
+      <div class="tcard" style="border-top-color:var(--teal)"><h4>Sponsors</h4><p>Robots cost money. Businesses help when the ask is clear: who you are, what the money does, and what they get back. It is a trade, not a favor.</p></div>
+      <div class="tcard" style="border-top-color:var(--indigo)"><h4>Outreach</h4><p>The thing you give back to your community - a club you run, kids you mentor, an event you host. It is the story judges and sponsors care about most.</p></div>
+    </div>
+    <p>Here is the whole trick, and it is smaller than it looks. Weak answers all fail the same three ways: they are <em>vague</em> ("we all worked hard"), they <em>brag or blame</em> (lifting yourself by pushing a teammate down), or they <em>ramble</em> until the point is buried. Strong answers are specific, honest, and short. That is a skill, and skills get better with reps. So let us do some reps.</p>
+    <div class="note teal">
+      <div class="nh">If talking to strangers scares you</div>
+      <p>That is normal, and you are not alone. You do not need to become a loud person. You need one true sentence about the real thing you do - the wiring map you keep, the build log nobody else updates, the pit you organized. Naming your own work plainly is not bragging. It is the honest answer to an honest question, and by the end of this page you will have that sentence ready. Practice it out loud with a mentor before your first event.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Drill 1</div>
+    <h2>At the judge's table</h2>
+    <p>A judge stops by your pit and asks a question. Pick the answer that lands. Get one wrong and you will see exactly <em>why</em> it lands flat - that is the useful part, so read it. Work through a few; you are aiming to answer three of them strong.</p>
+
+    <div class="builder">
+      <div class="builder-head">
+        <span class="builder-title">The judge asks</span>
+        <span class="builder-tag" id="judgeTag">1 of 5</span>
+      </div>
+      <div class="pbody">
+        <div class="judge-ask"><span class="who">Judge, at your pit</span><span id="judgeAsk"></span></div>
+        <div class="opts" id="judgeOpts"></div>
+        <div id="judgeMsg"></div>
+      </div>
+      <div class="actions">
+        <div class="dots" id="judgeDots"></div>
+        <button class="btn" id="judgePrev">&larr; Prev</button>
+        <button class="btn primary" id="judgeNext">Next question &rarr;</button>
+        <span class="savemsg" id="judgeScore">0 answered strong</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Drill 2</div>
+    <h2>Build the sponsor one-pager</h2>
+    <p>When you ask a business for support, you send one page. Not ten. A busy person decides in about a minute, so every line has to earn its place. Tap the pieces you would put on your one-pager and watch the verdict update. Some of these belong. Some will get your page thrown away - and one is a safety mistake.</p>
+
+    <div class="builder">
+      <div class="builder-head">
+        <span class="builder-title">Your one-pager</span>
+        <span class="builder-tag">graded live</span>
+      </div>
+      <div class="picks" id="picks"></div>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Good pieces in</div><div class="v" id="roGood">0 of 6</div></div>
+        <div class="ro"><div class="k2">Still missing</div><div class="v" id="roMiss">6</div></div>
+        <div class="ro"><div class="k2">Hurts your ask</div><div class="v" id="roBad">0</div></div>
+      </div>
+      <div class="verdict" id="spVerdict"><span class="dotv"></span><span id="spVerdictTxt">Tap the pieces you would include.</span></div>
+      <div class="actions">
+        <button class="btn" id="spReset">Clear the page</button>
+        <span class="savemsg" id="spSave"></span>
+      </div>
+    </div>
+    <div class="note">
+      <div class="nh">Why the "bad" ones sink you</div>
+      <p>A full technical spec answers a question the sponsor did not ask - they want to know what their money does, not every bracket's part number. A guilt line ("if you do not help, we cannot compete") pressures people and pushes them away; sponsors give to a clear, confident ask. And personal contact info like a student's home address should never go on a document you hand out - keep contact to a mentor or team email. Safety first, always with your mentor.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Drill 3</div>
+    <h2>Your own words</h2>
+    <p>The best pitch is one you actually mean. Write these three now, honestly and short. They save in this browser so you can come back and sharpen them, and you can read them straight to a judge. There is no grade here - just you, getting your sentences ready.</p>
+
+    <div class="builder">
+      <div class="builder-head">
+        <span class="builder-title">Reflection</span>
+        <span class="builder-tag">saved for you</span>
+      </div>
+      <div class="pbody">
+        <div class="rfield">
+          <label>1. Name one thing that is <em>yours</em> on the team - the thing people come to you for.</label>
+          <textarea id="r1" placeholder="e.g. I keep the wiring diagram. When something stops working, people come to me because I can find the loose connector fast."></textarea>
+          <div class="rsaved" id="rs1"></div>
+        </div>
+        <div class="rfield">
+          <label>2. Write one sentence a judge could remember you by.</label>
+          <textarea id="r2" placeholder="e.g. I'm the person who turned our chaotic pit into a labeled system anyone can work in."></textarea>
+          <div class="rsaved" id="rs2"></div>
+        </div>
+        <div class="rfield">
+          <label>3. One way your team gives back - add a number if you can.</label>
+          <textarea id="r3" placeholder="e.g. Every Tuesday we mentor an FLL team of 8 younger kids at our old middle school."></textarea>
+          <div class="rsaved" id="rs3"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="missions" id="missions">
+      <div class="m-head">&#127919; Missions <span class="m-sub">work through them at your own pace</span></div>
+      <div class="m-item" data-m="judge"><span class="m-st">&#9675;</span><span>Answer <b>3 judge questions</b> with the strong pick. Wrong picks do not count against you - just keep going until three land.</span></div>
+      <div class="m-item" data-m="sponsor"><span class="m-st">&#9675;</span><span>Build a sponsor one-pager that <b>passes the check</b> - the good pieces in, nothing that hurts the ask.</span></div>
+      <div class="m-item" data-m="reflect"><span class="m-st">&#9675;</span><span>Write down <b>one thing that is yours</b> on the team, in your own words, in reflection 1.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">&#9733;</span><span><b>Gold:</b> fill all three reflections <b>and</b> build an airtight one-pager - all six good pieces, nothing that hurts it. That is a real pitch, ready to go.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">A judge asks what you personally did this season. What makes an answer land?</div>
+        <div class="opts">
+          <button class="opt" data-why="Team spirit is great, but the judge asked about you on purpose. A vague 'we all did a bit of everything' hides your real work and gives them nothing to write down. Being specific about your own job is not bragging.">A modest "we all did a bit of everything," so you come across as a team player</button>
+          <button class="opt">A specific, first-person example of something you owned, said plainly</button>
+          <button class="opt" data-why="Lifting yourself by pointing out that others could not keep up reads as poor character, which is part of what these awards measure. Own your work fully without shrinking anyone else's.">A note that you did the hardest job and the others could not really keep up</button>
+        </div>
+        <div class="explain">Judges are listening for real people doing real things. One specific job, in your own voice, that only you can claim - that is the answer they remember. "We" answers and put-downs both fail; specific and honest wins.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">What belongs on a one-page sponsorship ask?</div>
+        <div class="opts">
+          <button class="opt" data-why="A sponsor is deciding whether to give money, not reviewing your CAD. A part-by-part spec buries the ask they actually care about. Show what the money funds and what they get back instead.">A complete technical spec of the robot, so they see how serious you are</button>
+          <button class="opt" data-why="Guilt pressures people and pushes them away. A sponsor gives when the ask is clear and the return is real, not when they feel cornered into it.">A strong line that they will be letting kids down if they say no</button>
+          <button class="opt">Who you are, what the money funds with real numbers, what the sponsor gets back, and how to reach you</button>
+        </div>
+        <div class="explain">A sponsorship is a trade. The one-pager makes it easy to say yes: this is us, this is what your money does, this is what you get, here is how to reach us. Clear and confident beats long and technical every time.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">A shy teammate says they do not really contribute. What is the kindest, truest thing to help them see?</div>
+        <div class="opts">
+          <button class="opt">Everyone on a team owns something real - the quiet jobs like the build log or wiring map count fully, and naming yours is not bragging</button>
+          <button class="opt" data-why="Growth is good, but a team needs many roles, and forcing a quiet student into the spotlight misses the point. The build log, the wiring map, the organized pit - those are real, judged contributions too.">They should push themselves to become the main drive-team speaker</button>
+          <button class="opt" data-why="Not true, and it would leave shy students out in the cold. Judges are trained to find each person's real contribution, and quiet, behind-the-scenes work counts every bit as much.">Honestly, judges only really care about the students who talk the most</button>
+        </div>
+        <div class="explain">A team is made of many jobs, and the quiet ones hold it together. Helping a shy teammate name their real contribution is how they find out they belong here - and it is the honest truth, not a pep talk.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="note" style="margin-top:30px">
+    <div class="nh">You did the reps</div>
+    <p>Awards and sponsors are not won by the flashiest robot. They are won by a team that can look someone in the eye and say one specific, honest, generous thing. You just practiced that. Read your three sentences out loud once, then go find a mentor and say them to a real person - that last rep is the one that sticks.</p>
+  </div>
+
+  <nav class="coursenav">
+    <a href="index.html">&larr; Academy home</a>
+    <a class="map" href="index.html">Academy map</a>
+    <a href="certificate.html">Certificate &rarr;</a>
+  </nav>
+
+</div>
+
+<footer>FRC Academy &middot; The business half</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---- shared state read by the missions checker ----
+  var stat = { judgeCleared:0, onePagerGood:false, onePagerAllGood:false, r1filled:false, allReflect:false };
+
+  // ---- persistence (this page's own key) ----
+  var STORE = "frc:pitch";
+  function loadState(){ try{ return JSON.parse(localStorage.getItem(STORE)) || {}; }catch(e){ return {}; } }
+  var state = loadState();
+  state.judge   = state.judge   || {};   // { "0":true, ... } questions answered strong
+  state.sponsor = state.sponsor || {};   // { elementId:true } pieces on the page
+  state.reflect = state.reflect || {};   // { r1:"", r2:"", r3:"" }
+  function saveState(){ try{ localStorage.setItem(STORE, JSON.stringify(state)); }catch(e){} }
+
+  // =====================================================================
+  // Drill 1 - the judge's table
+  // =====================================================================
+  var JUDGE = [
+    { ask:"What did YOU personally build or work on this season?",
+      correct:0,
+      land:"That is exactly what a judge writes down: one specific job, in your own voice, that only you can claim.",
+      options:[
+        { t:"I owned the intake wiring. I crimped every connector and made a labeled map so anyone can trace a fault in under a minute." },
+        { t:"We all pitched in and everyone kind of did a bit of everything on the robot.",
+          why:"Judges hear \"we\" all day. They asked about you on purpose. A team-shaped answer hides your real work and gives them nothing to remember you by. It is honest, and good, to say \"I\" here." },
+        { t:"I basically carried the electrical side - honestly nobody else really got it.",
+          why:"Putting teammates down to lift yourself up reads as poor character, which is exactly what these awards look at. You can own your work fully without shrinking anyone else's." }
+      ] },
+    { ask:"How does your team give back to your community?",
+      correct:1,
+      land:"Specific, honest, and countable. The judge can picture 22 kids at a library and even check it if they want.",
+      options:[
+        { t:"We are super passionate about STEM and we inspire our entire city.",
+          why:"\"We inspire everyone\" is a big claim with no proof behind it. Judges trust specific examples and real numbers, not large adjectives." },
+        { t:"We run a free Saturday robotics club at the library. Last year 22 younger kids came, and three of them started an FLL team we still mentor." },
+        { t:"So there is a lot - like we do the library thing sometimes, and we posted about recycling once, and a few of us helped at a science fair, and my friend's little sister...",
+          why:"Rambling buries the one thing the judge wanted to hear. They have minutes, not hours. Lead with your clearest example, give a number, then stop." }
+      ] },
+    { ask:"What was the hardest problem you hit this season, and how did you handle it?",
+      correct:0,
+      land:"A real failure, a real fix, and something you changed because of it. That is the whole story a judge is hoping to hear.",
+      options:[
+        { t:"Our climber hook snapped at our first event. I traced it to a stress point, we reprinted it in nylon, and it held the rest of the season. I keep a failure log now." },
+        { t:"Honestly, nothing really went wrong - our design just worked the first time.",
+          why:"Judges know robots break; that is the whole sport. A flawless season reads as either not quite true or that you never pushed hard. They want to see how you handle trouble, not that you dodged it." },
+        { t:"Our programmer kept breaking the code, so the robot basically never worked at practice.",
+          why:"Blaming a teammate in front of a judge is a red flag for teamwork. Talk about the problem and the fix you found, not whose fault it was." }
+      ] },
+    { ask:"You are quiet on the team. A judge kneels down and asks, \"What part of this team is yours?\"",
+      correct:2,
+      land:"Quiet does not mean small. You just named a job the whole team leans on. That is yours, and it counts.",
+      options:[
+        { t:"Oh, I don't really do much - the others are the impressive ones.",
+          why:"Selling yourself short hides a real contribution and leaves the judge with nothing to write down. Everyone on a team owns something. You are allowed to name yours plainly." },
+        { t:"I just help out wherever I'm needed, a bit of everything.",
+          why:"\"A bit of everything\" gives the judge nothing to hold onto. One specific thing that is yours is far more memorable than a general willingness to help." },
+        { t:"I keep the build log and the wiring diagram. When something breaks, people come find me because I can spot it fast." }
+      ] },
+    { ask:"Why should we give your team the Impact Award over the others here?",
+      correct:1,
+      land:"You pointed at what you built for other people, with a number, and left the other teams alone. That is the award in one sentence.",
+      options:[
+        { t:"Because our robot is way better than most of the teams in this room.",
+          why:"The Impact Award is about your effect on people, not your robot's ranking - and running down other teams reads as poor gracious professionalism. Point at what you built for others, not at who you beat." },
+        { t:"I can't speak for the others, but here is what we did: we started three FLL teams in schools that had none, and 40 kids now have a program because of it." },
+        { t:"We have worked really hard and we deserve it more than anyone.",
+          why:"\"We deserve it\" asks the judge to just take your word. Show them the work and the numbers, and let them arrive at \"they deserve it\" on their own." }
+      ] }
+  ];
+
+  var judgeIdx = 0;
+  var elJudgeAsk = document.getElementById("judgeAsk");
+  var elJudgeOpts = document.getElementById("judgeOpts");
+  var elJudgeMsg = document.getElementById("judgeMsg");
+  var elJudgeTag = document.getElementById("judgeTag");
+  var elJudgeScore = document.getElementById("judgeScore");
+  var elJudgeDots = document.getElementById("judgeDots");
+
+  function judgeCount(){ var n=0; for(var k in state.judge){ if(state.judge[k]) n++; } return n; }
+
+  function renderDots(){
+    var h="";
+    for(var i=0;i<JUDGE.length;i++){
+      h += '<i class="'+(state.judge[i]?"on":"")+(i===judgeIdx?" here":"")+'"></i>';
+    }
+    elJudgeDots.innerHTML = h;
+  }
+
+  function updateJudgeScore(){
+    stat.judgeCleared = judgeCount();
+    elJudgeScore.textContent = stat.judgeCleared + " answered strong";
+  }
+
+  function showLand(q){
+    var d = document.createElement("div");
+    d.className = "landnote";
+    d.innerHTML = "<b>That lands.</b> " + q.land;
+    elJudgeMsg.appendChild(d);
+  }
+
+  function onJudgePick(i, btn, q){
+    if(state.judge[judgeIdx]) return;                 // already solved
+    if(i === q.correct){
+      state.judge[judgeIdx] = true; saveState();
+      Array.prototype.forEach.call(elJudgeOpts.children, function(b){ b.classList.add("locked"); });
+      btn.classList.add("correct");
+      showLand(q);
+      updateJudgeScore(); renderDots();
+    } else {
+      btn.classList.add("wrong");
+      var wl = btn.nextElementSibling;
+      if(!wl || !wl.classList || !wl.classList.contains("whyline")){
+        wl = document.createElement("div"); wl.className = "whyline";
+        btn.parentNode.insertBefore(wl, btn.nextSibling);
+      }
+      wl.textContent = q.options[i].why || "Not quite - a strong answer is specific, honest, and short. Try another.";
+    }
+  }
+
+  function renderJudge(){
+    var q = JUDGE[judgeIdx];
+    var solved = !!state.judge[judgeIdx];
+    elJudgeAsk.textContent = q.ask;
+    elJudgeTag.textContent = (judgeIdx+1) + " of " + JUDGE.length;
+    elJudgeOpts.innerHTML = "";
+    elJudgeMsg.innerHTML = "";
+    q.options.forEach(function(o, i){
+      var b = document.createElement("button");
+      b.className = "opt"; b.type = "button"; b.textContent = o.t;
+      if(solved){ b.classList.add("locked"); if(i===q.correct) b.classList.add("correct"); }
+      b.addEventListener("click", function(){ onJudgePick(i, b, q); });
+      elJudgeOpts.appendChild(b);
+    });
+    if(solved) showLand(q);
+    renderDots();
+  }
+
+  document.getElementById("judgeNext").addEventListener("click", function(){
+    judgeIdx = (judgeIdx + 1) % JUDGE.length; renderJudge();
+  });
+  document.getElementById("judgePrev").addEventListener("click", function(){
+    judgeIdx = (judgeIdx - 1 + JUDGE.length) % JUDGE.length; renderJudge();
+  });
+
+  renderJudge(); updateJudgeScore();
+
+  // =====================================================================
+  // Drill 2 - the sponsor one-pager
+  // =====================================================================
+  var ELEMENTS = [
+    { id:"who",   good:true,  short:"who you are",           t:"Who you are - team number, school, and a one-line mission." },
+    { id:"photo", good:true,  short:"a photo",               t:"One clear photo of your robot or team in action." },
+    { id:"funds", good:true,  short:"what the money funds",  t:"What the money pays for, with real numbers - registration, materials, travel." },
+    { id:"gets",  good:true,  short:"what the sponsor gets", t:"What the sponsor gets back - logo on the robot, a banner, social shout-outs, a thank-you visit." },
+    { id:"impact",good:true,  short:"your outreach numbers", t:"Your outreach, with a number - kids reached, events run." },
+    { id:"cta",   good:true,  short:"how to reach you",      t:"A clear next step - who to contact, a team email, and a deadline." },
+    { id:"spec",  good:false, short:"the full tech spec",    t:"A part-by-part technical spec of the whole robot, every part number listed." },
+    { id:"guilt", good:false, short:"the guilt line",        t:"A guilt line - \"if you don't sponsor us, we can't compete.\"" },
+    { id:"addr",  good:false, short:"the home address",      t:"A student's home address and personal phone number." },
+    { id:"wall",  good:false, short:"the wall of text",      t:"A dense wall of text with no headings, photos, or white space." }
+  ];
+
+  var elPicks = document.getElementById("picks");
+  var elRoGood = document.getElementById("roGood");
+  var elRoMiss = document.getElementById("roMiss");
+  var elRoBad = document.getElementById("roBad");
+  var elSpV = document.getElementById("spVerdict");
+  var elSpVtxt = document.getElementById("spVerdictTxt");
+  var elSpSave = document.getElementById("spSave");
+  var spSaveTimer = null;
+
+  function listJoin(a){
+    if(a.length === 0) return "";
+    if(a.length === 1) return a[0];
+    if(a.length === 2) return a[0] + " and " + a[1];
+    return a.slice(0, -1).join(", ") + ", and " + a[a.length-1];
+  }
+
+  function gradeSponsor(){
+    var g=0, b=0, missing=[], badNames=[];
+    ELEMENTS.forEach(function(e){
+      var on = !!state.sponsor[e.id];
+      if(e.good){ if(on) g++; else missing.push(e.short); }
+      else { if(on){ b++; badNames.push(e.short); } }
+    });
+
+    var cls, msg;
+    if(b > 0){
+      cls = "bad";
+      msg = "Take " + listJoin(badNames) + " back off. A sponsor stops reading the second they hit " + badNames[0] + ", and your real ask never gets seen.";
+    } else if(g >= 6){
+      cls = "good";
+      msg = "Airtight. Who you are, what it funds, what they get back, your impact, and how to say yes - a sponsor can decide from this one page.";
+    } else if(g >= 5){
+      cls = "good";
+      msg = "This works. It says who you are, what the money does, and how to reach you. Add " + listJoin(missing) + " to make it airtight.";
+    } else if(g >= 3){
+      cls = "warn";
+      msg = "A solid start, but still thin. Missing: " + listJoin(missing) + ". A sponsor needs those to say yes.";
+    } else {
+      cls = "bad";
+      msg = g === 0 ? "Empty so far. Tap the pieces that belong on the page." : "Too thin to send. It still needs " + listJoin(missing) + ".";
+    }
+
+    elRoGood.textContent = g + " of 6";
+    elRoGood.className = "v " + (g >= 6 ? "green" : (g >= 3 ? "amber" : ""));
+    elRoMiss.textContent = missing.length;
+    elRoMiss.className = "v " + (missing.length === 0 ? "green" : "");
+    elRoBad.textContent = b;
+    elRoBad.className = "v " + (b > 0 ? "red" : "green");
+
+    elSpV.className = "verdict " + cls;
+    elSpVtxt.textContent = msg;
+
+    stat.onePagerGood = (cls === "good");
+    stat.onePagerAllGood = (g === 6 && b === 0);
+  }
+
+  function renderPicks(){
+    elPicks.innerHTML = "";
+    ELEMENTS.forEach(function(e){
+      var b = document.createElement("button");
+      b.className = "pick" + (state.sponsor[e.id] ? " on" : "");
+      b.type = "button"; b.textContent = e.t;
+      b.setAttribute("aria-pressed", state.sponsor[e.id] ? "true" : "false");
+      b.addEventListener("click", function(){
+        if(state.sponsor[e.id]){ delete state.sponsor[e.id]; } else { state.sponsor[e.id] = true; }
+        b.classList.toggle("on", !!state.sponsor[e.id]);
+        b.setAttribute("aria-pressed", state.sponsor[e.id] ? "true" : "false");
+        saveState(); gradeSponsor();
+        elSpSave.textContent = "saved";
+        clearTimeout(spSaveTimer);
+        spSaveTimer = setTimeout(function(){ elSpSave.textContent = ""; }, 1200);
+      });
+      elPicks.appendChild(b);
+    });
+  }
+
+  document.getElementById("spReset").addEventListener("click", function(){
+    state.sponsor = {}; saveState(); renderPicks(); gradeSponsor();
+  });
+
+  renderPicks(); gradeSponsor();
+
+  // =====================================================================
+  // Drill 3 - reflections
+  // =====================================================================
+  var reflectEls = [
+    { ta:document.getElementById("r1"), msg:document.getElementById("rs1"), key:"r1" },
+    { ta:document.getElementById("r2"), msg:document.getElementById("rs2"), key:"r2" },
+    { ta:document.getElementById("r3"), msg:document.getElementById("rs3"), key:"r3" }
+  ];
+  function filled(v){ return (v || "").trim().length >= 4; }
+  function updateReflectStat(){
+    stat.r1filled = filled(state.reflect.r1);
+    stat.allReflect = filled(state.reflect.r1) && filled(state.reflect.r2) && filled(state.reflect.r3);
+  }
+  reflectEls.forEach(function(r){
+    var timer = null;
+    if(state.reflect[r.key]) r.ta.value = state.reflect[r.key];
+    r.ta.addEventListener("input", function(){
+      state.reflect[r.key] = r.ta.value; saveState(); updateReflectStat();
+      r.msg.textContent = "saved";
+      clearTimeout(timer);
+      timer = setTimeout(function(){ r.msg.textContent = ""; }, 1200);
+    });
+  });
+  updateReflectStat();
+
+  // =====================================================================
+  // Missions (wrapped so a missions bug can never break the page)
+  // =====================================================================
+  try{
+    var MKEY = "frc:missions", GKEY = "frc:gold", mPage = location.pathname.split("/").pop();
+    var mSaved = {}, mGold = {};
+    try{ mSaved = JSON.parse(localStorage.getItem(MKEY)) || {}; }catch(e){}
+    try{ mGold = JSON.parse(localStorage.getItem(GKEY)) || {}; }catch(e){}
+    var mItems = {};
+    Array.prototype.forEach.call(document.querySelectorAll("#missions .m-item"), function(n){ mItems[n.getAttribute("data-m")] = n; });
+    function mMark(n){ n.classList.add("cleared"); n.querySelector(".m-st").textContent = n.classList.contains("gold") ? "★" : "✓"; }
+    function mClear(id){
+      var n = mItems[id]; if(!n || n.classList.contains("cleared")) return;
+      mMark(n);
+      var gold = n.classList.contains("gold");
+      var map = gold ? mGold : mSaved, key = gold ? GKEY : MKEY;
+      map[mPage + "#" + id] = true;
+      try{ localStorage.setItem(key, JSON.stringify(map)); }catch(e){}
+    }
+    Object.keys(mItems).forEach(function(id){
+      if((mItems[id].classList.contains("gold") ? mGold : mSaved)[mPage + "#" + id]) mMark(mItems[id]);
+    });
+    setInterval(function(){
+      try{
+        if(stat.judgeCleared >= 3) mClear("judge");
+        if(stat.onePagerGood) mClear("sponsor");
+        if(stat.r1filled) mClear("reflect");
+        if(stat.allReflect && stat.onePagerAllGood) mClear("gold");
+      }catch(e){}
+    }, 250);
+  }catch(e){}
+
+})();
+</script>
+<script>
+(function(){
+  // mastery quiz: correct locks and reveals the explain; wrong shows a data-why whyline and stays retryable
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the clinic showed you, then try another answer.'; } }); });
+  });
+})();
+</script>
+<script src="account-config.js"></script>
+<script src="account.js"></script>
+</body>
+</html>

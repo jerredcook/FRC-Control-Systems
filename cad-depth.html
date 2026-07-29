@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fabricate · CAD Depth</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:48px 0 18px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  h1{font-size:clamp(2.1rem,5vw,3.4rem);line-height:1.04;margin:.1em 0 .3em;letter-spacing:-.03em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(16px,2.2vw,19px);color:var(--text);max-width:60ch;margin-top:6px}
+  .dek b{color:var(--text)}
+  .cando{border-left:3px solid var(--indigo);background:rgba(255,138,76,.06);border-radius:0 10px 10px 0;padding:12px 16px;margin:18px 0 2px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);display:block;margin-bottom:6px}
+  .cando ul{margin:0;padding-left:18px}
+  .cando li{color:var(--muted);font-size:15px;line-height:1.5;margin:3px 0}
+
+  section{padding:26px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px} .lead{font-size:19px} em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  /* concept cards */
+  .rules{display:grid;gap:10px;margin:18px 0} @media(min-width:560px){.rules{grid-template-columns:1fr 1fr}}
+  .rule{display:flex;gap:11px;border:1px solid var(--line);border-radius:11px;padding:13px 14px;background:var(--panel)}
+  .rule .ri{font-size:20px;flex:0 0 auto}
+  .rule b{display:block;font-size:14.5px;color:var(--text);margin-bottom:2px}
+  .rule span{font-size:13.5px;color:var(--muted)}
+
+  /* interactive shell */
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8);margin-top:14px}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;gap:6px;align-items:center}
+  .demo-tag .live{width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 8px var(--red)}
+  .demo-tag .live.on{background:var(--green);box-shadow:0 0 8px var(--green)}
+  canvas.sketch{display:block;width:100%;height:300px;touch-action:none;cursor:grab}
+  canvas.sketch:active{cursor:grabbing}
+  canvas.mate{display:block;width:100%;height:190px}
+
+  .dofbar{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:22px;font-weight:600;margin-top:3px;color:var(--muted)}
+  .ro .v.big{font-size:26px}
+  .ro .v.teal{color:var(--teal)} .ro .v.green{color:var(--green)} .ro .v.amber{color:var(--amber)} .ro .v.red{color:var(--red)} .ro .v.indigo{color:var(--indigo)}
+
+  .verdict{padding:12px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:12.5px;letter-spacing:.05em;color:var(--muted);display:flex;align-items:flex-start;gap:10px;line-height:1.55}
+  .verdict .dotv{width:9px;height:9px;border-radius:50%;background:var(--faint);flex:0 0 auto;margin-top:5px}
+  .verdict.good .dotv{background:var(--green);box-shadow:0 0 10px var(--green)} .verdict.good{color:var(--green)}
+  .verdict.warn .dotv{background:var(--amber);box-shadow:0 0 10px var(--amber)} .verdict.warn{color:var(--amber)}
+
+  .cgroup{padding:12px 16px;border-top:1px solid var(--line)}
+  .cgroup .cg-h{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:8px}
+  .cbtns{display:flex;flex-wrap:wrap;gap:8px}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;padding:10px 12px;border-radius:8px;cursor:pointer;transition:.12s;min-height:38px}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .btn.primary{background:linear-gradient(180deg,#FFB27A,var(--indigo));color:#2a1503;font-weight:700;border:none}
+  .cbtn.applied{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--green)}
+  .cbtn.applied::before{content:"\2713 ";}
+  .cbtn.over{border-color:var(--red);background:rgba(255,107,107,.14);color:var(--red)}
+  .actions{display:flex;flex-wrap:wrap;gap:10px;padding:12px 16px;border-top:1px solid var(--line);align-items:center}
+  .savemsg{font-family:var(--mono);font-size:11px;color:var(--muted);margin-left:auto}
+
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--amber);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+
+  /* mate drill */
+  .drill-prompt{padding:14px 16px;border-top:1px solid var(--line);font-size:15.5px;color:var(--text)}
+  .drill-prompt .allowed{display:block;margin-top:7px;font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;color:var(--indigo)}
+  .mate-opts{display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 14px}
+  .mate-btn{flex:1 1 30%;min-width:120px;text-align:center;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:12px;letter-spacing:.04em;padding:12px 10px;border-radius:9px;cursor:pointer;transition:.12s;min-height:44px}
+  .mate-btn:hover{border-color:var(--indigo);color:var(--text)}
+  .mate-btn.correct{border-color:var(--green);background:rgba(67,214,126,.14);color:var(--text)}
+  .mate-btn.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .mate-btn.locked{cursor:default;opacity:.6} .mate-btn.locked.correct,.mate-btn.locked.wrong{opacity:1}
+  .drill-fb{padding:0 16px 12px;font-size:14px;color:var(--muted);line-height:1.55;display:none}
+  .drill-fb.show{display:block}
+  .drill-fb.ok{color:var(--green)}
+  .drill-fb .whyline{color:var(--muted)}
+  .drill-foot{display:flex;flex-wrap:wrap;gap:10px;padding:12px 16px;border-top:1px solid var(--line);align-items:center}
+  .drill-score{font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-left:auto}
+  .drill-score b{color:var(--green)}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note a{color:var(--teal);text-decoration:none;border-bottom:1px dotted rgba(52,215,197,.45)}
+  .note a:hover{border-bottom-style:solid}
+  .note.indigo{border-color:var(--indigo);background:rgba(255,138,76,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+  .whyline{margin-top:8px;font-size:13.5px;line-height:1.5;color:var(--muted);border-left:2px solid var(--red);background:rgba(255,107,107,.06);border-radius:0 8px 8px 0;padding:7px 12px}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px} @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px} .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--indigo);min-width:120px;text-transform:uppercase} .gl span{color:var(--muted)}
+
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="build.html"><span class="dot"></span><span class="name">Fabricate</span></a>
+    <div class="top-meta">CAD Depth</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Beyond the single CAD lesson</div>
+    <h1>Make the sketch <span class="accent">stop wiggling</span></h1>
+    <p class="dek">The CAD lesson showed you how to sketch a shape and pull it into a solid. This companion goes one layer deeper into the thing that trips up every new CAD designer: a sketch that <b>floppes around</b> because it is not pinned down. You will drive a real sketch from loose to locked by adding constraints, watch its <b>degrees of freedom</b> fall to zero, then learn how the same idea joins parts together in an assembly. Onshape is the free, browser-based CAD our Fabricate course already teaches.</p>
+    <div class="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Say what "degrees of freedom" means and read the DOF count as you constrain a sketch</li>
+      <li>Drive a loose sketch to fully defined, and spot when you are over-constraining it</li>
+      <li>Name the common assembly mates from the motion they allow</li>
+    </ul></div>
+  </div>
+
+  <section>
+    <div class="kicker">The idea</div>
+    <h2>A sketch has freedom until you take it away</h2>
+    <p class="lead">Draw a rectangle roughly and its corners can still slide anywhere.</p>
+    <p>Every point you draw starts <strong>free</strong>: it can move in x and in y. Two numbers of freedom per point. A four-corner plate has eight numbers of freedom before you pin anything down. Those eight are its <strong>degrees of freedom</strong>, or <span class="k">DOF</span>. Grab a corner and it floppes, because nothing is holding it.</p>
+    <p>A <strong>constraint</strong> removes freedom. You add them one at a time until there is nothing left to wiggle:</p>
+    <div class="rules">
+      <div class="rule"><div class="ri">📍</div><div><b>Coincident</b><span>Pin one point onto another point, or onto the origin. That locks both its x and its y at once, so it removes 2 DOF.</span></div></div>
+      <div class="rule"><div class="ri">📐</div><div><b>Horizontal / Vertical</b><span>Force an edge flat or upright. It removes 1 DOF - the edge can no longer tilt.</span></div></div>
+      <div class="rule"><div class="ri">📏</div><div><b>Dimension</b><span>Type a real number, like 120 mm, onto a length or a gap. It removes 1 DOF - that size is now fixed.</span></div></div>
+      <div class="rule"><div class="ri">✅</div><div><b>Fully defined</b><span>DOF hits 0. Nothing can move. Onshape turns the sketch a solved color, and it will never drift on you again.</span></div></div>
+    </div>
+    <p>The goal is simple: get the DOF to <strong>zero</strong>. Not more, not less. Below zero is a real problem too, and you will meet it in a second.</p>
+  </section>
+
+  <section>
+    <div class="kicker">Try it</div>
+    <h2>Constrain the plate</h2>
+    <p>Here is a loose 4-corner plate. Drag a corner and watch it flop. Then add constraints from the buttons and watch the <span class="k">DOF</span> readout count down. Get it to <strong>0</strong> and the plate locks and turns green.</p>
+
+    <div class="demo" id="demo1">
+      <div class="demo-head">
+        <span class="demo-title">Sketch · constraint solver</span>
+        <span class="demo-tag"><span class="live" id="live1"></span> <span id="state1">Under-defined</span></span>
+      </div>
+      <canvas class="sketch" id="sk"></canvas>
+      <div class="dofbar">
+        <div class="ro"><div class="k2">Degrees of freedom</div><div class="v big red" id="roDof">8</div></div>
+        <div class="ro"><div class="k2">Constraints used</div><div class="v indigo" id="roMoves">0</div></div>
+        <div class="ro"><div class="k2">Over-constrains</div><div class="v" id="roWaste">0</div></div>
+      </div>
+      <div class="verdict" id="v1"><span class="dotv"></span><span id="v1txt">Loose sketch. Drag a corner - it floppes because nothing is pinned. Start adding constraints.</span></div>
+      <div class="cgroup">
+        <div class="cg-h">Anchor corner A (bottom-left, on the origin)</div>
+        <div class="cbtns">
+          <button class="btn cbtn" data-c="origin">Pin A to origin</button>
+          <button class="btn cbtn" data-c="dimAx">Dimension A.x</button>
+          <button class="btn cbtn" data-c="dimAy">Dimension A.y</button>
+        </div>
+      </div>
+      <div class="cgroup">
+        <div class="cg-h">Straighten the edges</div>
+        <div class="cbtns">
+          <button class="btn cbtn" data-c="hAB">Bottom edge horizontal</button>
+          <button class="btn cbtn" data-c="hCD">Top edge horizontal</button>
+          <button class="btn cbtn" data-c="vDA">Left edge vertical</button>
+          <button class="btn cbtn" data-c="vBC">Right edge vertical</button>
+        </div>
+      </div>
+      <div class="cgroup">
+        <div class="cg-h">Set the sizes</div>
+        <div class="cbtns">
+          <button class="btn cbtn" data-c="dimW">Width = 120 mm</button>
+          <button class="btn cbtn" data-c="dimH">Height = 80 mm</button>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="reset1">Reset sketch</button>
+        <span class="savemsg" id="save1"></span>
+      </div>
+    </div>
+    <p class="caption">Each constraint takes away a way the plate could move. Pinning A to the origin removes two at once; each edge or dimension removes one. When the last one lands, DOF is 0 and the wiggle stops for good.</p>
+
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
+      <div class="m-item" data-m="first"><span class="m-st">○</span><span>Add your <b>first constraint</b> and watch the DOF drop below 8. That is one way the plate can no longer move.</span></div>
+      <div class="m-item" data-m="lock"><span class="m-st">○</span><span>Keep going until <b>DOF hits 0</b>. The plate turns green and stops flopping - that is a <b>fully defined</b> sketch, the state every real part wants to be in.</span></div>
+      <div class="m-item" data-m="over"><span class="m-st">○</span><span>Now poke the danger: click a constraint that is <b>already implied</b> (try Pin A to origin twice, or a dimension you already set). Read the <b>over-constrained</b> warning - real Onshape refuses it the same way.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> reach DOF 0 in the <b>minimum 7 constraints</b>. The trick: pin A to the origin (that single coincident kills 2 DOF at once) instead of dimensioning A.x and A.y separately, which costs you a wasted move.</span></div>
+    </div>
+
+    <div class="note indigo">
+      <div class="nh">Under-defined, defined, over-defined</div>
+      <p>Three states, and only one you want. <strong>Under-defined</strong> (DOF above 0) means the sketch can still drift, and it will move on you when you edit something nearby - the classic source of "why did my whole part just warp?" <strong>Fully defined</strong> (DOF exactly 0) is the goal: solid, predictable, safe to build features on. <strong>Over-defined</strong> (you tried to remove freedom that was already gone) means two constraints are fighting over the same thing, and Onshape flags it in red so you can delete the extra one. Aim for zero, land on zero.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">One level up</div>
+    <h2>From one part to a whole robot</h2>
+    <p>A single fully-defined part is pinned inside its own sketch. But a robot is <em>many</em> parts, and now each part has DOF <strong>relative to the parts around it</strong>. A loose part in an assembly floats in space with 6 degrees of freedom: it can slide along 3 directions and spin about 3 axes.</p>
+    <p>In an <strong>assembly</strong> you remove that freedom with <strong>mates</strong>. A mate is a constraint between two parts, and each kind leaves behind a different, deliberate amount of motion. That leftover motion is the whole point - it is how your mechanism moves:</p>
+    <div class="rules">
+      <div class="rule"><div class="ri">🔩</div><div><b>Fastened</b><span>0 DOF left. Bolted solid, no motion. A gearbox screwed to a side plate.</span></div></div>
+      <div class="rule"><div class="ri">🔄</div><div><b>Revolute</b><span>1 rotation. Spins about one axis only. An arm on a pivot, a wheel on a shaft.</span></div></div>
+      <div class="rule"><div class="ri">↕️</div><div><b>Slider</b><span>1 translation. Slides along one straight line. An elevator carriage on its rails.</span></div></div>
+      <div class="rule"><div class="ri">🌀</div><div><b>Cylindrical</b><span>1 rotation + 1 slide, same axis. A telescoping tube that spins and extends.</span></div></div>
+      <div class="rule"><div class="ri">🔮</div><div><b>Ball</b><span>3 rotations, no slide. Swivels every direction about one point, like a joystick.</span></div></div>
+      <div class="rule"><div class="ri">🛝</div><div><b>Planar</b><span>2 slides + 1 spin on a surface. A part resting flat on a plate.</span></div></div>
+    </div>
+    <p>Reading a mate is a skill you can train: look at the joint, ask "what motion does it still allow?", and the answer names the mate. Let us drill it.</p>
+
+    <div class="demo" id="demo2">
+      <div class="demo-head">
+        <span class="demo-title">Mate identifier · name the joint</span>
+        <span class="demo-tag" id="tag2">joint 1 / 6</span>
+      </div>
+      <canvas class="mate" id="mv"></canvas>
+      <div class="drill-prompt" id="prompt2">
+        <span id="p2text">--</span>
+        <span class="allowed" id="p2allow">--</span>
+      </div>
+      <div class="mate-opts" id="mateOpts">
+        <button class="mate-btn" data-t="fastened">Fastened</button>
+        <button class="mate-btn" data-t="revolute">Revolute</button>
+        <button class="mate-btn" data-t="slider">Slider</button>
+        <button class="mate-btn" data-t="cylindrical">Cylindrical</button>
+        <button class="mate-btn" data-t="ball">Ball</button>
+        <button class="mate-btn" data-t="planar">Planar</button>
+      </div>
+      <div class="drill-fb" id="fb2"></div>
+      <div class="drill-foot">
+        <button class="btn primary" id="next2" style="display:none">Next joint ▸</button>
+        <button class="btn" id="reset2">Restart drill</button>
+        <span class="drill-score" id="score2">Identified <b>0</b> / 6</span>
+      </div>
+    </div>
+    <p class="caption">Watch the animation, read what it is allowed to do, then name the mate. Miss one and you get a hint about the motion you overlooked. Name all six and you have the vocabulary every assembly uses.</p>
+  </section>
+
+  <section>
+    <div class="note indigo">
+      <div class="nh">Learn it for real: FRCDesign.org</div>
+      <p>This page is the mental model. To actually build these constraints and mates with your own hands, use <strong>Onshape</strong> (free in the browser) and the FRC-specific course at <a href="https://www.frcdesign.org" target="_blank" rel="noopener">FRCDesign.org</a>, an official Onshape education partner. A quick habit that will save you hours: after every sketch, glance at the DOF counter in the corner and do not move on until it reads 0. Ask your mentor to look over your first few assemblies - a second pair of eyes catches a floating part fast.</p>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">In a 2D sketch, what does the degrees-of-freedom number count?</div>
+        <div class="opts">
+          <button class="opt" data-why="Constraints are what you add to remove freedom, not the freedom itself. Early on you have lots of DOF and zero constraints - the two numbers move in opposite directions.">How many constraints you have already added</button>
+          <button class="opt">How many independent ways the geometry can still move or change</button>
+          <button class="opt" data-why="Sketches do get colored when solved, but that is just a visual cue. The DOF number is a count of remaining freedom, not a color.">What color Onshape will paint the sketch</button>
+        </div>
+        <div class="explain">DOF is the count of independent motions still left in the sketch. Each free point starts with 2 (x and y), and every constraint you add subtracts from that total until it reaches 0.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">You pin one corner of a plate onto the origin with a single coincident constraint. How much freedom does that one move remove?</div>
+        <div class="opts">
+          <button class="opt" data-why="A coincident to the origin does more than a horizontal or vertical, which each remove 1. Locking a point onto a fixed point pins both its x and its y together.">1 degree of freedom</button>
+          <button class="opt" data-why="Zero would mean the constraint did nothing, but pinning a point to the origin clearly stops it from wandering. It removes real freedom.">0 - the origin is just a decoration</button>
+          <button class="opt">2 degrees of freedom, because it locks both the point's x and its y</button>
+        </div>
+        <div class="explain">A point has 2 DOF, x and y. Landing it exactly on the origin fixes both at once, so one coincident removes 2. That is why pinning to the origin is the cheapest way to anchor a sketch, and why the gold mission wanted it instead of two separate dimensions.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">Onshape flashes an "over-constrained" warning at you. What did you most likely do?</div>
+        <div class="opts">
+          <button class="opt">Added a constraint that was already implied, so it fights or duplicates one that is there</button>
+          <button class="opt" data-why="Leaving freedom behind is the opposite problem - that keeps you under-defined with DOF above 0, and Onshape shows it in a different color, not an over-constrained error.">Left the sketch with some freedom still in it</button>
+          <button class="opt" data-why="Using the origin is good practice, not an error. The origin is a free anchor - it never causes an over-constraint by itself.">Anchored the sketch to the origin, which is never allowed</button>
+        </div>
+        <div class="explain">Over-constrained means you tried to remove freedom that was already gone - two constraints now describe the same thing, so they either duplicate or conflict. The fix is to delete the extra one and get back to exactly 0 DOF.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 4</div>
+        <div class="qt">An elevator carriage rides two rails: it slides straight up and down and does nothing else. Which assembly mate is that?</div>
+        <div class="opts">
+          <button class="opt" data-why="Revolute leaves a rotation - the carriage would have to spin about an axis. This one only slides in a straight line, no spinning, so it is not revolute.">Revolute</button>
+          <button class="opt" data-why="Cylindrical allows a slide AND a twist about the same axis. The carriage cannot twist on its rails - it is slide-only, which is a simpler mate.">Cylindrical</button>
+          <button class="opt">Slider</button>
+        </div>
+        <div class="explain">A slider leaves exactly 1 translation - motion along one straight line, and nothing else. That is precisely a carriage on rails. Revolute would leave a rotation, and cylindrical would leave a rotation plus the slide.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>CAD Depth · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Degrees of freedom</b><span>Independent ways geometry can still move; 2 per free point.</span></div>
+        <div class="gl"><b>Constraint</b><span>A rule that removes freedom from a sketch.</span></div>
+        <div class="gl"><b>Coincident</b><span>Pin a point onto another point or the origin; removes 2 DOF.</span></div>
+        <div class="gl"><b>Dimension</b><span>Fix a length or gap to a number; removes 1 DOF.</span></div>
+        <div class="gl"><b>Fully defined</b><span>DOF = 0. Nothing moves; the goal for every part.</span></div>
+        <div class="gl"><b>Over-constrained</b><span>Removed freedom that was already gone; delete the extra.</span></div>
+        <div class="gl"><b>Assembly / mate</b><span>Parts joined so only the motion you want survives.</span></div>
+        <div class="gl"><b>Revolute / Slider</b><span>Leave 1 rotation / 1 slide - the two workhorse mates.</span></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<nav class="coursenav">
+  <a href="build-lesson-33.html">← CAD with Onshape</a>
+  <a class="map" href="build.html">Course map</a>
+  <a href="glossary.html">Glossary →</a>
+</nav>
+
+<footer>Fabricate · Building an FRC robot</footer>
+
+<script>
+/* ===== Interactive 1: sketch constraint solver + DOF ===== */
+(function(){
+  "use strict";
+  var clamp=function(x,a,b){return x<a?a:(x>b?b:x);};
+  var cv=document.getElementById('sk'), ctx=cv.getContext('2d'), W=0,H=0,dpr=1;
+  // rest geometry (recomputed on fit): A bottom-left(origin), B bottom-right, C top-right, D top-left
+  var rest=[{x:0,y:0},{x:0,y:0},{x:0,y:0},{x:0,y:0}];
+  var live=[{x:0,y:0},{x:0,y:0},{x:0,y:0},{x:0,y:0}];
+  var originX=0, originY=0, Wpx=0, Hpx=0;
+  var phase=[0,1.7,3.1,4.6];
+
+  function fit(){
+    var r=cv.getBoundingClientRect(); if(!r.width)return;
+    dpr=window.devicePixelRatio||1;
+    cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0); W=r.width; H=r.height;
+    Wpx=Math.min(W*0.42,210); Hpx=Wpx*(80/120);
+    originX=W*0.30; originY=H*0.74;
+    rest[0]={x:originX,y:originY};
+    rest[1]={x:originX+Wpx,y:originY};
+    rest[2]={x:originX+Wpx,y:originY-Hpx};
+    rest[3]={x:originX,y:originY-Hpx};
+    for(var i=0;i<4;i++){ live[i]={x:rest[i].x,y:rest[i].y}; }
+  }
+  fit();
+
+  // ---- constraint state ----
+  var st;
+  function fresh(){ return { dof:8, moves:0, wasted:0,
+    axFixed:false, ayFixed:false,
+    hAB:false, vBC:false, hCD:false, vDA:false, dimW:false, dimH:false }; }
+  st=fresh();
+
+  var els={
+    roDof:document.getElementById('roDof'), roMoves:document.getElementById('roMoves'), roWaste:document.getElementById('roWaste'),
+    state1:document.getElementById('state1'), live1:document.getElementById('live1'),
+    v1:document.getElementById('v1'), v1txt:document.getElementById('v1txt'), save1:document.getElementById('save1')
+  };
+  var cbtns={};
+  Array.prototype.forEach.call(document.querySelectorAll('#demo1 .cbtn'),function(b){ cbtns[b.getAttribute('data-c')]=b; });
+
+  function overFlash(btn){
+    if(!btn)return;
+    btn.classList.add('over');
+    setTimeout(function(){ btn.classList.remove('over'); },600);
+  }
+
+  function apply(c){
+    var reduced=false, redundant=false;
+    switch(c){
+      case 'origin':{
+        var newly=(!st.axFixed?1:0)+(!st.ayFixed?1:0);
+        if(newly>0){ st.axFixed=true; st.ayFixed=true; st.dof-=newly; st.moves++; reduced=true; }
+        else redundant=true;
+        break; }
+      case 'dimAx': if(!st.axFixed){ st.axFixed=true; st.dof--; st.moves++; reduced=true; } else redundant=true; break;
+      case 'dimAy': if(!st.ayFixed){ st.ayFixed=true; st.dof--; st.moves++; reduced=true; } else redundant=true; break;
+      case 'hAB': if(!st.hAB){ st.hAB=true; st.dof--; st.moves++; reduced=true; } else redundant=true; break;
+      case 'vBC': if(!st.vBC){ st.vBC=true; st.dof--; st.moves++; reduced=true; } else redundant=true; break;
+      case 'hCD': if(!st.hCD){ st.hCD=true; st.dof--; st.moves++; reduced=true; } else redundant=true; break;
+      case 'vDA': if(!st.vDA){ st.vDA=true; st.dof--; st.moves++; reduced=true; } else redundant=true; break;
+      case 'dimW': if(!st.dimW){ st.dimW=true; st.dof--; st.moves++; reduced=true; } else redundant=true; break;
+      case 'dimH': if(!st.dimH){ st.dimH=true; st.dof--; st.moves++; reduced=true; } else redundant=true; break;
+    }
+    if(redundant){ st.wasted++; overFlash(cbtns[c]); }
+    if(reduced){ markApplied(); }
+    refresh(true);
+  }
+
+  function markApplied(){
+    // reflect anchor: origin implies both dims applied-looking
+    cbtns.origin.classList.toggle('applied', st.axFixed&&st.ayFixed);
+    cbtns.dimAx.classList.toggle('applied', st.axFixed);
+    cbtns.dimAy.classList.toggle('applied', st.ayFixed);
+    cbtns.hAB.classList.toggle('applied', st.hAB);
+    cbtns.vBC.classList.toggle('applied', st.vBC);
+    cbtns.hCD.classList.toggle('applied', st.hCD);
+    cbtns.vDA.classList.toggle('applied', st.vDA);
+    cbtns.dimW.classList.toggle('applied', st.dimW);
+    cbtns.dimH.classList.toggle('applied', st.dimH);
+  }
+
+  function refresh(save){
+    els.roDof.textContent=st.dof;
+    els.roDof.className='v big '+(st.dof===0?'green':(st.dof<=3?'amber':'red'));
+    els.roMoves.textContent=st.moves;
+    els.roWaste.textContent=st.wasted;
+    els.roWaste.className='v '+(st.wasted>0?'red':'indigo');
+    if(st.dof===0){
+      els.state1.textContent='Fully defined';
+      els.live1.classList.add('on');
+      els.v1.className='verdict good';
+      els.v1txt.textContent='FULLY DEFINED - DOF 0. The plate is locked and cannot move. You used '+st.moves+' constraint'+(st.moves===1?'':'s')+(st.moves===7?' - the minimum.':'.');
+    } else {
+      els.state1.textContent='Under-defined';
+      els.live1.classList.remove('on');
+      els.v1.className='verdict warn';
+      els.v1txt.textContent='DOF '+st.dof+' - still '+st.dof+' way'+(st.dof===1?'':'s')+' the plate can move. Keep constraining, or drag a corner to feel what is still loose.';
+    }
+    if(save){ persist(); }
+  }
+
+  // ---- relaxation: hard-project applied constraints ----
+  function project(){
+    var iter, i;
+    for(iter=0; iter<16; iter++){
+      // horizontal edges: equalize y
+      if(st.hAB){ var m=(live[0].y+live[1].y)/2; live[0].y=m; live[1].y=m; }
+      if(st.hCD){ var m2=(live[2].y+live[3].y)/2; live[2].y=m2; live[3].y=m2; }
+      // vertical edges: equalize x
+      if(st.vDA){ var mx=(live[3].x+live[0].x)/2; live[3].x=mx; live[0].x=mx; }
+      if(st.vBC){ var mx2=(live[1].x+live[2].x)/2; live[1].x=mx2; live[2].x=mx2; }
+      // dimensions: set distances
+      if(st.dimW){ setDist(0,1,Wpx); }
+      if(st.dimH){ setDist(0,3,Hpx); }
+      // anchor last so it wins
+      if(st.axFixed) live[0].x=originX;
+      if(st.ayFixed) live[0].y=originY;
+    }
+    // keep everything on-canvas
+    for(i=0;i<4;i++){ live[i].x=clamp(live[i].x,10,W-10); live[i].y=clamp(live[i].y,10,H-10); }
+  }
+  function setDist(i,j,target){
+    var dx=live[j].x-live[i].x, dy=live[j].y-live[i].y;
+    var d=Math.sqrt(dx*dx+dy*dy);
+    if(d<0.5) return;
+    var err=(d-target)/2, ux=dx/d, uy=dy/d;
+    live[i].x+=ux*err; live[i].y+=uy*err;
+    live[j].x-=ux*err; live[j].y-=uy*err;
+  }
+
+  // ---- drag + noise loop ----
+  var dragIx=-1, ptr={x:0,y:0};
+  function pos(ev){
+    var r=cv.getBoundingClientRect();
+    return { x:(ev.clientX-r.left), y:(ev.clientY-r.top) };
+  }
+  cv.addEventListener('pointerdown',function(ev){
+    var p=pos(ev), best=-1, bd=26;
+    for(var i=0;i<4;i++){ var d=Math.hypot(p.x-live[i].x,p.y-live[i].y); if(d<bd){ bd=d; best=i; } }
+    if(best>=0){ dragIx=best; ptr=p; try{cv.setPointerCapture(ev.pointerId);}catch(e){} ev.preventDefault(); }
+  });
+  cv.addEventListener('pointermove',function(ev){ if(dragIx>=0){ ptr=pos(ev); ev.preventDefault(); } });
+  function endDrag(){ dragIx=-1; }
+  cv.addEventListener('pointerup',endDrag);
+  cv.addEventListener('pointercancel',endDrag);
+  cv.addEventListener('pointerleave',function(){ if(dragIx>=0) endDrag(); });
+
+  function noiseAt(i,t){
+    var loose=st.dof/8, amp=13*loose;
+    var nx=Math.sin(t*1.3+phase[i])*0.6+Math.sin(t*0.73+phase[i]*2.1)*0.4;
+    var ny=Math.cos(t*1.1+phase[i]*1.4)*0.6+Math.sin(t*0.6+phase[i])*0.4;
+    return { x:rest[i].x+nx*amp, y:rest[i].y+ny*amp };
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    // origin crosshair + faint plane grid
+    ctx.strokeStyle='rgba(52,215,197,0.08)'; ctx.lineWidth=1;
+    for(var gx=originX-40; gx<W-6; gx+=22){ ctx.beginPath(); ctx.moveTo(gx,18); ctx.lineTo(gx,H-14); ctx.stroke(); }
+    for(var gy=18; gy<H-14; gy+=22){ ctx.beginPath(); ctx.moveTo(originX-40,gy); ctx.lineTo(W-6,gy); ctx.stroke(); }
+    // origin marker
+    ctx.strokeStyle='#FFB020'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(originX-9,originY); ctx.lineTo(originX+9,originY); ctx.moveTo(originX,originY-9); ctx.lineTo(originX,originY+9); ctx.stroke();
+    ctx.fillStyle='#FFB020'; ctx.font='9px ui-monospace,Menlo,monospace'; ctx.textAlign='left';
+    ctx.fillText('origin', originX+11, originY+13);
+
+    var locked=(st.dof===0);
+    var edgeCol=locked?'#43D67E':'#5f7bbf';
+    var fill=locked?'rgba(67,214,126,0.10)':'rgba(95,123,191,0.06)';
+    // face
+    ctx.beginPath();
+    ctx.moveTo(live[0].x,live[0].y);
+    ctx.lineTo(live[1].x,live[1].y);
+    ctx.lineTo(live[2].x,live[2].y);
+    ctx.lineTo(live[3].x,live[3].y);
+    ctx.closePath();
+    ctx.fillStyle=fill; ctx.fill();
+    ctx.strokeStyle=edgeCol; ctx.lineWidth=locked?2.5:2;
+    if(locked){ ctx.shadowColor='#43D67E'; ctx.shadowBlur=14; }
+    ctx.stroke(); ctx.shadowBlur=0;
+
+    // dimension labels
+    ctx.font='10px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillStyle='#FFB020';
+    if(st.dimW){ ctx.fillText('120 mm', (live[0].x+live[1].x)/2, Math.max(live[0].y,live[1].y)+15); }
+    if(st.dimH){ ctx.save(); ctx.translate((live[0].x+live[3].x)/2-16,(live[0].y+live[3].y)/2); ctx.rotate(-Math.PI/2); ctx.fillText('80 mm',0,0); ctx.restore(); }
+
+    // corner points
+    var labels=['A','B','C','D'];
+    for(var i=0;i<4;i++){
+      var pinned=(i===0&&st.axFixed&&st.ayFixed);
+      var r=(dragIx===i)?8:6.5;
+      ctx.beginPath(); ctx.arc(live[i].x,live[i].y,r,0,Math.PI*2);
+      ctx.fillStyle=locked?'#0e2b1a':(pinned?'#3a2a0a':'#12203a');
+      ctx.fill();
+      ctx.lineWidth=2; ctx.strokeStyle=locked?'#43D67E':(pinned?'#FFB020':'#8ea6d6'); ctx.stroke();
+      ctx.fillStyle=locked?'#43D67E':'#c4d2ee'; ctx.font='10px ui-monospace,Menlo,monospace'; ctx.textAlign='center';
+      ctx.fillText(labels[i], live[i].x, live[i].y-11);
+    }
+  }
+
+  var last=0;
+  function frame(ts){
+    var t=ts/1000;
+    for(var i=0;i<4;i++){
+      var target=(dragIx===i)?{x:ptr.x,y:ptr.y}:noiseAt(i,t);
+      var ease=(dragIx===i)?0.5:0.22;
+      live[i].x+=(target.x-live[i].x)*ease;
+      live[i].y+=(target.y-live[i].y)*ease;
+    }
+    project();
+    draw();
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  var rt; window.addEventListener('resize',function(){ clearTimeout(rt); rt=setTimeout(function(){ fit(); },140); });
+
+  // buttons
+  Array.prototype.forEach.call(document.querySelectorAll('#demo1 .cbtn'),function(b){
+    b.addEventListener('click',function(){ apply(b.getAttribute('data-c')); });
+  });
+  document.getElementById('reset1').addEventListener('click',function(){
+    st=fresh();
+    Array.prototype.forEach.call(document.querySelectorAll('#demo1 .cbtn'),function(b){ b.classList.remove('applied','over'); });
+    for(var i=0;i<4;i++){ live[i]={x:rest[i].x,y:rest[i].y}; }
+    refresh(true);
+  });
+
+  // ---- persistence (frc:cad sim state) ----
+  var CKEY='frc:cad';
+  var mPage=location.pathname.split('/').pop();
+  function persist(){
+    try{
+      var all=JSON.parse(localStorage.getItem(CKEY))||{};
+      all[mPage+':sketch']={ axFixed:st.axFixed,ayFixed:st.ayFixed,hAB:st.hAB,vBC:st.vBC,hCD:st.hCD,vDA:st.vDA,dimW:st.dimW,dimH:st.dimH,dof:st.dof,moves:st.moves,wasted:st.wasted };
+      localStorage.setItem(CKEY,JSON.stringify(all));
+      els.save1.textContent='progress saved';
+      clearTimeout(persist._t); persist._t=setTimeout(function(){ els.save1.textContent=''; },1200);
+    }catch(e){}
+  }
+  (function restore(){
+    try{
+      var all=JSON.parse(localStorage.getItem(CKEY))||{};
+      var s=all[mPage+':sketch']; if(!s) return;
+      st.axFixed=!!s.axFixed; st.ayFixed=!!s.ayFixed; st.hAB=!!s.hAB; st.vBC=!!s.vBC;
+      st.hCD=!!s.hCD; st.vDA=!!s.vDA; st.dimW=!!s.dimW; st.dimH=!!s.dimH;
+      // recompute dof from restored constraints; keep the saved move/waste counts
+      // (so a reloaded dim-anchor solve is never mistaken for the 7-move gold path)
+      var d=8;
+      ['axFixed','ayFixed','hAB','vBC','hCD','vDA','dimW','dimH'].forEach(function(k){ if(st[k]) d--; });
+      st.dof=d;
+      st.moves=(typeof s.moves==='number')?s.moves:0;
+      st.wasted=(typeof s.wasted==='number')?s.wasted:0;
+      markApplied();
+    }catch(e){}
+  })();
+  refresh(false);
+
+  // ---- missions (wrapped so a missions bug can never break the page) ----
+  try{
+    var MKEY='frc:missions', GKEY='frc:gold';
+    var mSaved={}, mGold={};
+    try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+    try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+    var mItems={};
+    Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+    function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+    function mClear(id){
+      var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+      mMark(n);
+      var gold=n.classList.contains('gold');
+      var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+      map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+    }
+    Object.keys(mItems).forEach(function(id){
+      if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+    });
+    setInterval(function(){ try{
+      if(st.dof<8) mClear('first');
+      if(st.dof===0) mClear('lock');
+      if(st.wasted>=1) mClear('over');
+      if(st.dof===0 && st.moves===7) mClear('gold');
+    }catch(e){} },200);
+  }catch(e){}
+})();
+</script>
+
+<script>
+/* ===== Interactive 2: mate identifier drill ===== */
+(function(){
+  "use strict";
+  var SCEN=[
+    { type:'revolute', text:'An arm swings up and down on a hex shaft. It rotates about that one axis and cannot slide along the shaft or shift sideways.',
+      allowed:'Allowed motion: 1 rotation', explain:'One fixed axis of spin and nothing else is a revolute mate - the workhorse for arms, wrist pivots, and wheels on a shaft.',
+      whys:{ cylindrical:'Cylindrical would also let it slide along the shaft. This arm is pinned so it can only spin, no sliding, which makes it a plain revolute.', ball:'A ball joint swivels every direction about a point. This arm is locked to one axis, so it is a single-axis revolute.', slider:'A slider only translates in a straight line. This arm rotates, it does not slide, so it is the rotation mate: revolute.' } },
+    { type:'slider', text:'The elevator carriage rides two rails. It slides straight up and down and does nothing else - no spinning, no leaning.',
+      allowed:'Allowed motion: 1 translation', explain:'Exactly one straight-line slide, with no rotation, is a slider mate. Elevator carriages, linear stages, and drawer slides all use it.',
+      whys:{ cylindrical:'Cylindrical adds a twist about the slide axis. The carriage cannot twist on its rails, so it is a slide-only slider.', planar:'Planar lets a part wander anywhere on a flat surface and spin. The carriage is trapped to one straight line, which is a slider.', revolute:'Revolute is a rotation. The carriage slides in a line and never rotates, so it is a slider.' } },
+    { type:'fastened', text:'A gearbox is bolted to the side plate with four screws. It cannot move at all relative to the plate - it is one rigid piece now.',
+      allowed:'Allowed motion: none (0 DOF)', explain:'Zero motion left is a fastened mate. Use it for anything bolted, riveted, or welded solid - it makes two parts act as one.',
+      whys:{ revolute:'Revolute leaves a spin behind. A bolted gearbox cannot spin on the plate, so no freedom survives - that is fastened.', slider:'Slider leaves a slide behind. Four screws stop all sliding, so nothing moves at all: fastened.', planar:'Planar still lets a part slide on the surface. Screwed down tight, the gearbox cannot slide, so it is fully fastened.' } },
+    { type:'cylindrical', text:'A telescoping tube both spins about its axis and extends in and out along that same axis, like a drill bit turning while it feeds into the wood.',
+      allowed:'Allowed motion: 1 rotation + 1 slide (same axis)', explain:'A spin and a slide sharing one axis is a cylindrical mate. Think telescoping shafts and lead screws that turn as they extend.',
+      whys:{ revolute:'Revolute is spin only. This tube also slides in and out, so it needs the extra freedom of a cylindrical mate.', slider:'Slider is slide only. This tube also spins about the axis, so slider alone cannot describe it - it is cylindrical.', ball:'A ball swivels in every direction about a point. This motion is locked to one axis for both the spin and the slide, so it is cylindrical.' } },
+    { type:'ball', text:'A camera sits on a ball joint. It can tilt and swivel in every direction about one point, but it cannot slide away from that point.',
+      allowed:'Allowed motion: 3 rotations, no slide', explain:'Free rotation in all directions about a single point, with no sliding, is a ball mate - like a joystick or a hip joint.',
+      whys:{ revolute:'Revolute allows only one axis of spin. A ball joint tilts and swivels every direction, which is three rotations, not one.', cylindrical:'Cylindrical mixes one spin with one slide. A ball joint never slides - it only rotates, but in every direction, which is a ball.', planar:'Planar is about sliding on a flat surface. A ball joint stays put at one point and only rotates, so it is a ball.' } },
+    { type:'planar', text:'A flat bracket rests on a flat plate. It can slide anywhere across the surface and spin in place, but it can never lift off the plate.',
+      allowed:'Allowed motion: 2 slides + 1 spin, all in the plane', explain:'Two directions of slide plus a spin, all kept flat against a surface, is a planar mate - a part sitting on a plane.',
+      whys:{ slider:'Slider allows only one straight line of motion. This bracket can slide two directions and spin, so it needs the planar mate.', fastened:'Fastened means no motion at all. This bracket still slides and spins on the surface, so it is not fastened - it is planar.', cylindrical:'Cylindrical is locked to a single axis. This motion spreads across a whole flat surface, which is planar.' } }
+  ];
+
+  var idx=0, solved=[], score=0;
+  var canvas=document.getElementById('mv'), ctx=canvas.getContext('2d'), W=0,H=0,dpr=1;
+  function fit(){ var r=canvas.getBoundingClientRect(); if(!r.width)return; dpr=window.devicePixelRatio||1; canvas.width=Math.round(r.width*dpr); canvas.height=Math.round(r.height*dpr); ctx.setTransform(dpr,0,0,dpr,0,0); W=r.width; H=r.height; }
+  fit();
+
+  var p2text=document.getElementById('p2text'), p2allow=document.getElementById('p2allow'), tag2=document.getElementById('tag2');
+  var fb2=document.getElementById('fb2'), next2=document.getElementById('next2'), score2=document.getElementById('score2');
+  var opts=document.querySelectorAll('#mateOpts .mate-btn');
+
+  function loadScenario(i){
+    idx=i; var s=SCEN[i];
+    p2text.textContent=s.text; p2allow.textContent=s.allowed;
+    tag2.textContent='joint '+(i+1)+' / '+SCEN.length;
+    fb2.className='drill-fb'; fb2.innerHTML=''; next2.style.display='none';
+    Array.prototype.forEach.call(opts,function(o){ o.classList.remove('correct','wrong','locked'); });
+    if(solved[i]){ // already solved, show as done
+      Array.prototype.forEach.call(opts,function(o){ o.classList.add('locked'); if(o.getAttribute('data-t')===s.type) o.classList.add('correct'); });
+      fb2.className='drill-fb show ok'; fb2.textContent='✓ '+s.explain;
+      next2.style.display=(nextUnsolved()>=0)?'inline-block':'none';
+    }
+  }
+  function nextUnsolved(){
+    for(var k=1;k<=SCEN.length;k++){ var j=(idx+k)%SCEN.length; if(!solved[j]) return j; }
+    return -1;
+  }
+  function pick(btn){
+    var s=SCEN[idx], t=btn.getAttribute('data-t');
+    if(solved[idx]) return;
+    if(t===s.type){
+      solved[idx]=true; score++;
+      Array.prototype.forEach.call(opts,function(o){ o.classList.add('locked'); });
+      btn.classList.add('correct');
+      fb2.className='drill-fb show ok'; fb2.textContent='✓ '+s.explain;
+      score2.innerHTML='Identified <b>'+score+'</b> / '+SCEN.length;
+      if(score>=SCEN.length){
+        next2.style.display='none';
+        fb2.innerHTML='✓ '+s.explain+'<br><br>You named all six mates. Reading a joint by the motion it allows is exactly how you build a working assembly.';
+      } else {
+        next2.style.display='inline-block';
+      }
+    } else {
+      btn.classList.add('wrong');
+      var why=(s.whys&&s.whys[t])||'Not quite. Look again at the allowed-motion line and match it to the mate - the number of rotations and slides is the giveaway.';
+      fb2.className='drill-fb show';
+      fb2.innerHTML='<div class="whyline">'+why+'</div>';
+    }
+  }
+  Array.prototype.forEach.call(opts,function(o){ o.addEventListener('click',function(){ pick(o); }); });
+  next2.addEventListener('click',function(){ var j=nextUnsolved(); if(j>=0) loadScenario(j); });
+  document.getElementById('reset2').addEventListener('click',function(){
+    solved=[]; score=0; score2.innerHTML='Identified <b>0</b> / '+SCEN.length; loadScenario(0);
+  });
+
+  // ---- animation of the current joint's allowed motion ----
+  function draw(t){
+    ctx.clearRect(0,0,W,H);
+    var s=SCEN[idx], cx=W*0.5, cy=H*0.5;
+    var ph=t/1000;
+    ctx.lineWidth=2;
+    function block(x,y,w,h,col){ ctx.fillStyle=col; ctx.strokeStyle='#33415e'; ctx.beginPath(); ctx.rect(x-w/2,y-h/2,w,h); ctx.fill(); ctx.stroke(); }
+    if(s.type==='fastened'){
+      block(cx,cy+8,120,34,'#20304e');
+      block(cx,cy-20,70,34,'#2a3a1a');
+      // bolts
+      ctx.fillStyle='#FFB020';
+      [-40,-14,14,40].forEach(function(dx){ ctx.beginPath(); ctx.arc(cx+dx,cy+8,3,0,7); ctx.fill(); });
+      ctx.fillStyle='#5E6F8E'; ctx.font='10px ui-monospace,Menlo,monospace'; ctx.textAlign='center'; ctx.fillText('bolted solid - no motion', cx, H-14);
+    } else if(s.type==='revolute'){
+      block(cx,cy+34,120,26,'#20304e'); // base
+      var ang=Math.sin(ph*1.4)*0.7-0.4;
+      ctx.save(); ctx.translate(cx,cy+22); ctx.rotate(ang);
+      ctx.fillStyle='#2a3a1a'; ctx.strokeStyle='#43D67E'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.rect(-8,-70,16,72); ctx.fill(); ctx.stroke();
+      ctx.restore();
+      ctx.fillStyle='#FFB020'; ctx.beginPath(); ctx.arc(cx,cy+22,5,0,7); ctx.fill();
+      arcArrow(cx,cy+22,40,-1.1,0.3);
+    } else if(s.type==='slider'){
+      // rails
+      ctx.strokeStyle='#33415e'; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.moveTo(cx-24,cy-60); ctx.lineTo(cx-24,cy+60); ctx.moveTo(cx+24,cy-60); ctx.lineTo(cx+24,cy+60); ctx.stroke();
+      var off=Math.sin(ph*1.6)*42;
+      block(cx,cy+off,74,30,'#2a3a1a');
+      lineArrow(cx,cy-70,cx,cy-52); lineArrow(cx,cy+70,cx,cy+52);
+    } else if(s.type==='cylindrical'){
+      // horizontal shaft, spins + slides
+      var off2=Math.sin(ph*1.3)*30;
+      ctx.strokeStyle='#33415e'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(cx-90,cy); ctx.lineTo(cx+90,cy); ctx.stroke();
+      ctx.save(); ctx.translate(cx+off2,cy);
+      ctx.fillStyle='#2a3a1a'; ctx.strokeStyle='#43D67E'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.rect(-26,-16,52,32); ctx.fill(); ctx.stroke();
+      // spin marks
+      var a=ph*3; ctx.strokeStyle='#FFB020';
+      ctx.beginPath(); ctx.moveTo(Math.cos(a)*-13,Math.sin(a)*13); ctx.lineTo(Math.cos(a)*13,Math.sin(a)*-13); ctx.stroke();
+      ctx.restore();
+      lineArrow(cx-90,cy+26,cx-70,cy+26); lineArrow(cx+90,cy+26,cx+70,cy+26);
+      arcArrow(cx,cy-34,20,-1.2,0.5);
+    } else if(s.type==='ball'){
+      ctx.fillStyle='#20304e'; ctx.strokeStyle='#33415e'; ctx.beginPath(); ctx.arc(cx,cy+18,20,0,7); ctx.fill(); ctx.stroke();
+      var ax=Math.sin(ph*1.5)*0.6, ay=Math.cos(ph*1.1)*0.5;
+      ctx.save(); ctx.translate(cx,cy+18); ctx.transform(1,ay*0.5,ax*0.5,1,0,0);
+      ctx.strokeStyle='#43D67E'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,-56); ctx.stroke();
+      ctx.fillStyle='#2a3a1a'; ctx.beginPath(); ctx.arc(0,-56,9,0,7); ctx.fill(); ctx.stroke();
+      ctx.restore();
+      ctx.fillStyle='#FFB020'; ctx.beginPath(); ctx.arc(cx,cy+18,5,0,7); ctx.fill();
+    } else if(s.type==='planar'){
+      // a plate surface (perspective) with a tile sliding + spinning
+      ctx.fillStyle='#141d31'; ctx.strokeStyle='#33415e'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(cx-110,cy+44); ctx.lineTo(cx+110,cy+44); ctx.lineTo(cx+80,cy-30); ctx.lineTo(cx-80,cy-30); ctx.closePath(); ctx.fill(); ctx.stroke();
+      var sx=Math.sin(ph*1.2)*40, sy=Math.cos(ph*0.9)*14, rot=ph*1.1;
+      ctx.save(); ctx.translate(cx+sx,cy+8+sy); ctx.rotate(rot);
+      ctx.fillStyle='#2a3a1a'; ctx.strokeStyle='#43D67E'; ctx.beginPath(); ctx.rect(-20,-14,40,28); ctx.fill(); ctx.stroke(); ctx.restore();
+    }
+    // small label of allowed DOF count
+    requestAnimationFrame(draw);
+  }
+  function lineArrow(x1,y1,x2,y2){ ctx.strokeStyle='#FFB020'; ctx.lineWidth=2; var a=Math.atan2(y2-y1,x2-x1); ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.lineTo(x2-6*Math.cos(a-0.5),y2-6*Math.sin(a-0.5)); ctx.moveTo(x2,y2); ctx.lineTo(x2-6*Math.cos(a+0.5),y2-6*Math.sin(a+0.5)); ctx.stroke(); }
+  function arcArrow(cx,cy,r,a0,a1){ ctx.strokeStyle='#FFB020'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(cx,cy,r,a0,a1); ctx.stroke(); var ex=cx+r*Math.cos(a1), ey=cy+r*Math.sin(a1); ctx.beginPath(); ctx.moveTo(ex,ey); ctx.lineTo(ex-6*Math.cos(a1-1.9),ey-6*Math.sin(a1-1.9)); ctx.moveTo(ex,ey); ctx.lineTo(ex-6*Math.cos(a1+0.3),ey-6*Math.sin(a1+0.3)); ctx.stroke(); }
+
+  var rt; window.addEventListener('resize',function(){ clearTimeout(rt); rt=setTimeout(fit,140); });
+  loadScenario(0);
+  requestAnimationFrame(draw);
+})();
+</script>
+
+<script>
+/* ===== mastery quiz handler (current, whyline on wrong) ===== */
+(function(){
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the page showed you, then try another answer.'; } }); });
+  });
+})();
+</script>
+
+<script>
+/* ===== mark this companion done under its own frc:cad key ===== */
+(function(){
+  var KEY="frc:cad", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script src="account-config.js"></script>
+<script src="account.js"></script>
+</body>
+</html>

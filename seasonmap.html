@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FRC Academy · Season Map - Kickoff to Competition</title>
+<script src="gamesense-data.js"></script>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --rose:#ff8fb5;    /* strategy / game sense */
+    --amber:#FFB020;   /* build / fabricate */
+    --indigo:#8E8CF8;  /* code / deploy */
+    --teal:#34D7C5;    /* control / tune */
+    --red:#FF6B6B;     /* wrong */
+    --green:#43D67E;   /* correct / event */
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ink); color:var(--text);
+    font-family:var(--sans); font-size:17px; line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(900px 500px at 82% -10%, rgba(52,215,197,.06), transparent 60%),
+      radial-gradient(760px 500px at -10% 8%, rgba(255,176,32,.05), transparent 55%);
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--teal);box-shadow:0 0 12px var(--teal)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:52px 0 18px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--teal)}
+  h1{font-size:clamp(2.2rem,5.6vw,3.7rem);line-height:1.03;margin:.14em 0 .3em;letter-spacing:-.03em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--teal),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(16px,2.3vw,19px);color:var(--text);max-width:56ch;margin-top:6px}
+  .dek b{color:var(--text)}
+
+  section{padding:26px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--teal);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.6rem,3.6vw,2.4rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  .lead{font-size:19px}
+  em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--teal);font-weight:600;font-size:.94em}
+
+  /* ORBIT game reference card */
+  .gamecard{border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,var(--panel),#11192B);padding:16px 18px;margin:20px 0}
+  .gamecard .gc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--rose);margin-bottom:7px;display:flex;align-items:center;gap:9px}
+  .gamecard .gc-h .badge{border:1px solid var(--line-2);border-radius:5px;padding:2px 8px;color:var(--muted);letter-spacing:.1em}
+  .gamecard p{margin:0;font-size:15.5px;color:var(--text)}
+  .gamecard b{color:var(--amber);font-weight:600}
+  .gamecard .t{color:var(--teal)}
+
+  /* interactive timeline panel */
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+
+  .tl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;padding:16px 12px 12px}
+  .tl-track{display:flex;position:relative;min-width:660px;padding-top:2px}
+  .tl-node{flex:1 1 0;min-width:92px;position:relative;background:none;border:none;color:inherit;cursor:pointer;padding:16px 6px 12px;text-align:center;font-family:inherit;scroll-snap-align:center;border-radius:10px;transition:background .12s}
+  .tl-node:hover{background:rgba(255,255,255,0.03)}
+  .tl-node::before{content:"";position:absolute;top:23px;left:-50%;width:100%;height:2px;background:var(--line-2);z-index:0}
+  .tl-node:first-child::before{display:none}
+  .tl-node.past-active::before{background:var(--nc,var(--teal));opacity:.6}
+  .tl-dot{position:relative;z-index:1;width:18px;height:18px;border-radius:50%;margin:0 auto 12px;background:var(--panel-2);border:2px solid var(--nc,var(--faint));transition:.14s}
+  .tl-node.visited .tl-dot{background:var(--nc,var(--teal));box-shadow:0 0 0 3px rgba(52,215,197,.12)}
+  .tl-node.active .tl-dot{background:var(--nc,var(--teal));box-shadow:0 0 12px -1px var(--nc,var(--teal)),0 0 0 4px rgba(255,255,255,.06)}
+  .tl-wk{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-bottom:4px}
+  .tl-node.active .tl-wk{color:var(--nc,var(--teal))}
+  .tl-name{font-size:12.5px;line-height:1.25;color:var(--muted)}
+  .tl-node.active .tl-name,.tl-node.visited .tl-name{color:var(--text)}
+  .tl-check{display:block;font-size:10px;color:var(--green);height:12px;margin-top:3px;opacity:0}
+  .tl-node.visited .tl-check{opacity:1}
+  .tl-hint{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);padding:0 16px 10px;display:none}
+  @media(max-width:560px){.tl-hint{display:block}}
+
+  /* detail panel */
+  .detail{border-top:1px solid var(--line);padding:18px 18px 20px;border-left:3px solid var(--nc,var(--teal));background:#0B1322}
+  .detail-head{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:baseline;margin-bottom:4px}
+  .detail-when{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .detail-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;margin-left:auto;color:var(--nc,var(--teal))}
+  .detail-name{margin:2px 0 10px;font-size:20px;font-weight:800;letter-spacing:-.01em;color:var(--text)}
+  .detail-what{margin:0 0 16px;font-size:15.5px;color:var(--text);line-height:1.6}
+  .detail-what b{color:var(--amber);font-weight:600}
+  .feeds-h{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+  .feeds{display:grid;gap:8px}
+  @media(min-width:520px){.feeds{grid-template-columns:1fr 1fr}}
+  .feed{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--line-2);background:var(--panel-2);border-radius:9px;padding:11px 13px;text-decoration:none;transition:.12s;min-height:44px}
+  .feed:hover{border-color:var(--nc,var(--teal));background:var(--panel)}
+  .feed .feed-label{font-size:14px;color:var(--text);line-height:1.3}
+  .feed .feed-go{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--nc,var(--teal));flex:0 0 auto}
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+
+  /* missions */
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--teal);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+
+  /* shared callout */
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:15.5px}
+  .note a{color:var(--teal);text-decoration:none;border-bottom:1px dotted rgba(52,215,197,.45)}
+  .note a:hover{border-bottom-style:solid}
+  .note.teal{border-color:var(--teal);background:rgba(52,215,197,.06)} .note.teal .nh{color:var(--teal)}
+
+  /* quiz */
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--teal);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:12px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s;min-height:44px}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--teal);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+  .whyline{margin:2px 0 4px;font-size:13.5px;color:var(--muted);border-left:2px solid var(--red);background:rgba(255,107,107,.05);padding:5px 12px;border-radius:0 8px 8px 0}
+
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--teal);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><span class="name">FRC Academy</span></a>
+    <div class="top-meta">Season Map</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Kickoff to competition</div>
+    <h1>The season <span class="accent">map</span></h1>
+    <p class="dek">Every lesson in this academy exists to help you win a real match. This page is the map that shows <b>when</b> each one pays off - from the Saturday the game drops to the day you roll onto the field. Tap a week and see exactly what happens then, and which lessons and tools feed it.</p>
+  </div>
+
+  <section>
+    <div class="kicker">The shape of a season</div>
+    <h2>Six weeks and a buzzer</h2>
+    <p class="lead">FRC runs on a clock, and the clock is short.</p>
+    <p>On one Saturday in early January, thousands of teams watch the same video and learn the same new game at the same instant. That is <strong>kickoff</strong>. From there you get roughly <strong>six weeks</strong> to design, build, program, and tune a robot, and then you take it to a competition. Everyone gets the same six weeks. The teams that do well are not the ones who work the most frantic hours, they are the ones who spend those weeks <em>in the right order</em>.</p>
+    <p>Think of it like a group bike trip with a hard departure time. If you spend all morning arguing about the route, you never actually ride. If you ride off before anyone reads the map, you end up somewhere useless, fast. The winning move is a quick, honest plan first, then steady work, then a little practice before you go.</p>
+
+    <div class="gamecard">
+      <div class="gc-h"><span class="badge">This season</span> The practice game - <span class="t" data-o="name">ORBIT</span></div>
+      <p>Everything on this map points at one short match. In <span class="t" data-o="name">ORBIT</span>, a match lasts just <b data-o="match.totalSec">150</b> seconds: <b data-o="match.autoSec">15</b> of autonomous, <b data-o="match.teleopSec">135</b> of driver control, and the last <b data-o="match.endgameSec">30</b> for the endgame scramble onto the Platform. A single high-ring <span data-o="piecePlural">Cells</span> scores <b data-o="scoring.rings.high.tele">8</b> points, and balancing on the Platform is worth <b data-o="scoring.endgame.balance.pts">20</b>. Every week below is really about being ready for those <b data-o="match.totalSec">150</b> seconds.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Walk the season</div>
+    <h2>Tap any phase</h2>
+    <p>Here is the whole season, kickoff on the left to the event on the right. Tap a phase to see what your team is doing that week and, more useful, the exact Academy lessons and tools built for it. The dots fill in as you explore.</p>
+
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="1">
+        <div class="qn">Predict first</div>
+        <div class="qt">Before you explore: of all seven phases, which one do rookie teams most often run out of time for and later wish they had protected?</div>
+        <div class="opts">
+          <button class="opt">Kickoff, because reading the whole manual can wait until the robot is built</button>
+          <button class="opt">The last two weeks, tuning and driver practice, because everything before them tends to run late</button>
+          <button class="opt">There is no pattern, teams run out of time in a different place every year</button>
+        </div>
+        <div class="explain">The early weeks feel urgent, so they almost never get skipped. It is the tail of the season that gets crushed: build and integration always eat more days than planned, and the time comes straight out of tuning and driver practice. That is exactly why this map front-loads a plan and why good teams guard those last two weeks on purpose. Explore the phases and watch how everything leans on the end.</div>
+      </div>
+    </div>
+
+    <div class="demo" id="demo">
+      <div class="demo-head">
+        <span class="demo-title">Season timeline</span>
+        <span class="demo-tag" id="exploreTag">0 / 7 explored</span>
+      </div>
+      <div class="tl-wrap">
+        <div class="tl-track" id="track"></div>
+      </div>
+      <div class="tl-hint">Scroll the timeline sideways to see all seven phases</div>
+      <div class="detail" id="detail"></div>
+    </div>
+    <p class="caption">The dots and connectors light up in each phase's course color as you open them. Kickoff is Game Sense, the build weeks are amber, code is indigo, tuning is teal, and the event is the finish line.</p>
+
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this map - take them at your own pace</span></div>
+      <div class="m-item" data-m="recon"><span class="m-st">○</span><span>Open <b>any 3 phases</b> and read what each week is really for. You are getting the shape of a season into your head.</span></div>
+      <div class="m-item" data-m="fullmap"><span class="m-st">○</span><span>Open <b>every phase</b>, Kickoff through Event day. Now you have seen the whole arc, start to finish.</span></div>
+      <div class="m-item" data-m="thread"><span class="m-st">○</span><span>From any phase, <b>follow one real link</b> - a lesson or a tool - to see what feeds that week. The map is only useful if you walk it.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> follow a link from <b>3 different phases</b>. You are not just reading the map now, you are connecting the whole academy to a real season.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Why the order</div>
+    <h2>Each week earns the next</h2>
+    <p>Notice how the map only works forward. You cannot <em>tune</em> a controller in week 5 until the robot is <em>integrated</em> in week 4, and you cannot integrate until there are real parts from <em>fabrication</em> and real code from <em>simulation</em>. You cannot fabricate the right parts until a <em>prototype</em> proved the idea, and you cannot prototype the right idea until <em>kickoff</em> told you what the game rewards.</p>
+    <p>That is the single most useful thing this map teaches: strategy is not the fun part you rush past to get to building. It is the decision that every later week inherits. Get it right on day one and the other forty days point the same direction.</p>
+    <div class="note teal">
+      <div class="nh">The two weeks everyone underbudgets</div>
+      <p>Tuning and driver practice sit at the end, so when anything upstream slips, they are what gets cut. A robot that lurches to its target and a driver who has never run a real cycle will lose to a plainer robot that is smooth and well-driven. Protect weeks 5 and 6 the way you would protect the finish line of a ride, not the part you sprint through, the part you planned the whole route to reach.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="note">
+      <div class="nh">Going further &middot; optional</div>
+      <p>The classic "six-week build season then bag the robot" is a useful model, but the real rules have loosened. FIRST removed the stop-build "bag day" back in 2020, so teams can now keep improving the robot between competitions instead of freezing it. Many teams also play a <a href="gamesense-lesson-6.html">district</a> schedule with several events across a few weeks, which turns the season into a loop: compete, learn what broke, fix and re-tune, compete again. The map below still holds - the order of the work is the same - it just repeats. And once the season ends, the best teams keep the loop going in the off-season, which is the calmest time to actually learn everything in this academy.</p>
+    </div>
+
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="0">
+        <div class="qn">Question 1</div>
+        <div class="qt">When does a team decide what its robot should actually do?</div>
+        <div class="opts">
+          <button class="opt">At kickoff, before building anything, by reading the game and doing the scoring math</button>
+          <button class="opt" data-why="By week 5 the robot is already built and just being polished. Deciding its job that late means you may have spent five weeks building the wrong robot. The core decision belongs to kickoff.">In week 5, once the robot is tuned and running well</button>
+          <button class="opt" data-why="You do adapt match-by-match strategy at the event, but the robot's core job is locked long before then. You cannot re-cut metal in the stands.">At the event, based on which partners you get matched with</button>
+        </div>
+        <div class="explain">Strategy is a kickoff decision. You read the manual, do the scoring math, and pick what your robot must do (and refuse to do) before anyone touches a tool. Every later week inherits that choice, which is why Game Sense sits first on the map.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 2</div>
+        <div class="qt">Why do software teams write and test code in the WPILib simulator during weeks 2-3, before the robot even exists?</div>
+        <div class="opts">
+          <button class="opt">So the program is written, tested, and ready the moment hardware powers on, instead of starting from zero</button>
+          <button class="opt" data-why="It is the same code. That is the whole point - you test it in the simulator, then run the exact same program on the robot. Nothing is thrown away and rewritten.">Because simulator code is completely different and has to be rewritten for the real robot</button>
+          <button class="opt" data-why="You can write robot code before the hardware is done, and strong teams do. Waiting for the robot wastes the two best weeks the software crew has.">Because it is impossible to write robot code until the robot is fully assembled</button>
+        </div>
+        <div class="explain">Simulation lets the code crew work in parallel with the build crew, like practicing a bike route on a map before you ride it. The same program that ran in sim runs on the robot at integration, so week 4 is not starting from scratch.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">Your team is running behind. Which phases do teams most often crush down to almost nothing, and regret?</div>
+        <div class="opts">
+          <button class="opt">Tuning and driver practice, the last two weeks</button>
+          <button class="opt" data-why="The first weeks feel urgent, so they rarely get skipped. It is the end of the season that gets squeezed when everything upstream runs late.">Kickoff and prototyping, the first two weeks</button>
+          <button class="opt" data-why="You cannot skip building the robot - those middle weeks are protected by pure necessity. The time gets taken from the end instead.">Fabrication and integration, the middle weeks</button>
+        </div>
+        <div class="explain">Delays roll downhill and land on weeks 5 and 6. Tuning and driver practice are the first things sacrificed and the last things you can afford to lose, which is why protecting them is a plan you make at kickoff, not a hope you have in week 6.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 4</div>
+        <div class="qt">What has to be true before week 5 tuning can even begin?</div>
+        <div class="opts">
+          <button class="opt">The robot is integrated - motors, sensors, and code all talking on one machine</button>
+          <button class="opt" data-why="Driver practice comes after tuning, in week 6. You cannot practice cycles with a robot that still lurches to its setpoint and misses.">The drivers have already logged their practice hours</button>
+          <button class="opt" data-why="Re-reading the manual is a kickoff and strategy job. Tuning needs a working, integrated robot in front of you, not more reading.">The game manual has been read through one more time</button>
+        </div>
+        <div class="explain">Tuning is making a working robot good. That means the hardware and code must already meet and behave at integration in week 4. You cannot smooth out a controller for a mechanism that is not wired up and moving yet.</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<nav class="coursenav">
+  <a href="gamesense.html">&larr; Game Sense hub</a>
+  <a class="map" href="index.html">Academy home</a>
+  <a href="index.html">All three courses &rarr;</a>
+</nav>
+
+<footer>FRC Academy · Build · Code · Control</footer>
+
+<script>
+(function(){
+  "use strict";
+  // Fill every static [data-o] span from window.ORBIT so a rebalance edits one file.
+  try{
+    var O=window.ORBIT; if(!O) return;
+    Array.prototype.forEach.call(document.querySelectorAll('[data-o]'),function(el){
+      var v=el.getAttribute('data-o').split('.').reduce(function(a,k){return (a==null)?a:a[k];},O);
+      if(v!==undefined&&v!==null) el.textContent=v;
+    });
+  }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  "use strict";
+  var O=window.ORBIT||{};
+  function og(path,fb){ try{ var v=path.split('.').reduce(function(a,k){return a[k];},O); return (v==null)?fb:v; }catch(e){ return fb; } }
+  var GAME=og('name','ORBIT'), PIECE=og('piecePlural','Cells');
+  var HI=og('scoring.rings.high.tele',8), BAL=og('scoring.endgame.balance.pts',20);
+
+  // ---- the season, one array; rebalancing game facts lives in gamesense-data.js ----
+  var PHASES=[
+    { id:"kickoff", col:"var(--rose)", wk:"Kickoff", name:"Read & strategize", when:"One Saturday, early January", tag:"Game Sense",
+      what:"The game drops. The whole team watches the reveal, then reads the manual cover to cover and does the scoring math before anyone touches a tool. What wins <em>this</em> game? You decide what your robot must do, and just as important, what it will not do. In "+GAME+" that means choosing early whether you chase high-ring "+PIECE+" (<b>"+HI+" points</b> each) or own the <b>"+BAL+"-point</b> Platform balance. A robot that tries to do everything usually does nothing well.",
+      feeds:[
+        {href:"gamesense-lesson-1.html",label:"Anatomy of a Match"},
+        {href:"gamesense-lesson-2.html",label:"Reading the Manual"},
+        {href:"gamesense-lesson-3.html",label:"Scoring Math"},
+        {href:"gamesense-lesson-4.html",label:"Ranking Points"},
+        {href:"gamesense-lesson-7.html",label:"The Strategy Huddle"},
+        {href:"scout.html",label:"Scout Trainer"}
+      ] },
+    { id:"prototype", col:"var(--amber)", wk:"Week 1", name:"Prototype", when:"Build season, week 1", tag:"Build",
+      what:"Before you cut a single expensive part, you prove ideas fast and cheap: cardboard, scrap wood, zip ties, spare wheels. Can this intake actually grab a "+PIECE.replace(/s$/,'')+"? Does this arm reach? A prototype that fails in week 1 is a gift, because it fails before it costs you anything. Size the motors and gearing now so week 2 builds the right thing. Power tools come out this week, so stay with your mentor.",
+      feeds:[
+        {href:"build-lesson-1.html",label:"Shop Safety & Mindset"},
+        {href:"build-lesson-44.html",label:"Sizing a Mechanism"},
+        {href:"design-challenge.html",label:"Design Challenge"},
+        {href:"build-lesson-2.html",label:"Hand Tools"}
+      ] },
+    { id:"fabricate", col:"var(--amber)", wk:"Wk 2-3", name:"Fabricate + code in sim", when:"Build season, weeks 2-3", tag:"Build + Code",
+      what:"Two crews work in parallel. The build crew cuts, drills, and assembles the real robot from the prototypes that survived. The software crew does <em>not</em> sit idle waiting for hardware - they write the whole robot program and test it in the WPILib simulator, so the code is ready the day the robot powers on. Coding in sim is like practicing a bike route on a map before you ever ride it.",
+      feeds:[
+        {href:"build-lesson-3.html",label:"Power Tools"},
+        {href:"build-lesson-4.html",label:"Measure & Mark"},
+        {href:"build-lesson-5.html",label:"Fasteners"},
+        {href:"deploy-lesson-1.html",label:"What a Robot Program Is"},
+        {href:"deploy-lesson-2.html",label:"Setting Up WPILib"},
+        {href:"deploy-lesson-3.html",label:"Build, Deploy, Run"}
+      ] },
+    { id:"integrate", col:"var(--indigo)", wk:"Week 4", name:"Integrate", when:"Build season, week 4", tag:"Code + Build",
+      what:"The big merge. Subsystems bolt onto one frame, and for the first time the code meets real motors, sensors, and a battery. This is where mismatched units and wiring surprises show up, and where everyone's separate code branches finally come together. Nothing behaves quite like the sim, and that is normal. Get every motor spinning the right way and every sensor reading true before you try to make any of it precise.",
+      feeds:[
+        {href:"closing-the-loop-lesson-9.html",label:"Robot Code Anatomy"},
+        {href:"closing-the-loop-lesson-10.html",label:"Units, Gears & Conversions"},
+        {href:"closing-the-loop-lesson-14.html",label:"Phoenix 6 & the Kraken"},
+        {href:"deploy-lesson-4.html",label:"Git & GitHub for Teams"}
+      ] },
+    { id:"tune", col:"var(--teal)", wk:"Week 5", name:"Tune", when:"Build season, week 5", tag:"Control",
+      what:"Now you make it good. The elevator that lurched to its setpoint gets smooth. The shooter holds an exact speed. This is closed-loop control, in order: feedforward first, then add kP, then Motion Magic, then validate. Write your gains down as you go, so a fresh battery or a swapped motor does not send you back to square one.",
+      feeds:[
+        {href:"closing-the-loop-lesson-2.html",label:"Proportional Control"},
+        {href:"closing-the-loop-lesson-5.html",label:"Tuning PID"},
+        {href:"closing-the-loop-lesson-6.html",label:"Feedforward"},
+        {href:"closing-the-loop-lesson-7.html",label:"System Identification"},
+        {href:"closing-the-loop-lesson-8.html",label:"The Complete Controller"},
+        {href:"worksheet.html",label:"Tuning Worksheet"},
+        {href:"closing-the-loop-troubleshooting.html",label:"Troubleshooting Guide"}
+      ] },
+    { id:"drive", col:"var(--rose)", wk:"Week 6", name:"Driver practice", when:"Build season, week 6", tag:"Game Sense",
+      what:"A great robot with an unpracticed driver loses to a decent robot with a great one. Put a human on the sticks and drill the real match: fast cycles, a clean endgame, and the muscle memory to stop on a dime under pressure. Run practice matches, call out roles, and build the driver's feel for the robot's weight and momentum, because a real robot does not stop the instant you let go.",
+      feeds:[
+        {href:"drivelab.html",label:"Drive Lab"},
+        {href:"gamesense-lesson-5.html",label:"Robot Roles"},
+        {href:"gamesense-lesson-7.html",label:"The Strategy Huddle"},
+        {href:"scout.html",label:"Scout Trainer"}
+      ] },
+    { id:"event", col:"var(--green)", wk:"Event", name:"Competition day", when:"Late February through April", tag:"Game Sense + Pit",
+      what:"Showtime. Qualification matches set the rankings, then the top seeds pick alliances for the playoffs. Between matches your pit crew swaps batteries, tightens what rattled loose, and fixes what broke - fast. Scouts fill the pick list from the stands. You do not win alone: you win with two alliance partners you chose well, and with a robot you can repair in six minutes.",
+      feeds:[
+        {href:"gamesense-lesson-6.html",label:"Alliance Selection"},
+        {href:"gamesense-lesson-7.html",label:"The Strategy Huddle"},
+        {href:"scout.html",label:"Scout Trainer"},
+        {href:"closing-the-loop-troubleshooting.html",label:"Pit Troubleshooting"},
+        {href:"drivelab.html",label:"Warm-up in the Drive Lab"}
+      ] }
+  ];
+
+  var track=document.getElementById("track"), detail=document.getElementById("detail"), exploreTag=document.getElementById("exploreTag");
+
+  // ---- persistence under frc:seasonmap (merge-safe read-modify-write) ----
+  var SKEY="frc:seasonmap";
+  function loadS(){ try{ return JSON.parse(localStorage.getItem(SKEY))||{}; }catch(e){ return {}; } }
+  function saveS(patch){ try{ var d=loadS(); for(var k in patch){ d[k]=patch[k]; } localStorage.setItem(SKEY,JSON.stringify(d)); }catch(e){} }
+  var stored=loadS();
+  var explored=stored.explored||{};   // phase id -> true, opened at least once
+  var linked=stored.linked||{};       // phase id -> true, a feed link followed
+
+  function esc(s){ return String(s); }
+  function renderDetail(p){
+    detail.style.setProperty("--nc", p.col);
+    var feeds=p.feeds.map(function(f){
+      return '<a class="feed" href="'+f.href+'" target="_blank" rel="noopener" data-phase="'+p.id+'">'
+        +'<span class="feed-label">'+esc(f.label)+'</span><span class="feed-go">open &#8599;</span></a>';
+    }).join("");
+    detail.innerHTML=
+      '<div class="detail-head"><span class="detail-when">'+esc(p.when)+'</span><span class="detail-tag">'+esc(p.tag)+'</span></div>'
+      +'<h3 class="detail-name">'+esc(p.wk)+' &middot; '+esc(p.name)+'</h3>'
+      +'<p class="detail-what">'+p.what+'</p>'
+      +'<div class="feeds-h">Academy lessons &amp; tools that feed this phase</div>'
+      +'<div class="feeds">'+feeds+'</div>';
+  }
+
+  var nodes=[];
+  function refreshTag(){ exploreTag.textContent=Object.keys(explored).length+" / "+PHASES.length+" explored"; }
+  function paintNode(i){
+    var n=nodes[i], p=PHASES[i];
+    n.classList.toggle("visited", !!explored[p.id]);
+    // colour the connector leading into any node whose previous phase is explored
+    if(i>0) n.classList.toggle("past-active", !!explored[PHASES[i-1].id]);
+  }
+  function setActive(i){
+    nodes.forEach(function(n){ n.classList.remove("active"); });
+    nodes[i].classList.add("active");
+    var p=PHASES[i];
+    renderDetail(p);
+    if(!explored[p.id]){ explored[p.id]=true; saveS({explored:explored}); }
+    nodes.forEach(function(_,j){ paintNode(j); });
+    refreshTag();
+  }
+
+  PHASES.forEach(function(p,i){
+    var b=document.createElement("button");
+    b.className="tl-node"; b.style.setProperty("--nc",p.col);
+    b.setAttribute("type","button");
+    b.setAttribute("aria-label",p.wk+" - "+p.name);
+    b.innerHTML='<span class="tl-dot"></span><span class="tl-wk">'+esc(p.wk)+'</span><span class="tl-name">'+esc(p.name)+'</span><span class="tl-check">&#10003;</span>';
+    b.addEventListener("click",function(){ setActive(i); });
+    track.appendChild(b); nodes.push(b);
+  });
+
+  // follow-a-link tracking (delegated; fires even though links open a new tab)
+  detail.addEventListener("click",function(ev){
+    var a=ev.target.closest?ev.target.closest("a.feed"):null; if(!a) return;
+    var pid=a.getAttribute("data-phase");
+    if(pid&&!linked[pid]){ linked[pid]=true; saveS({linked:linked}); }
+  });
+
+  // restore explored dots, then open the first phase (without forcing it explored)
+  nodes.forEach(function(_,j){ paintNode(j); });
+  refreshTag();
+  nodes[0].classList.add("active");
+  renderDetail(PHASES[0]);
+
+  // ---- missions (wrapped so a bug here can never break the page) ----
+  try{
+    var MKEY="frc:missions", GKEY="frc:gold", mPage=location.pathname.split("/").pop();
+    var mSaved={}, mGold={};
+    try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+    try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+    var mItems={};
+    Array.prototype.forEach.call(document.querySelectorAll("#missions .m-item"),function(n){ mItems[n.getAttribute("data-m")]=n; });
+    function mMark(n){ n.classList.add("cleared"); n.querySelector(".m-st").textContent=n.classList.contains("gold")?"★":"✓"; }
+    function mClear(id){
+      var n=mItems[id]; if(!n||n.classList.contains("cleared")) return;
+      mMark(n);
+      var gold=n.classList.contains("gold");
+      var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+      map[mPage+"#"+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+    }
+    Object.keys(mItems).forEach(function(id){
+      if((mItems[id].classList.contains("gold")?mGold:mSaved)[mPage+"#"+id]) mMark(mItems[id]);
+    });
+    setInterval(function(){
+      var v=Object.keys(explored).length, L=Object.keys(linked).length;
+      if(v>=3) mClear("recon");
+      if(v>=PHASES.length) mClear("fullmap");
+      if(L>=1) mClear("thread");
+      if(L>=3) mClear("gold");
+    },200);
+  }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  "use strict";
+  // quiz - mastery handler with data-why whyline on wrong
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the map showed you, then try another answer.'; } }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  // record completion in this page's own key once every quiz question is answered right
+  var SKEY="frc:seasonmap";
+  function mark(){ try{ var d=JSON.parse(localStorage.getItem(SKEY))||{}; if(!d.quizDone){ d.quizDone=true; localStorage.setItem(SKEY,JSON.stringify(d)); } }catch(e){} }
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){ var all=true; qs.forEach(function(q){ if(!q.querySelector(".opt.locked")) all=false; }); if(all) mark(); }
+  document.querySelectorAll("#quiz .opt").forEach(function(o){ o.addEventListener("click",function(){ setTimeout(check,40); }); });
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then explore the timeline
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain');
+  var picked=-1, revealed=false, ran=false;
+  var demos=document.querySelectorAll('.demo');
+  var style=document.createElement('style');
+  style.textContent='#predict .opt.picked{border-color:var(--teal,#34D7C5);box-shadow:0 0 0 2px rgba(52,215,197,.22)}';
+  document.head.appendChild(style);
+  var note=document.createElement('div');
+  note.style.cssText='display:none;font-size:13px;color:#92A2BE;margin-top:10px;font-style:italic';
+  q.appendChild(note);
+  function optText(i){ var t=(opts[i].textContent||'').trim(); return t.length>70 ? t.slice(0,67)+'...' : t; }
+  function reveal(){ if(revealed||picked<0) return; revealed=true;
+    opts.forEach(function(o){o.classList.add('locked');});
+    try{var pr=JSON.parse(localStorage.getItem('frc:predict'))||{r:0,w:0};if(picked===correct){pr.r++;}else{pr.w++;}localStorage.setItem('frc:predict',JSON.stringify(pr));}catch(e){}
+    if(picked===correct){
+      opts[picked].classList.add('correct');
+      note.textContent='You called it. "'+optText(picked)+'" is exactly right. Here is why:';
+    } else {
+      opts[picked].classList.add('wrong'); opts[correct].classList.add('correct');
+      note.textContent='You predicted "'+optText(picked)+'". The green answer is what really happens, and the surprise is the part worth remembering. Here is why:';
+    }
+    note.style.display='block';
+    explain.classList.add('show'); }
+  function onRan(ev){ if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#predict')) return; ran=true; if(picked>=0) reveal(); }
+  if(demos.length){
+    Array.prototype.forEach.call(demos,function(d){
+      d.addEventListener('pointerdown',onRan,true);
+      d.addEventListener('input',onRan,true);
+    });
+    window.addEventListener('keydown',onRan,true);
+  } else { ran=true; }
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(revealed)return; picked=i;
+    opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
+    if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you explore. When you are ready, tap a phase and see.'; note.style.display='block'; } }); });
+})();
+</script>
+<script src="account-config.js"></script>
+<script src="account.js"></script>
+</body>
+</html>

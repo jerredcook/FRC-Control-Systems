@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fabricate · The Robot Map</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#FF8A4C; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,138,76,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:48px 0 18px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  h1{font-size:clamp(2.1rem,5vw,3.4rem);line-height:1.04;margin:.1em 0 .3em;letter-spacing:-.03em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(16px,2.2vw,19px);color:var(--text);max-width:62ch;margin-top:6px}
+  .dek b{color:var(--text)}
+  section{padding:26px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  h3{font-size:1.15rem;margin:0 0 .4em;letter-spacing:-.01em}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  .lead li{margin:0 0 8px;color:var(--text)}
+  .lead b{color:var(--amber)}
+
+  /* ---- scenario card ---- */
+  .challenge{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8);overflow:hidden;margin-top:14px}
+  .ch-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .ch-name{font-family:var(--mono);font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--text)}
+  .ch-body{padding:16px}
+  .ch-body p{margin:0 0 12px;color:var(--text);font-size:16px}
+  .ch-body p:last-child{margin:0}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;padding:10px 13px;border-radius:8px;cursor:pointer;transition:.12s;min-height:38px}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .btn.primary{background:linear-gradient(180deg,#FFB27A,var(--indigo));color:#2a1503;font-weight:700;border:none}
+
+  /* ---- wiring diagram ---- */
+  .builder{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8);margin-top:18px}
+  .builder-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .builder-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .builder-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .diagram{padding:14px 16px}
+  .bus{display:flex;flex-wrap:wrap;align-items:stretch;gap:8px;margin-bottom:14px}
+  .bus-end{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);border:1px dashed var(--line-2);border-radius:8px;padding:8px 10px;display:flex;align-items:center;text-align:center;background:rgba(52,215,197,.04)}
+  .devgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+  .dev{border:1px solid var(--line-2);border-radius:11px;background:var(--panel-2);padding:11px 12px;position:relative}
+  .dev.motor{border-top:2px solid var(--indigo)}
+  .dev.sensor{border-top:2px solid var(--teal)}
+  .dev .dv-name{font-weight:700;font-size:15px;color:var(--text);line-height:1.2}
+  .dev .dv-ctrl{font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;color:var(--faint);margin:2px 0 8px}
+  .dev .dv-row{display:flex;justify-content:space-between;gap:8px;font-family:var(--mono);font-size:11.5px;padding:2px 0;color:var(--muted)}
+  .dev .dv-row .k{color:var(--faint)}
+  .dev .dv-row .val{color:var(--text)}
+  .dev .dv-row .val.can{color:var(--amber)}
+  .dev .dv-row .val.pdh{color:var(--indigo)}
+  .badge{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.05em;padding:3px 7px;border-radius:6px;margin-top:8px;border:1px solid var(--line-2)}
+  .badge.std{color:var(--green);border-color:rgba(67,214,126,.4);background:rgba(67,214,126,.07)}
+  .badge.mirror{color:var(--amber);border-color:rgba(255,176,32,.4);background:rgba(255,176,32,.08)}
+  .badge.sens{color:var(--teal);border-color:rgba(52,215,197,.4);background:rgba(52,215,197,.07)}
+  .diag-legend{font-size:13px;color:var(--muted);margin-top:12px;line-height:1.55}
+  .diag-legend b{color:var(--amber)}
+
+  /* ---- the map table ---- */
+  .maphead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:rgba(27,37,64,.3)}
+  .tablewrap{overflow-x:auto}
+  table.map{border-collapse:collapse;width:100%;min-width:520px;font-family:var(--mono)}
+  table.map th{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);font-weight:600}
+  table.map td{padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+  table.map tr:last-child td{border-bottom:none}
+  .td-dev{color:var(--text);font-size:13.5px;font-weight:600;font-family:var(--sans)}
+  .td-dev .sub{display:block;font-family:var(--mono);font-size:10px;color:var(--faint);font-weight:400;letter-spacing:.04em}
+  .cellin{width:100%;min-width:64px;background:#0B1322;border:1px solid var(--line-2);color:var(--text);font-family:var(--mono);font-size:14px;padding:8px 9px;border-radius:8px;min-height:38px}
+  .cellin:focus{outline:none;border-color:var(--indigo)}
+  .cellin.ok{border-color:rgba(67,214,126,.6);background:rgba(67,214,126,.06)}
+  .cellin.bad{border-color:var(--red);background:rgba(255,107,107,.08)}
+  select.cellin{cursor:pointer;-webkit-appearance:none;appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--faint) 50%),linear-gradient(135deg,var(--faint) 50%,transparent 50%);background-position:calc(100% - 15px) 16px,calc(100% - 10px) 16px;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:26px}
+  .na{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.04em}
+
+  /* ---- bring-up test ---- */
+  .testpanel{border-top:1px solid var(--line);padding:6px 0}
+  .test-h{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);padding:10px 16px 4px}
+  .tline{display:flex;gap:10px;align-items:flex-start;padding:6px 16px;font-size:14px;line-height:1.5;color:var(--muted);border-top:1px solid rgba(38,50,74,.5)}
+  .tline .td-dot{width:9px;height:9px;border-radius:50%;background:var(--faint);flex:0 0 auto;margin-top:6px}
+  .tline.good{color:var(--text)} .tline.good .td-dot{background:var(--green);box-shadow:0 0 8px var(--green)}
+  .tline.bad{color:#ffd9d9} .tline.bad .td-dot{background:var(--red);box-shadow:0 0 8px var(--red)}
+  .tline.idle .td-dot{background:var(--amber)}
+  .tline b{color:var(--text)}
+
+  /* ---- code panel ---- */
+  .codehead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 16px;border-top:1px solid var(--line);background:rgba(27,37,64,.3)}
+  .codehead .ch-t{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .codehead .ch-s{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--faint)}
+  .code{background:#0B1322;padding:14px 16px;overflow-x:auto}
+  .code pre{margin:0;font-family:var(--mono);font-size:12.5px;line-height:1.75;color:#cdd9ec;white-space:pre}
+  .code .kw{color:#7aa2f7} .code .cls{color:var(--teal)} .code .num{color:var(--amber)} .code .bool{color:var(--indigo)} .code .cm{color:var(--faint)} .code .blank{color:var(--red);font-weight:700}
+
+  .actions{display:flex;flex-wrap:wrap;gap:10px;padding:12px 16px;border-top:1px solid var(--line);align-items:center}
+  .savemsg{font-family:var(--mono);font-size:11px;color:var(--green);margin-left:auto}
+
+  /* ---- missions ---- */
+  .missions{margin-top:16px;border:1px solid var(--line-2);border-left:3px solid var(--indigo);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto;width:14px;text-align:center}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note.teal{border-left-color:var(--teal);background:rgba(52,215,197,.06)}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note.teal .nh{color:var(--teal)}
+  .note p{margin:0 0 10px;color:var(--text);font-size:15.5px}
+  .note p:last-child{margin:0}
+  .note a{color:var(--teal);text-decoration:none;border-bottom:1px dotted rgba(52,215,197,.45)}
+  .note a:hover{border-bottom-style:solid}
+  .note code{font-family:var(--mono);font-size:13px;color:var(--amber);background:rgba(255,176,32,.08);padding:1px 5px;border-radius:5px}
+
+  /* ---- quiz ---- */
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s;min-height:38px}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .whyline{margin:2px 0 4px;font-size:13.5px;color:var(--muted);border-left:2px solid var(--red);background:rgba(255,107,107,.05);padding:5px 12px;border-radius:0 8px 8px 0}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="build.html"><span class="dot"></span><span class="name">Fabricate</span></a>
+    <div class="top-meta">The Robot Map</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Electrical-to-code handoff</div>
+    <h1>The robot <span class="accent">map</span></h1>
+    <p class="dek">One team wires the robot. Another team writes the code. The only thing that keeps them agreeing is a single shared sheet: which motor is CAN ID 5, which breaker channel it lives on, and which way "positive" turns it. Get that sheet right and bring-up is calm. Get it wrong and you spend the first practice match asking <b>"wait, which motor is 5?"</b> while the arm drives itself into the floor.</p>
+  </div>
+
+  <section style="padding-top:8px">
+    <div class="kicker">Why the map exists</div>
+    <h2>The contract between two teams</h2>
+    <p>Think of it like a group project where one person builds the poster and another writes the labels. If nobody agreed on what goes where, the labels land on the wrong pictures. The robot map is that agreement, written down before anyone argues:</p>
+    <ul class="lead">
+      <li><b>CAN ID</b> - the address each motor controller and sensor answers to on the shared CAN wire. Every device needs its own. Two devices sharing an ID is like two houses with the same street number: mail goes nowhere.</li>
+      <li><b>PDH channel</b> - which numbered breaker slot on the Power Distribution Hub feeds that motor. It tells electrical where to plug the power wire, and it tells you where to look when a motor goes dead.</li>
+      <li><b>Positive direction</b> - which way the mechanism moves when the code sends a positive command. A gearbox mounted as a mirror image of its partner spins the opposite way, so the map records it as <b>Inverted</b> to cancel that out.</li>
+    </ul>
+    <p>Fill it in once, together, and the code below writes itself. Below is a real handoff: a wiring diagram from the electrical team, a map for you to fill, and a live bring-up test that tells you the second something does not line up.</p>
+  </section>
+
+  <div class="challenge">
+    <div class="ch-head">
+      <span class="ch-name">Pit report &middot; bring-up day</span>
+      <button class="btn primary" id="draftBtn">Reload pit draft</button>
+    </div>
+    <div class="ch-body">
+      <p>Electrical finished wiring last night and a tired teammate started the map for you. It is mostly there, but the arm came up on the practice field <b>driving down when you press raise</b>, and two sensor rows are still blank. Read the wiring diagram, finish the map, and fix whatever is fighting you. The bring-up test updates as you type.</p>
+      <p style="margin:0;font-size:14px;color:var(--faint)">Prefer a clean slate? Hit <b style="color:var(--muted)">Blank map</b> below and fill all six rows from scratch - that is the path to a gold clean sheet.</p>
+    </div>
+  </div>
+
+  <!-- ===== wiring diagram + map ===== -->
+  <div class="builder">
+    <div class="builder-head">
+      <span class="builder-title">Wiring diagram</span>
+      <span class="builder-tag">read this - it is the truth</span>
+    </div>
+    <div class="diagram">
+      <div class="bus">
+        <span class="bus-end">roboRIO<br>CAN out</span>
+        <span class="bus-end" style="flex:1 1 120px;border-style:solid;color:var(--teal)">one CAN wire, daisy-chained through every device</span>
+        <span class="bus-end">120&#8486;<br>terminator</span>
+      </div>
+      <div class="devgrid" id="devgrid"></div>
+      <p class="diag-legend"><b>Reading the mounts:</b> a <span style="color:var(--green)">standard</span> gearbox runs its mechanism the intended way on a positive command, so it is <b>Forward</b>. A <span style="color:var(--amber)">mirror</span> gearbox is bolted on flipped (its output shaft faces the other way), so a raw positive command runs it backward - record those as <b>Inverted</b> so the code cancels the flip. Sensors like the CANcoder and Pigeon take power from the CAN wire itself, so they have no PDH channel and no direction.</p>
+    </div>
+
+    <div class="maphead">
+      <span class="builder-title">The robot map</span>
+      <span class="builder-tag" id="mapCount">0 / 6 devices matched</span>
+    </div>
+    <div class="tablewrap">
+      <table class="map">
+        <thead>
+          <tr><th>Device</th><th>CAN ID</th><th>PDH ch</th><th>Positive direction</th></tr>
+        </thead>
+        <tbody id="mapBody"></tbody>
+      </table>
+    </div>
+
+    <div class="testpanel">
+      <div class="test-h">Bring-up test &middot; what the robot actually does</div>
+      <div id="testLines"></div>
+    </div>
+
+    <div class="codehead">
+      <span class="ch-t">Constants.java &middot; auto-generated</span>
+      <span class="ch-s">your map, compiled</span>
+    </div>
+    <div class="code"><pre id="codeOut"></pre></div>
+
+    <div class="actions">
+      <button class="btn" id="blankBtn">Blank map</button>
+      <button class="btn" id="revealBtn">Show the answer</button>
+      <span class="savemsg" id="savemsg"></span>
+    </div>
+  </div>
+
+  <!-- ===== missions ===== -->
+  <div class="missions" id="missions">
+    <div class="m-head">Missions <span class="m-sub">the diagram is your answer key</span></div>
+    <div class="m-item" data-m="fix"><span class="m-st">&#9675;</span><span><b>Fix the mismatch.</b> The arm drives down on a raise. Find the one wrong cell in the draft and correct it so the bring-up test reads "arm raises."</span></div>
+    <div class="m-item" data-m="map"><span class="m-st">&#9675;</span><span><b>Complete the map.</b> Fill every row so all six devices match the wiring diagram - IDs, channels, and directions all green.</span></div>
+    <div class="m-item gold" data-m="gold"><span class="m-st">&#9733;</span><span><b>Gold - clean sheet.</b> Reach a fully correct map without ever leaving a wrong value in a cell. Hit <b>Blank map</b> and fill all six rows right on the first try, the way a careful handoff should go.</span></div>
+  </div>
+
+  <div class="note teal">
+    <div class="nh">Why this beats "which motor is 5?"</div>
+    <p>Without a map, bring-up turns into a guessing game: someone spins a motor, someone else yells "no, the OTHER one," and every fix lives only in one person's head. The shared map turns all of that into lookups. Electrical wires to the sheet, you code to the sheet, and when a mechanism misbehaves you check the sheet first instead of re-deriving it under pressure.</p>
+    <p>This page is a friendly version of <code>templates/Constants.java</code> - the one file where a real robot keeps its IDs, channels, and directions so you change a number in exactly one place. Keep your map in that file, print a copy for the pit wall, and update both the second a wire moves. Always confirm live IDs and directions with your mentor in Phoenix Tuner before a match.</p>
+  </div>
+
+  <!-- ===== quiz ===== -->
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">On bring-up the robot spins in place instead of driving straight, even though both drive motors respond. What does the robot map most likely have wrong?</div>
+        <div class="opts">
+          <button class="opt" data-why="If a side were dead it would not respond, and the robot would yank to one side rather than spin evenly in place. Here both sides answer, so the wiring found them - the problem is which way each one turns.">One drive motor is missing from the CAN bus</button>
+          <button class="opt">The two sides have the same direction, so they push against each other</button>
+          <button class="opt" data-why="A wrong PDH channel would show up as a dead or unpowered motor, not a smooth spin. Power is clearly reaching both sides, so look at the direction column, not the channel column.">Both drive motors are on the wrong PDH channel</button>
+        </div>
+        <div class="explain">The left and right gearboxes are mirror images, so one side has to be Inverted for "positive means forward." If both are set Forward, one side drives ahead while the other drives back, and the robot pivots in place. Flip the mirror-mounted side to Inverted and it rolls straight. This is exactly the direction column doing its job.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">Your teammate wired the arm's CANcoder but left it off the robot map. What breaks?</div>
+        <div class="opts">
+          <button class="opt" data-why="The motor still has its own CAN ID and PDH channel on the map, so it powers up and spins fine. What is missing is the sensor that tells the code where the arm is.">Nothing works - the arm motor will not power on at all</button>
+          <button class="opt" data-why="A PDH breaker feeds power to motors. The CANcoder draws its power from the CAN wire, so it never needed a breaker channel - leaving it off the map does not overload anything.">The Power Distribution Hub overloads that channel</button>
+          <button class="opt">The code cannot find the sensor's CAN ID, so the arm has no idea where it is</button>
+        </div>
+        <div class="explain">Every device that talks on the CAN bus needs its ID on the map, sensors included. If the CANcoder's ID never makes it into the code, the arm's angle reads as unknown or zero and any position control goes haywire. The map is not just for motors - it is for everything on the bus.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">Two motor controllers end up set to the same CAN ID. Why is that worse than a wrong-but-unique ID?</div>
+        <div class="opts">
+          <button class="opt">Two devices answering to one address collide on the bus, so commands get unreliable and both can drop out</button>
+          <button class="opt" data-why="A duplicate ID is not a friendly averaging - the bus has no way to tell the two devices apart, so it is not a controlled split of power. The real problem is the collision itself, not the current.">They split the power evenly, so each motor only gets half its torque</button>
+          <button class="opt" data-why="Backwards - a wrong-but-unique ID is the easier bug, because you just correct one number. Two devices on one ID is the harder failure, because the bus cannot separate them at all.">It is actually fine, because at least both motors will still respond</button>
+        </div>
+        <div class="explain">A CAN ID is an address, and two devices on one address is like two houses sharing a number - the bus cannot tell them apart, so messages get confused and devices can disappear. A wrong-but-unique ID is a simpler fix: the command just goes to the wrong single place, and you correct one number. This is why the map keeps every ID unique on purpose.</div>
+      </div>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="build.html">&larr; Fabricate hub</a>
+    <a class="map" href="build.html">Course map</a>
+    <a href="glossary.html">Glossary &rarr;</a>
+  </nav>
+
+</div>
+
+<footer>Fabricate · Building an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  // ===MODEL=== single source of truth: what electrical actually built.
+  // dir: 'fwd' = positive runs the mechanism the intended way (standard mount),
+  //      'inv' = mirror mount, so positive must be inverted in code.
+  var DEVICES = [
+    {key:'leftDrive',  name:'Left drive',   ctrl:'Kraken X60',  can:1,  pdh:0,  mount:'std',    dir:'fwd', motion:'positive drives the robot forward'},
+    {key:'rightDrive', name:'Right drive',  ctrl:'Kraken X60',  can:2,  pdh:1,  mount:'mirror', dir:'inv', motion:'positive drives the robot forward'},
+    {key:'intake',     name:'Intake',       ctrl:'Falcon 500',  can:5,  pdh:4,  mount:'std',    dir:'fwd', motion:'positive pulls the game piece in'},
+    {key:'arm',        name:'Arm',          ctrl:'Kraken X60',  can:11, pdh:6,  mount:'mirror', dir:'inv', motion:'positive raises the arm'},
+    {key:'armEncoder', name:'Arm CANcoder', ctrl:'CANcoder',    can:21, pdh:null, mount:'sens', dir:null,  sensor:true, motion:'absolute arm angle'},
+    {key:'gyro',       name:'Pigeon 2',     ctrl:'Pigeon 2 IMU',can:20, pdh:null, mount:'sens', dir:null,  sensor:true, motion:'robot heading'}
+  ];
+  var BYKEY = {}; DEVICES.forEach(function(d){ BYKEY[d.key]=d; });
+
+  // The rushed pit draft: mostly right, but the arm direction is wrong
+  // (arm drives down on a raise) and the two sensor IDs are blank.
+  var DRAFT = {
+    leftDrive:{can:'1', pdh:'0', dir:'fwd'},
+    rightDrive:{can:'2', pdh:'1', dir:'inv'},
+    intake:{can:'5', pdh:'4', dir:'fwd'},
+    arm:{can:'11', pdh:'6', dir:'fwd'},          // <-- the deliberate mismatch
+    armEncoder:{can:'', pdh:'', dir:''},
+    gyro:{can:'', pdh:'', dir:''}
+  };
+  function blankState(){
+    var s={}; DEVICES.forEach(function(d){ s[d.key]={can:'',pdh:'',dir:''}; }); return s;
+  }
+  // ===END MODEL===
+
+  // ---- persistence ----
+  var STORE='frc:robotmap';
+  function saveState(){ try{ localStorage.setItem(STORE, JSON.stringify({entries:read(), dirty:studentDirty})); }catch(e){} }
+  function loadSaved(){ try{ return JSON.parse(localStorage.getItem(STORE)); }catch(e){ return null; } }
+
+  var studentDirty=false;
+
+  // ---- build the diagram ----
+  var devgrid=document.getElementById('devgrid');
+  DEVICES.forEach(function(d){
+    var el=document.createElement('div');
+    el.className='dev '+(d.sensor?'sensor':'motor');
+    var rows='';
+    rows+='<div class="dv-row"><span class="k">CAN ID</span><span class="val can">'+d.can+'</span></div>';
+    if(d.sensor){
+      rows+='<div class="dv-row"><span class="k">PDH</span><span class="val">CAN-powered</span></div>';
+      rows+='<div class="dv-row"><span class="k">Positive</span><span class="val">'+d.motion+'</span></div>';
+      rows+='<span class="badge sens">sensor - no direction</span>';
+    } else {
+      rows+='<div class="dv-row"><span class="k">PDH ch</span><span class="val pdh">'+d.pdh+'</span></div>';
+      rows+='<div class="dv-row"><span class="k">Positive</span><span class="val" style="font-size:10.5px">'+d.motion+'</span></div>';
+      rows+='<span class="badge '+(d.mount==='mirror'?'mirror':'std')+'">'+(d.mount==='mirror'?'↺ mirror mount':'↻ standard mount')+'</span>';
+    }
+    el.innerHTML='<div class="dv-name">'+d.name+'</div><div class="dv-ctrl">'+d.ctrl+'</div>'+rows;
+    devgrid.appendChild(el);
+  });
+
+  // ---- build the table ----
+  var mapBody=document.getElementById('mapBody');
+  var inputs={}; // key -> {can, pdh, dir}
+  DEVICES.forEach(function(d){
+    var tr=document.createElement('tr');
+    var td0=document.createElement('td'); td0.className='td-dev';
+    td0.innerHTML=d.name+'<span class="sub">'+d.ctrl+'</span>';
+    tr.appendChild(td0);
+
+    // CAN ID cell
+    var td1=document.createElement('td');
+    var canIn=document.createElement('input');
+    canIn.type='number'; canIn.min='0'; canIn.max='62'; canIn.step='1';
+    canIn.className='cellin'; canIn.setAttribute('inputmode','numeric');
+    canIn.setAttribute('aria-label', d.name+' CAN ID');
+    td1.appendChild(canIn); tr.appendChild(td1);
+
+    // PDH cell
+    var td2=document.createElement('td');
+    var pdhIn=null;
+    if(d.sensor){ td2.innerHTML='<span class="na">CAN-powered</span>'; }
+    else {
+      pdhIn=document.createElement('input');
+      pdhIn.type='number'; pdhIn.min='0'; pdhIn.max='23'; pdhIn.step='1';
+      pdhIn.className='cellin'; pdhIn.setAttribute('inputmode','numeric');
+      pdhIn.setAttribute('aria-label', d.name+' PDH channel');
+      td2.appendChild(pdhIn);
+    }
+    tr.appendChild(td2);
+
+    // direction cell
+    var td3=document.createElement('td');
+    var dirSel=null;
+    if(d.sensor){ td3.innerHTML='<span class="na">n/a - sensor</span>'; }
+    else {
+      dirSel=document.createElement('select'); dirSel.className='cellin';
+      dirSel.setAttribute('aria-label', d.name+' positive direction');
+      dirSel.innerHTML='<option value="">pick...</option><option value="fwd">Forward</option><option value="inv">Inverted</option>';
+      td3.appendChild(dirSel);
+    }
+    tr.appendChild(td3);
+
+    mapBody.appendChild(tr);
+    inputs[d.key]={can:canIn, pdh:pdhIn, dir:dirSel};
+
+    [canIn, pdhIn, dirSel].forEach(function(inp){
+      if(!inp) return;
+      inp.addEventListener('input', function(){ onUserEdit(d.key); });
+      inp.addEventListener('change', function(){ onUserEdit(d.key); });
+    });
+  });
+
+  function read(){
+    var s={};
+    DEVICES.forEach(function(d){
+      var io=inputs[d.key];
+      s[d.key]={
+        can:(io.can.value||'').trim(),
+        pdh:io.pdh?(io.pdh.value||'').trim():'',
+        dir:io.dir?io.dir.value:''
+      };
+    });
+    return s;
+  }
+  function apply(state){
+    DEVICES.forEach(function(d){
+      var io=inputs[d.key], v=state[d.key]||{can:'',pdh:'',dir:''};
+      io.can.value=v.can||'';
+      if(io.pdh) io.pdh.value=v.pdh||'';
+      if(io.dir) io.dir.value=v.dir||'';
+    });
+  }
+
+  // correctness of one device's cells vs the diagram
+  function cellState(d, v){
+    var out={};
+    out.can = (v.can!=='' && parseInt(v.can,10)===d.can);
+    out.canBlank = (v.can==='');
+    if(d.sensor){ out.pdh=true; out.dir=true; out.pdhBlank=false; out.dirBlank=false; }
+    else {
+      out.pdh = (v.pdh!=='' && parseInt(v.pdh,10)===d.pdh);
+      out.pdhBlank = (v.pdh==='');
+      out.dir = (v.dir===d.dir);
+      out.dirBlank = (v.dir==='');
+    }
+    return out;
+  }
+
+  function onUserEdit(key){
+    // flag a self-inflicted wrong entry (kills the clean-sheet gold)
+    var d=BYKEY[key], v=read()[key], cs=cellState(d, v);
+    if(v.can!=='' && !cs.can) studentDirty=true;
+    if(!d.sensor && v.pdh!=='' && !cs.pdh) studentDirty=true;
+    if(!d.sensor && v.dir!=='' && !cs.dir) studentDirty=true;
+    update(true);
+  }
+
+  // ---- bring-up test: what the robot does with this map ----
+  // A device "responds" only when its CAN ID matches the real device and is unique.
+  function grade(state){
+    // duplicate detection across all rows
+    var seen={}, dup={};
+    DEVICES.forEach(function(d){
+      var raw=state[d.key].can;
+      if(raw==='') return;
+      var n=parseInt(raw,10);
+      if(seen[n]!==undefined) dup[n]=true;
+      seen[n]=(seen[n]===undefined)?1:seen[n]+1;
+    });
+    function status(d){
+      var raw=state[d.key].can;
+      if(raw==='') return 'blank';
+      var n=parseInt(raw,10);
+      if(dup[n]) return 'conflict';
+      if(n!==d.can) return 'wrongid';
+      return 'ok';
+    }
+    var st={}; DEVICES.forEach(function(d){ st[d.key]=status(d); });
+    var lines=[];
+
+    // 1) CAN bus health
+    var conflictIds=Object.keys(dup);
+    var blanks=DEVICES.filter(function(d){ return st[d.key]==='blank'; });
+    var wrongs=DEVICES.filter(function(d){ return st[d.key]==='wrongid'; });
+    if(conflictIds.length){
+      lines.push({s:'bad', t:'<b>CAN bus:</b> two devices set to ID '+conflictIds[0]+' - they collide and both can drop off the bus. Every ID must be unique.'});
+    } else if(blanks.length){
+      lines.push({s:'idle', t:'<b>CAN bus:</b> '+(DEVICES.length-blanks.length)+' of 6 devices mapped. Finish the blank rows.'});
+    } else if(wrongs.length){
+      lines.push({s:'bad', t:'<b>CAN bus:</b> nothing answers at the ID you gave '+wrongs[0].name+' - that mechanism is dead. Check it against the diagram.'});
+    } else {
+      lines.push({s:'good', t:'<b>CAN bus:</b> all 6 devices answer, every ID unique.'});
+    }
+
+    // 2) drive
+    var lOk=st.leftDrive==='ok', rOk=st.rightDrive==='ok';
+    if(!lOk||!rOk){
+      lines.push({s:'bad', t:'<b>Drive:</b> a side is not answering - the robot yanks to one side. Fix the drive CAN IDs first.'});
+    } else {
+      var lGood=state.leftDrive.dir==='fwd', rGood=state.rightDrive.dir==='inv';
+      if(lGood&&rGood) lines.push({s:'good', t:'<b>Drive:</b> rolls straight forward.'});
+      else if(!lGood&&!rGood) lines.push({s:'bad', t:'<b>Drive:</b> both sides mirrored - it drives straight, but backward.'});
+      else lines.push({s:'bad', t:'<b>Drive:</b> the two sides fight - it spins in place instead of driving straight. One mirror-mounted side needs Inverted.'});
+    }
+
+    // 3) arm - the headline mismatch
+    if(st.arm!=='ok'){
+      lines.push({s:'bad', t:'<b>Arm:</b> command does nothing - check the arm CAN ID.'});
+    } else if(state.arm.dir==='inv'){
+      lines.push({s:'good', t:'<b>Arm:</b> raises when you command a raise.'});
+    } else if(state.arm.dir==='fwd'){
+      lines.push({s:'bad', t:'<b>Arm:</b> drives DOWN on a raise command - it is mirror-mounted, so it needs Inverted.'});
+    } else {
+      lines.push({s:'idle', t:'<b>Arm:</b> pick a direction to test it.'});
+    }
+
+    // 4) intake
+    if(st.intake!=='ok'){
+      lines.push({s:'bad', t:'<b>Intake:</b> not answering - check its CAN ID.'});
+    } else if(state.intake.dir==='fwd'){
+      lines.push({s:'good', t:'<b>Intake:</b> pulls the game piece in.'});
+    } else if(state.intake.dir==='inv'){
+      lines.push({s:'bad', t:'<b>Intake:</b> spits the game piece out - it is running backward.'});
+    } else {
+      lines.push({s:'idle', t:'<b>Intake:</b> pick a direction to test it.'});
+    }
+
+    // 5) CANcoder
+    if(st.armEncoder==='ok') lines.push({s:'good', t:'<b>Arm angle:</b> the CANcoder reports the true angle.'});
+    else if(st.armEncoder==='blank') lines.push({s:'idle', t:'<b>Arm angle:</b> the CANcoder is not on the map yet - the arm has no sense of position.'});
+    else lines.push({s:'bad', t:'<b>Arm angle:</b> nothing answers at that ID - the arm cannot tell where it is.'});
+
+    // 6) Pigeon
+    if(st.gyro==='ok') lines.push({s:'good', t:'<b>Heading:</b> the Pigeon holds the robot heading.'});
+    else if(st.gyro==='blank') lines.push({s:'idle', t:'<b>Heading:</b> the gyro is not on the map yet - the robot cannot tell which way it points.'});
+    else lines.push({s:'bad', t:'<b>Heading:</b> no gyro answers at that ID.'});
+
+    return {lines:lines, st:st};
+  }
+
+  // ---- code panel ----
+  function esc(v){ return v===''||v===undefined ? '<span class="blank">?</span>' : '<span class="num">'+v+'</span>'; }
+  function boolFor(dir){
+    if(dir==='') return '<span class="blank">?</span>';
+    return '<span class="bool">'+(dir==='inv'?'true':'false')+'</span>';
+  }
+  function buildCode(state){
+    function L(s){ return s+'\n'; }
+    var s=state, out='';
+    out+=L('<span class="kw">public final class</span> <span class="cls">Constants</span> {');
+    out+=L('  <span class="kw">public static final class</span> <span class="cls">DriveK</span> {');
+    out+=L('    <span class="kw">public static final int</span>     LEFT_ID       = '+esc(s.leftDrive.can)+';   <span class="cm">// PDH ch '+(s.leftDrive.pdh||'?')+'</span>');
+    out+=L('    <span class="kw">public static final int</span>     RIGHT_ID      = '+esc(s.rightDrive.can)+';   <span class="cm">// PDH ch '+(s.rightDrive.pdh||'?')+'</span>');
+    out+=L('    <span class="kw">public static final boolean</span> LEFT_INVERTED  = '+boolFor(s.leftDrive.dir)+';');
+    out+=L('    <span class="kw">public static final boolean</span> RIGHT_INVERTED = '+boolFor(s.rightDrive.dir)+';');
+    out+=L('  }');
+    out+=L('  <span class="kw">public static final class</span> <span class="cls">IntakeK</span> {');
+    out+=L('    <span class="kw">public static final int</span>     MOTOR_ID = '+esc(s.intake.can)+';   <span class="cm">// PDH ch '+(s.intake.pdh||'?')+'</span>');
+    out+=L('    <span class="kw">public static final boolean</span> INVERTED = '+boolFor(s.intake.dir)+';');
+    out+=L('  }');
+    out+=L('  <span class="kw">public static final class</span> <span class="cls">ArmK</span> {');
+    out+=L('    <span class="kw">public static final int</span>     MOTOR_ID    = '+esc(s.arm.can)+';   <span class="cm">// PDH ch '+(s.arm.pdh||'?')+'</span>');
+    out+=L('    <span class="kw">public static final int</span>     CANCODER_ID = '+esc(s.armEncoder.can)+';   <span class="cm">// on the CAN bus, no PDH</span>');
+    out+=L('    <span class="kw">public static final boolean</span> INVERTED    = '+boolFor(s.arm.dir)+';');
+    out+=L('  }');
+    out+=L('  <span class="kw">public static final int</span> PIGEON_ID = '+esc(s.gyro.can)+';   <span class="cm">// on the CAN bus, no PDH</span>');
+    out+='}';
+    return out;
+  }
+
+  // ---- render ----
+  var testLines=document.getElementById('testLines');
+  var codeOut=document.getElementById('codeOut');
+  var mapCount=document.getElementById('mapCount');
+  var savemsg=document.getElementById('savemsg');
+  var saveTimer=null;
+
+  function paintCells(state){
+    var matched=0;
+    DEVICES.forEach(function(d){
+      var v=state[d.key], cs=cellState(d, v), io=inputs[d.key];
+      function mark(inp, ok, blank){
+        if(!inp) return;
+        inp.classList.remove('ok','bad');
+        if(blank) return;
+        inp.classList.add(ok?'ok':'bad');
+      }
+      mark(io.can, cs.can, cs.canBlank);
+      mark(io.pdh, cs.pdh, cs.pdhBlank);
+      mark(io.dir, cs.dir, cs.dirBlank);
+      var full = cs.can && cs.pdh && cs.dir;
+      if(full) matched++;
+    });
+    return matched;
+  }
+
+  function allCorrect(state){
+    return DEVICES.every(function(d){
+      var cs=cellState(d, state[d.key]);
+      return cs.can && cs.pdh && cs.dir;
+    });
+  }
+
+  function update(save){
+    var state=read();
+    var matched=paintCells(state);
+    mapCount.textContent=matched+' / 6 devices matched';
+
+    var g=grade(state);
+    var html='';
+    g.lines.forEach(function(ln){
+      html+='<div class="tline '+ln.s+'"><span class="td-dot"></span><span>'+ln.t+'</span></div>';
+    });
+    testLines.innerHTML=html;
+    codeOut.innerHTML=buildCode(state);
+
+    if(save){
+      saveState();
+      savemsg.textContent='map saved';
+      clearTimeout(saveTimer);
+      saveTimer=setTimeout(function(){ savemsg.textContent=''; }, 1400);
+    }
+    runMissions(state);
+  }
+
+  // ---- missions (wrapped so a missions bug can never break the page) ----
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={}, mItems={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  function runMissions(state){
+    try{
+      // fix the mismatch: the arm's direction is now correct (Inverted)
+      if(state.arm.dir==='inv' && parseInt(state.arm.can,10)===BYKEY.arm.can) mClear('fix');
+      var done=allCorrect(state);
+      if(done) mClear('map');
+      if(done && !studentDirty) mClear('gold');
+    }catch(e){}
+  }
+
+  // ---- buttons ----
+  function loadDraft(){ studentDirty=false; apply(DRAFT); update(true); }
+  function loadBlank(){ studentDirty=false; apply(blankState()); update(true); }
+  function reveal(){
+    var s={};
+    DEVICES.forEach(function(d){
+      s[d.key]={ can:String(d.can), pdh:d.sensor?'':String(d.pdh), dir:d.sensor?'':d.dir };
+    });
+    // showing the answer is not a clean sheet
+    studentDirty=true;
+    apply(s); update(true);
+  }
+  document.getElementById('draftBtn').addEventListener('click', loadDraft);
+  document.getElementById('blankBtn').addEventListener('click', loadBlank);
+  document.getElementById('revealBtn').addEventListener('click', reveal);
+
+  // ---- start ----
+  var saved=loadSaved();
+  if(saved && saved.entries){ apply(saved.entries); studentDirty=!!saved.dirty; update(false); }
+  else { apply(DRAFT); update(false); }
+})();
+</script>
+
+<script>
+(function(){
+  // mastery quiz: correct locks; wrong shows a data-why whyline and stays retryable
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the diagram showed you, then try another answer.'; } }); });
+  });
+})();
+</script>
+
+<script>
+(function(){
+  // auto-mark this companion complete in the Build hub once its quiz is finished
+  var KEY="build:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script src="account-config.js"></script>
+<script src="account.js"></script>
+</body>
+</html>

@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FRC Academy · Leadership Clinic</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,176,32,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--amber);box-shadow:0 0 12px var(--amber)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:48px 0 18px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  h1{font-size:clamp(2.1rem,5vw,3.4rem);line-height:1.04;margin:.1em 0 .3em;letter-spacing:-.03em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--amber),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(16px,2.2vw,19px);color:var(--text);max-width:60ch;margin-top:6px}
+  .dek b{color:var(--text)}
+  section{padding:26px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--teal);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  .lead{font-size:19px}
+  em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  /* teaching list */
+  .ideas{display:grid;gap:12px;margin:20px 0 6px}
+  @media(min-width:620px){.ideas{grid-template-columns:1fr 1fr}}
+  .idea{border:1px solid var(--line);border-radius:11px;padding:14px 16px;background:var(--panel);border-top:2px solid var(--amber)}
+  .idea h4{margin:0 0 5px;font-family:var(--mono);font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--amber)}
+  .idea p{margin:0;font-size:14.5px;color:var(--muted);line-height:1.5}
+
+  /* scenario clinic */
+  .clinic{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8);overflow:hidden;margin-top:16px}
+  .cl-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:13px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .cl-title{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--text)}
+  .cl-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .pills{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line)}
+  .pill{position:relative;font-family:var(--mono);font-size:12.5px;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);border-radius:9px;padding:9px 13px;cursor:pointer;transition:.12s;min-width:40px;min-height:38px;text-align:center;line-height:1.2}
+  .pill:hover{border-color:var(--amber);color:var(--text)}
+  .pill.active{background:var(--amber);border-color:var(--amber);color:#2a1503;font-weight:700}
+  .pill.solved::after{content:"";position:absolute;top:-4px;right:-4px;width:11px;height:11px;border-radius:50%;background:var(--green);border:2px solid var(--panel);box-shadow:0 0 6px var(--green)}
+  .cl-body{padding:16px}
+  .sc-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .sc-title{font-size:20px;font-weight:800;letter-spacing:-.01em;margin:0 0 10px;color:var(--text)}
+  .sc-scene{margin:0 0 14px;color:var(--text);font-size:16px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+  .chip{font-family:var(--mono);font-size:11.5px;letter-spacing:.03em;border:1px solid var(--line-2);background:var(--panel-2);border-radius:7px;padding:6px 10px;color:var(--muted)}
+  .sc-prompt{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin:2px 0 10px}
+  .choices{display:flex;flex-direction:column;gap:10px}
+  .choice{display:block;width:100%;text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--text);padding:13px 15px;border-radius:10px;cursor:pointer;font-size:15.5px;font-family:var(--sans);transition:.12s;line-height:1.45;min-height:44px}
+  .choice:hover{border-color:var(--muted)}
+  .choice .cl{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:4px}
+  .choice.current{box-shadow:0 0 0 2px rgba(255,176,32,.28)}
+  .choice.rated-best{border-color:var(--green);background:rgba(67,214,126,.12)}
+  .choice.rated-best .cl{color:var(--green)}
+  .choice.rated-warn{border-color:var(--amber);background:rgba(255,176,32,.10)}
+  .choice.rated-warn .cl{color:var(--amber)}
+  .choice.rated-bad{border-color:var(--red);background:rgba(255,107,107,.10)}
+  .choice.rated-bad .cl{color:var(--red)}
+
+  .outcome{margin-top:15px;border:1px solid var(--line);border-radius:11px;background:#0B1322;overflow:hidden;display:none}
+  .outcome.show{display:block}
+  .oc-head{display:flex;align-items:center;gap:10px;padding:11px 15px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
+  .oc-head .ocdot{width:9px;height:9px;border-radius:50%;background:var(--faint);flex:0 0 auto}
+  .outcome.oc-good .ocdot{background:var(--green);box-shadow:0 0 10px var(--green)} .outcome.oc-good .oc-head{color:var(--green)}
+  .outcome.oc-warn .ocdot{background:var(--amber);box-shadow:0 0 10px var(--amber)} .outcome.oc-warn .oc-head{color:var(--amber)}
+  .outcome.oc-bad .ocdot{background:var(--red);box-shadow:0 0 10px var(--red)} .outcome.oc-bad .oc-head{color:var(--red)}
+  .oc-body{padding:13px 15px;font-size:15px;color:var(--text);line-height:1.6}
+  .principle{margin-top:12px;border-left:3px solid var(--green);background:rgba(67,214,126,.07);border-radius:0 10px 10px 0;padding:10px 14px;font-size:14.5px;color:var(--text);display:none;line-height:1.55}
+  .principle.show{display:block}
+  .principle b{color:var(--green);font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;display:block;margin-bottom:3px}
+
+  .cl-foot{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 16px;border-top:1px solid var(--line)}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s;min-height:40px}
+  .btn:hover{border-color:var(--amber);color:var(--text)}
+  .btn[disabled]{opacity:.4;cursor:default}
+  .btn[disabled]:hover{border-color:var(--line-2);color:var(--muted)}
+  .cl-foot .spacer{margin-left:auto}
+  .savemsg{font-family:var(--mono);font-size:11px;color:var(--green)}
+
+  .missions{margin-top:16px;border:1px solid var(--line-2);border-left:3px solid var(--amber);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0 0 10px;color:var(--text);font-size:15.5px}
+  .note p:last-child{margin:0}
+  .note.teal{border-color:var(--teal);background:rgba(52,215,197,.06)} .note.teal .nh{color:var(--teal)}
+  .note a{color:var(--teal);text-decoration:none;border-bottom:1px dotted rgba(52,215,197,.45)}
+  .note a:hover{border-bottom-style:solid}
+  .note ul{margin:6px 0 0;padding-left:20px}
+  .note li{color:var(--text);font-size:15.5px;margin:5px 0;line-height:1.5}
+  .note li b{color:var(--amber)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s;min-height:40px}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .whyline{margin:2px 0 4px;font-size:13.5px;color:var(--muted);border-left:2px solid var(--red);background:rgba(255,107,107,.05);padding:5px 12px;border-radius:0 8px 8px 0}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--teal);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--amber);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><span class="name">FRC Academy</span></a>
+    <div class="top-meta">Leadership Clinic</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Leadership &amp; subteam scenarios</div>
+    <h1>The call is <span class="accent">yours</span></h1>
+    <p class="dek">Building a robot is a people problem wearing a metal costume. Here are five real build-season dilemmas - the kind that stall a whole team for a week. You pick what you would do, and the clinic tells you the likely outcome. There is rarely one perfect answer, but there are clearly better and worse calls, and this is a safe place to make the bad ones.</p>
+  </div>
+
+  <section>
+    <div class="kicker">First, the shape of it</div>
+    <h2>What a subteam lead actually does</h2>
+    <p class="lead">A subteam - intake, drivetrain, electrical, programming - is a small group owning one job. Leading it is less about being the best builder and more about keeping people and parts unblocked.</p>
+    <p>Two ideas run under every scenario below. The first is <strong>people</strong>: the best idea has to be able to reach the room, no matter who has the quietest voice, and no one person should be a wall the whole team crashes into. The second is <strong>task dependencies</strong>: some work can only start once other work is done. Draw those arrows and the schedule almost writes itself. Miss them and you get two subteams politely waiting on each other while the clock runs out.</p>
+    <div class="ideas">
+      <div class="idea"><h4>Protect a baseline</h4><p>Always keep something that works. Improve in parallel against a deadline instead of betting the season on an untested redo.</p></div>
+      <div class="idea"><h4>Make work visible</h4><p>Files, schedules, and decisions live where the whole team can see them. Invisible work turns one person into a bottleneck.</p></div>
+      <div class="idea"><h4>Sequence by dependency</h4><p>Whoever's work others are waiting on goes first. A shared, posted plan beats a scramble every single time.</p></div>
+      <div class="idea"><h4>Run the room</h4><p>Part of leading a meeting is traffic control - making sure the best idea gets out, not just the loudest voice.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Try it</div>
+    <h2>The scenario clinic</h2>
+    <p>Read the situation, then pick the move you would actually make. The clinic shows you the likely fallout of <em>that</em> choice - so try the others too and see how each plays out. When you land on the strongest call, the scenario marks solved and the principle behind it appears. Work at your own pace, and if a real version of one of these lands on you, loop in your mentor.</p>
+
+    <div class="clinic" id="clinic">
+      <div class="cl-head">
+        <span class="cl-title" id="clTitle">Scenario</span>
+        <span class="cl-tag" id="clTag">1 / 5</span>
+      </div>
+      <div class="pills" id="pills"></div>
+      <div class="cl-body">
+        <div class="sc-eyebrow" id="scEyebrow">--</div>
+        <h3 class="sc-title" id="scTitle">--</h3>
+        <p class="sc-scene" id="scScene"></p>
+        <div class="chips" id="scChips"></div>
+        <div class="sc-prompt">What do you do?</div>
+        <div class="choices" id="scChoices"></div>
+        <div class="outcome" id="outcome">
+          <div class="oc-head"><span class="ocdot"></span><span id="ocLabel">Likely outcome</span></div>
+          <div class="oc-body" id="ocBody"></div>
+        </div>
+        <div class="principle" id="principle"><b>The principle</b><span id="prBody"></span></div>
+      </div>
+      <div class="cl-foot">
+        <button class="btn" id="prevBtn">&larr; Prev</button>
+        <button class="btn" id="nextBtn">Next &rarr;</button>
+        <span class="spacer"></span>
+        <button class="btn" id="resetBtn">Start over</button>
+        <span class="savemsg" id="savemsg"></span>
+      </div>
+    </div>
+
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this clinic - take them at your own pace</span></div>
+      <div class="m-item" data-m="explored"><span class="m-st">○</span><span>Work through <b>all five scenarios</b> - open every one at least once, even the ones that look easy.</span></div>
+      <div class="m-item" data-m="readall"><span class="m-st">○</span><span>In any one scenario, read the likely outcome of <b>all three choices</b> before you move on. Every option has something to teach.</span></div>
+      <div class="m-item" data-m="threebest"><span class="m-st">○</span><span>Find the <b>strongest call in at least three</b> of the five scenarios.</span></div>
+      <div class="m-item gold" data-m="allbest"><span class="m-st">★</span><span><b>Gold:</b> find the strongest call in <b>all five</b> scenarios.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="note">
+      <div class="nh">Running a subteam · the through-line</div>
+      <p>Every scenario you just worked is the same two ideas in a different jersey. Keep these on a sticky note when it is your call:</p>
+      <ul>
+        <li><b>Never ship without a fallback.</b> A working robot that jams sometimes still beats a beautiful redo that is not done. Prototype the upgrade on the side, with a deadline and a "must clearly beat the old one" bar.</li>
+        <li><b>Make the work visible.</b> Shared drive, posted schedule, decisions written down. The moment progress lives on one laptop or in one person's head, that person becomes a wall the whole team hits.</li>
+        <li><b>Draw the dependency arrows.</b> Ask "what has to be done before this can start?" for every task. Whoever others wait on goes first, and the plan gets posted where everyone can see it.</li>
+        <li><b>Break circular waits at the boundary.</b> When two subteams each wait on the other, they are missing a shared agreement, not motion. Get both leads to define and <em>freeze</em> the interface - the bolt pattern, the mount, the signal - then both build to it at once.</li>
+        <li><b>Protect the quiet voice.</b> Hand the floor to the person getting talked over, by name. Do it a few times and the room starts doing it on its own. The goal is the best idea winning, not the loudest.</li>
+      </ul>
+      <p>None of this needs you to be the best builder in the room. It needs you to keep people and parts unblocked, and to bring a mentor in early when a call is bigger than you.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="0">
+        <div class="qn">Question 1</div>
+        <div class="qt">Your intake jams about 1 in 5 tries and the lead wants a full rebuild with two weeks of build season left. What is the safest way to allow the improvement?</div>
+        <div class="opts">
+          <button class="opt">Keep the working intake as the competition robot and let the lead prototype v2 in parallel, against a hard deadline and a clear "must beat the old one" bar</button>
+          <button class="opt" data-why="A late rebuild with no fallback bets the whole season on a new design landing on time, and new designs almost never do. Improve in parallel and keep the robot that already works.">Green-light the full rebuild - a clean design is always worth it</button>
+          <button class="opt" data-why="Shipping the working intake is defensible, but flatly shutting down the person who most cares about quality burns their energy for the rest of the season. Give the idea a parallel track with a deadline instead.">Refuse outright and reassign the lead so they stop bringing it up</button>
+        </div>
+        <div class="explain">Protect a baseline, then improve against it. A working robot plus a side prototype with a deadline gets you the upgrade if it lands and a robot either way. That is the whole trick of changing things late.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 2</div>
+        <div class="qt">One designer keeps every part file on their own laptop, and the team stalls whenever they are out. The real fix is:</div>
+        <div class="opts">
+          <button class="opt" data-why="Waiting rewards the bottleneck and proves one laptop can stop the whole team. The problem is not the person, it is that the work is invisible to everyone else.">Wait for them to come back - they know the files best</button>
+          <button class="opt">A team rule that all files, work-in-progress included, live in the shared drive daily, with a clear WIP folder so nobody machines an unfinished part</button>
+          <button class="opt" data-why="It unblocks today but going behind someone's back breaks trust fast, and you might cut a part that was not ready. Fix the process with an agreed shared-files rule, not a raid.">Copy their files while they are out and hand them to manufacturing</button>
+        </div>
+        <div class="explain">Single points of failure are a process problem, not a personality one. A shared drive with a WIP convention makes work visible and safe at the same time, so nobody can become a wall by going home.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 3</div>
+        <div class="qt">The arm subteam is waiting on the frame subteam for the side rail, and the frame subteam is waiting on the arm subteam for the exact bolt pattern. Nothing moves. What breaks the deadlock?</div>
+        <div class="opts">
+          <button class="opt" data-why="Getting them talking is necessary but not the whole fix. With no structure they just re-explain why they are each stuck. Someone has to pin down the shared boundary.">Tell them to just communicate and figure it out</button>
+          <button class="opt" data-why="A guessed interface usually means holes that do not line up, so you scrap the rail and lose the time anyway, plus the material. You cannot guess your way past a missing agreement.">Have the frame team guess a bolt pattern so at least something gets built</button>
+          <button class="opt">Get both leads to agree and freeze the shared interface on paper right now, then let both subteams build to that fixed spec at the same time</button>
+        </div>
+        <div class="explain">A circular wait is a missing agreement, not missing motion. Define the interface - the bolt pattern and where the rail meets the gearbox - freeze it so it cannot drift, and now neither side has to wait on the other.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 4</div>
+        <div class="qt">A quiet rookie keeps getting talked over in design meetings but seems to have spotted a real problem with the shooter. Best move:</div>
+        <div class="opts">
+          <button class="opt">Pause the room and hand them the floor by name, then keep protecting airtime for quieter members so the pattern changes</button>
+          <button class="opt" data-why="&quot;Speak louder or lose&quot; selects for volume, not for being right, and quietly tells every quiet member their ideas do not count. You may be about to ship a flaw they already spotted.">Tell them it is on them to speak up louder if they want a voice</button>
+          <button class="opt" data-why="Kind, and you will get the idea, but fixing it only in private lets the room keep steamrolling them and the team never hears the point or learns the norm. Protect their airtime in the room too.">Only catch them privately after the meeting to ask what they meant</button>
+        </div>
+        <div class="explain">A leader's job in a meeting is partly traffic control. Naming the person and handing them the floor gets the idea out and teaches the room a norm. Do it a few times and it starts self-correcting.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 5</div>
+        <div class="qt">It is integration week and electrical, programming, and mechanical all grab the robot at once, so nothing gets finished. What helps most?</div>
+        <div class="opts">
+          <button class="opt" data-why="In a crunch &quot;the team will sort it out&quot; means the loudest person wins and quiet work stalls - which is exactly what is already happening. Integration week needs a plan most, not least.">Let whoever needs it most take it - the team is smart and will sort itself out</button>
+          <button class="opt">Post a time-block schedule on the robot: who has it, for how long, and what "done" means for each slot, with one person owning the calendar</button>
+          <button class="opt" data-why="A week-long single-owner handoff stalls the waiting subteams for days, when they often need small early access - a sensor mounted, a wire routed - to make progress. Shared scheduled blocks beat one team hogging it.">Give it to mechanical for the whole week, then electrical, then programming</button>
+        </div>
+        <div class="explain">A visible schedule with owners and a definition of done turns a scramble into a queue. People plan their work around their slot instead of hovering, and whoever others depend on goes first.</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<nav class="coursenav">
+  <a href="index.html">&larr; Academy home</a>
+  <a class="map" href="index.html">Academy home</a>
+  <a href="glossary.html">Glossary &rarr;</a>
+</nav>
+
+<footer>FRC Academy · Build · Code · Control</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  // ===DATA=== five build-season dilemmas. Each has three choices; exactly one is
+  // the strongest call (rating "best"), the others are "warn" (workable but costly)
+  // or "bad" (tends to backfire). The strongest call sits in a different slot each
+  // time so the answer cannot be pattern-matched.
+  var SCN = [
+    { id:"s1", eyebrow:"Intake · week 4 of 6", title:"Scrap it and start over?",
+      scene:"Your intake works but it is ugly - it jams about 1 in 5 tries. The intake lead, who designed it, wants to scrap the whole thing and build a cleaner v2. There are two weeks of build season left.",
+      chips:["Week 4 of 6","Jams 1 in 5","Lead wants a full redo"],
+      choices:[
+        { rating:"bad", label:"Green-light the full rebuild - a clean design is worth it and the lead knows this mechanism best.",
+          outcome:"You just bet the season on a fresh start with no fallback. New designs almost always slip, and if v2 is not done in time you show up with nothing that works. The 1-in-5 jam was a known, fixable problem, and you traded it for an unknown one. A rebuild this late needs a working robot to fall back on." },
+        { rating:"best", label:"Keep the current intake as the competition robot, and let the lead prototype v2 on the side - it only ships if it clearly beats the old one by a hard deadline.",
+          outcome:"This is the move. You protect a working robot, you honor the lead's idea, and you set an objective bar and a real deadline. Prototyping in parallel is how teams improve without gambling the season: if v2 wins by the deadline you swap it in, and if it does not, you already have a robot that plays." },
+        { rating:"warn", label:"Tell the lead no, we ship what we have, and move them onto a different task.",
+          outcome:"Shipping the working intake is defensible, but flatly shutting the lead down burns the person who most cares about quality and knows the mechanism best. You might even fix that jam faster by hearing them out. A hard no with no room to try often costs you that person's energy for the rest of the season." }
+      ],
+      principle:"Protect a baseline. Keep something that works, and improve in parallel against a deadline and a clear bar - never bet the season on an untested redo." },
+
+    { id:"s2", eyebrow:"CAD · shared files", title:"The designer who will not share",
+      scene:"Your strongest CAD designer keeps every part file on their own laptop and will not put them in the shared drive. \"They are not done, and people will mess them up.\" Manufacturing is stalled waiting on drawings, and the designer is out sick for two days.",
+      chips:["Manufacturing stalled","Files on one laptop","Owner out 2 days"],
+      choices:[
+        { rating:"bad", label:"Wait for them to come back - they know the files best, and it is only two days.",
+          outcome:"Two days of a six-week season is real, and you have now proven the whole team can be stopped by one person's laptop. Waiting rewards the hoarding and teaches everyone that single points of failure are fine. The parts still are not cut when they return, and you are further behind than before." },
+        { rating:"warn", label:"Copy the files off their laptop while they are out and hand them straight to manufacturing.",
+          outcome:"It unblocks today, but going behind someone's back to grab unfinished work breaks trust fast, and you might cut a part that was not actually ready. The immediate stall ends and you may get a scrap part and a people problem in return. The fix is a shared-files rule everyone agrees to, not a quiet raid." },
+        { rating:"best", label:"Set a team rule: all files live in the shared drive by end of each day, work-in-progress included, with a clear WIP folder so nobody machines an unfinished part.",
+          outcome:"This fixes the real problem, which is the process, not the person. A shared drive with a WIP convention lets work be visible and safe at the same time - nobody should be able to stop the team by going home, and you have answered the actual fear, that someone machines a rough draft, instead of ignoring it." }
+      ],
+      principle:"Make the work visible. Files, schedules, and decisions live where the whole team can see them. Invisible work turns one person into a wall everyone else hits." },
+
+    { id:"s3", eyebrow:"Integration week", title:"Everyone wants the robot at once",
+      scene:"It is integration week. Electrical, programming, and mechanical all need the robot at the same time. Everyone keeps grabbing it, nothing gets finished, two subsystems got half-wired then abandoned, and tempers are short.",
+      chips:["3 subteams, 1 robot","Nothing finishing","Tempers short"],
+      choices:[
+        { rating:"best", label:"Post a shared time-block schedule on the robot: who has it, for how long, and what \"done\" means for each slot - and one person owns the calendar.",
+          outcome:"A visible schedule with owners and a definition of done turns a scramble into a queue. People can plan their work around their slot instead of hovering, and one calendar-owner prevents double-booking. This is exactly what task dependencies need: whoever's work others are waiting on goes first, and the whole plan is out in the open." },
+        { rating:"bad", label:"Let whoever needs it most just grab it - the team is smart, they will sort it out.",
+          outcome:"\"They will sort it out\" during a crunch usually means the loudest person wins and quiet work stalls. With no plan the robot keeps getting passed around half-finished, which is exactly what is already happening. Integration week is when a team most needs a schedule, not least." },
+        { rating:"warn", label:"Assign the robot to mechanical until it is fully built, then hand it to electrical, then to programming.",
+          outcome:"A strict one-team-at-a-time handoff sounds clean, but it stalls the two waiting subteams for days, and they usually need small bits of access sooner - a sensor mounted, a wire routed - to make any progress at all. Integration almost always works better as scheduled shared blocks than as one team owning it for a week." }
+      ],
+      principle:"Sequence by dependency, in the open. A posted schedule with owners and a definition of done beats a scramble, and whoever others depend on goes first." },
+
+    { id:"s4", eyebrow:"Design meeting", title:"The rookie who stopped trying",
+      scene:"In design meetings, a quiet rookie keeps starting to say something about the shooter, but louder veterans talk right over them every time. You suspect they have spotted a real problem - and they have just about stopped trying to speak up.",
+      chips:["Rookie talked over","Likely a real catch","Room runs loud"],
+      choices:[
+        { rating:"bad", label:"It is on them to speak louder - that is how you earn a voice on a busy team.",
+          outcome:"This loses you the idea and the person. \"Speak louder or lose\" selects for volume, not for being right, and it quietly tells every quiet member their thoughts do not count. Good teams surface the best idea no matter who holds the quietest voice - and you may be about to ship a shooter flaw a rookie already saw." },
+        { rating:"warn", label:"Catch the rookie after the meeting and ask what they were going to say.",
+          outcome:"Kind, and much better than nothing - you will get the idea. But fixing it only in private still lets the room keep steamrolling them, and the rest of the team never hears the point or learns the norm. Pairing a private check-in with protecting their airtime in the room is what actually changes the pattern." },
+        { rating:"best", label:"Pause the room: \"hang on, they were partway through a point - go ahead,\" and give them the floor by name.",
+          outcome:"Naming the person and handing them the floor is a small move with a big effect: the idea finally gets heard, and everyone learns you will protect airtime for quieter members. Do it a few times and the room starts self-correcting. Leading a meeting is partly traffic control - making sure the best idea can get out, not just the loudest." }
+      ],
+      principle:"Run the room. Protect the quiet voice by handing them the floor, so the best idea wins on merit instead of on volume." },
+
+    { id:"s5", eyebrow:"Two subteams · one part", title:"Each waiting on the other",
+      scene:"The arm subteam cannot mount their gearbox until the frame subteam finishes the side rail. The frame subteam says they cannot finalize the rail until they know exactly where the arm's gearbox bolts go. Each is waiting on the other. Nothing is moving.",
+      chips:["Circular wait","Shared bolt pattern","Both stalled"],
+      choices:[
+        { rating:"warn", label:"Tell them to just talk to each other and figure it out.",
+          outcome:"Getting them talking is genuinely necessary - but \"figure it out\" with no structure often ends with both sides re-explaining why they are stuck. They need someone to break the loop by fixing an interface, not just a nudge to communicate. Communication is the start here, not the whole fix." },
+        { rating:"best", label:"Get both leads in a room, agree the bolt pattern and rail interface right now on paper, freeze it, and let both build to that fixed spec in parallel.",
+          outcome:"This breaks the deadlock the right way. You define the interface - the bolt pattern and where the rail meets the gearbox - freeze it so it cannot drift, and now neither side has to wait: both build to the same agreed contract at once. Circular waits get broken by nailing down the shared boundary, not by picking who goes first." },
+        { rating:"bad", label:"Have the frame team guess a bolt pattern and build the rail, so at least something moves.",
+          outcome:"Motion is not progress if it is wrong. A guessed interface usually means the rail's holes do not line up with the real gearbox, so you scrap the rail and lose the time anyway, plus the material. The deadlock is a missing agreement, and you cannot guess your way past a missing agreement - define the interface together first." }
+      ],
+      principle:"Break circular waits at the boundary. When two subteams wait on each other, they are missing a shared agreement - define and freeze the interface, then build in parallel." }
+  ];
+  // ===END DATA===
+
+  var LABELS = ["Option A","Option B","Option C"];
+  var HEADS = {
+    best:"Likely outcome · a strong call",
+    warn:"Likely outcome · workable, but watch out",
+    bad:"Likely outcome · this tends to backfire"
+  };
+  var HEADCLS = { best:"oc-good", warn:"oc-warn", bad:"oc-bad" };
+
+  // ---- persistence ----
+  var STORE = "frc:leadership";
+  function load(){ try{ return JSON.parse(localStorage.getItem(STORE)) || {}; }catch(e){ return {}; } }
+  function save(d){ try{ localStorage.setItem(STORE, JSON.stringify(d)); }catch(e){} }
+  var state = load();
+  state.opened = state.opened || {};
+  state.best   = state.best   || {};
+  state.picks  = state.picks  || {};   // picks[id] = { "0":true, ... } choice indices seen
+  state.missions = state.missions || {};
+  state.gold   = state.gold   || {};
+
+  // ---- elements ----
+  var el = {
+    clTitle:document.getElementById("clTitle"), clTag:document.getElementById("clTag"),
+    pills:document.getElementById("pills"),
+    scEyebrow:document.getElementById("scEyebrow"), scTitle:document.getElementById("scTitle"),
+    scScene:document.getElementById("scScene"), scChips:document.getElementById("scChips"),
+    scChoices:document.getElementById("scChoices"),
+    outcome:document.getElementById("outcome"), ocLabel:document.getElementById("ocLabel"),
+    ocBody:document.getElementById("ocBody"),
+    principle:document.getElementById("principle"), prBody:document.getElementById("prBody"),
+    prevBtn:document.getElementById("prevBtn"), nextBtn:document.getElementById("nextBtn"),
+    resetBtn:document.getElementById("resetBtn"), savemsg:document.getElementById("savemsg")
+  };
+  var cur = 0, saveTimer = null;
+
+  function flashSaved(){
+    el.savemsg.textContent = "progress saved";
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function(){ el.savemsg.textContent = ""; }, 1200);
+  }
+
+  function buildPills(){
+    el.pills.innerHTML = "";
+    SCN.forEach(function(sc, i){
+      var b = document.createElement("button");
+      b.className = "pill" + (i === cur ? " active" : "") + (state.best[sc.id] ? " solved" : "");
+      b.textContent = String(i + 1);
+      b.setAttribute("aria-label", "Scenario " + (i + 1) + (state.best[sc.id] ? ", solved" : ""));
+      b.addEventListener("click", function(){ showScenario(i); });
+      el.pills.appendChild(b);
+    });
+  }
+
+  function showOutcome(sc, idx){
+    var ch = sc.choices[idx];
+    el.ocLabel.textContent = HEADS[ch.rating];
+    el.ocBody.textContent = ch.outcome;
+    el.outcome.className = "outcome show " + HEADCLS[ch.rating];
+    // mark current highlight
+    var btns = el.scChoices.querySelectorAll(".choice");
+    Array.prototype.forEach.call(btns, function(b, i){ b.classList.toggle("current", i === idx); });
+  }
+
+  function pick(idx){
+    var sc = SCN[cur];
+    // record this choice as seen
+    if(!state.picks[sc.id]) state.picks[sc.id] = {};
+    state.picks[sc.id][String(idx)] = true;
+    // color the tried choice by its rating (stays after moving on)
+    var btn = el.scChoices.querySelectorAll(".choice")[idx];
+    btn.classList.remove("rated-best","rated-warn","rated-bad");
+    btn.classList.add("rated-" + sc.choices[idx].rating);
+    // best call?
+    if(sc.choices[idx].rating === "best" && !state.best[sc.id]){
+      state.best[sc.id] = true;
+      buildPills();
+    }
+    showOutcome(sc, idx);
+    // reveal the principle once the strongest call has been found for this scenario
+    if(state.best[sc.id]){
+      el.prBody.textContent = sc.principle;
+      el.principle.classList.add("show");
+    }
+    save(state);
+    flashSaved();
+    updateMissions();
+  }
+
+  function showScenario(i){
+    cur = ((i % SCN.length) + SCN.length) % SCN.length;
+    var sc = SCN[cur];
+    state.opened[sc.id] = true;
+    save(state);
+
+    el.clTitle.textContent = sc.title;
+    el.clTag.textContent = (cur + 1) + " / " + SCN.length;
+    el.scEyebrow.textContent = sc.eyebrow;
+    el.scTitle.textContent = sc.title;
+    el.scScene.textContent = sc.scene;
+    el.scChips.innerHTML = sc.chips.map(function(c){ return '<span class="chip">' + c + "</span>"; }).join("");
+
+    // choices
+    el.scChoices.innerHTML = "";
+    sc.choices.forEach(function(ch, idx){
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "choice";
+      var seen = state.picks[sc.id] && state.picks[sc.id][String(idx)];
+      if(seen) b.classList.add("rated-" + ch.rating);
+      var lab = document.createElement("span"); lab.className = "cl"; lab.textContent = LABELS[idx];
+      var txt = document.createElement("span"); txt.textContent = ch.label;
+      b.appendChild(lab); b.appendChild(txt);
+      b.addEventListener("click", function(){ pick(idx); });
+      el.scChoices.appendChild(b);
+    });
+
+    // outcome + principle: if already solved, surface the best outcome and principle
+    el.outcome.className = "outcome";
+    el.principle.classList.remove("show");
+    if(state.best[sc.id]){
+      var bestIdx = -1;
+      sc.choices.forEach(function(ch, idx){ if(ch.rating === "best") bestIdx = idx; });
+      if(bestIdx >= 0) showOutcome(sc, bestIdx);
+      el.prBody.textContent = sc.principle;
+      el.principle.classList.add("show");
+    }
+
+    buildPills();
+    el.prevBtn.disabled = false;
+    el.nextBtn.disabled = false;
+    updateMissions();
+  }
+
+  // ---- missions (wrapped so a missions bug can never break the page) ----
+  var mItems = {};
+  function initMissions(){
+    try{
+      Array.prototype.forEach.call(document.querySelectorAll("#missions .m-item"), function(n){
+        mItems[n.getAttribute("data-m")] = n;
+      });
+      // restore any already-cleared marks
+      Object.keys(mItems).forEach(function(id){
+        var isGold = mItems[id].classList.contains("gold");
+        if((isGold ? state.gold : state.missions)[id]) markMission(id);
+      });
+    }catch(e){}
+  }
+  function markMission(id){
+    var n = mItems[id]; if(!n || n.classList.contains("cleared")) return;
+    n.classList.add("cleared");
+    n.querySelector(".m-st").textContent = n.classList.contains("gold") ? "★" : "✓";
+  }
+  function clearMission(id){
+    var n = mItems[id]; if(!n || n.classList.contains("cleared")) return;
+    markMission(id);
+    var isGold = n.classList.contains("gold");
+    (isGold ? state.gold : state.missions)[id] = true;
+    save(state);
+  }
+  function updateMissions(){
+    try{
+      var opened = Object.keys(state.opened).length;
+      var best = Object.keys(state.best).length;
+      var anyAllSeen = Object.keys(state.picks).some(function(id){
+        return Object.keys(state.picks[id]).length >= 3;
+      });
+      if(opened >= SCN.length) clearMission("explored");
+      if(anyAllSeen) clearMission("readall");
+      if(best >= 3) clearMission("threebest");
+      if(best >= SCN.length) clearMission("allbest");
+    }catch(e){}
+  }
+
+  // ---- wiring ----
+  el.prevBtn.addEventListener("click", function(){ showScenario(cur - 1); });
+  el.nextBtn.addEventListener("click", function(){ showScenario(cur + 1); });
+  el.resetBtn.addEventListener("click", function(){
+    state = { opened:{}, best:{}, picks:{}, missions:{}, gold:{} };
+    save(state);
+    Object.keys(mItems).forEach(function(id){
+      var n = mItems[id]; n.classList.remove("cleared");
+      n.querySelector(".m-st").textContent = n.classList.contains("gold") ? "★" : "○";
+    });
+    cur = 0;
+    showScenario(0);
+    el.savemsg.textContent = "reset";
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function(){ el.savemsg.textContent = ""; }, 1200);
+  });
+
+  initMissions();
+  showScenario(0);
+})();
+</script>
+<script>
+(function(){
+  // mastery quiz handler - data-why whyline on wrong, explain on correct
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the clinic showed you, then try another answer.'; } }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  // record quiz completion in this page's own frc:leadership key once every question is right
+  var KEY="frc:leadership";
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d.quiz){d.quiz=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script src="account-config.js"></script>
+<script src="account.js"></script>
+</body>
+</html>

@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deploy · First Power-Up</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(142,140,248,.08), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:48px 0 18px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--indigo)}
+  h1{font-size:clamp(2.1rem,5vw,3.4rem);line-height:1.04;margin:.1em 0 .3em;letter-spacing:-.03em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(16px,2.2vw,19px);color:var(--text);max-width:62ch;margin-top:6px}
+  .dek b{color:var(--text)}
+  section{padding:26px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  .sub{color:var(--muted)}
+  em{color:var(--text);font-style:italic}
+
+  /* subteam cheat sheet */
+  .owners{display:grid;gap:12px;margin:18px 0 6px}
+  @media(min-width:620px){.owners{grid-template-columns:repeat(3,1fr)}}
+  .owner{border:1px solid var(--line);border-radius:11px;padding:14px 15px;background:var(--panel);border-top:2px solid var(--accent,var(--indigo))}
+  .owner h4{margin:0 0 5px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent,var(--indigo))}
+  .owner p{margin:0;font-size:14px;color:var(--muted);line-height:1.5}
+
+  /* clinic */
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8);margin-top:16px}
+  .demo-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  .robotstate{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);border-radius:20px;padding:5px 11px}
+  .robotstate .sdot{width:8px;height:8px;border-radius:50%;background:var(--faint)}
+  .robotstate.dead{color:var(--red);border-color:rgba(255,107,107,.4)} .robotstate.dead .sdot{background:var(--red);box-shadow:0 0 8px var(--red)}
+  .robotstate.disabled{color:var(--amber);border-color:rgba(255,176,32,.4)} .robotstate.disabled .sdot{background:var(--amber);box-shadow:0 0 8px var(--amber)}
+  .robotstate.enabled{color:var(--green);border-color:rgba(67,214,126,.4)} .robotstate.enabled .sdot{background:var(--green);box-shadow:0 0 8px var(--green)}
+
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .btn:disabled{opacity:.4;cursor:default}
+  .btn:disabled:hover{border-color:var(--line-2);color:var(--muted)}
+  .btn.primary{background:linear-gradient(180deg,#B3B1FB,var(--indigo));color:#12112e;font-weight:700;border:none}
+  .btn.primary:disabled{background:var(--panel-2);color:var(--muted)}
+
+  .checklist{padding:14px 16px 6px;border-bottom:1px solid var(--line)}
+  .cl-head{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-bottom:9px}
+  .ck-step{display:flex;align-items:center;gap:11px;width:100%;text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);border-radius:9px;padding:11px 13px;margin-bottom:8px;cursor:pointer;font-family:var(--sans);font-size:15px;transition:.12s;min-height:44px}
+  .ck-step:hover:not(:disabled){border-color:var(--indigo)}
+  .ck-step:disabled{cursor:default}
+  .ck-step .box{flex:0 0 auto;width:22px;height:22px;border-radius:6px;border:2px solid var(--faint);display:grid;place-items:center;font-size:13px;line-height:1;color:transparent}
+  .ck-step .num{font-family:var(--mono);font-size:11px;color:var(--faint);flex:0 0 auto;width:18px}
+  .ck-step.active{border-color:var(--indigo);box-shadow:0 0 0 2px rgba(142,140,248,.18);color:var(--text)}
+  .ck-step.active .box{border-color:var(--indigo)}
+  .ck-step.done{color:var(--text);opacity:.92}
+  .ck-step.done .box{border-color:var(--green);background:rgba(67,214,126,.16);color:var(--green)}
+  .ck-step.failed{color:var(--text)}
+  .ck-step.failed .box{border-color:var(--red);background:rgba(255,107,107,.14);color:var(--red)}
+  .ck-step.pending{opacity:.5}
+  .cl-actions{display:flex;flex-wrap:wrap;gap:9px;align-items:center;padding-top:4px;padding-bottom:8px}
+
+  .demo-stage{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line)}
+  @media(min-width:600px){.demo-stage{grid-template-columns:minmax(190px,0.85fr) 1.3fr}}
+  .stage-cell{background:#0B1322;position:relative}
+  .cell-label{position:absolute;top:8px;left:12px;z-index:2;font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);pointer-events:none}
+  .dspanel{padding:30px 16px 16px}
+  .batt{font-family:var(--mono);margin-bottom:14px}
+  .batt .bv{font-size:30px;font-weight:700;color:var(--text)}
+  .batt .bu{font-size:13px;color:var(--faint);margin-left:4px}
+  .batt.dead .bv{color:var(--red)}
+  .light{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+  .light .ll{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .light .lp{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;border-radius:20px;border:1px solid var(--line-2);color:var(--faint);min-width:52px;text-align:center}
+  .light .lp.on{color:var(--green);border-color:rgba(67,214,126,.5);background:rgba(67,214,126,.12)}
+  .light .lp.off{color:var(--red);border-color:rgba(255,107,107,.5);background:rgba(255,107,107,.1)}
+  .light .lp.warnp{color:var(--amber);border-color:rgba(255,176,32,.5);background:rgba(255,176,32,.1)}
+  .canline{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11.5px;line-height:1.5;color:var(--faint)}
+  .canline b{color:var(--muted)}
+  .canline.ok b{color:var(--green)} .canline.err b{color:var(--red)}
+  canvas.mech{display:block;width:100%;height:250px}
+
+  .symptom{padding:13px 16px;border-top:1px solid var(--line);font-size:14.5px;color:var(--muted);line-height:1.55;display:flex;gap:10px;align-items:flex-start}
+  .symptom .si{flex:0 0 auto;font-size:15px;margin-top:1px}
+  .symptom b{color:var(--text)}
+  .symptom.hidden{display:none}
+
+  /* missions */
+  .missions{margin-top:16px;border:1px solid var(--line-2);border-left:3px solid var(--indigo);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+  .tally{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px;padding-top:11px;border-top:1px solid var(--line)}
+  .tchip{font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;border:1px solid var(--line-2);background:var(--panel-2);border-radius:20px;padding:5px 11px;color:var(--faint);display:inline-flex;align-items:center;gap:6px}
+  .tchip .tc-dot{width:7px;height:7px;border-radius:50%;background:var(--faint)}
+  .tchip.on{color:var(--text);border-color:rgba(67,214,126,.45);background:rgba(67,214,126,.08)}
+  .tchip.on .tc-dot{background:var(--green);box-shadow:0 0 7px var(--green)}
+  .tcount{font-family:var(--mono);font-size:11px;color:var(--muted);margin-left:auto;align-self:center}
+
+  /* diagnosis */
+  .diagnosis{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden;margin-top:16px}
+  .dg-head{padding:14px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .dg-head .dh-t{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  .dg-head .dh-s{font-size:13.5px;color:var(--faint);margin-top:4px}
+  .dg-locked{padding:16px;font-size:14px;color:var(--faint);font-style:italic}
+  .dgbody{display:none}
+  .dgbody.on{display:block}
+  .q{padding:16px 16px;border-bottom:1px solid var(--line)}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--indigo);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:15.5px;color:var(--text);margin-bottom:12px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s;min-height:44px}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .whyline{margin:2px 0 4px;font-size:13.5px;color:var(--muted);border-left:2px solid var(--red);background:rgba(255,107,107,.05);padding:5px 12px;border-radius:0 8px 8px 0}
+  .verdict{padding:13px 16px;font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--muted);display:flex;align-items:flex-start;gap:10px;line-height:1.6}
+  .verdict .dotv{width:9px;height:9px;border-radius:50%;background:var(--faint);flex:0 0 auto;margin-top:5px}
+  .verdict.good .dotv{background:var(--green);box-shadow:0 0 10px var(--green)} .verdict.good{color:var(--green)}
+  .verdict.bad .dotv{background:var(--red);box-shadow:0 0 10px var(--red)} .verdict.bad{color:var(--red)}
+  .verdict b{color:var(--text)}
+
+  .note{border-left:3px solid var(--indigo);background:rgba(142,140,248,.07);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--indigo);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:15.5px}
+  .note a{color:var(--teal);text-decoration:none;border-bottom:1px dotted rgba(52,215,197,.45)}
+  .note a:hover{border-bottom-style:solid}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .quiz .q:last-child{border-bottom:none}
+  .quiz .qn{color:var(--amber)}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="code.html"><span class="dot"></span><span class="name">Deploy</span></a>
+    <div class="top-meta">First Power-Up</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Bring-up clinic</div>
+    <h1>First <span class="accent">power-up</span>.</h1>
+    <p class="dek">The robot is assembled. Battery in, breaker on, radio linked, code deployed, enable - and something is wrong. On a real team the fault could belong to <b>anyone</b>: a jammed chain, a dead breaker, a loose wire, a mistyped device ID, a motor wired backward. Your job on the first power-up is not to fix everything yourself. It is to read the symptoms, name the fault, and hand it to the right subteam.</p>
+  </div>
+
+  <section>
+    <p class="lead">Every robot's first run is a moment of truth. Nothing ever comes up perfectly the first time, and the skill that saves your build season is <em>triage</em>: looking at what the robot is doing, or not doing, and knowing which subteam owns the fix. Flailing on the wrong subsystem burns the hours you do not have.</p>
+    <p>The bring-up checklist is the same every time, like a pre-ride check on a bike: seat the battery, close the main breaker, link the radio, push the code, then enable. When a step misbehaves, <em>where</em> it misbehaves is your biggest clue.</p>
+  </section>
+
+  <section>
+    <div class="kicker">The mental model</div>
+    <h2>One symptom, three subteams</h2>
+    <p>Almost every first-power-up problem sorts into one of three buckets. Learn the fingerprints and you can point at the owner in seconds.</p>
+    <div class="owners">
+      <div class="owner" style="--accent:var(--amber)">
+        <h4>Mechanical</h4>
+        <p>Anything physical that stops the mechanism: a jammed chain, a bind, a bolt in the way. The tell is a motor that <em>strains</em> - high current - while nothing moves.</p>
+      </div>
+      <div class="owner" style="--accent:var(--teal)">
+        <h4>Electrical</h4>
+        <p>Power and wiring: a tripped main breaker, a dead battery lead, a loose CAN wire. The tell is missing power or a device that has dropped off the bus.</p>
+      </div>
+      <div class="owner" style="--accent:var(--indigo)">
+        <h4>Code</h4>
+        <p>What the software commands: a wrong device ID, a motor inverted the wrong way, a bad setpoint. The tell is a healthy, powered robot that still does the wrong thing.</p>
+      </div>
+    </div>
+    <p class="sub" style="margin-top:14px">Watch for the overlaps. A wrong CAN ID looks electrical at first glance - the mechanism will not move - but the bus is perfectly healthy and the real fix is one line of code. Reading past the surface is the whole game.</p>
+  </section>
+
+  <section>
+    <div class="kicker">Try it</div>
+    <h2>The bring-up bench</h2>
+    <p>Press <b>New robot</b> to roll a fresh, just-assembled robot with one hidden fault. Work the checklist top to bottom, command a test move, and read the Driver Station and the mechanism. Then make the call: name the fault <em>and</em> the subteam that owns the fix. Do this alongside your mentor when it is a real robot - a straining motor and a hot breaker are not things to leave running.</p>
+
+    <div class="demo" id="demo">
+      <div class="demo-head">
+        <span class="demo-title">Bring-up bench · one hidden fault</span>
+        <span class="robotstate" id="rstate"><span class="sdot"></span><span id="rstateTxt">No robot yet</span></span>
+        <button class="btn primary" id="newBtn">🤖 New robot</button>
+      </div>
+
+      <div class="checklist">
+        <div class="cl-head">Bring-up checklist</div>
+        <button class="ck-step pending" data-step="0" disabled><span class="num">1</span><span class="box">✓</span><span class="lbl">Seat and strap in the battery</span></button>
+        <button class="ck-step pending" data-step="1" disabled><span class="num">2</span><span class="box">✓</span><span class="lbl">Close the main breaker</span></button>
+        <button class="ck-step pending" data-step="2" disabled><span class="num">3</span><span class="box">✓</span><span class="lbl">Link the radio (Driver Station comms)</span></button>
+        <button class="ck-step pending" data-step="3" disabled><span class="num">4</span><span class="box">✓</span><span class="lbl">Deploy the robot code</span></button>
+        <button class="ck-step pending" data-step="4" disabled><span class="num">5</span><span class="box">✓</span><span class="lbl">Enable the robot</span></button>
+        <div class="cl-actions">
+          <button class="btn primary" id="moveBtn" disabled>Command a test move ▸</button>
+          <span class="sub" style="font-size:13px" id="clHint">Press New robot to begin.</span>
+        </div>
+      </div>
+
+      <div class="demo-stage">
+        <div class="stage-cell">
+          <span class="cell-label">Driver Station</span>
+          <div class="dspanel">
+            <div class="batt" id="batt"><span class="bv" id="battV">--</span><span class="bu">V</span></div>
+            <div class="light"><span class="ll">Comms</span><span class="lp" id="lpComms">--</span></div>
+            <div class="light"><span class="ll">Robot Code</span><span class="lp" id="lpCode">--</span></div>
+            <div class="light"><span class="ll">Enabled</span><span class="lp" id="lpEnable">--</span></div>
+            <div class="canline" id="canLine">CAN bus: <b>--</b></div>
+          </div>
+        </div>
+        <div class="stage-cell">
+          <span class="cell-label">Test mechanism · arm</span>
+          <canvas class="mech" id="mech"></canvas>
+        </div>
+      </div>
+
+      <div class="symptom hidden" id="symptom"><span class="si">🔎</span><span id="symptomTxt"></span></div>
+    </div>
+
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">roll New robot to face a fresh fault each time</span></div>
+      <div class="m-item" data-m="first"><span class="m-st">○</span><span>Diagnose your <b>first fault</b> correctly - name the fault and the subteam that owns the fix.</span></div>
+      <div class="m-item" data-m="three"><span class="m-st">○</span><span>Correctly diagnose <b>3 different fault types</b>. Press New robot between rolls; the fault is hidden and random.</span></div>
+      <div class="m-item" data-m="eachteam"><span class="m-st">○</span><span>Catch <b>one fault from each subteam</b> - a mechanical, an electrical, and a code fault.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> diagnose <b>all 5 fault types</b>. You will have seen every fingerprint a first power-up can throw at you.</span></div>
+      <div class="tally" id="tally">
+        <span class="tchip" data-t="chainjam"><span class="tc-dot"></span>Chain jam</span>
+        <span class="tchip" data-t="tripped"><span class="tc-dot"></span>Tripped breaker</span>
+        <span class="tchip" data-t="loosecan"><span class="tc-dot"></span>Loose CAN wire</span>
+        <span class="tchip" data-t="wrongid"><span class="tc-dot"></span>Wrong CAN ID</span>
+        <span class="tchip" data-t="inverted"><span class="tc-dot"></span>Inverted motor</span>
+        <span class="tcount" id="tcount">0 / 5 diagnosed</span>
+      </div>
+    </div>
+
+    <div class="diagnosis" id="diagnosis">
+      <div class="dg-head">
+        <div class="dh-t">🩺 Make the call</div>
+        <div class="dh-s">Name the fault, then name the subteam that owns the fix. Both have to be right.</div>
+      </div>
+      <div class="dg-locked" id="dgLocked">Work the bring-up checklist and command a test move first, then the options unlock.</div>
+      <div class="dgbody" id="dgBody">
+        <div class="q" id="qFault" data-correct="-1">
+          <div class="qn">The fault</div>
+          <div class="qt">What is actually wrong with this robot?</div>
+          <div class="opts">
+            <button class="opt" data-why="A chain jam makes the motor strain against a stuck mechanism - current spikes high while the arm stays put. If your motor drew about 0 A, or if it actually moved, the mechanics were not the thing stopping it.">Chain jam - the mechanism is physically stuck</button>
+            <button class="opt" data-why="A tripped main breaker kills everything: 0.0 V, no comms, no lights. If your robot powered up and the Driver Station linked, the breaker held, so the problem is downstream.">Tripped main breaker - no power reaches the robot</button>
+            <button class="opt" data-why="A loose CAN wire drops the controller off the bus: the Driver Station flags a CAN error and the device blinks red, on an otherwise powered, green robot. If your CAN bus read healthy, or the robot never powered up at all, the wire is not the culprit.">Loose CAN wire - the controller fell off the bus</button>
+            <button class="opt" data-why="A wrong CAN ID shows a powered, all-green board with a healthy bus that still will not move, at about 0 A - the code is calling an address nobody answers. If anything else stood out - no power, a CAN error, high current, or wrong-way motion - it is a different fault.">Wrong CAN ID - code is addressing a device that is not there</button>
+            <button class="opt" data-why="An inverted motor runs fine but drives the wrong way. If your mechanism did not move at all, inversion is not the problem.">Inverted motor - it runs, but the wrong direction</button>
+          </div>
+        </div>
+        <div class="q" id="qTeam" data-correct="-1">
+          <div class="qn">The owner</div>
+          <div class="qt">Which subteam owns the fix?</div>
+          <div class="opts">
+            <button class="opt" data-why="Mechanical owns physical binds and jams. Unless the mechanism was physically stuck while the motor strained against it, this is not a mechanical fix.">Mechanical</button>
+            <button class="opt" data-why="Electrical owns power and wiring - breakers, battery leads, CAN wires. If power and the CAN bus were both healthy, the wiring did its job and the fix lives elsewhere.">Electrical</button>
+            <button class="opt" data-why="Code owns device IDs, motor inversions, and setpoints - things you fix by editing and redeploying. A dead breaker, a loose wire, or a physical jam cannot be fixed in software.">Code</button>
+          </div>
+        </div>
+        <div class="verdict" id="dgVerdict"><span class="dotv"></span><span id="dgVerdictTxt">Answer both to see if you nailed it.</span></div>
+      </div>
+    </div>
+
+    <p class="sub" style="font-size:14px;margin-top:14px">The five faults here are the classics, but the reflex is the point: read the symptom, sort it into mechanical, electrical, or code, and hand it to whoever can fix it fastest. That reflex is what makes a pit crew calm when the robot is not.</p>
+  </section>
+
+  <section>
+    <div class="note">
+      <div class="nh">Going further · optional</div>
+      <p>Real bring-up has a longer checklist and better tools. The Driver Station's <b>Diagnostics</b> and <b>CAN/Power</b> tabs show live bus utilization and voltage sag; <b>Phoenix Tuner</b> (for CTRE devices) lists every device on the bus with its ID and firmware, which turns a wrong-CAN-ID hunt into a two-second read. A good team keeps a written bring-up checklist taped in the pit so the same steps happen in the same order every match, and nobody skips the one that bit them last time. When a fault stumps you, the fastest path is almost always to isolate: does power reach the device, does the bus see it, does the code address it, does the mechanism turn by hand.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">You close the main breaker and it snaps right back off. No comms, no lights, the bus reads 0.0 V. Whose fix is this, most likely?</div>
+        <div class="opts">
+          <button class="opt" data-why="Code cannot help a robot that has no power - there is nothing running to fix. A dead bus points at power and wiring, not software.">Code - redeploy and try again</button>
+          <button class="opt">Electrical - a tripped breaker or a bad power connection</button>
+          <button class="opt" data-why="A chain jam needs a powered, running motor to even show up as a strain. With 0.0 V and no lights, the mechanism never got the chance to move.">Mechanical - the mechanism is jammed</button>
+        </div>
+        <div class="explain">A breaker that will not stay closed, zero volts, and no lights all point one way: power is not getting through. That is electrical - a tripped main breaker, a loose battery lead, or a bad connection. No amount of code or mechanism work matters until the robot has power.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">The board is all green, the CAN bus is healthy and the controller shows online at ID 4, but you command a move and get nothing - about 0 A, as if the command vanished. Best guess?</div>
+        <div class="opts">
+          <button class="opt" data-why="A loose CAN wire would show a CAN error and the device dropping off the bus. Here the bus is healthy and the device is online, so the wiring is fine.">Loose CAN wire - electrical</button>
+          <button class="opt" data-why="A chain jam would make the motor strain and pull high current. Drawing about 0 A means the motor never got the command in the first place.">Chain jam - mechanical</button>
+          <button class="opt">Wrong CAN ID - code is talking to an address the hardware does not answer to</button>
+        </div>
+        <div class="explain">Healthy bus, device online, zero current, no movement: the command is going somewhere that does not exist. The code is addressing a device ID the hardware does not use - say the motor is ID 4 but the code asks for ID 5. Nobody answers, so nothing happens and no current flows. Fix it in code to match the hardware, or re-ID the device. The bus being healthy is what rules out a wiring fault.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">Everything is green, you enable and command the arm up, and the motor strains hard - current spikes past 50 A and you can hear it working - but the arm does not move. Fault and owner?</div>
+        <div class="opts">
+          <button class="opt">Chain jam - mechanical, the mechanism is physically stuck</button>
+          <button class="opt" data-why="A wrong CAN ID leaves the motor at about 0 A because the command never reaches it. A 50 A strain means the motor is very much getting the command and fighting something.">Wrong CAN ID - code</button>
+          <button class="opt" data-why="An inverted motor moves the wrong way, but it does move and it draws a normal current. A high strain with zero movement is a physical block, not a wiring direction.">Inverted motor - code</button>
+        </div>
+        <div class="explain">High current with no movement is the signature of a physical block. The motor is doing exactly what the code asked - pushing hard - but a jammed chain, a bind, or something in the way is stopping the mechanism cold. That is mechanical, and it needs hands on the robot, not a redeploy. Leaving a motor straining like that will pop a breaker or cook the motor, so disable and clear the jam.</div>
+      </div>
+    </div>
+  </section>
+
+  <nav class="coursenav">
+    <a href="deploy-lesson-3.html">← Build, Deploy, Run</a>
+    <a class="map" href="code.html">Course map</a>
+    <a href="deploy-lesson-17.html">Motors &amp; Controllers →</a>
+  </nav>
+
+</div>
+
+<footer>Deploy · Programming an FRC robot</footer>
+
+<script>
+/* ============ the bring-up bench ============ */
+(function(){
+  "use strict";
+  var clamp=function(x,a,b){return x<a?a:(x>b?b:x);};
+
+  var STORE="frc:firstpowerup";
+  function load(){ try{ return JSON.parse(localStorage.getItem(STORE))||{}; }catch(e){ return {}; } }
+  function saveAll(d){ try{ localStorage.setItem(STORE, JSON.stringify(d)); }catch(e){} }
+  var data=load(); data.diagnosed=data.diagnosed||{}; data.m=data.m||{};
+
+  // ---- fault definitions ----
+  // faultIdx = correct index in the fault question; teamIdx = correct index in the subteam question
+  // (fault opts: 0 chain jam, 1 tripped breaker, 2 loose CAN, 3 wrong CAN ID, 4 inverted)
+  // (team  opts: 0 Mechanical, 1 Electrical, 2 Code)
+  var FAULTS={
+    chainjam:{ faultIdx:0, teamIdx:0, powered:true,  canState:"ok",  current:55, moved:0,  jam:true,
+      canText:"healthy · 1 controller online at ID 4",
+      symptom:"Everything came up green and you enabled and commanded the arm up - but the motor <b>strains hard, current spiking to about 55 A</b>, and the arm does not move. It is fighting something it cannot turn.",
+      fix:"disable, clear the jam, then re-run - the motor was getting the command and pushing into a physical block." },
+    tripped:{ faultIdx:1, teamIdx:1, powered:false, canState:"na", current:0, moved:0,
+      canText:"-- (no power)",
+      symptom:"You closed the main breaker and it <b>snapped right back off</b>. The robot never powered up: <b>0.0 V</b> on the bus, no radio, no comms, every light dark.",
+      fix:"reset or replace the main breaker and check the battery leads - nothing downstream can run without power." },
+    loosecan:{ faultIdx:2, teamIdx:1, powered:true,  canState:"err", current:0, moved:0,
+      canText:"ERROR · controller (ID 4) dropped off the bus, blinking red",
+      symptom:"The robot powered up and the Driver Station linked - Comms and Robot Code green. But the DS is throwing a <b>CAN error</b>: the controller dropped off the bus and is blinking red. You enabled and commanded a move: <b>nothing, and about 0 A</b>. The motor never even heard you.",
+      fix:"reseat the CAN wire (check the daisy-chain and terminating resistor) - the controller is powered but not talking." },
+    wrongid:{ faultIdx:3, teamIdx:2, powered:true,  canState:"ok",  current:0, moved:0,
+      canText:"healthy · 1 controller online at ID 4",
+      symptom:"A <b>full green board</b>: Comms, Robot Code, Enabled, and a <b>healthy CAN bus</b> with the controller online at ID 4. You commanded a move and got <b>nothing - about 0 A</b>, as if the command vanished. The hardware is fine; the code is addressing the wrong place.",
+      fix:"make the code's device ID match the hardware (ID 4), or re-ID the device - the bus is healthy, only the address is wrong." },
+    inverted:{ faultIdx:4, teamIdx:2, powered:true,  canState:"ok",  current:12, moved:-1,
+      canText:"healthy · 1 controller online at ID 4",
+      symptom:"Everything came up green and the motor runs - but when you commanded the arm <b>UP, it drove DOWN</b>. It moves fine, just the wrong way, drawing a normal <b>about 12 A</b>.",
+      fix:"flip the motor's inverted setting in code and redeploy - it is wired and commanded fine, just spinning the wrong way." }
+  };
+  var FAULTKEYS=["chainjam","tripped","loosecan","wrongid","inverted"];
+
+  // ---- state ----
+  var S={ key:null, f:null, step:0, exposed:false, moveCommanded:false,
+          powered:false, comms:false, code:false, enabled:false, canState:"na",
+          armAng:0, armTo:0, animating:false, animT:0, jam:false, current:0 };
+  var last=null;
+
+  // ---- elements ----
+  var rstate=document.getElementById("rstate"), rstateTxt=document.getElementById("rstateTxt");
+  var battEl=document.getElementById("batt"), battV=document.getElementById("battV");
+  var lpComms=document.getElementById("lpComms"), lpCode=document.getElementById("lpCode"), lpEnable=document.getElementById("lpEnable");
+  var canLine=document.getElementById("canLine");
+  var symptom=document.getElementById("symptom"), symptomTxt=document.getElementById("symptomTxt");
+  var moveBtn=document.getElementById("moveBtn"), clHint=document.getElementById("clHint");
+  var steps=Array.prototype.slice.call(document.querySelectorAll(".ck-step"));
+  var mech=document.getElementById("mech");
+
+  function light(el,state,label){ // state: 'on','off','warn','na'
+    el.className="lp"+(state==="on"?" on":state==="off"?" off":state==="warn"?" warnp":"");
+    el.textContent=label;
+  }
+  function setRobotState(){
+    if(!S.key){ rstate.className="robotstate"; rstateTxt.textContent="No robot yet"; return; }
+    if(!S.powered && (S.step>=2 || S.blocked)){ rstate.className="robotstate dead"; rstateTxt.textContent="No power"; return; }
+    if(S.enabled){ rstate.className="robotstate enabled"; rstateTxt.textContent="Enabled"; return; }
+    if(S.comms){ rstate.className="robotstate disabled"; rstateTxt.textContent="Disabled"; return; }
+    rstate.className="robotstate"; rstateTxt.textContent="Powering up";
+  }
+  function paintDS(){
+    battEl.className="batt"+(S.powered?"":((S.step>=2||S.blocked)?" dead":""));
+    battV.textContent=S.powered?"12.4":((S.step>=2||S.blocked)?"0.0":"--");
+    light(lpComms, S.comms?"on":(S.step>2?"off":"na"), S.comms?"Yes":(S.step>2?"No":"--"));
+    light(lpCode, S.code?"on":(S.step>3?"off":"na"), S.code?"Yes":(S.step>3?"No":"--"));
+    light(lpEnable, S.enabled?"on":(S.step>4?"off":"na"), S.enabled?"Yes":(S.step>4?"No":"--"));
+    var cs=S.canState;
+    if(cs==="na"){ canLine.className="canline"; canLine.innerHTML="CAN bus: <b>--</b>"; }
+    else if(cs==="ok"){ canLine.className="canline ok"; canLine.innerHTML="CAN bus: <b>"+S.f.canText+"</b>"; }
+    else { canLine.className="canline err"; canLine.innerHTML="CAN bus: <b>"+S.f.canText+"</b>"; }
+    setRobotState();
+  }
+
+  function renderSteps(){
+    steps.forEach(function(b){
+      var i=parseInt(b.getAttribute("data-step"),10);
+      b.classList.remove("active","done","failed","pending");
+      b.disabled=true;
+      if(!S.key){ b.classList.add("pending"); return; }
+      if(i<S.step){ b.classList.add("done"); }
+      else if(i===S.step){
+        if(S.blocked){ b.classList.add("pending"); }   // stalled after a failed step
+        else { b.classList.add("active"); b.disabled=false; }
+      }
+      else { b.classList.add("pending"); }
+    });
+    if(S.failedStep!=null){
+      var fb=steps[S.failedStep]; if(fb){ fb.classList.remove("done","active","pending"); fb.classList.add("failed"); }
+    }
+  }
+
+  function setHint(t){ clHint.textContent=t; }
+
+  // ---- checklist logic ----
+  function doStep(i){
+    if(!S.key || i!==S.step || S.blocked) return;
+    var f=S.f;
+    if(i===0){ // seat battery
+      S.step=1; setHint("Battery seated. Now close the main breaker.");
+    } else if(i===1){ // main breaker
+      if(!f.powered){ // tripped breaker
+        S.canState="na"; S.failedStep=1; S.blocked=true; S.exposed=true;
+        exposeSymptom();
+        setHint("The breaker will not stay closed. That is your fault to name.");
+      } else {
+        S.powered=true; S.step=2; setHint("Powered up, 12.4 V. Link the radio next.");
+      }
+    } else if(i===2){ // radio
+      S.comms=true; S.step=3; setHint("Comms linked. Deploy the code.");
+    } else if(i===3){ // deploy code
+      S.code=true; S.canState=f.canState; S.step=4;
+      if(f.canState==="err") setHint("Code is running - but check that CAN status. Enable and test anyway.");
+      else setHint("Code is running and the bus looks healthy. Enable the robot.");
+    } else if(i===4){ // enable
+      S.enabled=true; S.step=5; moveBtn.disabled=false;
+      setHint("Enabled. Command a test move and watch the arm.");
+    }
+    paintDS(); renderSteps();
+  }
+
+  function commandMove(){
+    if(!S.enabled || S.moveCommanded) return;
+    var f=S.f;
+    S.moveCommanded=true; S.exposed=true;
+    S.current=f.current; S.jam=!!f.jam;
+    // arm: commanded UP is negative; inverted drives down (positive), others stay put
+    S.armTo=(f.moved===-1)?0.85:0;
+    S.animating=true; S.animT=0;
+    moveBtn.disabled=true;
+    exposeSymptom();
+    setHint("Move commanded. Read the arm and the current, then make the call below.");
+  }
+
+  function exposeSymptom(){
+    symptom.classList.remove("hidden");
+    symptomTxt.innerHTML=S.f.symptom;
+    unlockDiagnosis();
+  }
+
+  // ---- mechanism canvas ----
+  function makeCanvas(cv){
+    var ctx=cv.getContext("2d"), o={cv:cv,ctx:ctx,w:0,h:0};
+    function fit(){ var r=cv.getBoundingClientRect(); if(!r.width) return;
+      var dpr=window.devicePixelRatio||1; cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr);
+      ctx.setTransform(dpr,0,0,dpr,0,0); o.w=r.width; o.h=r.height; }
+    o.fit=fit; fit(); return o;
+  }
+  function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+  var world=makeCanvas(mech);
+
+  function drawMech(){
+    var ctx=world.ctx, W=world.w, H=world.h; if(!W) return;
+    ctx.clearRect(0,0,W,H);
+    var px=W*0.30, py=H*0.66, L=Math.min(W,H)*0.46;
+    // ground base
+    ctx.fillStyle="#141d31"; ctx.strokeStyle="#2B3A57"; ctx.lineWidth=1.5;
+    roundRect(ctx,px-26,py+6,52,20,4); ctx.fill(); ctx.stroke();
+    var noRobot=!S.key;
+    // commanded-up ghost target (only after a move is commanded)
+    if(S.moveCommanded){
+      var ga=-1.0, gx=px+Math.cos(ga)*L, gy=py+Math.sin(ga)*L;
+      ctx.strokeStyle="rgba(142,140,248,0.35)"; ctx.lineWidth=3; ctx.setLineDash([5,5]);
+      ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(gx,gy); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle="rgba(142,140,248,0.55)"; ctx.font="10px "+"ui-monospace,monospace";
+      ctx.fillText("commanded: UP", gx-30, gy-8);
+    }
+    // arm strain shake for a jam
+    var sx=0, sy=0;
+    if(S.jam && S.moveCommanded){ sx=(Math.random()*2-1)*1.6; sy=(Math.random()*2-1)*1.6; }
+    var a=S.armAng;
+    var ex=px+Math.cos(a)*L+sx, ey=py+Math.sin(a)*L+sy;
+    // arm
+    ctx.strokeStyle=noRobot? "#2B3A57" : (S.powered? "#8E8CF8":"#3a4360");
+    ctx.lineWidth=10; ctx.lineCap="round";
+    ctx.shadowColor= S.powered? "rgba(142,140,248,0.6)":"transparent"; ctx.shadowBlur= S.powered?12:0;
+    ctx.beginPath(); ctx.moveTo(px+sx,py+sy); ctx.lineTo(ex,ey); ctx.stroke();
+    ctx.shadowBlur=0;
+    // pivot
+    ctx.fillStyle="#0e1730"; ctx.strokeStyle="#33415e"; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.arc(px+sx,py+sy,7,0,7); ctx.fill(); ctx.stroke();
+    // roller/hand at tip
+    ctx.fillStyle= noRobot? "#243149" : (S.powered? "#0e2b2a":"#243149");
+    ctx.strokeStyle= noRobot? "#33415e" : (S.powered? "#34D7C5":"#3a4360");
+    ctx.lineWidth=2; ctx.beginPath(); ctx.arc(ex,ey,10,0,7); ctx.fill(); ctx.stroke();
+
+    // current gauge
+    var gx0=16, gy0=H-24, gw=W-32, gh=10;
+    ctx.fillStyle="#0e1730"; roundRect(ctx,gx0,gy0,gw,gh,5); ctx.fill();
+    var frac=clamp(S.current/60,0,1);
+    var col = S.current>40? "#FF6B6B" : (S.current>25? "#FFB020":"#43D67E");
+    ctx.fillStyle=col; roundRect(ctx,gx0,gy0,Math.max(4,gw*frac),gh,5); ctx.fill();
+    ctx.fillStyle="#5E6F8E"; ctx.font="10px ui-monospace,monospace";
+    ctx.fillText("motor current", gx0, gy0-6);
+    ctx.textAlign="right"; ctx.fillStyle=col;
+    ctx.fillText((S.moveCommanded? Math.round(S.current):0)+" A", gx0+gw, gy0-6);
+    ctx.textAlign="left";
+    if(noRobot){
+      ctx.fillStyle="#5E6F8E"; ctx.font="12px ui-monospace,monospace"; ctx.textAlign="center";
+      ctx.fillText("press New robot", W/2, H*0.30); ctx.textAlign="left";
+    }
+  }
+
+  var lastT=0;
+  function frame(ts){
+    var t=ts/1000, dt=lastT?Math.min(0.033,t-lastT):0.016; lastT=t;
+    if(S.animating){
+      S.animT+=dt;
+      var k=clamp(S.animT/0.7,0,1); var e=1-Math.pow(1-k,3); // ease-out
+      S.armAng=S.armTo*e;
+      if(k>=1) S.animating=false;
+    }
+    drawMech();
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  var rt; window.addEventListener("resize",function(){ clearTimeout(rt); rt=setTimeout(function(){ world.fit(); },120); });
+
+  // ---- new robot ----
+  function newRobot(){
+    var k; do { k=FAULTKEYS[Math.floor(Math.random()*FAULTKEYS.length)]; } while(FAULTKEYS.length>1 && k===last);
+    last=k;
+    S={ key:k, f:FAULTS[k], step:0, exposed:false, moveCommanded:false,
+        powered:false, comms:false, code:false, enabled:false, canState:"na",
+        armAng:0, armTo:0, animating:false, animT:0, jam:false, current:0,
+        blocked:false, failedStep:null };
+    moveBtn.disabled=true;
+    symptom.classList.add("hidden"); symptomTxt.textContent="";
+    lockDiagnosis();
+    paintDS(); renderSteps();
+    setHint("Robot on the bench. Start with step 1: seat the battery.");
+  }
+
+  steps.forEach(function(b){ b.addEventListener("click",function(){ doStep(parseInt(b.getAttribute("data-step"),10)); }); });
+  moveBtn.addEventListener("click",commandMove);
+  document.getElementById("newBtn").addEventListener("click",newRobot);
+
+  /* ===================== diagnosis ===================== */
+  var dgBody=document.getElementById("dgBody"), dgLocked=document.getElementById("dgLocked");
+  var qFault=document.getElementById("qFault"), qTeam=document.getElementById("qTeam");
+  var dgVerdict=document.getElementById("dgVerdict"), dgVerdictTxt=document.getElementById("dgVerdictTxt");
+  var faultCorrect=false, teamCorrect=false, registered=false;
+
+  function resetQ(q){
+    q.querySelectorAll(".opt").forEach(function(o){ o.classList.remove("correct","wrong","locked"); });
+    q.querySelectorAll(".whyline").forEach(function(w){ w.parentNode.removeChild(w); });
+  }
+  function lockDiagnosis(){
+    dgBody.classList.remove("on"); dgLocked.style.display="";
+    resetQ(qFault); resetQ(qTeam);
+    qFault.setAttribute("data-correct","-1"); qTeam.setAttribute("data-correct","-1");
+    faultCorrect=false; teamCorrect=false; registered=false;
+    dgVerdict.className="verdict"; dgVerdictTxt.textContent="Answer both to see if you nailed it.";
+  }
+  function unlockDiagnosis(){
+    if(!S.f) return;
+    qFault.setAttribute("data-correct", String(S.f.faultIdx));
+    qTeam.setAttribute("data-correct", String(S.f.teamIdx));
+    dgLocked.style.display="none"; dgBody.classList.add("on");
+  }
+
+  function wireDiag(q, onCorrect){
+    q.querySelectorAll(".opt").forEach(function(opt,i){
+      opt.addEventListener("click",function(){
+        var correct=parseInt(q.getAttribute("data-correct"),10);
+        if(correct<0) return;                       // not unlocked yet
+        if(q.querySelector(".opt.locked")) return;  // already solved this question
+        if(i===correct){
+          q.querySelectorAll(".opt").forEach(function(o){ o.classList.add("locked"); });
+          opt.classList.add("correct");
+          onCorrect();
+        } else {
+          if(opt.classList.contains("wrong")) return;
+          opt.classList.add("wrong");
+          var w=opt.getAttribute("data-why");
+          var wl=opt.nextElementSibling;
+          if(!wl||!wl.classList||!wl.classList.contains("whyline")){ wl=document.createElement("div"); wl.className="whyline"; opt.parentNode.insertBefore(wl, opt.nextSibling); }
+          wl.textContent=w||"Not quite - read the symptom panel again, then try another answer.";
+        }
+      });
+    });
+  }
+  wireDiag(qFault,function(){ faultCorrect=true; checkDiag(); });
+  wireDiag(qTeam,function(){ teamCorrect=true; checkDiag(); });
+
+  function checkDiag(){
+    if(faultCorrect && teamCorrect && !registered){
+      registered=true;
+      var f=S.f;
+      dgVerdict.className="verdict good";
+      dgVerdictTxt.innerHTML="Nailed it. <b>"+faultName(S.key)+"</b>, owned by <b>"+teamName(f.teamIdx)+"</b>. The fix: "+f.fix;
+      registerDiagnosis(S.key);
+    }
+  }
+  function faultName(k){ return {chainjam:"Chain jam",tripped:"Tripped main breaker",loosecan:"Loose CAN wire",wrongid:"Wrong CAN ID",inverted:"Inverted motor"}[k]; }
+  function teamName(i){ return ["Mechanical","Electrical","Code"][i]; }
+
+  /* ===================== missions + tally ===================== */
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll("#missions .m-item"),function(n){ mItems[n.getAttribute("data-m")]=n; });
+  function mMark(n){ if(!n||n.classList.contains("cleared")) return; n.classList.add("cleared"); n.querySelector(".m-st").textContent=n.classList.contains("gold")?"★":"✓"; }
+
+  function registerDiagnosis(k){
+    if(!data.diagnosed[k]){ data.diagnosed[k]=true; saveAll(data); }
+    refreshProgress();
+  }
+  function refreshProgress(){
+    try{
+      var keys=Object.keys(data.diagnosed).filter(function(k){ return data.diagnosed[k]; });
+      var count=keys.length;
+      // tally chips
+      Array.prototype.forEach.call(document.querySelectorAll("#tally .tchip"),function(c){
+        var t=c.getAttribute("data-t"); c.classList.toggle("on", !!data.diagnosed[t]);
+      });
+      document.getElementById("tcount").textContent=count+" / 5 diagnosed";
+      // missions
+      var hasMech=!!data.diagnosed.chainjam;
+      var hasElec=!!(data.diagnosed.tripped||data.diagnosed.loosecan);
+      var hasCode=!!(data.diagnosed.wrongid||data.diagnosed.inverted);
+      if(count>=1){ data.m.first=true; mMark(mItems.first); }
+      if(count>=3){ data.m.three=true; mMark(mItems.three); }
+      if(hasMech&&hasElec&&hasCode){ data.m.eachteam=true; mMark(mItems.eachteam); }
+      if(count>=5){ data.m.gold=true; mMark(mItems.gold); }
+      saveAll(data);
+    }catch(e){}
+  }
+
+  // restore saved progress on load
+  refreshProgress();
+  // draw an empty bench to start
+  newRobot();
+})();
+</script>
+
+<script>
+/* ============ mastery quiz (data-why whyline on wrong) ============ */
+(function(){
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the clinic showed you, then try another answer.'; } }); });
+  });
+})();
+</script>
+
+<script>
+/* ============ auto mark-done in deploy:done once the quiz is finished ============ */
+(function(){
+  var KEY="deploy:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script src="account-config.js"></script>
+<script src="account.js"></script>
+</body>
+</html>

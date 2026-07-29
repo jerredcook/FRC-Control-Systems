@@ -17,7 +17,7 @@
  *
  * Bump VERSION to ship a new shell and evict the old cache.
  */
-var VERSION = "frc-academy-v4";
+var VERSION = "frc-academy-v5";
 
 try { importScripts("precache-manifest.js"); } catch (e) { /* manifest optional */ }
 

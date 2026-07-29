@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deploy · Review a Teammate PR</title>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --amber:#FFB020; --teal:#34D7C5; --indigo:#8E8CF8; --red:#FF6B6B; --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--ink); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.65; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 80% -10%, rgba(138,140,248,.07), transparent 60%),radial-gradient(700px 500px at -10% 10%, rgba(52,215,197,.05), transparent 55%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 12px var(--indigo)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:48px 0 18px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  h1{font-size:clamp(2.1rem,5vw,3.4rem);line-height:1.04;margin:.1em 0 .3em;letter-spacing:-.03em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--indigo),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(16px,2.2vw,19px);color:var(--text);max-width:60ch;margin-top:6px}
+  .dek b{color:var(--text)}
+  section{padding:26px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  .lead{font-size:19px}
+  em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  /* three-things list */
+  .look{display:grid;gap:12px;margin:20px 0 6px}
+  @media(min-width:620px){.look{grid-template-columns:repeat(3,1fr)}}
+  .lk{border:1px solid var(--line);border-radius:11px;padding:14px 15px;background:var(--panel);border-top:2px solid var(--indigo)}
+  .lk h4{margin:0 0 5px;font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--indigo)}
+  .lk p{margin:0;font-size:14.5px;color:var(--muted);line-height:1.5}
+
+  /* clinic / diff */
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);display:flex;gap:7px;align-items:center;white-space:nowrap}
+  .live{width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:0 0 8px var(--red);transition:.2s}
+  .live.on{background:var(--green);box-shadow:0 0 8px var(--green)}
+
+  .howto{padding:12px 16px;border-bottom:1px solid var(--line);font-size:14.5px;color:var(--muted);background:rgba(27,37,64,.25)}
+  .howto b{color:var(--text)}
+
+  .diff-scroll{overflow-x:auto;background:#0B1322}
+  .diff-inner{min-width:max-content;font-family:var(--mono);font-size:13px;line-height:1.6}
+  .dfile{display:flex;align-items:center;gap:10px;padding:9px 14px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:#10192b;position:sticky;left:0}
+  .dfile:first-child{border-top:none}
+  .dfile .fp{color:var(--text);font-size:12.5px}
+  .dfile .ftag{margin-left:auto;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px}
+  .dfile .ftag.new{color:var(--green);border-color:rgba(67,214,126,.4)}
+  .dfile .ftag.mod{color:var(--amber);border-color:rgba(255,176,32,.4)}
+  .dhunk{padding:5px 14px;color:var(--faint);background:#0d1626;font-size:12px;border-bottom:1px solid rgba(38,50,74,.5);position:sticky;left:0}
+
+  .drow{display:flex;width:100%;align-items:stretch;min-height:30px;border:none;background:transparent;color:#cdd9ec;font-family:var(--mono);font-size:13px;text-align:left;cursor:pointer;padding:0;transition:background .12s;border-bottom:1px solid rgba(38,50,74,.28)}
+  .drow:hover{background:rgba(142,140,248,.10)}
+  .drow:focus-visible{outline:2px solid var(--indigo);outline-offset:-2px}
+  .drow .lno{flex:0 0 auto;width:3em;text-align:right;padding:5px 8px 5px 0;color:var(--faint);user-select:none;border-right:1px solid rgba(38,50,74,.6)}
+  .drow .gut{flex:0 0 auto;width:1.7em;text-align:center;padding:5px 0;color:var(--faint);user-select:none}
+  .drow .src{flex:0 0 auto;padding:5px 16px 5px 8px;white-space:pre}
+  .drow.add{background:rgba(67,214,126,.07)} .drow.add .gut{color:var(--green)}
+  .drow.add:hover{background:rgba(67,214,126,.14)}
+  .drow.del{background:rgba(255,107,107,.09)} .drow.del .gut{color:var(--red)} .drow.del .src{color:#ffbcbc}
+  .drow.del:hover{background:rgba(255,107,107,.16)}
+  .drow.found{box-shadow:inset 3px 0 0 var(--green)}
+  .drow.found .gut::after{content:" ⚑";color:var(--amber)}
+  @keyframes flashwrong{0%,100%{background:transparent}30%{background:rgba(255,107,107,.28)}}
+  .drow.flash{animation:flashwrong .55s ease}
+  .drow.add.flash,.drow.del.flash{animation:flashwrong .55s ease}
+
+  /* inline review comment (github style) */
+  .rcomment{position:sticky;left:0;width:min(100%,620px);margin:6px 14px 12px;border:1px solid var(--line-2);border-left:3px solid var(--indigo);border-radius:10px;background:var(--panel);padding:12px 15px;white-space:normal;font-family:var(--sans)}
+  .rc-head{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+  .rc-badge{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#0a0f24;background:var(--indigo);border-radius:5px;padding:3px 7px;font-weight:700}
+  .rc-title{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--text)}
+  .rc-why{margin:0 0 10px;font-size:14.5px;color:var(--muted);line-height:1.55}
+  .rc-why b{color:var(--text)}
+  .rc-suggest{border:1px dashed var(--line-2);border-radius:8px;background:var(--panel-2);padding:9px 12px}
+  .rc-slabel{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--green);display:block;margin-bottom:4px}
+  .rc-suggest p{margin:0;font-size:14px;color:var(--text);line-height:1.55}
+
+  .nudge{padding:12px 16px;border-top:1px solid var(--line);font-size:14.5px;color:var(--muted);min-height:44px;display:flex;align-items:center;gap:9px;transition:color .12s}
+  .nudge.good{color:var(--green)} .nudge.bad{color:var(--amber)}
+  .nudge .nd{flex:0 0 auto;width:8px;height:8px;border-radius:50%;background:var(--faint)}
+  .nudge.good .nd{background:var(--green)} .nudge.bad .nd{background:var(--amber)}
+
+  .controls{padding:12px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--indigo);color:var(--text)}
+  .legend{display:flex;flex-wrap:wrap;gap:16px;margin-left:auto;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .legend i{width:14px;height:10px;border-radius:3px;display:inline-block}
+
+  /* missions */
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--indigo);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14.5px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto;width:1.2em}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:15.5px}
+  .note a{color:var(--teal);text-decoration:none;border-bottom:1px dotted rgba(52,215,197,.45)}
+  .note a:hover{border-bottom-style:solid}
+  .note.indigo{border-color:var(--indigo);background:rgba(138,140,248,.07)} .note.indigo .nh{color:var(--indigo)}
+
+  /* quiz */
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)} .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7} .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .whyline{margin:8px 2px 2px;font-size:13.5px;color:var(--amber);border-left:2px solid var(--amber);padding:3px 0 3px 11px;line-height:1.5}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--indigo);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px}
+  @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px}
+  .gl b{font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--indigo);min-width:120px;text-transform:uppercase}
+  .gl span{color:var(--muted)}
+
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
+  footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="code.html"><span class="dot"></span><span class="name">Deploy</span></a>
+    <div class="top-meta">PR Review</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Reading code</div>
+    <h1>Review a <span class="accent">teammate</span> PR</h1>
+    <p class="dek">Someone on your team just opened a pull request. Before it merges, a human reads it - and today that human is you. Reviewing is not about catching people out. It is the <b>friendliest quality gate</b> your team has, and it is a skill you can practice.</p>
+  </div>
+
+  <section>
+    <div class="kicker">Why bother</div>
+    <h2>A review is a gift, not a gotcha</h2>
+    <p class="lead">Every line of robot code gets read far more often than it gets written.</p>
+    <p>A review is the moment a second pair of eyes catches the small stuff before it turns into a mystery at competition - a motor that overheats, a command that fights itself, a number nobody can explain at 11pm the night before a match. Catching it now, kindly, is a gift to your teammate and to future-you.</p>
+    <p>A good review comment does three things: it points at <em>one specific line</em>, it explains <em>why it matters</em>, and it names <em>the fix</em> - never the person. "You always forget this" stings and teaches nothing. "Add <span class="k">addRequirements</span> here so the scheduler knows who owns the intake" actually helps.</p>
+    <div class="look">
+      <div class="lk"><h4>Values with no name</h4><p>A bare number sitting in the code that only its author understands. It wants to be a named constant.</p></div>
+      <div class="lk"><h4>Safety that vanished</h4><p>Current limits, soft limits, brake modes that quietly disappeared in a diff. Ask why before you approve.</p></div>
+      <div class="lk"><h4>Commands with no owner</h4><p>A command that drives a motor but never claims its subsystem. A missing requirement lets two commands grab the same mechanism.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Your turn to review</div>
+    <h2>Read the pull request</h2>
+    <p>Here is a real-looking PR from a teammate: it adds an intake command and tidies the subsystem. It works, mostly. But three things need a second look, one from each card above. Read it like a reviewer and click the exact line you would leave a comment on.</p>
+
+    <div class="demo clinic" id="clinic">
+      <div class="demo-head">
+        <span class="demo-title">Pull request #42 · Add intake command</span>
+        <span class="demo-tag"><span class="live" id="clinicDot"></span> <span id="foundCount">0 / 3 found</span></span>
+      </div>
+      <div class="howto">Click a line to flag it. <b>Two of the three problems are things that are absent</b> - a config that got deleted, a safety call that was never made - so read for what is missing, not only for what looks wrong.</div>
+      <div class="diff-scroll">
+        <div class="diff-inner" id="diff">
+
+          <div class="dfile"><span class="fp">src/main/java/frc/robot/subsystems/IntakeSubsystem.java</span><span class="ftag mod">modified</span></div>
+          <div class="dhunk">@@ -10,7 +10,5 @@ public class IntakeSubsystem extends SubsystemBase</div>
+          <button class="drow" data-l="10"><span class="lno">10</span><span class="gut"> </span><span class="src">  public IntakeSubsystem() {</span></button>
+          <button class="drow" data-l="11"><span class="lno">11</span><span class="gut"> </span><span class="src">    TalonFXConfiguration cfg = new TalonFXConfiguration();</span></button>
+          <button class="drow del" data-fault="limit"><span class="lno"></span><span class="gut">-</span><span class="src">    cfg.CurrentLimits.SupplyCurrentLimit = 30;</span></button>
+          <button class="drow del" data-fault="limit"><span class="lno"></span><span class="gut">-</span><span class="src">    cfg.CurrentLimits.SupplyCurrentLimitEnable = true;</span></button>
+          <button class="drow" data-l="12"><span class="lno">12</span><span class="gut"> </span><span class="src">    roller.getConfigurator().apply(cfg);</span></button>
+          <button class="drow" data-l="13"><span class="lno">13</span><span class="gut"> </span><span class="src">  }</span></button>
+
+          <div class="dfile"><span class="fp">src/main/java/frc/robot/commands/IntakeCommand.java</span><span class="ftag new">new file</span></div>
+          <div class="dhunk">@@ -0,0 +1,22 @@</div>
+          <button class="drow add" data-l="1"><span class="lno">1</span><span class="gut">+</span><span class="src">package frc.robot.commands;</span></button>
+          <button class="drow add" data-l="2"><span class="lno">2</span><span class="gut">+</span><span class="src"></span></button>
+          <button class="drow add" data-l="3"><span class="lno">3</span><span class="gut">+</span><span class="src">import edu.wpi.first.wpilibj2.command.Command;</span></button>
+          <button class="drow add" data-l="4"><span class="lno">4</span><span class="gut">+</span><span class="src">import frc.robot.subsystems.IntakeSubsystem;</span></button>
+          <button class="drow add" data-l="5"><span class="lno">5</span><span class="gut">+</span><span class="src"></span></button>
+          <button class="drow add" data-l="6"><span class="lno">6</span><span class="gut">+</span><span class="src">public class IntakeCommand extends Command {</span></button>
+          <button class="drow add" data-l="7"><span class="lno">7</span><span class="gut">+</span><span class="src">  private final IntakeSubsystem intake;</span></button>
+          <button class="drow add" data-l="8"><span class="lno">8</span><span class="gut">+</span><span class="src"></span></button>
+          <button class="drow add" data-fault="req"><span class="lno">9</span><span class="gut">+</span><span class="src">  public IntakeCommand(IntakeSubsystem intake) {</span></button>
+          <button class="drow add" data-fault="req"><span class="lno">10</span><span class="gut">+</span><span class="src">    this.intake = intake;</span></button>
+          <button class="drow add" data-l="11"><span class="lno">11</span><span class="gut">+</span><span class="src">  }</span></button>
+          <button class="drow add" data-l="12"><span class="lno">12</span><span class="gut">+</span><span class="src"></span></button>
+          <button class="drow add" data-l="13"><span class="lno">13</span><span class="gut">+</span><span class="src">  @Override</span></button>
+          <button class="drow add" data-l="14"><span class="lno">14</span><span class="gut">+</span><span class="src">  public void execute() {</span></button>
+          <button class="drow add" data-fault="magic"><span class="lno">15</span><span class="gut">+</span><span class="src">    intake.setSpeed(0.85);</span></button>
+          <button class="drow add" data-l="16"><span class="lno">16</span><span class="gut">+</span><span class="src">  }</span></button>
+          <button class="drow add" data-l="17"><span class="lno">17</span><span class="gut">+</span><span class="src"></span></button>
+          <button class="drow add" data-l="18"><span class="lno">18</span><span class="gut">+</span><span class="src">  @Override</span></button>
+          <button class="drow add" data-l="19"><span class="lno">19</span><span class="gut">+</span><span class="src">  public void end(boolean interrupted) {</span></button>
+          <button class="drow add" data-l="20"><span class="lno">20</span><span class="gut">+</span><span class="src">    intake.setSpeed(0.0);</span></button>
+          <button class="drow add" data-l="21"><span class="lno">21</span><span class="gut">+</span><span class="src">  }</span></button>
+          <button class="drow add" data-l="22"><span class="lno">22</span><span class="gut">+</span><span class="src">}</span></button>
+
+        </div>
+      </div>
+      <div class="nudge" id="nudge"><span class="nd"></span><span id="nudgeTxt">Read the diff top to bottom. When a line makes you pause, click it - that pause is the reviewer instinct you are training.</span></div>
+      <div class="controls">
+        <button class="btn" id="resetClinic">Reset review</button>
+        <div class="legend"><span><i style="background:rgba(67,214,126,.5)"></i> added</span><span><i style="background:rgba(255,107,107,.5)"></i> removed</span></div>
+      </div>
+    </div>
+
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">hunt them down at your own pace</span></div>
+      <div class="m-item" data-m="req"><span class="m-st">○</span><span>Find the command that drives the intake but <b>never claims it</b> - a missing addRequirements.</span></div>
+      <div class="m-item" data-m="magic"><span class="m-st">○</span><span>Spot the <b>hardcoded speed</b> that should be a named constant.</span></div>
+      <div class="m-item" data-m="limit"><span class="m-st">○</span><span>Catch the <b>safety limit</b> this PR quietly deleted.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> flag all three with <b>zero wrong clicks</b> - a clean, precise review. Missed one? Hit Reset review and hunt again.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">The other half of review</div>
+    <h2>Say it kindly</h2>
+    <p>Finding the problem is only half the job. The comment you write is the part your teammate actually reads. Aim for specific and warm: point at the line, explain the risk, offer the fix, and assume they are smart and busy, not careless. You want them to open your review and feel helped, not judged.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">You spotted the missing addRequirements. Which review comment is the most helpful?</div>
+        <div class="opts">
+          <button class="opt" data-why="It names the person's mistake instead of the fix, and 'again' turns a small miss into a jab. Your teammate learns nothing except that you are annoyed.">"This is wrong. You forgot addRequirements again."</button>
+          <button class="opt">"Small thing - add addRequirements(intake) in the constructor so the scheduler knows this command owns the intake. Easy one to miss."</button>
+          <button class="opt" data-why="Friendly, but kindness includes catching real problems, not waving them through. Approving a bug is not doing your teammate a favor - it just moves the surprise to the field.">"lgtm 👍" and approve it as-is</button>
+        </div>
+        <div class="explain">The best comment points at one line, explains why it matters, and names the fix - warmly. It treats the miss as normal (it is) and hands over the solution instead of the blame.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 2</div>
+        <div class="qt">The PR deletes the roller's SupplyCurrentLimit. Why flag it?</div>
+        <div class="opts">
+          <button class="opt">A jammed roller can now pull huge current and trip the breaker or overheat the motor - the limit is the seatbelt for that circuit.</button>
+          <button class="opt" data-why="Current limits are not just a drivetrain thing. Any motor that can stall - an intake, an arm, a shooter feed - needs one, because a stalled motor pulls the most current of all.">Current limits only matter on the drivetrain, so it is fine to drop here.</button>
+          <button class="opt" data-why="A current limit caps how many amps the motor can draw. It does not change spin direction - that is set by the sign of the output or the motor's inverted config.">Without it, the motor will spin backwards.</button>
+        </div>
+        <div class="explain">Supply current limits protect the breaker and the wiring, and stator limits protect the motor. A stalled intake pulls the most current of anything, so removing that cap risks a brownout mid-match. Ask why it was deleted, and loop in a mentor before dropping it.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 3</div>
+        <div class="qt">You find a bare 0.85 buried in execute(). Best move as a reviewer?</div>
+        <div class="opts">
+          <button class="opt" data-why="Numbers inline feel harmless until three files use 0.85 and you have to change them all to tune the intake. A name says what it means and lives in one place.">Leave it - a number in the code is no big deal.</button>
+          <button class="opt" data-why="Taking over someone's branch is not reviewing, it is overwriting. Suggest the change and let them make it - that is how they learn and how they keep ownership of their work.">Rewrite the whole file yourself and push over their branch.</button>
+          <button class="opt">Suggest pulling it into a named constant like IntakeConstants.kIntakeSpeed, so it is clear what the number means and lives in one place.</button>
+        </div>
+        <div class="explain">A magic number is not a crash, it is a maintenance trap. Suggesting a named constant makes the intent obvious and gives one place to tune. Suggest it kindly and let your teammate make the edit.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="note indigo">
+      <div class="nh">🤝 On your team · this week</div>
+      <p>Next pull request your team opens, leave one comment that follows the recipe: point at a line, say why it matters, offer the fix. If you are not sure something is a real problem - a deleted current limit, a soft limit that changed - ask a question instead of a demand, and check with your mentor before anyone merges a change to a safety config. A review that asks "was this on purpose?" is worth ten that say "this is wrong."</p>
+    </div>
+    <div class="note">
+      <div class="nh">Going further · optional</div>
+      <p>Great reviews are easier when PRs are small. A change that touches 30 lines gets a careful read; one that touches 800 gets a tired "looks fine." When it is your turn to open a PR, keep it focused and write a one-line summary of what changed and why - you are making it easy for the next reviewer to be kind and thorough. The deeper habit: treat code as something the whole team reads together, not something one person owns alone. New to command requirements or current limits? The <a href="glossary.html">glossary</a> has both.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Review · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>addRequirements</b><span>Tells the scheduler which subsystem a command owns, so two commands cannot fight over one motor.</span></div>
+        <div class="gl"><b>Magic number</b><span>A bare value with no name. Pull it into a constant for clarity and one-place tuning.</span></div>
+        <div class="gl"><b>Current limit</b><span>Caps the amps a motor can pull. A seatbelt for the breaker and the motor - rarely safe to delete.</span></div>
+        <div class="gl"><b>Kind comment</b><span>One line, the why, and the fix - aimed at the code, never the person.</span></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<nav class="coursenav">
+  <a href="glossary.html">&larr; Glossary</a>
+  <a class="map" href="code.html">Course map</a>
+  <a href="review.html">Review what you missed &rarr;</a>
+</nav>
+
+<footer>Deploy · Programming an FRC robot</footer>
+
+<script>
+(function(){
+  "use strict";
+  // ---- fault content: why it matters + a kind review comment ----
+  var FAULTS = {
+    limit: {
+      title: "Deleted current limit",
+      why: "This PR removes the roller's supply current limit. Without it, a jammed intake can pull huge current and <b>trip the breaker or overheat the motor</b> - a brownout at the worst moment. A current limit is a seatbelt for the circuit, so it should almost never be deleted.",
+      comment: "I see the current limit got removed here - was that on purpose? I'd keep SupplyCurrentLimit = 30 with Enable = true so a jammed roller can't trip the breaker or cook the motor. Worth a quick check with a mentor before we drop it."
+    },
+    req: {
+      title: "Missing addRequirements",
+      why: "This command drives the intake but its constructor <b>never calls addRequirements(intake)</b>. Without it the scheduler doesn't know the command owns the roller, so another command can grab the same motor at the same time and they fight - or the default command keeps running underneath.",
+      comment: "Nice, clean command. One thing for the constructor: add addRequirements(intake); so the scheduler knows this command owns the intake and won't let anything else drive it at the same time. Easy to miss - I forget it too."
+    },
+    magic: {
+      title: "Magic number",
+      why: "That bare <b>0.85</b> sits in execute() with no name. The next person has no idea what it means, and if a few files use 0.85 you have to hunt them all down to retune. A named constant says what the number is <em>for</em> and gives one place to change it.",
+      comment: "Could we pull this 0.85 into a constant like IntakeConstants.kIntakeSpeed? Then it's clear what the number means and we only change it in one spot when we tune. Works fine as-is, just easier to live with later."
+    }
+  };
+  var FAULT_KEYS = ["req","magic","limit"];
+
+  var STORE = "frc:prreview";
+  function load(){ try{ return JSON.parse(localStorage.getItem(STORE)) || {}; }catch(e){ return {}; } }
+  function save(){
+    try{
+      var cur = JSON.parse(localStorage.getItem(STORE)) || {};
+      cur.found = st.found; cur.hadWrong = st.hadWrong; cur.gold = st.gold;
+      localStorage.setItem(STORE, JSON.stringify(cur));
+    }catch(e){}
+  }
+  var st = load();
+  if(!st.found) st.found = {};
+  st.hadWrong = !!st.hadWrong; st.gold = !!st.gold;
+
+  var rows = Array.prototype.slice.call(document.querySelectorAll("#diff .drow"));
+  var nudge = document.getElementById("nudge");
+  var nudgeTxt = document.getElementById("nudgeTxt");
+  var foundCount = document.getElementById("foundCount");
+  var dot = document.getElementById("clinicDot");
+
+  var WRONGS = [
+    "That line reads fine. Reviewers skim for values that should be named, and safety configs that went missing.",
+    "Good instinct to check, but that one is clean. Two of the three problems are things that are absent, not code that looks wrong.",
+    "Not a problem on that line. Look for a hardcoded number, a missing current limit, or a command that never claims its subsystem.",
+    "Keep going - a real reviewer clicks around too. The three issues are one named-value, one missing safety config, and one command with no owner."
+  ];
+  var wrongIdx = 0;
+
+  function totalFound(){ var n=0; FAULT_KEYS.forEach(function(k){ if(st.found[k]) n++; }); return n; }
+
+  function setNudge(msg, cls){
+    nudgeTxt.textContent = msg;
+    nudge.className = "nudge" + (cls ? " " + cls : "");
+  }
+
+  function insertComment(afterRow, fault){
+    // avoid a duplicate comment for the same fault
+    if(document.querySelector('.rcomment[data-fault="'+fault+'"]')) return;
+    var f = FAULTS[fault]; if(!f) return;
+    var card = document.createElement("div");
+    card.className = "rcomment";
+    card.setAttribute("data-fault", fault);
+    card.innerHTML =
+      '<div class="rc-head"><span class="rc-badge">Your review</span><span class="rc-title">'+f.title+'</span></div>'+
+      '<p class="rc-why">'+f.why+'</p>'+
+      '<div class="rc-suggest"><span class="rc-slabel">A kind comment sounds like</span><p>'+f.comment+'</p></div>';
+    if(afterRow && afterRow.parentNode){ afterRow.parentNode.insertBefore(card, afterRow.nextSibling); }
+  }
+
+  function markFoundRows(fault){
+    rows.forEach(function(r){ if(r.getAttribute("data-fault")===fault) r.classList.add("found"); });
+  }
+
+  // ---- missions (wrapped so a missions bug can never break the page) ----
+  var miItems = {};
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll("#missions .m-item"), function(n){
+      miItems[n.getAttribute("data-m")] = n;
+    });
+  }catch(e){}
+  function setMi(id, on){
+    try{
+      var n = miItems[id]; if(!n) return;
+      var gold = n.classList.contains("gold");
+      if(on){ n.classList.add("cleared"); n.querySelector(".m-st").textContent = gold ? "★" : "✓"; }
+      else { n.classList.remove("cleared"); n.querySelector(".m-st").textContent = gold ? "★" : "○"; }
+    }catch(e){}
+  }
+  function refreshMissions(){
+    try{
+      setMi("req", !!st.found.req);
+      setMi("magic", !!st.found.magic);
+      setMi("limit", !!st.found.limit);
+      if(totalFound()===3 && !st.hadWrong) st.gold = true;
+      setMi("gold", !!st.gold);
+    }catch(e){}
+  }
+
+  function updateBar(){
+    var n = totalFound();
+    foundCount.textContent = n + " / 3 found";
+    if(n===3) dot.classList.add("on"); else dot.classList.remove("on");
+    refreshMissions();
+  }
+
+  function findFault(fault, clickedRow){
+    if(st.found[fault]){
+      setNudge("You already flagged this one - your comment is right below it.", "good");
+      return;
+    }
+    st.found[fault] = true;
+    save();
+    markFoundRows(fault);
+    var anchor = clickedRow || document.querySelector('.drow[data-fault="'+fault+'"]');
+    insertComment(anchor, fault);
+    var n = totalFound();
+    if(n===3){
+      if(!st.hadWrong) setNudge("All three, no wrong clicks. That is a gold-standard review - precise and kind.", "good");
+      else setNudge("All three flagged. Read each comment and notice how it names the fix, never the person.", "good");
+    } else {
+      setNudge("Nice catch. Read the comment below, then keep hunting - " + (3-n) + " to go.", "good");
+    }
+    updateBar();
+  }
+
+  function wrongClick(row){
+    if(!st.hadWrong){ st.hadWrong = true; save(); }
+    row.classList.remove("flash");
+    // reflow so the animation restarts on repeat clicks
+    void row.offsetWidth;
+    row.classList.add("flash");
+    setNudge(WRONGS[wrongIdx % WRONGS.length], "bad");
+    wrongIdx++;
+    updateBar();
+  }
+
+  rows.forEach(function(r){
+    r.addEventListener("click", function(){
+      var fault = r.getAttribute("data-fault");
+      if(fault){ findFault(fault, r); }
+      else { wrongClick(r); }
+    });
+  });
+
+  // ---- restore saved state on load ----
+  FAULT_KEYS.forEach(function(k){
+    if(st.found[k]){ markFoundRows(k); insertComment(document.querySelector('.drow[data-fault="'+k+'"]'), k); }
+  });
+  updateBar();
+
+  // ---- reset ----
+  document.getElementById("resetClinic").addEventListener("click", function(){
+    st.found = {}; st.hadWrong = false; st.gold = false; save();
+    Array.prototype.forEach.call(document.querySelectorAll(".rcomment"), function(c){ c.parentNode.removeChild(c); });
+    rows.forEach(function(r){ r.classList.remove("found","flash"); });
+    wrongIdx = 0;
+    setNudge("Fresh start. Read the diff again and flag all three with no wrong clicks for gold.", "");
+    updateBar();
+  });
+})();
+</script>
+<script>
+(function(){
+  // mastery quiz: correct locks; wrong shows a data-why whyline and stays retryable
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what a kind, specific review comment does, then try another answer.'; } }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  // mark this companion complete under its own frc:prreview key once the quiz is finished
+  var STORE="frc:prreview";
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function mark(){ try{ var cur=JSON.parse(localStorage.getItem(STORE))||{}; if(!cur.quiz){ cur.quiz=true; localStorage.setItem(STORE,JSON.stringify(cur)); } }catch(e){} }
+  function check(){ var all=true; qs.forEach(function(q){ if(!q.querySelector(".opt.locked")) all=false; }); if(all) mark(); }
+  document.querySelectorAll("#quiz .opt").forEach(function(o){ o.addEventListener("click",function(){ setTimeout(check,40); }); });
+})();
+</script>
+<script src="account-config.js"></script>
+<script src="account.js"></script>
+</body>
+</html>
