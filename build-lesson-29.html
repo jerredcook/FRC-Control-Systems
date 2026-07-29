@@ -204,8 +204,8 @@
         <div class="qt">What is the roboRIO?</div>
         <div class="opts">
           <button class="opt">The robot's main computer - your code runs on it and commands everything</button>
-          <button class="opt">A motor</button>
-          <button class="opt">The battery</button>
+          <button class="opt" data-why="Motors are the parts you see move, so they steal the spotlight - but the roboRIO never moves anything itself. It is the computer that tells every motor what to do.">A motor</button>
+          <button class="opt" data-why="The battery is the other famous box on the robot, so the mix-up is common - but it only supplies power. The roboRIO supplies the decisions.">The battery</button>
         </div>
         <div class="explain">The roboRIO is the brain. Your program runs on it, reads sensors, and sends commands out over the CAN bus to the motor controllers.</div>
       </div>
@@ -213,8 +213,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">How are the motor controllers connected to the roboRIO?</div>
         <div class="opts">
-          <button class="opt">Each with its own long cable to the roboRIO</button>
-          <button class="opt">Wirelessly</button>
+          <button class="opt" data-why="That is how home-run wiring works in a house panel, so it is a fair picture - but CAN saves all that copper. One two-wire bus hops from device to device instead.">Each with its own long cable to the roboRIO</button>
+          <button class="opt" data-why="There is a radio on the robot, so wireless is a tempting guess - but that link only talks to the driver station. On the robot itself, commands ride the two CAN wires.">Wirelessly</button>
           <button class="opt">In a daisy chain on the two-wire CAN bus</button>
         </div>
         <div class="explain">CAN is a single two-wire bus that hops device to device in a daisy chain. Each controller taps the same two wires, no separate cable per device.</div>
@@ -223,11 +223,21 @@
         <div class="qn">Question 3</div>
         <div class="qt">A connector midway down the CAN bus comes loose. What happens?</div>
         <div class="opts">
-          <button class="opt">Only that one device drops</button>
+          <button class="opt" data-why="That is how a star network would fail, one branch at a time - but CAN is a chain. Cut a link and everything downstream of it goes silent together.">Only that one device drops</button>
           <button class="opt">Every device after the break loses communication</button>
-          <button class="opt">Nothing</button>
+          <button class="opt" data-why="It seems like five good connections should cover for one bad one, but a chain has no detours. The signal physically cannot reach past the break.">Nothing</button>
         </div>
         <div class="explain">A break in a daisy chain cuts off everything downstream of it. That's why a single loose CAN connector can knock out half the robot, and why crimps and strain relief matter.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">From the sim's pit report: exactly 3 of the 6 devices are answering, and a single link is loose. Which link has to be the culprit?</div>
+        <div class="opts">
+          <button class="opt" data-why="A break that early is the famous disaster, but it would leave only the roboRIO talking - 1 of 6. With 3 still answering, the signal clearly makes it two hops past the roboRIO before it dies.">The first link, right after the roboRIO</button>
+          <button class="opt">The link between the SparkMax and the PDH, the third hop down the chain</button>
+          <button class="opt" data-why="That break would be the gentlest one, dropping only the terminator for 5 of 6. Losing half the chain means the cut sits much further upstream.">The last link, just before the 120 Ω terminator</button>
+        </div>
+        <div class="explain">Count down the chain: a break silences everything after it, so 3 devices online means the first three (roboRIO, TalonFX, SparkMax) still talk and the break sits right after the third. That is the link between the SparkMax and the PDH. The online count is a map straight to the fault - exactly the reasoning the 3-of-6 mission asked you to do before clicking.</div>
       </div>
     </div>
   </section>
@@ -356,7 +366,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

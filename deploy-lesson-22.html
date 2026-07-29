@@ -319,9 +319,9 @@ rpmPub.<span class="fn">set</span>(shooter.<span class="fn">getRPM</span>());</p
         <div class="qn">Question 1</div>
         <div class="qt">What is NetworkTables?</div>
         <div class="opts">
-          <button class="opt">A type of motor controller</button>
+          <button class="opt" data-why="The name does sound like hardware, but motor controllers live on the CAN bus moving power. NetworkTables moves data - named values shared over the network.">A type of motor controller</button>
           <button class="opt">A shared key-value table synced between the robot and the dashboard</button>
-          <button class="opt">A battery</button>
+          <button class="opt" data-why="The battery moves electrons, not numbers. NetworkTables is the shared notebook of named values the robot and your laptop both read and write.">A battery</button>
         </div>
         <div class="explain">NetworkTables is a live table of named values shared over the network. The robot writes to it, dashboards read from it, and it all stays in sync automatically.</div>
       </div>
@@ -329,8 +329,8 @@ rpmPub.<span class="fn">set</span>(shooter.<span class="fn">getRPM</span>());</p
         <div class="qn">Question 2</div>
         <div class="qt">Is NetworkTables one-way (robot to dashboard only)?</div>
         <div class="opts">
-          <button class="opt">Yes, the robot can only send</button>
-          <button class="opt">Yes, the dashboard can only send</button>
+          <button class="opt" data-why="Telemetry out is the traffic you see most, so this feels right - but the kP slider in the sim proves the return lane: the dashboard writes, the robot reads.">Yes, the robot can only send</button>
+          <button class="opt" data-why="The same one-way trap, mirrored. If only the dashboard could send, you would never see RPM or voltage - both directions flow at once.">Yes, the dashboard can only send</button>
           <button class="opt">No - it's two-way; the dashboard can write values the robot reads</button>
         </div>
         <div class="explain">It's bidirectional. That's what makes live tuning and auto-mode choosers work: the dashboard writes "Shooter/kP" or "Auto/selected" and the robot reads it back, no code redeploy needed.</div>
@@ -340,10 +340,20 @@ rpmPub.<span class="fn">set</span>(shooter.<span class="fn">getRPM</span>());</p
         <div class="qt">Which tools read NetworkTables to show you the robot's data?</div>
         <div class="opts">
           <button class="opt">Elastic, Shuffleboard, AdvantageScope</button>
-          <button class="opt">GitHub and VS Code</button>
-          <button class="opt">The motor controllers</button>
+          <button class="opt" data-why="Those are your code tools - they edit and store source, so they come to mind fast. But they never subscribe to the live table; dashboards do.">GitHub and VS Code</button>
+          <button class="opt" data-why="Motor controllers only listen for commands on the CAN bus. The tools that subscribe to NetworkTables and draw your data are the dashboards.">The motor controllers</button>
         </div>
         <div class="explain">Dashboards like Elastic and Shuffleboard, and the log viewer AdvantageScope, all subscribe to NetworkTables to plot and display what your robot publishes.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">In the sim the robot publishes Shooter/RPM every loop. Suppose the dashboard let you type 5000 into that RPM widget. What would you see a moment later?</div>
+        <div class="opts">
+          <button class="opt" data-why="It would make a handy remote control, but RPM here is telemetry - the robot writes it from its sensors, and nothing in the code reads it back as a command.">The shooter spins up to 5000 - writing a dashboard value commands the robot</button>
+          <button class="opt">Your 5000 vanishes - the robot republishes the real RPM on its next loop, overwriting you</button>
+          <button class="opt" data-why="NetworkTables is more easygoing than that - anyone can write any key. It is simply last-writer-wins, and a robot writing every loop always wins.">NetworkTables rejects the edit, because every key has one permanent owner</button>
+        </div>
+        <div class="explain">A key the robot putNumber()s every loop cannot be tuned from the dashboard: whatever you type gets stomped by the robot's next write, about 20 ms later. That is exactly why Shooter/kP works the other way in the sim - the robot only reads that key, so your slider value sticks. One key, one direction: publish it or read it back, not both.</div>
       </div>
     </div>
   </section>
@@ -479,7 +489,7 @@ rpmPub.<span class="fn">set</span>(shooter.<span class="fn">getRPM</span>());</p
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

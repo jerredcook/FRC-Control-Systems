@@ -203,9 +203,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">What's the order of the pneumatic system?</div>
         <div class="opts">
-          <button class="opt">Cylinder → tank → compressor</button>
+          <button class="opt" data-why="Right parts, wrong direction - the cylinder is the end of the line, not the start. Air flows from the compressor that makes it, through the tank that stores it, to the cylinder that uses it.">Cylinder → tank → compressor</button>
           <button class="opt">Compressor → tank → solenoid valve → cylinder</button>
-          <button class="opt">Battery → cylinder directly</button>
+          <button class="opt" data-why="The battery does play a role, but only to spin the compressor and click the solenoid - electricity never touches the piston. Stored air from the tank does the shoving.">Battery → cylinder directly</button>
         </div>
         <div class="explain">The compressor builds pressure into the tank, the solenoid valve directs that stored air, and the cylinder turns it into motion. Airflow always runs in that order.</div>
       </div>
@@ -213,8 +213,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">What is pneumatics best suited for?</div>
         <div class="opts">
-          <button class="opt">Precise positioning anywhere in a range</button>
-          <button class="opt">Constant spinning</button>
+          <button class="opt" data-why="Tempting, because cylinders are so strong - but a cylinder only knows two spots, fully out or fully in. Stopping partway is a job for a motor with a sensor.">Precise positioning anywhere in a range</button>
+          <button class="opt" data-why="Spinning feels like power, but a cylinder strokes once and stops - continuous rotation is exactly what motors are for. Air shines at snap-action, two-position jobs.">Constant spinning</button>
           <button class="opt">Fast on-off jobs that hold position with no current</button>
         </div>
         <div class="explain">Air gives you two positions, out or in, with a strong snap and zero holding current. It's ideal for clamps and hooks, but wrong for anything needing to stop partway or move continuously.</div>
@@ -224,10 +224,20 @@
         <div class="qt">You keep firing the cylinder with the compressor off. What happens?</div>
         <div class="opts">
           <button class="opt">The tank runs low and the cylinder gets weak</button>
-          <button class="opt">It fires forever</button>
-          <button class="opt">The compressor turns itself on</button>
+          <button class="opt" data-why="It feels like the valve does the work, but every shot spends stored air from the tank, and a tank is a bucket, not a fountain. Run the bucket dry and the shots go soft.">It fires forever</button>
+          <button class="opt" data-why="Good instinct - real FRC robots often do auto-run the compressor. In this sim, though, nothing refills the tank until you switch it on yourself, so the pressure just falls.">The compressor turns itself on</button>
         </div>
         <div class="explain">Each shot spends stored air. With no compressor refilling the tank, pressure drops and the cylinder loses force, which is why teams watch their air supply during a match.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">The tank is full at 120 psi and the compressor is off. Each full-force shot costs about 6.5 psi. Roughly how many shots can you fire before the tank dips under 40 psi?</div>
+        <div class="opts">
+          <button class="opt" data-why="A careful guess, but the tank holds more than that - you have 80 psi to spend before hitting the 40 psi floor, and 6.5 goes into 80 about 12 times.">About 5 shots</button>
+          <button class="opt">About 12 shots</button>
+          <button class="opt" data-why="That would be a luxury, but 20 shots would cost around 130 psi - more air than the full tank even holds. The 40 psi floor arrives after about 12.">About 20 shots</button>
+        </div>
+        <div class="explain">You have 120 minus 40, so 80 psi of usable air, and 80 divided by 6.5 is a little over 12. Shot 12 leaves the tank near 42 psi, and the next one would drop it under 40. That is the gold-mission math, and it is the same air budget a drive team runs in their head during a match.</div>
       </div>
     </div>
   </section>
@@ -369,7 +379,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

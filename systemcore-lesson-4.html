@@ -260,9 +260,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">What is the RP2350 chip's job on SystemCore?</div>
         <div class="opts">
-          <button class="opt">It is the main brain that runs your robot code</button>
+          <button class="opt" data-why="With two chips on one board, mixing them up is easy - the CM5 is the brain that runs your code. The RP2350 is the helper dedicated to the Smart I/O ports.">It is the main brain that runs your robot code</button>
           <button class="opt">It is a helper chip that runs the reconfigurable Smart I/O ports</button>
-          <button class="opt">It stores the battery charge</button>
+          <button class="opt" data-why="A chip handling power sounds plausible, but storing charge is the battery's job. The RP2350's job is keeping the Smart I/O ports fast and steady.">It stores the battery charge</button>
         </div>
         <div class="explain">The CM5 is the brain that runs your code. The RP2350 is a separate, dedicated chip whose job is running the Smart I/O ports, so the ports stay fast and steady while the brain handles bigger jobs.</div>
       </div>
@@ -270,8 +270,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">What does "reconfigurable Smart I/O" mean?</div>
         <div class="opts">
-          <button class="opt">Each port has one fixed job set at the factory</button>
-          <button class="opt">The ports only work after a firmware update each match</button>
+          <button class="opt" data-why="Fixed jobs were the roboRIO way, with separate PWM, digital, and analog banks, so it is a fair guess. Smart I/O flips that: you pick each port's job in software.">Each port has one fixed job set at the factory</button>
+          <button class="opt" data-why="Firmware updates are a real chore in robotics, so this sounds believable, but there is no per-match ritual - reconfigurable just means your code chooses the port's role.">The ports only work after a firmware update each match</button>
           <button class="opt">One port can be set in software to act as PWM, Digital I/O, or Analog Input</button>
         </div>
         <div class="explain">A Smart I/O port is like a multi-tool socket. The plug stays the same, and you choose in code whether it acts as PWM, digital, or analog. One socket, you pick its job.</div>
@@ -281,8 +281,8 @@
         <div class="qt">What is CAN FD?</div>
         <div class="opts">
           <button class="opt">A faster, higher-bandwidth version of the CAN bus used today</button>
-          <button class="opt">A brand of battery</button>
-          <button class="opt">A type of camera lens</button>
+          <button class="opt" data-why="The letters do read like a product code, but CAN FD is wiring, not power - a faster, higher-bandwidth version of the CAN bus robots already use.">A brand of battery</button>
+          <button class="opt" data-why="With vision built into the board, camera parts are a fair place to look, but CAN FD lives on the wiring side - the faster bus that motors and sensors talk over.">A type of camera lens</button>
         </div>
         <div class="explain">CAN FD is a faster, higher-bandwidth version of the CAN bus robots already use. On SystemCore it runs at 1 Mbps, leaving plenty of room for fast device updates.</div>
       </div>
@@ -324,7 +324,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

@@ -242,8 +242,8 @@ rps       = motor.<span class="fn">get_velocity</span>().value  <span class="cm"
         <div class="qn">Question 1</div>
         <div class="qt">What is a TalonFX?</div>
         <div class="opts">
-          <button class="opt">A type of battery</button>
-          <button class="opt">The roboRIO's main processor</button>
+          <button class="opt" data-why="A fair guess from the name alone, but the TalonFX supplies no power itself - it is the motor controller built into a Kraken or Falcon, the little brain that drives the motor.">A type of battery</button>
+          <button class="opt" data-why="It is a processor, which is the tempting part - but it lives inside the motor, not the roboRIO. The rio is the robot's main computer; the TalonFX is the controller riding on the motor itself.">The roboRIO's main processor</button>
           <button class="opt">The motor controller inside a Kraken or Falcon that can run the control loop on board</button>
         </div>
         <div class="explain">The TalonFX is the brain built into each Kraken/Falcon. It drives the motor and can run PID + feedforward itself at 1 kHz - you address it in code by its CAN id.</div>
@@ -253,8 +253,8 @@ rps       = motor.<span class="fn">get_velocity</span>().value  <span class="cm"
         <div class="qt">Why is running the loop on the TalonFX (1 kHz) better than on the roboRIO (50 Hz)?</div>
         <div class="opts">
           <button class="opt">It corrects 20× more often, so it reacts faster and with steadier timing - and frees the roboRIO</button>
-          <button class="opt">It uses less battery</button>
-          <button class="opt">It makes the motor physically stronger</button>
+          <button class="opt" data-why="Saving battery would be nice, but roughly the same current flows either way. The real win is timing: 1,000 corrections a second instead of 50, with none of them arriving late.">It uses less battery</button>
+          <button class="opt" data-why="No extra muscle - same magnets, same windings. The gain is a quicker, steadier loop, like a rider who checks their balance 20 times more often without pedaling any harder.">It makes the motor physically stronger</button>
         </div>
         <div class="explain">A 1 kHz loop catches disturbances almost instantly and isn't fighting the rest of your code for CPU time. The roboRIO just sends targets and reads status, leaving it free for higher-level work.</div>
       </div>
@@ -262,11 +262,21 @@ rps       = motor.<span class="fn">get_velocity</span>().value  <span class="cm"
         <div class="qn">Question 3</div>
         <div class="qt">In the on-motor approach, what does your roboRIO code send to the TalonFX?</div>
         <div class="opts">
-          <button class="opt">A new voltage every 20 ms</button>
+          <button class="opt" data-why="That is exactly the old roboRIO way, which is why it feels right - it is the habit you are unlearning. On-motor control sends a target once and lets the TalonFX work out the volts at 1 kHz.">A new voltage every 20 ms</button>
           <button class="opt">A target (like a position or velocity), and the motor closes the loop itself</button>
-          <button class="opt">Nothing - the motor is fully autonomous</button>
+          <button class="opt" data-why="Tempting once you hear that the motor runs the loop, but it still needs to be told where to go. Your code supplies the target; the motor supplies the corrections.">Nothing - the motor is fully autonomous</button>
         </div>
         <div class="explain">You send a control request with a target. The TalonFX runs PID + feedforward against that target on board, so you're commanding "go here" instead of computing volts yourself.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">You leave the loop running on the TalonFX and wait until the roboRIO counter reads about 150. What does the TalonFX counter read at that same moment?</div>
+        <div class="opts">
+          <button class="opt" data-why="They would match if both loops ran at the same rate, but the counters count loop passes - and the TalonFX makes 1,000 of them every second to the roboRIO's 50.">About 150 - the counters climb together</button>
+          <button class="opt">About 3,000 - twenty TalonFX loops for every one roboRIO loop</button>
+          <button class="opt" data-why="Twice as fast undersells it badly. The gap is 1 kHz against 50 Hz, a factor of 20 - and that factor is exactly what makes onboard control feel instant.">About 300 - the TalonFX runs about twice as fast</button>
+        </div>
+        <div class="explain">The roboRIO loop ticks 50 times a second and the TalonFX 1,000, so the ratio stays locked at 20 no matter how long you watch. A rio count of 150 means 3 seconds have passed, and in 3 seconds the onboard loop has made about 3,000 corrections - each one a chance to catch a bump the slower loop would miss.</div>
       </div>
     </div>
   </section>
@@ -409,7 +419,7 @@ rps       = motor.<span class="fn">get_velocity</span>().value  <span class="cm"
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
     opts.forEach(function(opt,i){
-      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
+      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } });
     });
   });
 })();

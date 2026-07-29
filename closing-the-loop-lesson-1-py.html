@@ -449,7 +449,7 @@
         <div class="qt">A microwave that heats for a fixed time no matter what's inside is an example of…</div>
         <div class="opts">
           <button class="opt">Open loop control</button>
-          <button class="opt">Closed loop control</button>
+          <button class="opt" data-why="Tempting, because a microwave feels automatic - but automatic is not the same as watching. It never checks the food, so nothing loops back.">Closed loop control</button>
         </div>
         <div class="explain">Open loop. It commits to an action (3:00 of heating) and never measures the result, so it can't tell whether the food is cold, hot, or on fire.</div>
       </div>
@@ -457,9 +457,9 @@
         <div class="qn">Question 2</div>
         <div class="qt">In control terms, the gap between where you want to be and where you actually are is called the…</div>
         <div class="opts">
-          <button class="opt">Setpoint</button>
+          <button class="opt" data-why="Close - the setpoint is one half of the gap. It is where you want to be; the gap itself is what is left after you subtract where you are.">Setpoint</button>
           <button class="opt">Error</button>
-          <button class="opt">Measurement</button>
+          <button class="opt" data-why="Fair guess - the measurement is the other half of the gap. It is where you actually are; the error is the setpoint minus that reading.">Measurement</button>
         </div>
         <div class="explain">Error - it's the setpoint minus the measurement. Almost everything a controller does is a reaction to this single number.</div>
       </div>
@@ -467,11 +467,21 @@
         <div class="qn">Question 3</div>
         <div class="qt">Why does a closed-loop controller handle surprises (like a gust of wind) better than an open-loop one?</div>
         <div class="opts">
-          <button class="opt">It uses a more powerful motor</button>
-          <button class="opt">It plans the whole motion before starting</button>
+          <button class="opt" data-why="Power feels like the fix, but both loops here share the same thruster. The difference is that only one of them ever notices the gust.">It uses a more powerful motor</button>
+          <button class="opt" data-why="Planning ahead sounds smart, but a plan made before the gust cannot include the gust. That is open loop thinking - closed loop reacts while things change.">It plans the whole motion before starting</button>
           <button class="opt">It keeps measuring and corrects based on the error</button>
         </div>
         <div class="explain">It keeps measuring. Because it's constantly comparing where it is to where it wants to be, an unexpected push just shows up as error - and it corrects. Open loop never looks back, so it can't react to anything it didn't expect.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">In the open vs closed sim: you pick Closed loop, press Run, and slide Disturbance up to 0.40. What does the marker do?</div>
+        <div class="opts">
+          <button class="opt" data-why="That would take a perfect controller, and this one only pushes back after it sees a gap. A gust that keeps changing keeps remaking a small gap, so the marker is always chasing it.">Sits frozen exactly on the 0.50 line, as if the gust were not there</button>
+          <button class="opt">Stays close but keeps wobbling, riding just above the line around 0.55</button>
+          <button class="opt" data-why="That is the open-loop ending. Closed loop keeps measuring, so the gust shows up as error and gets pushed back on before it can carry the marker away.">Drifts up and pins near the top, the same as open loop</button>
+        </div>
+        <div class="explain">Closed loop holds the marker close but not perfect. The gust keeps changing, so a small shifting error is always left for the controller to chase, and the marker wobbles around a spot slightly above the line - near 0.55 with the slider at 0.40. Run the same gust in open loop and compare: that marker walks off and pins near the top.</div>
       </div>
     </div>
   </section>
@@ -734,7 +744,7 @@
     var explain=q.querySelector('.explain');
     var done=false;
     opts.forEach(function(opt,i){
-      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
+      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } });
     });
   });
 })();

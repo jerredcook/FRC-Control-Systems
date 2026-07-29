@@ -368,9 +368,9 @@ motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="output" 
         <div class="qn">Question 1</div>
         <div class="qt">The derivative term responds to…</div>
         <div class="opts">
-          <button class="opt">The size of the error right now</button>
+          <button class="opt" data-why="Easy to blur, but the size of the gap is kP's department. The derivative does not care how big the error is - only how fast it is moving.">The size of the error right now</button>
           <button class="opt">How fast the error is changing</button>
-          <button class="opt">The total error accumulated so far</button>
+          <button class="opt" data-why="That running total is the integral, last lesson's term. The derivative is its mirror image - no memory at all, just the speed of the error this instant.">The total error accumulated so far</button>
         </div>
         <div class="explain">Derivative is the error's rate of change - its speed. That's what lets it anticipate the target and ease off before you arrive, rather than reacting only to how far off you are.</div>
       </div>
@@ -378,9 +378,9 @@ motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="output" 
         <div class="qn">Question 2</div>
         <div class="qt">Why does adding kD reduce overshoot?</div>
         <div class="opts">
-          <button class="opt">It increases the motor's maximum voltage</button>
+          <button class="opt" data-why="The battery sets the ceiling and no gain can raise it. kD spends the same volts differently - as a brake when the gap is closing fast.">It increases the motor's maximum voltage</button>
           <button class="opt">It acts like a brake proportional to how fast you're closing in</button>
-          <button class="opt">It removes the steady-state error</button>
+          <button class="opt" data-why="Erasing leftover error is the integral's specialty. At a steady park nothing is changing, so the derivative reads zero and has nothing to say.">It removes the steady-state error</button>
         </div>
         <div class="explain">When the gap is shrinking fast, the derivative pushes back against the motion - bleeding off speed on the approach so the carriage settles instead of sailing past. That's damping.</div>
       </div>
@@ -388,11 +388,21 @@ motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="output" 
         <div class="qn">Question 3</div>
         <div class="qt">With sensor noise on, a high kD makes the motor command spike wildly. Why?</div>
         <div class="opts">
-          <button class="opt">The integral is winding up</button>
+          <button class="opt" data-why="Windup is a real villain, but its signature is one big slow overshoot after a long move. Wild spiking the moment Noise turns on is the derivative chewing on jitter.">The integral is winding up</button>
           <button class="opt">Differentiating a noisy measurement amplifies the noise into big spikes</button>
-          <button class="opt">kD has been set negative</button>
+          <button class="opt" data-why="A negative kD would feed motion instead of braking it - a smooth runaway, not spikes. The hash you see is a healthy kD faithfully amplifying a jittery sensor.">kD has been set negative</button>
         </div>
         <div class="explain">Taking the rate of change of a jittery signal turns tiny wiggles into large jumps - and kD multiplies them straight into the output. It's the central reason to keep kD modest and filter noisy sensors.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">From the sim</div>
+        <div class="qt">Noise is off and the defaults are loaded, with kD at 2.0. You press Step, and mid-climb the carriage is rising at about 0.5 m/s. What is the D-term (V) readout showing right then?</div>
+        <div class="opts">
+          <button class="opt">About -1 V - the brake leaning against the climb</button>
+          <button class="opt" data-why="Right size, wrong sign. The gap is closing fast, so the derivative pushes against the motion - it bleeds speed off the approach instead of feeding it.">About +1 V - the derivative adds push toward the line</button>
+          <button class="opt" data-why="Other way around - arrival is when the D-term goes quiet. The derivative speaks exactly while things are changing, and mid-climb is peak change.">0 V - the D-term waits until the carriage reaches the line</button>
+        </div>
+        <div class="explain">The D-term opposes motion: kD times the climb rate, aimed backward. That is 2.0 × 0.5 = 1 V of brake, so the readout shows about -1 V at the fastest part of the climb, then fades to zero as the carriage settles. Watch it swing negative on the way up - that swing is the damping.</div>
       </div>
     </div>
   </section>
@@ -592,7 +602,7 @@ motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="output" 
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
     opts.forEach(function(opt,i){
-      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
+      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } });
     });
   });
 })();

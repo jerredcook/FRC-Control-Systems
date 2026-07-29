@@ -279,8 +279,8 @@ score.<input class="blank" data-ans="andthen|andthen()" data-reveal="andThen" ar
         <div class="qt">A parallel composition of A, B, C ends when…</div>
         <div class="opts">
           <button class="opt">ALL of them finish</button>
-          <button class="opt">the first one finishes</button>
-          <button class="opt">exactly 3 seconds pass</button>
+          <button class="opt" data-why="That is a real rule, just not this one - ending on the first finisher is a race. Parallel is patient and waits for every member.">the first one finishes</button>
+          <button class="opt" data-why="Sneaky coincidence - 3 s is just B's length here. Parallel has no clock of its own; it ends whenever the slowest member finishes.">exactly 3 seconds pass</button>
         </div>
         <div class="explain">Parallel runs them together and waits for every one to complete. (Race ends when the first finishes; deadline ends when the chosen deadline command finishes.)</div>
       </div>
@@ -288,8 +288,8 @@ score.<input class="blank" data-ans="andthen|andthen()" data-reveal="andThen" ar
         <div class="qn">Question 2</div>
         <div class="qt">You want "aim, but give up after 2 seconds." Which fits?</div>
         <div class="opts">
-          <button class="opt">aim.andThen(wait)</button>
-          <button class="opt">Commands.sequence(aim)</button>
+          <button class="opt" data-why="andThen does chain things, but the wait would only start after aim finishes - if aim never ends, you never get there. Giving up takes a race against a timer: withTimeout.">aim.andThen(wait)</button>
+          <button class="opt" data-why="A sequence of one command is just that command with no time limit attached. The give-up timer lives in withTimeout.">Commands.sequence(aim)</button>
           <button class="opt">aim.withTimeout(2)</button>
         </div>
         <div class="explain">withTimeout(2) races aim against a 2-second timer - whichever ends first stops the group. It's the standard "do it, but don't hang" pattern.</div>
@@ -298,11 +298,21 @@ score.<input class="blank" data-ans="andthen|andthen()" data-reveal="andThen" ar
         <div class="qn">Question 3</div>
         <div class="qt">In a race(A, B, C), when does the whole group end?</div>
         <div class="opts">
-          <button class="opt">When all three finish</button>
+          <button class="opt" data-why="Waiting for everyone is parallel's rule. A race is the opposite: the first one over the line ends the whole group.">When all three finish</button>
           <button class="opt">The instant the first one finishes - the rest are interrupted</button>
-          <button class="opt">Never</button>
+          <button class="opt" data-why="It can feel like racing could go on forever, but a race is guaranteed to end the moment its quickest member does - here C at 1 second.">Never</button>
         </div>
         <div class="explain">A race ends the moment any member finishes; the others are interrupted (and their end(true) runs). Useful for "shoot OR time out," for example.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">From the sim</div>
+        <div class="qt">On the timeline you drag A to 1.5 s, B to 3.0 s, and C to 2.5 s, then play Deadline (A). When does the group end, and who gets amber caps?</div>
+        <div class="opts">
+          <button class="opt">At 1.5 s - A is the deadline, so B and C are both cut short with amber caps</button>
+          <button class="opt" data-why="Waiting for the slowest is parallel thinking. Deadline hands the stopwatch to one chosen command - here A - and everyone else lives or dies by A's finish.">At 3.0 s, when B, the longest, finally finishes</button>
+          <button class="opt" data-why="That 7.0 s is the one-after-another total, which is sequence. In a deadline group all three start together, and A's finish at 1.5 s ends the whole thing.">At 7.0 s, after A, B, and C run one after another</button>
+        </div>
+        <div class="explain">Deadline (A) ends the moment A finishes, at 1.5 s. B (3.0 s) and C (2.5 s) both needed more time than that, so both are interrupted and wear the amber cut caps. Try it on the sliders - the group-end line parks exactly on A's finish.</div>
       </div>
     </div>
   </section>
@@ -531,7 +541,7 @@ score.<input class="blank" data-ans="andthen|andthen()" data-reveal="andThen" ar
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

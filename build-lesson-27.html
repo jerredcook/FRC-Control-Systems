@@ -206,9 +206,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">What's the correct order of the power chain?</div>
         <div class="opts">
-          <button class="opt">PDH → battery → motors → breaker</button>
+          <button class="opt" data-why="It has all the right pieces, which makes it tempting - but the source has to come first. Power starts at the battery, passes the breaker, and only then does the PDH fan it out.">PDH → battery → motors → breaker</button>
           <button class="opt">Battery → main breaker → PDH → fused branches → loads</button>
-          <button class="opt">Battery → motors directly</button>
+          <button class="opt" data-why="It would be simpler, and it would even run - right up until a short dumps hundreds of amps with nothing to stop it. The breaker and the fused PDH exist to stand in between.">Battery → motors directly</button>
         </div>
         <div class="explain">Power flows battery → main breaker → Power Distribution Hub → each fused branch → its load. Every level adds protection between the battery and the device.</div>
       </div>
@@ -216,8 +216,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">A single motor's wire shorts out. What should happen?</div>
         <div class="opts">
-          <button class="opt">The battery explodes</button>
-          <button class="opt">The whole robot loses power forever</button>
+          <button class="opt" data-why="A short is genuinely dangerous, so the fear is healthy - but that is exactly what the fuse is there to prevent. It blows in a blink, long before the battery is in real trouble.">The battery explodes</button>
+          <button class="opt" data-why="A whole-robot blackout is what a fault on the main looks like - a branch fault is smaller. Its own fuse pops and the rest of the robot never even notices.">The whole robot loses power forever</button>
           <button class="opt">That branch's fuse blows, isolating it while the rest keeps running</button>
         </div>
         <div class="explain">Each branch is fused, so a short pops just that fuse and cuts only that circuit. The rest of the robot is unaffected, that's why distribution is fused per-branch.</div>
@@ -227,10 +227,20 @@
         <div class="qt">What is the main breaker for?</div>
         <div class="opts">
           <button class="opt">A master off switch and protection against a very large fault</button>
-          <button class="opt">Charging the battery</button>
-          <button class="opt">Spinning the motors</button>
+          <button class="opt" data-why="The breaker does sit right next to the battery, so the guess is natural - but charging happens off the robot. On the robot the breaker is the master switch and the last line of protection.">Charging the battery</button>
+          <button class="opt" data-why="Every motor's current does flow through it, so it touches every spin - but it never drives anything. The breaker is a switch and a guard, not a power source.">Spinning the motors</button>
         </div>
         <div class="explain">The 120-amp main breaker sits right after the battery as the robot's master switch and the last line of protection for a major overload.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">In the sim you power on, then press Overload a branch three times in a row, never touching Short the main. What do the readouts show?</div>
+        <div class="opts">
+          <button class="opt" data-why="With everything dark it sure looks like a shutdown, but check who fired: three little fuses, not the main. The breaker only trips for a fault it has to handle itself, like a short on the main line.">System reads SHUT DOWN and the breaker reads TRIPPED, since every load is dead</button>
+          <button class="opt">All three loads go dark, System reads partial, and the main breaker still says closed</button>
+          <button class="opt" data-why="It feels like faults should add up, but each branch fuse clears its own fault completely. The main never sees enough current to care, no matter how many branches blow.">The third overload trips the main automatically to protect the battery</button>
+        </div>
+        <div class="explain">Each press blows one branch fuse, so after three presses every load is dark - and yet the main breaker never fired, because each fuse caught its own fault first. System reads partial, not shut down. That is the gold mission's picture: with layered protection, the last line of defense is rarely needed.</div>
       </div>
     </div>
   </section>
@@ -346,7 +356,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

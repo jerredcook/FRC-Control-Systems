@@ -359,9 +359,9 @@ ks = <input class="blank" data-ans="(up_intercept-down_intercept)/2|(up_intercep
         <div class="qn">Question 1</div>
         <div class="qt">In the ramp test, you plot voltage against velocity and the data forms a line. The <em>slope</em> of that line is…</div>
         <div class="opts">
-          <button class="opt">kG - the gravity gain</button>
+          <button class="opt" data-why="Gravity is in the picture, but it costs the same voltage at every speed, so it hides in the intercept - the slope only tracks the cost that grows with velocity, and that is kV.">kG - the gravity gain</button>
           <button class="opt">kV - the velocity gain</button>
-          <button class="opt">kA - the acceleration gain</button>
+          <button class="opt" data-why="A fair suspect, but the ramp deliberately keeps acceleration near zero, so kA never touches this plot - the slope is the per-unit-of-speed cost, kV.">kA - the acceleration gain</button>
         </div>
         <div class="explain">kV. Slope is "extra voltage per extra unit of speed" - exactly what kV means. The intercept holds kS + kG, and kA never appears because acceleration is held near zero.</div>
       </div>
@@ -369,8 +369,8 @@ ks = <input class="blank" data-ans="(up_intercept-down_intercept)/2|(up_intercep
         <div class="qn">Question 2</div>
         <div class="qt">Why run the ramp test both up and down?</div>
         <div class="opts">
-          <button class="opt">To double-check the slope kV</button>
-          <button class="opt">To give the battery time to recover</button>
+          <button class="opt" data-why="Double-checking sounds responsible, but that is a bonus, not the reason - the down ramp flips friction's sign, and the two different intercepts are what let you split kS from kG.">To double-check the slope kV</button>
+          <button class="opt" data-why="Battery sag is real, but a rest break is not the reason - going down flips friction's sign, so the two intercepts differ, and that difference is what splits kS from kG.">To give the battery time to recover</button>
           <button class="opt">To separate kS from kG - the two intercepts differ because friction flips sign</button>
         </div>
         <div class="explain">A single ramp only gives you kS + kG lumped together. Going the other direction flips friction's sign, so the up-intercept is kG + kS and the down-intercept is kG − kS. Average them for kG, halve their difference for kS.</div>
@@ -380,10 +380,20 @@ ks = <input class="blank" data-ans="(up_intercept-down_intercept)/2|(up_intercep
         <div class="qt">The slow ramp test never reveals kA. Why not - and what does?</div>
         <div class="opts">
           <button class="opt">The ramp keeps acceleration near zero, so kA·a stays ~0; the dynamic step test reveals it</button>
-          <button class="opt">kA can't be measured at all - you always have to guess it</button>
-          <button class="opt">kA only matters for drivetrains, never elevators</button>
+          <button class="opt" data-why="It does hide from the ramp, but not from every test - a dynamic step creates a big, brief acceleration that finally gives kA something to act on.">kA can't be measured at all - you always have to guess it</button>
+          <button class="opt" data-why="Elevators accelerate too - any mass needs extra voltage to speed up. The ramp misses kA only because it holds acceleration near zero on purpose.">kA only matters for drivetrains, never elevators</button>
         </div>
         <div class="explain">The ramp is deliberately slow so acceleration ≈ 0 and the line stays clean - which means kA never shows up. A dynamic step test creates a big, brief acceleration so kA finally has something to act on, and you read it from how hard the mechanism accelerates.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">You run the ramp and hit Auto-fit: the line lands at intercept 0.51 and slope 1.80. Roughly what voltage should hold a steady cruise at velocity 0.30?</div>
+        <div class="opts">
+          <button class="opt" data-why="Good instinct - 1.80 × 0.30 = 0.54 is the speed cost, but the mechanism also charges its standing fee: the 0.51 intercept for friction plus gravity gets paid first, every time.">About 0.54 V - slope times velocity</button>
+          <button class="opt">About 1.05 V - intercept plus slope times velocity</button>
+          <button class="opt" data-why="The slope looks like a voltage, but it is a rate - volts per unit of speed. Multiply it by the 0.30 velocity, then add the 0.51 intercept on top.">About 1.80 V - the slope value is the voltage</button>
+        </div>
+        <div class="explain">The fitted line is your model: voltage = 0.51 + 1.80 × 0.30 = 1.05 volts. That is feedforward read straight off the plot - the intercept pays friction and gravity, the slope term pays for speed. Run the ramp again and watch the dot cloud pass right through 1.05 V at 0.30 velocity.</div>
       </div>
     </div>
   </section>
@@ -625,7 +635,7 @@ ks = <input class="blank" data-ans="(up_intercept-down_intercept)/2|(up_intercep
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
     opts.forEach(function(opt,i){
-      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
+      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } });
     });
   });
 

@@ -246,9 +246,9 @@ intake.<input class="blank" data-ans="set_goal" data-reveal="set_goal" aria-labe
         <div class="qn">Question 1</div>
         <div class="qt">What does a subsystem contain?</div>
         <div class="opts">
-          <button class="opt">The whole robot's code in one place</button>
+          <button class="opt" data-why="Keeping everything together sounds simple, but that is the wall of code this pattern escapes - a subsystem holds exactly one mechanism, so an elevator bug lives in one small file.">The whole robot's code in one place</button>
           <button class="opt">One mechanism - its hardware, its state, and its periodic loop</button>
-          <button class="opt">Only the controller bindings</button>
+          <button class="opt" data-why="Bindings live over in RobotContainer - the subsystem is the mechanism side of the deal: its motor, its sensor, its goal, and the periodic() that works toward it.">Only the controller bindings</button>
         </div>
         <div class="explain">A subsystem models one mechanism: it owns that mechanism's motor and sensor, holds its state (like a goal), and updates itself in periodic(). The Elevator subsystem is everything-elevator.</div>
       </div>
@@ -257,8 +257,8 @@ intake.<input class="blank" data-ans="set_goal" data-reveal="set_goal" aria-labe
         <div class="qt">Who is allowed to command the elevator's motor directly?</div>
         <div class="opts">
           <button class="opt">Only the Elevator subsystem - others call its public methods</button>
-          <button class="opt">Any command, any time</button>
-          <button class="opt">The Driver Station</button>
+          <button class="opt" data-why="Convenient right up until two commands shove the same motor opposite ways - that fight is what the one-owner rule prevents. Commands knock on the public door, set_goal(), instead.">Any command, any time</button>
+          <button class="opt" data-why="The Driver Station enables the robot and streams your inputs, but it never touches a motor - on the robot, only the owning subsystem commands its own hardware.">The Driver Station</button>
         </div>
         <div class="explain">Encapsulation: the subsystem owns its hardware. Commands ask via methods like set_goal(). One owner means no two pieces of code can secretly fight over the same motor.</div>
       </div>
@@ -266,8 +266,8 @@ intake.<input class="blank" data-ans="set_goal" data-reveal="set_goal" aria-labe
         <div class="qn">Question 3</div>
         <div class="qt">When does a subsystem's <code style="font-family:var(--mono);color:var(--teal)">periodic()</code> run?</div>
         <div class="opts">
-          <button class="opt">Only when a command uses it</button>
-          <button class="opt">Once at startup</button>
+          <button class="opt" data-why="Commands come and go, which makes this feel right - but periodic() is steadier than that. The scheduler calls it every loop for every subsystem, command or no command.">Only when a command uses it</button>
+          <button class="opt" data-why="Once at startup is __init__'s moment - periodic() is the opposite: not once but every 20 ms, for as long as the robot runs.">Once at startup</button>
           <button class="opt">Every loop, always - the scheduler calls it for every subsystem</button>
         </div>
         <div class="explain">periodic() runs every 20 ms regardless of what commands are active, so it's the reliable home for a subsystem's continuous control loop.</div>
@@ -334,7 +334,7 @@ intake.<input class="blank" data-ans="set_goal" data-reveal="set_goal" aria-labe
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

@@ -279,8 +279,8 @@ self.odometry.<input class="blank" data-ans="resetposition" data-fill="resetPosi
         <div class="qt">What is odometry?</div>
         <div class="opts">
           <button class="opt">A running estimate of the robot's pose from wheel distances and gyro heading</button>
-          <button class="opt">A type of motor</button>
-          <button class="opt">The robot's battery gauge</button>
+          <button class="opt" data-why="Odometry does sound like a machine part, but the -metry ending means measuring. It is a measurement habit, adding up wheel and gyro readings every loop, not a piece of hardware.">A type of motor</button>
+          <button class="opt" data-why="Both are running tallies the robot keeps, which is the tempting link. The battery gauge tracks energy left; odometry tracks where you are on the field.">The robot's battery gauge</button>
         </div>
         <div class="explain">Odometry tracks where the robot is on the field by integrating how far the wheels rolled and how the heading changed, updated every loop from a known start.</div>
       </div>
@@ -288,8 +288,8 @@ self.odometry.<input class="blank" data-ans="resetposition" data-fill="resetPosi
         <div class="qn">Question 2</div>
         <div class="qt">Why does an odometry estimate drift over a match?</div>
         <div class="opts">
-          <button class="opt">The battery dies</button>
-          <button class="opt">The field moves</button>
+          <button class="opt" data-why="Batteries really do sag late in a match, but sag makes motors weaker; it does not confuse the math. Drift comes from tiny measurement errors that pile up loop after loop.">The battery dies</button>
+          <button class="opt" data-why="It can honestly feel that way when the estimate wanders, but the field is bolted down. It is the estimate that moves, nudged off by little errors that never get removed.">The field moves</button>
           <button class="opt">It integrates motion, so small errors (wheel slip, gyro bias) accumulate</button>
         </div>
         <div class="explain">Each tiny measurement error gets added to the running total and never removed, so the estimate slowly diverges. Blending in vision corrections is how teams fight the drift.</div>
@@ -298,11 +298,21 @@ self.odometry.<input class="blank" data-ans="resetposition" data-fill="resetPosi
         <div class="qn">Question 3</div>
         <div class="qt">What does odometry.getPoseMeters() give you?</div>
         <div class="opts">
-          <button class="opt">Just the heading</button>
+          <button class="opt" data-why="Heading is in there, so this is close - but a Pose2d carries more. Heading alone comes straight from the gyro; the pose adds the x and y that odometry worked out from the wheels.">Just the heading</button>
           <button class="opt">The robot's full pose: x, y, and heading on the field</button>
-          <button class="opt">The distance to the nearest wall</button>
+          <button class="opt" data-why="That would take a sensor looking outward, like a rangefinder. Odometry only knows itself - wheels and gyro - so it reports where the robot is, not what is around it.">The distance to the nearest wall</button>
         </div>
         <div class="explain">A Pose2d bundles position (x, y) and orientation (heading). That's everything a path follower or auto routine needs to know where the robot is.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">You spin in place for 3 full turns (Drift stays tiny the whole time), then drive straight for about a meter. What does the Drift readout do?</div>
+        <div class="opts">
+          <button class="opt" data-why="That is exactly what the readout suggested during the spin, which is the trap. The spin quietly bent the heading estimate about 40 degrees, and a crooked heading turns every straight meter into sideways error.">Stays near zero - spinning in place adds no position error, and driving straight is the easy case</button>
+          <button class="opt">Jumps by around half a meter, because the spin left the heading estimate crooked and the whole drive goes slightly the wrong way</button>
+          <button class="opt" data-why="The wheel-scale error is real but small. The bigger thief is heading: the spin banked about 40 degrees of hidden heading error, and driving a meter along a crooked heading costs closer to half a meter.">Grows only by the wheel-scale error, about 0.05 m</button>
+        </div>
+        <div class="explain">This sim's gyro over-reads every turn by 4 percent, so 3 full turns bank about 43 degrees of hidden heading error while Drift barely moves. The moment you drive, that crooked heading points the estimate the wrong way, and half a meter or more of drift appears within a single meter of travel. That is the bend mission explained, and it is why heading error is the expensive kind - like a bike with the handlebars welded a little off-center, every meter forward is also a meter drifting sideways.</div>
       </div>
     </div>
   </section>
@@ -472,7 +482,7 @@ self.odometry.<input class="blank" data-ans="resetposition" data-fill="resetPosi
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

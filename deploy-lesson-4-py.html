@@ -260,9 +260,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">What is a commit?</div>
         <div class="opts">
-          <button class="opt">Sending your code to the robot</button>
+          <button class="opt" data-why="That is deploy's job - easy to blur, since both feel like shipping something. A commit ships nothing anywhere; it saves a labeled snapshot into the repo's history.">Sending your code to the robot</button>
           <button class="opt">A saved, labeled snapshot of your code you can always return to</button>
-          <button class="opt">A type of motor controller</button>
+          <button class="opt" data-why="It does sound like robot hardware, but commit is pure git vocabulary - a saved snapshot of your code. The motor controllers you will meet are parts like the Talon and the Spark.">A type of motor controller</button>
         </div>
         <div class="explain">A commit records the state of your files with a message. The full history of commits lets you see what changed, when, and roll back to any point - Git's time-machine superpower.</div>
       </div>
@@ -270,8 +270,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">Why work on a branch instead of directly on <code style="font-family:var(--mono);color:var(--teal)">main</code>?</div>
         <div class="opts">
-          <button class="opt">Branches make the code run faster</button>
-          <button class="opt">It's required to deploy</button>
+          <button class="opt" data-why="Nice thought, but the robot never knows which branch built the code - branches organize people, not performance. Their real gift is safety: your experiments cannot break main.">Branches make the code run faster</button>
+          <button class="opt" data-why="Deploy never checks your branch - you can deploy from anywhere, which is exactly the danger. Branching is a team habit that keeps main deployable, not a rule the tools enforce.">It's required to deploy</button>
           <button class="opt">So your in-progress work can't break the team's main code until it's reviewed and ready</button>
         </div>
         <div class="explain">A branch is a safe sandbox. You commit freely without touching main; when it's solid, a pull request merges it in. main stays deployable the whole time.</div>
@@ -281,10 +281,20 @@
         <div class="qt">What's a pull request for?</div>
         <div class="opts">
           <button class="opt">Proposing your branch be merged into main, so teammates can review it first</button>
-          <button class="opt">Downloading the latest code</button>
-          <button class="opt">Restarting the roboRIO</button>
+          <button class="opt" data-why="Sneaky naming - that is git pull, a different thing entirely. A pull request is a proposal on GitHub: please review my branch and merge it into main.">Downloading the latest code</button>
+          <button class="opt" data-why="A restart happens on the robot; a pull request lives on GitHub - it is how you ask teammates to review your branch before it joins main.">Restarting the roboRIO</button>
         </div>
         <div class="explain">A pull request (PR) on GitHub says "here's my branch - please review and merge." It's where teammates catch bugs and discuss changes before they reach main. (git pull, a different thing, downloads the latest.)</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">In the playground you are still standing on the intake branch and you press git merge intake. What happens?</div>
+        <div class="opts">
+          <button class="opt" data-why="Right goal, wrong seat - a merge pulls changes INTO the branch you are standing on, and you are standing on intake. Checkout main first, then merge.">It works, and both your commit and your teammate's land on main</button>
+          <button class="opt">Git says no - you merge into the branch you are on, so you must checkout main first</button>
+          <button class="opt" data-why="Merging never deletes anything - it only adds a commit that ties two histories together. And direction still matters: you have to be standing on main to pull intake in.">It deletes the intake branch and moves its commit over to main</button>
+        </div>
+        <div class="explain">Merge direction trips everyone up once. git merge intake means "bring intake's commits into the branch I am on right now" - and standing on intake, that is a no-op, so the playground stops you and points at git checkout main. The rescue works in that order: checkout main, then merge, and main ends up holding your commit and your teammate's fix deadband, nothing lost. Get the order right every time and you have the zero-rejections gold run.</div>
       </div>
     </div>
   </section>
@@ -402,7 +412,7 @@
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
     opts.forEach(function(opt,i){
-      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
+      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } });
     });
   });
 })();

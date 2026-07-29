@@ -202,8 +202,8 @@
         <div class="qn">Question 1</div>
         <div class="qt">What causes a robot to tip over?</div>
         <div class="opts">
-          <button class="opt">A weak battery</button>
-          <button class="opt">Too many wheels</button>
+          <button class="opt" data-why="The battery does matter to tipping, but as a weight, not a power source - mounted high it raises the center of mass. The tip itself is the CoM swinging past a wheel during a hard start or stop.">A weak battery</button>
+          <button class="opt" data-why="More wheels change traction and turning, not tipping - the robot goes over when its center of mass passes outside the wheelbase, however many wheels sit under it.">Too many wheels</button>
           <button class="opt">Its center of mass swinging out past a wheel, usually from hard acceleration or stopping</button>
         </div>
         <div class="explain">Tipping happens when the center of mass moves outside the wheelbase. Accelerating or stopping fast adds inertia that pulls the CoM toward the edge, and past a wheel it topples.</div>
@@ -213,8 +213,8 @@
         <div class="qt">Which two changes make a robot harder to tip?</div>
         <div class="opts">
           <button class="opt">Lower the center of mass and widen the wheelbase</button>
-          <button class="opt">Raise the CoM and narrow the base</button>
-          <button class="opt">Add more weight up high</button>
+          <button class="opt" data-why="That is the winning recipe run in reverse - tall and narrow is how you build a robot that faceplants on the first hard stop. Low and wide gives the CoM the longest possible trip before it passes a wheel.">Raise the CoM and narrow the base</button>
+          <button class="opt" data-why="More weight sounds like more stability, but placement beats amount - weight up high raises the CoM and makes tipping easier. Put that same weight down low and it actually helps.">Add more weight up high</button>
         </div>
         <div class="explain">A low CoM and a wide base both increase how far the center of mass has to travel before it passes a wheel. Tall and narrow is exactly the recipe for tipping.</div>
       </div>
@@ -222,11 +222,21 @@
         <div class="qn">Question 3</div>
         <div class="qt">Where should the heavy battery usually go?</div>
         <div class="opts">
-          <button class="opt">As high as possible</button>
+          <button class="opt" data-why="Up high keeps it out of the way, which is tempting when packaging gets tight - but the battery is usually the heaviest single part, and mounting it high drags the whole CoM up with it. Low and centered is the free stability win.">As high as possible</button>
           <button class="opt">Low and centered, to pull the center of mass down</button>
-          <button class="opt">It doesn't matter</button>
+          <button class="opt" data-why="For most parts placement is flexible, but the battery is the heaviest thing on the robot - where it sits moves the whole CoM. Low and centered buys real stability for free.">It doesn't matter</button>
         </div>
         <div class="explain">The battery is often the heaviest part, so mounting it low and centered drops the overall center of mass, making the robot much more stable.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">You slide CoM height to 100% and leave the wheelbase at 50%. Pushing the stop slider up slowly, roughly where does the readout flip to TIPPING?</div>
+        <div class="opts">
+          <button class="opt" data-why="A mid wheelbase helps, but the CoM at full height stretches the tipping lever way out - the sim's tall robot goes over just past half a g. Only a lower CoM or a wider base survives the full 1.2.">Not until the full 1.2 g - the wheelbase is still at its middle setting</button>
+          <button class="opt">Just past 0.55 g - a little more than half as hard as gravity</button>
+          <button class="opt" data-why="Tall hurts, but not that much - the base still has to lose the tug-of-war, and at mid wheelbase that takes just over half a g. Tall robots can drive fine; they just need gentler stops.">Almost immediately, around 0.15 g - tall robots cannot survive any stop</button>
+        </div>
+        <div class="explain">The sim tips when the stop, measured in g, beats the ratio of half the wheelbase to the CoM height. At 100% height and 50% wheelbase that ratio works out to about 0.56, so the robot wobbles through the 0.4s and 0.5s and goes over just past 0.55 g. That is the tipping threshold the missions had you hunt for - every robot has one, and lowering the CoM or widening the base is how you raise it.</div>
       </div>
     </div>
   </section>
@@ -351,7 +361,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

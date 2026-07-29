@@ -252,8 +252,8 @@
         <div class="qn">Question 1</div>
         <div class="qt">What is SystemCore, at its heart?</div>
         <div class="opts">
-          <button class="opt">A simple on-off switch box</button>
-          <button class="opt">A battery pack</button>
+          <button class="opt" data-why="Plenty of robot electronics really are simple switch boxes, so the guess is fair, but SystemCore is the opposite - a full Linux computer running your code, vision, and radio at once.">A simple on-off switch box</button>
+          <button class="opt" data-why="It does sit right in the middle of the power wiring, so the mix-up is natural, but the battery stays its own separate part. SystemCore is the computer the battery feeds.">A battery pack</button>
           <button class="opt">A full Linux computer built around a Raspberry Pi CM5</button>
         </div>
         <div class="explain">SystemCore is a real computer, not only a controller. It is built around a Raspberry Pi Compute Module 5 running Linux, which is why it can handle heavy work like vision on its own.</div>
@@ -262,9 +262,9 @@
         <div class="qn">Question 2</div>
         <div class="qt">Which of these is built right into SystemCore?</div>
         <div class="opts">
-          <button class="opt">A gasoline engine</button>
+          <button class="opt" data-why="Robots do need muscle, but FRC robots are battery-electric with motors. What SystemCore builds in is electronics: vision smarts, an IMU, and a WiFi radio.">A gasoline engine</button>
           <button class="opt">Vision smarts, an IMU, and a WiFi radio</button>
-          <button class="opt">A separate radio box you bolt on</button>
+          <button class="opt" data-why="That was true on the roboRIO, which is exactly why it tempts, but bolt-on is the old way. On SystemCore the radio lives inside the board.">A separate radio box you bolt on</button>
         </div>
         <div class="explain">SystemCore folds in vision, a motion sensor (IMU), and a dual-band WiFi radio. There is no separate radio box, that is now part of the board.</div>
       </div>
@@ -273,8 +273,8 @@
         <div class="qt">Who builds SystemCore?</div>
         <div class="opts">
           <button class="opt">Limelight, the vision-camera group</button>
-          <button class="opt">A car company</button>
-          <button class="opt">Each team builds their own from scratch</button>
+          <button class="opt" data-why="Robot parts do borrow a lot from the car world, but SystemCore comes from inside FRC - Limelight, the group behind the vision cameras many teams already use.">A car company</button>
+          <button class="opt" data-why="Teams do build so much themselves that this feels on brand, but the brain is standard issue - every team gets the same Limelight-built board in the kit.">Each team builds their own from scratch</button>
         </div>
         <div class="explain">Limelight builds SystemCore. Their camera background is why real vision smarts come baked into the board.</div>
       </div>
@@ -316,7 +316,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

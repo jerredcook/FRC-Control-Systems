@@ -189,9 +189,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">How does a flywheel shooter launch a game piece?</div>
         <div class="opts">
-          <button class="opt">With a spring</button>
+          <button class="opt" data-why="Springs have launched plenty of catapults, but a flywheel works differently - the wheel is already spinning before the piece ever arrives, and its surface grabs and accelerates the piece as it passes through.">With a spring</button>
           <button class="opt">A spinning wheel grips the piece and flings it at roughly the wheel's surface speed</button>
-          <button class="opt">With compressed air only</button>
+          <button class="opt" data-why="Pneumatics do show up on robots, but usually for grippers and hoods, not launching - most FRC shooters are a spinning wheel that flings the piece at its surface speed. No air tank required.">With compressed air only</button>
         </div>
         <div class="explain">The spinning flywheel contacts the piece and accelerates it to near the wheel's surface speed, then releases it. Faster wheel, faster and farther the shot.</div>
       </div>
@@ -199,8 +199,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">What two things together determine where a shot lands?</div>
         <div class="opts">
-          <button class="opt">Battery voltage and weight</button>
-          <button class="opt">Wheel color and size only</button>
+          <button class="opt" data-why="Voltage does feed the motor, but a good velocity loop holds the RPM steady even as the battery sags - the trajectory itself is set by exit speed and launch angle, like any thrown ball.">Battery voltage and weight</button>
+          <button class="opt" data-why="Wheel size does factor into surface speed, but color is just paint - and neither one sets the arc by itself. Where the shot lands comes from exit speed plus launch angle.">Wheel color and size only</button>
           <button class="opt">Exit speed (from RPM) and launch angle (from the hood)</button>
         </div>
         <div class="explain">Like any projectile, the trajectory comes from how fast it leaves (RPM) and at what angle (the hood). Tune both to put the piece in the goal.</div>
@@ -210,10 +210,20 @@
         <div class="qt">Why does a shooter need its flywheel RPM held steady?</div>
         <div class="opts">
           <button class="opt">Range depends on RPM, so a sagging speed makes every shot land differently</button>
-          <button class="opt">To save battery</button>
-          <button class="opt">It doesn't matter</button>
+          <button class="opt" data-why="A steady loop is not really about saving power - it is about consistency. Range rides directly on RPM, so a wheel that sags after each piece drops the next shot short.">To save battery</button>
+          <button class="opt" data-why="It matters more than almost anything on a shooter - if the RPM sags between shots, identical shots land in different places. Steady RPM is what makes a shooter repeatable.">It doesn't matter</button>
         </div>
         <div class="explain">Shot distance is set by exit speed. If the RPM dips after feeding a piece, the next shot goes short. A velocity control loop with feedforward keeps it steady, the Control course's flywheel lesson.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">From the sim</div>
+        <div class="qt">You score with the dashed arc just kissing the goal. Then you raise the Flywheel RPM by 500 and touch nothing else. Where does the next shot go?</div>
+        <div class="opts">
+          <button class="opt" data-why="The angle sets the shape of the arc, but the RPM sets how far it carries - the same angle at a faster exit speed stretches the whole path longer, so the shot sails past the goal.">Right in again, since the launch angle never changed</button>
+          <button class="opt" data-why="It sounds plausible, but the wheel is spinning far faster than the piece moves, so grip time barely changes - the piece simply leaves faster, and a faster exit means a longer shot.">Short, because a faster wheel has less time to grip the piece</button>
+          <button class="opt">Long - the piece leaves faster, so the arc carries past the goal</button>
+        </div>
+        <div class="explain">In the sim the exit speed comes straight from the RPM, and with the angle fixed a faster launch carries farther, so the arc that used to end in the goal now lands beyond it. The fix runs both directions: falling short? Add RPM. Sailing long? Take some off. The hood angle shapes the arc's height; the RPM sets its reach.</div>
       </div>
     </div>
   </section>
@@ -314,7 +324,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

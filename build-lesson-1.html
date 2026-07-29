@@ -193,8 +193,8 @@
         <div class="qn">Question 1</div>
         <div class="qt">When do you put your safety glasses on?</div>
         <div class="opts">
-          <button class="opt">Only while a tool is actually cutting</button>
-          <button class="opt">Only if you're close to the machine</button>
+          <button class="opt" data-why="That feels efficient, but chips from someone else's cut can cross the whole room. Your eyes are at risk the moment you walk in, not just while your own tool spins.">Only while a tool is actually cutting</button>
+          <button class="opt" data-why="Distance feels like protection, but a chip off a grinder flies farther than you would ever guess. In the shop means glasses on, wherever you happen to stand.">Only if you're close to the machine</button>
           <button class="opt">The moment you enter the shop, and keep them on</button>
         </div>
         <div class="explain">Chips and debris travel across a room, and someone else's cut can reach your eyes. Glasses on entry, off on exit, is the simplest rule that works.</div>
@@ -204,8 +204,8 @@
         <div class="qt">You're about to use the drill press. Should you wear gloves?</div>
         <div class="opts">
           <button class="opt">No - gloves can catch on a spinning bit and pull your hand in</button>
-          <button class="opt">Yes, always, for extra protection</button>
-          <button class="opt">Only thick leather ones</button>
+          <button class="opt" data-why="A natural instinct - gloves protect hands everywhere else. But on a spinning bit the fabric can catch and drag your whole hand in, so bare hands are actually the safer choice here.">Yes, always, for extra protection</button>
+          <button class="opt" data-why="Thicker feels tougher, but thick leather gives a spinning bit even more to grab. Nothing on your hands near anything that spins - save the gloves for sharp edges and hot parts.">Only thick leather ones</button>
         </div>
         <div class="explain">On any rotating tool, a glove is more dangerous than bare hands. If it catches, it drags your hand into the machine. Bare hands pull away cleanly.</div>
       </div>
@@ -213,9 +213,9 @@
         <div class="qn">Question 3</div>
         <div class="qt">You're not sure how to set up a cut safely. What's the right move?</div>
         <div class="opts">
-          <button class="opt">Guess and go quickly so you don't look slow</button>
+          <button class="opt" data-why="Nobody wants to look slow, but a guess at a machine risks fingers, not pride. Every experienced builder you admire got that way by asking questions constantly.">Guess and go quickly so you don't look slow</button>
           <button class="opt">Stop and ask a mentor or experienced member</button>
-          <button class="opt">Use the tool without the guard to see better</button>
+          <button class="opt" data-why="Seeing better sounds sensible, but the guard is exactly what stands between the blade and you. If a setup is unclear with the guard on, the fix is a mentor, never a removed guard.">Use the tool without the guard to see better</button>
         </div>
         <div class="explain">Stopping to ask is always the right call. The best builders ask constantly. Removing a guard or guessing is how people get hurt.</div>
       </div>
@@ -321,7 +321,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

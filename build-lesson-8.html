@@ -177,8 +177,8 @@
         <div class="qt">What does COTS stand for?</div>
         <div class="opts">
           <button class="opt">Commercial off-the-shelf - a ready-made part you buy</button>
-          <button class="opt">Custom on the spot</button>
-          <button class="opt">Carbon, oxygen, titanium, steel</button>
+          <button class="opt" data-why="It sounds plausible because custom is the other half of this lesson - but COTS is the buy side: commercial off-the-shelf, a part a vendor already sells.">Custom on the spot</button>
+          <button class="opt" data-why="Clever chemistry, but it is not an element list - COTS is shopping talk: commercial off-the-shelf, a ready-made part you order from a vendor.">Carbon, oxygen, titanium, steel</button>
         </div>
         <div class="explain">COTS means commercial off-the-shelf: a part a vendor already makes and sells. You buy it ready to use instead of fabricating it yourself.</div>
       </div>
@@ -186,9 +186,9 @@
         <div class="qn">Question 2</div>
         <div class="qt">Which kind of part is usually best to buy rather than build?</div>
         <div class="opts">
-          <button class="opt">A bracket unique to your robot's layout</button>
+          <button class="opt" data-why="That bracket is the one thing you cannot buy - no vendor knows your robot's layout, so unique geometry is exactly where custom wins.">A bracket unique to your robot's layout</button>
           <button class="opt">A high-stress, precision part like a gearbox or swerve module</button>
-          <button class="opt">Anything you possibly can</button>
+          <button class="opt" data-why="Buying does save shop time, so the instinct is good - but buy everything and nothing fits your design; save purchases for the precision, high-stress parts.">Anything you possibly can</button>
         </div>
         <div class="explain">Gearboxes, swerve modules, wheels, and bearings are precision, high-stress parts that vendors have already perfected. Buying them means reliability you don't have to engineer yourself.</div>
       </div>
@@ -196,8 +196,8 @@
         <div class="qn">Question 3</div>
         <div class="qt">When is custom fabrication the right call?</div>
         <div class="opts">
-          <button class="opt">Never; always buy</button>
-          <button class="opt">Always; building is cheaper</button>
+          <button class="opt" data-why="Vendors are great, but they only sell parts many teams need - the pieces shaped to your robot and this year's game still have to come from your shop.">Never; always buy</button>
+          <button class="opt" data-why="It can look cheaper on paper, but machine hours are the real cost - teams that build everything usually run out of season before they run out of parts.">Always; building is cheaper</button>
           <button class="opt">When the part's geometry is unique to your robot or this year's game</button>
         </div>
         <div class="explain">If no vendor sells what you need, because it's specific to your design or the game, you build it. Custom is for the parts that make your robot yours.</div>
@@ -274,7 +274,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

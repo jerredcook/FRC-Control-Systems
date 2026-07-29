@@ -283,9 +283,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">Which of these carries over to 2027?</div>
         <div class="opts">
-          <button class="opt">Nothing; you start completely from scratch</button>
+          <button class="opt" data-why="A big platform change can feel like a total reset - but the ideas survive: control theory, command-based code, your mechanisms, and your languages all travel with you.">Nothing; you start completely from scratch</button>
           <button class="opt">Control theory, command-based code, mechanisms, CAN motor controllers, and your languages</button>
-          <button class="opt">Only the robot's paint color</button>
+          <button class="opt" data-why="Funny, but it undersells you - far more survives than the look of the robot: PID, command-based structure, CAN motor controllers, and Java, C++, and Python all make the jump.">Only the robot's paint color</button>
         </div>
         <div class="explain">Most of the academy carries over: control theory (PID, feedforward), command-based programming, your mechanisms, CAN motor controllers, vendor libraries, and Java, C++, and Python. The board, wiring, radio, and Driver Station are the big changes.</div>
       </div>
@@ -293,8 +293,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">What is a good way to get ready for SystemCore today?</div>
         <div class="opts">
-          <button class="opt">Buy all the new hardware immediately, before you need it</button>
-          <button class="opt">Stop building robots until 2027 arrives</button>
+          <button class="opt" data-why="Being first sounds like being ready - but there is no rush: every 2027 team gets a SystemCore in the Kit of Parts, and the specs are still shifting under it.">Buy all the new hardware immediately, before you need it</button>
+          <button class="opt" data-why="Waiting can feel safe while things are changing - but building now is exactly the preparation that transfers, because the fundamentals are the part that does not change.">Stop building robots until 2027 arrives</button>
           <button class="opt">Keep building and learning fundamentals, and follow the official channels</button>
         </div>
         <div class="explain">Keep building robots and learning fundamentals, since they transfer, and follow the official FIRST and WPILib channels. There is no rush to buy hardware; every 2027 team gets one in the Kit of Parts. Teams that want to help can look at beta testing.</div>
@@ -304,8 +304,8 @@
         <div class="qt">Where should you verify the details when something is uncertain?</div>
         <div class="opts">
           <button class="opt">The official FIRST and WPILib sources</button>
-          <button class="opt">A random comment on a video</button>
-          <button class="opt">Whatever you remember from last season</button>
+          <button class="opt" data-why="Comments can sound very confident - but confidence is not accuracy, and alpha details change fast. The official FIRST and WPILib sources hold the current truth.">A random comment on a video</button>
+          <button class="opt" data-why="Last season's knowledge usually serves you well - but SystemCore is new and still in alpha, so facts you remember may already be out of date. Check the official sources.">Whatever you remember from last season</button>
         </div>
         <div class="explain">SystemCore is in alpha, so specs, wiring, pricing, and deploy steps can change. Always verify against the official FIRST and WPILib sources linked on the course page before you rely on anything.</div>
       </div>
@@ -347,7 +347,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

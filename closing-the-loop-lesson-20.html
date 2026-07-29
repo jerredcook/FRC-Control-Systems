@@ -343,8 +343,8 @@ cfg.Slot0.GravityType = <span class="ty">GravityTypeValue</span>.<input class="b
         <div class="qn">Question 1</div>
         <div class="qt">Why does an arm's gravity feedforward depend on its angle?</div>
         <div class="opts">
-          <button class="opt">Because the motor weakens at angles</button>
-          <button class="opt">It doesn't - gravity is always the same</button>
+          <button class="opt" data-why="Easy to blame the motor, but it pushes just as hard at any angle. What changes is the load: gravity's twist on the arm fades with cos(angle), full at horizontal and zero straight up.">Because the motor weakens at angles</button>
+          <button class="opt" data-why="Gravity's pull is constant, true - but its twist on the pivot is not. Held straight out, the weight levers hard on the pivot; pointed straight up, it pulls along the arm and turns nothing.">It doesn't - gravity is always the same</button>
           <button class="opt">The gravity torque scales with cos(angle): full at horizontal, zero straight up</button>
         </div>
         <div class="explain">Horizontal, the arm's whole weight pulls down on the pivot (cos 0° = 1). Straight up, the weight pulls along the arm, creating no turning torque (cos 90° = 0). So the hold voltage is kG·cos(angle).</div>
@@ -354,8 +354,8 @@ cfg.Slot0.GravityType = <span class="ty">GravityTypeValue</span>.<input class="b
         <div class="qt">On Phoenix 6, how do you get the cosine scaling?</div>
         <div class="opts">
           <button class="opt">Set GravityType = Arm_Cosine, with the arm's zero at horizontal</button>
-          <button class="opt">Multiply kP by cosine yourself every loop</button>
-          <button class="opt">Use a bigger current limit</button>
+          <button class="opt" data-why="So close - something does get scaled by cosine, but it is kG, the gravity hold, not kP. And Arm_Cosine has the device do that scaling for you on every loop.">Multiply kP by cosine yourself every loop</button>
+          <button class="opt" data-why="Current limits protect the motor from overheating - they never shape the hold voltage. The cosine scaling comes from the gravity type setting, not from more amps.">Use a bigger current limit</button>
         </div>
         <div class="explain">GravityType.Arm_Cosine tells the onboard loop to scale kG by cos(position). Because it uses the measured position, zero must be horizontal so cos(0)=1 corresponds to full gravity.</div>
       </div>
@@ -363,11 +363,21 @@ cfg.Slot0.GravityType = <span class="ty">GravityTypeValue</span>.<input class="b
         <div class="qn">Question 3</div>
         <div class="qt">Which sensor setup helps an arm know its true angle the moment the robot turns on?</div>
         <div class="opts">
-          <button class="opt">The internal rotor alone</button>
+          <button class="opt" data-why="The rotor is fast and precise once running, which makes it tempting - but it only counts from wherever it woke up, so it can never know the true angle at power-on.">The internal rotor alone</button>
           <button class="opt">A FusedCANcoder (absolute angle + fast rotor)</button>
-          <button class="opt">A current sensor</button>
+          <button class="opt" data-why="Current tells you how hard the motor is working, not where the arm points. Cosine feedforward needs an angle, and an absolute one from the very first instant.">A current sensor</button>
         </div>
         <div class="explain">The rotor only counts from boot, so it can't know an absolute angle. A FusedCANcoder gives the true angle immediately - essential for an arm, where cosine feedforward needs a correct angle from the first instant.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">From the sim</div>
+        <div class="qt">Cosine comp is on and kG is 0.50. You park the target at 60° and let the arm settle. What does the Feedforward readout show?</div>
+        <div class="opts">
+          <button class="opt" data-why="0.50 V is what a flat kG would apply - exactly the mistake cosine comp exists to fix. With comp on, the hold voltage scales by cos(angle), and at 60° that factor is only 0.5.">0.50 V - kG is the hold voltage, so the readout shows all of it</button>
+          <button class="opt" data-why="That is kG × cos 30°, the classic mix-up of measuring the angle from vertical. This arm measures from horizontal, so at 60° up the factor is cos 60° = 0.5.">About 0.43 V - the cosine factor at 60° is 0.87</button>
+          <button class="opt">0.25 V - the hold voltage is kG × cos 60°, and cos 60° is 0.5</button>
+        </div>
+        <div class="explain">Feedforward is kG × cos(angle): 0.50 × cos 60° = 0.50 × 0.5 = 0.25 V, the exact arithmetic the second mission had you predict before the sim did it. Two thirds of the way up, gravity's twist has already faded to half, and the readout keeps fading toward 0 V as the arm approaches vertical.</div>
       </div>
     </div>
   </section>
@@ -675,7 +685,7 @@ cfg.Slot0.GravityType = <span class="ty">GravityTypeValue</span>.<input class="b
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
     opts.forEach(function(opt,i){
-      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
+      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } });
     });
   });
 })();

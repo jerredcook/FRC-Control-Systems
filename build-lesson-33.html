@@ -205,9 +205,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">What is CAD used for?</div>
         <div class="opts">
-          <button class="opt">Painting the robot</button>
+          <button class="opt" data-why="CAD parts do get colors, so fair guess - but the colors are just labels for telling parts apart. The real job is designing and fit-checking the robot before any metal gets cut.">Painting the robot</button>
           <button class="opt">Designing and testing the robot on a computer before building it</button>
-          <button class="opt">Driving the robot</button>
+          <button class="opt" data-why="Driving comes at the very end, once the robot exists - CAD lives at the other end of the season, while the robot is still an idea being tested on screen.">Driving the robot</button>
         </div>
         <div class="explain">CAD lets you model every part and the whole robot on screen, catching fit and clearance problems before any material is cut.</div>
       </div>
@@ -216,8 +216,8 @@
         <div class="qt">How do you turn a 2D sketch into a solid 3D part?</div>
         <div class="opts">
           <button class="opt">Extrude it - push the flat outline out to a thickness</button>
-          <button class="opt">Print it</button>
-          <button class="opt">Delete it</button>
+          <button class="opt" data-why="Closer than you might think - 3D printing does turn models into objects. But inside CAD the move is extrude: push the flat sketch out to a thickness. Printing comes later, once the part exists.">Print it</button>
+          <button class="opt" data-why="Deleting throws the shape away - and the sketch matters even after the extrude, because it keeps owning the part. Change the sketch and the solid follows.">Delete it</button>
         </div>
         <div class="explain">Extruding pulls the 2D sketch out to a depth, turning the outline into a solid part. It's the most common CAD feature.</div>
       </div>
@@ -225,11 +225,21 @@
         <div class="qn">Question 3</div>
         <div class="qt">What is an assembly?</div>
         <div class="opts">
-          <button class="opt">A single bolt</button>
-          <button class="opt">A 2D drawing</button>
+          <button class="opt" data-why="A bolt is a part, the smallest unit in CAD. An assembly is the opposite end of the ladder - many parts, bolts included, mated together into the whole machine.">A single bolt</button>
+          <button class="opt" data-why="A 2D drawing is the sketch, the very first rung. An assembly is the top rung: finished 3D parts placed together into the robot.">A 2D drawing</button>
           <button class="opt">Many parts mated together - the whole robot, virtually</button>
         </div>
         <div class="explain">An assembly places every part in its real position so you can check fit, motion, and weight, building the entire robot on screen first.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">You drag the extrude depth down to exactly 1 mm and let go. What does the State readout show?</div>
+        <div class="opts">
+          <button class="opt" data-why="Honestly, real CAD would side with you - any nonzero depth is a solid there. This sim draws its line just above 1 mm, which is exactly the edge one of the missions had you find.">Solid part, because any depth above zero counts as 3D</button>
+          <button class="opt">Flat sketch - 1 mm has not crossed the line into a solid yet</button>
+          <button class="opt" data-why="It would be a glitchy readout if it did - but the sim is a clean either-or. At 1 mm or below it reads flat sketch, above that solid part, with no in-between.">The readout flickers back and forth between the two</button>
+        </div>
+        <div class="explain">The sim keeps everything at 1 mm and below on the sketch side, so the State readout still says flat sketch and the tag reads sketch (2D). Nudge the slider one more millimeter and it flips to solid part - the same edge you met in the missions.</div>
       </div>
     </div>
   </section>
@@ -362,7 +372,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

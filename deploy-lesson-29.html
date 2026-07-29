@@ -321,8 +321,8 @@ drive.<input class="blank" data-ans="arcadedrive" data-fill="arcadeDrive" style=
         <div class="qn">Question 1</div>
         <div class="qt">To aim the robot at a tag, what do you use as the PID error?</div>
         <div class="opts">
-          <button class="opt">The battery voltage</button>
-          <button class="opt">The robot's top speed</button>
+          <button class="opt" data-why="Voltage does feed the PID math elsewhere, so the association is fair. But an aiming error must shrink to zero exactly when you are on target - voltage never does that, tx does.">The battery voltage</button>
+          <button class="opt" data-why="Speed limits how fast you can swing around, but it cannot tell you which way or how far to turn. The error has to measure off-center-ness, and that is tx.">The robot's top speed</button>
           <button class="opt">tx - the camera's yaw to the target - with a setpoint of 0</button>
         </div>
         <div class="explain">tx is how far off-center the target is. Set the controller's target to 0 and it computes a turn that drives tx to zero, pointing the robot straight at the tag.</div>
@@ -331,9 +331,9 @@ drive.<input class="blank" data-ans="arcadedrive" data-fill="arcadeDrive" style=
         <div class="qn">Question 2</div>
         <div class="qt">Why might a high kP make vision aiming oscillate?</div>
         <div class="opts">
-          <button class="opt">The camera runs out of battery</button>
+          <button class="opt" data-why="Power problems make a camera drop out or go dark, not wobble. Hunting back and forth is a control-loop signature: a big gain acting on data that arrives a few frames late.">The camera runs out of battery</button>
           <button class="opt">The camera reports slightly late, so a big gain overshoots and hunts</button>
-          <button class="opt">AprilTags can't be aimed at</button>
+          <button class="opt" data-why="Aiming at tags is the whole trick of this lesson, so the target is not the problem. The wobble comes from the loop itself: high gain shoving hard on slightly stale tx.">AprilTags can't be aimed at</button>
         </div>
         <div class="explain">Camera latency means the robot corrects based on stale tx. A large gain overshoots before the new measurement catches up, so it swings back and forth. Lower kP or add a little D.</div>
       </div>
@@ -342,10 +342,20 @@ drive.<input class="blank" data-ans="arcadedrive" data-fill="arcadeDrive" style=
         <div class="qt">Before the robot shoots, what should isFinished() check?</div>
         <div class="opts">
           <button class="opt">That |tx| is below a small tolerance - the robot is locked on</button>
-          <button class="opt">That the battery is full</button>
-          <button class="opt">That the match is over</button>
+          <button class="opt" data-why="A healthy battery is always nice, but it says nothing about where this shot will land. The gate that matters is aim: is tx sitting inside the tolerance band right now.">That the battery is full</button>
+          <button class="opt" data-why="The name isFinished makes match endings come to mind, which is the word trap. It asks whether this command's own job is done - locked on target - not whether the clock ran out.">That the match is over</button>
         </div>
         <div class="explain">Gate the shot on being aimed: only finish (and fire) once tx is within a tolerance band. Shooting mid-swing sends the game piece wide.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">From the sim</div>
+        <div class="qt">Fresh page: you set Target offset to 40 degrees and kP to 0.10, then press Aim. Roughly what does the turn output read on the first frames?</div>
+        <div class="opts">
+          <button class="opt">About 4.0 - the output is kP times the error, and 0.10 x 40 is 4</button>
+          <button class="opt" data-why="There is a clamp at 8, so this is a reasonable fear. But the clamp only trims outputs that are already too big: 0.10 x 40 = 4 sits comfortably inside the limit and passes through untouched.">8.0 - the controller always opens at its clamp limit and eases off from there</button>
+          <button class="opt" data-why="kP is the recipe, not the meal. It only becomes an output after multiplying the error: 0.10 per degree times 40 degrees of tx makes a turn command of 4.">0.10 - the kP value is the output until the error changes</button>
+        </div>
+        <div class="explain">A P controller's output is gain times error: 0.10 x 40 = 4.0, inside the clamp, so that is what the readout shows. Then watch it shrink as tx closes - half the error means half the output - which is exactly why P control eases off as it arrives instead of slamming into the target. It is the same squeeze-the-brakes-lighter-as-you-slow feel you trained in the Control course, now with a camera for a sensor.</div>
       </div>
     </div>
   </section>
@@ -454,7 +464,7 @@ drive.<input class="blank" data-ans="arcadedrive" data-fill="arcadeDrive" style=
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 
   // ---- fault clinic (additive) - injects hidden faults, watches for the fix ----

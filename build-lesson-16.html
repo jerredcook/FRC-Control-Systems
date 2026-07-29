@@ -175,9 +175,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">What is a mechanism archetype?</div>
         <div class="opts">
-          <button class="opt">A brand of motor</button>
+          <button class="opt" data-why="Motor names get tossed around the shop constantly, so the guess is fair - but an archetype is a mechanism pattern, like an elevator or an arm, not a product on a shelf.">A brand of motor</button>
           <button class="opt">A common mechanism pattern, like an elevator or an arm, that you reuse and combine</button>
-          <button class="opt">A type of bolt</button>
+          <button class="opt" data-why="Hardware jargon does blur together, but archetypes live a level up - they are the big reusable mechanism shapes, not the fasteners holding those shapes together.">A type of bolt</button>
         </div>
         <div class="explain">Archetypes are the standard mechanism shapes, elevators, arms, four-bars, intakes, shooters, grippers, that nearly every robot is built from. You pick and combine them for the game.</div>
       </div>
@@ -185,8 +185,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">You need to launch a game piece across the field. Which archetype?</div>
         <div class="opts">
-          <button class="opt">Elevator</button>
-          <button class="opt">Gripper</button>
+          <button class="opt" data-why="An elevator does get a piece up high, which sounds close to launching - but it only lifts. Sending a piece across the field takes a flywheel flinging it at speed.">Elevator</button>
+          <button class="opt" data-why="A gripper does deliver game pieces, so it is in the right family - but it holds and places. Throwing something across the field is the shooter's whole job.">Gripper</button>
           <button class="opt">Shooter (flywheel)</button>
         </div>
         <div class="explain">Launching a piece at distance is exactly what a flywheel shooter does: spin a wheel up and feed the piece into it. An elevator lifts; a gripper holds.</div>
@@ -196,8 +196,8 @@
         <div class="qt">When in doubt about which mechanism to build, what's the best instinct?</div>
         <div class="opts">
           <button class="opt">Pick the simplest archetype that reliably does what the game rewards</button>
-          <button class="opt">Build the most complex one possible</button>
-          <button class="opt">Build all of them</button>
+          <button class="opt" data-why="Complex mechanisms look impressive on reveal day, which is exactly why this tempts - but reliability wins matches. The simple thing that scores every time beats the showpiece that jams.">Build the most complex one possible</button>
+          <button class="opt" data-why="More mechanisms feels like more points, but each one costs motors, weight, and build time - a robot that does one job flawlessly beats one that does six poorly.">Build all of them</button>
         </div>
         <div class="explain">Simplicity wins. A robot that does one job flawlessly beats one that does several poorly. Choose the simplest archetype that scores reliably.</div>
       </div>
@@ -284,7 +284,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

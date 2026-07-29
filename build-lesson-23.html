@@ -202,9 +202,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">How does a six-wheel tank drive turn?</div>
         <div class="opts">
-          <button class="opt">The wheels pivot to aim, like a shopping cart's front casters</button>
+          <button class="opt" data-why="That is how swerve steers, and it is coming in Lesson 5.4 - but a tank drive's wheels are bolted straight ahead. It turns by running the sides at different speeds and letting the wheels scrub sideways.">The wheels pivot to aim, like a shopping cart's front casters</button>
           <button class="opt">The sides spin at different speeds and the wheels scrub sideways to rotate</button>
-          <button class="opt">It can't turn</button>
+          <button class="opt" data-why="It turns, just not gracefully - spinning the two sides at different speeds skids the wheels sideways and rotates the robot. The whole drop-center trick exists to make that skid cheaper.">It can't turn</button>
         </div>
         <div class="explain">Tank (skid-steer) drives turn by running the two sides at different speeds. The wheels have to scrub sideways against the floor to rotate the robot, there's no steering.</div>
       </div>
@@ -212,8 +212,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">What does dropping the center wheels do?</div>
         <div class="opts">
-          <button class="opt">Makes the robot faster in a straight line</button>
-          <button class="opt">Adds traction to all six wheels</button>
+          <button class="opt" data-why="Straight-line speed comes from gearing and motors - the drop is all about turning. Lowering the middle wheels lets the robot rock onto them and pivot without dragging all six sideways.">Makes the robot faster in a straight line</button>
+          <button class="opt" data-why="It actually does the opposite - the drop lifts the end wheels slightly so fewer wheels carry the weight at any moment. That small traction cost is the price you gladly pay for a clean pivot.">Adds traction to all six wheels</button>
           <button class="opt">Lets the robot rock onto the middle wheels and pivot, cutting turn scrub</button>
         </div>
         <div class="explain">A drop center lowers the middle wheels slightly, so the robot tips onto them and turns about its center. That shortens the effective wheelbase and dramatically reduces scrub.</div>
@@ -223,10 +223,20 @@
         <div class="qt">Why do most teams start with a COTS or kit drivetrain?</div>
         <div class="opts">
           <button class="opt">It's proven, fast to assemble, and frees time for scoring mechanisms</button>
-          <button class="opt">It's required by the rules</button>
-          <button class="opt">It's the only option</button>
+          <button class="opt" data-why="The rules set size and safety limits, but they do not care whose drivetrain design you use - teams pick kits because they are proven and quick, which frees build time for the mechanisms that score.">It's required by the rules</button>
+          <button class="opt" data-why="Custom drivetrains are absolutely allowed, and veteran teams build them - kits win because the season is short, and a proven chassis driving on day two beats a custom one driving in week five.">It's the only option</button>
         </div>
         <div class="explain">A drivetrain has to just work, so teams lean on proven kits rather than reinventing one. That gets the robot driving quickly and saves the build time for the parts that score.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">You grind through a full circle with drop center OFF, then flip it ON and circle again. In the sim, about how much faster is the drop-center turn?</div>
+        <div class="opts">
+          <button class="opt" data-why="The skid marks are the visible clue, but the scrub they mark is real drag stealing turn speed - with the end wheels lifted, the same motors spin the robot roughly two and a half times faster.">The same speed - drop center only cleans up the skid marks</button>
+          <button class="opt">About 2.5 times faster - most of the flat turn was spent fighting scrub</button>
+          <button class="opt" data-why="The flat robot does still grind around - scrub eats roughly two thirds of its turn rate, not nearly all of it. Time both circles and the gap comes out near 2.5x, a big win but not 10.">About 10 times faster - the flat robot barely rotates at all</button>
+        </div>
+        <div class="explain">The sim scales the turn rate by how much scrub the geometry demands. With drop center the scrub factor is low and the robot keeps about 84% of its turn speed; flat on six wheels it keeps only about 32%. Divide the two and the drop-center robot turns roughly 2.6 times faster - the exact gap you felt in the grind mission. Same motors, same floor; the only change is how much sideways skidding each turn has to buy.</div>
       </div>
     </div>
   </section>
@@ -360,7 +370,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

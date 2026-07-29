@@ -204,8 +204,8 @@
         <div class="qn">Question 1</div>
         <div class="qt">How does a roller intake grip a game piece?</div>
         <div class="opts">
-          <button class="opt">With glue</button>
-          <button class="opt">With magnets</button>
+          <button class="opt" data-why="Sticky would grab, sure - but glue never lets go, and the robot has to release the piece to score. Compression gives grip on demand: squeeze, pull in, release.">With glue</button>
+          <button class="opt" data-why="Magnets grab steel, but FRC game pieces are foam, rubber, and plastic - nothing for a magnet to hold. The squeeze of compression is what makes the grip.">With magnets</button>
           <button class="opt">By compressing it slightly between the spinning roller and a surface, then dragging it in</button>
         </div>
         <div class="explain">The roller sits closer than the piece is tall, so it squeezes the piece. That compression creates grip, and the spinning surface pulls the piece into the robot.</div>
@@ -215,8 +215,8 @@
         <div class="qt">What happens with too little compression?</div>
         <div class="opts">
           <button class="opt">The roller can't grip, so the piece slips and isn't pulled in</button>
-          <button class="opt">The piece is crushed</button>
-          <button class="opt">Nothing changes</button>
+          <button class="opt" data-why="Crushing is the failure at the other end of the slider - too much squeeze. With too little there is no grip at all, and the piece just slides back out.">The piece is crushed</button>
+          <button class="opt" data-why="It seems like a small tweak, but grip comes entirely from the squeeze - take the compression away and the roller spins uselessly against the piece.">Nothing changes</button>
         </div>
         <div class="explain">Without enough squeeze there's no grip, the roller spins against the piece and it slips out. Too much compression is the opposite problem: the piece can't fit and jams.</div>
       </div>
@@ -224,11 +224,21 @@
         <div class="qn">Question 3</div>
         <div class="qt">What's the best way to dial in an intake's compression and speed?</div>
         <div class="opts">
-          <button class="opt">Calculate it exactly from the game manual</button>
+          <button class="opt" data-why="The manual gives you the piece's size, which is a fair start - but squishy game pieces and carpet do not follow clean formulas. The sweet spot only shows up when real pieces go through real rollers.">Calculate it exactly from the game manual</button>
           <button class="opt">Prototype it and test with real game pieces, then tune</button>
-          <button class="opt">Copy a random number</button>
+          <button class="opt" data-why="Borrowing another team's numbers is at least a starting point, but their wheels, gap, and geometry are not yours - a number only becomes right after you test it on your own intake.">Copy a random number</button>
         </div>
         <div class="explain">There's no formula for the perfect grab. You build a rough intake, feed real pieces through it, and adjust the gap, wheels, and speed until it works every time.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">From the sim</div>
+        <div class="qt">You set Compression to 45%, comfortably in the green band, but drop Roller speed to 20%, then feed a piece. What happens?</div>
+        <div class="opts">
+          <button class="opt" data-why="The squeeze is right, which is exactly the trap - grip without enough surface speed cannot drag the piece in. Below about 25% roller speed the sim spits it back out.">It pulls in fine, since the compression is right where it should be</button>
+          <button class="opt" data-why="A jam is a squeeze problem, not a speed problem - it happens when compression is cranked past about 85% and the piece cannot fit through the gap. Slow rollers cause a slip instead, the piece easing back out.">It jams at the mouth, because slow rollers act like a wall</button>
+          <button class="opt">It slips back out - a good squeeze cannot rescue rollers that spin too slowly</button>
+        </div>
+        <div class="explain">The sim needs two things at once: enough compression to grip (roughly 20% to 85%) and enough roller speed (about 25% or more) to drag the piece in. 45% compression passes the first test, but 20% speed fails the second, so the piece slips back out. Grip and speed are separate edges, the same pair you mapped in the slow-spin mission, and a good intake respects both.</div>
       </div>
     </div>
   </section>
@@ -358,7 +368,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

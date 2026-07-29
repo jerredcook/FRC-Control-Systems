@@ -261,9 +261,9 @@ self.estimator.<input class="blank" data-ans="addvisionmeasurement" data-fill="a
         <div class="qn">Question 1</div>
         <div class="qt">What does a pose estimator blend together?</div>
         <div class="opts">
-          <button class="opt">Two cameras</button>
+          <button class="opt" data-why="Two of something is the right instinct - fusion does mean combining sources. But the pair is not camera plus camera; it is smooth wheel-and-gyro odometry plus absolute vision fixes.">Two cameras</button>
           <button class="opt">Smooth odometry with absolute vision measurements</button>
-          <button class="opt">The battery and the gyro</button>
+          <button class="opt" data-why="The gyro really is half-involved, on the odometry side, so this is close. But the battery has no opinion about position - the other ingredient is the camera's view of a known tag.">The battery and the gyro</button>
         </div>
         <div class="explain">It runs odometry every loop for smoothness and folds in vision fixes when a tag is seen. Together they give a pose that's both stable between sightings and accurate at each one.</div>
       </div>
@@ -272,8 +272,8 @@ self.estimator.<input class="blank" data-ans="addvisionmeasurement" data-fill="a
         <div class="qt">Why is a vision measurement "absolute" while odometry drifts?</div>
         <div class="opts">
           <button class="opt">AprilTags are at known field positions, so a sighting fixes you to a real spot</button>
-          <button class="opt">Cameras never make mistakes</button>
-          <button class="opt">Odometry uses a worse battery</button>
+          <button class="opt" data-why="Cameras are actually pretty noisy - a blurry frame can be off by a lot. Vision earns the word absolute for a different reason: the tag it sees sits at a known, surveyed spot on the field.">Cameras never make mistakes</button>
+          <button class="opt" data-why="Both run off the same battery, so power cannot be the difference. The difference is the reference: odometry only adds up its own motion, while vision anchors to a fixed landmark.">Odometry uses a worse battery</button>
         </div>
         <div class="explain">Each tag's location is published, so seeing one anchors the robot to a known place. Odometry only adds up motion, so its errors accumulate with nothing to correct them, until vision does.</div>
       </div>
@@ -281,11 +281,21 @@ self.estimator.<input class="blank" data-ans="addvisionmeasurement" data-fill="a
         <div class="qn">Question 3</div>
         <div class="qt">Which call injects a camera fix into the estimate?</div>
         <div class="opts">
-          <button class="opt">update()</button>
-          <button class="opt">getEstimatedPosition()</button>
+          <button class="opt" data-why="update() runs every loop, so it feels like the one doing everything - but it only folds in the wheels and gyro. The camera's fix enters through its own dedicated call.">update()</button>
+          <button class="opt" data-why="That one reads the blended answer out; it never writes anything in. Injecting a fix is the add call - and its name says exactly what it adds: a vision measurement.">getEstimatedPosition()</button>
           <button class="opt">addVisionMeasurement()</button>
         </div>
         <div class="explain">update() handles odometry every loop; addVisionMeasurement() is the extra call you make only when the camera has a tag, blending that absolute fix into the running estimate.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">From the sim</div>
+        <div class="qt">Vision is ON and the dashed estimate has drifted 0.50 m off the truth just as a fix lands. Right after the teal pulse, roughly what does the Drift readout show?</div>
+        <div class="opts">
+          <button class="opt" data-why="The pulse does look like a teleport, which is the tempting read. But an estimator blends rather than jumps - the camera is a little noisy too, so each fix closes most of the gap and trusts the next fixes with the rest.">0.00 m - a vision fix snaps the estimate exactly onto the truth</button>
+          <button class="opt" data-why="Sneakily backwards - correcting the past is exactly what vision is for. Because the tag sits at a known field spot, a sighting can pull the already-accumulated error back out, most of it in one fix.">Still 0.50 m - a fix only stops future drift, it cannot undo drift that already happened</button>
+          <button class="opt">About 0.2 m - the fix pulls the estimate most of the way to the truth, and the next fixes finish the job</button>
+        </div>
+        <div class="explain">This sim's estimator moves the pose about 60 percent of the way to the camera's answer on each fix, so 0.50 m of drift becomes roughly 0.50 x 0.4 = 0.20 m, plus a whisper of camera noise. That partial pull is the trust weighting from the note above in action: jump all the way and every noisy frame twitches the robot, blend and you get smooth and accurate. Watch the Drift readout stair-step down across two or three pulses.</div>
       </div>
     </div>
   </section>
@@ -410,7 +420,7 @@ self.estimator.<input class="blank" data-ans="addvisionmeasurement" data-fill="a
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

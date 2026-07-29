@@ -210,9 +210,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">A battery rests at 12.8 volts. The robot pulls a big current. What happens to the voltage at the terminals?</div>
         <div class="opts">
-          <button class="opt">It rises above 12.8 volts</button>
+          <button class="opt" data-why="You might picture the battery pushing harder when asked, but the physics runs the other way - current crossing the internal resistance eats voltage, so the terminals sag.">It rises above 12.8 volts</button>
           <button class="opt">It sags below 12.8 volts, because current crossing the internal resistance eats some voltage</button>
-          <button class="opt">It stays exactly 12.8 volts no matter what</button>
+          <button class="opt" data-why="That is what the resting number seems to promise, but it only holds with no current flowing. The moment the robot pulls hard, volts are lost inside the pack.">It stays exactly 12.8 volts no matter what</button>
         </div>
         <div class="explain">Terminal voltage = resting voltage minus (current times internal resistance). The harder the robot pulls, the more voltage gets eaten inside the battery, so the terminals sag. That sag is the whole reason robots brown out.</div>
       </div>
@@ -220,8 +220,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">A battery reads a healthy 12.8 volts at rest. What does that prove?</div>
         <div class="opts">
-          <button class="opt">It proves the battery is in great health</button>
-          <button class="opt">It proves the battery will hold up fine in a match</button>
+          <button class="opt" data-why="This is the trap that bites teams every season - a worn pack can rest at a perfect 12.8 V. Resting voltage shows a full tank, not a wide pipe.">It proves the battery is in great health</button>
+          <button class="opt" data-why="A reasonable hope, but match survival depends on internal resistance, and a resting reading cannot see that. Only a test under load proves the pack can pour.">It proves the battery will hold up fine in a match</button>
           <button class="opt">Only that the tank is full; it says nothing about internal resistance or health</button>
         </div>
         <div class="explain">Resting voltage shows how full the tank is, not how narrow the pipe has become. A worn battery with high internal resistance can still rest at 12.8 volts. You only see health by testing under load.</div>
@@ -231,10 +231,20 @@
         <div class="qt">Why does a tired, higher-resistance battery brown out sooner than a fresh one?</div>
         <div class="opts">
           <button class="opt">Higher internal resistance means a bigger voltage drop for the same current, so it sags further toward brownout</button>
-          <button class="opt">It holds less resting voltage to begin with</button>
-          <button class="opt">It runs out of amp-hours faster</button>
+          <button class="opt" data-why="The sneaky part is that it usually does not - a tired pack can rest at the same 12.8 V as a fresh one. The difference hides inside, as higher resistance.">It holds less resting voltage to begin with</button>
+          <button class="opt" data-why="Capacity does fade with age, but brownout is a voltage problem, not an empty tank. Higher resistance sags the volts harder on every burst, even with charge to spare.">It runs out of amp-hours faster</button>
         </div>
         <div class="explain">The drop is current times internal resistance. Double the resistance and the same current causes roughly double the sag, so a tired battery dives toward the brownout zone on bursts a fresh one would shrug off, even when both rest at the same voltage.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">From the sim</div>
+        <div class="qt">In the sim you set the current slider to 200 A and drag battery health down to worn, 25 milliohms. Roughly what does the terminal voltage read?</div>
+        <div class="opts">
+          <button class="opt" data-why="That is the resting-voltage trap all over again - 12.8 V is only what the tank reads with no current flowing. Pull 200 A through 25 milliohms and 5 whole volts vanish inside the pack.">About 12.8 V - health only matters once the battery runs low on charge</button>
+          <button class="opt" data-why="That is the fresh-battery answer - 200 A across 10 milliohms only costs 2 volts. At a worn 25 milliohms the same current eats 5 volts, and the readout lands much lower.">About 10.8 V, still comfortably in the healthy zone</button>
+          <button class="opt">About 7.8 V, down in the amber sagging zone</button>
+        </div>
+        <div class="explain">Terminal voltage = 12.8 - (200 x 0.025) = 12.8 - 5.0 = 7.8 volts. Same current as a fresh pack, but the worn battery's higher internal resistance eats 5 volts on the way out, dragging the readout into the sagging zone. Set the sliders there and watch it happen.</div>
       </div>
     </div>
   </section>
@@ -309,7 +319,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

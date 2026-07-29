@@ -329,9 +329,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">Where does your robot program actually run?</div>
         <div class="opts">
-          <button class="opt">On your laptop, which stays plugged in the whole match</button>
+          <button class="opt" data-why="Fair guess, since the laptop is where you write it - but the laptop only builds the program and sends it over. After deploy, the roboRIO runs it all by itself.">On your laptop, which stays plugged in the whole match</button>
           <button class="opt">On the roboRIO - the computer on the robot - after you deploy it</button>
-          <button class="opt">In the cloud</button>
+          <button class="opt" data-why="Lots of apps do live there, but a robot match has no internet to lean on - the program rides along on the robot itself, on the roboRIO.">In the cloud</button>
         </div>
         <div class="explain">You write and build on your laptop, then deploy the program to the roboRIO. From then on it runs on the robot itself - the laptop can disconnect entirely.</div>
       </div>
@@ -339,8 +339,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">What is the everyday loop of robot programming?</div>
         <div class="opts">
-          <button class="opt">Write the whole robot once, then never change it</button>
-          <button class="opt">Deploy first, then write the code</button>
+          <button class="opt" data-why="That would be relaxing, but no plan survives the first test drive - real teams go around the write, build, deploy, run loop hundreds of times a season.">Write the whole robot once, then never change it</button>
+          <button class="opt" data-why="Deploy does feel like the exciting part, but there is nothing to send yet - deploy ships a program you already wrote and built.">Deploy first, then write the code</button>
           <button class="opt">Write → build → deploy → run & observe → repeat</button>
         </div>
         <div class="explain">You make a change, build it, deploy it to the robot, run it and watch the result, then go again. Most of the skill is making that loop fast so you can iterate.</div>
@@ -350,10 +350,20 @@
         <div class="qt">What's the Driver Station for?</div>
         <div class="opts">
           <button class="opt">Enabling the robot and showing you what it's doing while it runs</button>
-          <button class="opt">Compiling your code</button>
-          <button class="opt">Charging the battery</button>
+          <button class="opt" data-why="Close neighbor, wrong tool - compiling happens in VS Code on your laptop before deploy. The Driver Station takes over afterward, enabling the robot and watching it run.">Compiling your code</button>
+          <button class="opt" data-why="It usually sits right next to the battery charger in the pit, but charging is the charger's job - the Driver Station is software, your live window into the running robot.">Charging the battery</button>
         </div>
         <div class="explain">The Driver Station is the app on the laptop that enables/disables the robot, selects the mode (teleop, autonomous, test), and surfaces telemetry and errors - your live window into the running robot.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">In the cockpit you deploy this 8-line program: drive.forward(), drive.turn(90), repeated four times. Where does the robot finish the run?</div>
+        <div class="opts">
+          <button class="opt" data-why="That would be true if the robot never rotated, but drive.turn(90) turns the whole robot, so each forward() heads off in a new direction - up, right, down, left.">About four steps away from START, since every forward() stacks up in the same direction</button>
+          <button class="opt">Right back on START, facing the way it began, having traced a full square</button>
+          <button class="opt" data-why="That is exactly how the live commands feel, one click one move - but deploy changes the deal: the robot runs every line by itself, start to finish, no clicks from you.">It runs line 1, then waits for you to click each remaining command</button>
+        </div>
+        <div class="explain">Each drive.forward() covers one field step and each drive.turn(90) is a quarter turn, so forward-then-turn repeated four times draws the four sides of a square. The four quarter turns add up to 360 degrees, so the robot parks back on START pointed exactly the way it started - the same path as the square mission.</div>
       </div>
     </div>
   </section>
@@ -461,7 +471,7 @@
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
     opts.forEach(function(opt,i){
-      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
+      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } });
     });
   });
 })();

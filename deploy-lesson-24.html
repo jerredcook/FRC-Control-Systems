@@ -278,8 +278,8 @@
         <div class="qn">Question 1</div>
         <div class="qt">What can a swerve drive do that a tank drive can't?</div>
         <div class="opts">
-          <button class="opt">Go faster in a straight line</button>
-          <button class="opt">Use fewer motors</button>
+          <button class="opt" data-why="In a straight line both are just wheels on carpet - gearing sets top speed, not the drive style. Swerve's edge is direction: slide anywhere while spinning.">Go faster in a straight line</button>
+          <button class="opt" data-why="Swerve actually spends more motors - eight for four modules, a drive plus a steer on each. What that buys is holonomic motion, not motor savings.">Use fewer motors</button>
           <button class="opt">Translate any direction while rotating, because each wheel steers</button>
         </div>
         <div class="explain">Independent steering on every module makes swerve holonomic: it can slide sideways, drive diagonally, and spin all at once. Tank can only move along the direction it's pointing.</div>
@@ -288,9 +288,9 @@
         <div class="qn">Question 2</div>
         <div class="qt">You command pure rotation (omega only, no translation). How do the modules point?</div>
         <div class="opts">
-          <button class="opt">All parallel, facing forward</button>
+          <button class="opt" data-why="Parallel wheels is the pure-translation picture from your first mission. To rotate, each wheel must push along the circle around the center - the pinwheel.">All parallel, facing forward</button>
           <button class="opt">In a pinwheel - each tangent to the turn, so the robot spins in place</button>
-          <button class="opt">They stop</button>
+          <button class="opt" data-why="Omega is still a motion command, so the wheels have real work to do. Kinematics aims each one tangent to the turn and the robot spins in place.">They stop</button>
         </div>
         <div class="explain">For rotation, each module must push perpendicular to its line from the center, forming a pinwheel. That's exactly what the kinematics computes from omega.</div>
       </div>
@@ -299,10 +299,20 @@
         <div class="qt">What does kinematics.toSwerveModuleStates(speeds) return?</div>
         <div class="opts">
           <button class="opt">An angle and speed for each of the four modules</button>
-          <button class="opt">The battery voltage</button>
-          <button class="opt">A single number for the whole robot</button>
+          <button class="opt" data-why="Voltage comes from the power system, not from geometry. Kinematics answers a motion question: what should each wheel do to make the chassis command happen.">The battery voltage</button>
+          <button class="opt" data-why="One command is what you handed in - vx, vy, omega for the chassis. Kinematics fans it out the other way: four states, an angle and speed per module.">A single number for the whole robot</button>
         </div>
         <div class="explain">It converts one chassis command (vx, vy, omega) into four SwerveModuleStates, each carrying the angle to steer to and the speed to drive. The module controllers then chase those targets.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">With omega near 0.5, you drag translation until one module's arrow disappears while the other three keep pushing. What is going on?</div>
+        <div class="opts">
+          <button class="opt" data-why="Desaturation is gentler than that - it scales all four modules by the same factor, so it can shrink every arrow together but never erase just one.">Desaturation ran out of headroom and cut that module's speed to zero</button>
+          <button class="opt">Your translation exactly cancels the spin's push at that wheel - the turn center sits on it, and the robot pivots around it</button>
+          <button class="opt" data-why="The cancellation is real but local - each wheel adds a spin push that depends on its own corner, so the total can only hit zero at the one spot where the two motions oppose exactly.">Translation and rotation cancel everywhere, so all four arrows should read zero</button>
+        </div>
+        <div class="explain">Each module's velocity is the chassis translation plus a rotation contribution that depends on where that wheel sits. Drag the translation until it exactly opposes the spin's push at one corner and that wheel's total hits zero - you have moved the center of rotation onto it. The other three still feel a net push, so the robot swings around the planted wheel, like a skater pivoting on one skate. That is the gold mission, explained.</div>
       </div>
     </div>
   </section>
@@ -448,7 +458,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

@@ -303,9 +303,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">What's the right order to tune a mechanism?</div>
         <div class="opts">
-          <button class="opt">Crank kP first, then add feedforward if needed</button>
+          <button class="opt" data-why="Tempting, because kP feels like the real controller - but kP-first means using error to fight gravity, the droop from Lesson 2. Feedforward first leaves kP almost nothing to do.">Crank kP first, then add feedforward if needed</button>
           <button class="opt">Configure → characterize (feedforward) → add kP → motion profile → validate</button>
-          <button class="opt">Just copy gains from another team</button>
+          <button class="opt" data-why="It sounds like a shortcut, but their gains fit their gearbox, mass, and friction, not yours. Characterizing your own mechanism is the whole point of the workflow.">Just copy gains from another team</button>
         </div>
         <div class="explain">Feedforward first. Once kS/kG/kV/kA are doing the heavy lifting, kP only trims a tiny leftover error, so it's easy to tune and stays stable. Doing kP first means fighting gravity with error.</div>
       </div>
@@ -313,8 +313,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">After SysId, why does kP usually end up small?</div>
         <div class="opts">
-          <button class="opt">Because big kP is illegal</button>
-          <button class="opt">Because the motor is weak</button>
+          <button class="opt" data-why="It can feel like a rule, but nobody inspects your gains - a big kP is just unstable. kP ends up small because feedforward leaves it so little error to correct.">Because big kP is illegal</button>
+          <button class="opt" data-why="Fair guess, but motor strength is not the story. After SysId the feedforward already predicts nearly the right voltage, so kP only has crumbs of error left to trim.">Because the motor is weak</button>
           <button class="opt">Because feedforward already supplies most of the voltage, so kP only corrects the small remaining error</button>
         </div>
         <div class="explain">With good feedforward, the predicted voltage is nearly right on its own. kP just cleans up disturbances and model error - so it can be modest, which keeps the loop calm and stable.</div>
@@ -324,10 +324,20 @@
         <div class="qt">What does "validate" actually mean for a tuned elevator?</div>
         <div class="opts">
           <button class="opt">Hit every setpoint repeatably, hold under load, and never oscillate</button>
-          <button class="opt">Compile without errors</button>
-          <button class="opt">Reach the top once</button>
+          <button class="opt" data-why="Compiling is step zero, not step five - code can build cleanly and still oscillate on the real robot. Validate means proving behavior, not syntax.">Compile without errors</button>
+          <button class="opt" data-why="One good run feels like victory, but matches demand it again and again, loaded and bumped. Repeatable is the bar, and that takes many trips to every setpoint.">Reach the top once</button>
         </div>
         <div class="explain">A mechanism is only "done" when it's reliable: it nails each scoring position over and over, holds steady when loaded or bumped, and shows no oscillation. That's what wins matches.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">The carriage is parked on target when you drag Added load up to 0.35 - far past what the missions showed the loop can hide. With kP at 7, where does the carriage end up?</div>
+        <div class="opts">
+          <button class="opt" data-why="It would be nice, and a small load really does hide inside the 0.02 tolerance. But kP only pushes while error exists, so a big standing load demands a big standing error - waiting never fixes that.">Dead on target - given enough time, feedback absorbs any load</button>
+          <button class="opt">About 0.05 below target - the leftover error is roughly load ÷ kP, and 0.35 ÷ 7 is 0.05</button>
+          <button class="opt" data-why="Good instinct that the load matters, but the loop does fight back. kP pushes harder the lower the carriage sags, so it stops where kP times error balances the load - about 0.05 low, not the whole 0.35.">About 0.35 below target - the carriage sags by the full load</button>
+        </div>
+        <div class="explain">A P term needs a standing error to make a standing push, so the carriage parks where kP times the error balances the extra weight: 0.35 ÷ 7 = 0.05 below the target, exactly the load ÷ kP rule from the limit mission. To take that weight off feedback's shoulders you would grow the feedforward instead - a bigger kG, or a loaded gains slot.</div>
       </div>
     </div>
   </section>
@@ -541,7 +551,7 @@
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
     opts.forEach(function(opt,i){
-      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
+      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } });
     });
   });
 })();

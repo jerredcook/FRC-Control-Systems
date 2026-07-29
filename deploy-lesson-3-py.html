@@ -326,9 +326,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">What does "deploy" do?</div>
         <div class="opts">
-          <button class="opt">Turns on the robot's battery</button>
+          <button class="opt" data-why="Power does come first, but that is the job of the breaker on the robot - deploy is a software step: it copies your program over the network and starts it.">Turns on the robot's battery</button>
           <button class="opt">Copies your built program onto the roboRIO and starts it running</button>
-          <button class="opt">Only packages your Python locally, without sending it</button>
+          <button class="opt" data-why="So close - packaging is the build half, the step right before. Deploy takes that package, copies it onto the roboRIO, and starts it running.">Only packages your Python locally, without sending it</button>
         </div>
         <div class="explain">Build packages; deploy sends the program to the roboRIO and launches it. After a successful deploy the robot reports "Robot Code" and is ready to be enabled.</div>
       </div>
@@ -336,8 +336,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">Your code is deployed and running, but the robot is <em>disabled</em>. What happens?</div>
         <div class="opts">
-          <button class="opt">The code stops running entirely</button>
-          <button class="opt">The robot drives anyway</button>
+          <button class="opt" data-why="It sure looks stopped from the outside, but the program never quits - disabled only blocks the motors while your periodic methods keep looping 50 times a second.">The code stops running entirely</button>
+          <button class="opt" data-why="That would be genuinely scary - disabled exists exactly so this cannot happen. The code keeps thinking, but every motor output is forced to zero until you enable.">The robot drives anyway</button>
           <button class="opt">Your code keeps running, but all motor outputs are forced to zero</button>
         </div>
         <div class="explain">Disabled doesn't stop your program - periodic methods still run. It just blocks motor output for safety. Nothing moves until you enable a mode.</div>
@@ -347,10 +347,20 @@
         <div class="qt">Which mode runs a pre-programmed routine with no driver input?</div>
         <div class="opts">
           <button class="opt">Autonomous</button>
-          <button class="opt">Teleoperated</button>
-          <button class="opt">Test</button>
+          <button class="opt" data-why="Tele- means far away, as in remote control - teleop is you driving with the controller. The mode that runs with no driver input is Autonomous.">Teleoperated</button>
+          <button class="opt" data-why="The name tempts, but Test mode is for poking at mechanisms by hand in the pit - the pre-programmed, no-driver routine is Autonomous.">Test</button>
         </div>
         <div class="explain">Autonomous runs your autonomousPeriodic / auto command on its own - the first ~15 seconds of an FRC match. Teleoperated is driver control; Test is for pit checks.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">From the sim</div>
+        <div class="qt">In the cockpit the lights read Comms GREEN, Robot Code RED, Joysticks GREEN. Which fix do you reach for first?</div>
+        <div class="opts">
+          <button class="opt" data-why="A wrong team number kills Communications, but Comms is green here - the laptop is reaching the robot just fine. The program on it has stopped, so re-deploy.">Set the right team number in DS setup</button>
+          <button class="opt" data-why="The Joysticks light is green, so the DS already sees your controller - re-plugging it cannot restart a program that died on the roboRIO.">Re-plug the joystick and rescan USB</button>
+          <button class="opt">Re-deploy the code - the link is fine but the program on the roboRIO stopped</button>
+        </div>
+        <div class="explain">Read the lights layer by layer. Comms green means the laptop can reach the roboRIO, so the network is healthy. Robot Code red with good comms means the program itself is not running - it crashed or never started - and running robotpy deploy puts a fresh copy on and launches it. That is exactly Fault 2 in the cockpit, and the same read works at a real field.</div>
       </div>
     </div>
   </section>
@@ -486,7 +496,7 @@
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
     opts.forEach(function(opt,i){
-      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
+      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } });
     });
   });
 })();

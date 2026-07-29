@@ -284,9 +284,9 @@ drive.<input class="blank" data-ans="tankdrive" data-reveal="tankDrive" aria-lab
         <div class="qn">Question 1</div>
         <div class="qt">On a tank drivetrain, how do you turn the robot in place?</div>
         <div class="opts">
-          <button class="opt">Spin both sides forward at full speed</button>
+          <button class="opt" data-why="Full speed both sides is a drag race, not a turn - matched sides carry the robot straight. Turning needs a difference between the sides, and a pivot needs them opposite.">Spin both sides forward at full speed</button>
           <button class="opt">Spin one side forward and the other backward</button>
-          <button class="opt">Turn off both sides</button>
+          <button class="opt" data-why="Zero on both sides just parks the robot where it sits. A pivot needs the sides fighting - one forward, one backward - so the robot rotates about its center.">Turn off both sides</button>
         </div>
         <div class="explain">Opposite wheel directions rotate the robot around its center with no forward motion. Equal-and-same spins it straight; unequal-and-same curves it.</div>
       </div>
@@ -295,8 +295,8 @@ drive.<input class="blank" data-ans="tankdrive" data-reveal="tankDrive" aria-lab
         <div class="qt">What does arcadeDrive do that tankDrive doesn't?</div>
         <div class="opts">
           <button class="opt">It mixes one stick's forward and turn into left/right commands</button>
-          <button class="opt">It uses a completely different drivetrain</button>
-          <button class="opt">It drives faster</button>
+          <button class="opt" data-why="Easy to assume from how different the two modes feel, but the sim's mode switch never touched the robot - same wheels, same motors. Only the stick-to-wheels math changes.">It uses a completely different drivetrain</button>
+          <button class="opt" data-why="Both top out at the same full command of 1.0 per side, so neither is faster. Arcade's difference is the mixing - one stick becomes two wheel commands.">It drives faster</button>
         </div>
         <div class="explain">arcadeDrive takes forward and turn from a single stick and computes left = fwd + turn, right = fwd - turn. tankDrive skips the mixing and takes each side directly.</div>
       </div>
@@ -304,11 +304,21 @@ drive.<input class="blank" data-ans="tankdrive" data-reveal="tankDrive" aria-lab
         <div class="qn">Question 3</div>
         <div class="qt">In arcade mixing, a pure turn-right command (turn > 0, fwd = 0) produces…</div>
         <div class="opts">
-          <button class="opt">Both sides forward</button>
-          <button class="opt">Both sides backward</button>
+          <button class="opt" data-why="Both sides forward takes a forward command, and here fwd is 0 - the turn term flips sign between sides, so left gets +turn while right gets -turn.">Both sides forward</button>
+          <button class="opt" data-why="Same trap, mirrored - nothing here drives both sides negative. The mix hands the sides opposite signs, which is exactly what pivots the robot.">Both sides backward</button>
           <button class="opt">Left side forward, right side backward - a pivot</button>
         </div>
         <div class="explain">With fwd = 0: left = 0 + turn (forward), right = 0 - turn (backward). The robot pivots in place toward the right. The mixing handles it automatically.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">In arcade you hold the stick so Forward reads 0.80 and Turn reads 0.50. What do the wheel readouts show?</div>
+        <div class="opts">
+          <button class="opt" data-why="The math does say 1.30, but no motor can give more than full output - the sim clamps the command at 1.00, exactly what the gold mission showed.">Left 1.30, Right 0.30 - the readouts show exactly what the mixing math says</button>
+          <button class="opt">Left pins at 1.00, Right 0.30 - the left side clips, so you get less turn than you asked for</button>
+          <button class="opt" data-why="That is what WPILib's DifferentialDrive would do - desaturate both sides by the same factor. This sim runs the raw mix, so the right keeps its 0.30 and only the left clips.">Left 1.00, Right 0.23 - the sim scales both sides down together to preserve the turn</button>
+        </div>
+        <div class="explain">The mix asks for left = 0.80 + 0.50 = 1.30 and right = 0.80 - 0.50 = 0.30, but a wheel command tops out at 1.00, so the left pins there. The gap between the sides shrinks from 1.00 to 0.70, and the robot turns shallower than you commanded. Real drive code desaturates instead, scaling both sides by the same factor (to 1.00 and 0.23) - trading a little speed to keep your turn.</div>
       </div>
     </div>
   </section>
@@ -497,7 +507,7 @@ drive.<input class="blank" data-ans="tankdrive" data-reveal="tankDrive" aria-lab
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

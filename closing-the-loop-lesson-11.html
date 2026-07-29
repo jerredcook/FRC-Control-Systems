@@ -307,9 +307,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">What does <code style="font-family:var(--mono);color:var(--teal)">pid.calculate(measured, goal)</code> return?</div>
         <div class="opts">
-          <button class="opt">The error between measured and goal</button>
+          <button class="opt" data-why="It does find the error first, but that is a private step along the way - what comes back is the finished output with your gains already applied, ready to hand to the motor.">The error between measured and goal</button>
           <button class="opt">The output voltage to send to the motor</button>
-          <button class="opt">Whether the robot is enabled</button>
+          <button class="opt" data-why="Enabled or disabled is the Driver Station's department - the PIDController just does control math on the two numbers you hand it.">Whether the robot is enabled</button>
         </div>
         <div class="explain">It computes the error for you, applies the P/I/D gains, and returns the controller's output - the voltage you hand straight to setVoltage().</div>
       </div>
@@ -318,8 +318,8 @@
         <div class="qt">With only P and D and gravity pulling down, the elevator settles slightly below the target. Why?</div>
         <div class="opts">
           <button class="opt">P needs a leftover error to make the voltage that holds against gravity</button>
-          <button class="opt">The PIDController has a bug</button>
-          <button class="opt">The sensor is reading the wrong units</button>
+          <button class="opt" data-why="Blaming the library is tempting when the robot misses, but this is P doing its math perfectly - no error means no voltage, so it must keep a little droop to hold on.">The PIDController has a bug</button>
+          <button class="opt" data-why="Unit bugs are real, but they scale readings by a big factor and cause wild misses - a small, steady park just below the target is pure P's gravity signature.">The sensor is reading the wrong units</button>
         </div>
         <div class="explain">It's the Lesson 2 droop: the only way pure P produces a holding voltage is to keep a little error around. Feedforward (next lesson) supplies that voltage directly, so the error can go to zero.</div>
       </div>
@@ -327,11 +327,21 @@
         <div class="qn">Question 3</div>
         <div class="qt">How do you let the rest of your code ask "are we there yet?"</div>
         <div class="opts">
-          <button class="opt">Read the motor temperature</button>
-          <button class="opt">There's no way to know</button>
+          <button class="opt" data-why="Temperature tells you the motor is working hard, not whether the mechanism arrived - closeness to the target comes from the controller itself, via atSetpoint().">Read the motor temperature</button>
+          <button class="opt" data-why="It can feel that way when nothing obvious reports it, but WPILib built it in - set a tolerance once and atSetpoint() answers the question on every loop.">There's no way to know</button>
           <button class="opt">Call setTolerance(...) once, then check pid.atSetpoint()</button>
         </div>
         <div class="explain">setTolerance defines how close counts as "there," and atSetpoint() returns true once the measurement is within that band - handy for ending a command when the move finishes.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">Gravity in this sim takes 0.45 V to hold. With kP = 6.0 and no kI, roughly what does the Error readout settle at?</div>
+        <div class="opts">
+          <button class="opt" data-why="Zero is the dream, but pure P has no memory - at zero error it outputs zero volts, and zero volts loses to gravity. It has to keep a little error to keep holding.">0.00 - the loop closes the error completely</button>
+          <button class="opt">About 0.075 - just enough error that kP × error makes the 0.45 V hold</button>
+          <button class="opt" data-why="0.45 is the voltage gravity demands, not the error - the droop is the error that produces that voltage: 0.45 divided by kP = 6, about 0.075.">About 0.45 - the error equals the gravity voltage</button>
+        </div>
+        <div class="explain">At rest the P term alone must cancel gravity: kP × error = 0.45, so error = 0.45 ÷ 6 = 0.075. Watch the readout hover right around there - then try kP = 12 and see the droop halve to about 0.04. It shrinks but never reaches zero; only feedforward (next lesson) or kI can finish the job.</div>
       </div>
     </div>
   </section>
@@ -511,7 +521,7 @@
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
     opts.forEach(function(opt,i){
-      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
+      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } });
     });
   });
 })();

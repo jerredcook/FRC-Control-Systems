@@ -168,8 +168,8 @@
         <div class="qt">What gets assembled first?</div>
         <div class="opts">
           <button class="opt">The frame - the structure everything else bolts to</button>
-          <button class="opt">The bumpers</button>
-          <button class="opt">The arm</button>
+          <button class="opt" data-why="Bumpers feel essential, and they are - at the very end. They wrap a finished robot, so they go on last, not first.">The bumpers</button>
+          <button class="opt" data-why="The arm is the exciting part, so starting there tempts everyone. But it needs a frame to bolt onto - structure first, mechanisms later.">The arm</button>
         </div>
         <div class="explain">The frame is the foundation. Every other subsystem mounts to it, so it has to come first.</div>
       </div>
@@ -177,8 +177,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">Why wire the electrical before adding the mechanisms?</div>
         <div class="opts">
-          <button class="opt">It looks neater</button>
-          <button class="opt">No reason</button>
+          <button class="opt" data-why="Tidy wiring is a nice bonus, but the real reason is access - once an arm fills the space, you cannot reach those wires at all, neat or not.">It looks neater</button>
+          <button class="opt" data-why="It can feel arbitrary until you have fished a connector out from under a mounted arm with tweezers. Wire while the inside is still open and reachable.">No reason</button>
           <button class="opt">So you can still reach the inside before mechanisms block access</button>
         </div>
         <div class="explain">Once an arm or intake fills the space, the wiring is buried. Run it while the inside is still open and reachable.</div>
@@ -187,9 +187,9 @@
         <div class="qn">Question 3</div>
         <div class="qt">What's the real reason assembly order matters?</div>
         <div class="opts">
-          <button class="opt">It doesn't</button>
+          <button class="opt" data-why="It looks that way until a buried bolt costs you an hour in the pit. Order decides what stays reachable, and that is everything when you are rushed.">It doesn't</button>
           <button class="opt">Access - each layer can cover up the one beneath it</button>
-          <button class="opt">To make it heavier</button>
+          <button class="opt" data-why="The robot weighs the same no matter what order the parts go on. What order changes is access - whether you can still reach things later.">To make it heavier</button>
         </div>
         <div class="explain">Order is about access. Build so that nothing you'll need to reach later gets buried under something added earlier.</div>
       </div>
@@ -274,7 +274,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

@@ -281,9 +281,9 @@ self.state = <span class="ty">State</span>.<input class="blank" data-ans="idle|s
         <div class="qn">Question 1</div>
         <div class="qt">What is a state machine?</div>
         <div class="opts">
-          <button class="opt">A kind of motor controller</button>
+          <button class="opt" data-why="Fair guess - machine does sound like hardware. But this one is pure code: a set of named states and the rules for moving between them.">A kind of motor controller</button>
           <button class="opt">A set of named states with defined transitions, where the robot is in exactly one at a time</button>
-          <button class="opt">A dashboard widget</button>
+          <button class="opt" data-why="You often do watch the current state on a dashboard, but that display is just a window. The machine itself is the code deciding which state the robot is in.">A dashboard widget</button>
         </div>
         <div class="explain">A state machine lists the states the system can be in and the events that move between them. At any moment it's in one state, which keeps the logic clear and predictable.</div>
       </div>
@@ -292,8 +292,8 @@ self.state = <span class="ty">State</span>.<input class="blank" data-ans="idle|s
         <div class="qt">Why is a state machine better than a pile of separate booleans?</div>
         <div class="opts">
           <button class="opt">Illegal combinations become impossible - there's no "intaking AND shooting" state</button>
-          <button class="opt">It uses less battery</button>
-          <button class="opt">It runs the motors faster</button>
+          <button class="opt" data-why="Battery is precious, so this tempts, but code structure barely touches the meter. The real win is that contradictory states become impossible to even write.">It uses less battery</button>
+          <button class="opt" data-why="Speed comes from voltage and gearing, not from how the logic is organized. What a state machine buys is clarity - one state at a time, so bad combos cannot happen.">It runs the motors faster</button>
         </div>
         <div class="explain">With one state attribute and explicit transitions, contradictory situations simply can't be represented. Separate booleans let you drift into "is_shooting and is_intaking" and force messy guard code.</div>
       </div>
@@ -301,11 +301,21 @@ self.state = <span class="ty">State</span>.<input class="blank" data-ans="idle|s
         <div class="qn">Question 3</div>
         <div class="qt">In the machine above, you press shoot while in IDLE. What happens?</div>
         <div class="opts">
-          <button class="opt">The robot shoots anyway</button>
-          <button class="opt">It crashes</button>
+          <button class="opt" data-why="That is exactly what a pile of booleans might let happen. Here SHOOTING is only reachable from LOADED, so an IDLE shoot press has no path to follow.">The robot shoots anyway</button>
+          <button class="opt" data-why="A fair fear - unexpected input crashes plenty of programs. But the machine handles it by design: no matching transition means the event is quietly ignored, not fatal.">It crashes</button>
           <button class="opt">Nothing - there's no transition from IDLE on shoot, so the event is ignored</button>
         </div>
         <div class="explain">Shooting is only reachable from LOADED. With no IDLE-to-SHOOTING transition defined, the event is simply rejected, which is exactly the safety a state machine buys you.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">The machine is in INTAKING, rollers running, and you press intake a second time. What does the log show?</div>
+        <div class="opts">
+          <button class="opt" data-why="Most states do answer to a single event, so this is a sensible bet. But INTAKING keeps a second exit - you may have found it in the missions - and a repeat press takes it.">press intake ignored - INTAKING only answers to note detected</button>
+          <button class="opt">press intake · INTAKING → IDLE - the intake button doubles as the cancel</button>
+          <button class="opt" data-why="It would be convenient if a button press could confirm a game piece, but only the beam sensor knows the truth. LOADED is reached by note detected, never by a hopeful press.">INTAKING → LOADED, because a second press confirms the game piece</button>
+        </div>
+        <div class="explain">INTAKING lists two exits: note detected moves forward to LOADED, and a second intake press cancels back to IDLE. That cancel path is a driver mercy - if nothing came in, you should not be stuck with rollers spinning. Every other event bounces off, exactly like the ignored lines in the log.</div>
       </div>
     </div>
   </section>
@@ -427,7 +437,7 @@ self.state = <span class="ty">State</span>.<input class="blank" data-ans="idle|s
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

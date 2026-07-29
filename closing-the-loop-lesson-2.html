@@ -372,9 +372,9 @@ motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="output" 
         <div class="qn">Question 1</div>
         <div class="qt">With pure proportional control, raising <span class="k">kP</span> will…</div>
         <div class="opts">
-          <button class="opt">Eliminate steady-state error completely</button>
+          <button class="opt" data-why="It feels like enough gain should finish the job, but droop is g over kP - a bigger gain only divides the gap smaller. Only an infinite kP would erase it, and the ringing gets you long before that.">Eliminate steady-state error completely</button>
           <button class="opt">Shrink steady-state error but never remove it</button>
-          <button class="opt">Have no effect on steady-state error</button>
+          <button class="opt" data-why="kP is actually in the droop formula - the gap is g divided by kP. Raising the gain does shrink it; what it cannot do is finish the job.">Have no effect on steady-state error</button>
         </div>
         <div class="explain">Droop is g/kP - a bigger gain makes it smaller, but it only reaches zero if kP were infinite (which would make the system wildly unstable). P alone can't fully close the gap.</div>
       </div>
@@ -382,9 +382,9 @@ motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="output" 
         <div class="qn">Question 2</div>
         <div class="qt">Why does the elevator settle below the target under proportional control?</div>
         <div class="opts">
-          <button class="opt">The encoder reads the wrong height</button>
+          <button class="opt" data-why="A lying sensor would cause misses too, so good instinct - but this encoder is honest. The gap exists because the controller needs leftover error to make its holding voltage.">The encoder reads the wrong height</button>
           <button class="opt">The motor needs some error to produce the voltage that holds against gravity</button>
-          <button class="opt">kP is set to a negative number</button>
+          <button class="opt" data-why="A negative kP would push away from the target entirely and run for the rails. Parking a little low is what a perfectly healthy positive gain does against gravity.">kP is set to a negative number</button>
         </div>
         <div class="explain">Output is kP × error. Holding against gravity needs a nonzero voltage, which needs a nonzero error - so the carriage parks exactly where the leftover error supplies the holding voltage.</div>
       </div>
@@ -392,11 +392,21 @@ motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="output" 
         <div class="qn">Question 3</div>
         <div class="qt">You push <span class="k">kP</span> very high and the carriage overshoots and oscillates. This shows…</div>
         <div class="opts">
-          <button class="opt">A higher gain is always better</button>
-          <button class="opt">kP only changes speed, never stability</button>
+          <button class="opt" data-why="More feels better, but you just watched the price - the carriage sailing past and ringing. Past a point, extra gain trades calm for wobble.">A higher gain is always better</button>
+          <button class="opt" data-why="Speed is half the story. Crank kP far enough and the scope shows the other half - overshoot and ringing, which is stability starting to slip.">kP only changes speed, never stability</button>
           <button class="opt">The tradeoff - higher kP shrinks droop but adds overshoot and ringing</button>
         </div>
         <div class="explain">Exactly the proportional bind: you can dial out the droop or dial out the overshoot, but not both with kP alone. The fix is adding other terms, which is where we're headed.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">From the sim</div>
+        <div class="qt">You slide kP to 6.0, keep the setpoint at 0.70, press Step, and let it settle. Roughly where does the carriage park?</div>
+        <div class="opts">
+          <button class="opt">Near 0.62 - about 0.075 short of the line</button>
+          <button class="opt" data-why="Tempting, but no finite gain closes the gap. The Droop readout is doing the math for you: g over kP is 0.45 / 6, so 0.075 of gap survives.">Right on 0.70 - a kP of 6 is strong enough to close the gap</button>
+          <button class="opt" data-why="0.59 is where kP 4 parks, with its 0.45 / 4 droop. Droop shrinks as kP grows, so at 6 the gap tightens to 0.45 / 6.">Near 0.59 - the same distance short as the default kP of 4</button>
+        </div>
+        <div class="explain">Droop is g / kP = 0.45 / 6 = 0.075, so the carriage settles near 0.70 - 0.075, which is about 0.62. Try it: set kP to 6, press Step, and check the Droop readout against where the position trace flattens.</div>
       </div>
     </div>
   </section>
@@ -613,7 +623,7 @@ motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="output" 
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
     opts.forEach(function(opt,i){
-      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
+      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } });
     });
   });
 })();

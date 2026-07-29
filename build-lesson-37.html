@@ -179,9 +179,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">What's the workhorse for cutting tube and plate to length?</div>
         <div class="opts">
-          <button class="opt">The lathe</button>
+          <button class="opt" data-why="The lathe is a star machine, but only for round parts. Cutting tube and plate to length is everyday saw work, and the bandsaw does it all day long.">The lathe</button>
           <button class="opt">The bandsaw or chop saw</button>
-          <button class="opt">The 3D printer</button>
+          <button class="opt" data-why="Printers feel like they can make anything, but they grow plastic parts slowly and never cut metal. Sizing tube and plate to length is a saw's job.">The 3D printer</button>
         </div>
         <div class="explain">Saws cut stock to length, and they make most of the cuts on a robot. The lathe and mill are for special shapes.</div>
       </div>
@@ -189,8 +189,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">What's the lathe best at?</div>
         <div class="opts">
-          <button class="opt">Flat plates</button>
-          <button class="opt">Drilling grids of holes</button>
+          <button class="opt" data-why="Flat faces are the mill's home turf. A lathe spins the part against the cutter, so everything it makes comes out round.">Flat plates</button>
+          <button class="opt" data-why="A lathe can drill, but only one hole dead on the spinning centerline. A grid of holes across a plate belongs on the drill press.">Drilling grids of holes</button>
           <button class="opt">Round parts like shafts and spacers</button>
         </div>
         <div class="explain">A lathe spins the part against a cutter, perfect for anything round and turned about an axis.</div>
@@ -200,8 +200,8 @@
         <div class="qt">What's the first manufacturing skill to learn?</div>
         <div class="opts">
           <button class="opt">Safety - glasses on, no loose clothing, respect every machine</button>
-          <button class="opt">Speed</button>
-          <button class="opt">Making the part look pretty</button>
+          <button class="opt" data-why="Speed does come, and it comes free once safe habits are automatic. Rush before that and the machine wins - safety is the skill you build first.">Speed</button>
+          <button class="opt" data-why="A clean finish is satisfying, but it is polish, not foundation. Safe habits keep you whole; looks can always be filed on later.">Making the part look pretty</button>
         </div>
         <div class="explain">Shop safety comes before any cut. Parts are replaceable; you are not. Safe habits are the foundation of every good shop.</div>
       </div>
@@ -283,7 +283,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

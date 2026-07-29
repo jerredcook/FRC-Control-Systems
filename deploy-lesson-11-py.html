@@ -281,9 +281,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">What runs the whole command-based robot each loop?</div>
         <div class="opts">
-          <button class="opt">Your teleopPeriodic, line by line</button>
+          <button class="opt" data-why="That is how a first robot often works, so it feels right - but in command-based, teleopPeriodic is nearly empty. The scheduler's run() does the per-loop driving.">Your teleopPeriodic, line by line</button>
           <button class="opt">The CommandScheduler, called once from robotPeriodic()</button>
-          <button class="opt">The Driver Station</button>
+          <button class="opt" data-why="The Driver Station enables the robot and streams your joystick values, but it runs none of your code - the scheduler on the robot is what executes everything each loop.">The Driver Station</button>
         </div>
         <div class="explain">CommandScheduler.getInstance().run() is the engine - called every 20 ms, it reads inputs, runs active commands, and updates every subsystem. You write the pieces; it runs them.</div>
       </div>
@@ -291,8 +291,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">In command-based terms, a Subsystem is a ___ and a Command is a ___.</div>
         <div class="opts">
-          <button class="opt">verb … noun</button>
-          <button class="opt">file … folder</button>
+          <button class="opt" data-why="Right pair, flipped order - the subsystem is the thing itself, like the elevator, and the command is the doing, like raising it. Nouns hold hardware; verbs act on them.">verb … noun</button>
+          <button class="opt" data-why="They do live in files, but that is just filing, not meaning - the split that matters is mechanism versus action: Elevator is a noun, RaiseElevator is a verb.">file … folder</button>
           <button class="opt">noun (a mechanism) … verb (an action)</button>
         </div>
         <div class="explain">Subsystems are the nouns - the Elevator, the Intake. Commands are the verbs - raise it, run it. The scheduler coordinates verbs acting on nouns.</div>
@@ -302,10 +302,20 @@
         <div class="qt">What is RobotContainer for?</div>
         <div class="opts">
           <button class="opt">Creating subsystems, building commands, and binding them to buttons - once at startup</button>
-          <button class="opt">Running the control loop every 20 ms</button>
-          <button class="opt">Storing the battery charge</button>
+          <button class="opt" data-why="That is the scheduler's beat, not RobotContainer's - the container runs once at startup to build and wire everything, then hands the keys over and steps aside.">Running the control loop every 20 ms</button>
+          <button class="opt" data-why="Battery charge belongs to the hardware and the Driver Station display - RobotContainer is pure wiring: create the subsystems, build the commands, bind the buttons.">Storing the battery charge</button>
         </div>
         <div class="explain">RobotContainer is the setup/wiring file: it instantiates your subsystems and connects controller buttons to commands. It runs once; the scheduler does the per-loop work afterward.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">In the cockpit sim, the scheduler is midway through loop 3 when you press Schedule RaiseElevator. On which loop does its execute() run for the first time?</div>
+        <div class="opts">
+          <button class="opt" data-why="It feels urgent, but the scheduler never abandons a pass midway - a command scheduled mid-loop only gets its initialize() right away, then waits for the next full pass.">Loop 3 - the scheduler runs it the instant you schedule it</button>
+          <button class="opt">Loop 4 - the next full pass picks it up</button>
+          <button class="opt" data-why="Only one pass goes by, not two - the command misses the pass it arrived during and boards the very next one. At 20 ms a loop, that wait is a single heartbeat.">Loop 5 - a new command always waits two full loops</button>
+        </div>
+        <div class="explain">This is the mission-checker question with the numbers filled in: scheduled mid-pass during loop 3, RaiseElevator sits queued while that pass finishes, and its execute() first fires in loop 4's command phase. The scheduler finishes what it started - a one-loop wait of just 20 ms.</div>
       </div>
     </div>
   </section>
@@ -365,7 +375,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

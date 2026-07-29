@@ -329,8 +329,8 @@ drive.<span class="fn">drive</span>(<span class="num">0</span>, <span class="num
         <div class="qn">Question 1</div>
         <div class="qt">What does the camera's <code style="font-family:var(--mono);color:var(--teal)">tx</code> represent in control terms?</div>
         <div class="opts">
-          <button class="opt">The setpoint</button>
-          <button class="opt">The output voltage</button>
+          <button class="opt" data-why="You are right next door - the setpoint is what tx gets compared against, and it is 0, dead center. tx itself is the distance from that setpoint, which makes it the error.">The setpoint</button>
+          <button class="opt" data-why="Output comes out the far end of the loop, after the gain does its work. tx goes in the front: it is the measured miss the controller is trying to erase.">The output voltage</button>
           <button class="opt">The error - how far off-target the robot is pointed</button>
         </div>
         <div class="explain">tx is the angle between bore-sight and the target. The setpoint is 0 (centered), so tx is the error. Multiply it by kP and you have a turn command - proportional control with a camera for a sensor.</div>
@@ -340,8 +340,8 @@ drive.<span class="fn">drive</span>(<span class="num">0</span>, <span class="num
         <div class="qt">Crank the aim kP way up. What happens, and why?</div>
         <div class="opts">
           <button class="opt">The aim overshoots and hunts - same instability as an over-tuned PID</button>
-          <button class="opt">The camera sees farther</button>
-          <button class="opt">Nothing changes</button>
+          <button class="opt" data-why="kP lives in the control loop, not the lens - the camera reports the same tx no matter the gain. What changes is how hard the robot reacts to that number.">The camera sees farther</button>
+          <button class="opt" data-why="Gain always matters - that was the whole story of Lesson 2, and a camera sensor does not repeal it. Too much kP and the aim swings past center and hunts.">Nothing changes</button>
         </div>
         <div class="explain">It's the exact same proportional loop from Lesson 2. Too much gain overreacts to the error, swings past center, and oscillates. Vision doesn't change the control rules one bit.</div>
       </div>
@@ -349,11 +349,21 @@ drive.<span class="fn">drive</span>(<span class="num">0</span>, <span class="num
         <div class="qn">Question 3</div>
         <div class="qt">Besides aiming, what can vision do that wheel odometry can't?</div>
         <div class="opts">
-          <button class="opt">Spin the motors faster</button>
+          <button class="opt" data-why="Vision is a sensor - it only reports, it never pushes. Its superpower is knowing exactly where the robot sits on the field from a tag whose location is known.">Spin the motors faster</button>
           <button class="opt">Give an absolute field position from a known tag, correcting odometry drift</button>
-          <button class="opt">Replace the gyro entirely</button>
+          <button class="opt" data-why="Tempting, since both track heading - but the camera loses sight of tags and its frames arrive late. The gyro never blinks, so vision corrects it rather than replacing it.">Replace the gyro entirely</button>
         </div>
         <div class="explain">Odometry accumulates error as wheels slip. A recognized AprilTag has a known field location, so it pins down where the robot truly is - you blend it in with addVisionMeasurement to keep the pose honest.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">In the drift clinic, a steady push drags the aim like a crosswind, and with kP at 2.0 the robot parks about 5° off center. You raise kP to 10. Where does it park now?</div>
+        <div class="opts">
+          <button class="opt" data-why="So close - but a P-only loop must keep some error alive to generate the steady turn that fights the push. More kP shrinks the standing miss; only an I term or a feedforward can truly zero it.">Dead on 0° - enough gain erases the miss completely</button>
+          <button class="opt">About 1° off - the standing miss is roughly 10° ÷ kP, so five times the gain shrinks it five times, inside the lock zone</button>
+          <button class="opt" data-why="That is true when nothing pushes back - with no disturbance, any kP eventually centers the aim. Fighting a steady push takes a standing error, though, and its size shrinks as kP grows.">Still about 5° - kP changes how fast it aims, not where it settles</button>
+        </div>
+        <div class="explain">Against a steady push, a P-only loop settles where its correction exactly cancels the disturbance, and in this sim that standing miss works out to about 10° ÷ kP. At kP = 2 that is 5°, well outside the 1.5° lock zone; at kP = 10 it is 1°, and LOCKED finally sticks. Bigger gain leans harder into the wind - it never makes the wind go away.</div>
       </div>
     </div>
   </section>
@@ -670,7 +680,7 @@ drive.<span class="fn">drive</span>(<span class="num">0</span>, <span class="num
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
     opts.forEach(function(opt,i){
-      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
+      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } });
     });
   });
 })();

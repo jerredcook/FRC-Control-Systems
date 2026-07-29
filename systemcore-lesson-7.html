@@ -272,8 +272,8 @@
         <div class="qn">Question 1</div>
         <div class="qt">What is new about the SystemCore Driver Station compared to the old one?</div>
         <div class="opts">
-          <button class="opt">It only runs on Windows, same as before</button>
-          <button class="opt">It replaces the Driver Station on the roboRIO too</button>
+          <button class="opt" data-why="Fair guess, since the old app really was Windows-only - but that limit is exactly what the new Driver Station removes. It runs on Windows, macOS, and Linux.">It only runs on Windows, same as before</button>
+          <button class="opt" data-why="Tempting, because a new app sounds like it replaces everything - but the roboRIO keeps the existing Driver Station. Only SystemCore teams get the new one.">It replaces the Driver Station on the roboRIO too</button>
           <button class="opt">It runs on Windows, macOS, and Linux</button>
         </div>
         <div class="explain">The old Driver Station was Windows-only. The new one, built for SystemCore, runs on Windows, macOS, and Linux. The roboRIO keeps the existing Driver Station, so only SystemCore uses the new app.</div>
@@ -282,9 +282,9 @@
         <div class="qn">Question 2</div>
         <div class="qt">Which text languages does WPILib 2027 officially support on SystemCore?</div>
         <div class="opts">
-          <button class="opt">Only Java</button>
+          <button class="opt" data-why="Java is the most common FRC choice, so it is easy to think it stands alone - but C++ and Python (through RobotPy) are fully supported on SystemCore too.">Only Java</button>
           <button class="opt">Java, C++, and Python</button>
-          <button class="opt">JavaScript and Rust</button>
+          <button class="opt" data-why="Both are popular languages elsewhere, so this sounds plausible - but WPILib 2027 sticks with Java, C++, and Python, plus Blockly for block coding.">JavaScript and Rust</button>
         </div>
         <div class="explain">The three officially supported text languages are Java, C++, and Python (Python via RobotPy), and all of them run on SystemCore. There is also Blockly for block-based coding.</div>
       </div>
@@ -293,8 +293,8 @@
         <div class="qt">Which of these is a real new feature of the SystemCore Driver Station?</div>
         <div class="opts">
           <button class="opt">Controller rumble and LED output</button>
-          <button class="opt">A tank that stores compressed air</button>
-          <button class="opt">It removes support for gamepad buttons</button>
+          <button class="opt" data-why="Air tanks are real robot parts, so the words sound at home here - but that is pneumatics hardware on the robot, not a feature of the laptop app that reads your gamepads.">A tank that stores compressed air</button>
+          <button class="opt" data-why="New software sometimes drops old features, so the worry is fair - but this one goes the other way: up to 64 buttons and 8 POVs, more than before.">It removes support for gamepad buttons</button>
         </div>
         <div class="explain">The new Driver Station adds rumble and LED output, 16-bit axes, and support for up to 64 buttons and 8 POVs. It keeps full gamepad support, with much more of it.</div>
       </div>
@@ -336,7 +336,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

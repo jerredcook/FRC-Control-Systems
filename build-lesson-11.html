@@ -203,9 +203,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">What can chain do that meshed gears can't?</div>
         <div class="opts">
-          <button class="opt">Change the ratio while spinning</button>
+          <button class="opt" data-why="That is a bike derailleur's trick, and it needs extra hardware to shove the chain between sprockets - a plain chain run holds one fixed ratio, same as gears.">Change the ratio while spinning</button>
           <button class="opt">Carry power across a gap between two shafts</button>
-          <button class="opt">Eliminate the need for a motor</button>
+          <button class="opt" data-why="Nothing downstream of the motor makes power, it only reshapes it - chain's gift is carrying that power across a gap that meshed gears cannot span.">Eliminate the need for a motor</button>
         </div>
         <div class="explain">Gears must touch to transfer power. Chain loops over two sprockets that can be far apart, moving the same ratio across a distance, like a bike chain.</div>
       </div>
@@ -213,8 +213,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">An 18T sprocket drives a 54T sprocket. What's the ratio?</div>
         <div class="opts">
-          <button class="opt">1:3 overdrive</button>
-          <button class="opt">18:54</button>
+          <button class="opt" data-why="The 3 is right but flipped - an overdrive needs the big sprocket driving the small one; here the 54T is the driven side, so the output slows into a 3:1 reduction.">1:3 overdrive</button>
+          <button class="opt" data-why="18:54 is the honest tooth count, one step from done - divide it out, 54 over 18, and it becomes the 3:1 a builder would actually say.">18:54</button>
           <button class="opt">3:1 reduction - driven ÷ driver = 54 / 18</button>
         </div>
         <div class="explain">Sprocket ratios work just like gears: driven teeth over driver teeth. 54 / 18 = 3, a 3:1 reduction. The output spins a third as fast with triple the torque.</div>
@@ -224,10 +224,20 @@
         <div class="qt">A chain is skipping teeth under load. Most likely cause?</div>
         <div class="opts">
           <button class="opt">It's too loose - it needs more tension</button>
-          <button class="opt">It's too tight</button>
-          <button class="opt">The ratio is wrong</button>
+          <button class="opt" data-why="Too tight causes trouble too, just a different kind - fast wear and a stiff drivetrain. Skipping means the slack chain is climbing up and over the sprocket teeth.">It's too tight</button>
+          <button class="opt" data-why="The ratio sets speed and torque, not grip - a chain skips when it is loose enough to ride up over the teeth, whatever the ratio happens to be.">The ratio is wrong</button>
         </div>
         <div class="explain">A slack chain rides up and jumps over the sprocket teeth. Tighten it with a tensioner or by moving a sprocket, or remove a half-link, so it seats properly under load.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">In the sim, you set a 36T driver and a 12T driven sprocket, like the flip mission. If the driver side turns at 100 rpm, what does the driven sprocket do?</div>
+        <div class="opts">
+          <button class="opt" data-why="That is what happens when the big sprocket is the driven one - here the big one is doing the driving, so the small driven side spins faster, not slower.">About 33 rpm - a bigger sprocket on one side always slows the output</button>
+          <button class="opt">About 300 rpm, spinning the same direction as the driver</button>
+          <button class="opt" data-why="You nailed the speed - the direction is the chain surprise, though: the loop wraps both sprockets the same way, so they spin together, unlike meshed gears.">About 300 rpm, but reversed like a pair of meshed gears</button>
+        </div>
+        <div class="explain">Ratio is driven over driver: 12 / 36 is 0.33:1, an overdrive, so the driven side spins 3 times faster - 300 rpm. And both sprockets turn the same direction, because the chain wraps them instead of meshing them. It is exactly your bike: big chainring at the pedals, small cog at the wheel, wheel spinning faster and the same way.</div>
       </div>
     </div>
   </section>
@@ -373,7 +383,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

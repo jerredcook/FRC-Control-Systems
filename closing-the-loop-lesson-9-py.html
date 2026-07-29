@@ -324,9 +324,9 @@ self.driver = <span class="ty">CommandXboxController</span>(<span class="num">0<
         <div class="qn">Question 1</div>
         <div class="qt">How often does a standard FRC robot run its periodic code?</div>
         <div class="opts">
-          <button class="opt">Once, when the robot turns on</button>
+          <button class="opt" data-why="Setup code does run once at power-on, but that is what __init__ is for - the periodic loop re-runs on a 20 ms heartbeat for the whole match.">Once, when the robot turns on</button>
           <button class="opt">Every 20 ms - about 50 times every second</button>
-          <button class="opt">Only when a button is pressed</button>
+          <button class="opt" data-why="Buttons feel like triggers, but a press only changes the goal - the loop itself keeps running every 20 ms whether you touch anything or not.">Only when a button is pressed</button>
         </div>
         <div class="explain">The roboRIO runs the loop on a fixed 20 ms beat (50 Hz). Everything - reading sensors, running controllers, setting motors - happens fresh on every one of those beats.</div>
       </div>
@@ -334,8 +334,8 @@ self.driver = <span class="ty">CommandXboxController</span>(<span class="num">0<
         <div class="qn">Question 2</div>
         <div class="qt">In command-based code, where does the PID control loop from Part I actually run?</div>
         <div class="opts">
-          <button class="opt">In robot.py, once at startup</button>
-          <button class="opt">In the subsystem's __init__</button>
+          <button class="opt" data-why="robot.py sounds central, but it only launches the robot and hands off - and code that runs once could never keep chasing a moving error.">In robot.py, once at startup</button>
+          <button class="opt" data-why="Close - __init__ is where the PIDController gets built, but it runs exactly once. Control has to re-run every 20 ms, and that is periodic()'s beat.">In the subsystem's __init__</button>
           <button class="opt">In the subsystem's periodic() method, every loop</button>
         </div>
         <div class="explain">periodic() is the spot WPILib calls every 20 ms, so the continuous "measure, decide, act" loop lives there. __init__ runs once (setup); robot.py just launches the robot.</div>
@@ -345,10 +345,20 @@ self.driver = <span class="ty">CommandXboxController</span>(<span class="num">0<
         <div class="qt">What's the difference between a Subsystem and a Command?</div>
         <div class="opts">
           <button class="opt">A Subsystem is a mechanism and its hardware; a Command is an action that uses subsystems</button>
-          <button class="opt">A Subsystem is for autonomous; a Command is for teleop</button>
-          <button class="opt">They're two names for the same thing</button>
+          <button class="opt" data-why="Both show up in every mode - autonomous and teleop are when things run, while subsystems and commands are what runs, and they work as a pair in both.">A Subsystem is for autonomous; a Command is for teleop</button>
+          <button class="opt" data-why="They are a tight pair, which makes them blur together - but one is the mechanism that owns the hardware, and the other is an action that borrows it for a job.">They're two names for the same thing</button>
         </div>
         <div class="explain">Subsystems are the nouns (the elevator, its motor and sensor, its loop). Commands are the verbs (go to 1.2 m). Commands set goals; subsystems do the continuous work of reaching them.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">You pause the loop at READ and use Step one beat. How many presses until the iteration counter ticks up by one?</div>
+        <div class="opts">
+          <button class="opt" data-why="Reasonable guess, but each press moves one phase, not one lap - the counter only ticks once all four phases finish and the pulse wraps back to Read.">One - every press is one full iteration</button>
+          <button class="opt">Four - Decide, Act, Wait, then the wrap back into Read ticks the counter</button>
+          <button class="opt" data-why="Fifty is the laps-per-second number on the real robot, not a press count - here one lap is just four phase steps, and the counter ticks on the wrap back to Read.">Fifty - one press for every loop in a second</button>
+        </div>
+        <div class="explain">Each press advances one phase, so a full lap takes four: Decide, Act, Wait, and the wrap back to Read, which is when the counter ticks. The real roboRIO finishes that whole four-phase lap in 20 ms - then does it again, 50 times every second, for the entire match.</div>
       </div>
     </div>
   </section>
@@ -569,7 +579,7 @@ self.driver = <span class="ty">CommandXboxController</span>(<span class="num">0<
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
     opts.forEach(function(opt,i){
-      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
+      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } });
     });
   });
 })();

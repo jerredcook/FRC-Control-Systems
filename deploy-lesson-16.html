@@ -264,8 +264,8 @@ driver.<span class="fn">x</span>().<input class="blank" data-ans="whiletrue" dat
         <div class="qn">Question 1</div>
         <div class="qt">You schedule a command that requires Drive while another Drive command is running. What happens?</div>
         <div class="opts">
-          <button class="opt">They run at the same time</button>
-          <button class="opt">The new one is rejected</button>
+          <button class="opt" data-why="Reasonable guess - commands with different requirements do coexist. But these two both need Drive, and the scheduler never lets one subsystem have two owners.">They run at the same time</button>
+          <button class="opt" data-why="First-come-first-served would be a fair rule, but the scheduler favors the newcomer: the new command interrupts the old one and takes Drive over.">The new one is rejected</button>
           <button class="opt">The new one interrupts the old - only one command owns Drive at a time</button>
         </div>
         <div class="explain">Requirements guarantee a single owner per subsystem. Scheduling a new command that needs Drive interrupts whatever held it (its end(true) runs). No two commands can drive the same motors at once.</div>
@@ -275,8 +275,8 @@ driver.<span class="fn">x</span>().<input class="blank" data-ans="whiletrue" dat
         <div class="qt">What is a default command?</div>
         <div class="opts">
           <button class="opt">A command that runs whenever no other command requires that subsystem</button>
-          <button class="opt">The first command you write</button>
-          <button class="opt">A command that can't be interrupted</button>
+          <button class="opt" data-why="The name does sound like a starter command, but default here means fallback - the thing a subsystem does whenever nothing else claims it.">The first command you write</button>
+          <button class="opt" data-why="Actually the reverse - a default command is the easiest thing to interrupt. Its whole job is to yield to anything else and quietly resume after.">A command that can't be interrupted</button>
         </div>
         <div class="explain">setDefaultCommand gives a subsystem a fallback action - usually teleop driving - that runs in the gaps when nothing else needs it, and resumes automatically when a higher-priority command ends.</div>
       </div>
@@ -284,11 +284,21 @@ driver.<span class="fn">x</span>().<input class="blank" data-ans="whiletrue" dat
         <div class="qn">Question 3</div>
         <div class="qt">Running a command that requires Intake - does it disturb a command using Drive?</div>
         <div class="opts">
-          <button class="opt">Yes, always</button>
+          <button class="opt" data-why="It feels like scheduling anything should shake things up, but interruption only happens over a shared requirement - Intake and Drive are separate subsystems.">Yes, always</button>
           <button class="opt">No - they require different subsystems, so they coexist</button>
-          <button class="opt">Only on Tuesdays</button>
+          <button class="opt" data-why="Nice try - the scheduler never checks the calendar. It checks requirements, and Intake and Drive do not overlap, so these commands coexist any day of the week.">Only on Tuesdays</button>
         </div>
         <div class="explain">Interruption only happens between commands that share a requirement. Intake and Drive are separate subsystems, so their commands run side by side without conflict.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">In the sim you press Schedule Aim, then Schedule FollowPath, then End Drive cmd. Who controls the Drive subsystem now?</div>
+        <div class="opts">
+          <button class="opt" data-why="A fair hope, but interrupted commands do not wait in line - when FollowPath bumped Aim, Aim's end(true) ran and it was gone for good.">AimAtTarget - it resumes because FollowPath interrupted it</button>
+          <button class="opt">TeleopDrive - ending FollowPath hands Drive back to its default command</button>
+          <button class="opt" data-why="An idle subsystem would make sense without a default, but Drive has one. The moment FollowPath ends, the scheduler slides TeleopDrive right back in.">Nobody - Drive sits idle until you schedule something new</button>
+        </div>
+        <div class="explain">FollowPath interrupted Aim (both need Drive), so Aim is gone, not paused. When you end FollowPath, the scheduler sees nothing requiring Drive and immediately resumes the default, TeleopDrive. Run that exact button sequence and watch the owner box do it.</div>
       </div>
     </div>
   </section>
@@ -384,7 +394,7 @@ driver.<span class="fn">x</span>().<input class="blank" data-ans="whiletrue" dat
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

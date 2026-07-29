@@ -208,8 +208,8 @@
         <div class="qn">Question 1</div>
         <div class="qt">How does a hex shaft transmit torque to a gear?</div>
         <div class="opts">
-          <button class="opt">With a set screw</button>
-          <button class="opt">With glue</button>
+          <button class="opt" data-why="A set screw can keep a part from sliding along the shaft, so it is a fair guess - but on hex the torque rides through the flats of the shape itself. No screw needed to stop the spin.">With a set screw</button>
+          <button class="opt" data-why="Glue holds model parts fine, so the thought is natural - but robot torque would shear a glue joint in a heartbeat. The hex flats push on the bore's flats and carry it all.">With glue</button>
           <button class="opt">The hexagon shape locks into the gear's hex bore - it can't slip</button>
         </div>
         <div class="explain">The flats of the hex push directly on the matching flats of the bore. The shape itself carries the torque, so a hex-bored part can't rotate independently on a hex shaft.</div>
@@ -218,9 +218,9 @@
         <div class="qn">Question 2</div>
         <div class="qt">What's the weakness of a set screw on a round shaft?</div>
         <div class="opts">
-          <button class="opt">It's too expensive</button>
+          <button class="opt" data-why="Cost is a normal engineering worry, so this sounds plausible - but set screws are actually the cheap option. Their real sin is loosening and slipping when torque or vibration hits.">It's too expensive</button>
           <button class="opt">It can back out and slip under high torque or shock loads</button>
-          <button class="opt">It only works on hex shaft</button>
+          <button class="opt" data-why="Other way around - the set screw is the round-shaft trick. Hex barely needs one, because the shape of the shaft already carries the torque on its own.">It only works on hex shaft</button>
         </div>
         <div class="explain">A set screw grips with a tiny contact point. Under high torque or vibration it can loosen and let the shaft spin inside the part. That's why teams prefer hex or a key for anything loaded.</div>
       </div>
@@ -229,10 +229,20 @@
         <div class="qt">Why is hex the default shaft for student-built robots?</div>
         <div class="opts">
           <button class="opt">It's hard to assemble wrong - slide on and go, nothing to torque or align</button>
-          <button class="opt">It's the only legal shaft</button>
-          <button class="opt">It spins faster</button>
+          <button class="opt" data-why="Rules do decide a lot in FRC, so checking legality is a smart instinct - but round and keyed shafts are perfectly legal. Hex wins on build-season forgiveness, not the rulebook.">It's the only legal shaft</button>
+          <button class="opt" data-why="Speed lives in the motor and the gearing, not in the shaft's cross-section - a hex shaft and a round shaft at the same rpm spin exactly the same.">It spins faster</button>
         </div>
         <div class="explain">Hex needs no keys, no set-screw torque spec, and nothing to align. Parts slide on and can't slip. Under a build-season deadline, that reliability is exactly why hex dominates.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">On Round + set screw, you creep the torque up slowly. At about what torque does the amber gear mark stop moving completely while the teal shaft mark keeps spinning?</div>
+        <div class="opts">
+          <button class="opt" data-why="Great instinct - that is exactly where slipping starts. But just past the tick the gear still creeps forward, because the slip only eats part of the shaft's motion at first.">Right around 51%, the moment Result first reads SLIPPING</button>
+          <button class="opt">Around 55% - a little past the slip point, once the slip rate eats all of the shaft's motion</button>
+          <button class="opt" data-why="Maxing the dial certainly stalls it, so this feels like the safe answer - but the gear mark already parks around 55%, far earlier than full torque.">Only at 100%, when the torque dial is maxed out</button>
+        </div>
+        <div class="explain">Slipping begins just past the amber tick at 50%, but the gear still creeps because the slip only cancels part of the shaft's speed. By about 55% the slip rate swallows all of it and the gear mark parks while the shaft spins on - the creep-then-stall window the gold mission had you hunt. On hex or a key, the marks never separate at any torque.</div>
       </div>
     </div>
   </section>
@@ -374,7 +384,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

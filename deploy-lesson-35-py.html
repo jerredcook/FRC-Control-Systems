@@ -259,8 +259,8 @@ motor.<span class="fn">configurator</span>.<input class="blank" data-ans="apply|
         <div class="qn">Question 1</div>
         <div class="qt">What is a brownout?</div>
         <div class="opts">
-          <button class="opt">A failed unit test</button>
-          <button class="opt">A vision target that disappears</button>
+          <button class="opt" data-why="Both are alarms, which is the mix-up, but a red test lives on your laptop. A brownout is electrical: the battery sags so low the roboRIO cuts motor power to stay alive.">A failed unit test</button>
+          <button class="opt" data-why="Losing a target is a real field headache, but it only blinds the aim. A brownout is about power - sagging voltage forces the roboRIO to shut the motors down mid-match.">A vision target that disappears</button>
           <button class="opt">The battery sags so low the roboRIO cuts motor power to protect itself</button>
         </div>
         <div class="explain">Under heavy load the voltage drops; below about 6.8 V the roboRIO disables motor outputs to keep itself alive. It happens mid-match with no warning, which is why you prevent it.</div>
@@ -270,8 +270,8 @@ motor.<span class="fn">configurator</span>.<input class="blank" data-ans="apply|
         <div class="qt">How do current limits help prevent brownouts?</div>
         <div class="opts">
           <button class="opt">They cap how much each motor can pull, so the total draw never crashes the battery</button>
-          <button class="opt">They make the battery bigger</button>
-          <button class="opt">They turn off the gyro</button>
+          <button class="opt" data-why="It can feel like a bigger battery, since the robot survives more load, but the pack never changes. Limits shrink the demand side, capping each motor so the total draw stays survivable.">They make the battery bigger</button>
+          <button class="opt" data-why="Sensors like the gyro sip only milliamps, so cutting one would not save the bus. Current limits work where the amps actually flow - the motors.">They turn off the gyro</button>
         </div>
         <div class="explain">Voltage sag is driven by current. Capping each motor's supply current keeps the combined draw in a safe range, so the bus voltage stays above the brownout threshold even under load.</div>
       </div>
@@ -279,11 +279,21 @@ motor.<span class="fn">configurator</span>.<input class="blank" data-ans="apply|
         <div class="qn">Question 3</div>
         <div class="qt">Which is an example of defensive coding?</div>
         <div class="opts">
-          <button class="opt">Running the motor at full speed always</button>
+          <button class="opt" data-why="Simple and predictable can sound safe, but full throttle always is maximum draw with zero judgment. Defensive code checks its inputs and leaves the battery headroom.">Running the motor at full speed always</button>
           <button class="opt">Checking camera.has_target() before reading the target</button>
-          <button class="opt">Deleting your unit tests</button>
+          <button class="opt" data-why="Fewer red marks might feel tidier, but tests are one of your defenses, not clutter. Defensive coding adds guards - it never removes safety nets.">Deleting your unit tests</button>
         </div>
         <div class="explain">Guarding inputs, checking has_target() before using get_yaw(), means you never act on data that isn't there. Safe defaults and input checks keep a dropped sensor from turning into a runaway robot.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">From the sim</div>
+        <div class="qt">Current limits are ON, capping the draw at 110 A, and you shove the load slider to 100%. Where does the battery settle, and does the robot stay enabled?</div>
+        <div class="opts">
+          <button class="opt" data-why="6.1 V is the right number for the wrong switch - that is where 100% load lands with limits OFF, when the full 300 A hits the battery. The cap exists precisely to keep that from happening.">About 6.1 V and a brownout, because 100% load always wins</button>
+          <button class="opt" data-why="A cap trims the draw, it does not erase it - 110 A still flows, and real amps always sag a battery some. The win is sagging to a safe floor instead of crashing through 6.8 V.">12.6 V, unchanged, because the limiter blocks the load entirely</button>
+          <button class="opt">Around 10.3 V - sagging, but safely above the 6.8 V line, so the robot keeps driving</button>
+        </div>
+        <div class="explain">With the cap holding the draw at 110 A, this battery settles near 12.7 - 110 x 0.022 = 10.3 V, comfortably above the 6.8 V brownout line, so the motors stay live. Uncapped, the same slider asks for 300 A and the voltage crashes to about 6.1 V - brownout, motors cut. Same load either way; one configuration flag is the difference between finishing the match and sitting dead on the field.</div>
       </div>
     </div>
   </section>
@@ -381,7 +391,7 @@ motor.<span class="fn">configurator</span>.<input class="blank" data-ans="apply|
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

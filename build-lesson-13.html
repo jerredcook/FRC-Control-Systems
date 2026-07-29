@@ -207,9 +207,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">What does a bearing do for a shaft?</div>
         <div class="opts">
-          <button class="opt">Speeds it up</button>
+          <button class="opt" data-why="Less friction does feel like free speed, but a bearing only stops friction from stealing motion - the motor and the gearing decide how fast the shaft turns.">Speeds it up</button>
           <button class="opt">Lets it spin with low friction while holding it in place</button>
-          <button class="opt">Adds torque</button>
+          <button class="opt" data-why="Torque has to come from a motor or a gear stage - a bearing just holds the shaft steady and stays out of the way while the torque passes through.">Adds torque</button>
         </div>
         <div class="explain">A bearing supports the shaft and lets it rotate freely with very little friction. Without one, the shaft would grind against its mount and bind.</div>
       </div>
@@ -217,8 +217,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">A loaded shaft is held by just one bearing. What happens as it spins?</div>
         <div class="opts">
-          <button class="opt">It runs perfectly true</button>
-          <button class="opt">It spins faster</button>
+          <button class="opt" data-why="One bearing does hold the shaft up, so this feels safe - but the loaded end is unsupported, like a diving board, and it bows and whirls as it spins.">It runs perfectly true</button>
+          <button class="opt" data-why="It would be nice if load helped, but load only drags and bends - speed comes from the motor, and a bowing shaft just wastes it in wobble and wear.">It spins faster</button>
           <button class="opt">It bends and whips around - runout that wears parts</button>
         </div>
         <div class="explain">A single bearing leaves the load end unsupported, like a diving board. It deflects under load and wobbles as it spins. Two bearings, one on each side, fix it.</div>
@@ -228,10 +228,20 @@
         <div class="qt">You're using 1/2" hex shaft. What bearing bore do you need?</div>
         <div class="opts">
           <button class="opt">A 1/2" hex bore that matches the shaft</button>
-          <button class="opt">Any round bore</button>
-          <button class="opt">A bore one size smaller</button>
+          <button class="opt" data-why="A round bore sounds flexible, but hex corners will not seat in a round hole that size - the matching hex bore is what lets the shaft slide in and carry torque through the bearing.">Any round bore</button>
+          <button class="opt" data-why="Snug sounds right because bearings do press-fit - but that press fit is the outer ring into its pocket. The bore itself must match the shaft, or the shaft will not slide in at all.">A bore one size smaller</button>
         </div>
         <div class="explain">The bearing's bore must match the shaft. A 1/2" hex shaft needs a 1/2" hex-bore bearing so the shaft fits and the hex can transmit torque through it.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">From the sim</div>
+        <div class="qt">In the sim you are on 1 bearing (cantilever) with the load at 50%, and Runout reads wobbling. You nudge the load up to 70%. What does the Runout box read now?</div>
+        <div class="opts">
+          <button class="opt">high wobble - past the mid-50s load the cantilever crosses the sim's red line</button>
+          <button class="opt" data-why="It is tempting to pin everything on the bearing count, and count does matter most - but with one bearing the wobble grows with load, and 70% sits past the flip point you hunted just after halfway.">Still wobbling - runout depends on the bearing count, not on the load</button>
+          <button class="opt" data-why="Pressing harder can seat a loose part, so the instinct is fair - but load bends a cantilever more, never less. Only the second bearing earns a runs true.">runs true - the extra load presses the shaft straighter</button>
+        </div>
+        <div class="explain">A cantilever's wobble scales with load, and the sim flips from wobbling to high wobble once the load passes about 55% - the flip point from the missions, and 70% is well beyond it. Switch to 2 bearings and the very same 70% load reads runs true, which is the whole case for the second bearing.</div>
       </div>
     </div>
   </section>
@@ -355,7 +365,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

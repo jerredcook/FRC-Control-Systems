@@ -320,9 +320,9 @@ motor.<input class="blank" data-ans="setvoltage" aria-label="blank" autocomplete
         <div class="qn">Question 1</div>
         <div class="qt">Why do teams prefer setVoltage(6) over set(0.5)?</div>
         <div class="opts">
-          <button class="opt">It's shorter to type</button>
+          <button class="opt" data-why="If only - setVoltage is actually more typing than set. Its win is behavior: it holds real volts while a percent command shrinks with the battery.">It's shorter to type</button>
           <button class="opt">It compensates for battery sag, so the robot behaves the same all match</button>
-          <button class="opt">It makes the motor spin faster</button>
+          <button class="opt" data-why="Tempting, but on a full battery both commands push exactly the same 6 volts. The difference only appears as the battery sags - setVoltage holds on, set() fades.">It makes the motor spin faster</button>
         </div>
         <div class="explain">set() is a fraction of the live battery voltage, so it weakens as the battery drains. setVoltage() holds the actual volts you asked for, giving repeatable behavior, which is exactly what control loops need.</div>
       </div>
@@ -330,8 +330,8 @@ motor.<input class="blank" data-ans="setvoltage" aria-label="blank" autocomplete
         <div class="qn">Question 2</div>
         <div class="qt">A motor is in Brake neutral mode and you command 0 output. What happens?</div>
         <div class="opts">
-          <button class="opt">It keeps spinning forever</button>
-          <button class="opt">It explodes</button>
+          <button class="opt" data-why="Spinning on is Coast's move, and even Coast loses to friction eventually. Brake shorts the motor leads so the rotor stops fast and holds.">It keeps spinning forever</button>
+          <button class="opt" data-why="Brake does sound violent, but electrically it is gentle - shorting the leads just makes the spinning motor fight its own motion until it stops.">It explodes</button>
           <button class="opt">It resists motion and stops quickly, holding position</button>
         </div>
         <div class="explain">Brake mode shorts the motor leads at zero output, resisting motion so the mechanism stops fast and holds. Coast mode lets it spin down freely, which is what you want for, say, a drivetrain that should roll to a stop.</div>
@@ -341,10 +341,20 @@ motor.<input class="blank" data-ans="setvoltage" aria-label="blank" autocomplete
         <div class="qt">What does a motor controller actually do?</div>
         <div class="opts">
           <button class="opt">Takes your code's command and delivers that much power to the motor</button>
-          <button class="opt">Replaces the need for a battery</button>
-          <button class="opt">Stores your robot program</button>
+          <button class="opt" data-why="It does sit in the power path, so close - but a controller only portions out the battery's power. With no battery there is nothing to portion.">Replaces the need for a battery</button>
+          <button class="opt" data-why="Easy mix-up - your program lives on the roboRIO. The controller receives the roboRIO's commands over CAN and turns them into motor power.">Stores your robot program</button>
         </div>
         <div class="explain">The roboRIO runs your code and sends a command over CAN; the motor controller turns that command into the actual voltage and current the motor receives. Your code never wires straight to the motor.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">From the sim</div>
+        <div class="qt">On the rig in set (percent) mode, you put the command at 60 and drag the battery down to 9.0 V. What does the output readout show?</div>
+        <div class="opts">
+          <button class="opt">5.4 V - 60% of the 9.0 V the battery actually has</button>
+          <button class="opt" data-why="That would be 60% of a full 12 V, but percent mode never promises 12 - it hands you a fraction of whatever the battery has right now, and right now that is 9.0 V.">7.2 V</button>
+          <button class="opt" data-why="9.0 V is the battery ceiling, and you would only hit it by asking for everything. A 60% command takes its fraction of the 9.0 V, not all of it.">9.0 V</button>
+        </div>
+        <div class="explain">Percent mode multiplies the command by the live battery: 0.60 × 9.0 V = 5.4 V. On a fresh 12 V battery the same command gave 7.2 V - same code, weaker push, which is exactly why setVoltage usually gets the job.</div>
       </div>
     </div>
   </section>
@@ -567,7 +577,7 @@ motor.<input class="blank" data-ans="setvoltage" aria-label="blank" autocomplete
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

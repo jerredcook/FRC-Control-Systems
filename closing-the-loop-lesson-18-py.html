@@ -329,9 +329,9 @@ cfg.slot0.k_p = <span class="num">12</span>      <span class="cm"># then tune k_
         <div class="qn">Question 1</div>
         <div class="qt">What is SysId actually measuring?</div>
         <div class="opts">
-          <button class="opt">The robot's battery voltage</button>
+          <button class="opt" data-why="SysId does watch voltage closely, which makes this tempting - but voltage is the input it wiggles, not the answer it finds. The output is your mechanism's gains: kS, kV, kA, and kG.">The robot's battery voltage</button>
           <button class="opt">The feedforward gains kS, kV, kA (and kG) of your real mechanism</button>
-          <button class="opt">The CAN bus speed</button>
+          <button class="opt" data-why="The bus is just the wire the data rides home on. SysId is measuring the mechanism at the far end of that wire - how volts turn into motion.">The CAN bus speed</button>
         </div>
         <div class="explain">SysId runs a ramp and a step, then fits the voltage/velocity/acceleration data to recover kS, kV, kA, and (for gravity-loaded mechanisms) kG - the model of how your hardware turns voltage into motion.</div>
       </div>
@@ -340,8 +340,8 @@ cfg.slot0.k_p = <span class="num">12</span>      <span class="cm"># then tune k_
         <div class="qt">How is the test data captured on Phoenix 6?</div>
         <div class="opts">
           <button class="opt">SignalLogger records it to a .hoot file, which you analyze in Tuner X</button>
-          <button class="opt">You write the numbers down off the dashboard</button>
-          <button class="opt">It isn't recorded - you estimate</button>
+          <button class="opt" data-why="Pencil and paper cannot keep up - hundreds of samples land every second during the ramp. SignalLogger records them all to a .hoot file for Tuner X to fit.">You write the numbers down off the dashboard</button>
+          <button class="opt" data-why="Guessing is exactly what SysId exists to replace. The whole run is logged, and the gains come out of a line fit over real data, not a hunch.">It isn't recorded - you estimate</button>
         </div>
         <div class="explain">SignalLogger streams every device signal to a .hoot log. Tuner X opens that log, runs the line-fit you just did by hand, and reports the gains - no manual graphing.</div>
       </div>
@@ -349,11 +349,21 @@ cfg.slot0.k_p = <span class="num">12</span>      <span class="cm"># then tune k_
         <div class="qn">Question 3</div>
         <div class="qt">Once SysId gives you kS, kV, kA, kG, where do they go?</div>
         <div class="opts">
-          <button class="opt">Into a spreadsheet, forever</button>
-          <button class="opt">Into the roboRIO's PIDController</button>
+          <button class="opt" data-why="Save a copy if you like, but numbers in a spreadsheet move no motors. The gains only start working once they are applied to the device's slot0.">Into a spreadsheet, forever</button>
+          <button class="opt" data-why="That would work, and it is a fair instinct from Part II - but it wastes the 1 kHz loop you just set up. These gains belong on the device, in slot0, where the Kraken uses them onboard.">Into the roboRIO's PIDController</button>
           <button class="opt">Into the device's slot0 - then you tune kP for tracking</button>
         </div>
         <div class="explain">The feedforward gains go straight into slot0. With them in place, the onboard loop already does most of the work, so you only need a modest kP (and maybe kD) to clean up tracking.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">You run the ramp and fit the line, and the reveal shows the true line: intercept 0.51, slope 1.8. A separate test tells you this rig's kS is 0.06. What kG do you type into slot0?</div>
+        <div class="opts">
+          <button class="opt" data-why="Close - the intercept is the voltage at zero speed, but two things resist a standing start: friction and gravity. It is kS plus kG, so subtract the 0.06 of kS first.">0.51 - the whole intercept is kG</button>
+          <button class="opt">0.45 - the intercept is kS + kG, so kG = 0.51 - 0.06</button>
+          <button class="opt" data-why="1.8 is the slope, and the slope is kV - the volts each unit of speed costs. Gravity hides in the intercept, the cost of just holding still.">1.8 - the bigger number is always gravity</button>
+        </div>
+        <div class="explain">The intercept is the voltage the mechanism needs at zero velocity, which is static friction plus gravity: kS + kG = 0.51. Take away kS = 0.06 and kG = 0.45 is what remains - the exact gravity voltage this rig fights. The slope, 1.8, is kV. That little subtraction is the same split Tuner X performs when it turns your ramp data into slot0 numbers.</div>
       </div>
     </div>
   </section>
@@ -573,7 +583,7 @@ cfg.slot0.k_p = <span class="num">12</span>      <span class="cm"># then tune k_
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
     opts.forEach(function(opt,i){
-      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
+      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } });
     });
   });
 })();

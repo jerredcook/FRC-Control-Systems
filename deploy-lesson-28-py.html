@@ -279,9 +279,9 @@ result = camera.<input class="blank" data-ans="getlatestresult" data-fill="getLa
         <div class="qn">Question 1</div>
         <div class="qt">What is an AprilTag?</div>
         <div class="opts">
-          <button class="opt">A type of motor</button>
+          <button class="opt" data-why="The name does sound like a gadget, but there is nothing electric in an AprilTag. It is just ink on a flat panel - all the smarts live in the camera that reads it.">A type of motor</button>
           <button class="opt">A printed marker with an ID and a known fixed position on the field</button>
-          <button class="opt">A dashboard widget</button>
+          <button class="opt" data-why="Detected tags do show up on dashboards, which is the mix-up. The tag itself is bolted to the field wall; the widget only reports that a camera spotted it.">A dashboard widget</button>
         </div>
         <div class="explain">AprilTags are fiducial markers placed at surveyed spots on the field. Detecting one gives you both its ID and a trusted reference point to aim at or locate from.</div>
       </div>
@@ -289,8 +289,8 @@ result = camera.<input class="blank" data-ans="getlatestresult" data-fill="getLa
         <div class="qn">Question 2</div>
         <div class="qt">Where does the actual image processing happen?</div>
         <div class="opts">
-          <button class="opt">On the AprilTag itself</button>
-          <button class="opt">Inside the motor controller</button>
+          <button class="opt" data-why="Tempting, because QR codes make printed squares feel smart. But a tag is passive paper - it computes nothing. The pixel-crunching happens in whatever camera computer is looking at it.">On the AprilTag itself</button>
+          <button class="opt" data-why="Motor controllers do run their own little control loops, so they are a fair suspect. But they only think about motor shafts. Images need a real computer - a coprocessor like a Pi or a Limelight.">Inside the motor controller</button>
           <button class="opt">On a coprocessor (PhotonVision on a Pi, or a Limelight) that publishes results</button>
         </div>
         <div class="explain">A dedicated coprocessor does the vision work and sends simple numbers (tx, ty, id) over NetworkTables. The roboRIO just reads them, keeping its loop fast.</div>
@@ -300,10 +300,20 @@ result = camera.<input class="blank" data-ans="getlatestresult" data-fill="getLa
         <div class="qt">What does tx (the target's yaw) represent?</div>
         <div class="opts">
           <button class="opt">How far left or right of center the target is - the error you turn to zero</button>
-          <button class="opt">The battery voltage</button>
-          <button class="opt">The robot's top speed</button>
+          <button class="opt" data-why="Voltage sits on every dashboard, so the two-letter labels start to blur together. But tx is a camera number: the angle between the crosshair and the target, in degrees.">The battery voltage</button>
+          <button class="opt" data-why="tx does change as the robot turns, which may be the link your brain grabbed. But it measures direction, not speed - how many degrees off-center the tag sits right now.">The robot's top speed</button>
         </div>
         <div class="explain">tx is the horizontal angle from the camera's centerline to the target. Drive it to zero and the robot is pointed straight at the tag, which is exactly the next lesson.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">You slide Pan to +20 degrees. Tag 5 sits at bearing +4 with the biggest area on screen; tag 7 sits at bearing +26. Which best-target readouts do you get?</div>
+        <div class="opts">
+          <button class="opt" data-why="Size feels like it should win, and that instinct trips almost everyone - it is the takeover mission. Best target means closest to the crosshair, so the smallest tx wins, not the biggest square.">ID 5 with tx -16, because the biggest tag wins the best-target pick</button>
+          <button class="opt">ID 7 with tx about +6, because 26 minus 20 leaves it closest to the crosshair</button>
+          <button class="opt" data-why="Right tag, and +26 really is where it sits on the wall. But tx is measured from wherever the camera points, so subtract the pan: 26 minus 20 leaves +6 from the crosshair.">ID 7 with tx +26, straight from its bearing on the wall</button>
+        </div>
+        <div class="explain">tx is bearing minus pan. At +20 degrees of pan, tag 5 sits at 4 - 20 = -16 and tag 7 at 26 - 20 = +6, and best target goes to whichever is closest to center - so ID 7 wins even though tag 5 looks more than twice as big. Area hints at closeness; tx decides best. Slide the pan slowly and you can watch the takeover happen right around +15, where the two tags tie.</div>
       </div>
     </div>
   </section>
@@ -449,7 +459,7 @@ result = camera.<input class="blank" data-ans="getlatestresult" data-fill="getLa
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

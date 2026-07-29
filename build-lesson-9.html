@@ -184,8 +184,8 @@
         <div class="qn">Question 1</div>
         <div class="qt">Why does a tube need at least two bolts into a gusset, not one?</div>
         <div class="opts">
-          <button class="opt">For looks</button>
-          <button class="opt">To make it heavier</button>
+          <button class="opt" data-why="Tidy bolt patterns do look professional, but the pattern is doing physics - the second bolt is what stops the tube from pivoting around the first.">For looks</button>
+          <button class="opt" data-why="Extra bolts add a little weight, but that is a side effect, not the goal - the second bolt kills the hinge so the tube cannot swing around the first.">To make it heavier</button>
           <button class="opt">One bolt lets the tube pivot like a hinge; two stop the rotation</button>
         </div>
         <div class="explain">A single bolt is a pivot point, the tube can swing around it. Two bolts spread apart fix the angle, so the joint stays rigid under load.</div>
@@ -195,8 +195,8 @@
         <div class="qt">What does a gusset do?</div>
         <div class="opts">
           <button class="opt">Spans a joint and ties two tubes together, spreading the load</button>
-          <button class="opt">Reduces the robot's weight</button>
-          <button class="opt">Stores electronics</button>
+          <button class="opt" data-why="Gussets often have lightening holes, so the mix-up is fair - but a gusset adds a bit of metal on purpose, trading a few grams for a rigid corner.">Reduces the robot's weight</button>
+          <button class="opt" data-why="That is the bellypan's job - a gusset is a small corner plate whose whole life is tying two tubes into one stiff joint.">Stores electronics</button>
         </div>
         <div class="explain">A gusset is a plate bolted across a corner. It connects the two tubes and distributes the load across several bolts so the joint stays stiff.</div>
       </div>
@@ -204,11 +204,21 @@
         <div class="qn">Question 3</div>
         <div class="qt">A square frame leans over into a parallelogram under load. The fix?</div>
         <div class="opts">
-          <button class="opt">Use thicker bolts</button>
+          <button class="opt" data-why="Beefier hardware feels stronger, but the frame racks because of its shape - a parallelogram folds no matter how thick the pins at its corners are.">Use thicker bolts</button>
           <button class="opt">Add a diagonal or gusset to make a triangle</button>
-          <button class="opt">Remove a tube</button>
+          <button class="opt" data-why="Less material rarely stiffens anything - with a side gone the frame flops even more; the fix is adding a diagonal so the shape becomes a triangle.">Remove a tube</button>
         </div>
         <div class="explain">A rectangle can rack into a parallelogram, but a triangle can't change shape without changing a side's length. A diagonal brace or corner gusset locks the frame.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">From the sim</div>
+        <div class="qt">In the sim, you fill all three holes in the horizontal tube but only one in the vertical tube, then press Test load. What does the joint do?</div>
+        <div class="opts">
+          <button class="opt" data-why="Four bolts sounds like plenty, which is the trap - rigidity is counted per tube, and the vertical tube is still swinging on its single bolt like a hinge.">Holds rigid - four bolts total is more than enough for one corner</button>
+          <button class="opt" data-why="Collapse only happens when a tube has no bolts at all - here both tubes are attached, so the joint sags on its one-bolt hinge instead of falling apart.">Collapses completely - the tubes are not really joined</button>
+          <button class="opt">Sags - the vertical tube still pivots on its single bolt, so the corner folds</button>
+        </div>
+        <div class="explain">The joint is only as stiff as its weakest tube. Three bolts lock the horizontal tube solid, but the vertical tube has one bolt, and one bolt is a pivot - so the corner still folds and the readout shows sags. The rule is two bolts, spread apart, in each tube. Totals across the whole joint do not count.</div>
       </div>
     </div>
   </section>
@@ -313,7 +323,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

@@ -270,9 +270,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">What kind of code is a good fit for unit testing?</div>
         <div class="opts">
-          <button class="opt">Only code that talks to motors</button>
+          <button class="opt" data-why="Motors feel like the real robot, so this tempts - but motor code needs hardware to prove anything. Unit tests shine on the opposite: pure logic that runs the same on any laptop.">Only code that talks to motors</button>
           <button class="opt">Pure logic - conversions, state transitions, command decisions</button>
-          <button class="opt">Nothing in robot code can be tested</button>
+          <button class="opt" data-why="It can feel that way when everything seems to need a robot, but a lot of robot code is plain math. Conversions and state decisions run happily, and provably, on your computer.">Nothing in robot code can be tested</button>
         </div>
         <div class="explain">Unit tests shine on logic that doesn't need hardware: math, state machines, decision functions. You feed inputs and assert outputs, all in milliseconds on your computer.</div>
       </div>
@@ -281,8 +281,8 @@
         <div class="qt">What's the main long-term benefit of a test suite?</div>
         <div class="opts">
           <button class="opt">It catches regressions when someone later changes the code</button>
-          <button class="opt">It makes the robot faster</button>
-          <button class="opt">It charges the battery</button>
+          <button class="opt" data-why="Tests never touch match speed - they run on your laptop, not the roboRIO. Their value is the net under future edits: break the math and the suite fails in seconds.">It makes the robot faster</button>
+          <button class="opt" data-why="No wires run from the test runner to the battery. What the suite protects is something else you cannot buy back: working math that stays working after the next edit.">It charges the battery</button>
         </div>
         <div class="explain">Tests are a safety net. When a future edit breaks the gear math, the suite fails immediately instead of letting the bug reach a match. Run them on every commit.</div>
       </div>
@@ -290,11 +290,21 @@
         <div class="qn">Question 3</div>
         <div class="qt">A test is red. What does that tell you?</div>
         <div class="opts">
-          <button class="opt">The robot is on fire</button>
-          <button class="opt">The test is wrong and should be deleted</button>
+          <button class="opt" data-why="Red is alarm-colored for a reason, but this alarm lives entirely in code, often with no robot within miles. It just means expected and actual disagreed.">The robot is on fire</button>
+          <button class="opt" data-why="Occasionally the test really is wrong, but deleting on red is like unplugging a beeping smoke alarm. Suspect the code first - the red row in the sim was a genuine missing pi.">The test is wrong and should be deleted</button>
           <button class="opt">The actual result didn't match the expected one - there's a bug to fix</button>
         </div>
         <div class="explain">A red test means the code's output disagreed with the assertion. That's the test doing its job: it points you straight at a bug, which you fix until the test goes green.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">With the fix still off, you add a test for a bigger drum: assert inches(3, 2.0) == pytest.approx(?, abs=1e-3). Which expected value makes the test correctly catch the bug?</div>
+        <div class="opts">
+          <button class="opt" data-why="That is the trap of copying the code output back into the test - the buggy code returns 3 x 2.0 = 6.000, so this test goes green and blesses the bug. Expected values come from paper math, never from the code under test.">6.000, because that is what the code currently returns</button>
+          <button class="opt">18.850, which is 3 turns x pi x the 2.0 inch drum</button>
+          <button class="opt" data-why="You remembered the pi the code forgot - that is the hard part - but dropped the drum size. 3 x pi is the travel on a 1.0 inch drum; this drum is 2.0 inches, so the travel doubles.">9.425, which is 3 turns x pi</button>
+        </div>
+        <div class="explain">One drum turn travels the circumference, pi times diameter, so 3 turns on a 2.0 inch drum travel 3 x pi x 2.0 = 18.850 inches. The un-fixed code returns just turns times diameter, 6.000, so expecting 18.850 turns the test red and pins the missing pi, while expecting 6.000 would have quietly passed a bug. A test expected value always comes from the math, not from asking the code.</div>
       </div>
     </div>
   </section>
@@ -417,7 +427,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

@@ -206,9 +206,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">Why crimp a connection instead of just twisting the wires?</div>
         <div class="opts">
-          <button class="opt">Twisting is always fine</button>
+          <button class="opt" data-why="Twisted wires do carry current fine on the bench, which is what makes them sneaky - a season of vibration works them loose. A crimp grips the copper for good.">Twisting is always fine</button>
           <button class="opt">A crimp makes a tight, lasting grip; twisted wire works loose under vibration</button>
-          <button class="opt">Crimping is faster</button>
+          <button class="opt" data-why="Honestly, twisting is the faster one - crimping takes the tool and a moment of care. You crimp because the joint lasts, not to save time.">Crimping is faster</button>
         </div>
         <div class="explain">A proper crimp squeezes the copper into a solid, gas-tight joint that survives vibration and tugs. Twisted wire loosens and eventually drops the connection.</div>
       </div>
@@ -216,8 +216,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">What does strain relief do?</div>
         <div class="opts">
-          <button class="opt">Makes wires shorter</button>
-          <button class="opt">Adds resistance</button>
+          <button class="opt" data-why="Tidy runs are short, so the two ideas travel together - but strain relief is about where a yank lands. The zip tie takes the pull so the joint never feels it.">Makes wires shorter</button>
+          <button class="opt" data-why="Resistance sounds like an electrical fix, but strain relief is purely mechanical. It anchors the wire so force goes into the zip tie instead of the connection.">Adds resistance</button>
           <button class="opt">Anchors the wire so a pull lands on the anchor, not the connection</button>
         </div>
         <div class="explain">Strain relief secures the wire nearby so any yank pulls on the zip tie or clamp instead of stressing the actual joint, keeping the connection intact.</div>
@@ -227,10 +227,20 @@
         <div class="qt">What's the simplest way to check a connection?</div>
         <div class="opts">
           <button class="opt">Give it a firm tug - the pull test</button>
-          <button class="opt">Hope it's fine</button>
-          <button class="opt">Paint it</button>
+          <button class="opt" data-why="Everyone has shipped a joint on hope once - and paid for it mid-match. A two-second tug on the bench is the cheap insurance.">Hope it's fine</button>
+          <button class="opt" data-why="A marked wire is easier to trace, so labeling has real value - but paint only changes how a joint looks. Only a firm tug tells you whether it will hold.">Paint it</button>
         </div>
         <div class="explain">The pull test: a firm tug on every connection. If it moves, fix it on the bench now. It's the single best habit for a reliable robot.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">In the sim you tug three joints in a row: Twisted + Zip-tied, then Crimped + None, then Crimped + Zip-tied. How many read HOLDS?</div>
+        <div class="opts">
+          <button class="opt" data-why="Half a fix feels like half the protection, but each part covers a different failure. Miss either one and the tug still finds the weak spot - only the full combo holds.">Two - anything with either a crimp or a zip tie holds</button>
+          <button class="opt">Exactly one - only Crimped + Zip-tied survives the tug</button>
+          <button class="opt" data-why="Generous, but the sim is strict for a reason: one good part cannot cover for the missing one. Two of those three joints pull right out.">All three - each has at least one thing protecting it</button>
+        </div>
+        <div class="explain">The sim only shows HOLDS when both jobs are covered: the crimp grips the copper and the zip tie keeps the tug off the joint. Twisted + Zip-tied fails at the joint, Crimped + None takes the yank straight on the crimp, and only Crimped + Zip-tied passes - the same lesson the half-fix mission taught.</div>
       </div>
     </div>
   </section>
@@ -376,7 +386,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

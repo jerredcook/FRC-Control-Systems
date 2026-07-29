@@ -293,8 +293,8 @@ motorSim.<span class="fn">setRotorVelocity</span>(sim.<input class="blank" data-
         <div class="qn">Question 1</div>
         <div class="qt">What is robot simulation for?</div>
         <div class="opts">
-          <button class="opt">Charging the battery faster</button>
-          <button class="opt">Replacing the drive team</button>
+          <button class="opt" data-why="Charging is a job for the charger cart - sim has no battery at all, which is rather the point. It exists so your code can run with zero hardware attached.">Charging the battery faster</button>
+          <button class="opt" data-why="Drivers do get practice reps in sim, but nobody is replaced - humans still drive. What sim stands in for is the hardware: a physics model plays the part of the mechanism.">Replacing the drive team</button>
           <button class="opt">Running your real code against a physics model, so you can test without hardware</button>
         </div>
         <div class="explain">Simulation runs your unchanged program against a model of the mechanism. You can test logic, autos, and tuning on a laptop, no robot required.</div>
@@ -303,9 +303,9 @@ motorSim.<span class="fn">setRotorVelocity</span>(sim.<input class="blank" data-
         <div class="qn">Question 2</div>
         <div class="qt">In simulation, where do the sensor values come from?</div>
         <div class="opts">
-          <button class="opt">A real encoder</button>
+          <button class="opt" data-why="That is the wiring your instincts expect, but check the sim tag: hardware disconnected. The physics model computes the motion and hands it back as the sensor reading.">A real encoder</button>
           <button class="opt">The physics model, fed by the voltage your code commands</button>
-          <button class="opt">Random numbers</button>
+          <button class="opt" data-why="They can feel conjured from nowhere, but they are anything but random. The model integrates the voltage your code commands, so the readings follow real spin-up physics.">Random numbers</button>
         </div>
         <div class="explain">simulationPeriodic() pushes your motor voltage into the model, advances the physics, and writes the resulting motion back as the sensor reading. The loop closes just like on the robot.</div>
       </div>
@@ -314,10 +314,20 @@ motorSim.<span class="fn">setRotorVelocity</span>(sim.<input class="blank" data-
         <div class="qt">Why is simulation worth the setup?</div>
         <div class="opts">
           <button class="opt">You catch bugs and tune gains before the robot exists or is available</button>
-          <button class="opt">It makes the robot lighter</button>
-          <button class="opt">It removes the need for a battery</button>
+          <button class="opt" data-why="Weight lives in metal and wire, not code - sim changes nothing on the scale. Its payoff is time: bugs caught on a laptop before the robot is even wired.">It makes the robot lighter</button>
+          <button class="opt" data-why="Your laptop needs no robot battery, true, but the real robot on the field always will. The gift of sim is different: crashes that cost nothing and can be stepped through.">It removes the need for a battery</button>
         </div>
         <div class="explain">A crash in sim costs nothing and you can step through it. Teams that simulate write and tune most of their code before wiring the robot, arriving at competition ahead.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">From the sim</div>
+        <div class="qt">With rotor inertia at 1.0x you clocked a spin-up to 3500 rpm. You drag inertia to 4.0x, change nothing else, and press 3500 rpm again. What does the stopwatch show?</div>
+        <div class="opts">
+          <button class="opt" data-why="Heavier feels like it should mean slower everywhere, but top speed is set by voltage, and the commanded voltage has not changed. Inertia only resists changes in speed - like a loaded bike trailer, you still reach cruising speed, just later.">It levels off at about a quarter of the speed, since the rotor is four times heavier</button>
+          <button class="opt" data-why="Tempting to trust the loop that much, but with the same gains the controller pushes the same voltage for the same error. It cannot summon extra effort, so the heavier rotor simply winds up on a slower clock.">Nothing changes, because the PID automatically cancels out the extra inertia</button>
+          <button class="opt">The spin-up takes about four times longer, but the wheel levels off at the same top rpm</button>
+        </div>
+        <div class="explain">That is the gold-mission experiment: at 4.0x the run to 85% of target takes roughly four times as long, then settles at the same speed, because steady-state rpm depends on voltage while inertia only sets how fast the speed can change. This is exactly why the constants you hand FlywheelSim matter - type in the wrong inertia and the sim spins up on a different clock than the real wheel, and gains tuned against it will lie to you.</div>
       </div>
     </div>
   </section>
@@ -474,7 +484,7 @@ motorSim.<span class="fn">setRotorVelocity</span>(sim.<input class="blank" data-
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

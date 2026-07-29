@@ -213,9 +213,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">Why is aluminum the default material for FRC structure?</div>
         <div class="opts">
-          <button class="opt">It's the cheapest metal</button>
+          <button class="opt" data-why="Price matters to teams, so it is a fair guess - but steel is actually cheaper per pound. Aluminum wins on strength-to-weight and on being easy to machine in a school shop.">It's the cheapest metal</button>
           <button class="opt">It's light, strong enough, and easy to cut and drill</button>
-          <button class="opt">It never bends</button>
+          <button class="opt" data-why="Stiff is the goal, but every material bends under enough load - the sim's sag readout shows aluminum doing it. We pick it for weight and workability, then get stiffness from the profile's shape.">It never bends</button>
         </div>
         <div class="explain">Aluminum is about a third the weight of steel while still being strong enough for a robot, and it's soft enough to machine with shop tools. That balance is why nearly every frame is aluminum.</div>
       </div>
@@ -223,8 +223,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">What's the advantage of the standard hole pattern on the tube?</div>
         <div class="opts">
-          <button class="opt">It makes the tube lighter</button>
-          <button class="opt">It looks nice</button>
+          <button class="opt" data-why="The holes do shave a little weight, which makes this tempting - but that is a side effect. The pattern's real job is letting parts bolt on anywhere without laying out and drilling new holes.">It makes the tube lighter</button>
+          <button class="opt" data-why="It does look sharp, no argument - but teams pay for those holes because of what they do: any bracket or gusset drops straight onto the grid, no measuring, no drilling.">It looks nice</button>
           <button class="opt">Parts and gussets bolt on anywhere without new drilling</button>
         </div>
         <div class="explain">The pre-drilled grid lets you attach brackets, gussets, and mechanisms at regular spots without measuring and drilling each time. It speeds up the build enormously.</div>
@@ -234,10 +234,20 @@
         <div class="qt">A 1x2 tube will carry a bending load. How should you orient it?</div>
         <div class="opts">
           <button class="opt">Tall side facing the load - stiffness grows with height</button>
-          <button class="opt">Flat side facing the load</button>
-          <button class="opt">Orientation doesn't matter</button>
+          <button class="opt" data-why="Flat looks stable, like a plank lying on the ground - but bending resistance comes from height, cubed. Laid flat, the same tube gives up 8 times its stiffness for nothing.">Flat side facing the load</button>
+          <button class="opt" data-why="Same tube either way, so it feels like it should not matter - but the sim shows the same 1x2 sagging 8 times more on its side. Pointing the height into the load is the whole trick.">Orientation doesn't matter</button>
         </div>
         <div class="explain">Bending stiffness rises with the cube of the height in the load direction. Standing the 2-inch dimension up makes the same tube far stiffer than laying it flat, for no extra weight.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">In the sim, a 1x1 tube spanning 3.0 ft sags about 0.056 in under the 20 lb push. You stretch the same tube out to a 6.0 ft span. Roughly what sag does the readout show now?</div>
+        <div class="opts">
+          <button class="opt" data-why="Linear feels natural - twice the bridge, twice the dip - but a longer span hands the load a longer lever on a longer lever. Sag grows with the cube of the length, so doubling it means 8 times, not 2.">About 0.11 in - double the span, double the sag</button>
+          <button class="opt">About 0.45 in - doubling the span multiplies the sag by two cubed, eight times</button>
+          <button class="opt" data-why="The cross-section is unchanged, true - but sag depends on the span as well as the profile. Stretch the same tube twice as far and the 20 lb push has a much longer lever to bend it with.">Still about 0.056 in - the tube did not change, so the sag will not either</button>
+        </div>
+        <div class="explain">Length punishes with a cube, just like height helps with one. Sag grows with the span cubed, so doubling 3.0 ft to 6.0 ft multiplies the sag by 2 x 2 x 2 = 8: about 0.056 x 8, or roughly 0.45 in - nearly half an inch of droop, plank-between-two-chairs territory. Slide the length out in the sim and watch the readout climb. This is why long unsupported spans get a taller profile, a brace, or both.</div>
       </div>
     </div>
   </section>
@@ -380,7 +390,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

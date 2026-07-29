@@ -267,8 +267,8 @@ autos.<input class="blank" data-ans="append" data-reveal="append" aria-label="bl
         <div class="qn">Question 1</div>
         <div class="qt">What's the index of the first element in a Python list?</div>
         <div class="opts">
-          <button class="opt">1</button>
-          <button class="opt">-1</button>
+          <button class="opt" data-why="Counting from 1 is how people count, which is exactly why this bites - Python lists count from 0, so the first module is modules[0] and the fourth of four is modules[3].">1</button>
+          <button class="opt" data-why="Extra tempting because -1 really is a valid Python index - but it counts from the back, so modules[-1] is the last module, not the first. The front of the list is 0.">-1</button>
           <button class="opt">0 - lists are zero-indexed</button>
         </div>
         <div class="explain">Python lists start at index 0, so modules[0] is the first and modules[3] is the fourth of four. Off-by-one mistakes here are a classic bug.</div>
@@ -278,8 +278,8 @@ autos.<input class="blank" data-ans="append" data-reveal="append" aria-label="bl
         <div class="qt">Why use an enum for a shooter's states instead of ints?</div>
         <div class="opts">
           <button class="opt">Only the named states are allowed, and the names are self-explanatory</button>
-          <button class="opt">Enums are faster than ints</button>
-          <button class="opt">Ints can't be used in a match</button>
+          <button class="opt" data-why="Speed sounds like a win, but the robot cannot tell the difference - the enum's real gift is safety and readability: no rogue state = 7, and State.SHOOTING explains itself.">Enums are faster than ints</button>
+          <button class="opt" data-why="Ints actually match just fine, which is the sneaky part - the real problem is they allow values that mean nothing. An enum fences the choices to the states you named.">Ints can't be used in a match</button>
         </div>
         <div class="explain">An enum restricts the value to your listed states (no rogue state = 7) and reads clearly (State.SHOOTING vs 2). That safety and clarity is exactly what a state machine needs.</div>
       </div>
@@ -287,11 +287,21 @@ autos.<input class="blank" data-ans="append" data-reveal="append" aria-label="bl
         <div class="qn">Question 3</div>
         <div class="qt">You have a growing number of autonomous routines. Which fits?</div>
         <div class="opts">
-          <button class="opt">A single float variable</button>
+          <button class="opt" data-why="A float holds one number, and an auto routine is a whole command - with more arriving every week of build season. You need a container that grows, not a lone value.">A single float variable</button>
           <button class="opt">A list - it grows as you append more</button>
-          <button class="opt">An enum with one value</button>
+          <button class="opt" data-why="Enums shine for a fixed set of named states - a growing pile of routines is the opposite, since every new auto would mean editing the enum. A growable list just takes append().">An enum with one value</button>
         </div>
         <div class="explain">A list holds a variable number of items and grows with append(). Use a list when the count can change as you add routines.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">From the sim</div>
+        <div class="qt">In the sim the machine sits on READY and you press Advance twice. Which state chip is lit now?</div>
+        <div class="opts">
+          <button class="opt" data-why="The first press does land on SHOOTING, but the second keeps moving - every Advance steps exactly one state along, so nothing ever stays put for two presses.">SHOOTING - it fires and stays there</button>
+          <button class="opt" data-why="The machine does loop, just not back to where you stood - the wrap happens after the last state, SHOOTING, which rolls over to the front of the list, IDLE.">READY - two presses loop you back to where you started</button>
+          <button class="opt">IDLE - after SHOOTING the cycle wraps to the start</button>
+        </div>
+        <div class="explain">Each Advance moves one step through the list: READY to SHOOTING, then SHOOTING wraps around to IDLE - the full ride from the loop mission. That wrap is how a real shooter returns to waiting after it fires: the state machine's last state hands off to its first.</div>
       </div>
     </div>
   </section>
@@ -411,7 +421,7 @@ autos.<input class="blank" data-ans="append" data-reveal="append" aria-label="bl
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

@@ -272,9 +272,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">How do you start a new robot project?</div>
         <div class="opts">
-          <button class="opt">Create an empty folder and write every file by hand</button>
+          <button class="opt" data-why="Respect for the ambition, but nobody hand-builds the scaffolding - robotpy init makes a complete, runnable project in seconds so you can spend your effort on robot code instead.">Create an empty folder and write every file by hand</button>
           <button class="opt">Run 'robotpy init' in an empty folder and pick an example</button>
-          <button class="opt">Download someone else's robot and delete their code</button>
+          <button class="opt" data-why="Teams really do study each other's code, but starting from someone else's project drags in their team number, settings, and habits - robotpy init hands you a clean, current starting point.">Download someone else's robot and delete their code</button>
         </div>
         <div class="explain">The robotpy init command generates a complete, runnable project from an example - pick command-based and enter your team number. You never start from a blank file.</div>
       </div>
@@ -283,8 +283,8 @@
         <div class="qt">Which files will you actually edit most of the time?</div>
         <div class="opts">
           <button class="opt">robotcontainer.py and the files in subsystems/ and commands/</button>
-          <button class="opt">robot.py and the test files</button>
-          <button class="opt">pyproject.toml, every loop</button>
+          <button class="opt" data-why="robot.py sounds like home base, and it does launch everything - but in a command-based project it mostly hands off to the scheduler. Your daily work lives in subsystems, commands, and robotcontainer.py.">robot.py and the test files</button>
+          <button class="opt" data-why="You will open pyproject.toml a few times a season to add a library, but that is it - it is the project recipe, not the robot's behavior. The everyday files are robotcontainer.py, subsystems/, and commands/.">pyproject.toml, every loop</button>
         </div>
         <div class="explain">Your robot's behavior lives in subsystems, commands, and the wiring in robotcontainer.py. robot.py and pyproject.toml are scaffolding you rarely touch.</div>
       </div>
@@ -292,11 +292,21 @@
         <div class="qn">Question 3</div>
         <div class="qt">Why choose the command-based example over plain TimedRobot?</div>
         <div class="opts">
-          <button class="opt">It runs faster on the roboRIO</button>
-          <button class="opt">It's required by the rules</button>
+          <button class="opt" data-why="A fair hope, but both flavors run on the same 20 ms heartbeat - command-based buys you organization, not speed.">It runs faster on the roboRIO</button>
+          <button class="opt" data-why="The rules do not care which example you pick - plain TimedRobot is perfectly legal. Command-based wins because it keeps a growing robot organized, which is why nearly every team chooses it.">It's required by the rules</button>
           <button class="opt">It adds the command-based structure that keeps a growing robot organized</button>
         </div>
         <div class="explain">Command-based gives you subsystems and commands - a clean way to scale from one mechanism to a whole robot without your code turning into spaghetti. It's what this course (and most teams) use.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">In the cockpit's team-number step you type 9999 instead of 1234, and it counts as a wrong pick. What would the same mistake cost you on a real laptop?</div>
+        <div class="opts">
+          <button class="opt" data-why="It does look like a label, but it is really an address ingredient - robotpy deploy builds the roboRIO's network address from the team number, so a wrong one points at the wrong robot.">Nothing, the team number is just a label on the project</button>
+          <button class="opt">robotpy deploy would search the network for team 9999's robot and never find yours</button>
+          <button class="opt" data-why="Running and simulating never look at the team number, so the code works fine on your laptop - the trouble waits until robotpy deploy goes hunting on the network for a robot that is not there.">Your code would crash on startup because 9999 is not your number</button>
+        </div>
+        <div class="explain">The team number is how deploy finds your robot: it becomes part of the roboRIO's network address, the way a house number gets mail to the right door. Type the wrong number and everything still runs on your laptop - robotpy deploy just searches the network for a robot that is not yours and gives up. That is why the cockpit checks it, and why real teams set it once when they create the project and leave it alone.</div>
       </div>
     </div>
   </section>
@@ -377,7 +387,7 @@
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
     opts.forEach(function(opt,i){
-      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
+      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } });
     });
   });
 })();

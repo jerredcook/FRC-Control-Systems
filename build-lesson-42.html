@@ -219,9 +219,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">What actually causes a brownout?</div>
         <div class="opts">
-          <button class="opt">The battery is fully charged and overflows with volts</button>
+          <button class="opt" data-why="Funny enough, it is the opposite problem - brownout is a shortage, not an overflow. Heavy combined draw sags the voltage too low and the controller cuts the motors.">The battery is fully charged and overflows with volts</button>
           <button class="opt">Battery voltage sags too low under heavy combined draw, so the controller cuts motor outputs</button>
-          <button class="opt">A motor spins too fast and overheats the battery</button>
+          <button class="opt" data-why="Heat feels like the villain, but a free-spinning motor barely sips current. It is the combined heavy draw sagging the voltage that triggers the cut, no heat required.">A motor spins too fast and overheats the battery</button>
         </div>
         <div class="explain">When many motors pull hard at once, the battery voltage sags. If it drops too low, around 6.8 volts on the roboRIO, the controller protects itself by cutting motor outputs. That cut is the brownout.</div>
       </div>
@@ -229,8 +229,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">Why does a motor pulling a hard, short burst usually not trip the 120 amp main breaker?</div>
         <div class="opts">
-          <button class="opt">The breaker only watches the average over the whole match</button>
-          <button class="opt">120 amps is a hard ceiling that can never be crossed even for an instant</button>
+          <button class="opt" data-why="Close - it does look past single spikes, but its memory is heat over seconds, not a whole match. Hold a heavy overload and the warmth builds until it trips.">The breaker only watches the average over the whole match</button>
+          <button class="opt" data-why="The label reads like a hard ceiling, but the breaker is thermal and needs time to heat up. A brief surge past 120 A slips through; a sustained one, or a dead short, trips it.">120 amps is a hard ceiling that can never be crossed even for an instant</button>
           <button class="opt">The breaker is thermal and time-dependent, so it tolerates a brief surge and only trips faster the longer you exceed the limit</button>
         </div>
         <div class="explain">The main breaker reacts to heat over time, not to an instant number. A short surge over 120 amps is tolerated, but the more and longer you exceed it the faster it trips. A dead short trips it almost instantly.</div>
@@ -240,10 +240,20 @@
         <div class="qt">Your robot keeps browning out when you push into the wall. What is a real fix?</div>
         <div class="opts">
           <button class="opt">Set software current limits and use a fresh, healthy battery</button>
-          <button class="opt">Push harder so the motors break through faster</button>
-          <button class="opt">Remove the main breaker so more current can flow</button>
+          <button class="opt" data-why="It feels heroic, but pushing harder pulls even more current, sags the voltage further, and browns you out faster. Limits plus a fresh pack keep the volts above the floor.">Push harder so the motors break through faster</button>
+          <button class="opt" data-why="More current sounds like more power, but the breaker was never the bottleneck - the sag happens inside the battery. Removing it only removes your fire protection.">Remove the main breaker so more current can flow</button>
         </div>
         <div class="explain">Software current limits keep the motors from all pulling stall current at once, and a fresh battery with low internal resistance sags less under the same load. Both keep the voltage above the brownout line. Removing the breaker is dangerous and does not fix the sag.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">From the sim</div>
+        <div class="qt">Limits off, you switch on Drivetrain pushing (+250 A) and Shooter spin-up (+150 A), a 400 A total. What do the sim's readouts show?</div>
+        <div class="opts">
+          <button class="opt">About 7.2 V - the breaker reads surging, but the robot hangs on 0.4 V above the 6.8 V brownout floor</button>
+          <button class="opt" data-why="Easy mix-up - the breaker and the brownout are two separate guards. 400 A is a surge the thermal breaker tolerates, and the voltage lands at 12.8 - (400 x 0.014) = 7.2 V, still above the 6.8 V floor.">Instant brownout - 400 A is more than triple the 120 A main breaker</button>
+          <button class="opt" data-why="A nice thought, but nothing takes turns - both mechanisms pull from the one battery at the same moment, so their amps add. A 400 A combined draw sags the pack far below its resting 12.8 V.">A steady 12.8 V - the drivetrain and shooter take turns drawing current</button>
+        </div>
+        <div class="explain">Voltage = 12.8 - (400 x 0.014) = 7.2 volts. That is the gold-mission load-out: a surge more than triple the breaker's rating, yet still 0.4 V above the 6.8 V floor, so the robot keeps driving. Flip the intake's 120 A on top of it and you land near 5.5 V - straight into brownout.</div>
       </div>
     </div>
   </section>
@@ -424,7 +434,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

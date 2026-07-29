@@ -344,9 +344,9 @@ volts = lqr.<span class="fn">calculate</span>(x, reference)[<span class="num">0<
         <div class="qn">Question 1</div>
         <div class="qt">What is the "state" of a simple elevator?</div>
         <div class="opts">
-          <button class="opt">Its voltage</button>
+          <button class="opt" data-why="Voltage is u, the input - the thing you push with. The state is what that pushing changes: for an elevator, its position and velocity.">Its voltage</button>
           <button class="opt">Its position and velocity</button>
-          <button class="opt">Its CAN id</button>
+          <button class="opt" data-why="The CAN id is a street address for messages, and it never changes while the elevator moves. State is the stuff that evolves: position and velocity.">Its CAN id</button>
         </div>
         <div class="explain">State is the minimal set of numbers describing the system right now. For an elevator that's position and velocity - together they tell you everything about its motion.</div>
       </div>
@@ -354,8 +354,8 @@ volts = lqr.<span class="fn">calculate</span>(x, reference)[<span class="num">0<
         <div class="qn">Question 2</div>
         <div class="qt">How does LQR decide the gains K?</div>
         <div class="opts">
-          <button class="opt">Randomly</button>
-          <button class="opt">By copying PID</button>
+          <button class="opt" data-why="Optimal is the opposite of a dice roll - LQR solves for the one K that best balances your stated priorities, straight from the mechanism's model.">Randomly</button>
+          <button class="opt" data-why="Fun twist - it is nearly the reverse. State feedback is the general framework and PD is its two-state special case. LQR derives the gains from Q and R, not from precedent.">By copying PID</button>
           <button class="opt">By balancing Q (how much you penalize state error) against R (how much effort costs)</button>
         </div>
         <div class="explain">You express your priorities as Q and R; LQR solves for the K that minimizes the resulting cost. Bigger Q → tighter and snappier; bigger R → gentler. No manual gain-guessing.</div>
@@ -365,10 +365,20 @@ volts = lqr.<span class="fn">calculate</span>(x, reference)[<span class="num">0<
         <div class="qt">State feedback on [position, velocity] turns out to be…</div>
         <div class="opts">
           <button class="opt">PD control - k₁ is kP, k₂ is kD</button>
-          <button class="opt">Completely unrelated to PID</button>
-          <button class="opt">Only usable in simulation</button>
+          <button class="opt" data-why="That is exactly the trap the reveal dismantles - put names on K's two entries and they are kP and kD. PID is the two-state special case of state feedback.">Completely unrelated to PID</button>
+          <button class="opt" data-why="Real robots run it every match - wpimath ships LinearSystemId and an LQR class for exactly that. Simulation is just where you rehearse it safely.">Only usable in simulation</button>
         </div>
         <div class="explain">With a two-state system, K has two entries that multiply position error and velocity - exactly kP and kD. State-space is the general framework; PID is the special case you've been using all along.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">From the sim</div>
+        <div class="qt">Your gentle (high R) climb logged nearly 4 s to settle with under 3 V of peak push. You slide the knob to full tight (high Q) and press Move ▸ for the same big climb. What does the log read now?</div>
+        <div class="opts">
+          <button class="opt" data-why="That free lunch is exactly what the Q versus R trade rules out - tighter tracking is purchased with effort. If speed cost nothing, there would be no balance for LQR to strike.">Faster and cheaper - under 2 s with an even smaller peak push</button>
+          <button class="opt" data-why="The volts are not decoration - k1 and k2 both climb with the knob, and bigger gains shove the state toward the target harder and sooner. More push is precisely what settles it faster.">The same settle time - the knob only changes how many volts it spends along the way</button>
+          <button class="opt">It settles in well under 2 s, but the peak push blows past 10 V - speed bought with volts</button>
+        </div>
+        <div class="explain">Full tight raises both gains together (k₁ to 18, k₂ to 4.6), so the first shove on a big climb runs around 11 to 12 V and the carriage settles in roughly a second and a half - against nearly 4 s and under 2 V at full gentle. That is the Q versus R bargain the missions had you price out by hand: tight tracking is real, and it is paid for in effort.</div>
       </div>
     </div>
   </section>
@@ -615,7 +625,7 @@ volts = lqr.<span class="fn">calculate</span>(x, reference)[<span class="num">0<
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
     opts.forEach(function(opt,i){
-      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
+      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } });
     });
   });
 })();

@@ -202,9 +202,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">What two motors does a swerve module have?</div>
         <div class="opts">
-          <button class="opt">Two drive motors</button>
+          <button class="opt" data-why="Two motors is the right count, and both do turn things - but if both drove the wheel, nothing could aim it. One motor drives the wheel and the other steers the whole module.">Two drive motors</button>
           <button class="opt">A drive motor to spin the wheel and a steer motor to point it</button>
-          <button class="opt">A motor and a battery</button>
+          <button class="opt" data-why="The battery does power everything, so it comes to mind - but it lives elsewhere on the robot, not in the module. The module's pair is a drive motor for speed and a steer motor for heading.">A motor and a battery</button>
         </div>
         <div class="explain">Each module has a drive motor (wheel speed) and a steer motor (heading). Together they let one wheel point any direction and drive any speed.</div>
       </div>
@@ -212,8 +212,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">What does a four-module swerve let a robot do?</div>
         <div class="opts">
-          <button class="opt">Only drive straight</button>
-          <button class="opt">Only spin in place</button>
+          <button class="opt" data-why="Driving straight is the one thing every drivetrain can do, so it feels safe - but swerve's whole point is everything else. With each wheel steerable, it slides any direction while it spins.">Only drive straight</button>
+          <button class="opt" data-why="Swerve can spin in place, so this is close - but that is just one trick in its bag. Four independently pointed wheels let it translate any direction and rotate at the same time.">Only spin in place</button>
           <button class="opt">Move any direction and rotate at the same time (holonomic)</button>
         </div>
         <div class="explain">With every wheel independently steered, the robot is holonomic: it can translate any direction and spin simultaneously, far more agile than a tank drive.</div>
@@ -223,10 +223,20 @@
         <div class="qt">Should you build swerve modules from scratch or buy them?</div>
         <div class="opts">
           <button class="opt">Buy them - they're precision, high-stress parts (the buy-not-build call)</button>
-          <button class="opt">Always build them to save money</button>
-          <button class="opt">It doesn't matter</button>
+          <button class="opt" data-why="Saving money is a real team concern, so this tempts - but a module packs precision gears and a sensor into a tight space. A scratch-built one usually costs more in failed matches than it saves.">Always build them to save money</button>
+          <button class="opt" data-why="It genuinely matters here. A swerve module is exactly the kind of precision, high-stress part the buy-not-build rule points at: buy it proven instead of fabricating it.">It doesn't matter</button>
         </div>
         <div class="explain">Modules are complex and precise, so nearly every team buys proven COTS modules. The code (swerve kinematics) is what you write to control them.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">In the sim you dragged the Steer slider from 170° all the way around to -170°. How far apart are those two headings really?</div>
+        <div class="opts">
+          <button class="opt" data-why="That is what the slider traveled, so it feels right - but headings live on a circle, and the circle offers a shortcut. Going the other way around, those two headings are only 20° apart.">340° apart - the module has to swing the long way, just like the slider did</button>
+          <button class="opt">Only 20° apart - a smart module takes the short way around</button>
+          <button class="opt" data-why="180° apart is the special case where flipping the drive motor shines, but that is not this pair. 170° and -170° sit just 20° apart, straddling the wrap point.">180° apart - they are opposite headings</button>
+        </div>
+        <div class="explain">Headings wrap around a circle. 170° and -170° both sit near the straight-back direction, one on each side of it, so they are only 20° apart even though the slider traveled 340°. Real swerve code always takes the short arc, which is exactly what the wrap mission had you feel by hand.</div>
       </div>
     </div>
   </section>
@@ -357,7 +367,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

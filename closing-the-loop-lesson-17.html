@@ -314,8 +314,8 @@ motor.<span class="fn">setControl</span>(request.<span class="fn">withPosition</
         <div class="qn">Question 1</div>
         <div class="qt">What does Motion Magic add compared to a plain PositionVoltage request?</div>
         <div class="opts">
-          <button class="opt">A higher current limit</button>
-          <button class="opt">A second motor</button>
+          <button class="opt" data-why="Current limits live in their own config group and do not change with the request type. Motion Magic changes the shape of the move - a planned ramp instead of a lunge.">A higher current limit</button>
+          <button class="opt" data-why="No new hardware - it is the same Kraken. What is new is the software onboard: the device builds a ramp-cruise-slow plan and tracks it itself.">A second motor</button>
           <button class="opt">A smooth onboard motion profile, so the move ramps up and slows down instead of lunging</button>
         </div>
         <div class="explain">It's the Part II trapezoid profile, generated and tracked on the device. Instead of snapping to the target, the motor follows a planned ramp-cruise-slow trajectory - gentler and more accurate.</div>
@@ -325,8 +325,8 @@ motor.<span class="fn">setControl</span>(request.<span class="fn">withPosition</
         <div class="qt">What do MotionMagicCruiseVelocity and MotionMagicAcceleration control?</div>
         <div class="opts">
           <button class="opt">The top speed of the move and how quickly it ramps to that speed - the profile's shape</button>
-          <button class="opt">The PID gains</button>
-          <button class="opt">The motor's CAN id</button>
+          <button class="opt" data-why="Easy mix-up - the gains stay in Slot0. These two numbers shape the plan those gains chase: the move's top speed and how hard it ramps.">The PID gains</button>
+          <button class="opt" data-why="The CAN id is set in Tuner X and never moves with a config group. These two numbers sculpt the profile - how fast it cruises and how quickly it gets there.">The motor's CAN id</button>
         </div>
         <div class="explain">They define the trapezoid: cruise velocity is the fastest the move will go, acceleration is how hard it ramps up and down. Jerk optionally rounds the corners for an even smoother feel.</div>
       </div>
@@ -334,11 +334,21 @@ motor.<span class="fn">setControl</span>(request.<span class="fn">withPosition</
         <div class="qn">Question 3</div>
         <div class="qt">How is Motion Magic <em>Expo</em> different from regular Motion Magic?</div>
         <div class="opts">
-          <button class="opt">It's slower</button>
+          <button class="opt" data-why="It can actually finish sooner, because no cruise guess is wasted. Expo shapes the profile from kV and kA so the move uses everything the motor really has.">It's slower</button>
           <button class="opt">It uses the mechanism's kV and kA to shape an exponential profile matched to what the motor can really do</button>
-          <button class="opt">It only works on drivetrains</button>
+          <button class="opt" data-why="It works anywhere regular Motion Magic does - elevators, arms, flywheels. The difference is the shape of the profile, not which mechanism is allowed to use it.">It only works on drivetrains</button>
         </div>
         <div class="explain">Instead of a fixed cruise velocity you guess, Expo uses kV/kA so the profile naturally respects the motor's real top speed - accelerating hard, then easing in as it approaches it.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">With acceleration at 1.5, cruise velocity 0.44 gave the amber trace a long flat roof. You double cruise velocity to 0.88 and press Move again. What happens to that roof?</div>
+        <div class="opts">
+          <button class="opt" data-why="Halving is the intuitive guess, but the ramps betray you: reaching 0.88 takes twice the time and four times the distance of reaching 0.44, and both ends of the move pay that price.">It lasts about half as long, since the cruise is twice as fast</button>
+          <button class="opt">It nearly vanishes - the roof shrinks from about 1.2 s to about 0.2 s</button>
+          <button class="opt" data-why="Acceleration shapes the ramps, true - but the roof is whatever is left of the move after both ramps take their cut, and a higher cruise makes those cuts much bigger.">It stays the same length - the roof is set by acceleration, not cruise velocity</button>
+        </div>
+        <div class="explain">Faster cruise means longer ramps: getting to 0.88 takes twice the time and four times the distance of getting to 0.44. On this short 0.67 climb the two ramps eat almost the whole move, so the sim's roof collapses from roughly 1.2 s of cruising to a 0.2 s sliver. Top speed only pays off when there is room to use it - like sprinting on a bike for a driveway-length ride.</div>
       </div>
     </div>
   </section>
@@ -581,7 +591,7 @@ motor.<span class="fn">setControl</span>(request.<span class="fn">withPosition</
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
     opts.forEach(function(opt,i){
-      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
+      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } });
     });
   });
 })();

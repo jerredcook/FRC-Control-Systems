@@ -193,9 +193,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">What does "1/4-20" tell you about a bolt?</div>
         <div class="opts">
-          <button class="opt">It's 20 inches long</button>
+          <button class="opt" data-why="A fair guess, since bolts do come in lengths - but length gets listed separately. Here the 20 counts how many threads are packed into each inch.">It's 20 inches long</button>
           <button class="opt">Quarter-inch diameter, 20 threads per inch</button>
-          <button class="opt">It takes 20 in-lb of torque</button>
+          <button class="opt" data-why="Torque is on your mind from the sim, which makes this tempting - but the name only describes the bolt's geometry. Proper torque comes from a chart, not from the name.">It takes 20 in-lb of torque</button>
         </div>
         <div class="explain">The first number is the diameter (1/4 inch), the second is the thread pitch (20 threads per inch). The hole or nut it goes into must match both exactly.</div>
       </div>
@@ -203,8 +203,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">You keep tightening a bolt well past snug. What happens?</div>
         <div class="opts">
-          <button class="opt">It gets stronger and stronger</button>
-          <button class="opt">Nothing, you can't over-tighten</button>
+          <button class="opt" data-why="It genuinely does get stronger for a while, which is the trap. Past proper torque the threads shear, and all that strength vanishes in one soft click.">It gets stronger and stronger</button>
+          <button class="opt" data-why="The wrench feels like it could turn forever, but the threads are tiny ramps of soft metal. Push far enough past snug and they shear right off.">Nothing, you can't over-tighten</button>
           <button class="opt">The threads strip and the bolt grips nothing</button>
         </div>
         <div class="explain">Past the proper torque, the threads shear off. Now the bolt spins freely with no clamping force, and you have to drill it out or replace the part. Snug, then stop.</div>
@@ -214,10 +214,20 @@
         <div class="qt">A bolt on a vibrating robot keeps working loose. Best fix?</div>
         <div class="opts">
           <button class="opt">Use a nylock nut or threadlocker</button>
-          <button class="opt">Tighten it until the threads strip</button>
-          <button class="opt">Use a bigger screwdriver</button>
+          <button class="opt" data-why="More muscle feels like more security, but stripping is the one outcome worse than loose - a stripped bolt holds nothing at all. Locking hardware beats vibration; force never does.">Tighten it until the threads strip</button>
+          <button class="opt" data-why="A bigger tool adds leverage, but leverage was never the problem. Vibration walks the nut loose, so the fix is something that grips the threads: a nylock or threadlocker.">Use a bigger screwdriver</button>
         </div>
         <div class="explain">A nylock nut grips the threads with a nylon insert, and threadlocker bonds them chemically. Either keeps a fastener from rattling out under FRC's constant vibration.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">From the sim</div>
+        <div class="qt">You pick the 1/4-20 in the sim, hold the tighten button, and let go when the readout shows 60 in-lb. What result do you get?</div>
+        <div class="opts">
+          <button class="opt" data-why="That fear is well earned on the #10-32, whose threads shear near 30 in-lb - but you switched bolts. Strip torque scales with size, and the thicker 1/4-20 shrugs off 60.">Stripped - 60 in-lb is double what stripped the #10-32, so the threads are gone</button>
+          <button class="opt" data-why="Bigger bolt, bigger numbers is the right direction, just too far - about 100 in-lb is where the 1/4-20 strips, not where it gets snug. Its green band opens around 55.">Loose, backs out - the 1/4-20 needs over 100 in-lb before it counts as snug</button>
+          <button class="opt">Snug - 60 in-lb sits inside the 1/4-20's green band of roughly 55 to 80 in-lb</button>
+        </div>
+        <div class="explain">Each size has its own bands: the #10-32 is snug from about 12 to 22 in-lb and strips near 30, while the 1/4-20 is snug from about 55 to 80 and strips around 100. Sixty in-lb would destroy the small bolt but seats the big one perfectly. Same twist of the wrist, different bolt, opposite outcome - that is why torque specs always name the bolt size, and why the green band jumps when you switch sizes in the sim.</div>
       </div>
     </div>
   </section>
@@ -320,7 +330,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

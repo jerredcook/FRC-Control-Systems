@@ -187,9 +187,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">A gearbox has a 4:1 stage and a 3:1 stage. What's the total ratio?</div>
         <div class="opts">
-          <button class="opt">7:1 (you add them)</button>
+          <button class="opt" data-why="Adding feels natural because that is how most everyday numbers combine - but the second stage slows a shaft the first stage already slowed, so reductions compound: 4 × 3 = 12.">7:1 (you add them)</button>
           <button class="opt">12:1 (you multiply them)</button>
-          <button class="opt">1:1</button>
+          <button class="opt" data-why="1:1 would mean the two stages cancel each other out - but both stages slow the shaft in the same direction, so they stack instead of undoing each other.">1:1</button>
         </div>
         <div class="explain">Stages multiply: 4 × 3 = 12, a 12:1 reduction. Each stage's output feeds the next, so the reductions compound rather than add.</div>
       </div>
@@ -198,8 +198,8 @@
         <div class="qt">What's the main advantage of a planetary gearbox?</div>
         <div class="opts">
           <button class="opt">A lot of reduction in a small, in-line package that bolts to the motor</button>
-          <button class="opt">It needs no gears</button>
-          <button class="opt">It removes the need for a motor</button>
+          <button class="opt" data-why="The name almost sells it, planetary does sound like magic - but inside it is packed with gears: a sun, planets, and a ring. The win is how compactly they all fit.">It needs no gears</button>
+          <button class="opt" data-why="A gearbox shapes power, it never creates it - the motor still bolts to one end and supplies every bit of the work the output delivers.">It removes the need for a motor</button>
         </div>
         <div class="explain">Planetary gearboxes stack big reductions into a compact unit that mounts straight on the motor. That's why they're the default for FRC mechanisms.</div>
       </div>
@@ -207,11 +207,21 @@
         <div class="qn">Question 3</div>
         <div class="qt">You need a 25:1 reduction from stackable 3:1, 4:1, and 5:1 stages. What works?</div>
         <div class="opts">
-          <button class="opt">A single 3:1 stage</button>
-          <button class="opt">4:1 and 4:1</button>
+          <button class="opt" data-why="One stage is the simplest build, which makes it appealing - but a lone 3:1 is only 3:1. You need stages whose product reaches 25.">A single 3:1 stage</button>
+          <button class="opt" data-why="Two matching stages is exactly the right shape of idea - but 4 × 4 = 16, not 25. Two 5:1 stages hit the target on the nose.">4:1 and 4:1</button>
           <button class="opt">5:1 and 5:1 - they multiply to 25:1</button>
         </div>
         <div class="explain">5 × 5 = 25. You build a target ratio by choosing stages whose product hits it. Often several combinations work, and you pick based on torque and the cartridges on hand.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">In the sim you build three stages: 5:1, 5:1, and 3:1, with the motor spinning in at 6000 rpm. What does the Output block read?</div>
+        <div class="opts">
+          <button class="opt" data-why="Adding the stages is the classic trap - 5 + 5 + 3 = 13 feels tidy, but each stage divides what the last one left, so the reductions multiply to 75, not 13.">About 460 rpm, because 5 + 5 + 3 = 13 and 6000 / 13 is about 460</button>
+          <button class="opt">80 rpm and ×75 torque, because 5 × 5 × 3 = 75 and 6000 / 75 = 80</button>
+          <button class="opt" data-why="If the stages took turns like riders drafting, the biggest would set the pace - but they run in series, so every stage divides the speed again. All three count.">1200 rpm, because only the biggest single stage sets the output speed</button>
+        </div>
+        <div class="explain">Stages multiply: 5 × 5 × 3 = 75, so the output turns at 6000 / 75 = 80 rpm with 75 times the torque. That 75:1 build is the one total that threads the gold mission's needle - at least ×75 torque while the output stays above 75 rpm.</div>
       </div>
     </div>
   </section>
@@ -322,7 +332,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

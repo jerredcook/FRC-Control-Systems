@@ -256,9 +256,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">What's the difference between Elastic and AdvantageScope?</div>
         <div class="opts">
-          <button class="opt">They're identical</button>
+          <button class="opt" data-why="They do show the same signals, which makes this tempting. The split is when: Elastic is the live glance during the match, AdvantageScope is the replay you study afterward.">They're identical</button>
           <button class="opt">Elastic is a live driver dashboard; AdvantageScope replays the recorded log afterward</button>
-          <button class="opt">AdvantageScope drives the motors</button>
+          <button class="opt" data-why="It looks powerful enough, but AdvantageScope only reads the recorded log. Nothing on the dashboard side ever commands a motor - your robot code does that.">AdvantageScope drives the motors</button>
         </div>
         <div class="explain">Elastic gives the drive team a glance during the match. AdvantageScope reads the .wpilog after, so you can scrub the timeline and analyze exactly what every signal did.</div>
       </div>
@@ -267,8 +267,8 @@
         <div class="qt">Why log the setpoint alongside the measured value?</div>
         <div class="opts">
           <button class="opt">So you can see the gap between what you wanted and what you got</button>
-          <button class="opt">To make the log file bigger</button>
-          <button class="opt">It speeds up the robot</button>
+          <button class="opt" data-why="Funny, but backwards - file size is the cost, not the goal. The extra signal is there so the gap between wanted and got jumps out at you.">To make the log file bigger</button>
+          <button class="opt" data-why="Logging never adds speed - if anything it costs a tiny bit. You pay that price gladly because setpoint next to measured turns guessing into knowing.">It speeds up the robot</button>
         </div>
         <div class="explain">The measurement alone can't tell you if it was correct. Side by side with the setpoint, the error jumps out, which is exactly what you need to diagnose a control problem.</div>
       </div>
@@ -276,11 +276,21 @@
         <div class="qn">Question 3</div>
         <div class="qt">What does DataLogManager.start() do?</div>
         <div class="opts">
-          <button class="opt">Starts the motors</button>
-          <button class="opt">Launches the dashboard</button>
+          <button class="opt" data-why="The word start pulls you toward hardware, but this start belongs to the logger. Motors move only when your code commands them - this call just begins recording.">Starts the motors</button>
+          <button class="opt" data-why="Right neighborhood, wrong tool - the dashboard is opened by hand on the driver station laptop. This call runs in robot code and opens the .wpilog file for writing.">Launches the dashboard</button>
           <button class="opt">Begins recording signals to a .wpilog file you can review later</button>
         </div>
         <div class="explain">It opens a log on the roboRIO and records published signals throughout the match, giving you a complete timeline to replay in AdvantageScope.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">From the sim</div>
+        <div class="qt">You scrub the cursor to t = 6.2 s, mid-shot, and read: setpoint 3200 rpm, measured 2850 rpm, current 41 A, battery 10.6 V. What story do the four numbers tell together?</div>
+        <div class="opts">
+          <button class="opt">A shot just dragged the flywheel down and the controller is pulling hard to recover - the dip, the spike, and the sag are one event</button>
+          <button class="opt" data-why="10.6 V does look scary alone, which is exactly why you read signals together. Scrub past t = 6.3 s - the battery pops back near 12 V the moment the current spike ends. That is load sag, not a dying pack.">The battery is dying and should be swapped before the next match</button>
+          <button class="opt" data-why="A perfectly flat line would be nice, but every shot steals energy from the wheel, so a dip is healthy physics. What you actually judge is the recovery - and here it is back near 3200 within a second.">The control loop is broken, since measured should never leave the setpoint</button>
+        </div>
+        <div class="explain">Read together, the four traces are one story: the shot at t = 6 s drags measured rpm below the setpoint, the controller answers with a burst of current, and that draw sags the battery. Scrub a little further and everything recovers - current back to a few amps, battery near 12 V, rpm climbing home. Any one number alone could have fooled you; the log read side by side cannot.</div>
       </div>
     </div>
   </section>
@@ -390,7 +400,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

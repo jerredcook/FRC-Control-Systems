@@ -414,6 +414,7 @@
         "summary{padding:8px 0}" +
       "}" +
       "@media (max-width:480px){pre.code{padding:12px}}" +
+      "#quiz .whyline{margin:6px 0 2px;padding:5px 10px;border-left:2px solid rgba(255,107,107,.55);color:#92a2be;font-size:13px;line-height:1.5}" +
       "pre.frc-wrap{white-space:pre-wrap!important;overflow-wrap:anywhere}" +
       ".frc-wrapbtn{display:block;margin:0 0 5px auto;font-family:ui-monospace,Menlo,monospace;" +
       "font-size:10px;letter-spacing:.06em;padding:5px 9px;border-radius:7px;" +

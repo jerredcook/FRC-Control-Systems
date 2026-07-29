@@ -334,9 +334,9 @@ motor.<span class="fn">setVoltage</span>( <input class="blank" data-ans="feedfor
         <div class="qn">Question 1</div>
         <div class="qt">In the complete controller, how do feedforward and feedback split the work?</div>
         <div class="opts">
-          <button class="opt">Feedback predicts the motion; feedforward fixes mistakes afterward</button>
+          <button class="opt" data-why="You have both jobs right but swapped - predicting from the plan is feedforward's whole identity, and reacting to mistakes after they appear is what feedback was built for.">Feedback predicts the motion; feedforward fixes mistakes afterward</button>
           <button class="opt">Feedforward predicts most of the voltage from the planned motion; feedback corrects the small leftover</button>
-          <button class="opt">They each control a different motor</button>
+          <button class="opt" data-why="They can feel like two separate machines, but they are just two voltages summed into one command for the same motor - predict plus correct, added together.">They each control a different motor</button>
         </div>
         <div class="explain">Feedforward uses the model to supply most of the voltage up front; feedback only has to handle the residual - disturbances, model error, battery sag. Predict almost everything, correct the rest.</div>
       </div>
@@ -344,8 +344,8 @@ motor.<span class="fn">setVoltage</span>( <input class="blank" data-ans="feedfor
         <div class="qn">Question 2</div>
         <div class="qt">With feedforward only and a sudden load the controller never modeled, what did you observe?</div>
         <div class="opts">
-          <button class="opt">It tracked perfectly - feedforward handles everything</button>
-          <button class="opt">It went unstable and oscillated</button>
+          <button class="opt" data-why="On the profile it does look flawless, which is the trap - feedforward is open-loop and never reads position, so a load it did not predict goes uncorrected forever.">It tracked perfectly - feedforward handles everything</button>
+          <button class="opt" data-why="Instability is a feedback disease - it takes a loop overreacting to error. Feedforward has no loop at all, so it just holds calmly at the wrong height.">It went unstable and oscillated</button>
           <button class="opt">It settled with a steady error - feedforward can't see a disturbance it didn't predict</button>
         </div>
         <div class="explain">Feedforward is open-loop: it acts on the plan, not on measurement. An unmodeled load just sits there as a steady offset until a feedback term notices the error and pushes back.</div>
@@ -355,10 +355,20 @@ motor.<span class="fn">setVoltage</span>( <input class="blank" data-ans="feedfor
         <div class="qt">Why feed the motion profile's velocity to feedforward, rather than just the final goal?</div>
         <div class="opts">
           <button class="opt">So kV and kA supply voltage for the planned speed at every instant, keeping error tiny all the way through the move</button>
-          <button class="opt">Because the goal is a secret until the move ends</button>
-          <button class="opt">It makes the motor quieter</button>
+          <button class="opt" data-why="Fun theory, but the goal is known the whole time - the point is that the profile tells kV and kA how fast to be moving right now, not just where to stop.">Because the goal is a secret until the move ends</button>
+          <button class="opt" data-why="A profiled move can sound smoother, but that is a side effect - the real win is voltage matched to the planned speed at every instant, which keeps the error tiny.">It makes the motor quieter</button>
         </div>
         <div class="explain">A bare goal tells feedforward nothing about how fast to be moving right now. The profile gives a velocity and acceleration at every instant, so kV and kA can supply the right voltage throughout - not just once you've arrived.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">From the sim</div>
+        <div class="qt">You are in FF + FB mode with kP at its default 6.0, and you drag in an added load of 0.30. Once everything settles, roughly what does the Error readout show?</div>
+        <div class="opts">
+          <button class="opt">About 0.05 - feedback must supply the missing 0.30, and kP × 0.05 makes exactly that</button>
+          <button class="opt" data-why="Mapping the load straight onto the error is tempting, but the load sets the voltage feedback must produce - divide by kP = 6 to find the error that makes it, about 0.05.">About 0.30 - the error matches the load</button>
+          <button class="opt" data-why="Feedforward would love to help, but it only knows the plan - a surprise load is invisible to it, and P feedback needs some standing error before it can push back.">0.00 - feedforward absorbs the load automatically</button>
+        </div>
+        <div class="explain">Feedforward never modeled this load, so feedback has to carry it - and P feedback only pushes when there is error. It needs kP × error = 0.30, so the carriage sags about 0.30 ÷ 6 = 0.05 below the profile. Double kP and the sag halves; a pinch of kI would erase it completely.</div>
       </div>
     </div>
   </section>
@@ -599,7 +609,7 @@ motor.<span class="fn">setVoltage</span>( <input class="blank" data-ans="feedfor
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
     opts.forEach(function(opt,i){
-      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
+      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } });
     });
   });
 })();

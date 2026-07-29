@@ -315,9 +315,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">You bought Krakens. What do you need to control them in code?</div>
         <div class="opts">
-          <button class="opt">Nothing - RobotPy includes every motor library</button>
+          <button class="opt" data-why="Wouldn't that be handy - but RobotPy ships only the foundation. Vendor motors speak their own dialect, so a Kraken needs CTRE's phoenix6 package.">Nothing - RobotPy includes every motor library</button>
           <button class="opt">Add the CTRE Phoenix 6 package (phoenix6)</button>
-          <button class="opt">Add the REV REVLib package</button>
+          <button class="opt" data-why="Easy mix-up - REVLib drives REV hardware like the SparkMax and NEO. Krakens are CTRE, so they need phoenix6.">Add the REV REVLib package</button>
         </div>
         <div class="explain">Krakens use CTRE's TalonFX, so you add the phoenix6 package. (REVLib is for REV's SparkMax/NEO.) RobotPy alone doesn't include vendor motor libraries.</div>
       </div>
@@ -325,8 +325,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">How do you add a vendor library?</div>
         <div class="opts">
-          <button class="opt">Copy the vendor's whole GitHub repo into your project</button>
-          <button class="opt">Email the vendor</button>
+          <button class="opt" data-why="That would technically get you the code, but now you own updating it forever - the requires list tells robotpy sync to fetch the right version for you, cleanly.">Copy the vendor's whole GitHub repo into your project</button>
+          <button class="opt" data-why="Their support folks are friendly, but they would just point you at the same package name - adding it to pyproject.toml and running robotpy sync takes seconds, no email needed.">Email the vendor</button>
           <button class="opt">List it under requires in pyproject.toml, then run robotpy sync</button>
         </div>
         <div class="explain">RobotPy reads the requires list in pyproject.toml; robotpy sync downloads each package and cross-builds it for the roboRIO. No copying source by hand.</div>
@@ -336,10 +336,20 @@
         <div class="qt">You don't know how to make a sensor return its value. What's the move?</div>
         <div class="opts">
           <button class="opt">Open the library's docs / API and find the class's methods</button>
-          <button class="opt">Guess method names until one runs</button>
-          <button class="opt">Give up and use a different sensor</button>
+          <button class="opt" data-why="We have all tried it, but running is not the same as correct - Python happily calls a lucky guess that does the wrong thing. The API reference tells you what each method actually does.">Guess method names until one runs</button>
+          <button class="opt" data-why="Swapping hardware to dodge a docs lookup trades a five-minute read for hours of rewiring - and the new sensor comes with docs of its own anyway.">Give up and use a different sensor</button>
         </div>
         <div class="explain">The docs and API reference list every class and what its methods do. Finding the answer there (or on Chief Delphi) is the core skill - far faster and more reliable than guessing.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">From the installer: your robot runs Falcon drive, a Pigeon 2 gyro, and AprilTag vision. What is the smallest set of packages that covers all three?</div>
+        <div class="opts">
+          <button class="opt" data-why="A natural count, but read Phoenix 6's fine print in the installer: it covers Kraken / Falcon, CANcoder, AND the Pigeon 2 - one install handles two of your three devices.">Three - one library per device</button>
+          <button class="opt">Two - phoenix6 for the Falcons and Pigeon 2, plus PhotonLib for the AprilTags</button>
+          <button class="opt" data-why="Phoenix 6 is the right first pick, but REVLib drives REV hardware like the SparkMax and NEO - nothing on this robot is REV. The AprilTags need a vision library, PhotonLib.">Two - phoenix6 plus REV REVLib</button>
+        </div>
+        <div class="explain">This is the installer's gold mission, and the trick hides in the fine print: Phoenix 6 covers the TalonFX inside every Falcon and Kraken and also the Pigeon 2 gyro, so one install handles two devices. That leaves vision, which is PhotonLib's whole job. Two entries in your requires list, three devices covered, nothing extra - the only-add-what-you-use habit in action.</div>
       </div>
     </div>
   </section>
@@ -448,7 +458,7 @@
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
     opts.forEach(function(opt,i){
-      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
+      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } });
     });
   });
 })();

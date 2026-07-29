@@ -254,9 +254,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">What is MotionCore mainly for?</div>
         <div class="opts">
-          <button class="opt">It is the main brain that runs your robot code</button>
+          <button class="opt" data-why="The two Core names blur together easily - SystemCore is the brain that runs your code. MotionCore is the companion that spreads power and CAN to motors and sensors.">It is the main brain that runs your robot code</button>
           <button class="opt">It is a companion that distributes power and CAN to motors and sensors</button>
-          <button class="opt">It is the WiFi radio</button>
+          <button class="opt" data-why="Radios are on the mind in this course since one just moved, but the WiFi radio lives inside SystemCore. MotionCore's job is power and CAN distribution.">It is the WiFi radio</button>
         </div>
         <div class="explain">SystemCore is the brain. MotionCore is the companion module, primarily a power and CAN distribution device that makes it easy to connect motors and smart sensors. In FTC it also handles encoders and actuators.</div>
       </div>
@@ -264,8 +264,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">What does the bridge between SystemCore and MotionCore carry?</div>
         <div class="opts">
-          <button class="opt">Only WiFi signals</button>
-          <button class="opt">Only cooling air</button>
+          <button class="opt" data-why="WiFi is SystemCore's headline trick, so it is a natural guess, but WiFi travels through the air. The bridge cable carries power and CAN FD data.">Only WiFi signals</button>
+          <button class="opt" data-why="Electronics do need cooling, so airflow is a reasonable thought, but the bridge is a 4-pin cable - it carries power to SystemCore plus CAN FD data between the boards.">Only cooling air</button>
           <button class="opt">Power to SystemCore and CAN FD data between the two boards</button>
         </div>
         <div class="explain">The MotionCore bridge port uses a 4-pin Molex Micro-Fit+ connector. That one cable carries power to SystemCore and carries CAN FD communication between the two boards, running at 1 Mbps.</div>
@@ -275,8 +275,8 @@
         <div class="qt">Which part of the FRC power story is NOT settled yet?</div>
         <div class="opts">
           <button class="opt">What the battery connects to, whether the PDH stays, the input voltage, and the brownout threshold</button>
-          <button class="opt">That there is one 12 V battery</button>
-          <button class="opt">That a battery needs fusing to be safe</button>
+          <button class="opt" data-why="With so much changing, the battery seems fair game too, but the one 12 V battery is a settled fundamental - the open questions are about what it connects to.">That there is one 12 V battery</button>
+          <button class="opt" data-why="With rules in flux, safety feels up for grabs, but fusing is bedrock - it always applies. The unsettled parts are the wiring details around it.">That a battery needs fusing to be safe</button>
         </div>
         <div class="explain">The exact FRC power wiring is not final: what the battery connects to, whether today's PDH stays, the input voltage, and the brownout threshold are all still open. The battery fundamentals (one 12 V battery, fusing, the idea of a brownout) still apply, and the Build course covers them.</div>
       </div>
@@ -318,7 +318,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

@@ -186,9 +186,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">What does inspection check?</div>
         <div class="opts">
-          <button class="opt">How fast the robot is</button>
+          <button class="opt" data-why="Speed is what scouts measure, not inspectors. Inspection only asks whether the robot is legal and safe - a slow robot passes just as easily as a fast one.">How fast the robot is</button>
           <button class="opt">That the robot is legal and safe - weight, size, bumpers, fusing, no hazards</button>
-          <button class="opt">The team's logo</button>
+          <button class="opt" data-why="Style would be a fun category, but inspectors never grade looks. They work a fixed list: weight, size, bumpers, fusing, and hazards.">The team's logo</button>
         </div>
         <div class="explain">Inspection verifies the robot meets the legal and safety rules so every match is fair and no one gets hurt. Pass it and you can compete.</div>
       </div>
@@ -196,8 +196,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">How do you make inspection easy?</div>
         <div class="opts">
-          <button class="opt">Rush everything the night before</button>
-          <button class="opt">Skip the rules and hope</button>
+          <button class="opt" data-why="Every team has felt that late-night pull, but rushing is exactly how robots arrive overweight with illegal bumpers. Build to the rules all season instead.">Rush everything the night before</button>
+          <button class="opt" data-why="Hope is not a strategy at the inspection table - the checklist is fixed and every item comes up. Respect the rules all season and there is nothing to fear.">Skip the rules and hope</button>
           <button class="opt">Build to the rules all season - then inspection is just a formality</button>
         </div>
         <div class="explain">If you respect the weight, bumper, and electrical rules throughout the build, inspection confirms what you already know instead of becoming a panic.</div>
@@ -207,8 +207,8 @@
         <div class="qt">Put the three FRC Academy courses together, what can you now do?</div>
         <div class="opts">
           <button class="opt">Build a robot, program it, and control it precisely - the whole craft</button>
-          <button class="opt">Only drive it</button>
-          <button class="opt">Nothing yet</button>
+          <button class="opt" data-why="Driving is the fun part, but you finished three whole courses - you can build the machine, program it, and control it. Driving is where you show that off.">Only drive it</button>
+          <button class="opt" data-why="Far too modest. Three courses of building, coding, and control is the complete toolkit - the next step is a real robot, and you are ready for it.">Nothing yet</button>
         </div>
         <div class="explain">Fabricate builds the machine, Deploy programs it, and Closing the Loop makes it move precisely. Together they're a complete path from idea to a robot on the field.</div>
       </div>
@@ -274,7 +274,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

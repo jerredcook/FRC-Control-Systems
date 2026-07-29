@@ -326,8 +326,8 @@ motor.<span class="fn">setVoltage</span>(ffVolts + fbVolts);</pre>
         <div class="qn">Question 1</div>
         <div class="qt">What does a motion profile give you that a bare setpoint doesn't?</div>
         <div class="opts">
-          <button class="opt">A higher top speed</button>
-          <button class="opt">It removes the need for feedback entirely</button>
+          <button class="opt" data-why="Tempting, because the profile does talk about max velocity - but that number is a ceiling you choose, not a boost. The profile's real gift is a plan for the whole move.">A higher top speed</button>
+          <button class="opt" data-why="Feedforward does get stronger with a plan, but bumps, friction, and load still sneak in unannounced - feedback stays on the team to nudge out what the plan cannot predict.">It removes the need for feedback entirely</button>
           <button class="opt">A planned velocity and acceleration at every instant, with smooth, limited motion</button>
         </div>
         <div class="explain">A raw setpoint just says "be there now," creating a huge instant error. A profile lays out a smooth ramp-cruise-slow - and its velocity/acceleration are exactly what feedforward needs to keep error tiny throughout the move.</div>
@@ -337,8 +337,8 @@ motor.<span class="fn">setVoltage</span>(ffVolts + fbVolts);</pre>
         <div class="qt">A <code style="font-family:var(--mono);color:var(--teal)">ProfiledPIDController</code> combines which two things?</div>
         <div class="opts">
           <button class="opt">A TrapezoidProfile (the plan) and a PIDController (the feedback)</button>
-          <button class="opt">Two motors</button>
-          <button class="opt">Feedforward and feedback</button>
+          <button class="opt" data-why="The name sounds heavy-duty, but no hardware is involved - it is one software object that plans the move and runs PID feedback against that plan.">Two motors</button>
+          <button class="opt" data-why="So close - that pair is the full gold standard, but ProfiledPIDController only brings the profile and the PID. You still add feedforward yourself, fed by the profile's velocity.">Feedforward and feedback</button>
         </div>
         <div class="explain">It generates the trapezoid motion profile and runs PID feedback against that moving setpoint - all in one object. You still add feedforward separately.</div>
       </div>
@@ -346,11 +346,21 @@ motor.<span class="fn">setVoltage</span>(ffVolts + fbVolts);</pre>
         <div class="qn">Question 3</div>
         <div class="qt">In the gold-standard loop, what velocity do you pass to ElevatorFeedforward?</div>
         <div class="opts">
-          <button class="opt">The final goal position</button>
+          <button class="opt" data-why="A natural reach, but the goal is a position and kV wants a speed. Hand feedforward the plan's velocity right now, not the spot where the move ends.">The final goal position</button>
           <button class="opt">The profile's current setpoint velocity - pid.getSetpoint().velocity</button>
-          <button class="opt">Always zero</button>
+          <button class="opt" data-why="Zero is only right after the move is over. While the plan is rolling, kV earns its keep by matching the planned speed at every instant.">Always zero</button>
         </div>
         <div class="explain">Feedforward needs to know how fast the plan says to be moving right now, so you feed it pid.getSetpoint().velocity. That lets kV and kA supply the voltage for the planned speed-up, cruise, and slow-down.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">You press Move for the full 0.67 climb with max velocity 1.2 and max acceleration 1.2. What peak does the Profile vel readout reach?</div>
+        <div class="opts">
+          <button class="opt" data-why="On a longer move it would - but watch the ramps. This climb is too short to finish speeding up before it must start slowing down, so the plan never touches 1.2.">About 1.2 - the plan climbs to your cruise limit and holds it</button>
+          <button class="opt">About 0.9 - the speed-up and slow-down ramps meet before the plan ever reaches 1.2</button>
+          <button class="opt" data-why="That is the triangle peak from the missions, with acceleration way down at 0.3. At 1.2 the ramps are four times steeper, so they carry the plan much closer to cruise before they meet.">About 0.45 - short hops always peak at the same spot</button>
+        </div>
+        <div class="explain">A plan only cruises if there is room to finish speeding up and then slowing down. At acceleration 1.2 the two ramps meet mid-move at about 0.90 - press Move with these settings and the readout tops out right there, shy of your 1.2 ceiling. Raise acceleration and the peak creeps upward; only a longer move would let it truly cruise.</div>
       </div>
     </div>
   </section>
@@ -604,7 +614,7 @@ motor.<span class="fn">setVoltage</span>(ffVolts + fbVolts);</pre>
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
     opts.forEach(function(opt,i){
-      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
+      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } });
     });
   });
 })();

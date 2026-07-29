@@ -271,9 +271,9 @@ self.driver.<span class="fn">x</span>().<input class="blank" data-ans="whiletrue
         <div class="qn">Question 1</div>
         <div class="qt">What's the difference between onTrue and whileTrue?</div>
         <div class="opts">
-          <button class="opt">They're the same</button>
+          <button class="opt" data-why="Easy to assume since both start on a press, but they part ways at release: onTrue lets its command keep running, whileTrue cancels it the moment you let go.">They're the same</button>
           <button class="opt">onTrue fires once on press; whileTrue runs only while held and ends on release</button>
-          <button class="opt">whileTrue only works on bumpers</button>
+          <button class="opt" data-why="Fair guess since the sim put whileTrue on a bumper, but any Trigger supports every binding - which button it is never limits what you can bind.">whileTrue only works on bumpers</button>
         </div>
         <div class="explain">onTrue schedules the command once when the condition becomes true. whileTrue runs the command for as long as the condition stays true, interrupting it the moment you let go.</div>
       </div>
@@ -281,8 +281,8 @@ self.driver.<span class="fn">x</span>().<input class="blank" data-ans="whiletrue
         <div class="qn">Question 2</div>
         <div class="qt">Besides buttons, what can a Trigger react to?</div>
         <div class="opts">
-          <button class="opt">Only the A button</button>
-          <button class="opt">Nothing else</button>
+          <button class="opt" data-why="A is just the first button you met - every button, bumper, and stick direction makes a Trigger, and so do things that are not buttons at all.">Only the A button</button>
+          <button class="opt" data-why="It looks button-shaped, but a Trigger is really any boolean condition - a sensor announcing a game piece works exactly the same way.">Nothing else</button>
           <button class="opt">Any boolean - like a sensor reading "game piece detected"</button>
         </div>
         <div class="explain">A Trigger wraps any boolean condition. Trigger(intake.has_game_piece) lets the robot react to a sensor automatically - the same binding machinery, no button required.</div>
@@ -292,10 +292,20 @@ self.driver.<span class="fn">x</span>().<input class="blank" data-ans="whiletrue
         <div class="qt">Where do you set up button bindings?</div>
         <div class="opts">
           <button class="opt">In RobotContainer, once at startup</button>
-          <button class="opt">In each subsystem's periodic()</button>
-          <button class="opt">In main.py</button>
+          <button class="opt" data-why="periodic() feels like the busy place, but it is for the subsystem's own housekeeping every loop. Bindings are one-time wiring, and wiring lives in RobotContainer.">In each subsystem's periodic()</button>
+          <button class="opt" data-why="main.py does start the program, but it is boilerplate you never touch. The button-to-command wiring belongs in RobotContainer's configure_bindings().">In main.py</button>
         </div>
         <div class="explain">Bindings are wiring, so they live in RobotContainer's configure_bindings(), called once when the robot starts. After that the scheduler watches the triggers for you.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">From the sim</div>
+        <div class="qt">On the gamepad you tap A once, then hold X and hold LB at the same time. What does the Running now (whileTrue) list show?</div>
+        <div class="opts">
+          <button class="opt" data-why="It feels like every press should stick, but A is an onTrue binding: it schedules Intake once and moves on. Only held whileTrue bindings live in that list.">All three - Intake a note, Aim at target, and Slow mode</button>
+          <button class="opt" data-why="First-pressed does not win anything here - A's onTrue command fired once and finished. The list only tracks commands whose buttons are still held.">Only Intake a note, since A was pressed first</button>
+          <button class="opt">Aim at target and Slow mode - the two whileTrue commands you are still holding</button>
+        </div>
+        <div class="explain">The Running now list tracks whileTrue commands, which live exactly as long as their buttons stay held. X keeps Aim at target alive and LB keeps Slow mode alive. A's tap fired its onTrue command once - one log line, nothing held - so it never joins the list.</div>
       </div>
     </div>
   </section>
@@ -415,7 +425,7 @@ self.driver.<span class="fn">x</span>().<input class="blank" data-ans="whiletrue
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

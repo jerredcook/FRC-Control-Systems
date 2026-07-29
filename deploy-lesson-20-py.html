@@ -267,8 +267,8 @@ self.elevator.<input class="blank" data-ans="setposition" data-reveal="setPositi
         <div class="qn">Question 1</div>
         <div class="qt">What does a digital input like a limit switch give your code?</div>
         <div class="opts">
-          <button class="opt">A distance in inches</button>
-          <button class="opt">A voltage from 0 to 12</button>
+          <button class="opt" data-why="Distance is a rich, many-valued reading, and that is an encoder's report. A digital input carries exactly one bit: pressed or not.">A distance in inches</button>
+          <button class="opt" data-why="There is a real voltage on the wire, so this tempts - but the DIO port boils it down to a single True or False before your code ever sees it.">A voltage from 0 to 12</button>
           <button class="opt">A boolean - True or False, like pressed or not</button>
         </div>
         <div class="explain">Digital inputs are one bit: on or off. A limit switch is pressed or not; a beam break is blocked or clear. That single boolean is all you read with get().</div>
@@ -278,8 +278,8 @@ self.elevator.<input class="blank" data-ans="setposition" data-reveal="setPositi
         <div class="qt">Why do teams "home" a mechanism against a limit switch?</div>
         <div class="opts">
           <button class="opt">To get a known, absolute zero - a relative encoder forgets where it is on every boot</button>
-          <button class="opt">To charge the battery</button>
-          <button class="opt">To make the motor spin faster</button>
+          <button class="opt" data-why="Nothing on the robot recharges its own battery - that happens off-robot between matches. Homing is about position: giving the encoder a trustworthy zero.">To charge the battery</button>
+          <button class="opt" data-why="Homing actually runs the motor slow and gentle on purpose. The prize is not speed - it is a known zero the encoder can count from.">To make the motor spin faster</button>
         </div>
         <div class="explain">A relative encoder only counts change, so it can't know its true position at power-on. Driving to a physical switch gives an absolute reference, so "20 inches" is the same height every time.</div>
       </div>
@@ -287,11 +287,21 @@ self.elevator.<input class="blank" data-ans="setposition" data-reveal="setPositi
         <div class="qn">Question 3</div>
         <div class="qt">A switch reads True when it's NOT pressed. How do you make your code's "at_bottom" True mean pressed?</div>
         <div class="opts">
-          <button class="opt">Buy a new switch</button>
+          <button class="opt" data-why="Tempting to blame the part, but nothing is wrong with it - normally-open wiring just reads backward from what you expect. One not in code fixes it for free.">Buy a new switch</button>
           <button class="opt">Invert it: return not self.bottom_limit.get()</button>
-          <button class="opt">You can't, it's broken</button>
+          <button class="opt" data-why="It really does look broken the first time you see it, but the switch is fine - it is just wired the other way. Flip the reading in code and True means pressed again.">You can't, it's broken</button>
         </div>
         <div class="explain">Normally-open vs normally-closed wiring flips the sense of get(). A simple not makes your boolean read the way you think, so True always means "active." Test it on the real robot and invert as needed.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">You press Pass a game piece and watch it roll all the way through the throat. A second after it exits, what does the Beam break readout show?</div>
+        <div class="opts">
+          <button class="opt" data-why="It feels like the robot should remember, but a beam break has no memory - it reports only this instant. If your code needs to know a piece came through, your code has to latch it.">BROKEN (True) - the sensor remembers a piece came through</button>
+          <button class="opt">CLEAR (False) - the beam only reads True while a piece is actually blocking it</button>
+          <button class="opt" data-why="They are both digital inputs, which makes them cousins, but each lives on its own DIO port with its own get(). The switch knows nothing about the beam.">Whatever the limit switch shows, since the two sensors share one reading</button>
+        </div>
+        <div class="explain">A beam break is a live yes-or-no: blocked right now, or not. In the sim the readout flips to BROKEN only while the piece crosses the middle, then drops straight back to CLEAR as it exits. That is why real intake code reacts the instant it sees True, or latches the detection in a variable, instead of expecting the sensor to remember.</div>
       </div>
     </div>
   </section>
@@ -407,7 +417,7 @@ self.elevator.<input class="blank" data-ans="setposition" data-reveal="setPositi
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

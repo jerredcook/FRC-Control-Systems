@@ -297,9 +297,9 @@ motor.<input class="blank" data-ans="set_position|set_position()" data-reveal="s
         <div class="qn">Question 1</div>
         <div class="qt">The raw encoder reads 40 motor rotations through a 10:1 gearbox. How many times did the mechanism turn?</div>
         <div class="opts">
-          <button class="opt">400</button>
+          <button class="opt" data-why="You multiplied when the gearbox divides - 400 would mean the mechanism spun faster than the motor, and a reduction does the opposite. Motor to mechanism means divide by 10.">400</button>
           <button class="opt">4 - you divide motor rotations by the gear ratio</button>
-          <button class="opt">40</button>
+          <button class="opt" data-why="Passing the number straight through skips the gearbox entirely. Ten motor turns make just one mechanism turn, so 40 motor rotations is only 4.">40</button>
         </div>
         <div class="explain">The gearbox reduces 10 motor turns into 1 mechanism turn, so 40 / 10 = 4 mechanism rotations. Mechanism rotations = motor rotations ÷ gear ratio.</div>
       </div>
@@ -308,8 +308,8 @@ motor.<input class="blank" data-ans="set_position|set_position()" data-reveal="s
         <div class="qt">What does sensor_to_mechanism_ratio do for you?</div>
         <div class="opts">
           <button class="opt">Applies the gear reduction so get_position() returns mechanism units directly</button>
-          <button class="opt">Makes the motor spin slower</button>
-          <button class="opt">Changes the motor's max voltage</button>
+          <button class="opt" data-why="The physical gearbox is what slows the output - this config changes no motion at all. It just teaches the software the ratio so readings arrive in mechanism units.">Makes the motor spin slower</button>
+          <button class="opt" data-why="Voltage settings live in a different part of the config. This one is about measurement, not power - it converts the sensor's turns into mechanism turns.">Changes the motor's max voltage</button>
         </div>
         <div class="explain">It tells Phoenix 6 the gear ratio once, so position and velocity come back already converted to mechanism rotations. No more dividing by hand everywhere you read the sensor.</div>
       </div>
@@ -317,11 +317,21 @@ motor.<input class="blank" data-ans="set_position|set_position()" data-reveal="s
         <div class="qn">Question 3</div>
         <div class="qt">To turn mechanism rotations into linear inches on an elevator, you multiply by…</div>
         <div class="opts">
-          <button class="opt">the gear ratio again</button>
-          <button class="opt">the battery voltage</button>
+          <button class="opt" data-why="You already spent the gear ratio getting to mechanism rotations - using it again double-counts the gearbox. The last step is pure geometry: the drum's circumference.">the gear ratio again</button>
+          <button class="opt" data-why="Battery voltage decides how hard the motor pushes, not how far a rotation reaches. Position is geometry: each drum turn pulls in one circumference of cable.">the battery voltage</button>
           <button class="opt">the drum circumference (π × diameter)</button>
         </div>
         <div class="explain">Each rotation of the drum pulls in one circumference of cable, so inches = mechanism rotations × (π × drum diameter). Geometry is the last step from rotations to real-world distance.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">From the sim</div>
+        <div class="qt">On the elevator you set 20 motor rotations, a 10:1 gear ratio, and the 1.8 in drum. What height does the readout show?</div>
+        <div class="opts">
+          <button class="opt" data-why="That skips the gearbox - 20 rotations times the circumference would be right only if the drum spun with the motor. Divide by 10 first: the drum only turned twice.">About 113 in</button>
+          <button class="opt" data-why="You divided by the ratio, nice - but then used the bare diameter. Each drum turn pulls in a full circumference, so multiply by π × 1.8, not just 1.8.">About 3.6 in</button>
+          <button class="opt">About 11.3 in - 2 drum turns times the circumference, π × 1.8</button>
+        </div>
+        <div class="explain">Walk the chain: 20 motor rotations ÷ 10 = 2 drum rotations, and each pulls in π × 1.8 ≈ 5.65 in of cable, so 2 × 5.65 ≈ 11.3 in. Set the sliders and the Height readout lands right on it.</div>
       </div>
     </div>
   </section>
@@ -463,7 +473,7 @@ motor.<input class="blank" data-ans="set_position|set_position()" data-reveal="s
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

@@ -254,9 +254,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">When does SystemCore arrive for FRC?</div>
         <div class="opts">
-          <button class="opt">It is already required for the 2025 season</button>
+          <button class="opt" data-why="It feels current because teams really were running SystemCore in 2025, but that was the alpha and beta window. Required use starts with the 2027 season.">It is already required for the 2025 season</button>
           <button class="opt">January 2027, the start of the 2027 season</button>
-          <button class="opt">Not until 2030</button>
+          <button class="opt" data-why="Big changes often slip, so a far-off date sounds like the safe bet, but this one has a schedule - SystemCore launches for FRC in January 2027.">Not until 2030</button>
         </div>
         <div class="explain">SystemCore launches for FRC in January 2027. The 2025 and 2026 seasons were the alpha and beta testing window, and FTC follows later in September 2027.</div>
       </div>
@@ -264,8 +264,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">What does SystemCore replace?</div>
         <div class="opts">
-          <button class="opt">Only the roboRIO</button>
-          <button class="opt">Only the wireless radio</button>
+          <button class="opt" data-why="That is half the story - it does replace the roboRIO, but the separate wireless radio box retires too, folded into the same board.">Only the roboRIO</button>
+          <button class="opt" data-why="The radio does move inside, but that is only half of it - SystemCore also takes over the roboRIO's job as the robot's brain.">Only the wireless radio</button>
           <button class="opt">Both the roboRIO and the wireless radio</button>
         </div>
         <div class="explain">SystemCore folds two parts into one. It replaces the roboRIO and the separate wireless radio, so one board now does the job both used to do.</div>
@@ -275,8 +275,8 @@
         <div class="qt">In 2027, can a team run a roboRIO alongside SystemCore?</div>
         <div class="opts">
           <button class="opt">No, you do not wire both on the same robot</button>
-          <button class="opt">Yes, both run together on one robot</button>
-          <button class="opt">Only at championship events</button>
+          <button class="opt" data-why="Running old and new side by side sounds like a gentle handoff, but this is a clean swap - one robot uses one brain, not two.">Yes, both run together on one robot</button>
+          <button class="opt" data-why="Championship events do sometimes get special rules, but not here - the one-brain rule is the same at every 2027 event.">Only at championship events</button>
         </div>
         <div class="explain">On one robot you use one or the other. SystemCore is the 2027 standard and every team gets one in the kit. How long the roboRIO stays legal overall during the changeover is still being finalized, so check the official rules.</div>
       </div>
@@ -318,7 +318,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

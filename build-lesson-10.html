@@ -202,9 +202,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">A 12-tooth gear drives a 48-tooth gear. What's the ratio?</div>
         <div class="opts">
-          <button class="opt">1:4 (overdrive)</button>
+          <button class="opt" data-why="You got the 4 right, just flipped - an overdrive needs a big driver spinning a small driven; here the big gear is driven, so the output slows into a 4:1 reduction.">1:4 (overdrive)</button>
           <button class="opt">4:1 reduction - driven ÷ driver = 48 / 12</button>
-          <button class="opt">12:48</button>
+          <button class="opt" data-why="12:48 is the raw tooth count, so you are one step from done - divide it out, 48 over 12, and it simplifies to the 4:1 that builders actually say.">12:48</button>
         </div>
         <div class="explain">Ratio is driven teeth over driver teeth: 48 / 12 = 4, a 4:1 reduction. The output spins a quarter the speed with four times the torque.</div>
       </div>
@@ -212,8 +212,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">A 3:1 reduction does what to speed and torque?</div>
         <div class="opts">
-          <button class="opt">Triples the speed, thirds the torque</button>
-          <button class="opt">Triples both</button>
+          <button class="opt" data-why="You have the trade right, just backwards - a reduction slows the output down; it is an overdrive that speeds things up and pays for it in torque.">Triples the speed, thirds the torque</button>
+          <button class="opt" data-why="That would be free power, and gears never hand that out - the trade is strict, so whatever factor you gain in torque you give up in speed.">Triples both</button>
           <button class="opt">Thirds the speed, triples the torque</button>
         </div>
         <div class="explain">Reduction trades speed for torque, one for one. A 3:1 output spins at 1/3 the input speed and delivers 3× the torque. You never get both; you choose.</div>
@@ -223,10 +223,20 @@
         <div class="qt">Why do most FRC mechanisms gear the motor down, not up?</div>
         <div class="opts">
           <button class="opt">Motors spin too fast and too weak; reduction makes usable force</button>
-          <button class="opt">Gearing up is illegal</button>
-          <button class="opt">To save battery</button>
+          <button class="opt" data-why="The rules stay out of it - gearing up is perfectly legal, and shooter wheels do it; most mechanisms reduce simply because motors spin too fast and too weak.">Gearing up is illegal</button>
+          <button class="opt" data-why="A well-geared mechanism can strain the motor less, so this half tempts - but the real reason is mechanical: turning 6000 weak rpm into slow, usable force.">To save battery</button>
         </div>
         <div class="explain">A motor free-spins around 6000 rpm with little torque. Reduction slows it to a useful speed and multiplies the force, which is what a drivetrain or arm actually needs.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">From the sim</div>
+        <div class="qt">In the sim, you set the driver to 10 teeth and the driven to 40. The input readout stays at 6000 rpm. Roughly what does the output show?</div>
+        <div class="opts">
+          <button class="opt">About 1500 rpm, with a ×4.0 torque multiplier</button>
+          <button class="opt" data-why="That is the math for the opposite setup, a 40T driver spinning a 10T driven - here the big gear is the driven one, so the output slows down instead of screaming.">About 24000 rpm at a quarter of the torque</button>
+          <button class="opt" data-why="If only - speed and torque are one trade, never separate. A 4:1 reduction divides the speed by 4 in the same moment it multiplies the torque by 4.">Still 6000 rpm - the ratio changes torque but never speed</button>
+        </div>
+        <div class="explain">40 driven over 10 driver is a 4:1 reduction, so the output spins 6000 / 4 = 1500 rpm and carries about 4 times the torque. That is the exact shooter-wheel target from the missions - and this time you hit it with gear math instead of slider luck.</div>
       </div>
     </div>
   </section>
@@ -352,7 +362,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

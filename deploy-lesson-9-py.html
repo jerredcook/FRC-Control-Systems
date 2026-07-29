@@ -269,8 +269,8 @@ arm = <input class="blank" data-ans="arm" data-reveal="Arm" aria-label="blank" a
         <div class="qn">Question 1</div>
         <div class="qt">When Elevator is written as <code style="font-family:var(--mono);color:var(--teal)">class Elevator(Subsystem)</code>, what does it get?</div>
         <div class="opts">
-          <button class="opt">Nothing - it just renames the class</button>
-          <button class="opt">A copy it has to maintain by hand</button>
+          <button class="opt" data-why="It can look like ceremony, but naming the parent is a live link - Elevator really receives every Subsystem member, which is why the scheduler calls your periodic() without you wiring anything.">Nothing - it just renames the class</button>
+          <button class="opt" data-why="It feels like a big copy-paste, but nothing is duplicated - the child stays linked to the one parent, so there is no second version for you to keep in sync.">A copy it has to maintain by hand</button>
           <button class="opt">All of Subsystem's members for free, which it can use or override</button>
         </div>
         <div class="explain">Inheritance gives the child everything the parent has. Elevator automatically registers with the scheduler and gets called each loop - you only write the parts that are unique to your elevator.</div>
@@ -280,8 +280,8 @@ arm = <input class="blank" data-ans="arm" data-reveal="Arm" aria-label="blank" a
         <div class="qt">How do you override an inherited method in Python?</div>
         <div class="opts">
           <button class="opt">Define a method with the same name in the child class</button>
-          <button class="opt">Mark it with a special keyword the runtime requires</button>
-          <button class="opt">You can't - inherited methods are frozen</button>
+          <button class="opt" data-why="That is Java thinking - Python requires no keyword at all. Matching the parent's method name is the whole trick; the optional @override decorator only helps a type checker double-check you.">Mark it with a special keyword the runtime requires</button>
+          <button class="opt" data-why="Frozen sounds plausible, but Python is famously flexible here - define a method with the parent's name and your version wins for your class, no permission needed.">You can't - inherited methods are frozen</button>
         </div>
         <div class="explain">Defining a method with the same name as a parent's replaces it for your class. There's no required keyword - though a @override decorator lets a type checker confirm the name really matches a parent method, catching a misspelling.</div>
       </div>
@@ -289,9 +289,9 @@ arm = <input class="blank" data-ans="arm" data-reveal="Arm" aria-label="blank" a
         <div class="qn">Question 3</div>
         <div class="qt">How is an interface different from a parent class?</div>
         <div class="opts">
-          <button class="opt">There's no difference</button>
+          <button class="opt" data-why="They rhyme, which is the trap - inheriting from a class gets real working code, while an interface only makes you promise to write the listed methods yourself.">There's no difference</button>
           <button class="opt">An interface is a contract of methods a class promises to provide, not code it inherits</button>
-          <button class="opt">An interface can only have one method</button>
+          <button class="opt" data-why="Some famous interfaces are tiny, which plants the idea - but a contract can list as many methods as it likes. Command asks for several. Size is not the difference; the contract is.">An interface can only have one method</button>
         </div>
         <div class="explain">Inheriting from a class gets its actual code. An interface (an abstract base class, or just duck typing) only requires that you supply the methods it lists - the contract. WPILib uses both; you mostly consume contracts like Command and Sendable.</div>
       </div>
@@ -358,7 +358,7 @@ arm = <input class="blank" data-ans="arm" data-reveal="Arm" aria-label="blank" a
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

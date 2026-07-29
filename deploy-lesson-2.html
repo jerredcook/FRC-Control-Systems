@@ -271,9 +271,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">How do you start a new robot project?</div>
         <div class="opts">
-          <button class="opt">Create an empty folder and write every file by hand</button>
+          <button class="opt" data-why="Respect for the ambition, but nobody hand-builds the scaffolding - the generator makes a complete, buildable project in seconds so you can spend your effort on robot code instead.">Create an empty folder and write every file by hand</button>
           <button class="opt">Use 'WPILib: Create a new project' in the WPILib VS Code</button>
-          <button class="opt">Download someone else's robot and delete their code</button>
+          <button class="opt" data-why="Teams really do study each other's code, but starting from someone else's project drags in their team number, settings, and habits - the generator hands you a clean, current starting point.">Download someone else's robot and delete their code</button>
         </div>
         <div class="explain">The WPILib VS Code generates a complete, buildable project from a template - pick Command Robot, Java, and your team number. You never start from a blank file.</div>
       </div>
@@ -282,8 +282,8 @@
         <div class="qt">Which files will you actually edit most of the time?</div>
         <div class="opts">
           <button class="opt">RobotContainer.java and the files in subsystems/ and commands/</button>
-          <button class="opt">Main.java and gradlew</button>
-          <button class="opt">build.gradle, every loop</button>
+          <button class="opt" data-why="Those names sound important, and they are - so important they never change. Main.java just launches Robot and gradlew just launches the build; your daily work lives in subsystems, commands, and RobotContainer.">Main.java and gradlew</button>
+          <button class="opt" data-why="You will open build.gradle a few times a season to add a library, but that is it - it is the build recipe, not the robot's behavior. The everyday files are RobotContainer, subsystems/, and commands/.">build.gradle, every loop</button>
         </div>
         <div class="explain">Your robot's behavior lives in subsystems, commands, and the wiring in RobotContainer. Main.java, gradlew, and build.gradle are scaffolding you rarely touch.</div>
       </div>
@@ -291,11 +291,21 @@
         <div class="qn">Question 3</div>
         <div class="qt">Why choose the Command Robot template over Timed Robot?</div>
         <div class="opts">
-          <button class="opt">It runs faster on the roboRIO</button>
-          <button class="opt">It's required by the rules</button>
+          <button class="opt" data-why="A fair hope, but both templates run on the same 20 ms heartbeat - command-based buys you organization, not speed.">It runs faster on the roboRIO</button>
+          <button class="opt" data-why="The rules do not care which template you pick - Timed Robot is perfectly legal. Command Robot wins because it keeps a growing robot organized, which is why nearly every team chooses it.">It's required by the rules</button>
           <button class="opt">It adds the command-based structure that keeps a growing robot organized</button>
         </div>
         <div class="explain">Command-based gives you subsystems and commands - a clean way to scale from one mechanism to a whole robot without your code turning into spaghetti. It's what this course (and most teams) use.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">In the cockpit's team-number step you type 9999 instead of 1234, and it counts as a wrong pick. What would the same mistake cost you on a real laptop?</div>
+        <div class="opts">
+          <button class="opt" data-why="It does look like a label, but it is really an address ingredient - deploy builds the roboRIO's network address from the team number, so a wrong one points at the wrong robot.">Nothing, the team number is just a label on the project</button>
+          <button class="opt">Deploy would search the network for team 9999's robot and never find yours</button>
+          <button class="opt" data-why="Compiling never looks at the team number, so the build sails through fine - the trouble waits until deploy goes hunting on the network for a robot that is not there.">The build would fail to compile because 9999 is not your number</button>
+        </div>
+        <div class="explain">The team number is how deploy finds your robot: it becomes part of the roboRIO's network address, the way a house number gets mail to the right door. Type the wrong number and the build still succeeds - deploy just searches the network for a robot that is not yours and gives up. That is why the cockpit checks it, and why real teams set it once when they create the project and leave it alone.</div>
       </div>
     </div>
   </section>
@@ -385,7 +395,7 @@
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
     opts.forEach(function(opt,i){
-      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
+      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } });
     });
   });
 })();

@@ -270,9 +270,9 @@ can = shooter.<input class="blank" data-ans="can_id" data-reveal="can_id" aria-l
         <div class="qn">Question 1</div>
         <div class="qt">What's the difference between a class and an object?</div>
         <div class="opts">
-          <button class="opt">They're the same thing</button>
+          <button class="opt" data-why="They travel together, so the blur is natural - but one Motor class stamps out many Motor objects. The blueprint is written once; the things are built as many times as you like.">They're the same thing</button>
           <button class="opt">A class is the blueprint; an object is a specific thing built from it</button>
-          <button class="opt">A class is faster than an object</button>
+          <button class="opt" data-why="Speed is not the split here - neither one is faster. The class is the written blueprint; the object is a real instance built from it, carrying its own data.">A class is faster than an object</button>
         </div>
         <div class="explain">The class describes the kind of thing (its attributes and methods). Each object is one real instance with its own data - like two Motors built from the same Motor class.</div>
       </div>
@@ -281,8 +281,8 @@ can = shooter.<input class="blank" data-ans="can_id" data-reveal="can_id" aria-l
         <div class="qt">What does a constructor (<code style="font-family:var(--mono);color:var(--teal)">__init__</code>) do?</div>
         <div class="opts">
           <button class="opt">Builds a new object and sets up its starting attributes</button>
-          <button class="opt">Deletes an object</button>
-          <button class="opt">Deploys the code</button>
+          <button class="opt" data-why="That is the opposite end of an object's life - __init__ is the birth recipe Python runs when you call the class. Python quietly cleans up unused objects for you later.">Deletes an object</button>
+          <button class="opt" data-why="Deploy sounds official, but that is the toolchain's job from Part 1 - a constructor runs inside your program, setting up one new object's starting attributes.">Deploys the code</button>
         </div>
         <div class="explain">The constructor is the recipe Python runs when you call the class - it runs once per object to initialize that object's attributes (e.g., its name and CAN id).</div>
       </div>
@@ -290,11 +290,21 @@ can = shooter.<input class="blank" data-ans="can_id" data-reveal="can_id" aria-l
         <div class="qn">Question 3</div>
         <div class="qt">If you make two Motor objects and change one's <code style="font-family:var(--mono);color:var(--teal)">can_id</code>, what happens to the other?</div>
         <div class="opts">
-          <button class="opt">It changes too</button>
-          <button class="opt">The program crashes</button>
+          <button class="opt" data-why="It would change only if both names pointed at one object - but you called Motor twice, so there are two separate Motors, each holding its own can_id, just like the sim's two cards.">It changes too</button>
+          <button class="opt" data-why="Nothing that dramatic - changing an attribute is an everyday move. The edit lands on the one object you touched, and the other Motor never even notices.">The program crashes</button>
           <button class="opt">Nothing - each object has its own separate attributes</button>
         </div>
         <div class="explain">Objects have independent state. left.can_id and right.can_id are different boxes; changing one leaves the other untouched. That independence is why objects model separate pieces of hardware so well.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">From the sim</div>
+        <div class="qt">In the spawner you build left = Motor("Left", 1) and right = Motor("Right", 2), then click left's card and change its can_id to 9. What does right.can_id read now?</div>
+        <div class="opts">
+          <button class="opt">2 - editing one object never touches the other</button>
+          <button class="opt" data-why="Shared blueprint, separate boxes - the class is only the recipe. Each call to Motor built its own object with its own can_id attribute, so the edit stays on left.">9 - they share the one blueprint, so they share the change</button>
+          <button class="opt" data-why="CAN ids are not seats that reshuffle - nothing slides anywhere. Each object simply keeps whatever value its own attribute holds, so right stays on the 2 it was built with.">1 - right slides down to take the freed-up number</button>
+        </div>
+        <div class="explain">This is the independence mission from the spawner: two objects from one class hold completely separate data. Editing left.can_id rewrites one object's box; right.can_id still holds the 2 it was built with. That per-object data is what lets one Motor class drive every motor on the robot.</div>
       </div>
     </div>
   </section>
@@ -431,7 +441,7 @@ can = shooter.<input class="blank" data-ans="can_id" data-reveal="can_id" aria-l
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

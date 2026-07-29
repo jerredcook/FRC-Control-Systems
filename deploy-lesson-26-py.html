@@ -262,9 +262,9 @@ auto = <input class="blank" data-ans="pathplannerauto" data-fill="PathPlannerAut
         <div class="qn">Question 1</div>
         <div class="qt">What is a trajectory (path)?</div>
         <div class="opts">
-          <button class="opt">A single target point</button>
+          <button class="opt" data-why="A target point is where you want to end up, so it is a fair guess. But a trajectory is the whole journey: a smooth curve through many waypoints, with a speed for every moment along it.">A single target point</button>
           <button class="opt">A smooth, pre-planned route through waypoints, with speeds, that the robot follows</button>
-          <button class="opt">A list of button bindings</button>
+          <button class="opt" data-why="Bindings also get set up ahead of time in your container class, which is the tempting overlap. But bindings map buttons to commands; a trajectory is the route the drivetrain drives.">A list of button bindings</button>
         </div>
         <div class="explain">A trajectory is a continuous curve fit through waypoints, carrying a position and velocity for every moment in time. The robot follows it during autonomous instead of being driven by hand.</div>
       </div>
@@ -272,8 +272,8 @@ auto = <input class="blank" data-ans="pathplannerauto" data-fill="PathPlannerAut
         <div class="qn">Question 2</div>
         <div class="qt">How does the path follower stay on the planned line?</div>
         <div class="opts">
-          <button class="opt">It guesses</button>
-          <button class="opt">It drives full speed and hopes</button>
+          <button class="opt" data-why="From the stands it can look like guessing, but the follower is doing feedback math every loop: compare the pose to the path, compute a correction, repeat, fifty times a second.">It guesses</button>
+          <button class="opt" data-why="That is dead reckoning, and some old autos really did run that way - and drifted off course. A follower checks odometry every loop and steers back toward the line instead of hoping.">It drives full speed and hopes</button>
           <button class="opt">It compares odometry pose to the path target and corrects with feedback (PID)</button>
         </div>
         <div class="explain">Every loop the follower computes the error between where it should be and where odometry says it is, then applies the same PID and feedforward from the Control course to drive that error to zero.</div>
@@ -283,10 +283,20 @@ auto = <input class="blank" data-ans="pathplannerauto" data-fill="PathPlannerAut
         <div class="qt">What are PathPlanner and Choreo?</div>
         <div class="opts">
           <button class="opt">Tools to design paths in a GUI that your robot code then follows</button>
-          <button class="opt">Motor controllers</button>
-          <button class="opt">Dashboards for telemetry</button>
+          <button class="opt" data-why="The names do have a hardware ring to them, but both are desktop apps. Your motor controllers are the Talons and Sparks on the robot; these tools just draw the routes those motors will follow.">Motor controllers</button>
+          <button class="opt" data-why="They do show a graphical field view, which is the mix-up. A dashboard watches a live robot during a match; PathPlanner and Choreo work before the match, designing the paths it will drive.">Dashboards for telemetry</button>
         </div>
         <div class="explain">They're path-design tools: you place waypoints visually, they generate a smooth, feasible trajectory, and you load it by name. Choreo optimizes for the fastest path; PathPlanner is waypoint-based with events.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">From the sim</div>
+        <div class="qt">Two of your routes run START to GOAL and both read CLEAR: one is 13.8 m, the other 11.9 m. If the robot averages about 3 m/s in auto, roughly how much time does the tighter route save?</div>
+        <div class="opts">
+          <button class="opt" data-why="Clean only means it misses the crate - the follower still drives every meter of curve. Extra meters are extra seconds, which is exactly why the missions push you under 14 m and then under 12 m.">None - once a path is CLEAR, every clean route takes about the same time</button>
+          <button class="opt" data-why="So close - the numbers are right but the operation is flipped. Meters divided by meters-per-second gives seconds: 1.9 over 3 is about 0.6, not 1.9 times 3.">About 6 seconds, since saving 1.9 m at 3 m/s means multiplying the two</button>
+          <button class="opt">About 0.6 seconds - the route is 1.9 m shorter, and 1.9 m divided by 3 m/s is about 0.6</button>
+        </div>
+        <div class="explain">Time is distance divided by speed: the tighter route is 13.8 - 11.9 = 1.9 m shorter, and 1.9 / 3 is about 0.6 seconds. That sounds tiny until you remember autonomous lasts only 15 seconds - tighten two or three paths and you have bought a whole extra second, sometimes the difference between scoring and almost scoring. That is why the gold mission hugs the crate like a cyclist clipping the tightest safe line around a corner.</div>
       </div>
     </div>
   </section>
@@ -497,7 +507,7 @@ auto = <input class="blank" data-ans="pathplannerauto" data-fill="PathPlannerAut
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

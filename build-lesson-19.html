@@ -199,9 +199,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">At what angle does gravity fight an arm the hardest?</div>
         <div class="opts">
-          <button class="opt">Straight up</button>
+          <button class="opt" data-why="It feels like the top of the climb should be the hardest, but up there the load sits directly over the pivot - the moment arm is zero, so gravity has no twist at all. The fight peaks when the arm sticks straight out.">Straight up</button>
           <button class="opt">Horizontal (sticking straight out)</button>
-          <button class="opt">Straight down</button>
+          <button class="opt" data-why="Hanging straight down feels heavy, but the load is again in line with the pivot, so gravity pulls along the arm instead of twisting it. Horizontal is where the twist is fiercest.">Straight down</button>
         </div>
         <div class="explain">Horizontal is the worst case: the load's full weight acts at the longest horizontal distance from the pivot, so the holding torque peaks. Vertical puts the load over the pivot, requiring none.</div>
       </div>
@@ -209,8 +209,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">How does the holding torque change as the arm rotates from horizontal to vertical?</div>
         <div class="opts">
-          <button class="opt">It stays the same</button>
-          <button class="opt">It increases</button>
+          <button class="opt" data-why="Reasonable thought, since the weight itself never changes - but the twist depends on the horizontal reach, and that reach shrinks as the arm rises. Same weight, shrinking moment arm.">It stays the same</button>
+          <button class="opt" data-why="Lifting higher feels like it should cost more, but the moment arm is shrinking the whole way up - gravity's twist actually fades toward zero as the load moves over the pivot.">It increases</button>
           <button class="opt">It falls off as the cosine of the angle, reaching zero at vertical</button>
         </div>
         <div class="explain">Torque is proportional to cos(angle from horizontal). It's at maximum when level and drops to zero when the arm is vertical and the load sits right over the pivot.</div>
@@ -220,10 +220,20 @@
         <div class="qt">How does robot code automatically hold an arm against gravity?</div>
         <div class="opts">
           <button class="opt">ArmFeedforward adds a kG·cos(angle) term to predict and cancel the gravity torque</button>
-          <button class="opt">It guesses</button>
-          <button class="opt">It can't; only counterweights work</button>
+          <button class="opt" data-why="Fair suspicion, but the code does not need to guess - the arm's angle tells it exactly how hard gravity twists, so kG times cos(angle) is a calculation, not a shot in the dark.">It guesses</button>
+          <button class="opt" data-why="Counterweights do help, but they are not the only tool - ArmFeedforward cancels gravity in software with kG times cos(angle), and plenty of arms hold steady with no counterweight at all.">It can't; only counterweights work</button>
         </div>
         <div class="explain">The Control course's ArmFeedforward computes the gravity torque from the angle (kG times the cosine) and feeds in exactly that much motor effort, so the arm holds steady at any angle.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">You slide the arm to 60° above horizontal and hold it there. Roughly what does the holding torque read?</div>
+        <div class="opts">
+          <button class="opt" data-why="Nice linear thinking, but the cosine curve is not a straight ramp - it falls slowly at first and fast near vertical. cos(60°) is exactly one half, so the bar reads about 50%.">About 33%, since 60° leaves a third of the swing to go</button>
+          <button class="opt">About 50% - cos(60°) is exactly one half</button>
+          <button class="opt" data-why="That 87% belongs to 30°, where the arm is still mostly level. By 60° the load has moved much closer over the pivot, and cos(60°) cuts the twist to half.">About 87%, the same as it read at 30°</button>
+        </div>
+        <div class="explain">The sim computes the torque as cos(angle from horizontal), and cos(60°) = 0.5, so the bar parks right around 50%. Notice it is not linear: you gave up two thirds of the swing to shed only half the torque. That is exactly why the missions had you hunt for the 50% spot - it hides past 45°, not at it.</div>
       </div>
     </div>
   </section>
@@ -344,7 +354,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

@@ -322,9 +322,9 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(cf
         <div class="qn">Question 1</div>
         <div class="qt">Where do the gains (kP, kG, kV…) live for an on-motor loop?</div>
         <div class="opts">
-          <button class="opt">In a PIDController object on the roboRIO</button>
+          <button class="opt" data-why="That was true in Part II, which is why it tempts - but moving off the rio is the whole point of Part III. The gains now live on the device, in Slot0, so the Kraken can run the loop itself.">In a PIDController object on the roboRIO</button>
           <button class="opt">In Slot0 of the TalonFXConfiguration, applied to the device</button>
-          <button class="opt">They're hard-coded into the motor at the factory</button>
+          <button class="opt" data-why="The factory has no idea how heavy your elevator is. Gains describe your mechanism, so you measure them yourself and write them into Slot0 with the rest of the config.">They're hard-coded into the motor at the factory</button>
         </div>
         <div class="explain">You store all eight gains in Slot0 and apply() them to the device. From then on, the TalonFX uses them to run feedforward + PID on board against whatever target you send.</div>
       </div>
@@ -333,8 +333,8 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(cf
         <div class="qt">To make the motor go to a position, your code…</div>
         <div class="opts">
           <button class="opt">Sends a control request, e.g. setControl(request.withPosition(target))</button>
-          <button class="opt">Computes the voltage and calls setVoltage() every loop</button>
-          <button class="opt">Writes the position to a file</button>
+          <button class="opt" data-why="That is the Part II way, and it still works - but it wastes the fast onboard loop. Here you hand over the target once and the device does the 1 kHz math for you.">Computes the voltage and calls setVoltage() every loop</button>
+          <button class="opt" data-why="Files are for logs you read after the match. A moving robot needs the target on the wire right now - and that is exactly what a control request delivers.">Writes the position to a file</button>
         </div>
         <div class="explain">You command a target with a control request like PositionVoltage. The device runs the loop itself - you never compute the voltage. That's the whole point of on-motor control.</div>
       </div>
@@ -342,11 +342,21 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(cf
         <div class="qn">Question 3</div>
         <div class="qt">What does setting GravityType to Elevator_Static vs Arm_Cosine change?</div>
         <div class="opts">
-          <button class="opt">The motor's maximum speed</button>
-          <button class="opt">Which CAN bus it uses</button>
+          <button class="opt" data-why="Speed limits live elsewhere - Motion Magic's cruise velocity handles that, next lesson. GravityType only shapes how the kG holding voltage gets applied.">The motor's maximum speed</button>
+          <button class="opt" data-why="The bus is chosen when you construct the TalonFX, not by a gravity setting. This one decides whether kG stays constant or follows cos(angle) as an arm swings.">Which CAN bus it uses</button>
           <button class="opt">How kG is applied - a constant for an elevator, scaled by cos(angle) for an arm</button>
         </div>
         <div class="explain">Gravity is constant on an elevator but changes with angle on an arm. GravityType tells the onboard loop which model to use so kG holds correctly in both cases.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">With the target at 0.70, you set Slot0 kP to 9 and drag kG down to 0. Once the carriage stops bouncing, roughly where does it park?</div>
+        <div class="opts">
+          <button class="opt" data-why="kP only pushes while error exists, and holding this carriage up takes 0.45 V - so the loop has to keep some error on the books just to generate that voltage.">Right at 0.70 - kP alone can hold the target exactly</button>
+          <button class="opt">About 0.65 - it droops by 0.45 / 9, which is 0.05</button>
+          <button class="opt" data-why="0.09 was the droop with kP at 5, the mission number. Raise kP to 9 and the same 0.45 V of gravity needs less error to produce: 0.45 / 9 is only 0.05.">About 0.61 - the droop is always 0.09 no matter what kP is</button>
+        </div>
+        <div class="explain">Holding still costs 0.45 V of gravity voltage. With kG gone, that voltage has to come from kP times error, so the error settles at 0.45 / 9 = 0.05 and the carriage parks near 0.65. Drag kG back to 0.45 and the droop vanishes - feedforward pays the gravity bill so feedback does not have to.</div>
       </div>
     </div>
   </section>
@@ -551,7 +561,7 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(cf
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
     opts.forEach(function(opt,i){
-      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
+      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } });
     });
   });
 })();

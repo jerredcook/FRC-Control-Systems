@@ -192,9 +192,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">A motor pulls more current than your wire can carry. What happens?</div>
         <div class="opts">
-          <button class="opt">It runs faster</button>
+          <button class="opt" data-why="More current does mean more motor power, so the link is tempting - but the wire is the victim here. Extra amps in a too-thin wire become heat, not speed.">It runs faster</button>
           <button class="opt">The wire overheats - you need a thicker gauge</button>
-          <button class="opt">Nothing</button>
+          <button class="opt" data-why="Wires look indestructible, so nothing feels plausible - but copper has a limit. Push past it and the wire heats until the insulation melts, which is how robot fires start.">Nothing</button>
         </div>
         <div class="explain">Too much current in too thin a wire turns into heat, which can melt insulation or start a fire. A bigger motor needs a thicker wire (lower AWG number).</div>
       </div>
@@ -202,8 +202,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">How should you size the branch breaker?</div>
         <div class="opts">
-          <button class="opt">Way below the motor's draw</button>
-          <button class="opt">As large as possible</button>
+          <button class="opt" data-why="Smaller sounds safer, which is the trap - a breaker below the normal draw pops every time the motor works hard. You want it just above the draw, not below it.">Way below the motor's draw</button>
+          <button class="opt" data-why="Bigger feels like headroom, but the breaker's job is to protect the wire. Oversize it and a fault can cook the wire before the breaker ever notices.">As large as possible</button>
           <button class="opt">Just above the motor's normal draw, and no larger than the wire can handle</button>
         </div>
         <div class="explain">The breaker should let the motor pull its normal current without nuisance-tripping, but still trip to protect the wire from a fault. Too small trips constantly; too big leaves the wire unprotected.</div>
@@ -213,10 +213,20 @@
         <div class="qt">Which wire is thicker and carries more current?</div>
         <div class="opts">
           <button class="opt">10 AWG - a lower number means a thicker wire</button>
-          <button class="opt">18 AWG</button>
-          <button class="opt">They're the same</button>
+          <button class="opt" data-why="Bigger number, bigger wire is the natural read - but gauge runs backward. 18 AWG is the skinny one; 10 AWG is the thick wire that carries more current.">18 AWG</button>
+          <button class="opt" data-why="It would be convenient if gauge did not matter, but it is the whole game. The AWG number tracks thickness in reverse, so 10 and 18 are very different wires.">They're the same</button>
         </div>
         <div class="explain">Wire gauge runs backward: the smaller the AWG number, the thicker the wire and the more current it carries. 10 AWG is much thicker than 18 AWG.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">In the sim, the heavy lift motor draws about 52 A. You pick 10 AWG wire (good for about 55 A) and a 60 A breaker. What does the checker say?</div>
+        <div class="opts">
+          <button class="opt" data-why="So close - the wire handles the draw, and the breaker clears the motor. But the third rule is the sneaky one: the breaker also has to sit at or under the wire's 55 A limit, and 60 A does not.">Good wiring - the wire carries the draw and the breaker sits above it</button>
+          <button class="opt">Wire unprotected - the 60 A breaker is bigger than the 10 AWG wire can handle</button>
+          <button class="opt" data-why="Nuisance trips happen when the breaker is at or below the draw, and 60 A sits comfortably above 52 A. The real problem runs the other way: it is above what the wire can take.">Breaker nuisance-trips - 60 A is too close to the motor's 52 A draw</button>
+        </div>
+        <div class="explain">Two of the three checks pass: 10 AWG carries 52 A fine, and 60 A sits above the draw so it will not nuisance-trip. But the breaker must also be at or below what the wire survives, about 55 A, and a 60 A breaker leaves a window where the wire cooks before it trips. Protection always has to cover the weakest link, and here that link is the wire.</div>
       </div>
     </div>
   </section>
@@ -295,7 +305,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

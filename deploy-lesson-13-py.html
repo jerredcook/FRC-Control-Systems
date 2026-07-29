@@ -276,9 +276,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">Which command method runs every single loop while the command is active?</div>
         <div class="opts">
-          <button class="opt">initialize()</button>
+          <button class="opt" data-why="A natural pick since it sounds like the main event, but initialize() runs exactly once at the start. The every-loop worker is execute().">initialize()</button>
           <button class="opt">execute() - it's the repeating work</button>
-          <button class="opt">end()</button>
+          <button class="opt" data-why="Tempting because end() matters so much, but it runs exactly once when the command stops. The method called every loop is execute().">end()</button>
         </div>
         <div class="explain">execute() is called every loop while the command runs. initialize() and end() each run exactly once - at the start and the stop.</div>
       </div>
@@ -286,8 +286,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">What makes a command finish on its own?</div>
         <div class="opts">
-          <button class="opt">It runs out of memory</button>
-          <button class="opt">end() decides</button>
+          <button class="opt" data-why="It would be dramatic, but memory has nothing to do with it - the scheduler simply asks isFinished() every loop and stops the command when it says so.">It runs out of memory</button>
+          <button class="opt" data-why="Close - end() is part of stopping, but it is the cleanup crew, not the judge. isFinished() makes the call; end() runs once after the verdict.">end() decides</button>
           <button class="opt">isFinished() returns True</button>
         </div>
         <div class="explain">Every loop the scheduler checks isFinished(). The moment it returns True, the command's end() runs and it's removed. Return False forever and it runs until interrupted.</div>
@@ -297,10 +297,20 @@
         <div class="qt">A command is interrupted partway through. What happens to end()?</div>
         <div class="opts">
           <button class="opt">end(True) still runs, so it can stop motors cleanly</button>
-          <button class="opt">end() is skipped entirely</button>
-          <button class="opt">The robot crashes</button>
+          <button class="opt" data-why="A fair worry, but commands2 guarantees the opposite: end(True) still fires on an interruption, exactly so motors get shut off cleanly.">end() is skipped entirely</button>
+          <button class="opt" data-why="It feels like a clash should break something, but interruption is routine for the scheduler - it calls end(True) on the old command and moves on.">The robot crashes</button>
         </div>
         <div class="explain">end() always runs - with interrupted = True when something cut it short. That's why "turn things off" belongs in end(): it's guaranteed to fire either way.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">You press Run on the lifecycle stepper and isFinished() answers YES on loop 4. Counting every loop, how many times did execute() do its work before end(False)?</div>
+        <div class="opts">
+          <button class="opt" data-why="So close - but look at loop 4 in the log: execute() still ran right before isFinished() answered YES. The work and the done-yet question share every loop.">3 times, because the loop where isFinished() says YES skips the work</button>
+          <button class="opt">4 times - execute() ran on loops 1 through 4, including the loop where isFinished() said YES</button>
+          <button class="opt" data-why="A reasonable hunch, but end() is cleanup only - it never calls execute(). Once isFinished() says YES, the working part of the life is over.">5 times, because end(False) runs execute() one last time</button>
+        </div>
+        <div class="explain">Each loop runs execute() and then asks isFinished(). On loops 1, 2, and 3 the answer was no; on loop 4 execute() ran again and isFinished() finally said YES, so end(False) fired. That is 4 runs of execute() - the work and the done-yet question always travel together.</div>
       </div>
     </div>
   </section>
@@ -378,7 +388,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

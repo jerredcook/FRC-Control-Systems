@@ -272,9 +272,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">What does "imaging" SystemCore mean?</div>
         <div class="opts">
-          <button class="opt">Taking a photo of the board for your notebook</button>
+          <button class="opt" data-why="The everyday meaning of the word points that way - but in computing an image is a copy of an operating system, and imaging means flashing it onto the board.">Taking a photo of the board for your notebook</button>
           <button class="opt">Flashing the board's Linux operating system, like setting up a Raspberry Pi</button>
-          <button class="opt">Sending your finished robot code to run a match</button>
+          <button class="opt" data-why="Close cousin - that step is deploying. Imaging comes first and installs the operating system your code will run on top of.">Sending your finished robot code to run a match</button>
         </div>
         <div class="explain">Imaging flashes the operating system onto the board, much like installing the operating system on a new computer or a Raspberry Pi. You do it to get the board ready, before you deploy your code.</div>
       </div>
@@ -282,8 +282,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">How does deploying to SystemCore differ from the roboRIO?</div>
         <div class="opts">
-          <button class="opt">It is identical; you run the same Gradle command</button>
-          <button class="opt">SystemCore needs no operating system at all</button>
+          <button class="opt" data-why="It would be handy if nothing changed - but the roboRIO pair of imaging tool plus Gradle deploy does not carry over. SystemCore gets new setup and deploy steps.">It is identical; you run the same Gradle command</button>
+          <button class="opt" data-why="It feels simpler that way - but SystemCore runs real-time Linux, and imaging exists precisely to put that operating system on the board.">SystemCore needs no operating system at all</button>
           <button class="opt">SystemCore is a Linux board you image first, so its setup and deploy steps are new</button>
         </div>
         <div class="explain">The roboRIO used a separate imaging tool and a Gradle deploy like ./gradlew deploy. SystemCore is a Linux board you image like a Raspberry Pi, so the setup and deploy steps are new and being finalized.</div>
@@ -293,8 +293,8 @@
         <div class="qt">What should you remember about the exact 2027 deploy steps?</div>
         <div class="opts">
           <button class="opt">They are new and being finalized, so follow the official docs</button>
-          <button class="opt">They are locked in and will never change</button>
-          <button class="opt">vendordeps are going away entirely</button>
+          <button class="opt" data-why="Certainty would be comforting - but SystemCore is still in alpha, so the imaging and deploy steps are being finalized and can shift before 2027.">They are locked in and will never change</button>
+          <button class="opt" data-why="With so much changing, it is easy to assume everything goes - but vendordeps stay. You still declare your motor and sensor libraries the same way.">vendordeps are going away entirely</button>
         </div>
         <div class="explain">The exact 2027 imaging and deploy steps are new and still being finalized, so use the official WPILib and FIRST documentation. vendordeps stay; they still declare your robot's libraries.</div>
       </div>
@@ -336,7 +336,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

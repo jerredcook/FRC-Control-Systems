@@ -364,8 +364,8 @@ self.motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="out
         <div class="qn">Question 1</div>
         <div class="qt">What does the integral term accumulate?</div>
         <div class="opts">
-          <button class="opt">The current velocity of the carriage</button>
-          <button class="opt">The rate the error is changing</button>
+          <button class="opt" data-why="Natural guess since the carriage is moving, but nothing in the I line reads speed. The integral only stares at the gap and how long it has lingered.">The current velocity of the carriage</button>
+          <button class="opt" data-why="That is the derivative, and it gets its own lesson next. The integral looks backward instead - it is the running total of error that has already happened.">The rate the error is changing</button>
           <button class="opt">The error, summed up over time</button>
         </div>
         <div class="explain">Each loop it adds error × dt onto a running total. That growing sum is the controller's memory of how long, and how badly, the target has been missed.</div>
@@ -375,8 +375,8 @@ self.motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="out
         <div class="qt">How does the integral term erase steady-state error?</div>
         <div class="opts">
           <button class="opt">It grows until it supplies the holding voltage itself, freeing the error to reach zero</button>
-          <button class="opt">It makes kP larger automatically</button>
-          <button class="opt">It ignores small errors below a threshold</button>
+          <button class="opt" data-why="It can feel like extra gain, but kP never budges. The integral adds a second, separate push - one that keeps growing while any error lingers.">It makes kP larger automatically</button>
+          <button class="opt" data-why="That describes a deadband, which tolerates small errors instead of fixing them. The integral is the opposite - even a tiny leftover error keeps feeding the sum until it is gone.">It ignores small errors below a threshold</button>
         </div>
         <div class="explain">As long as any error remains, the integral keeps climbing. It stops only when it's large enough to hold the load on its own - at which point no leftover error is needed, so the error settles at zero.</div>
       </div>
@@ -384,11 +384,21 @@ self.motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="out
         <div class="qn">Question 3</div>
         <div class="qt">A move to a far target overshoots badly and takes forever to settle. The likely culprit is…</div>
         <div class="opts">
-          <button class="opt">kP set too low</button>
+          <button class="opt" data-why="Low kP makes everything sluggish, short moves included. A big sail-past only on long moves points at something that builds with time - the integral overcharging on the trip.">kP set too low</button>
           <button class="opt">Integral windup - the accumulator piled up while the carriage couldn't keep up</button>
-          <button class="opt">The encoder sampling too fast</button>
+          <button class="opt" data-why="Reading the sensor often is harmless - fresher data is a gift. The pile-up here lives in the integral accumulator, not in the encoder.">The encoder sampling too fast</button>
         </div>
         <div class="explain">During the long approach the integral accumulates error it can't immediately act on. By arrival it's hugely overcharged, so it overshoots and unwinds slowly. Clamping the integral or using an iZone prevents it.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">From the sim</div>
+        <div class="qt">Press Step with kP at 4.0 and kI at 1.0, and let the carriage settle right on the line. Where does the I-term (V) readout level off?</div>
+        <div class="opts">
+          <button class="opt" data-why="The growing stops, but the total stays. The integral is a memory: the sum it built on the way up is exactly what keeps the carriage from sagging.">At 0 V - with the error gone there is nothing left to hold</button>
+          <button class="opt" data-why="Only lingering error makes it climb. On the line the error is zero, so every new addition is zero and the total freezes in place.">It never levels off - the integral climbs forever</button>
+          <button class="opt">At about 0.45 V - exactly the voltage that holds the carriage against gravity</button>
+        </div>
+        <div class="explain">Parked on the line, the error is zero, so the P term contributes nothing. The whole gravity hold falls to the integral, and gravity in this sim costs 0.45 V - so the I-term climbs to about 0.45 and freezes there. Run it and watch the readout land on that number.</div>
       </div>
     </div>
   </section>
@@ -581,7 +591,7 @@ self.motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="out
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
     opts.forEach(function(opt,i){
-      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
+      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } });
     });
   });
 })();

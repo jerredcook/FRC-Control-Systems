@@ -267,9 +267,9 @@ git <input class="blank" data-ans="tag" data-reveal="tag" aria-label="blank" aut
         <div class="qn">Question 1</div>
         <div class="qt">When should you commit and push your robot code?</div>
         <div class="opts">
-          <button class="opt">Only once, at the end of the season</button>
+          <button class="opt" data-why="One big save feels efficient, but it leaves months of work riding on a single laptop. Commit often and push before every event, so no crash can cost more than a day.">Only once, at the end of the season</button>
           <button class="opt">Regularly, and always before an event, so working code is backed up</button>
-          <button class="opt">Never; it's safer on the robot only</button>
+          <button class="opt" data-why="The robot feels like the safest vault, but a roboRIO can be reimaged or fried at any moment. The deployed copy is not a backup - the pushed repo is.">Never; it's safer on the robot only</button>
         </div>
         <div class="explain">Frequent commits and a push before every event mean a crashed laptop or a bad change can't erase your work. A tagged, working build is your safety net.</div>
       </div>
@@ -277,8 +277,8 @@ git <input class="blank" data-ans="tag" data-reveal="tag" aria-label="blank" aut
         <div class="qn">Question 2</div>
         <div class="qt">What's the practice field for?</div>
         <div class="opts">
-          <button class="opt">Running the real match</button>
-          <button class="opt">Charging batteries</button>
+          <button class="opt" data-why="It looks exactly like the real field, which is the point - but matches happen only on the competition field. The practice field is where a change earns your trust first.">Running the real match</button>
+          <button class="opt" data-why="Charging lives in the pit, on the charger cart. The practice field has one job: proving code works before you trust it in a match.">Charging batteries</button>
           <button class="opt">Testing code before you trust it in a match</button>
         </div>
         <div class="explain">Test changes on the practice field first. Never deploy untested code into a real match; if there's no time to test, run the last version that worked.</div>
@@ -288,10 +288,20 @@ git <input class="blank" data-ans="tag" data-reveal="tag" aria-label="blank" aut
         <div class="qt">Why use a written pre-match checklist?</div>
         <div class="opts">
           <button class="opt">Under pressure, a checklist keeps you from forgetting the basics (auto, battery, tested code)</button>
-          <button class="opt">It makes the robot faster</button>
-          <button class="opt">It replaces the need to test</button>
+          <button class="opt" data-why="No list adds speed - the robot is as fast as its gearing and code. What the list guards are the basics pressure makes you skip: the auto, the battery, the tested build.">It makes the robot faster</button>
+          <button class="opt" data-why="A ticked box is not a test - in fact one of the items literally is testing on the practice field. The checklist verifies the testing happened; it never substitutes for it.">It replaces the need to test</button>
         </div>
         <div class="explain">The simplest steps are the easiest to skip when you're rushed. A checklist makes "ready" verifiable, so the robot never takes the field with the auto unselected or a dead battery.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">From the sim</div>
+        <div class="qt">You have ticked five of the six items - only the log review is left. What does the checklist show?</div>
+        <div class="opts">
+          <button class="opt">83% on the meter, the tag still counting 5 / 6, and no cleared banner - ready is all six or nothing</button>
+          <button class="opt" data-why="Percent thinking is for grades, not for safety checks - a checklist does not round up. Pilots and pit crews clear only at complete, because the one skipped item is always the one that bites.">The cleared banner appears at 80%, since that rounds up to ready</button>
+          <button class="opt" data-why="The log review feels the most skippable when you are rushed, and that is exactly why it made the list. Every item earned its spot from a lost match - the meter counts all six equally.">The meter jumps to 100%, because reviewing the log is optional</button>
+        </div>
+        <div class="explain">Five of six shows 83% and the clearance banner stays hidden - it appears only when every single item is ticked. That is the whole philosophy: ready is a fact, not a percentage. And the item you left, the log review, is the one that tells you why the last match went sideways before you change anything.</div>
       </div>
     </div>
   </section>
@@ -382,7 +392,7 @@ git <input class="blank" data-ans="tag" data-reveal="tag" aria-label="blank" aut
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 
   // ---- missions (wrapped so a missions bug can never break the lesson) ----

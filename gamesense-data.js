@@ -42,6 +42,7 @@ window.ORBIT = {
 
   rp: {
     win: 2, tie: 1, loss: 0,
+    bonus: 1,   // RP paid per bonus accomplishment (Energized, Harmony), win or lose
     energized: { name: "Energized", note: "alliance scores at least 40 Reactor points", threshold: 40 },
     harmony:   { name: "Harmony",   note: "all three alliance robots dock or balance" }
   },

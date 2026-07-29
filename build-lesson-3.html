@@ -198,9 +198,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">You drill steel at the same high speed you'd use for wood. What happens?</div>
         <div class="opts">
-          <button class="opt">It cuts cleaner</button>
+          <button class="opt" data-why="Faster feels like more cutting power, but in steel the extra speed turns into heat at the tip. Heat dulls the bit - it never cleans up the cut.">It cuts cleaner</button>
           <button class="opt">The heat burns the bit dull and can harden the steel</button>
-          <button class="opt">Nothing different</button>
+          <button class="opt" data-why="It seems like the drill should not care, but the material does. Steel sheds heat poorly, so wood speed cooks the bit and can even harden the steel under it.">Nothing different</button>
         </div>
         <div class="explain">Harder materials need slower speeds. Too fast generates heat that dulls the bit and can work-harden the steel, making it even tougher to drill. Slow down for steel.</div>
       </div>
@@ -208,8 +208,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">Polycarbonate (clear plastic) drilled too fast tends to…</div>
         <div class="opts">
-          <button class="opt">Get stronger</button>
-          <button class="opt">Stay perfectly clean</button>
+          <button class="opt" data-why="Heat does strengthen some metals, so it is a fair thought - but polycarbonate is a plastic with a low melting point. Extra speed just melts it.">Get stronger</button>
+          <button class="opt" data-why="Plastic feels easy to drill, which is the trap. Push the speed and friction melts it, and the melt re-welds behind the bit and grabs.">Stay perfectly clean</button>
           <button class="opt">Melt, web, and grab the bit</button>
         </div>
         <div class="explain">Plastic has a low melting point, so excess speed and heat melt it. It re-welds behind the bit (webbing) and can grab. Moderate speed and steady feed keep it clean.</div>
@@ -219,10 +219,20 @@
         <div class="qt">Before drilling a part on the drill press, you should…</div>
         <div class="opts">
           <button class="opt">Clamp the part down securely</button>
-          <button class="opt">Hold it firmly with your fingers</button>
-          <button class="opt">Set the highest speed for power</button>
+          <button class="opt" data-why="Your grip feels strong, but a grabbing bit spins the part faster than any hand can react. Let the clamp take that fight instead of your fingers.">Hold it firmly with your fingers</button>
+          <button class="opt" data-why="More speed sounds like more capability, but speed gets matched to the material, not maxed. And no speed setting protects an unclamped part.">Set the highest speed for power</button>
         </div>
         <div class="explain">Always clamp. If the bit grabs an unclamped part, it spins it into a blur right where your hand is. Clamping makes the tool fight the clamp instead of you.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">You park the speed slider at 1200 rpm and click through all four materials without touching it. Which one shows a clean cut?</div>
+        <div class="opts">
+          <button class="opt" data-why="Soft metal is the right instinct, but aluminum's green band starts at 1400 rpm, so 1200 sits just under it and the bit chatters. Nudge the slider up a notch and watch it turn green.">Aluminum - it is soft, so a middle speed suits it fine</button>
+          <button class="opt">Polycarbonate only - 1200 rpm lands inside its 700 to 1400 band, and the other three bands miss it</button>
+          <button class="opt" data-why="They do sit at opposite ends, which is exactly why one speed cannot serve both - steel's band tops out at 850 and wood's does not start until 1900, so 1200 misses each from a different side.">Steel and wood - one hard, one soft, so they bracket the middle nicely</button>
+        </div>
+        <div class="explain">Each material carries its own green band: steel 350 to 850, polycarbonate 700 to 1400, aluminum 1400 to 2400, wood 1900 to 3000. Only polycarbonate's band contains 1200 rpm, so it alone cuts clean there - steel burns, and aluminum and wood both complain that 1200 is too slow. Try it in the sim: same slider position, four different verdicts. That is why there is no single right speed, only a right speed for this material.</div>
       </div>
     </div>
   </section>
@@ -323,7 +333,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

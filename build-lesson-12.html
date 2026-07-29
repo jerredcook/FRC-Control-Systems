@@ -197,8 +197,8 @@
         <div class="qt">What's a timing belt's main advantage over chain?</div>
         <div class="opts">
           <button class="opt">Quieter, cleaner, and needs no lubrication</button>
-          <button class="opt">It can change ratio mid-run</button>
-          <button class="opt">It's always cheaper</button>
+          <button class="opt" data-why="Neither belt nor chain can do that - the tooth counts fix the ratio. The belt's real win is running quiet, clean, and nearly maintenance-free.">It can change ratio mid-run</button>
+          <button class="opt" data-why="Sometimes it is cheaper, sometimes not - price flips both ways depending on the parts. The advantage that never flips is the quiet, clean, no-lube running.">It's always cheaper</button>
         </div>
         <div class="explain">A toothed belt runs quiet, throws no oil, and barely stretches, so it needs almost no maintenance. Chain clatters and needs lubrication and tensioning.</div>
       </div>
@@ -206,8 +206,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">Why is a belt drive's center distance constrained?</div>
         <div class="opts">
-          <button class="opt">Belts can stretch to any length</button>
-          <button class="opt">Pulleys can only be certain sizes</button>
+          <button class="opt" data-why="Timing belts are built specifically not to stretch - that is what keeps the teeth meshed. A fixed loop means only one center distance makes it fit.">Belts can stretch to any length</button>
+          <button class="opt" data-why="Pulleys do come in set sizes, so this tempts - but that is true of gears and sprockets too. The belt's fixed loop length is what pins the spacing down.">Pulleys can only be certain sizes</button>
           <button class="opt">Belts come in fixed tooth counts, so the spacing must match the belt</button>
         </div>
         <div class="explain">A belt is a closed loop with a set number of teeth. For given pulleys, only one center distance makes that belt fit, so you design the layout around the belt length.</div>
@@ -216,11 +216,21 @@
         <div class="qn">Question 3</div>
         <div class="qt">Why doesn't a GT2 timing belt slip like an old flat belt?</div>
         <div class="opts">
-          <button class="opt">It's glued to the pulleys</button>
+          <button class="opt" data-why="Glue would stop the slipping and also stop the belt - it has to fly around the loop, so it grips with interlocking teeth instead of anything sticky.">It's glued to the pulleys</button>
           <button class="opt">Its teeth mesh with teeth on the pulleys</button>
-          <button class="opt">It's magnetic</button>
+          <button class="opt" data-why="Nothing magnetic in rubber and fiberglass - the no-slip grip is purely mechanical: belt teeth seated in pulley teeth, a positive drive like chain.">It's magnetic</button>
         </div>
         <div class="explain">Timing belts are toothed and run on toothed pulleys. The teeth interlock, so the belt drives positively without slipping, just like chain and sprockets.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">From the sim</div>
+        <div class="qt">In the sim, Pulley A is 18T, Pulley B is 36T, and the 90T belt fits with a center distance near 31.5 pitches. You grow Pulley B to 48T. What happens to the center distance?</div>
+        <div class="opts">
+          <button class="opt" data-why="Totally intuitive, and totally the trap - the belt length is fixed, and bigger pulleys eat more of it in the wraps, leaving less to span the gap between shafts.">It grows - bigger pulleys need more room between the shafts</button>
+          <button class="opt" data-why="The belt is the biggest lever, true - but pulley sizes spend belt too. Grow a pulley and its wrap swallows belt that used to be spacing, pulling the centers in.">It stays the same - only swapping the belt can move the spacing</button>
+          <button class="opt">It shrinks to about 28.5 pitches - the bigger wrap uses up belt, pulling the pulleys closer</button>
+        </div>
+        <div class="explain">The loop is fixed at 90 teeth, so any belt the pulleys wrap up cannot also span the gap. Roughly, center distance = (belt - half the pulley teeth) / 2: that is (90 - 27) / 2 = 31.5 pitches before, and (90 - 33) / 2 = 28.5 after. Drag Pulley B up in the sim and watch the readout drop - real belt-run design is exactly this budget.</div>
       </div>
     </div>
   </section>
@@ -330,7 +340,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

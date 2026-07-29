@@ -178,9 +178,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">What does "design for manufacture" mean?</div>
         <div class="opts">
-          <button class="opt">Making the fanciest possible part</button>
+          <button class="opt" data-why="Fancy is fun to draw, but a part is only as good as your shop's ability to make it. DFM aims the design at your real tools, not at maximum impressiveness.">Making the fanciest possible part</button>
           <button class="opt">Designing parts your shop can actually make well, with the tools you have</button>
-          <button class="opt">Avoiding CAD</button>
+          <button class="opt" data-why="DFM and CAD are teammates, not rivals - you use CAD to design the part, and DFM thinking to keep that design buildable in your actual shop.">Avoiding CAD</button>
         </div>
         <div class="explain">DFM means choosing geometry, materials, and tolerances that fit your real tools and time, so the part gets built well and on schedule.</div>
       </div>
@@ -188,8 +188,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">When should you call for a very tight tolerance?</div>
         <div class="opts">
-          <button class="opt">On every dimension</button>
-          <button class="opt">Never</button>
+          <button class="opt" data-why="It sounds careful, but tight everywhere means slow everywhere - and most dimensions simply do not care. Save the precision for the spots that do, like bearing bores.">On every dimension</button>
+          <button class="opt" data-why="Tempting after hearing how slow tight tolerances are, but some fits genuinely need them - a bearing that rattles in a sloppy bore wears out fast. Rare, not never.">Never</button>
           <button class="opt">Only where it genuinely matters, like a bearing fit</button>
         </div>
         <div class="explain">Tight tolerances are slow and hard to hit. Reserve them for the few spots that need them and leave everything else generous.</div>
@@ -199,8 +199,8 @@
         <div class="qt">Why design around standard stock and simple shapes?</div>
         <div class="opts">
           <button class="opt">They're faster to make and easier to replace when something breaks</button>
-          <button class="opt">They look worse on purpose</button>
-          <button class="opt">There's no reason</button>
+          <button class="opt" data-why="Nothing about standard stock is worse-looking - clean, simple parts usually look best. The choice is about speed to make and ease to replace, not looks.">They look worse on purpose</button>
+          <button class="opt" data-why="There is a very practical reason: standard, simple parts cut fast on the tools you own, and when one breaks at an event you can remake it before the next match.">There's no reason</button>
         </div>
         <div class="explain">Standard, simple parts cut fast, fit the tools you have, and can be remade quickly at an event, which is reliability you can build.</div>
       </div>
@@ -279,7 +279,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

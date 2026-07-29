@@ -246,8 +246,8 @@
         <div class="qn">Question 1</div>
         <div class="qt">Which of these is now built into SystemCore?</div>
         <div class="opts">
-          <button class="opt">Only the battery</button>
-          <button class="opt">Only the motors</button>
+          <button class="opt" data-why="The board does connect straight to robot power, so the guess is fair, but the battery stays its own separate part. What moved inside is vision, an IMU, and the WiFi radio.">Only the battery</button>
+          <button class="opt" data-why="Motors feel like the heart of the robot, but they stay out on the frame doing the pushing. What SystemCore pulls inside are the electronics: vision, the IMU, and the radio.">Only the motors</button>
           <button class="opt">Vision processing, an IMU, and a WiFi radio</button>
         </div>
         <div class="explain">SystemCore folds three former add-ons into the board: Limelight vision processing, an onboard IMU for heading and odometry, and an integrated dual-band WiFi radio.</div>
@@ -257,8 +257,8 @@
         <div class="qt">What happened to the separate radio box?</div>
         <div class="opts">
           <button class="opt">It is gone; the WiFi radio is built into SystemCore</button>
-          <button class="opt">It got bigger and now needs two power cables</button>
-          <button class="opt">It moved to the Driver Station laptop</button>
+          <button class="opt" data-why="Add-ons often do grow over the years, so this reads plausible, but the radio went the other way - it vanished into SystemCore, box, wiring, and all.">It got bigger and now needs two power cables</button>
+          <button class="opt" data-why="The laptop is the other end of the WiFi link, so it is a tempting home, but the robot-side radio now lives inside SystemCore, riding on the robot.">It moved to the Driver Station laptop</button>
         </div>
         <div class="explain">The separate radio box and its power and wiring are gone. SystemCore has an integrated dual-band 2.4/5 GHz WiFi radio, so the link to the Driver Station is built in.</div>
       </div>
@@ -266,9 +266,9 @@
         <div class="qn">Question 3</div>
         <div class="qt">How does a team get vision on SystemCore?</div>
         <div class="opts">
-          <button class="opt">They must buy and configure a separate coprocessor</button>
+          <button class="opt" data-why="That has been the standard recipe for years, which is exactly why it tempts, but it is the old way - SystemCore does the vision processing itself.">They must buy and configure a separate coprocessor</button>
           <button class="opt">They plug a USB camera into the board, which does the vision processing</button>
-          <button class="opt">Vision is not possible on SystemCore</button>
+          <button class="opt" data-why="A new board dropping features is a reasonable worry, but vision went the other direction - it is built in, from the Limelight camera folks themselves.">Vision is not possible on SystemCore</button>
         </div>
         <div class="explain">Vision processing is built into the board. Plug a USB camera into SystemCore and it handles the work, like reading AprilTags, so every team gets vision without a separate coprocessor.</div>
       </div>
@@ -310,7 +310,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

@@ -296,9 +296,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">Which type would you use for a motor's speed in meters per second?</div>
         <div class="opts">
-          <button class="opt">int</button>
+          <button class="opt" data-why="int feels like the default number, but it only holds whole values - it has nowhere to put the .5 in 1.5 m/s. Decimals live in a double.">int</button>
           <button class="opt">double - it needs decimals</button>
-          <button class="opt">String</button>
+          <button class="opt" data-why="Text can spell out 1.5, but a String is just characters - you cannot do math on it. A speed needs a number type, and with decimals that is double.">String</button>
         </div>
         <div class="explain">Speeds, voltages, and positions are rarely whole numbers, so they're doubles. int is for whole-number things like CAN ids and counts.</div>
       </div>
@@ -306,8 +306,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">In Java, what is <code style="font-family:var(--mono);color:var(--teal)">7 / 2</code> when both are ints?</div>
         <div class="opts">
-          <button class="opt">3.5</button>
-          <button class="opt">4</button>
+          <button class="opt" data-why="That is the math-class answer, which is exactly what makes this trap sneaky - int divided by int stays an int, so Java throws away the .5 before you ever see it.">3.5</button>
+          <button class="opt" data-why="Rounding up would at least be predictable, but integer division never rounds - it simply drops the decimal part, leaving 3.">4</button>
           <button class="opt">3 - integer division drops the decimal</button>
         </div>
         <div class="explain">int ÷ int gives an int: the .5 is thrown away, leaving 3. Use 7 / 2.0 (or cast) to get 3.5.</div>
@@ -317,8 +317,8 @@
         <div class="qt">What does a variable's <em>type</em> tell you?</div>
         <div class="opts">
           <button class="opt">What kind of value the box can hold (whole number, decimal, true/false, text)</button>
-          <button class="opt">How fast the code runs</button>
-          <button class="opt">Which motor it controls</button>
+          <button class="opt" data-why="A reasonable hunch, but a type is about what fits in the box, not performance - your code will not lap any faster because you picked int over double.">How fast the code runs</button>
+          <button class="opt" data-why="Motors get picked by values you store IN variables, like a CAN id - the type only says what kind of value the box holds: whole number, decimal, true/false, or text.">Which motor it controls</button>
         </div>
         <div class="explain">The type (int, double, boolean, String…) declares what sort of value lives in that variable - and the compiler keeps you honest about it.</div>
       </div>
@@ -423,7 +423,7 @@
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
     opts.forEach(function(opt,i){
-      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
+      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } });
     });
   });
 })();

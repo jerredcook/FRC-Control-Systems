@@ -311,9 +311,9 @@ meters = output_rot * <input class="blank" data-ans="circumference|circ" aria-la
         <div class="qn">Question 1</div>
         <div class="qt">The motor reports 36 rotations through a 12 : 1 gearbox. How many <em>output</em> rotations is that?</div>
         <div class="opts">
-          <button class="opt">432 rotations</button>
+          <button class="opt" data-why="That is 36 × 12 - right numbers, flipped operation. The gearbox trades speed for torque, so the output turns fewer times than the motor: divide, and you get 3.">432 rotations</button>
           <button class="opt">3 rotations</button>
-          <button class="opt">36 rotations</button>
+          <button class="opt" data-why="Skipping the gearbox is the classic slip - it sits in the path whether you remember it or not, swallowing 12 motor turns for every single output turn.">36 rotations</button>
         </div>
         <div class="explain">3. The gearbox spins the motor 12 times for every 1 output turn, so you divide: 36 ÷ 12 = 3 output rotations.</div>
       </div>
@@ -322,8 +322,8 @@ meters = output_rot * <input class="blank" data-ans="circumference|circ" aria-la
         <div class="qt">To turn output rotations into a linear distance, you multiply by…</div>
         <div class="opts">
           <button class="opt">The drum's circumference (π × diameter)</button>
-          <button class="opt">The gear ratio again</button>
-          <button class="opt">The motor's voltage</button>
+          <button class="opt" data-why="The ratio already did its job getting you to output turns - the step that is left is pure geometry, and only the circumference knows how far one turn travels.">The gear ratio again</button>
+          <button class="opt" data-why="Voltage sets how hard the motor pushes, not how far a turn reaches - position conversion is pure geometry and works out the same with the power off.">The motor's voltage</button>
         </div>
         <div class="explain">One full output turn pays out exactly one circumference of cable, so distance = output rotations × (π × diameter). Just keep the diameter in the same units you want the distance in.</div>
       </div>
@@ -331,11 +331,21 @@ meters = output_rot * <input class="blank" data-ans="circumference|circ" aria-la
         <div class="qn">Question 3</div>
         <div class="qt">What does <code style="font-family:var(--mono);color:var(--teal)">sensor_to_mechanism_ratio</code> do in Phoenix 6?</div>
         <div class="opts">
-          <button class="opt">Sets the motor's maximum speed</button>
-          <button class="opt">Changes the PID gains automatically</button>
+          <button class="opt" data-why="It lives in the config next to real limits, so it reads like one - but it only rescales what the sensor reports; the motor spins exactly as fast either way.">Sets the motor's maximum speed</button>
+          <button class="opt" data-why="It does change what your gains act on, since error is now measured in output units - but the gain numbers themselves stay exactly what you set.">Changes the PID gains automatically</button>
           <button class="opt">Makes get_position() report output rotations, with the gear ratio already removed</button>
         </div>
         <div class="explain">You give the TalonFX the gear ratio once, and from then on its position and velocity come back in mechanism (output) units - so you don't divide by the gear ratio by hand all over your code.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">From the sim</div>
+        <div class="qt">Keep the 2.0 in drum (about 0.16 m per output turn) and set the gear to 15 : 1. Roughly how many motor rotations put the carriage at 0.80 m?</div>
+        <div class="opts">
+          <button class="opt" data-why="That comes from dividing by the ratio a second time - going backwards from height to motor turns you multiply by 15, because the motor always spins more than the drum, never less.">About 0.3 rotations</button>
+          <button class="opt" data-why="Five is exactly right for the drum - but those are output turns. The motor sits behind a 15 : 1 gearbox, so it must spin 15 times that many: 75.">About 5 rotations</button>
+          <button class="opt">About 75 rotations</button>
+        </div>
+        <div class="explain">Run the chain backwards: 0.80 m ÷ 0.16 m per turn = 5 output turns, and each output turn costs 15 motor turns, so 5 × 15 = 75 motor rotations. Same math as the missions, just a taller target - drag the slider to 75 and watch Height land on 0.80 m.</div>
       </div>
     </div>
   </section>
@@ -534,7 +544,7 @@ meters = output_rot * <input class="blank" data-ans="circumference|circ" aria-la
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
     opts.forEach(function(opt,i){
-      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
+      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } });
     });
   });
 })();

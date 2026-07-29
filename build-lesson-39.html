@@ -167,9 +167,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">What should you do before every match?</div>
         <div class="opts">
-          <button class="opt">Nothing, if it worked last match</button>
+          <button class="opt" data-why="Tempting after a clean match, but a day of hits quietly loosens bolts and drains packs. Working last match proves nothing about the next one.">Nothing, if it worked last match</button>
           <button class="opt">Run a quick checklist: fresh battery, tighten bolts, check connections</button>
-          <button class="opt">Repaint it</button>
+          <button class="opt" data-why="Paint is for the offseason. Between matches you have minutes, and they go to battery, bolts, and connectors - the things that actually fail on the field.">Repaint it</button>
         </div>
         <div class="explain">A short pre-match checklist catches a low battery, loose bolt, or wiggling connector before it fails on the field.</div>
       </div>
@@ -178,8 +178,8 @@
         <div class="qt">Why swap to a fresh battery each match?</div>
         <div class="opts">
           <button class="opt">Voltage matters - a strong pack gives full power when it counts</button>
-          <button class="opt">Batteries are decorative</button>
-          <button class="opt">To add weight</button>
+          <button class="opt" data-why="It would be a very heavy decoration - that pack powers every motor on the robot, and how well it holds voltage under load decides how hard you can push.">Batteries are decorative</button>
+          <button class="opt" data-why="The pack is heavy, but no team wants extra pounds. The swap is about voltage - a fresh pack holds it up under load right through the final seconds.">To add weight</button>
         </div>
         <div class="explain">A fully charged battery holds voltage under load, so the robot keeps its full power through the match, often the margin in a close game.</div>
       </div>
@@ -187,8 +187,8 @@
         <div class="qn">Question 3</div>
         <div class="qt">Why carry spare motors, wheels, and controllers?</div>
         <div class="opts">
-          <button class="opt">To look prepared</button>
-          <button class="opt">There's no reason</button>
+          <button class="opt" data-why="A tidy spares kit does look sharp, but that is a side effect. The point is that when a motor dies mid-event, the spare gets you back on the field.">To look prepared</button>
+          <button class="opt" data-why="Spares feel like dead weight right up until something breaks - and at a competition, something always does. They turn a day-ending failure into a pit fix.">There's no reason</button>
           <button class="opt">So a known failure can be fixed in the pit instead of ending your day</button>
         </div>
         <div class="explain">Things break at competition. Spares of the parts you know can fail let you repair fast and get back on the field.</div>
@@ -259,7 +259,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

@@ -461,9 +461,9 @@ self.left.<span class="fn">set</span>(<input class="blank" data-ans="speed+rotat
         <div class="qn">Question 1</div>
         <div class="qt">When you "deploy" your code to an XRP, where does your robot program actually run?</div>
         <div class="opts">
-          <button class="opt">It is flashed onto the XRP and runs on the Pico W itself</button>
+          <button class="opt" data-why="That is exactly how a roboRIO works, so it is a fair guess - but the XRP flips the model: your program stays on the laptop in robotpy simulation, and only motor commands and sensor readings cross the WiFi link.">It is flashed onto the XRP and runs on the Pico W itself</button>
           <button class="opt">It runs in WPILib simulation on your laptop, connected to the XRP over WiFi</button>
-          <button class="opt">It runs in the cloud and streams to the robot over the internet</button>
+          <button class="opt" data-why="Wireless does feel cloud-like, but the XRP makes its own little WiFi network - your laptop talks straight to the robot across the table, and no internet is involved anywhere.">It runs in the cloud and streams to the robot over the internet</button>
         </div>
         <div class="explain">With the XRP, your code runs in simulation on your laptop with robotpy sim. A WebSocket link over the XRP's own WiFi network carries motor commands out and sensor readings back. "Deploy" here means run in simulation, connected to the XRP.</div>
       </div>
@@ -472,8 +472,8 @@ self.left.<span class="fn">set</span>(<input class="blank" data-ans="speed+rotat
         <div class="qt">In the XRP Drivetrain, which classes give you the two drive motors and the heading?</div>
         <div class="opts">
           <button class="opt">XRPMotor for each drive motor, and XRPGyro for the heading</button>
-          <button class="opt">TalonFX for the motors, and a Pigeon for the heading</button>
-          <button class="opt">Spark for the motors, and an accelerometer for the heading</button>
+          <button class="opt" data-why="Those are the right names on a full FRC robot, which is why they tempt - but TalonFX and Pigeon are CTRE hardware. The XRP brings its own classes, XRPMotor and XRPGyro.">TalonFX for the motors, and a Pigeon for the heading</button>
+          <button class="opt" data-why="Spark is real FRC gear, so the guess is reasonable - but the XRP has its own XRPMotor and XRPGyro classes, and an accelerometer measures shove, not which way you are pointing.">Spark for the motors, and an accelerometer for the heading</button>
         </div>
         <div class="explain">The XRP exposes its drive motors as XRPMotor (channels 0 and 1), its wheel encoders as Encoder on DIO pins, and its onboard gyro as XRPGyro. TalonFX and Pigeon are CTRE parts you would use on a full FRC robot.</div>
       </div>
@@ -481,8 +481,8 @@ self.left.<span class="fn">set</span>(<input class="blank" data-ans="speed+rotat
         <div class="qn">Question 3</div>
         <div class="qt">Why does the open-loop "drive until distance is at least the target" overshoot, while the PID version lands on target?</div>
         <div class="opts">
-          <button class="opt">Open-loop uses a slower motor, so it cannot reach full speed</button>
-          <button class="opt">PID drives a higher fixed speed the whole way</button>
+          <button class="opt" data-why="Speed feels like the culprit, but both modes drive the same motors - the real difference is that open-loop never checks the error, so it coasts past the line at any speed.">Open-loop uses a slower motor, so it cannot reach full speed</button>
+          <button class="opt" data-why="PID can look punchy off the line, but it is the opposite of a fixed speed - it eases off as the gap shrinks, like braking a bike before a stop sign, and that easing is why it lands on target.">PID drives a higher fixed speed the whole way</button>
           <button class="opt">Open-loop sets a fixed speed and never looks at the error, so it coasts past; PID watches the remaining gap and eases off as it closes</button>
         </div>
         <div class="explain">Open-loop picks a speed and stops once the encoder crosses the line, so it always coasts a bit further. PID measures the gap to the target every loop and slows down as the gap shrinks, so it settles on the line, the droop-and-correct idea from Closing the Loop.</div>
@@ -491,8 +491,8 @@ self.left.<span class="fn">set</span>(<input class="blank" data-ans="speed+rotat
         <div class="qn">Question 4</div>
         <div class="qt">How much of the command-based code you wrote earlier in this course works on the XRP?</div>
         <div class="opts">
-          <button class="opt">None of it; the XRP uses a completely different framework</button>
-          <button class="opt">Only the autonomous parts</button>
+          <button class="opt" data-why="New hardware often does mean starting over, so this tempts - but the XRP is supported by WPILib and RobotPy, so subsystems, commands, and PIDController carry straight over. Only the hardware class names change.">None of it; the XRP uses a completely different framework</button>
+          <button class="opt" data-why="Autonomous is where the square lives, so it is an easy guess - but teleop driving, subsystems, and commands all run on the XRP too. The whole command-based structure transfers, not just one mode.">Only the autonomous parts</button>
           <button class="opt">The same patterns: subsystems, commands, and PID controllers, with XRP-specific classes for the motors, encoders, and gyro</button>
         </div>
         <div class="explain">The XRP is WPILib-supported, so the structure you learned, commands2.Subsystem, command factories, PIDController, is the same. Only the hardware classes change to XRPMotor, Encoder, and XRPGyro. That is why the skills transfer.</div>
@@ -501,11 +501,21 @@ self.left.<span class="fn">set</span>(<input class="blank" data-ans="speed+rotat
         <div class="qn">Question 5</div>
         <div class="qt">Why is the XRP a good way to practice without an FRC team's budget?</div>
         <div class="opts">
-          <button class="opt">It is free and ships with every RobotPy install</button>
+          <button class="opt" data-why="The RobotPy software really is free, which makes this tempting - but the robot itself is a small kit you buy, roughly $35 to $70. Cheap, not free, and that price is the whole point.">It is free and ships with every RobotPy install</button>
           <button class="opt">It is a low-cost robot, roughly $35 to $70, that runs the same WPILib code, so you do not need a full FRC robot to practice</button>
-          <button class="opt">It only works with special paid software you rent each season</button>
+          <button class="opt" data-why="Plenty of robot kits do lock you into paid apps, so that is a fair suspicion - but the XRP goes the other way: the same free RobotPy tools you already installed drive it. No rental anywhere.">It only works with special paid software you rent each season</button>
         </div>
         <div class="explain">A full FRC robot costs thousands of dollars. The XRP is roughly $35 to $70 (check the current price) and runs the very same WPILib code, so you can practice the whole build-code-tune loop on real hardware on your own desk.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">In the path tracer, the open-loop robot drives leg 1 about 138 px along a side the dashed square says should be 130 px. You flip the toggle to PID, hit Reset, and step leg 1 again. Where does the robot dot stop now?</div>
+        <div class="opts">
+          <button class="opt" data-why="It feels like the motor decides the distance, but the controller decides when to ease off - open-loop keeps its baked-in drift, while PID watches the gap shrink and stops on the line.">At about 138 px again, because switching the controller cannot change how far the robot drives</button>
+          <button class="opt">Exactly on the 130 px corner, because the PID leg watches the remaining gap and lands on target</button>
+          <button class="opt" data-why="PID does slow down near the end, but slowing down is not stopping short - it eases off exactly so it can settle on the 130 px line instead of under it.">Around 122 px, short of the corner, because PID drives slower</button>
+        </div>
+        <div class="explain">In the tracer, every open-loop leg carries a baked-in drift, leg 1 runs 8 px long, 138 instead of 130, and the corners are off too, 94 degrees instead of 90, so the errors stack as you step. The PID legs have no drift at all: each one measures the gap left to the target and eases off as it closes, so the dot parks exactly on the dashed corner. Same square, same motors, different ending - that is the whole capstone in one toggle.</div>
       </div>
     </div>
   </section>
@@ -732,7 +742,7 @@ self.left.<span class="fn">set</span>(<input class="blank" data-ans="speed+rotat
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,idx){ opt.addEventListener('click',function(){ if(done)return; if(idx===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,idx){ opt.addEventListener('click',function(){ if(done)return; if(idx===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

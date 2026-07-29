@@ -361,9 +361,9 @@ self.motor.<span class="fn">setVoltage</span>(feedforward + <input class="blank"
         <div class="qn">Question 1</div>
         <div class="qt">What does feedforward do that feedback can't?</div>
         <div class="opts">
-          <button class="opt">It measures the error more accurately</button>
+          <button class="opt" data-why="Feedforward does not measure at all - that is its superpower. It predicts from physics before any error exists; accurate measuring stays feedback's department.">It measures the error more accurately</button>
           <button class="opt">It predicts the needed voltage in advance from the mechanism's physics</button>
-          <button class="opt">It replaces the encoder</button>
+          <button class="opt" data-why="You still need the sensor - feedback still cleans up whatever the prediction misses. Feedforward lightens the loop's workload; it does not take over the job.">It replaces the encoder</button>
         </div>
         <div class="explain">Feedback only reacts to error after it appears. Feedforward uses a model of the mechanism to supply most of the voltage up front, so the error never grows large in the first place.</div>
       </div>
@@ -372,8 +372,8 @@ self.motor.<span class="fn">setVoltage</span>(feedforward + <input class="blank"
         <div class="qt">With correct kG and no integral at all, why does the elevator hold with zero steady-state error?</div>
         <div class="opts">
           <button class="opt">kG supplies the gravity-holding voltage directly, so no leftover error is needed</button>
-          <button class="opt">The integral is secretly still running</button>
-          <button class="opt">Gravity stops acting once it reaches the target</button>
+          <button class="opt" data-why="Fair suspicion, but the kI slider truly is at zero - no memory is building. The holding volts come from kG's prediction, not from an integral's history.">The integral is secretly still running</button>
+          <button class="opt" data-why="Gravity never clocks out - it pulls exactly as hard at the target as anywhere else. What changed is that kG already pays gravity's bill, so no error has to.">Gravity stops acting once it reaches the target</button>
         </div>
         <div class="explain">In Lesson 2 the droop existed because P needed error to generate the holding voltage. Feedforward provides that voltage outright, so the error can sit at zero - no integral required.</div>
       </div>
@@ -381,11 +381,21 @@ self.motor.<span class="fn">setVoltage</span>(feedforward + <input class="blank"
         <div class="qn">Question 3</div>
         <div class="qt">Which feedforward terms only matter when the setpoint is moving?</div>
         <div class="opts">
-          <button class="opt">kS and kG</button>
-          <button class="opt">kG alone</button>
+          <button class="opt" data-why="Those two are the always-on pair, actually - kS breaks friction loose and kG carries the weight even in a dead-still hold. The moving-only terms are the other two.">kS and kG</button>
+          <button class="opt" data-why="kG matters whenever gravity does, parked or moving - holding still costs kG volts every second. The terms that need motion to mean anything are kV and kA.">kG alone</button>
           <button class="opt">kV and kA - velocity and acceleration</button>
         </div>
         <div class="explain">kG (gravity) and kS (static friction at the start) apply even for a hold. kV and kA respond to commanded speed and acceleration, so they need a moving trajectory to act on - which is what motion profiling provides.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">From the sim</div>
+        <div class="qt">kI stays at 0 and kP at 4.0. You drag kG up to 0.90 - double what gravity needs - and press Step. Where does the carriage end up?</div>
+        <div class="opts">
+          <button class="opt" data-why="More is not free - feedforward is a prediction, and this one now predicts wrong on purpose. The extra 0.45 V is an uninvited push the feedback must cancel.">On the line at 0.70, since extra feedforward can only help</button>
+          <button class="opt" data-why="Droop comes from too little lift, and you just doubled the lift. With surplus volts pushing up, the miss lands on the far side of the line.">Below the line near 0.59, the old droop again</button>
+          <button class="opt">Above the line near 0.81, parked with a steady negative error</button>
+        </div>
+        <div class="explain">The surplus 0.45 V shoves the carriage past the line, and with kI at zero only the P term can fight back - and P needs error to make voltage. It parks where kP × error cancels the extra push: 0.45 / 4 is about 0.11 above the setpoint, so about 0.81. A feedforward that lies gets paid back in steady-state error - which is why Lesson 7 is about measuring these constants instead of guessing.</div>
       </div>
     </div>
   </section>
@@ -587,7 +597,7 @@ self.motor.<span class="fn">setVoltage</span>(feedforward + <input class="blank"
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
     opts.forEach(function(opt,i){
-      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
+      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } });
     });
   });
 })();

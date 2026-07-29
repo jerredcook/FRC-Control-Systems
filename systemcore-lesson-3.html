@@ -252,9 +252,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">Which of these is NEW with SystemCore compared to the roboRIO?</div>
         <div class="opts">
-          <button class="opt">Using Java to write robot code</button>
+          <button class="opt" data-why="Java is so central it feels new every season, but it carries straight over - you wrote Java on the roboRIO and you still do on SystemCore.">Using Java to write robot code</button>
           <button class="opt">The WiFi radio and vision built right into the board</button>
-          <button class="opt">Driving the robot with a controller</button>
+          <button class="opt" data-why="Driving is the fun part, so it jumps to mind first, but drivers have always used controllers. The new part is the radio and vision moving inside the board.">Driving the robot with a controller</button>
         </div>
         <div class="explain">SystemCore folds the radio and vision inside the board itself. The roboRIO needed a separate radio and usually a separate vision computer.</div>
       </div>
@@ -262,8 +262,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">Which of these stays the SAME when you switch to SystemCore?</div>
         <div class="opts">
-          <button class="opt">You must buy a separate radio box</button>
-          <button class="opt">The Driver Station only runs on Windows</button>
+          <button class="opt" data-why="That was the routine for years, so it is easy to leave on the checklist, but it is one of the things that changes - the radio is built into SystemCore now.">You must buy a separate radio box</button>
+          <button class="opt" data-why="It was Windows-only for so long that it feels permanent, but that is a change too - SystemCore's Driver Station goes cross-platform.">The Driver Station only runs on Windows</button>
           <button class="opt">Your CAN motor controllers and command-based code</button>
         </div>
         <div class="explain">Your motor controllers like Kraken and REV, your command-based code, and your control theory all carry over. The separate radio and Windows-only Driver Station are the old roboRIO ways, not the new ones.</div>
@@ -273,8 +273,8 @@
         <div class="qt">What is MotionCore?</div>
         <div class="opts">
           <button class="opt">A companion board that handles power and CAN</button>
-          <button class="opt">A new programming language</button>
-          <button class="opt">The name of the old roboRIO</button>
+          <button class="opt" data-why="The Core name does sound like a language or a framework, but it is hardware - a companion board that carries power and CAN out to the motors.">A new programming language</button>
+          <button class="opt" data-why="The old brain is on your mind in this course, so the guess makes sense, but the roboRIO kept its own name. MotionCore is new - SystemCore's power and CAN companion.">The name of the old roboRIO</button>
         </div>
         <div class="explain">MotionCore is the companion board that pairs with SystemCore to handle power and CAN, carrying signals and current out to the motors.</div>
       </div>
@@ -316,7 +316,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

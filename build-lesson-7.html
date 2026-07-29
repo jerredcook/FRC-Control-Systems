@@ -211,9 +211,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">You need a clear guard that can take a hit. Which plastic?</div>
         <div class="opts">
-          <button class="opt">Acrylic - it's the same thing</button>
+          <button class="opt" data-why="They look identical on the shelf, which is exactly the trap - acrylic is brittle and shatters on the first hit, while polycarbonate flexes and shrugs it off.">Acrylic - it's the same thing</button>
           <button class="opt">Polycarbonate - it flexes and absorbs impact</button>
-          <button class="opt">Neither can be used on a robot</button>
+          <button class="opt" data-why="Careful instinct, but clear panels are all over real robots - the rule is just to use tough polycarbonate and leave brittle acrylic in the picture frame.">Neither can be used on a robot</button>
         </div>
         <div class="explain">Polycarbonate (Lexan) bends and bounces back instead of shattering. Acrylic looks identical but is brittle and cracks on impact, exactly what you don't want in a match.</div>
       </div>
@@ -222,8 +222,8 @@
         <div class="qt">What's aluminum plate (1/8" to 1/4") mainly used for?</div>
         <div class="opts">
           <button class="opt">Structural parts: gearbox plates, gussets, motor mounts</button>
-          <button class="opt">Clear windows</button>
-          <button class="opt">Wiring insulation</button>
+          <button class="opt" data-why="A window does need flat stock, but aluminum is opaque - clear jobs go to polycarbonate, while plate earns its keep carrying structural loads.">Clear windows</button>
+          <button class="opt" data-why="Wires do need protection, but aluminum conducts electricity, the opposite of insulation - plate is for structure like gearbox plates and mounts.">Wiring insulation</button>
         </div>
         <div class="explain">Thick aluminum plate is the structural flat stock, it carries real loads as gearbox plates, gussets, and mounts. Thin sheet is for light panels and covers.</div>
       </div>
@@ -231,11 +231,21 @@
         <div class="qn">Question 3</div>
         <div class="qt">You bend a thin aluminum panel hard and let go. What happens?</div>
         <div class="opts">
-          <button class="opt">It shatters</button>
-          <button class="opt">It springs perfectly back to flat</button>
+          <button class="opt" data-why="Shattering is acrylic's failure, not metal's - bend aluminum hard and it yields quietly, keeping the bend like a paperclip you opened too far.">It shatters</button>
+          <button class="opt" data-why="A gentle flex does spring back, so this is a fair guess - but a hard bend crosses the yield point, and past that aluminum keeps the bend.">It springs perfectly back to flat</button>
           <button class="opt">It stays bent - a permanent set</button>
         </div>
         <div class="explain">Past its yield point, aluminum deforms permanently and keeps the bend. That's useful when you want to form a bracket, but a surprise if you expected it to spring back like polycarbonate.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">In the sim, you take Aluminum sheet up to 50% load and back to 0, press Reset, then go up to 60% and back to 0. What do you see each time?</div>
+        <div class="opts">
+          <button class="opt" data-why="It does spring back at 50%, so you are halfway there - but the yield point in this sim sits just above that, and the 60% run crosses it and leaves a bend.">Flat both times - aluminum always springs back unless it reaches 100%</button>
+          <button class="opt">Flat after the 50% run, but a permanent set after the 60% run</button>
+          <button class="opt" data-why="Aluminum feels soft, so this tempts - but below its yield point it is springy like any metal; only the 60% run pushes past yield and keeps the bend.">Bent both times - any load at all leaves aluminum with a permanent set</button>
+        </div>
+        <div class="explain">The sim's aluminum yields at about 52% load. Stop at 50% and you are still on the springy side of the yield point, so the panel returns dead flat. Push to 60% and you cross it - the panel keeps a bend even at zero load, the paperclip effect from the missions. Riding that 48 to 52 edge is exactly the gold mission.</div>
       </div>
     </div>
   </section>
@@ -379,7 +389,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

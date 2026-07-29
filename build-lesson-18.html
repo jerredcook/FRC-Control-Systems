@@ -208,9 +208,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">When is an elevator a better choice than an arm?</div>
         <div class="opts">
-          <button class="opt">When you need to swing in an arc</button>
+          <button class="opt" data-why="Arcs are the arm's home turf - if the tool must sweep up and over something, build an arm. The elevator's gift is pure straight-line height.">When you need to swing in an arc</button>
           <button class="opt">When you need clean straight-up-and-down vertical reach</button>
-          <button class="opt">Never</button>
+          <button class="opt" data-why="Arms do feel simpler, one pivot and one motor, so never is tempting - but when the job is pure vertical reach, an elevator's straight line beats wrestling an arc into place.">Never</button>
         </div>
         <div class="explain">An elevator moves its carriage in a straight vertical line. When the job is pure height with no need to swing, that's simpler and more predictable than an arm's arc.</div>
       </div>
@@ -218,8 +218,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">In a 2-stage cascade elevator, how fast does the carriage move vs the cable?</div>
         <div class="opts">
-          <button class="opt">Half as fast</button>
-          <button class="opt">The same speed</button>
+          <button class="opt" data-why="Half is the right ratio, just pointed the wrong way - the carriage is the fast, weak side of the trade. It moves twice the cable while lifting with half the force.">Half as fast</button>
+          <button class="opt" data-why="One-to-one is exactly right for Continuous rigging, so this is a close call - but cascade stacks each stage's motion, and the carriage outruns the cable two to one.">The same speed</button>
           <button class="opt">Twice as fast - each stage adds the cable's motion</button>
         </div>
         <div class="explain">Cascade rigging stacks the stage motions: with two moving stages the carriage travels twice the cable, reaching higher per motor turn. Continuous rigging is one-to-one.</div>
@@ -229,10 +229,20 @@
         <div class="qt">What's the downside of cascade's extra speed?</div>
         <div class="opts">
           <button class="opt">Less lifting force and more tension on the cable</button>
-          <button class="opt">It uses more battery only</button>
-          <button class="opt">There is no downside</button>
+          <button class="opt" data-why="Battery draw is a real robot worry, so this sounds plausible - but the true bill is mechanical: half the lifting force, and a cable and pulleys carrying extra tension.">It uses more battery only</button>
+          <button class="opt" data-why="The sim does make cascade look like free height, so this tempts - but rigging obeys the same rule as gears: twice the speed costs half the force, and the cable feels the difference.">There is no downside</button>
         </div>
         <div class="explain">Speed and force trade. Cascade moves twice as fast but lifts with half the force and loads the rigging harder. For heavy lifts, continuous is the safer, stronger choice.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">In the sim you pull Continuous rigging to a full 100%, and the amber bracket beside the carriage reads 50% - its ceiling. Your team wants Cascade to park the carriage at that exact same height. Where do you set the slider?</div>
+        <div class="opts">
+          <button class="opt" data-why="Same height for the same pull is how it works within one rigging, but not across the two - Cascade doubles the cable's travel, so a full 100% pull sends the carriage right past this height, all the way up to the dashed max reach line.">100% - the same height always takes the same pull, whatever the rigging</button>
+          <button class="opt">50% - cascade doubles the cable's travel, so the same height costs half the pull</button>
+          <button class="opt" data-why="Doubling twice would be right if each stage doubled the motion again, but the whole 2-stage rig doubles it once - the carriage moves twice the cable, so matching this height takes 50%, not 25%.">25% - each of the two stages doubles the motion, so a quarter pull is enough</button>
+        </div>
+        <div class="explain">Cascade's carriage travels twice the cable, so any height costs half the pull that Continuous pays: the height Continuous needs a full 100% for, Cascade reaches at just 50% on the slider. That is the samespot mission in reverse, and it is the same fact behind the gold mission - flip the rigging at mid-slider and the height doubles, because the routing decides how much cable a height costs before the motor ever turns.</div>
       </div>
     </div>
   </section>
@@ -352,7 +362,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

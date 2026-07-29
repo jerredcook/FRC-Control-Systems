@@ -327,9 +327,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">What two control loops does a single swerve module run?</div>
         <div class="opts">
-          <button class="opt">Two velocity loops</button>
+          <button class="opt" data-why="Half right - the drive motor really is a velocity loop. But the steer motor must point the wheel at an angle and hold it, and holding an angle is position control, just like the arm.">Two velocity loops</button>
           <button class="opt">A steer loop (position, like the arm) and a drive loop (velocity, like the flywheel)</button>
-          <button class="opt">A single PID for everything</button>
+          <button class="opt" data-why="One loop cannot chase two different goals at once - an angle for steering and a speed for driving. Each motor gets its own loop, so a module runs two.">A single PID for everything</button>
         </div>
         <div class="explain">Each module points its wheel with position control and spins it with velocity control - exactly the two Part IV mechanisms, one per motor. Four modules means eight motors and eight loops.</div>
       </div>
@@ -338,8 +338,8 @@
         <div class="qt">What does kinematics do?</div>
         <div class="opts">
           <button class="opt">Converts the driver's vx, vy, and rotation into an angle + speed for each module</button>
-          <button class="opt">Charges the battery</button>
-          <button class="opt">Tunes the PID gains</button>
+          <button class="opt" data-why="The name sounds fancy enough to do anything, but kinematics is pure geometry - it splits the driver's three numbers into an angle and a speed for each corner.">Charges the battery</button>
+          <button class="opt" data-why="Tuning is your job, done once per mechanism. Kinematics runs every single loop, converting chassis motion into the four module states - it is math, not gains.">Tunes the PID gains</button>
         </div>
         <div class="explain">SwerveDriveKinematics turns the three chassis numbers (forward, strafe, rotate) into four SwerveModuleStates. Run it backward - from how far the wheels actually moved - and you get odometry.</div>
       </div>
@@ -347,11 +347,21 @@
         <div class="qn">Question 3</div>
         <div class="qt">Why does a swerve module's steering need a FusedCANcoder?</div>
         <div class="opts">
-          <button class="opt">To spin faster</button>
-          <button class="opt">It doesn't - any sensor works</button>
+          <button class="opt" data-why="Speed is the drive motor's department. The CANcoder is about the steering angle - knowing it absolutely, so the wheel starts true instead of crooked.">To spin faster</button>
+          <button class="opt" data-why="The rotor alone really does work fine while driving - the catch is power-on. It forgets its zero when the robot sleeps, so without an absolute sensor the wheels boot crooked.">It doesn't - any sensor works</button>
           <button class="opt">So the wheel knows its absolute angle at power-on and doesn't start crooked</button>
         </div>
         <div class="explain">Steering is position control, and the rotor alone forgets its zero at power-off. An absolute CANcoder, fused with the fast rotor, gives the true wheel angle immediately - just like the arm.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">You hold Forward at 0.40 and Rotate at 1.00 through one full spin, watching the Front-left speed readout. What does it do?</div>
+        <div class="opts">
+          <button class="opt" data-why="A steady 1.4 is what pure rotation alone gives that corner. Add the forward slide and the two motions stack when they line up and cancel when they oppose, so the speed has to breathe as the robot turns.">Holds steady around 1.4 for the whole spin</button>
+          <button class="opt">Swings between about 1.0 and 1.8, peaking when the corner's share of the turn lines up with the slide</button>
+          <button class="opt" data-why="The sliders command speeds, not accelerations - holding them steady holds the motion steady. The swing you see repeats once per revolution because it comes from geometry, not from time.">Climbs steadily the longer you hold the sliders</button>
+        </div>
+        <div class="explain">Each corner's wheel velocity is the chassis slide plus that corner's share of the rotation. The rotation part alone is about 1.4 here; as the robot spins, the 0.40 forward slide sometimes adds to it (1.4 + 0.4 = 1.8) and sometimes fights it (1.4 - 0.4 = 1.0). That breathing is the blend mission's rhythm - kinematics recomputing the mix at every heading.</div>
       </div>
     </div>
   </section>
@@ -646,7 +656,7 @@
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
     opts.forEach(function(opt,i){
-      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
+      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } });
     });
   });
 })();

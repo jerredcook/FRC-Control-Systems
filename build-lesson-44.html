@@ -222,8 +222,8 @@
         <div class="qn">Question 1</div>
         <div class="qt">A 10:1 gear reduction does what to a motor's output?</div>
         <div class="opts">
-          <button class="opt">Speeds it up about 10 times and adds torque too</button>
-          <button class="opt">Changes nothing, it only saves space</button>
+          <button class="opt" data-why="It would be lovely to get both, but a gearbox cannot create energy - reduction is a trade, spending speed to buy torque, like dropping a bike into its hill-climbing gear.">Speeds it up about 10 times and adds torque too</button>
+          <button class="opt" data-why="Gearboxes are compact, so the guess is fair, but packaging is not their job - a 10:1 genuinely transforms the output, about 10 times slower for roughly 10 times the twist.">Changes nothing, it only saves space</button>
           <button class="opt">Slows it about 10 times slower for roughly 10 times the torque</button>
         </div>
         <div class="explain">Reduction trades speed for torque. A 10:1 turns the output about 10 times slower but with roughly 10 times the twist, minus a little friction loss. That is the main knob you turn to match a motor to a job.</div>
@@ -232,9 +232,9 @@
         <div class="qn">Question 2</div>
         <div class="qt">What is ReCalc for?</div>
         <div class="opts">
-          <button class="opt">Writing the robot's driving code</button>
+          <button class="opt" data-why="Fair guess from the name, but the code lives over in the Deploy course - ReCalc handles the design math, sizing motors and ratios before anyone cuts metal.">Writing the robot's driving code</button>
           <button class="opt">You give it the mechanism, weight, target speed, motor, and ratio, and it reports speed, time, current, and a suggested ratio</button>
-          <button class="opt">Ordering parts and tracking your budget</button>
+          <button class="opt" data-why="Teams do keep a spreadsheet for that, but ReCalc is not it - it is a physics calculator that turns your mechanism numbers into speed, time, and current answers.">Ordering parts and tracking your budget</button>
         </div>
         <div class="explain">ReCalc has every FRC motor built in. You pick the mechanism type and enter your numbers, and it reports the top speed, the time to move, the current draw, whether the robot tips, and a recommended ratio so you can adjust and re-read.</div>
       </div>
@@ -243,10 +243,20 @@
         <div class="qt">Why does the current draw matter when you choose a gear ratio?</div>
         <div class="opts">
           <button class="opt">Too much current can trip the 120 A breaker or brown out the battery</button>
-          <button class="opt">Current has nothing to do with the gear ratio</button>
-          <button class="opt">More current always makes the robot faster, so you want the most</button>
+          <button class="opt" data-why="They feel like separate knobs, but they are tied together - the ratio sets how hard the motor pushes, and a harder push always pulls more current from the battery.">Current has nothing to do with the gear ratio</button>
+          <button class="opt" data-why="More current does mean more push, which is the tempting half - but too much trips the 120 A main breaker or sags the battery into a brownout, and a rebooting robot is not fast at all.">More current always makes the robot faster, so you want the most</button>
         </div>
         <div class="explain">Pushing harder and adding motors both raise current. If the draw climbs too high it can trip the main breaker or sag the battery into a brownout, so a good ratio hits your speed and force targets while keeping current in a safe range.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">In the tradeoff sim you slide the reduction up to 50:1 and leave the motor count at 2. Roughly what current does the sim estimate, and how does it react?</div>
+        <div class="opts">
+          <button class="opt" data-why="That 16 A is only the fixed base draw of the two motors - the sim piles on more current as the reduction climbs, because a harder push always pulls harder on the battery.">About 16 A, since the gear ratio does not change how much current the motors pull</button>
+          <button class="opt">About 106 A, the current readout turns red, and the verdict warns you to watch the breaker</button>
+          <button class="opt" data-why="Motors do share the load, but each one still drinks its own current - in the sim adding a motor raises the total draw, it never splits or halves it.">About 53 A, because the two motors split the current between them and halve the total</button>
+        </div>
+        <div class="explain">In the sim, current is about 8 A per motor plus 0.9 A per motor for each step of reduction: with 2 motors at 50:1 that is 16 + 90, around 106 A. That crosses the 90 A warning line, so the readout goes red and the verdict says to watch the breaker. Slide it there and check, then notice the fix is the same loop ReCalc teaches: back the ratio off or rethink the motors until speed and current both look right.</div>
       </div>
     </div>
   </section>
@@ -333,7 +343,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

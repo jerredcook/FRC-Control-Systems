@@ -380,9 +380,9 @@ self.controller.<span class="fn">setPID</span>(<input class="blank" data-ans="kp
         <div class="qn">Question 1</div>
         <div class="qt">What's the recommended order for adding PID gains?</div>
         <div class="opts">
-          <button class="opt">kI first, then kP, then kD</button>
+          <button class="opt" data-why="Starting with the droop-fixer feels tidy, but kI is the touchiest gain and the last resort. Shape the response with kP, calm it with kD, then let kI mop up whatever is left.">kI first, then kP, then kD</button>
           <button class="opt">kP first, then kD, then kI</button>
-          <button class="opt">All three at once, then adjust</button>
+          <button class="opt" data-why="It sounds efficient, but with three knobs moving you cannot tell which turn caused which change. One gain at a time keeps every effect on the scope readable.">All three at once, then adjust</button>
         </div>
         <div class="explain">Get a responsive kP, damp it with kD, then add kI only if a steady-state error remains. This order keeps each effect readable instead of three gains fighting at once.</div>
       </div>
@@ -390,9 +390,9 @@ self.controller.<span class="fn">setPID</span>(<input class="blank" data-ans="kp
         <div class="qn">Question 2</div>
         <div class="qt">The carriage reaches the target fast but overshoots and rings. Best first move?</div>
         <div class="opts">
-          <button class="opt">Add more kI</button>
+          <button class="opt" data-why="kI cures parking low, not ringing - here it would pile extra push onto a carriage already sailing past. An overshooting trace is asking for damping.">Add more kI</button>
           <button class="opt">Raise kD (or lower kP)</button>
-          <button class="opt">Increase the setpoint</button>
+          <button class="opt" data-why="Moving the target changes where it rings, not whether it rings. The overshoot lives in the gains, so it follows the carriage to any setpoint you pick.">Increase the setpoint</button>
         </div>
         <div class="explain">Overshoot and ringing are a damping problem - raise kD to brake the approach, or back off kP if it's too aggressive. Adding kI here would only make the overshoot worse.</div>
       </div>
@@ -400,11 +400,21 @@ self.controller.<span class="fn">setPID</span>(<input class="blank" data-ans="kp
         <div class="qn">Question 3</div>
         <div class="qt">After a long move the carriage overshoots hard and takes forever to settle, but short moves are fine. The cause?</div>
         <div class="opts">
-          <button class="opt">kP is too low</button>
-          <button class="opt">The encoder is broken</button>
+          <button class="opt" data-why="Low kP would drag on every move, short ones included. When only the long move misbehaves, suspect something that grows with time on the way there.">kP is too low</button>
+          <button class="opt" data-why="A broken encoder would wreck every move, short ones first. Only-the-long-move-suffers is the classic fingerprint of integral pile-up, not a sensor fault.">The encoder is broken</button>
           <button class="opt">Integral windup on the long approach</button>
         </div>
         <div class="explain">Long moves give the integral time to pile up a backlog it can't act on, so it overshoots and unwinds slowly. Short moves never accumulate enough to matter. Clamp the integral or use an iZone.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">You load the Drooping preset (kP 6, kI 0) and let it settle. The Error readout sticks near 0.07 and will not budge. Which single change drives it all the way to 0.00?</div>
+        <div class="opts">
+          <button class="opt" data-why="Closer, but never zero - droop is g over kP, so kP 20 still leaves about 0.02 on the readout. Dividing a gap smaller is not the same as erasing it.">Slide kP up to 20</button>
+          <button class="opt">Nudge kI up from zero and let the integral build</button>
+          <button class="opt" data-why="kD only speaks while things are moving. Parked and steady there is no motion to brake, so its term reads zero and the carriage does not move an inch.">Raise kD to 6</button>
+        </div>
+        <div class="explain">That stubborn 0.07 is droop - gravity's 0.45 V divided by kP of 6. Only the integral can finish the job, because it keeps building until it supplies the holding volts itself, letting the error fall to zero. Load the preset, slide kI to about 0.5, and watch the Error readout bleed to 0.00.</div>
       </div>
     </div>
   </section>
@@ -625,7 +635,7 @@ self.controller.<span class="fn">setPID</span>(<input class="blank" data-ans="kp
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
     opts.forEach(function(opt,i){
-      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
+      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } });
     });
   });
 })();

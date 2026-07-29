@@ -200,8 +200,8 @@
         <div class="qt">What's the first step in designing a robot?</div>
         <div class="opts">
           <button class="opt">Understand the game and list what the robot must do</button>
-          <button class="opt">Start cutting metal</button>
-          <button class="opt">Buy the most expensive motor</button>
+          <button class="opt" data-why="Cutting metal feels like progress, which is exactly the trap - metal cut for the wrong plan is time and stock you never get back. Understand the game first, saws later.">Start cutting metal</button>
+          <button class="opt" data-why="Nice parts help, but no motor can rescue a robot built for the wrong job. The game manual, not the price tag, tells you what to build.">Buy the most expensive motor</button>
         </div>
         <div class="explain">You can't design for a game you don't understand. Read the manual, learn how points are scored, and write down the requirements before sketching anything.</div>
       </div>
@@ -209,8 +209,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">What does a decision matrix do?</div>
         <div class="opts">
-          <button class="opt">Designs the robot for you</button>
-          <button class="opt">Picks the cheapest option</button>
+          <button class="opt" data-why="If only - the matrix has no ideas of its own. People invent the concepts; the matrix just scores them fairly so the choice is not a shouting match.">Designs the robot for you</button>
+          <button class="opt" data-why="Cost can be one of the criteria if your team adds it, but the matrix plays no favorites - it totals whatever criteria and weights you feed it.">Picks the cheapest option</button>
           <button class="opt">Scores each concept against weighted criteria so the choice is objective</button>
         </div>
         <div class="explain">It rates every concept on the things that matter, weighted by importance, and totals them. The choice becomes a defensible number instead of the loudest opinion.</div>
@@ -219,11 +219,21 @@
         <div class="qn">Question 3</div>
         <div class="qt">Why include reliability and buildability in the criteria?</div>
         <div class="opts">
-          <button class="opt">They don't matter, only scoring does</button>
+          <button class="opt" data-why="Scoring is why you play, so this feels right - but a robot broken in the pit scores zero. Reliability is what lets the scoring happen match after match.">They don't matter, only scoring does</button>
           <button class="opt">A robot that works every match usually beats a fancy one that breaks</button>
-          <button class="opt">To make the matrix longer</button>
+          <button class="opt" data-why="More rows is not the goal - every criterion has to earn its spot by changing the outcome. These two are in because they decide real matches.">To make the matrix longer</button>
         </div>
         <div class="explain">Consistency wins. A robot you can actually finish and that scores every match outperforms a brilliant design that spends half its matches broken in the pit.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">From the sim</div>
+        <div class="qt">Simple and Sturdy is rated Scoring 3, Speed 2, Reliability 5, Buildability 5. You set the weights to Scoring 4, Speed 0, Reliability 0, Buildability 2. What total shows on its bar?</div>
+        <div class="opts">
+          <button class="opt" data-why="That is the four ratings added straight up - but the matrix multiplies each rating by its weight first, and the zero-weight criteria drop out entirely.">15</button>
+          <button class="opt" data-why="So close - 24 is Fast and Fancy's total under these same weights, 5 times 4 plus 2 times 2. Simple and Sturdy earns 12 from Scoring plus 10 from Buildability.">24</button>
+          <button class="opt">22</button>
+        </div>
+        <div class="explain">Each rating times its weight, added up: 3 times 4 gives 12 for Scoring and 5 times 2 gives 10 for Buildability, while Speed and Reliability are zeroed out. That is 22 - the same hand total the mission had you check on paper against the bar.</div>
       </div>
     </div>
   </section>
@@ -329,7 +339,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

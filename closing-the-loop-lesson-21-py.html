@@ -399,9 +399,9 @@ cfg.slot0.k_p = <span class="num">5.0</span>    <span class="cm"># amps per rps 
         <div class="qn">Question 1</div>
         <div class="qt">For velocity control, which gain does most of the work?</div>
         <div class="opts">
-          <button class="opt">kP</button>
+          <button class="opt" data-why="kP earned its keep on the elevator and arm, so it is a natural reflex - but those were position loops. For velocity, kV predicts the volts each speed needs and carries the whole loop.">kP</button>
           <button class="opt">kV - volts per unit of speed</button>
-          <button class="opt">kG</button>
+          <button class="opt" data-why="kG holds a mechanism up against gravity - but gravity does not slow a spinning wheel, so a flywheel has no kG at all.">kG</button>
         </div>
         <div class="explain">kV directly predicts the voltage needed to sustain a given speed, so it carries a velocity loop. kP only trims small errors, and there's no kG because gravity doesn't resist a spinning wheel.</div>
       </div>
@@ -410,8 +410,8 @@ cfg.slot0.k_p = <span class="num">5.0</span>    <span class="cm"># amps per rps 
         <div class="qt">Why keep kP small on a flywheel?</div>
         <div class="opts">
           <button class="opt">A large kP makes the speed overshoot and hunt - kV already holds it, so kP only needs to nudge</button>
-          <button class="opt">Large kP draws too much current</button>
-          <button class="opt">kP does nothing for velocity</button>
+          <button class="opt" data-why="Current is always worth watching, but that is not the danger here - stability is. A big kP overreacts to tiny speed errors and sets the wheel hunting up and down.">Large kP draws too much current</button>
+          <button class="opt" data-why="It does plenty - after a shot, kP is what sees the dip and refills it fast. It just has to stay gentle so it nudges instead of overreacting.">kP does nothing for velocity</button>
         </div>
         <div class="explain">With kV doing the heavy lifting, a big kP overreacts to tiny errors and sets the speed oscillating. A gentle kP cleans up disturbances without destabilizing the loop.</div>
       </div>
@@ -419,11 +419,21 @@ cfg.slot0.k_p = <span class="num">5.0</span>    <span class="cm"># amps per rps 
         <div class="qn">Question 3</div>
         <div class="qt">After a game piece dips the speed, what brings it back up?</div>
         <div class="opts">
-          <button class="opt">Nothing - you wait it out</button>
-          <button class="opt">Gravity</button>
+          <button class="opt" data-why="Waiting is exactly what the sleepy-kP clinic case felt like - the dip refills at the wheel's own slow pace. A working kP sees the error and adds volts right away instead.">Nothing - you wait it out</button>
+          <button class="opt" data-why="Gravity gets no vote on a spinning wheel - that is why there is no kG here. The recovery volts come from feedback reacting to the speed error.">Gravity</button>
           <button class="opt">Feedback (kP) reacting to the velocity error, on top of kV holding the base voltage</button>
         </div>
         <div class="explain">kV keeps supplying the steady-state voltage, and kP sees the sudden velocity error and adds extra volts to recover. That's why you wait for at_speed() again before the next shot.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">From the sim</div>
+        <div class="qt">You break the feedforward on purpose: kV down to 0.30, kP maxed at 8, target at 0.70. Where does the speed end up?</div>
+        <div class="opts">
+          <button class="opt">It settles just short, near 0.66, and At speed? never says yes - even a maxed kP cannot replace a starved kV</button>
+          <button class="opt" data-why="It feels like maximum feedback should win, but kP only makes volts out of error. The wheel parks exactly where kP's push balances the shortfall, which always leaves some error standing.">Right on 0.70 - kP at 8 is strong enough to close any gap</button>
+          <button class="opt" data-why="kP only adds volts while the speed sits below the target, and that push fades as the gap closes - it cannot carry the wheel past. Parking high is the too-much-kV signature, the opposite fault.">Above 0.70 - all that kP shoves the wheel past the target</button>
+        </div>
+        <div class="explain">This is the gap mission's punchline. kP can only push while error exists, so the wheel settles where kP times the error makes up for the starved kV - about 0.04 short, parked near 0.66, forever outside the at-speed tolerance. Feedback trims a good feedforward; it cannot replace one.</div>
       </div>
     </div>
   </section>
@@ -673,7 +683,7 @@ cfg.slot0.k_p = <span class="num">5.0</span>    <span class="cm"># amps per rps 
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
     opts.forEach(function(opt,i){
-      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
+      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } });
     });
   });
 

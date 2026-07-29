@@ -190,8 +190,8 @@
         <div class="qn">Question 1</div>
         <div class="qt">A battery reads a normal resting voltage. Why isn't that enough to trust it?</div>
         <div class="opts">
-          <button class="opt">Resting voltage is always wrong</button>
-          <button class="opt">Voltage doesn't matter at all</button>
+          <button class="opt" data-why="Almost - the lesson does say resting voltage lies, but lies means incomplete, not always wrong; the reading is real, it just cannot show a weak cell until a load pulls on it.">Resting voltage is always wrong</button>
+          <button class="opt" data-why="Voltage matters a lot - the catch is when you read it; a tired battery holds a normal number at rest and only sags once the robot starts drawing current.">Voltage doesn't matter at all</button>
           <button class="opt">A tired battery can still read fine at rest; you only see weakness under load</button>
         </div>
         <div class="explain">Resting voltage lies. A worn battery can show a normal number with nothing pulling on it, then sag badly the moment the robot draws current. A battery analyzer like the Beak loads the cell and reads its internal resistance, which is the honest test.</div>
@@ -201,8 +201,8 @@
         <div class="qt">A battery came off the robot warm and you want it ready again. What's the safe move?</div>
         <div class="opts">
           <button class="opt">Let it rest and cool, then charge it on a smart charger with a mentor present</button>
-          <button class="opt">Charge it on the robot to save time</button>
-          <button class="opt">Fast-charge it well past its rating</button>
+          <button class="opt" data-why="The time savings is tempting, which is exactly why the rule exists - charging on the robot is against event safety rules and a real fire and shock hazard, so the battery always comes off first.">Charge it on the robot to save time</button>
+          <button class="opt" data-why="It feels like the quick fix, but pushing current past the rating printed on the battery overheats the cell and wears it out early; the smart charger at the rated pace is the safe road back to full.">Fast-charge it well past its rating</button>
         </div>
         <div class="explain">A battery off the robot is warm and partly spent, so let it cool and rest first, then charge it fully on a proper smart charger. Never charge a battery on the robot (against the rules and unsafe), never fast-charge beyond its rating, and always have a mentor overseeing the charging station.</div>
       </div>
@@ -210,9 +210,9 @@
         <div class="qn">Question 3</div>
         <div class="qt">Why bother labeling, logging, and rotating your batteries?</div>
         <div class="opts">
-          <button class="opt">It looks organized for judges</button>
+          <button class="opt" data-why="Judges do notice a tidy pit, but that is a side bonus - the log's real job is forcing the cooldown gap and exposing the one cell that keeps testing weak.">It looks organized for judges</button>
           <button class="opt">It forces each battery to cool and fully recharge, and reveals which cells keep testing weak</button>
-          <button class="opt">It lets you reuse one battery all day</button>
+          <button class="opt" data-why="It is the opposite - the whole point of rotating is that no battery runs two matches back to back, so every cell gets time to cool and fully recharge before it races again.">It lets you reuse one battery all day</button>
         </div>
         <div class="explain">Rotation gives every battery a cooldown and a full recharge between matches, so you never send out a warm, half-spent cell. The log also exposes the battery that keeps showing up weak on the analyzer, so you can retire it before it causes a mid-match brownout.</div>
       </div>
@@ -278,7 +278,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

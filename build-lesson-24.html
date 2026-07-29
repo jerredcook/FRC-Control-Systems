@@ -202,8 +202,8 @@
         <div class="qn">Question 1</div>
         <div class="qt">What sets the maximum force a wheel can push before slipping?</div>
         <div class="opts">
-          <button class="opt">The motor's horsepower</button>
-          <button class="opt">The battery voltage</button>
+          <button class="opt" data-why="Power feels like push, but the floor gets the final vote - past the grip limit, extra horsepower only spins the wheel faster. The ceiling is friction times the weight pressing down.">The motor's horsepower</button>
+          <button class="opt" data-why="Voltage sets how hard the motor can try, not how hard the carpet lets you push - the slip point is grip times weight, and it does not move when the battery does.">The battery voltage</button>
           <button class="opt">Its grip (tread) times the weight pressing it down</button>
         </div>
         <div class="explain">Traction limit = coefficient of friction × weight on the wheel. That's the most it can push or accelerate. More motor power past that point just spins the wheel.</div>
@@ -213,8 +213,8 @@
         <div class="qt">You command more drive force than the wheels' traction. What happens?</div>
         <div class="opts">
           <button class="opt">The wheels break loose and spin; the actual push stays at the traction limit</button>
-          <button class="opt">The robot pushes twice as hard</button>
-          <button class="opt">The motor explodes</button>
+          <button class="opt" data-why="If only - the traction limit is a hard ceiling, not a suggestion. Commanding more force past it just breaks the wheels loose, and the actual push stays pinned right at the limit.">The robot pushes twice as hard</button>
+          <button class="opt" data-why="Motors do heat up when they fight a wall, but here the wheel slips before the motor suffers - the wheels spin on the carpet and the push tops out at the traction limit.">The motor explodes</button>
         </div>
         <div class="explain">Once you exceed traction, the wheel spins on the carpet. You can't push harder than your grip allows, no matter how much power you add.</div>
       </div>
@@ -222,11 +222,21 @@
         <div class="qn">Question 3</div>
         <div class="qt">Two robots are shoving each other. Which one wins?</div>
         <div class="opts">
-          <button class="opt">The one with the bigger motors</button>
+          <button class="opt" data-why="Bigger motors feel like the obvious edge, but in a shove both robots are already past their traction limits - the winner is whoever grips harder, not whoever can spin harder.">The one with the bigger motors</button>
           <button class="opt">The one with more traction - grippier tread and more weight on the drive wheels</button>
-          <button class="opt">The heavier robot, always</button>
+          <button class="opt" data-why="Weight does help - it is half of the traction formula - but only the weight on the drive wheels counts, and slick tread throws the advantage away. Grip times weight wins, not weight alone.">The heavier robot, always</button>
         </div>
         <div class="explain">Pushing matches come down to traction, not motor power. Grippier tread, softer durometer, and more weight over the drive wheels all add traction and win the shove.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">You leave the sliders at their starting values, grip mid and weight 60%, so Max push reads 53%. Then you slide Drive force up to 80%. What does Actual push read?</div>
+        <div class="opts">
+          <button class="opt" data-why="The slider asks for 80%, but the carpet only honors requests up to the traction limit - past 53% the wheels break loose, and the extra 27 points buy nothing but wheel spin.">80%, matching what you commanded</button>
+          <button class="opt">53% - the wheels break loose and the push stays pinned at the traction limit</button>
+          <button class="opt" data-why="Good instinct to subtract, but nothing gets carved off - the tread delivers everything up to its 53% limit and simply wastes the rest as spin. The readout parks at 53, not the difference.">About 27%, the leftover after subtracting the limit</button>
+        </div>
+        <div class="explain">At the starting grip and weight the sim's traction limit is 53%, so commanding 80% just breaks the wheels loose - Actual push pins at 53% while the wheels spin. To truly push harder you have to raise the limit itself, with grippier tread or more weight over the wheels, exactly what the missions had you prove with the grip and weight sliders.</div>
       </div>
     </div>
   </section>
@@ -358,7 +368,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

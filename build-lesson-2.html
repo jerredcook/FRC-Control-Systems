@@ -175,9 +175,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">What drives a socket-head cap screw, the most common FRC bolt?</div>
         <div class="opts">
-          <button class="opt">A Phillips screwdriver</button>
+          <button class="opt" data-why="A fair guess - Phillips heads are everywhere at home. But a socket-head cap screw has a hexagonal socket in the top, so it takes a hex key, not a cross-shaped tip.">A Phillips screwdriver</button>
           <button class="opt">A hex / Allen key</button>
-          <button class="opt">Pliers</button>
+          <button class="opt" data-why="Pliers will grab almost anything, which is exactly the temptation. But they chew up the head fast; the hex key fits inside the socket and turns it cleanly.">Pliers</button>
         </div>
         <div class="explain">Socket-head cap screws have a hexagonal socket in the top, so a hex (Allen) key fits inside and drives them. It's the tool you'll use more than any other.</div>
       </div>
@@ -186,8 +186,8 @@
         <div class="qt">Why match the driver size carefully to the fastener?</div>
         <div class="opts">
           <button class="opt">A loose fit spins inside the head and strips it</button>
-          <button class="opt">It makes the bolt stronger</button>
-          <button class="opt">It changes the thread pitch</button>
+          <button class="opt" data-why="It would be nice if a snug fit added strength, but the bolt's strength comes from its own steel. The right size is about grip, so the tool turns the head instead of rounding it out.">It makes the bolt stronger</button>
+          <button class="opt" data-why="Threads are on your mind from this lesson, but the pitch is cut into the bolt at the factory. No driver can change it - the wrong size only ruins the head.">It changes the thread pitch</button>
         </div>
         <div class="explain">A tool that's too small can't grip, so it rounds out the head. A stripped fastener is slow and frustrating to remove. Seat the right size fully before you turn.</div>
       </div>
@@ -195,8 +195,8 @@
         <div class="qn">Question 3</div>
         <div class="qt">You just cut a tube and the edge is sharp. What do you reach for?</div>
         <div class="opts">
-          <button class="opt">A tape measure</button>
-          <button class="opt">A ratchet</button>
+          <button class="opt" data-why="Measuring first is usually the right instinct, but this cut is already made. The sharp burr is the problem now, and smoothing it is a job for a file.">A tape measure</button>
+          <button class="opt" data-why="A ratchet turns fasteners, and there is nothing to turn yet. The freshly cut edge needs its burr smoothed off before it slices a hand.">A ratchet</button>
           <button class="opt">A file or deburring tool</button>
         </div>
         <div class="explain">Every cut and drilled hole leaves a sharp burr. A quick pass with a file or deburring tool removes it so it won't slice a hand or interfere with assembly.</div>
@@ -288,7 +288,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

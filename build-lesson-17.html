@@ -210,9 +210,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">What does a parallel four-bar linkage do?</div>
         <div class="opts">
-          <button class="opt">Spins a wheel up to speed</button>
+          <button class="opt" data-why="Spinning a wheel up is the shooter's job from the toolbox lesson - a four-bar is about carrying, not launching. It swings a platform while holding its angle.">Spins a wheel up to speed</button>
           <button class="opt">Moves an end effector while keeping it at a constant angle</button>
-          <button class="opt">Lifts straight up only</button>
+          <button class="opt" data-why="Straight vertical travel is the elevator's specialty - a four-bar sweeps along an arc, gaining reach and height together while the platform stays level.">Lifts straight up only</button>
         </div>
         <div class="explain">A parallel four-bar forms a parallelogram, so the coupler (and whatever rides on it) keeps the same angle through the whole swing, staying level while it reaches out and up.</div>
       </div>
@@ -221,8 +221,8 @@
         <div class="qt">Why does the platform stay level on a four-bar but tilt on a single arm?</div>
         <div class="opts">
           <button class="opt">The two parallel arms keep it a parallelogram; a single arm rotates everything on its end</button>
-          <button class="opt">The four-bar has a sensor keeping it level</button>
-          <button class="opt">The single arm is heavier</button>
+          <button class="opt" data-why="It honestly looks that smart, so a sensor is a fair guess - but there are no electronics at all. A parallelogram cannot tilt, which is why teams love it: level for free.">The four-bar has a sensor keeping it level</button>
+          <button class="opt" data-why="Weight is a real design worry, but it is not what tilts the tray - a single arm rigidly rotates everything on its end, light or heavy.">The single arm is heavier</button>
         </div>
         <div class="explain">It's pure geometry. A parallelogram's opposite sides stay parallel, so the coupler can't rotate. A single arm rigidly carries its end effector, so the end effector turns with the arm.</div>
       </div>
@@ -230,11 +230,21 @@
         <div class="qn">Question 3</div>
         <div class="qt">How do you set the angle a four-bar's end effector holds?</div>
         <div class="opts">
-          <button class="opt">With a PID loop in code</button>
-          <button class="opt">It's random</button>
+          <button class="opt" data-why="After enough control lessons everything starts to look like a PID problem - but a four-bar's angle is locked in by geometry before the robot ever powers on. Nothing to tune.">With a PID loop in code</button>
+          <button class="opt" data-why="It can look random until you spot the pattern - but the tilt follows the bar lengths exactly. Equal parallel arms hold level; unequal arms tilt a planned amount.">It's random</button>
           <button class="opt">By choosing the bar lengths and pivot positions when you design it</button>
         </div>
         <div class="explain">The behavior is built into the geometry. Equal parallel arms hold level; deliberately unequal arms tilt by a set amount. You design it on paper, not in software.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">From the sim</div>
+        <div class="qt">In the sim, on Single arm, you park the slider at 120 degrees. What does the End effector tilt readout show?</div>
+        <div class="opts">
+          <button class="opt">-30 degrees, from the missions' rule: tilt = 90 - arm angle, and 90 - 120 = -30</button>
+          <button class="opt" data-why="The size is right, 120 is 30 past vertical - but watch which way the tray leans in the sim. Past 90 degrees the rule 90 - arm angle goes negative, so it reads -30.">30 degrees, since you pushed 30 past vertical</button>
+          <button class="opt" data-why="Staying level is the four-bar's superpower, and it is easy to carry that over - but you are on Single arm here, and a single arm rotates its tray right along with it.">0 degrees, the linkage holds the tray level at every angle</button>
+        </div>
+        <div class="explain">A single arm carries its tray rigidly, so tilt = 90 - arm angle. At 120 degrees that is 90 - 120 = -30 degrees, leaning the opposite way from the 60-degree tilt you computed at 30 degrees in the missions. Flip back to Four-bar and the same slider position reads 0 - the parallelogram never tilts.</div>
       </div>
     </div>
   </section>
@@ -361,7 +371,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

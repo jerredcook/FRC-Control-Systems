@@ -262,8 +262,8 @@
         <div class="qn">Question 1</div>
         <div class="qt">What does a method's <em>return value</em> give you?</div>
         <div class="opts">
-          <button class="opt">A new motor</button>
-          <button class="opt">The names of its parameters</button>
+          <button class="opt" data-why="Methods do drive motors on a robot, so the guess makes sense - but a return value is just data handed back to the caller, like deadband handing back the cleaned-up number.">A new motor</button>
+          <button class="opt" data-why="Parameters are part of the story, but they are the inputs going in - the return value is the answer coming out after the method does its work.">The names of its parameters</button>
           <button class="opt">The result it hands back when you call it</button>
         </div>
         <div class="explain">You call a method with inputs (parameters); it does work and returns a value you can use - like deadband(x, tol) returning the cleaned-up joystick value.</div>
@@ -273,8 +273,8 @@
         <div class="qt">In the deadband, when does it return 0 instead of x?</div>
         <div class="opts">
           <button class="opt">When |x| is less than tol - the stick is barely moved</button>
-          <button class="opt">When x is exactly 1.0</button>
-          <button class="opt">Never</button>
+          <button class="opt" data-why="Full stick feels special, but 1.0 is far outside the band, so it passes straight through - the zero happens when |x| sneaks in under tol.">When x is exactly 1.0</button>
+          <button class="opt" data-why="It happens more than never - any time the stick sits inside the band, which is most of the time you are not touching it, the method returns exactly 0.">Never</button>
         </div>
         <div class="explain">The if checks Math.abs(x) &lt; tol. If the joystick is inside that small band, it's treated as zero so noise doesn't drive the robot; outside, x passes through.</div>
       </div>
@@ -282,11 +282,21 @@
         <div class="qn">Question 3</div>
         <div class="qt">Why use a loop to configure four modules?</div>
         <div class="opts">
-          <button class="opt">Loops make the robot faster</button>
+          <button class="opt" data-why="A fair hope, but the robot runs the same either way - the loop saves the programmer, not the processor, by writing the step once instead of four times.">Loops make the robot faster</button>
           <button class="opt">One block of code handles all four - no copy-paste, no missed module</button>
-          <button class="opt">It's the only way to use arrays</button>
+          <button class="opt" data-why="Arrays and loops are best friends, but you can grab modules[2] any time with no loop in sight - the loop just visits every slot without copy-paste.">It's the only way to use arrays</button>
         </div>
         <div class="explain">A for loop runs the same code for each index. Write it once; it can't drift out of sync the way four copy-pasted blocks can.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">In the sim, tol sits at 0.10 and a worn stick rests at exactly x = 0.10. What does deadband hand back?</div>
+        <div class="opts">
+          <button class="opt" data-why="So close - 0.10 is right on the fence, not inside it. The test is Math.abs(x) &lt; tol, strictly less, and 0.10 &lt; 0.10 is false, so x passes through untouched.">0 - the stick is inside the band</button>
+          <button class="opt">0.10 - it passes straight through</button>
+          <button class="opt" data-why="A reasonable guess, since some teams do reshape the output later - but this deadband is all-or-nothing: 0 inside the band, x untouched outside it. Nothing gets halved.">0.05 - the deadband cuts the value in half</button>
+        </div>
+        <div class="explain">The edge mission trained exactly this spot: the check is Math.abs(x) &lt; tol, strictly less than. At x = 0.10 the test 0.10 &lt; 0.10 comes up false, so the else branch runs and 0.10 comes through - which is why a stick that rests right at the edge makes the robot creep.</div>
       </div>
     </div>
   </section>
@@ -390,7 +400,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

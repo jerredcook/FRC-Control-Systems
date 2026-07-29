@@ -318,9 +318,9 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(<i
         <div class="qn">Question 1</div>
         <div class="qt">Which setting most directly protects your motor from burning up?</div>
         <div class="opts">
-          <button class="opt">NeutralMode</button>
+          <button class="opt" data-why="Brake vs coast matters a lot, but it only decides what the motor does when idle - it cannot stop the windings from cooking under a hard load. The stator limit does that.">NeutralMode</button>
           <button class="opt">The stator current limit</button>
-          <button class="opt">The CAN id</button>
+          <button class="opt" data-why="The CAN id is just the motor's street address on the bus - it changes where messages go, not how much current is allowed to heat the windings.">The CAN id</button>
         </div>
         <div class="explain">The stator current limit caps the current actually flowing through the motor windings - that's what generates heat and torque. A supply limit additionally protects your breaker. Always set both.</div>
       </div>
@@ -328,8 +328,8 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(<i
         <div class="qn">Question 2</div>
         <div class="qt">For an arm that must hold its position when the robot is disabled, which neutral mode do you want?</div>
         <div class="opts">
-          <button class="opt">Coast - let it swing freely</button>
-          <button class="opt">It doesn't matter</button>
+          <button class="opt" data-why="Coast is the right pick for a drivetrain you push around the pit, which is why it tempts - but a disabled arm in coast flops straight down. Brake is what holds it up.">Coast - let it swing freely</button>
+          <button class="opt" data-why="It genuinely matters here - disable the robot in coast and the arm drops the moment power cuts. Brake resists motion, so the arm stays where you left it.">It doesn't matter</button>
           <button class="opt">Brake - resist motion so it stays put</button>
         </div>
         <div class="explain">Brake mode shorts the motor leads when idle, resisting motion, so the arm doesn't flop down. Coast is for things you want to roll free, like a drivetrain you push around the pit.</div>
@@ -339,10 +339,20 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(<i
         <div class="qt">What does a FusedCANcoder give you that the internal rotor alone can't?</div>
         <div class="opts">
           <button class="opt">An absolute angle that's correct the moment the robot powers on</button>
-          <button class="opt">More torque</button>
-          <button class="opt">A faster CAN bus</button>
+          <button class="opt" data-why="Torque comes from current and the motor itself - a sensor cannot add muscle. What the CANcoder adds is knowledge: the true angle the moment power comes on.">More torque</button>
+          <button class="opt" data-why="Bus speed is a wiring-and-hardware thing that no sensor choice changes. The fused setup is about knowing the absolute angle at power-on, not moving data faster.">A faster CAN bus</button>
         </div>
         <div class="explain">The internal rotor is fast but only counts from wherever it booted. A CANcoder is absolute - it knows the true angle immediately. Fusing them gives an arm or swerve module instant, accurate position plus a smooth high-rate loop.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">In the builder, the ratio slider sits at 9.0 and you flip Position sensor from Internal rotor to Fused CANcoder. What happens to the ratio line in the generated Java?</div>
+        <div class="opts">
+          <button class="opt" data-why="Absolute does sound like ratio-free, which is the trap - but fusing fast rotor counts with the CANcoder angle only works if the device knows how many rotor turns make one sensor turn.">It disappears - an absolute sensor makes the gear ratio unnecessary</button>
+          <button class="opt">It becomes RotorToSensorRatio = 9.0, and FeedbackSensorSource plus FeedbackRemoteSensorID lines appear</button>
+          <button class="opt" data-why="Reasonable guess, but click it and watch - the whole Feedback block rewrites. The ratio now describes rotor turns per CANcoder turn, so it changes name to match its new job.">It stays SensorToMechanismRatio = 9.0 - the sensor picker changes other blocks, not this one</button>
+        </div>
+        <div class="explain">Flip the switch and watch the Feedback block rewrite itself: the source becomes FusedCANcoder, a device id line appears, and your 9.0 moves into RotorToSensorRatio - rotor turns per CANcoder turn, the number the fusing math needs. Same slider, new meaning, which is why the builder renames the line instead of dropping it.</div>
       </div>
     </div>
   </section>
@@ -484,7 +494,7 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(<i
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
     opts.forEach(function(opt,i){
-      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
+      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } });
     });
   });
 })();

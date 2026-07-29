@@ -204,9 +204,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">Why prototype before building the final part?</div>
         <div class="opts">
-          <button class="opt">To make the robot heavier</button>
+          <button class="opt" data-why="Weight is one thing a prototype never adds - the mockup never rides on the robot. It exists to answer questions cheaply, then gets recycled.">To make the robot heavier</button>
           <button class="opt">To find problems while they're cheap and fast to fix</button>
-          <button class="opt">Prototyping is a waste of time</button>
+          <button class="opt" data-why="It can feel like a detour when the deadline looms, but twenty minutes of cardboard routinely saves days of remachining. The fastest teams are the ones that prototype the most.">Prototyping is a waste of time</button>
         </div>
         <div class="explain">A rough mockup surfaces flaws early, when fixing them costs minutes and cardboard instead of days and aluminum.</div>
       </div>
@@ -215,8 +215,8 @@
         <div class="qt">What should you usually prototype with first?</div>
         <div class="opts">
           <button class="opt">Cheap, fast materials like cardboard, tape, and wood</button>
-          <button class="opt">The most expensive aluminum</button>
-          <button class="opt">Nothing, just build the final part</button>
+          <button class="opt" data-why="Aluminum feels serious, but it buys you maybe two tries - and early on you need a dozen. Save the metal for after cardboard has settled the shape questions.">The most expensive aluminum</button>
+          <button class="opt" data-why="Skipping straight to the final part is the expensive gamble - the first flaw shows up in machined metal instead of free cardboard. Cheap tries first, commitment later.">Nothing, just build the final part</button>
         </div>
         <div class="explain">Start at the bottom of the ladder. Cheap materials let you try many ideas quickly before committing real time and money.</div>
       </div>
@@ -224,11 +224,21 @@
         <div class="qn">Question 3</div>
         <div class="qt">When should you commit to the final metal version?</div>
         <div class="opts">
-          <button class="opt">Immediately, before any testing</button>
-          <button class="opt">Never</button>
+          <button class="opt" data-why="Bold, but that bets the whole build window on a guess. Metal comes after the cheap rungs have proven the shape and the motion.">Immediately, before any testing</button>
+          <button class="opt" data-why="You do have to commit eventually - a cardboard intake cannot take a match hit. The trick is committing after the big questions are answered, not before.">Never</button>
           <button class="opt">After cheap prototypes have answered the big questions</button>
         </div>
         <div class="explain">Climb the ladder: once cardboard and wood have proven the shape, fit, and motion, you commit to metal with confidence.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">The question on the table is motion: will the arm really swing through its full travel? You also want about 5 tries to get it right. Where does the sim say to park the material slider?</div>
+        <div class="opts">
+          <button class="opt" data-why="Cardboard is the champion for shape questions and it hands you 12 tries - but it flexes too much to prove real motion. The 5-try rung sits one step up.">Cardboard</button>
+          <button class="opt">Plywood</button>
+          <button class="opt" data-why="Aluminum would certainly prove the motion, but the sim only affords you 2 tries there - an expensive way to answer a question plywood settles for far less.">Aluminum</button>
+        </div>
+        <div class="explain">Plywood is the middle rung: stiff enough to prove real motion, and the sim's tries readout gives it about 5 attempts for the time and cost. Cardboard's 12 tries are for shape questions; aluminum's 2 are saved for the final is-it-match-ready question.</div>
       </div>
     </div>
   </section>
@@ -348,7 +358,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

@@ -264,8 +264,8 @@ chooser.<input class="blank" data-ans="addoption" data-fill="addOption" aria-lab
         <div class="qn">Question 1</div>
         <div class="qt">What is an autonomous routine, in code?</div>
         <div class="opts">
-          <button class="opt">A single setVoltage call</button>
-          <button class="opt">A special kind of motor</button>
+          <button class="opt" data-why="A voltage call is real robot code, so it is a fair reach - but it is one muscle twitch, not a routine. An auto strings whole commands together: drives, scores, intakes, in order.">A single setVoltage call</button>
+          <button class="opt" data-why="No new hardware appears when auto starts - the same motors run either way. What changes is who is in charge: a command group gives the orders instead of a driver.">A special kind of motor</button>
           <button class="opt">A command composition of path-follows and mechanism commands</button>
         </div>
         <div class="explain">Auto is just the command groups from Part 3 applied to the field: sequence a few path-follow and mechanism commands and the robot runs them on its own.</div>
@@ -274,9 +274,9 @@ chooser.<input class="blank" data-ans="addoption" data-fill="addOption" aria-lab
         <div class="qn">Question 2</div>
         <div class="qt">You want the shooter spinning up while the robot is still driving to the goal. How?</div>
         <div class="opts">
-          <button class="opt">Put them in sequence, one after the other</button>
+          <button class="opt" data-why="Sequence is the right tool for most of an auto, which is why it tempts here. But sequence waits: the shooter would only start spinning after the drive fully ends. Overlap takes a parallel composition.">Put them in sequence, one after the other</button>
           <button class="opt">Run them in parallel - drive.followPath(...).alongWith(shooter.spinUp())</button>
-          <button class="opt">It's impossible</button>
+          <button class="opt" data-why="It would be, if the scheduler ran one command at a time - but it happily runs commands on different subsystems together. Drivetrain drives, shooter spins, no conflict.">It's impossible</button>
         </div>
         <div class="explain">Parallel composition runs both at once, so the shooter is at speed the moment the robot arrives. Overlapping actions like this is how teams shave seconds off an auto.</div>
       </div>
@@ -285,10 +285,20 @@ chooser.<input class="blank" data-ans="addoption" data-fill="addOption" aria-lab
         <div class="qt">How does the drive team pick which auto runs before a match?</div>
         <div class="opts">
           <button class="opt">A SendableChooser published to the dashboard</button>
-          <button class="opt">By re-deploying new code each match</button>
-          <button class="opt">It's random</button>
+          <button class="opt" data-why="Teams really have tried this, and it burns them - deploys are slow and risky with a match about to start. A chooser moves the decision to the dashboard, no laptop surgery in the queue line.">By re-deploying new code each match</button>
+          <button class="opt" data-why="Match play can feel chaotic, but the auto is never left to chance. The drive team picks it on purpose from a dashboard list, matched to their alliance's strategy for that game.">It's random</button>
         </div>
         <div class="explain">A SendableChooser lists your autos on the dashboard (NetworkTables again). The drive team selects one before the match, and the robot reads that choice when autonomous starts.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">Run the auto and pause it while chip 3 - followPath to PICKUP - is active. Is the green game-piece dot on the robot at that moment?</div>
+        <div class="opts">
+          <button class="opt" data-why="It did start with the preload, which is the tempting half. But chip 2 was scoreHigh, and scoring hands the piece away. A sequence changes the robot's state step by step, not all at the end.">Yes - the robot keeps its preload until the routine ends</button>
+          <button class="opt">No - chip 2 scored the preload, so the robot drives to PICKUP empty, and the dot returns after chip 4 intakes</button>
+          <button class="opt" data-why="A fair suspicion, sims do decorate - but watch one full run closely. The dot vanishes at each score and reappears at the intake, tracking exactly what the sequence has done so far.">The dot never changes - it is decoration, not part of the sequence</button>
+        </div>
+        <div class="explain">The dot is the robot's game-piece state, and the sequence drives it: the preload leaves at chip 2 (score), the robot travels to PICKUP empty, and chip 4's intake loads a new piece for the final score. Pausing anywhere and asking what should be true right now is exactly how you will debug a real auto - if the robot arrives at the goal without a piece, you know precisely which earlier step to blame.</div>
       </div>
     </div>
   </section>
@@ -433,7 +443,7 @@ chooser.<input class="blank" data-ans="addoption" data-fill="addOption" aria-lab
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

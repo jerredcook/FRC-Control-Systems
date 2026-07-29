@@ -272,8 +272,8 @@ gyro.<input class="blank" data-ans="setyaw" data-reveal="setYaw" aria-label="bla
         <div class="qn">Question 1</div>
         <div class="qt">What does a gyro / IMU measure?</div>
         <div class="opts">
-          <button class="opt">How far a mechanism extended</button>
-          <button class="opt">The battery voltage</button>
+          <button class="opt" data-why="That is the encoder's job from the last lesson - it measures one mechanism's travel. The gyro watches the whole robot and reports which way it points.">How far a mechanism extended</button>
+          <button class="opt" data-why="Worth watching, but voltage is the power system's number, not the IMU's. A gyro senses rotation - the robot's heading.">The battery voltage</button>
           <button class="opt">The robot's heading - which way the whole robot is pointing</button>
         </div>
         <div class="explain">An IMU senses rotation, giving you yaw (heading). Encoders handle "how far did this mechanism move"; the gyro handles "which way is the robot facing."</div>
@@ -283,8 +283,8 @@ gyro.<input class="blank" data-ans="setyaw" data-reveal="setYaw" aria-label="bla
         <div class="qt">You spin the robot two and a half times to the left. What does the continuous getYaw() read (CCW positive)?</div>
         <div class="opts">
           <button class="opt">About 900° - it keeps counting, it doesn't reset at 360</button>
-          <button class="opt">Exactly 180°</button>
-          <button class="opt">0°, it always resets each turn</button>
+          <button class="opt" data-why="180 is where the wrapped form folds, so it is a tempting stop - but continuous yaw never folds. It keeps adding: 2.5 turns lands at 900.">Exactly 180°</button>
+          <button class="opt" data-why="A reading that resets each lap would lose count of the laps. Continuous yaw is an odometer - it keeps every degree you turn.">0°, it always resets each turn</button>
         </div>
         <div class="explain">Continuous yaw accumulates: 2.5 turns × 360 = 900°. That's great for counting total rotation. If you want it folded into -180..180, use the wrapped form or a Rotation2d.</div>
       </div>
@@ -292,11 +292,21 @@ gyro.<input class="blank" data-ans="setyaw" data-reveal="setYaw" aria-label="bla
         <div class="qn">Question 3</div>
         <div class="qt">Field-relative driving ("forward is always down-field") depends on what?</div>
         <div class="opts">
-          <button class="opt">The drum diameter</button>
+          <button class="opt" data-why="Drum diameter belongs to the elevator math from the encoder lesson. Field-relative needs to know which way the robot faces, and only the gyro knows that.">The drum diameter</button>
           <button class="opt">The gyro heading, used to rotate the joystick into the field frame</button>
-          <button class="opt">Brake mode</button>
+          <button class="opt" data-why="Brake mode only decides how a motor settles when you stop commanding it. Rotating the stick into the field frame takes a live heading from the gyro.">Brake mode</button>
         </div>
         <div class="explain">Field-relative drive takes your joystick command and rotates it by the negative of the robot's heading, so "away from you" maps to down-field no matter how the robot is turned. No gyro, no field-relative.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">You hold ⟲ until the continuous getYaw() readout shows +630°. What does the wrapped -180..180 readout show?</div>
+        <div class="opts">
+          <button class="opt" data-why="Good start - 630 minus one full turn is 270. But 270 sits past the +180 edge, so the wrapped readout folds it once more, to -90.">+270°</button>
+          <button class="opt">-90°</button>
+          <button class="opt" data-why="That is the continuous readout's number - it never folds. The wrapped readout strips the full turn and folds the rest into the -180..180 range.">+630°</button>
+        </div>
+        <div class="explain">Strip the full lap first: 630 - 360 = 270. But the wrapped form only runs -180 to +180, so 270 folds around to 270 - 360 = -90. Try it in the sim: park continuous near +630 and the wrapped readout sits near -90 while full turns reads 1.75.</div>
       </div>
     </div>
   </section>
@@ -434,7 +444,7 @@ gyro.<input class="blank" data-ans="setyaw" data-reveal="setYaw" aria-label="bla
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

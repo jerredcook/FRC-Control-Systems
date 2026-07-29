@@ -300,9 +300,9 @@ motor.<span class="fn">setVoltage</span>( <input class="blank" data-ans="ffvolts
         <div class="qn">Question 1</div>
         <div class="qt">For a static hold, <code style="font-family:var(--mono);color:var(--teal)">ff.calculate(0)</code> returns approximately…</div>
         <div class="opts">
-          <button class="opt">Zero - nothing is moving</button>
+          <button class="opt" data-why="Zero motion does wipe out the kV, kA, and kS terms - but gravity never clocks out, and kG is the standing charge feedforward pays to hold against it.">Zero - nothing is moving</button>
           <button class="opt">kG - the constant voltage that holds against gravity</button>
-          <button class="opt">The full battery voltage</button>
+          <button class="opt" data-why="Full battery is a maximum-effort sprint, and holding still is the opposite - the hang costs only kG, a small slice of the 12 volts available.">The full battery voltage</button>
         </div>
         <div class="explain">At zero velocity the kV and kA terms vanish and kS doesn't apply, so the feedforward returns kG - exactly the voltage needed to hang in place. That's what erases the droop.</div>
       </div>
@@ -310,8 +310,8 @@ motor.<span class="fn">setVoltage</span>( <input class="blank" data-ans="ffvolts
         <div class="qn">Question 2</div>
         <div class="qt">How do you combine feedforward and PID in code?</div>
         <div class="opts">
-          <button class="opt">Use whichever one is bigger</button>
-          <button class="opt">Multiply their outputs</button>
+          <button class="opt" data-why="Picking a winner sounds tidy, but they are teammates - feedforward carries the predicted load while PID trims the leftovers, so both voltages go in.">Use whichever one is bigger</button>
+          <button class="opt" data-why="Multiplying feels like combining, but volts times volts is not volts - and the moment PID's output touches zero, the product would erase feedforward too.">Multiply their outputs</button>
           <button class="opt">Add their outputs: setVoltage(ffVolts + fbVolts)</button>
         </div>
         <div class="explain">They're both voltages. Feedforward supplies the predicted bulk; PID adds a correction for whatever's left. You sum them and send the total to the motor.</div>
@@ -321,10 +321,20 @@ motor.<span class="fn">setVoltage</span>( <input class="blank" data-ans="ffvolts
         <div class="qt">Why does ArmFeedforward need the arm's angle, but ElevatorFeedforward doesn't?</div>
         <div class="opts">
           <button class="opt">Gravity's pull on an arm changes with angle (kG·cos θ); on an elevator it's constant</button>
-          <button class="opt">Arms use a different kind of motor</button>
-          <button class="opt">Elevators don't experience gravity</button>
+          <button class="opt" data-why="The motor can be the same in both - what changes is the geometry: an arm is a lever, so gravity's grip fades with angle and the feedforward has to know that angle.">Arms use a different kind of motor</button>
+          <button class="opt" data-why="Elevators feel gravity plenty - that is exactly what kG fights. The difference is that the pull never changes with height, so one constant kG covers every position.">Elevators don't experience gravity</button>
         </div>
         <div class="explain">A horizontal arm fights full gravity; a vertical one fights none - so the holding voltage scales with cos(angle). An elevator pulls straight up against the same gravity everywhere, so a single kG covers it.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">From the sim</div>
+        <div class="qt">Feedforward is on, but you drag kG to 0.65 when the true gravity hold is 0.45, with kP = 4.0. Where does the carriage park?</div>
+        <div class="opts">
+          <button class="opt" data-why="That would be true with a kI term or a perfect kG, but this loop has neither - plain P will happily trade a standing error against the extra shove, so the offset stays.">Dead on the setpoint - PID still zeroes out the difference</button>
+          <button class="opt" data-why="0.20 is the extra voltage, not the distance - P converts it into position error at a rate of one over kP, so the park is 0.20 ÷ 4 = 0.05 above.">About 0.20 above - the full kG excess becomes distance</button>
+          <button class="opt">About 0.05 above - P needs 0.20 ÷ 4 of error to cancel the extra push</button>
+        </div>
+        <div class="explain">kG is over-guessing gravity by 0.65 - 0.45 = 0.20 V, a constant upward shove. The carriage rises until the P term pulls back exactly that hard: kP × error = 0.20, so it parks 0.20 ÷ 4 = 0.05 above the line. Mis-tuned feedforward does not oscillate - it just parks you off by its mistake divided by kP.</div>
       </div>
     </div>
   </section>
@@ -504,7 +514,7 @@ motor.<span class="fn">setVoltage</span>( <input class="blank" data-ans="ffvolts
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
     opts.forEach(function(opt,i){
-      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} });
+      opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } });
     });
   });
 })();

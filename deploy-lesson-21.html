@@ -288,9 +288,9 @@ drive.<span class="fn">arcadeDrive</span>(fwd, rot);   <span class="cm">// rot: 
         <div class="qn">Question 1</div>
         <div class="qt">Why apply a deadband to a joystick axis?</div>
         <div class="opts">
-          <button class="opt">To make the robot faster</button>
+          <button class="opt" data-why="Top speed never changes - a full push still reaches full output. The deadband only cleans up the tiny wobble near center so the robot holds still at rest.">To make the robot faster</button>
           <button class="opt">Sticks don't rest at exactly 0, so small values are ignored to stop drift</button>
-          <button class="opt">To save battery</button>
+          <button class="opt" data-why="A resting creep sips barely any battery - the real cost is a robot that will not sit still. The deadband zeroes out that wobble.">To save battery</button>
         </div>
         <div class="explain">A released stick still reads a little off-center. Without a deadband that becomes a slow creep. Treating anything near zero as zero keeps the robot still when the driver isn't touching it.</div>
       </div>
@@ -298,8 +298,8 @@ drive.<span class="fn">arcadeDrive</span>(fwd, rot);   <span class="cm">// rot: 
         <div class="qn">Question 2</div>
         <div class="qt">What does squaring the input (keeping its sign) do for the driver?</div>
         <div class="opts">
-          <button class="opt">Caps the top speed at 50%</button>
-          <button class="opt">Reverses the controls</button>
+          <button class="opt" data-why="Half push does become a quarter, so a cap feels plausible - but the ends stay put: 1.0 squared is still 1.0, so full speed survives.">Caps the top speed at 50%</button>
+          <button class="opt" data-why="Reversal is the minus-sign bug from getLeftY, a different beast. Squaring with copySign keeps the sign, so directions never flip.">Reverses the controls</button>
           <button class="opt">Fine control near center, while a full push still reaches full speed</button>
         </div>
         <div class="explain">Squaring a number between 0 and 1 makes small inputs much smaller but leaves 1.0 at 1.0. So gentle pushes are gentle and precise, and a full push is still full speed.</div>
@@ -309,10 +309,20 @@ drive.<span class="fn">arcadeDrive</span>(fwd, rot);   <span class="cm">// rot: 
         <div class="qt">You push the left stick forward and the robot drives backward. The likely fix?</div>
         <div class="opts">
           <button class="opt">Negate getLeftY() - forward on the stick reads negative</button>
-          <button class="opt">Increase the deadband to 100%</button>
-          <button class="opt">Switch to brake mode</button>
+          <button class="opt" data-why="A bigger deadband just ignores more of the stick, and 100% ignores all of it - the robot stops responding entirely. The direction is flipped, so fix the sign.">Increase the deadband to 100%</button>
+          <button class="opt" data-why="Brake mode only changes how the robot settles when you let go. Backward-when-you-push-forward is a sign problem, and the leading minus fixes it.">Switch to brake mode</button>
         </div>
         <div class="explain">By convention, a forward stick returns a negative axis value. Flipping the sign with a leading minus makes "push forward" mean "drive forward." It's the single most common gamepad bug.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">From the sim</div>
+        <div class="qt">You set the deadband to 20%, keep the Squared curve, and push the stick all the way to the edge. What does Output speed read?</div>
+        <div class="opts">
+          <button class="opt" data-why="Sensible subtraction, but the deadband is not a tax on the top - applyDeadband rescales the remaining range so a full push still ends at 1.0.">About 80% - the deadband takes its 20% off the top</button>
+          <button class="opt" data-why="You squared faithfully, but the 0.8 never happens - the deadband rescaling stretches a full push back to 1.0 before the curve ever touches it.">About 64% - that is 0.8 squared</button>
+          <button class="opt">100% - the deadband rescales, so a full push is still full speed</button>
+        </div>
+        <div class="explain">The deadband claims the bottom 20% of stick travel, then the rest is stretched to cover 0 to 1 again: a full push maps to (1.0 - 0.2) / (1 - 0.2) = 1.0, and squaring 1.0 leaves 1.0. That rescale is why there is no jump at the deadband edge and no lost top speed. Try it in the sim: deadband 20%, Squared, pin the stick to the rim, and Output speed reads 100%.</div>
       </div>
     </div>
   </section>
@@ -472,7 +482,7 @@ drive.<span class="fn">arcadeDrive</span>(fwd, rot);   <span class="cm">// rot: 
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

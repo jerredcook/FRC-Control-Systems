@@ -188,8 +188,8 @@
         <div class="qn">Question 1</div>
         <div class="qt">Why use a caliper instead of a ruler for robot parts?</div>
         <div class="opts">
-          <button class="opt">It's faster to read</button>
-          <button class="opt">It measures angles</button>
+          <button class="opt" data-why="Speed would be handy, but a ruler is actually quicker to glance at. The caliper's win is precision - a thousandth of an inch instead of a sixteenth.">It's faster to read</button>
+          <button class="opt" data-why="Easy to mix up with a protractor, which does handle angles. A caliper measures lengths and diameters - the special part is how finely it reads them.">It measures angles</button>
           <button class="opt">It reads to a thousandth of an inch, the precision parts need to fit</button>
         </div>
         <div class="explain">A ruler stops at about a sixteenth of an inch. A caliper reads to 0.001 inch, which is the precision holes and shafts need to line up and fit together.</div>
@@ -199,8 +199,8 @@
         <div class="qt">A part is spec'd at 1.250 ± 0.005 in. What does the ± 0.005 mean?</div>
         <div class="opts">
           <button class="opt">Anywhere from 1.245 to 1.255 in is acceptable</button>
-          <button class="opt">It must be exactly 1.250 in</button>
-          <button class="opt">It can be any size</button>
+          <button class="opt" data-why="Exact sounds like the goal, but no real part is ever perfectly on size. The plus-minus is the designer admitting that and telling you exactly how close counts.">It must be exactly 1.250 in</button>
+          <button class="opt" data-why="The plus-minus does grant some slack, but only 0.005 worth in each direction. Outside the 1.245 to 1.255 window, the part fails.">It can be any size</button>
         </div>
         <div class="explain">Tolerance is the allowed range. ± 0.005 means 0.005 over or under is fine, so 1.245 to 1.255 in all pass. Nothing is ever perfectly on size, so you specify how close is close enough.</div>
       </div>
@@ -208,11 +208,21 @@
         <div class="qn">Question 3</div>
         <div class="qt">Why center-punch a hole location before drilling?</div>
         <div class="opts">
-          <button class="opt">To make the hole bigger</button>
+          <button class="opt" data-why="The punch does leave a mark, but only a tiny dimple. Hole size comes from the drill bit - the dimple is there to hold that bit on target.">To make the hole bigger</button>
           <button class="opt">So the drill bit starts on the mark instead of wandering</button>
-          <button class="opt">To harden the metal</button>
+          <button class="opt" data-why="Hammering can harden metal, so the guess is fair - but this dimple is far too small for that. Its whole job is catching the drill tip so it cannot skate off your mark.">To harden the metal</button>
         </div>
         <div class="explain">A center punch makes a small dimple that catches the drill tip, so the bit bites exactly on your mark instead of skating across the surface. Mark, punch, then drill.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">From the sim</div>
+        <div class="qt">New target: 0.750 in, same ±0.005 tolerance. You slide the jaws to exactly 0.755 in and press Check. What does the sim say?</div>
+        <div class="opts">
+          <button class="opt">In tolerance - the band runs 0.745 to 0.755, and landing right on the edge still counts</button>
+          <button class="opt" data-why="It feels like being a full 0.005 off should hurt, but 0.005 is precisely what the spec allows. The tolerance is a promise that anything inside the band, edges included, works.">Off by 0.005, so it fails - a reading that far from target can never pass</button>
+          <button class="opt" data-why="Under feels safer, like leaving extra material, but the plus-minus is symmetric on purpose. Over by 0.005 passes exactly like under by 0.005 - both sides of the band are real.">Fails - readings over the target never pass, only readings under it</button>
+        </div>
+        <div class="explain">Tolerance is the full allowed window, edges included: 0.750 ± 0.005 accepts everything from 0.745 to 0.755. At 0.755 you are 0.005 over, which is exactly the limit, so Check shows the green in-tolerance mark. One more thousandth, 0.756, and it fails by 0.001. Try both in the sim and watch the verdict flip on a single step of the slider - that is how sharp a real spec's edge is.</div>
       </div>
     </div>
   </section>
@@ -300,7 +310,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>

@@ -200,9 +200,9 @@
         <div class="qn">Question 1</div>
         <div class="qt">Why does FRC require bumpers?</div>
         <div class="opts">
-          <button class="opt">For decoration</button>
+          <button class="opt" data-why="The team colors do make the robot look sharp, but the fabric is just the wrapper. The rule exists so robots can slam into each other all match without wrecking frames.">For decoration</button>
           <button class="opt">To protect your robot and others in a contact sport, consistently and safely</button>
-          <button class="opt">To add weight</button>
+          <button class="opt" data-why="They do add real weight, a few kilograms of it - but that is a cost the rules accept, not the goal. The goal is cushioning hits in a full-contact game.">To add weight</button>
         </div>
         <div class="explain">Robots collide constantly, so bumpers cushion the hits and keep frames from damaging each other. The rules standardize them so contact is fair and safe.</div>
       </div>
@@ -210,8 +210,8 @@
         <div class="qn">Question 2</div>
         <div class="qt">A bumper is built perfectly but mounted too high. What happens at inspection?</div>
         <div class="opts">
-          <button class="opt">It passes anyway</button>
-          <button class="opt">Only half-passes</button>
+          <button class="opt" data-why="Great craftsmanship feels like it should count, but height is a hard gate. A perfect bumper mounted outside the zone still fails until you move it.">It passes anyway</button>
+          <button class="opt" data-why="Inspection would be friendlier that way, but there is no partial credit - a bumper is either in the legal zone or the robot does not play.">Only half-passes</button>
           <button class="opt">It fails - bumpers must sit within the legal height zone</button>
         </div>
         <div class="explain">Height is a hard rule. Even a well-built bumper outside the legal zone fails inspection, and the robot can't play until it's fixed.</div>
@@ -221,10 +221,20 @@
         <div class="qt">What's the standard bumper construction?</div>
         <div class="opts">
           <button class="opt">Plywood backing, pool noodles, a fabric cover, and team numbers</button>
-          <button class="opt">Just a strip of metal</button>
-          <button class="opt">Bare aluminum tube</button>
+          <button class="opt" data-why="Metal feels tougher, which is the trap - a hard bumper transfers the whole hit into both robots. The wood-and-noodle recipe absorbs the hit instead.">Just a strip of metal</button>
+          <button class="opt" data-why="Aluminum tube is what the frame is made of, so it comes to mind - but bumpers exist to cushion that frame. The rules require the plywood, noodle, and fabric recipe.">Bare aluminum tube</button>
         </div>
         <div class="explain">Wood backing for structure, stacked pool noodles for cushioning, a tight red or blue fabric cover, and your team number, the rules-defined recipe nearly every team follows.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">From the sim</div>
+        <div class="qt">In the sim the legal zone runs from about 41% to 88% on the slider. You park the bumper at 90% to ride as high as possible. What does the inspection readout say?</div>
+        <div class="opts">
+          <button class="opt" data-why="After the ride-high mission this feels like the same move, but the mission kept you at the edge or below it. Inspection has no close-enough - one step past the line is a fail.">Legal - 90% is close enough to the edge to count</button>
+          <button class="opt">Too high - 90% sits just past the top of the zone</button>
+          <button class="opt" data-why="Fair suspicion, some scales do run backward - but this slider reads straight: a bigger percent is a higher bumper. At 90% you are over the top edge, not under the bottom one.">Too low - the slider percentage runs opposite to height</button>
+        </div>
+        <div class="explain">Close does not count at inspection. The zone tops out near 88% on this slider, so parking at 90% overshoots by a hair and the readout flips to too high. To ride high legally you have to tuck just under the edge, which is exactly what the ride-high and gold missions had you practice.</div>
       </div>
     </div>
   </section>
@@ -339,7 +349,7 @@
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
-    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); explain.classList.add('show');} }); });
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong'); var w=opt.getAttribute('data-why'); var wl=opt.nextElementSibling; if(!wl||!wl.classList||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.parentNode.insertBefore(wl, opt.nextSibling); } wl.textContent=w||'Not quite - look again at what the lesson showed you, then try another answer.'; } }); });
   });
 })();
 </script>
