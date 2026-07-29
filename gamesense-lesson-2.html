@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Game Sense · Lesson 2 - Reading the Manual</title>
+<script src="gamesense-data.js"></script>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --rose:#ff8fb5;    /* course accent */
+    --amber:#FFB020;
+    --teal:#34D7C5;
+    --indigo:#8E8CF8;
+    --red:#FF6B6B;
+    --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ink); color:var(--text);
+    font-family:var(--sans); font-size:17px; line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(900px 500px at 80% -10%, rgba(255,143,181,.06), transparent 60%),
+      radial-gradient(700px 500px at -10% 10%, rgba(142,140,248,.05), transparent 55%);
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--rose);box-shadow:0 0 12px var(--rose)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--rose)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--rose),var(--indigo));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:44ch;margin-top:6px}
+
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--rose);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  p .sub,.sub{color:var(--muted)}
+  .lead{font-size:19px}
+  em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--rose);font-weight:600;font-size:.94em}
+
+  .formula{font-family:var(--mono);background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:18px 20px;margin:20px 0;font-size:17px;overflow-x:auto;color:#cfe;text-align:center}
+  .formula .small{display:block;font-size:13px;color:var(--muted);margin-top:8px;font-family:var(--sans)}
+  .formula b{color:var(--rose)}
+
+  .spec{background:var(--ink);border:1px solid var(--line);border-left:3px solid var(--rose);border-radius:0 11px 11px 0;padding:16px 18px;margin:18px 0;font-size:16px;color:var(--text)}
+  .spec b{font-family:var(--mono);color:var(--rose);letter-spacing:.06em;margin-right:10px}
+
+  .terms{display:grid;gap:12px;margin:22px 0 6px}
+  @media(min-width:560px){.terms{grid-template-columns:repeat(3,1fr)}}
+  .term{border:1px solid var(--line);border-radius:10px;padding:14px 15px;background:var(--panel);border-top:2px solid var(--rose)}
+  .term h4{margin:0 0 4px;font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--rose)}
+  .term p{margin:0;font-size:14.5px;color:var(--muted);line-height:1.45}
+
+  /* interactive panel */
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;gap:6px;align-items:center}
+  .demo-tag .live{width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 8px var(--red)}
+  .demo-tag .live.on{background:var(--green);box-shadow:0 0 8px var(--green)}
+
+  .drill{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line)}
+  @media(min-width:720px){.drill{grid-template-columns:1.05fr 1fr}.cell-rules{order:-1}}
+  .drill-cell{background:#0B1322;padding:14px 14px 18px}
+  .rb-head{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin-bottom:8px}
+  .rb-fam{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--indigo);margin:12px 0 6px}
+  .rb-fam:first-of-type{margin-top:2px}
+  .rule{display:block;width:100%;text-align:left;border:1px solid var(--line-2);background:var(--panel-2);border-radius:10px;padding:10px 12px;margin:0 0 8px;cursor:pointer;transition:.12s;color:var(--muted);font-family:var(--sans);font-size:13.5px;line-height:1.5;min-height:44px}
+  .rule:hover{border-color:var(--muted)}
+  .rule .r-top{display:flex;align-items:center;gap:8px;margin-bottom:3px}
+  .rule .r-top b{font-family:var(--mono);color:var(--rose);font-size:12px;letter-spacing:.08em}
+  .rule .r-class{margin-left:auto;font-family:var(--mono);font-style:normal;font-size:9.5px;letter-spacing:.1em;color:var(--amber);border:1px solid var(--line-2);border-radius:20px;padding:2px 8px;white-space:nowrap}
+  .rule .r-class.tech{color:var(--red)}
+  .rule .r-text{display:block}
+  .rule.hit{border-color:var(--green);background:rgba(67,214,126,.08);color:var(--text)}
+  .rule.miss{border-color:var(--red);background:rgba(255,107,107,.08)}
+
+  .sc-tag{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--rose);margin-bottom:8px}
+  .sc-text{font-size:15.5px;color:var(--text);line-height:1.6;margin:0 0 12px;min-height:3.2em}
+  .sc-step{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-bottom:10px}
+  .sc-hint{display:none;font-size:13.5px;color:var(--amber);margin:0 0 10px;font-style:italic}
+  .vrow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  .vbtn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;padding:11px 13px;border-radius:8px;cursor:pointer;transition:.12s;min-height:40px}
+  .vbtn:hover{border-color:var(--rose);color:var(--text)}
+  .vbtn.off{opacity:.35;pointer-events:none}
+  .vbtn.hit{background:var(--green);border-color:var(--green);color:#06121f;font-weight:700}
+  .vbtn.miss{border-color:var(--red);color:var(--red)}
+  .sc-explain{display:none;font-size:14px;color:var(--muted);border-left:2px solid var(--green);padding:4px 0 4px 13px;margin:2px 0 12px;line-height:1.55}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s;min-height:40px}
+  .btn:hover{border-color:var(--rose);color:var(--text)}
+  .btn.primary{background:linear-gradient(180deg,#ffb9d1,var(--rose));color:#2a0a16;font-weight:700;border:none}
+
+  .verdict{padding:12px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--muted);display:flex;align-items:center;gap:10px}
+  .verdict .dotv{width:9px;height:9px;border-radius:50%;background:var(--faint);flex:0 0 auto}
+  .verdict.good .dotv{background:var(--green);box-shadow:0 0 10px var(--green)} .verdict.good{color:var(--green)}
+  .verdict.warn .dotv{background:var(--amber);box-shadow:0 0 10px var(--amber)} .verdict.warn{color:var(--amber)}
+  .verdict.bad .dotv{background:var(--red);box-shadow:0 0 10px var(--red)} .verdict.bad{color:var(--red)}
+
+  .readouts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:20px;font-weight:600;margin-top:3px}
+  .ro .v.rose{color:var(--rose)} .ro .v.red{color:var(--red)} .ro .v.indigo{color:var(--indigo)}
+  .controls{padding:12px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .controls .note-inline{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;color:var(--faint);text-transform:uppercase}
+
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--rose);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--rose);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.rose{border-color:var(--rose);background:rgba(255,143,181,.06)} .note.rose .nh{color:var(--rose)}
+
+  /* quiz */
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)}
+  .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--rose);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s;min-height:40px}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7}
+  .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--rose);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+  .whyline{margin:2px 0 4px;font-size:13.5px;color:var(--muted);border-left:2px solid var(--red);background:rgba(255,107,107,.05);padding:5px 12px;border-radius:0 8px 8px 0}
+
+  /* recap */
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px}
+  @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px}
+  .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--rose);min-width:130px;text-transform:uppercase}
+  .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(142,140,248,0.1),transparent 70%)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--indigo)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)}
+
+  footer{padding:40px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--rose);color:var(--text)}
+  .coursenav a.map{border-color:transparent;color:var(--indigo)}
+
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="gamesense.html"><span class="dot"></span><span class="name">Game Sense</span></a>
+    <div class="top-meta">Lesson 02 / 07 · Read the Game</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Lesson 02</b> Read the Game</div>
+    <div class="eyebrow">Reading the Manual</div>
+    <h1>Read it like<br>a <span class="accent">referee</span></h1>
+    <p class="dek">Nobody memorizes the manual. Good teams learn to find the right rule fast - and today you make five referee calls yourself.</p>
+  </div>
+
+  <section>
+    <p class="lead">Every match has two scoreboards.</p>
+    <p>There is the one where you earn points, and a quieter one underneath where you give them away. In ORBIT a penalty never subtracts from your score. The referee adds points to the <strong>other alliance</strong>: <span class="k" data-o="foul"></span> for a foul, <span class="k" data-o="tech"></span> for a tech foul.</p>
+    <div class="formula">
+      foul → +<b data-o="foul"></b> to them &nbsp;·&nbsp; tech foul → +<b data-o="tech"></b> to them
+      <span class="small">There is no minus sign on your side. A penalty is a gift, delivered straight to your opponents.</span>
+    </div>
+    <p>Do the comparison and it gets uncomfortable fast. A tech foul hands over <span data-o="tech"></span> points, and a high-ring <span data-o="piece"></span> - the best single score in the game during teleop - earns <span data-o="highTele"></span>. One careless bump in the wrong zone cancels a whole trip to the Reactor by your best scorer.</p>
+    <p>Which makes the manual the cheapest points in the sport: every penalty you do not commit is scoring you never had to do. This lesson is about how to actually read the thing.</p>
+  </section>
+
+  <section>
+    <div class="kicker">Anatomy</div>
+    <h2>Every rule has the same skeleton</h2>
+    <p>Rules look like dense legal text until you see the bones. Here is a real one from the ORBIT manual:</p>
+    <div class="spec"><b>O101</b><span id="specText"></span></div>
+    <p>Read it again slowly and it breaks into four parts: a <strong>name</strong> (O101), an <strong>act</strong> (holding a second <span data-o="piece"></span>), a <strong>number</strong> (<span data-o="hold"></span> seconds), and a <strong>price</strong> (FOUL). Every rule in every manual you will ever read has this shape.</p>
+    <div class="terms">
+      <div class="term"><h4>The name</h4><p>A short ID you can say fast. Refs and drive coaches talk in IDs, so one number gets everyone staring at the same sentence.</p></div>
+      <div class="term"><h4>The number</h4><p>Almost every rule has something countable: <span data-o="hold"></span> seconds to drop an extra <span data-o="piece"></span>, <span data-o="sep"></span> meters to reset a pin. Refs count. They do not vibe.</p></div>
+      <div class="term"><h4>The price</h4><p>FOUL (+<span data-o="foul"></span>) or TECH FOUL (+<span data-o="tech"></span>). The class tells you how much the game cares about what just happened.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Navigation</div>
+    <h2>Know the neighborhoods</h2>
+    <p>Nobody carries a whole manual in their head, and referees do not either. What they carry is the <strong>map</strong>: which family of rules lives where. In ORBIT's Section O, the first digit does the sorting for you:</p>
+    <div class="terms">
+      <div class="term"><h4>O1xx · <span data-o="pieces"></span></h4><p>Rules about game pieces: how many you may hold, where they may fly.</p></div>
+      <div class="term"><h4>O2xx · Contact</h4><p>Robot on robot: pushing, pinning, and the places contact is forbidden.</p></div>
+      <div class="term"><h4>O3xx · Endgame</h4><p>Protections that switch on in the final <span data-o="endgame"></span> seconds, when points are biggest.</p></div>
+    </div>
+    <p>It is like your first day at a big bike park. You do not memorize every sign on every trail. You learn the map at the trailhead - green loops here, jump lines there - and then read the one sign that matters when you actually reach it.</p>
+    <p>So when something happens on the field, you do not start reading at page one. You ask <em>which family is this</em>, jump to that neighborhood, and read one or two sentences carefully. That is the whole skill, and the drill below trains exactly it.</p>
+    <div class="note rose">
+      <div class="nh">This transfers to the real game</div>
+      <p>Real FRC manuals pull the same trick with letters: G rules govern gameplay, R rules govern how the robot may be built. The numbers reshuffle every January when a new game drops, but navigating by family never goes stale. Learn it once on ORBIT, use it every season.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Try it</div>
+    <h2>The scavenger drill</h2>
+    <p>Here is all of Section O - the complete penalty section of the ORBIT manual, five rules. Beside it, five moments from a match, and you are the referee. For each one, find the rule that decides it and tap it, then make the call: legal, foul, or tech foul. The manual stays open the whole time. Real refs look things up mid-match, and so should you.</p>
+
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="1">
+        <div class="qn">Predict first</div>
+        <div class="qt">Partway through this drill, Red 1 pins a Blue robot for <span data-o="pinShort"></span> seconds, backs off <span data-o="sepPlus"></span> meters, then comes back and pins for <span data-o="pinShort"></span> more - <span data-o="pinTotal"></span> seconds of pinning in total. What should the referee call?</div>
+        <div class="opts">
+          <button class="opt">A foul - the pinning added up past the <span data-o="pin"></span>-second limit</button>
+          <button class="opt">Nothing - the count reset when they separated, and neither pin reached <span data-o="pin"></span> seconds</button>
+          <button class="opt">A tech foul - pinning the same robot twice escalates the penalty</button>
+        </div>
+        <div class="explain">O204 runs each pin on its own clock, and separating by <span data-o="sep"></span> meters resets it. Each pin here stayed under the <span data-o="pin"></span>-second limit, so the referee keeps the whistle down. This exact moment is one of the five scenarios - find the reset clause in the manual panel and watch your gut argue with it.</div>
+      </div>
+    </div>
+
+    <div class="demo" id="demo">
+      <div class="demo-head">
+        <span class="demo-title">ORBIT rulebook · Scavenger drill</span>
+        <span class="demo-tag"><span class="live on" id="live"></span> <span id="status">Live</span></span>
+      </div>
+      <div class="drill">
+        <div class="drill-cell cell-sc">
+          <div class="sc-tag" id="scTag">Scenario 1 of 5 · you are the referee</div>
+          <p class="sc-text" id="scText"></p>
+          <div class="sc-step" id="scStep">Step 1 · tap the rule in the manual that decides this</div>
+          <div class="sc-hint" id="scHint"></div>
+          <div class="vrow">
+            <button class="vbtn off" type="button" data-v="legal">Legal · no call</button>
+            <button class="vbtn off" type="button" data-v="foul">Foul · +<span data-o="foul"></span></button>
+            <button class="vbtn off" type="button" data-v="tech">Tech · +<span data-o="tech"></span></button>
+          </div>
+          <div class="sc-explain" id="scExplain"></div>
+          <button class="btn primary" type="button" id="nextBtn" style="display:none">Next scenario ▸</button>
+        </div>
+        <div class="drill-cell cell-rules">
+          <div class="rb-head">ORBIT manual · Section O · Penalties</div>
+          <div id="rulebook"></div>
+        </div>
+      </div>
+      <div class="verdict" id="vbar"><span class="dotv"></span><span id="vbarTxt">Scenario 1 of 5 · find the deciding rule</span></div>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Cleared</div><div class="v rose" id="roCleared">0/5</div></div>
+        <div class="ro"><div class="k2">Wrong rule picks</div><div class="v red" id="roWrong">0</div></div>
+        <div class="ro"><div class="k2">Penalty pts awarded</div><div class="v indigo" id="roPts">0</div></div>
+      </div>
+      <div class="controls">
+        <button class="btn" type="button" id="restart">Restart drill</button>
+        <span class="note-inline">Wrong picks are fine - that is reading practice</span>
+      </div>
+    </div>
+    <p class="caption">What feels illegal and what is illegal are different lists. The sneakiest scenario in this drill is the one where the right call is no call at all.</p>
+
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this drill - take them at your own pace</span></div>
+      <div class="m-item" data-m="three"><span class="m-st">○</span><span>Clear <b>3 scenarios</b>: find the deciding rule, then make the right call.</span></div>
+      <div class="m-item" data-m="all"><span class="m-st">○</span><span>Clear <b>all 5</b>. One of them is legal, and it is the one your gut will argue about.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> clear all 5 in a single run with <b>zero wrong rule picks</b>. Restart the drill any time for a clean attempt.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="note rose">
+      <div class="nh">Going further &middot; optional</div>
+      <p>In real FRC the manual is a living document. FIRST publishes Team Updates during the season that change rules mid-year, and runs an official Q&amp;A where any team can ask what a rule really means - the answers are binding at every event. Strong teams give one student the job of reading every update the day it drops and reporting the changes at the next meeting. It is one of the highest-value jobs on a team, and it needs no code and no shop. Try this: which of ORBIT's five rules would you most want to ask a clarifying question about, and what exactly would you ask?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show one good question</summary>
+        <p style="margin-top:8px">Here is one for O101: "The rule says a robot may control at most one Cell. If a second Cell gets trapped against our bumper while we drive, are we controlling it?" That is the real shape of a good Q&amp;A question. It takes one word from the rule ("control"), finds its fuzzy edge, and asks about a situation your robot will genuinely be in. The best questions come from picturing your robot doing its normal job and asking where the rule's words get blurry.</p>
+      </details>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">Your robot commits a foul. What actually happens on the scoreboard?</div>
+        <div class="opts">
+          <button class="opt" data-why="It feels like a fine you pay, but the manual runs it the other way: the points are added to your opponents, which stings the same but reads differently mid-match.">Your alliance's score drops by <span data-o="foul"></span> points</button>
+          <button class="opt">The other alliance gains <span data-o="foul"></span> points</button>
+          <button class="opt" data-why="Ranking points are a separate system - penalties land on the match score itself, in real time.">Nothing until the match ends - fouls only affect rankings</button>
+        </div>
+        <div class="explain">Penalties are a gift to your opponents: <span data-o="foul"></span> for a foul, <span data-o="tech"></span> for a tech foul. The final margin works out the same as losing points yourself, but knowing where they land helps you read a scoreboard while the match is running.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">Which of these hands the other alliance more points?</div>
+        <div class="opts">
+          <button class="opt" data-why="Holding an extra piece too long is a plain foul in O101 - the zone rule carries the heavier class.">Holding a second <span data-o="piece"></span> too long (O101)</button>
+          <button class="opt" data-why="Tempting, but the manual prices rules in two classes on purpose: the acts that can wreck an opponent's match get the bigger tech-foul price.">They cost the same - a rule is a rule</button>
+          <button class="opt">Contact inside the opponent's loading bay (O207)</button>
+        </div>
+        <div class="explain">O207 is a TECH FOUL at <span data-o="tech"></span> points, while O101 is a plain foul at <span data-o="foul"></span>. The manual prices rules by how badly the act can damage the other alliance's game, and protected zones sit near the top of that list.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 3 · From the sim</div>
+        <div class="qt">In the drill, an opponent shoved a robot that was touching its own platform with <span data-o="egLeft"></span> seconds left. What did rule O301 make the referee do?</div>
+        <div class="opts">
+          <button class="opt" data-why="The endgame gets the heavier tech class, because a shove there can erase a whole endgame's worth of points at once.">Call a plain foul and let play continue</button>
+          <button class="opt">Call a tech foul and score the shoved robot as Balanced anyway</button>
+          <button class="opt" data-why="Defense is legal for most of the match, but the final seconds turn the platform into a protected zone.">Nothing - defense is legal for the whole match</button>
+        </div>
+        <div class="explain">O301 protects the endgame: inside the final <span data-o="endgame"></span> seconds you may not touch a robot on its own platform. The price is a tech foul (<span data-o="tech"></span> points) plus the robot is scored as Balanced (<span data-o="balance"></span> points) - <span data-o="swing"></span> points swinging the wrong way from one shove.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 4</div>
+        <div class="qt">Your robot intentionally lobs 3 <span data-o="pieces"></span> over the Reactor's high ring guard. What does O115 cost you?</div>
+        <div class="opts">
+          <button class="opt"><span data-o="threeCells"></span> points to the other alliance - one foul per <span data-o="piece"></span></button>
+          <button class="opt" data-why="It feels like one decision, but O115 says FOUL per Cell - the manual charges by the piece, not by the choice."><span data-o="foul"></span> points - it was one bad decision, so one foul</button>
+          <button class="opt" data-why="The word launched sounds dramatic, but O115 files this as a plain foul - it just multiplies."><span data-o="tech"></span> points - launching is always a tech foul</button>
+        </div>
+        <div class="explain">O115 reads "FOUL per Cell," so 3 <span data-o="pieces"></span> means 3 fouls: <span data-o="threeCells"></span> points. Per-instance wording is exactly the kind of detail that scavenger reading catches and vibes miss.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Lesson 02 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Foul</b><span>A penalty that adds <span data-o="foul"></span> points to the other alliance's score.</span></div>
+        <div class="gl"><b>Tech foul</b><span>The heavier class: <span data-o="tech"></span> points to them, for acts that can wreck an opponent's match.</span></div>
+        <div class="gl"><b>Rule ID</b><span>The short name (like O204) everyone uses to point at the same rule fast.</span></div>
+        <div class="gl"><b>Threshold</b><span>The countable number inside a rule: seconds held, meters backed off.</span></div>
+        <div class="gl"><b>Protected zone</b><span>A place or moment where contact rules tighten, like the loading bay or the endgame platform.</span></div>
+        <div class="gl"><b>Per-instance</b><span>When a rule charges once per piece or per event, not once per decision.</span></div>
+      </div>
+      <div class="next">
+        <div class="n-eyebrow">Up next · Lesson 03</div>
+        <h3>Scoring Math</h3>
+        <p style="margin-bottom:0">You can now read what the game forbids. Next you read what it pays. Ring values and cycle times turn into one number - points per minute - that tells you where your robot should score, and settles strategy arguments with arithmetic instead of volume.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<nav class="coursenav">
+  <a href="gamesense-lesson-1.html">← Lesson 01 · Anatomy of a Match</a>
+  <a class="map" href="gamesense.html">Course map</a>
+  <a href="gamesense-lesson-3.html">Lesson 03 · Scoring Math →</a>
+</nav>
+
+<footer>Game Sense · Reading and playing the FRC game</footer>
+
+<script>
+(function(){
+  "use strict";
+  var O=window.ORBIT||{};
+  var F=O.fouls||{foul:3,tech:8,rules:[]};
+  var R=F.rules||[];
+  function ruleById(id){ for(var i=0;i<R.length;i++){ if(R[i].id===id) return R[i]; } return null; }
+  function num(re,txt,fb){ var m=(txt||'').match(re); return m?parseInt(m[1],10):fb; }
+  var piece=O.piece||'Cell', pieces=O.piecePlural||'Cells';
+  var T={
+    hold:num(/(\d+)\s*second/,(ruleById('O101')||{}).text,3),
+    pin:num(/(\d+)\s*second/,(ruleById('O204')||{}).text,5),
+    sep:num(/(\d+)\s*meter/,(ruleById('O204')||{}).text,2),
+    endgame:(O.match&&O.match.endgameSec)||30
+  };
+  var balancePts=20, highTele=8;
+  try{ balancePts=O.scoring.endgame.balance.pts; }catch(e){}
+  try{ highTele=O.scoring.rings.high.tele; }catch(e){}
+
+  // inject every ORBIT-derived number into the prose
+  var FILL={
+    foul:F.foul, tech:F.tech, hold:T.hold, pin:T.pin, sep:T.sep, endgame:T.endgame,
+    balance:balancePts, highTele:highTele, swing:F.tech+balancePts,
+    threeCells:3*F.foul, pinShort:T.pin-1, sepPlus:T.sep+1, pinTotal:2*(T.pin-1),
+    egLeft:T.endgame-10, piece:piece, pieces:pieces
+  };
+  Array.prototype.forEach.call(document.querySelectorAll('[data-o]'),function(n){
+    var k=n.getAttribute('data-o'); if(FILL[k]!==undefined) n.textContent=FILL[k];
+  });
+  var spec=ruleById('O101'); if(spec){ document.getElementById('specText').textContent=spec.text; }
+
+  // ---- mini-manual panel, grouped by rule family ----
+  var famName={1:pieces,2:'Robot contact',3:'Endgame'};
+  function famOf(id){ return famName[Math.floor(parseInt(id.slice(1),10)/100)]||'Other'; }
+  var sorted=R.slice().sort(function(a,b){ return parseInt(a.id.slice(1),10)-parseInt(b.id.slice(1),10); });
+  var rbEl=document.getElementById('rulebook');
+  var lastFam=null;
+  sorted.forEach(function(r){
+    var f=famOf(r.id);
+    if(f!==lastFam){ var h=document.createElement('div'); h.className='rb-fam'; h.textContent=f; rbEl.appendChild(h); lastFam=f; }
+    var isTech=/TECH FOUL/.test(r.text);
+    var b=document.createElement('button'); b.type='button'; b.className='rule'; b.setAttribute('data-rule',r.id);
+    b.innerHTML='<span class="r-top"><b>'+r.id+'</b><i class="r-class'+(isTech?' tech':'')+'">'+(isTech?'TECH +'+F.tech:'FOUL +'+F.foul)+'</i></span><span class="r-text"></span>';
+    b.querySelector('.r-text').textContent=r.text;
+    rbEl.appendChild(b);
+  });
+
+  // ---- the five scenarios, every number computed from ORBIT ----
+  var SC=[
+    {rule:'O101', v:'foul', pts:F.foul,
+     text:"Blue 2's intake snags a second "+piece+" while one is already inside, and keeps both for "+(T.hold+1)+" seconds before spitting one out.",
+     hint:"Count the "+pieces+". One rule cares how many a robot may hold.",
+     explain:"Two "+pieces+" held past the "+T.hold+"-second limit. O101 makes the call for you: foul, "+F.foul+" points to Red. Notice the referee never touched Blue's score. Red's simply grew."},
+    {rule:'O204', v:'legal', pts:0,
+     text:"Red 1 pins Blue 3 against the Reactor base for "+(T.pin-1)+" seconds, backs away about "+(T.sep+1)+" meters, then comes back and pins for "+(T.pin-1)+" more.",
+     hint:"This is robot pushing on robot. Look in the contact family.",
+     explain:"Neither pin reached "+T.pin+" seconds, and backing off past "+T.sep+" meters reset the count. It feels dirty and it is completely legal. The manual, not your gut, keeps the list."},
+    {rule:'O207', v:'tech', pts:F.tech,
+     text:"Chasing a loose "+piece+", Blue 1 drifts into Red's loading bay zone and bumps Red 3 inside it.",
+     hint:"Where did the contact happen? One rule is about a zone.",
+     explain:"The loading bay is protected. Any contact inside it is a tech foul: "+F.tech+" points to Red, even though Blue was only chasing a "+piece+". Zones do not care why you were there."},
+    {rule:'O301', v:'tech', pts:F.tech,
+     text:"With "+(T.endgame-10)+" seconds on the clock, Red 2 shoves Blue 3 while Blue 3 is touching the Blue platform.",
+     hint:"Check the clock first. One rule only wakes up near the end.",
+     explain:"Inside the final "+T.endgame+" seconds the platform is protected. Tech foul, "+F.tech+" points to Blue, and Blue 3 is scored as Balanced anyway for "+balancePts+" more. One shove moved "+(F.tech+balancePts)+" points."},
+    {rule:'O115', v:'foul', pts:2*F.foul,
+     text:"Blue 3 lobs two "+pieces+" clean over the Reactor's high ring guard, on purpose, to feed a partner on the far side.",
+     hint:"Follow the flying "+pieces+". One rule says where they may not go.",
+     explain:"O115 charges per "+piece+": two over the guard is two fouls, "+(2*F.foul)+" points to Red. Per-"+piece+" wording is exactly the detail that scavenger reading catches."}
+  ];
+
+  var idx=0, phase=1, cleared=0, wrongPicks=0, pts=0, drillDone=false;
+  var el={
+    scTag:document.getElementById('scTag'), scText:document.getElementById('scText'),
+    scStep:document.getElementById('scStep'), scHint:document.getElementById('scHint'),
+    scExplain:document.getElementById('scExplain'), nextBtn:document.getElementById('nextBtn'),
+    vbar:document.getElementById('vbar'), vbarTxt:document.getElementById('vbarTxt'),
+    roCleared:document.getElementById('roCleared'), roWrong:document.getElementById('roWrong'),
+    roPts:document.getElementById('roPts'), live:document.getElementById('live'),
+    status:document.getElementById('status'), restart:document.getElementById('restart')
+  };
+  var vbtns=Array.prototype.slice.call(document.querySelectorAll('.vbtn'));
+  var ruleBtns=Array.prototype.slice.call(rbEl.querySelectorAll('.rule'));
+
+  function setVbar(cls,msg){ el.vbar.className='verdict'+(cls?' '+cls:''); el.vbarTxt.textContent=msg; }
+  function updateRo(){ el.roCleared.textContent=cleared+'/'+SC.length; el.roWrong.textContent=wrongPicks; el.roPts.textContent=pts; }
+  function setVbtns(on){ vbtns.forEach(function(b){ b.classList.toggle('off',!on); }); }
+
+  function showScenario(){
+    var sc=SC[idx];
+    phase=1;
+    el.scTag.textContent='Scenario '+(idx+1)+' of '+SC.length+' · you are the referee';
+    el.scText.textContent=sc.text;
+    el.scStep.textContent='Step 1 · tap the rule in the manual that decides this';
+    el.scStep.style.display='';
+    el.scHint.style.display='none';
+    el.scExplain.style.display='none';
+    el.nextBtn.style.display='none';
+    ruleBtns.forEach(function(b){ b.classList.remove('hit','miss'); });
+    vbtns.forEach(function(b){ b.classList.remove('hit','miss'); });
+    setVbtns(false);
+    setVbar('','Scenario '+(idx+1)+' of '+SC.length+' · find the deciding rule');
+    updateRo();
+  }
+
+  function finish(){
+    drillDone=true;
+    el.scTag.textContent='Drill complete';
+    el.scText.textContent='That is all five calls. You read the manual the way referees do: family first, then the sentence, then the number.'+(wrongPicks?' Restart for a clean run if gold is still waiting.':' And a clean run too - zero wrong rule picks.');
+    el.scStep.style.display='none'; el.scHint.style.display='none';
+    el.scExplain.style.display='none'; el.nextBtn.style.display='none';
+    setVbtns(false);
+    setVbar('good','Drill complete · '+cleared+'/'+SC.length+' cleared · '+wrongPicks+' wrong rule pick'+(wrongPicks===1?'':'s'));
+    el.live.classList.remove('on'); el.status.textContent='Done';
+  }
+
+  rbEl.addEventListener('click',function(e){
+    var b=e.target.closest('.rule'); if(!b||drillDone||phase!==1) return;
+    var sc=SC[idx];
+    if(b.getAttribute('data-rule')===sc.rule){
+      phase=2; b.classList.add('hit');
+      el.scStep.textContent='Step 2 · make the call';
+      el.scHint.style.display='none';
+      setVbtns(true);
+      setVbar('warn',sc.rule+' found · now make the call');
+    } else {
+      wrongPicks++; updateRo();
+      b.classList.add('miss'); setTimeout(function(){ b.classList.remove('miss'); },700);
+      el.scHint.textContent=sc.hint; el.scHint.style.display='block';
+      setVbar('bad','Not that rule · read the scenario again');
+    }
+  });
+
+  vbtns.forEach(function(b){
+    b.addEventListener('click',function(){
+      if(drillDone||phase!==2) return;
+      var sc=SC[idx];
+      if(b.getAttribute('data-v')===sc.v){
+        phase=3; cleared++; pts+=sc.pts; updateRo();
+        b.classList.add('hit');
+        el.scExplain.textContent=sc.explain; el.scExplain.style.display='block';
+        el.scStep.style.display='none';
+        setVbtns(false); b.classList.remove('off');
+        var msg = sc.v==='legal' ? 'Legal · no call · play on'
+                : sc.v==='foul' ? 'Foul confirmed · +'+sc.pts+' to the other alliance'
+                : 'Tech foul confirmed · +'+sc.pts+' to the other alliance';
+        setVbar('good',msg);
+        el.nextBtn.textContent = idx===SC.length-1 ? 'Finish ▸' : 'Next scenario ▸';
+        el.nextBtn.style.display='';
+      } else {
+        b.classList.add('miss'); setTimeout(function(){ b.classList.remove('miss'); },700);
+        setVbar('bad','Not that call · the rule\'s last words name the price');
+      }
+    });
+  });
+
+  el.nextBtn.addEventListener('click',function(){
+    if(idx===SC.length-1){ finish(); } else { idx++; showScenario(); }
+  });
+
+  el.restart.addEventListener('click',function(){
+    idx=0; cleared=0; wrongPicks=0; pts=0; drillDone=false;
+    el.live.classList.add('on'); el.status.textContent='Live';
+    showScenario();
+  });
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  setInterval(function(){
+    if(cleared>=3) mClear('three');
+    if(cleared>=SC.length){ mClear('all'); if(wrongPicks===0) mClear('gold'); }
+  },200);
+  }catch(e){}
+
+  showScenario();
+
+  // ---- quiz ----
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong');
+      try{ var why=opt.getAttribute('data-why');
+        if(why){ var wl=opt.nextElementSibling; if(!wl||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.insertAdjacentElement('afterend',wl); } wl.textContent=why; }
+      }catch(e){} } }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  // auto-mark this lesson complete in the hub once its quiz is finished
+  var KEY="gamesense:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then run the sim
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain');
+  var picked=-1, revealed=false, ran=false;
+  var demos=document.querySelectorAll('.demo');
+  var style=document.createElement('style');
+  style.textContent='#predict .opt.picked{border-color:var(--teal,#34D7C5);box-shadow:0 0 0 2px rgba(52,215,197,.22)}';
+  document.head.appendChild(style);
+  var note=document.createElement('div');
+  note.style.cssText='display:none;font-size:13px;color:#92A2BE;margin-top:10px;font-style:italic';
+  q.appendChild(note);
+  function optText(i){ var t=(opts[i].textContent||'').trim(); return t.length>70 ? t.slice(0,67)+'...' : t; }
+  function reveal(){ if(revealed||picked<0) return; revealed=true;
+    opts.forEach(function(o){o.classList.add('locked');});
+    try{var pr=JSON.parse(localStorage.getItem('frc:predict'))||{r:0,w:0};if(picked===correct){pr.r++;}else{pr.w++;}localStorage.setItem('frc:predict',JSON.stringify(pr));}catch(e){}
+    if(picked===correct){
+      opts[picked].classList.add('correct');
+      note.textContent='You called it. "'+optText(picked)+'" is exactly what happens. Here is why:';
+    } else {
+      opts[picked].classList.add('wrong'); opts[correct].classList.add('correct');
+      note.textContent='You predicted "'+optText(picked)+'". The sim went a different way - the green answer is what really happens, and the surprise is the part worth remembering. Here is why:';
+    }
+    note.style.display='block';
+    explain.classList.add('show'); }
+  function onRan(ev){ if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#predict')) return; ran=true; if(picked>=0) reveal(); }
+  if(demos.length){
+    Array.prototype.forEach.call(demos,function(d){
+      d.addEventListener('pointerdown',onRan,true);
+      d.addEventListener('input',onRan,true);
+    });
+    window.addEventListener('keydown',onRan,true);
+  } else { ran=true; }
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(revealed)return; picked=i;
+    opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
+    if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
+})();
+</script>
+<script src="account-config.js"></script>
+<script src="account.js"></script>
+</body>
+</html>

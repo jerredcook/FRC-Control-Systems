@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Game Sense · Part 2.2 - Alliance Selection</title>
+<script src="gamesense-data.js"></script>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --rose:#ff8fb5;    /* course accent */
+    --amber:#FFB020;   /* values / highlights */
+    --teal:#34D7C5;    --indigo:#8E8CF8;
+    --red:#FF6B6B;     --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ink); color:var(--text);
+    font-family:var(--sans); font-size:17px; line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(900px 500px at 80% -10%, rgba(255,143,181,.07), transparent 60%),
+      radial-gradient(700px 500px at -10% 10%, rgba(142,140,248,.05), transparent 55%);
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--rose);box-shadow:0 0 12px var(--rose)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--rose),var(--indigo));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:48ch;margin-top:6px}
+
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--rose);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  .lead{font-size:19px}
+  em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .terms{display:grid;gap:12px;margin:22px 0 6px}
+  @media(min-width:560px){.terms{grid-template-columns:repeat(3,1fr)}}
+  .term{border:1px solid var(--line);border-radius:10px;padding:14px 15px;background:var(--panel);border-top:2px solid var(--rose)}
+  .term h4{margin:0 0 4px;font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--rose)}
+  .term p{margin:0;font-size:14.5px;color:var(--muted);line-height:1.45}
+
+  /* interactive panel */
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;gap:6px;align-items:center;text-align:right}
+  .demo-tag .live{width:7px;height:7px;border-radius:50%;background:var(--faint);flex:0 0 auto}
+  .demo-tag .live.on{background:var(--green);box-shadow:0 0 8px var(--green)}
+
+  .alliances{padding:12px 16px 4px;display:grid;gap:8px}
+  .alrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#0B1322}
+  .alrow.you{border-color:rgba(255,143,181,.5)}
+  .altag{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);flex:0 0 74px}
+  .alrow.you .altag{color:var(--rose)}
+  .chip{border:1px solid var(--line-2);border-radius:8px;padding:4px 9px;background:var(--panel-2);min-width:0}
+  .chip .cn{font-family:var(--mono);font-size:12px;color:var(--text);font-weight:600}
+  .chip .cs{font-family:var(--mono);font-size:9.5px;color:var(--faint);letter-spacing:.04em}
+  .chip.empty{border-style:dashed;color:var(--faint)}
+  .chip.empty .cn{color:var(--faint);font-weight:400}
+  .chip.sleeperchip{border-color:rgba(255,176,32,.55)}
+  .altotal{margin-left:auto;font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+  .altotal b{color:var(--text);font-size:15px}
+
+  .tblwrap{overflow-x:auto;border-top:1px solid var(--line);margin-top:10px}
+  table.scout{width:100%;min-width:540px;border-collapse:collapse;font-size:13.5px}
+  table.scout th{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);font-weight:500;white-space:nowrap}
+  table.scout td{padding:8px 10px;border-bottom:1px solid var(--line);color:var(--muted);white-space:nowrap}
+  table.scout td.tname{color:var(--text);font-family:var(--mono);font-size:12.5px}
+  table.scout td.num{font-family:var(--mono)}
+  table.scout td .rk{color:var(--amber)}
+  table.scout td .balhi{color:var(--teal)}
+  table.scout tr.taken td{opacity:.38}
+  table.scout tr.taken td .takenby{opacity:1;color:var(--rose);font-family:var(--mono);font-size:10px;letter-spacing:.08em}
+  .draftbtn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--rose);font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;padding:7px 12px;border-radius:7px;cursor:pointer;transition:.12s;min-height:28px}
+  .draftbtn:hover{border-color:var(--rose);color:var(--text)}
+  .draftbtn[disabled]{opacity:.32;cursor:default;color:var(--muted)}
+  .draftbtn[disabled]:hover{border-color:var(--line-2)}
+
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s;min-height:32px}
+  .btn:hover{border-color:var(--rose);color:var(--text)}
+  .btn.primary{background:linear-gradient(180deg,#ffc0d6,var(--rose));color:#2a0d18;font-weight:700;border:none}
+  .ctl-hint{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.04em}
+
+  .readouts{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  @media(min-width:560px){.readouts{grid-template-columns:repeat(4,1fr)}}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:20px;font-weight:600;margin-top:3px;color:var(--muted)}
+  .ro .v.rose{color:var(--rose)} .ro .v.teal{color:var(--teal)} .ro .v.amber{color:var(--amber)} .ro .v.red{color:var(--red)} .ro .v.green{color:var(--green)}
+
+  .verdict{padding:12px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--muted);display:flex;align-items:center;gap:10px}
+  .verdict .dotv{width:9px;height:9px;border-radius:50%;background:var(--faint);flex:0 0 auto}
+  .verdict.good .dotv{background:var(--green);box-shadow:0 0 10px var(--green)} .verdict.good{color:var(--green)}
+  .verdict.bad .dotv{background:var(--red);box-shadow:0 0 10px var(--red)} .verdict.bad{color:var(--red)}
+
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--rose);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--rose);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.rose{border-color:var(--rose);background:rgba(255,143,181,.06)} .note.rose .nh{color:var(--rose)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)}
+  .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7}
+  .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .whyline{margin:2px 0 4px;font-size:13.5px;color:var(--muted);border-left:2px solid var(--red);background:rgba(255,107,107,.05);padding:5px 12px;border-radius:0 8px 8px 0}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--rose);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px}
+  @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px}
+  .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--rose);min-width:118px;text-transform:uppercase}
+  .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(255,143,181,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--rose);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--rose)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)}
+  .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--rose);color:var(--text)}
+  .coursenav a.map{border-color:transparent;color:var(--indigo)}
+  footer{padding:40px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="gamesense.html"><span class="dot"></span><span class="name">Game Sense</span></a>
+    <div class="top-meta">Part 2 &middot; 02 / 03 &middot; Play the Game</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 2 &middot; 02</b> Play the Game</div>
+    <div class="eyebrow">Alliance Selection</div>
+    <h1>Draft your<br><span class="accent">alliance</span>.</h1>
+    <p class="dek">After the last qualification match, the top seeds take turns picking playoff partners. A few minutes, one list, and the whole playoff run gets decided. Today you are seed 2, and the scouting data is on the table.</p>
+  </div>
+
+  <section>
+    <p class="lead">The rankings just froze.</p>
+    <p>Qualification matches are over, and the scoreboard has done its sorting. Now comes <strong>alliance selection</strong>: the top-seeded teams become <strong>captains</strong>, and one by one they invite other teams to join them for the playoffs. It is like picking sides for a lunchtime game, except everyone saw every match, and the smart captains did their homework the night before.</p>
+    <p>To keep it fair, the picking order <em>snakes</em>. With four captains it runs <span class="k">1-2-3-4</span>, then turns around and runs <span class="k">4-3-2-1</span>. The captain who waited through the whole first round gets two picks back to back, the way you might let a friend take two pieces of candy in a row because you got to open the bag. Real FRC events run eight alliances instead of four, but the snake works exactly the same, and in this lesson we will play the four-alliance version so you can feel the whole thing in one sitting.</p>
+    <div class="terms">
+      <div class="term"><h4>Captain</h4><p>A top-seeded team that picks partners. You earn the chair by ranking well in quals.</p></div>
+      <div class="term"><h4>Snake order</h4><p>Round one runs down the seeds, round two runs back up. Waiting longest pays you back with back-to-back picks.</p></div>
+      <div class="term"><h4>Pick list</h4><p>A scouting-built ranking of every team, finished before selection starts. The list decides, not the moment.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">The homework</div>
+    <h2>Bring a list, not a feeling</h2>
+    <p>Selection moves fast. A team gets called, the crowd reacts, the board changes, and suddenly it is your turn. If you try to think it through live, you will grab whatever robot looked flashy in the last match you happened to watch. Good teams walk in with a <strong>pick list</strong>: every team ranked, argued over the night before with the scouts, so that on stage the only job is to read the next name that is still available.</p>
+    <p>What goes on the list? Numbers, mostly. In ORBIT the scout table tracks each team's average <strong>Cells per match</strong>, which <strong>ring</strong> they usually feed, and how often they <strong>Balance</strong> in the endgame. From the first two you can compute a points-per-match estimate, the same idea as the stat called <span class="k">OPR</span> that real scouting systems use. And the ring matters as much as the count: a mid-ring Cell is worth <span class="k" data-o="teleMid"></span> points in teleop and a high-ring Cell <span class="k" data-o="teleHigh"></span>, so a team feeding 9 mid-ring Cells a match (<span data-o="ex9mid"></span> points) quietly outscores one making 5 high-ring Cells (<span data-o="ex5high"></span> points), even though the high shots look cooler.</p>
+  </section>
+
+  <section>
+    <div class="kicker">The hidden column</div>
+    <h2>What a balancer is really worth</h2>
+    <p>Here is the part most captains under-read. In the last <span data-o="endgameSec"></span> seconds, a robot that <strong>Balances</strong> on the platform earns <span class="k" data-o="bal"></span> points. A robot that only parks earns <span class="k" data-o="park"></span>. And when two or more alliance robots balance together, each of them adds the <span class="k" data-o="hb"></span> point Harmony bonus on top. So a team that balances 95 times out of 100 is quietly worth about <span class="k" data-o="egSleeper"></span> endgame points every single match, before the bonus, while a 30 percent balancer averages closer to <span class="k" data-o="egDecoy"></span>.</p>
+    <p>One more thing changes the moment quals end: <strong>ranking points stop existing</strong>. In the playoffs there is no Harmony RP to chase, no Energized RP, nothing but the match score. But do not toss the platform out with the RPs. Balance and the Harmony bonus are plain match points, and a near-certain <span data-o="bal"></span> pointer at the buzzer is worth more than a couple of flashy Cells that may or may not happen. Keep that thought. You are about to use it.</p>
+  </section>
+
+  <section>
+    <div class="kicker">Try it</div>
+    <h2>The draft room</h2>
+    <p>You are seed 2 of 4. The other three captains draft the way a lot of real captains do: straight down the Reactor points column, biggest number first. Press <strong>Start draft</strong>, make your two picks when the board says it is your turn, and the sim will project a playoff match between your alliance and Alliance 1. Redraft as many times as you like.</p>
+
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="1">
+        <div class="qn">Predict first</div>
+        <div class="qt">One team on the scout table, the 8241 Lanterns, balances 95 percent of the time but has the lowest Reactor points on the board. When you run the draft, what usually happens to them?</div>
+        <div class="opts">
+          <button class="opt">They go in the first few picks, because captains love a sure climb</button>
+          <button class="opt">They are still sitting there at your last pick, because captains drafting on Reactor points alone never look their way</button>
+          <button class="opt">They are never worth drafting, since the lowest scorer only drags an alliance down</button>
+        </div>
+        <div class="explain">The other captains in this sim rank teams by Reactor points only, so the Lanterns sink to the bottom of the board and are usually still there in round two. But a 95 percent balancer brings about <span data-o="egSleeper"></span> endgame points to every match, plus the <span data-o="hb"></span> point Harmony bonus when a teammate balances with them. Run the draft and watch who takes them, and what it does to the projection.</div>
+      </div>
+    </div>
+
+    <div class="demo" id="demo">
+      <div class="demo-head">
+        <span class="demo-title">Alliance selection &middot; snake draft</span>
+        <span class="demo-tag"><span class="live" id="live"></span> <span id="status">Press Start draft</span></span>
+      </div>
+      <div class="alliances" id="alBoard"></div>
+      <div class="tblwrap">
+        <table class="scout" aria-label="Scout data for the eight pickable teams">
+          <thead>
+            <tr><th>Team</th><th>Cells / match</th><th>Ring</th><th>Reactor pts</th><th>Balance</th><th></th></tr>
+          </thead>
+          <tbody id="poolBody"></tbody>
+        </table>
+      </div>
+      <div class="controls">
+        <button class="btn primary" id="startBtn">Start draft ▸</button>
+        <span class="ctl-hint" id="hint">Reactor pts = Cells &times; ring value. The table is sorted the way the other captains read it.</span>
+      </div>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Your alliance (A2)</div><div class="v rose" id="roYou">--</div></div>
+        <div class="ro"><div class="k2">Alliance 1</div><div class="v" id="roA1">--</div></div>
+        <div class="ro"><div class="k2">All-3 balance chance</div><div class="v teal" id="roHarm">--</div></div>
+        <div class="ro"><div class="k2">Margin</div><div class="v" id="roMargin">--</div></div>
+      </div>
+      <div class="verdict" id="verdict"><span class="dotv"></span><span id="verdictTxt">Projections appear after pick 8 of 8</span></div>
+    </div>
+    <p class="caption">The projection is the same math every time: Reactor points from the table, <span data-o="leave"></span> Leave points per robot in auto, and the expected endgame from each robot's balance rate, Harmony bonus included. No dice, so every point of swing comes from your picks.</p>
+
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this draft room - take them at your own pace</span></div>
+      <div class="m-item" data-m="draft"><span class="m-st">○</span><span>Run <b>one full draft</b>, start to finish, and read the projection panel. Win or lose, notice which alliance ended up with the Lanterns.</span></div>
+      <div class="m-item" data-m="beat"><span class="m-st">○</span><span>Draft an alliance <b>projected to beat Alliance 1</b>. The captains around you rank teams by Reactor points alone - somewhere in that habit is your opening.</span></div>
+      <div class="m-item" data-m="harmony"><span class="m-st">○</span><span>Draft for the climb: get your <b>all-three-balance chance to 50 percent or better</b>. It may cost you the win projection, and feeling that tradeoff is the point.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> find the sleeper - the team everyone scrolls past, top balance rate, bottom Reactor points - and <b>win with them on your alliance</b>.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">What the board missed</div>
+    <h2>Value depends on who is asking</h2>
+    <p>If you cleared the missions, you found it: the Lanterns are not a good team or a bad team, they are a good team <em>for you</em>. On Alliance 1, whose captain rarely balances, a lonely balancer collects their <span data-o="bal"></span> points and that is that. On your alliance, next to a captain who balances 85 percent of the time, the same robot keeps triggering the Harmony bonus, and the two of you together are worth more than you are apart. Scouts call a pick like that a <strong>sleeper</strong>: a team the headline stat undersells, waiting for the one captain who reads the whole table.</p>
+    <p>That is the deepest idea in alliance selection. You are not collecting the three biggest numbers, you are building one machine out of three robots. A second high scorer sounds great until both robots are jostling at the same loading bay. The draft rewards the team that asks <em>what does my alliance need next</em>, not <em>who is best</em>.</p>
+    <div class="note">
+      <div class="nh">At a real event</div>
+      <p>Real selection has a few extra wrinkles: eight alliances instead of four, a captain may invite another captain to join them, and a team that declines an invitation cannot be picked by anyone else afterward, though it can still captain its own alliance. None of that changes the skill. The snake, the pick list, and reading value the other captains missed carry over exactly.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="note rose">
+      <div class="nh">Going further &middot; optional</div>
+      <p>Draft strategy has a second layer: knowing what will still be there later. If a team you like is ranked low on everyone else's board, picking them in round one wastes value, because they would have survived to your round-two pick anyway. Real scouts mark each target with "will they last until pick 7?" and reach early only when the answer is no. Here is one to chew on: Alliance 1's captain is the best scorer at this event. Why might their smartest first pick still be a balancer instead of the next-best scorer?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">Two scorers overlap: there is one Reactor and one loading bay per alliance, so a second scorer spends part of every match waiting behind the first, and its paper points shrink on the field. A balancer overlaps with nobody. It also fixes Alliance 1's real weakness, a captain who rarely balances, raising the alliance's floor with near-certain endgame points instead of stacking more of what they already have. The general rule: draft the robot that raises your worst number, not the one that pads your best number. And notice the draft-position layer too, since the second-best scorer may still be on the board at their last pick while the good balancers usually are not.</p>
+      </details>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">Four captains run a snake draft and you are seed 2. Round one goes 1-2-3-4. Which picks are yours?</div>
+        <div class="opts">
+          <button class="opt" data-why="That is how a straight repeating order would feel, and lots of games work that way - but the snake reverses on purpose so the captain who waited longest is not always last.">Second and fifth, because the order just repeats</button>
+          <button class="opt">Second and seventh, because round two reverses, so seed 4 picks twice in a row</button>
+          <button class="opt" data-why="Giving seed 1 the first pick and the last pick would double-reward the top seed - the snake exists to do the opposite and pay back the captains who waited.">Second and eighth, since seed 1 always closes out the round</button>
+        </div>
+        <div class="explain">The snake runs 1-2-3-4 then 4-3-2-1, so your picks are the 2nd and the 7th, and seed 4 gets picks 4 and 5 back to back as payment for waiting. Real events run the same snake with eight alliances.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">Why do teams build a pick list the night before selection instead of deciding on stage?</div>
+        <div class="opts">
+          <button class="opt" data-why="It feels official enough to be a rule, but nobody collects a list - the list exists for you, not for the refs.">The rules require every captain to submit a written list</button>
+          <button class="opt" data-why="Watching seed 1 is smart, but copying them means playing their game a pick behind - your list is how you find the value they missed.">So you can quickly copy whatever seed 1 does</button>
+          <button class="opt">Selection moves fast and every pick changes the board, so a ranking argued out calmly beats a decision made in the moment</button>
+        </div>
+        <div class="explain">On stage there is noise, a ticking clock, and a board that changes with every name called. The pick list moves the hard thinking to the night before, when the scouts can argue it out with data. During selection the only job left is reading the highest name still available.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">From the sim: drafting the 8241 Lanterns, the lowest Reactor score on the board, projected better than drafting the 1773 Badgers, who out-score them. What made the difference?</div>
+        <div class="opts">
+          <button class="opt">Endgame value: a near-certain Balance plus the Harmony bonus is worth more than the Badgers' few extra Reactor points</button>
+          <button class="opt" data-why="A fair suspicion, but the projection has no dice in it - it is the same arithmetic every run, so the swing has to come from the numbers themselves.">Luck - the projection rolls differently each time</button>
+          <button class="opt" data-why="High ring is the flashy guess, but the Lanterns are a mid-ring team - their value arrives in the last thirty seconds, on the platform, not at the Reactor.">The Lanterns secretly score high-ring Cells in the projection</button>
+        </div>
+        <div class="explain">A 95 percent balancer averages about <span data-o="egSleeper"></span> endgame points before bonuses, while a 30 percent balancer averages closer to <span data-o="egDecoy"></span>. Add the Harmony bonus next to your high-balance captain and the Lanterns swing more points at the buzzer than the Badgers add at the Reactor. The scout table's quietest column decided the match.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 4</div>
+        <div class="qt">Your team chased the Harmony ranking point all through quals. Ranking points vanish in the playoffs, so why does balancing still matter?</div>
+        <div class="opts">
+          <button class="opt" data-why="Cells feel like the whole game, but one Balance is worth as much as several Cells in a single move - walking away from the platform leaves easy points sitting there.">It does not - smart playoff alliances skip the platform and just keep scoring Cells</button>
+          <button class="opt" data-why="Ranking points really are gone in the playoffs - what remains is the plain match points printed next to Balance in the scoring table.">The refs quietly award a ranking point for it anyway</button>
+          <button class="opt">Balance and the Harmony bonus are match points, and playoff matches are decided by match points alone</button>
+        </div>
+        <div class="explain">RPs only ever decided seeding, and seeding is settled. What survives into the playoffs is the scoring table itself: Balance still pays its points and Harmony still pays its bonus, as match points. That is why endgame reliability shows up on every good pick list.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 2 &middot; 02 &middot; Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Captain</b><span>A top seed that picks playoff partners.</span></div>
+        <div class="gl"><b>Snake order</b><span>Down the seeds, then back up; fairness by reversal.</span></div>
+        <div class="gl"><b>Pick list</b><span>Scouting-built ranking, finished before selection.</span></div>
+        <div class="gl"><b>OPR</b><span>A stats estimate of points a team adds per match.</span></div>
+        <div class="gl"><b>Sleeper</b><span>A team the headline stat undersells.</span></div>
+        <div class="gl"><b>Harmony bonus</b><span>Extra points each when partners balance together.</span></div>
+      </div>
+      <a class="next" href="gamesense.html">
+        <div class="n-eyebrow">Up next &middot; Part 2 &middot; 03 &middot; coming soon</div>
+        <h3>The Strategy Huddle &middot; back to the map &rarr;</h3>
+        <p>You drafted the alliance. Next, the three of you get about ninety seconds to agree on one plan - who scores, who feeds, who climbs first. That lesson is still being written, so head back to the map to review or push ahead.</p>
+      </a>
+    </div>
+  </section>
+
+</div>
+
+<nav class="coursenav">
+  <a href="gamesense-lesson-4.html">&larr; Part 1 &middot; 04 &middot; Ranking Points</a>
+  <a class="map" href="gamesense.html">Course map</a>
+  <a href="gamesense.html">Back to the course map &rarr;</a>
+</nav>
+
+<footer>Game Sense &middot; Reading and playing the FRC game</footer>
+
+<script>
+(function(){
+  "use strict";
+  var O=window.ORBIT;
+
+  /* ---- inject ORBIT numbers into the prose ---- */
+  try{
+    var bal=O.scoring.endgame.balance.pts, park=O.scoring.endgame.park.pts, hb=O.scoring.endgame.harmonyBonusEach;
+    var VALS={
+      teleMid:O.scoring.rings.mid.tele,
+      teleHigh:O.scoring.rings.high.tele,
+      ex9mid:9*O.scoring.rings.mid.tele,
+      ex5high:5*O.scoring.rings.high.tele,
+      endgameSec:O.match.endgameSec,
+      bal:bal, park:park, hb:hb,
+      leave:O.scoring.leave,
+      egSleeper:Math.round(0.95*bal+0.05*park),
+      egDecoy:Math.round(0.30*bal+0.70*park)
+    };
+    document.querySelectorAll('[data-o]').forEach(function(n){
+      var k=n.getAttribute('data-o');
+      if(VALS[k]!==undefined) n.textContent=VALS[k];
+    });
+  }catch(e){}
+
+  /* MODEL-START (validated numerically - see the course feasibility script) */
+  var CAPTAINS=[
+    {id:"c1", num:"3941", name:"Thunderheads", cells:8, ring:"high", bal:0.40},
+    {id:"c2", num:"6072", name:"Fireflies",    cells:7, ring:"high", bal:0.85},
+    {id:"c3", num:"1580", name:"Marmots",      cells:8, ring:"mid",  bal:0.75},
+    {id:"c4", num:"8449", name:"Tumbleweeds",  cells:5, ring:"high", bal:0.55}
+  ];
+  var POOL=[
+    {id:"p1", num:"5327", name:"Comets",     cells:8,  ring:"high", bal:0.35},
+    {id:"p2", num:"2914", name:"Ridgebacks", cells:7,  ring:"high", bal:0.55},
+    {id:"p3", num:"7688", name:"Orioles",    cells:9,  ring:"mid",  bal:0.70},
+    {id:"p4", num:"4126", name:"Vipers",     cells:8,  ring:"mid",  bal:0.60},
+    {id:"p5", num:"9350", name:"Herons",     cells:6,  ring:"mid",  bal:0.65},
+    {id:"p6", num:"6488", name:"Mules",      cells:14, ring:"low",  bal:0.45},
+    {id:"p7", num:"1773", name:"Badgers",    cells:13, ring:"low",  bal:0.30},
+    {id:"p8", num:"8241", name:"Lanterns",   cells:4,  ring:"mid",  bal:0.95}
+  ];
+  var SLEEPER="p8";
+  var ORDER=[0,1,2,3,3,2,1,0]; /* snake: seeds 1-2-3-4 then 4-3-2-1; index 1 = YOU */
+
+  function offense(t){ return t.cells*O.scoring.rings[t.ring].tele; }
+  function endgameExp(rates){
+    var balP=O.scoring.endgame.balance.pts, parkP=O.scoring.endgame.park.pts, hbP=O.scoring.endgame.harmonyBonusEach;
+    var total=0;
+    for(var m=0;m<8;m++){
+      var pr=1,n=0,pts=0;
+      for(var i=0;i<3;i++){
+        if(m&(1<<i)){ pr*=rates[i]; n++; pts+=balP; }
+        else { pr*=(1-rates[i]); pts+=parkP; }
+      }
+      if(n>=2) pts+=hbP*n;
+      total+=pr*pts;
+    }
+    return total;
+  }
+  function projTeams(ts){
+    var off=0; ts.forEach(function(t){off+=offense(t);});
+    return 3*O.scoring.leave+off+endgameExp(ts.map(function(t){return t.bal;}));
+  }
+  function harmonyOf(ts){ var p=1; ts.forEach(function(t){p*=t.bal;}); return p; }
+  function aiPick(availArr){
+    return availArr.reduce(function(b,t){ return offense(t)>offense(b)?t:b; });
+  }
+  /* MODEL-END */
+
+  var el={
+    live:document.getElementById('live'), status:document.getElementById('status'),
+    board:document.getElementById('alBoard'), body:document.getElementById('poolBody'),
+    start:document.getElementById('startBtn'), hint:document.getElementById('hint'),
+    roYou:document.getElementById('roYou'), roA1:document.getElementById('roA1'),
+    roHarm:document.getElementById('roHarm'), roMargin:document.getElementById('roMargin'),
+    verdict:document.getElementById('verdict'), verdictTxt:document.getElementById('verdictTxt')
+  };
+
+  /* ---- draft state ---- */
+  var takenBy={};      /* pool id -> alliance index 0..3 */
+  var picks=[[],[],[],[]];
+  var turn=0, waiting=false, draftDone=false, timer=null;
+  var projYou=0, projA1=0, harm=0;
+
+  function availList(){ return POOL.filter(function(t){ return takenBy[t.id]===undefined; }); }
+  function ringName(r){ return r.charAt(0).toUpperCase()+r.slice(1); }
+
+  function chipHTML(t, extra){
+    return '<span class="chip'+(extra||'')+'"><span class="cn">'+t.num+' '+t.name+'</span><br>'+
+      '<span class="cs">'+t.cells+' '+O.piecePlural+' &middot; '+ringName(t.ring)+' &middot; '+Math.round(t.bal*100)+'% bal</span></span>';
+  }
+  function renderBoard(totals){
+    var html='';
+    for(var a=0;a<4;a++){
+      var you=(a===1);
+      html+='<div class="alrow'+(you?' you':'')+'">'+
+        '<span class="altag">A'+(a+1)+(you?' &middot; YOU':' &middot; seed '+(a+1))+'</span>'+
+        chipHTML(CAPTAINS[a]);
+      for(var s=0;s<2;s++){
+        if(picks[a][s]) html+=chipHTML(picks[a][s], picks[a][s].id===SLEEPER?' sleeperchip':'');
+        else html+='<span class="chip empty"><span class="cn">pick '+(s+1)+'</span></span>';
+      }
+      if(totals) html+='<span class="altotal">proj <b>'+Math.round(totals[a])+'</b></span>';
+      html+='</div>';
+    }
+    el.board.innerHTML=html;
+  }
+  function renderTable(){
+    var sorted=POOL.slice().sort(function(a,b){ return offense(b)-offense(a); });
+    var html='';
+    sorted.forEach(function(t){
+      var who=takenBy[t.id];
+      var taken=(who!==undefined);
+      html+='<tr'+(taken?' class="taken"':'')+'>'+
+        '<td class="tname">'+t.num+' '+t.name+'</td>'+
+        '<td class="num">'+t.cells+'</td>'+
+        '<td>'+ringName(t.ring)+'</td>'+
+        '<td class="num"><span class="rk">'+offense(t)+'</span></td>'+
+        '<td class="num"><span class="'+(t.bal>=0.7?'balhi':'')+'">'+Math.round(t.bal*100)+'%</span></td>'+
+        '<td>'+(taken
+          ? '<span class="takenby">&rarr; A'+(who+1)+'</span>'
+          : '<button class="draftbtn" data-id="'+t.id+'"'+(waiting?'':' disabled')+'>Draft</button>')+
+        '</td></tr>';
+    });
+    el.body.innerHTML=html;
+  }
+  function setStatus(txt,on){
+    el.status.textContent=txt;
+    el.live.classList.toggle('on',!!on);
+  }
+
+  function resetSim(){
+    clearTimeout(timer);
+    takenBy={}; picks=[[],[],[],[]];
+    turn=0; waiting=false; draftDone=false;
+    projYou=0; projA1=0; harm=0;
+    el.roYou.textContent='--'; el.roA1.textContent='--';
+    el.roHarm.textContent='--'; el.roMargin.textContent='--';
+    el.roMargin.className='v';
+    el.verdict.className='verdict'; el.verdictTxt.textContent='Projections appear after pick 8 of 8';
+    el.hint.textContent='Reactor pts = Cells × ring value. The table is sorted the way the other captains read it.';
+    renderBoard(null); renderTable();
+  }
+
+  function applyPick(cap,t){
+    takenBy[t.id]=cap;
+    picks[cap].push(t);
+    turn++;
+    renderBoard(null); renderTable();
+    nextTurn();
+  }
+  function nextTurn(){
+    if(turn>=ORDER.length){ finish(); return; }
+    var cap=ORDER[turn];
+    if(cap===1){
+      waiting=true;
+      setStatus('Pick '+(turn+1)+' of 8 - your pick. Choose from the table.', true);
+      el.hint.textContent='Your turn: press Draft on any open team.';
+      renderTable();
+    } else {
+      waiting=false;
+      setStatus('Pick '+(turn+1)+' of 8 - Alliance '+(cap+1)+' is choosing...', true);
+      renderTable();
+      timer=setTimeout(function(){ applyPick(cap, aiPick(availList())); }, 800);
+    }
+  }
+  function finish(){
+    waiting=false; draftDone=true;
+    var totals=[];
+    for(var a=0;a<4;a++) totals[a]=projTeams([CAPTAINS[a]].concat(picks[a]));
+    projYou=totals[1]; projA1=totals[0];
+    harm=harmonyOf([CAPTAINS[1]].concat(picks[1]));
+    var margin=projYou-projA1;
+    el.roYou.textContent=Math.round(projYou);
+    el.roA1.textContent=Math.round(projA1);
+    el.roHarm.textContent=Math.round(harm*100)+'%';
+    el.roMargin.textContent=(margin>=0?'+':'')+margin.toFixed(1);
+    el.roMargin.className='v '+(margin>0?'green':'red');
+    if(margin>0){
+      el.verdict.className='verdict good';
+      el.verdictTxt.textContent='Projected: your alliance beats Alliance 1';
+    } else {
+      el.verdict.className='verdict bad';
+      el.verdictTxt.textContent='Projected: Alliance 1 wins - redraft and find the points still on the board';
+    }
+    setStatus('Draft complete', false);
+    el.hint.textContent='Read the projection, then Redraft to try a different plan.';
+    renderBoard(totals);
+    renderTable();
+  }
+
+  el.start.addEventListener('click',function(){
+    resetSim();
+    el.start.textContent='Redraft ↺';
+    nextTurn();
+  });
+  el.body.addEventListener('click',function(e){
+    var btn=e.target.closest('button.draftbtn');
+    if(!btn||!waiting) return;
+    var t=POOL.filter(function(x){return x.id===btn.getAttribute('data-id');})[0];
+    if(!t||takenBy[t.id]!==undefined) return;
+    waiting=false;
+    applyPick(1,t);
+  });
+
+  resetSim();
+
+  /* ---- missions (wrapped so a missions bug can never break the lesson) ---- */
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  setInterval(function(){
+    if(!draftDone) return;
+    mClear('draft');
+    if(harm>=0.5) mClear('harmony');
+    if(projYou>projA1){
+      mClear('beat');
+      var hasSleeper=picks[1].some(function(t){return t.id===SLEEPER;});
+      if(hasSleeper) mClear('gold');
+    }
+  },200);
+  }catch(e){}
+
+  /* ---- quiz ---- */
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong');
+      try{ var why=opt.getAttribute('data-why');
+        if(why){ var wl=opt.nextElementSibling; if(!wl||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.insertAdjacentElement('afterend',wl); } wl.textContent=why; }
+      }catch(e){} } }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  // auto-mark this lesson complete in the hub once its quiz is finished
+  var KEY="gamesense:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then run the sim
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain');
+  var picked=-1, revealed=false, ran=false;
+  var demos=document.querySelectorAll('.demo');
+  var style=document.createElement('style');
+  style.textContent='#predict .opt.picked{border-color:var(--teal,#34D7C5);box-shadow:0 0 0 2px rgba(52,215,197,.22)}';
+  document.head.appendChild(style);
+  var note=document.createElement('div');
+  note.style.cssText='display:none;font-size:13px;color:#92A2BE;margin-top:10px;font-style:italic';
+  q.appendChild(note);
+  function optText(i){ var t=(opts[i].textContent||'').trim(); return t.length>70 ? t.slice(0,67)+'...' : t; }
+  function reveal(){ if(revealed||picked<0) return; revealed=true;
+    opts.forEach(function(o){o.classList.add('locked');});
+    try{var pr=JSON.parse(localStorage.getItem('frc:predict'))||{r:0,w:0};if(picked===correct){pr.r++;}else{pr.w++;}localStorage.setItem('frc:predict',JSON.stringify(pr));}catch(e){}
+    if(picked===correct){
+      opts[picked].classList.add('correct');
+      note.textContent='You called it. "'+optText(picked)+'" is exactly what happens. Here is why:';
+    } else {
+      opts[picked].classList.add('wrong'); opts[correct].classList.add('correct');
+      note.textContent='You predicted "'+optText(picked)+'". The sim went a different way - the green answer is what really happens, and the surprise is the part worth remembering. Here is why:';
+    }
+    note.style.display='block';
+    explain.classList.add('show'); }
+  function onRan(ev){ if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#predict')) return; ran=true; if(picked>=0) reveal(); }
+  if(demos.length){
+    Array.prototype.forEach.call(demos,function(d){
+      d.addEventListener('pointerdown',onRan,true);
+      d.addEventListener('input',onRan,true);
+    });
+    window.addEventListener('keydown',onRan,true);
+  } else { ran=true; }
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(revealed)return; picked=i;
+    opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
+    if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
+})();
+</script>
+<script src="account-config.js"></script>
+<script src="account.js"></script>
+</body>
+</html>

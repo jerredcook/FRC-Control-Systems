@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Game Sense · Part 2.3 - The Strategy Huddle</title>
+<script src="gamesense-data.js"></script>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --rose:#ff8fb5;    /* course accent */
+    --amber:#FFB020;   /* values / highlights */
+    --teal:#34D7C5;    --indigo:#8E8CF8;
+    --red:#FF6B6B;     --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ink); color:var(--text);
+    font-family:var(--sans); font-size:17px; line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(900px 500px at 80% -10%, rgba(255,143,181,.07), transparent 60%),
+      radial-gradient(700px 500px at -10% 10%, rgba(142,140,248,.05), transparent 55%);
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--rose);box-shadow:0 0 12px var(--rose)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--rose),var(--indigo));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:48ch;margin-top:6px}
+
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--rose);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  .lead{font-size:19px}
+  em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .terms{display:grid;gap:12px;margin:22px 0 6px}
+  @media(min-width:560px){.terms{grid-template-columns:repeat(3,1fr)}}
+  .term{border:1px solid var(--line);border-radius:10px;padding:14px 15px;background:var(--panel);border-top:2px solid var(--rose)}
+  .term h4{margin:0 0 4px;font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--rose)}
+  .term p{margin:0;font-size:14.5px;color:var(--muted);line-height:1.45}
+
+  /* interactive panel */
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;gap:6px;align-items:center;text-align:right}
+  .demo-tag .live{width:7px;height:7px;border-radius:50%;background:var(--faint);flex:0 0 auto}
+  .demo-tag .live.on{background:var(--green);box-shadow:0 0 8px var(--green)}
+
+  .planner{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line)}
+  @media(min-width:700px){.planner{grid-template-columns:1fr 1fr}}
+  .pside{background:#0B1322;padding:12px 14px}
+  .sidehead{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-bottom:10px}
+  .sidehead.you{color:var(--rose)}
+  .rcard{border:1px solid var(--line);border-radius:10px;background:#10192E;padding:10px 12px;margin-bottom:8px}
+  .rcard:last-child{margin-bottom:0}
+  .rcard.opp{border-style:solid;background:#0D1526}
+  .rtop{display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+  .rname{font-family:var(--mono);font-size:12.5px;color:var(--text);font-weight:600}
+  .rbal{font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:.04em}
+  .rstats{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin:3px 0 8px;letter-spacing:.02em}
+  .rcard.opp .rstats{margin-bottom:4px}
+  .jbtns{display:flex;flex-wrap:wrap;gap:6px}
+  .jbtn{border:1px solid var(--line-2);background:var(--panel);color:var(--muted);font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;padding:7px 10px;border-radius:7px;cursor:pointer;min-height:28px;transition:.12s}
+  .jbtn:hover{border-color:var(--rose);color:var(--text)}
+  .jbtn.active{background:var(--rose);border-color:var(--rose);color:#2a0d18;font-weight:700}
+  .rrole{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .rcard.opp .rrole{margin-top:4px}
+  .rrole .up{color:var(--green)} .rrole .dn{color:var(--red)} .rrole .hl{color:var(--amber)}
+
+  .tlwrap{border-top:1px solid var(--line);background:#0B1322;position:relative}
+  .tlwrap .cell-label{position:absolute;top:8px;left:10px;z-index:2;font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);pointer-events:none}
+  canvas#tl{display:block;width:100%;height:238px}
+
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s;min-height:32px}
+  .btn:hover{border-color:var(--rose);color:var(--text)}
+  .ctl-hint{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.04em}
+
+  .readouts{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  @media(min-width:560px){.readouts{grid-template-columns:repeat(4,1fr)}}
+  .ro{background:#0B1322;padding:11px 14px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:20px;font-weight:600;margin-top:3px;color:var(--muted)}
+  .ro .v.rose{color:var(--rose)} .ro .v.teal{color:var(--teal)} .ro .v.amber{color:var(--amber)} .ro .v.red{color:var(--red)} .ro .v.green{color:var(--green)}
+
+  .verdict{padding:12px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--muted);display:flex;align-items:center;gap:10px}
+  .verdict .dotv{width:9px;height:9px;border-radius:50%;background:var(--faint);flex:0 0 auto}
+  .verdict.good .dotv{background:var(--green);box-shadow:0 0 10px var(--green)} .verdict.good{color:var(--green)}
+  .verdict.bad .dotv{background:var(--red);box-shadow:0 0 10px var(--red)} .verdict.bad{color:var(--red)}
+
+  .legend{display:flex;flex-wrap:wrap;gap:14px;padding:11px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .legend i{width:16px;height:4px;border-radius:2px;display:inline-block}
+
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--rose);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--rose);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.rose{border-color:var(--rose);background:rgba(255,143,181,.06)} .note.rose .nh{color:var(--rose)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)}
+  .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7}
+  .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .whyline{margin:2px 0 4px;font-size:13.5px;color:var(--muted);border-left:2px solid var(--red);background:rgba(255,107,107,.05);padding:5px 12px;border-radius:0 8px 8px 0}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--rose);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px}
+  @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px}
+  .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--rose);min-width:118px;text-transform:uppercase}
+  .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(255,143,181,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--rose);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--rose)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)}
+  .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--rose);color:var(--text)}
+  .coursenav a.map{border-color:transparent;color:var(--indigo)}
+  footer{padding:40px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="gamesense.html"><span class="dot"></span><span class="name">Game Sense</span></a>
+    <div class="top-meta">Part 2 &middot; 03 / 03 &middot; Play the Game</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 2 &middot; 03</b> Play the Game</div>
+    <div class="eyebrow">The Strategy Huddle</div>
+    <h1>Three robots,<br><span class="accent">one plan</span>.</h1>
+    <p class="dek">The draft gave you two partners. Now the three of you get about two minutes in the queue line to agree on what each robot does with its <span data-o="totalSec"></span> seconds. This is the meeting where matches get won early.</p>
+  </div>
+
+  <section>
+    <p class="lead">The bracket is out.</p>
+    <p>Say your draft went the way the gold mission did last lesson: you are the 6072 Fireflies, and sitting beside you are the 7688 Orioles and the 8241 Lanterns. Somewhere ahead in the bracket waits Alliance 1 - the Thunderheads, the Comets they grabbed with the first pick, and the Badgers they scooped up at the end. Your scouts have already written down exactly how Alliance 1 plays. What nobody has written down yet is how <em>you</em> will.</p>
+    <p>That is what the <strong>strategy huddle</strong> is for. Before every playoff match, the three drive teams find each other near the queue and talk. A good huddle is not a pep talk, and it is not three teams each promising to do their best. It ends with a <strong>plan</strong>: one job per robot, plus a clock that says when each job changes.</p>
+    <p>Think of a long group ride. Three riders who all sprint at once burn out and finish slow. A group that works takes turns: one rider pulls at the front and breaks the wind, the others tuck in behind and save their legs, and everyone knows when the switch happens. Nobody is being generous. The group is simply faster when the jobs are split, and the riders agreed on the split <em>before</em> the road got hard. Your alliance is that group now.</p>
+  </section>
+
+  <section>
+    <div class="kicker">The jobs</div>
+    <h2>A plan is three choices</h2>
+    <p>In the planner below, each of your robots takes exactly one job: cycle the <strong>high</strong>, <strong>mid</strong>, or <strong>low</strong> ring, <strong>feed</strong>, <strong>defend</strong>, or <strong>dock early</strong>. Three of those jobs score Cells. Three of them score nothing at all, and this lesson exists because the nothing-jobs keep winning matches.</p>
+    <p>First, a warning about the scoring jobs. Your alliance shares <em>one</em> loading bay and one face of each Reactor ring. Put two robots on the same ring and they queue behind each other at both ends - in the planner, every lap on a shared ring stretches by <span class="k" data-o="congS"></span> seconds per robot. Remember the draft lesson's warning about two scorers jostling at one loading bay? Today you get to watch it cost you points.</p>
+    <div class="terms">
+      <div class="term"><h4>Feed</h4><p>Hoover Cells and hand them to your partners. Scores zero itself, but every scoring teammate's lap gets <span data-o="feedS"></span> seconds shorter. ORBIT's scouting notes call this the Feeder archetype.</p></div>
+      <div class="term"><h4>Defend</h4><p>Shadow their most dangerous scorer. Their lap stretches by <span data-o="defS"></span> seconds, but expect to concede about one foul (<span data-o="foulPts"></span> points) - pinning is rule <span data-o="rulePinId"></span>.</p></div>
+      <div class="term"><h4>Dock early</h4><p>Head home with <span data-o="earlyLeft"></span> seconds still on the clock. The Balance is locked in, and a settled platform nudges each teammate's balance odds up about <span data-o="bumpPts"></span> points in a hundred.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">The clock</div>
+    <h2>The endgame starts in the middle</h2>
+    <p>You know the shape of a match from Part 1: <span class="k" data-o="autoSec"></span> seconds of auto, <span class="k" data-o="teleopSec"></span> of teleop, and the final <span class="k" data-o="endgameSec"></span> seconds are the endgame window. A robot on the standard plan cycles until that window opens, then rides home to the platform - which means its real scoring day is only <span class="k" data-o="scoreWin"></span> seconds long. Every projection in the planner is built on that window.</p>
+    <p>Docking early moves one robot's departure up to <span data-o="earlyLeft"></span> seconds remaining. That costs about a lap of scoring, and here is what it buys. A Balance pays <span class="k" data-o="balPts"></span> points against <span class="k" data-o="parkPts"></span> for a park, so an endgame that goes wrong is expensive - and rule <span class="k" data-o="ruleDockId"></span> says that once the last <span data-o="endgameSec"></span> seconds begin, opponents may not touch a robot in contact with its own platform. Arrive early and you are already untouchable when it matters, with the platform settled for the teammates arriving behind you. When two or more of you balance together, each adds the <span data-o="hbPts"></span> point Harmony bonus on top.</p>
+    <p>One more idea before you take the whiteboard, and it is the biggest one in this lesson. The scoreboard only ever shows a <strong>difference</strong>. A point you delete from their column is worth exactly as much as a point you add to yours. Keep that in your pocket for the moment a zero-scoring job starts to look useless.</p>
+  </section>
+
+  <section>
+    <div class="kicker">Try it</div>
+    <h2>The huddle board</h2>
+    <p>You call the jobs for all three of your robots. Alliance 1's plan is locked - your scouts clocked it in their earlier playoff rounds: Thunderheads keep the high ring on <span data-o="tLap"></span> second laps, the Comets slide down to mid so the two of them do not jam each other (their coach knows about shared lanes too), and the Badgers live on low. The projection updates the moment you tap a job. No dice anywhere - every point of swing is your plan working.</p>
+
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="1">
+        <div class="qn">Predict first</div>
+        <div class="qt">The Fireflies and the Orioles both cycle the high ring fastest, and the board opens with both of them on it. Compared with sliding the Orioles down to mid, the both-on-high plan scores...</div>
+        <div class="opts">
+          <button class="opt">More - the high ring pays the most per Cell, so doubling up on it doubles the best thing</button>
+          <button class="opt">Less - they share one lane and one loading bay, both laps stretch, and the alliance total drops</button>
+          <button class="opt">Exactly the same - the Reactor only counts Cells that arrive, not who brings them</button>
+        </div>
+        <div class="explain">Stacked on high, both robots queue at the same loading bay and the same ring face, so each lap stretches by <span data-o="congS"></span> seconds and your Reactor projection is <span data-o="bothHighOff"></span>. Slide the Orioles to mid and it jumps to <span data-o="splitOff"></span> - the mid ring pays less per Cell, but short laps deliver so many more Cells that the alliance comes out <span data-o="congDrop"></span> points ahead. Watch the timeline bars change length as you make the switch.</div>
+      </div>
+    </div>
+
+    <div class="demo" id="demo">
+      <div class="demo-head">
+        <span class="demo-title">Strategy huddle &middot; planner vs Alliance 1</span>
+        <span class="demo-tag"><span class="live on" id="live"></span> <span id="status">Live projection</span></span>
+      </div>
+      <div class="planner">
+        <div class="pside">
+          <div class="sidehead you">Your alliance &middot; tap one job per robot</div>
+          <div id="youCards"></div>
+        </div>
+        <div class="pside">
+          <div class="sidehead">Alliance 1 &middot; scout report &middot; locked</div>
+          <div id="oppCards"></div>
+        </div>
+      </div>
+      <div class="tlwrap"><span class="cell-label">Match timeline &middot; <span data-o="totalSec"></span> s</span><canvas id="tl"></canvas></div>
+      <div class="legend">
+        <span><i style="background:var(--amber)"></i> High</span>
+        <span><i style="background:var(--indigo)"></i> Mid</span>
+        <span><i style="background:var(--teal)"></i> Low</span>
+        <span><i style="background:var(--rose)"></i> Feed</span>
+        <span><i style="background:var(--red)"></i> Defend</span>
+        <span><i style="background:var(--green)"></i> Platform</span>
+      </div>
+      <div class="controls">
+        <button class="btn" id="resetBtn">Reset plan ↺</button>
+        <span class="ctl-hint" id="hint">Both alliances leave their zones in auto: <span data-o="autoBoth"></span> points each side, baked in.</span>
+      </div>
+      <div class="readouts">
+        <div class="ro"><div class="k2">You (Alliance 2)</div><div class="v rose" id="roYou">--</div></div>
+        <div class="ro"><div class="k2">Alliance 1</div><div class="v" id="roThem">--</div></div>
+        <div class="ro"><div class="k2">Margin</div><div class="v" id="roMargin">--</div></div>
+        <div class="ro"><div class="k2">All-3 balance odds</div><div class="v teal" id="roBal">--</div></div>
+      </div>
+      <div class="verdict" id="verdict"><span class="dotv"></span><span id="verdictTxt">Tap a job to start planning</span></div>
+    </div>
+    <p class="caption">The projection is plain arithmetic: Cells from each robot's lap times, <span data-o="leavePts"></span> Leave points per robot in auto, expected platform points from each balance rate, Harmony included, plus any fouls your defense concedes. Same plan in, same number out, every time.</p>
+
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this huddle - take them at your own pace</span></div>
+      <div class="m-item" data-m="win"><span class="m-st">○</span><span>Turn it around: the opening plan is losing by about <b><span data-o="defMarginAbs"></span> points</b>. Rearrange the jobs until the <b>margin goes green</b>. More than one road gets there.</span></div>
+      <div class="m-item" data-m="blowout"><span class="m-st">○</span><span>Find the biggest win on the board: a plan that wins by <b><span data-o="m2th"></span> or more</b>. Hint: it is not all-scoring. The best plan asks one of your robots to never score a single Cell.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> win with a plan that sends one robot home to <b>dock at <span data-o="earlyLeft"></span> seconds remaining</b>. Certainty costs a lap. Prove it can still pay.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Debrief</div>
+    <h2>What the big wins share</h2>
+    <p>If you cleared the missions, you noticed something strange. Out of every possible all-scoring plan, exactly one of them wins, and it squeaks by with less than a point to spare. Every comfortable win on that board benches a scorer. The best plan of all puts the Lanterns on feed: they hand over their own <span data-o="lLowP"></span> points of low-ring scoring, and their shuttle service gives the Fireflies and Orioles about <span data-o="feedGain"></span> points of extra Cells between them. The alliance got stronger because one robot agreed to disappear from the scoring column.</p>
+    <p>Defense tells the same story from the other side. The Lanterns shadowing the Thunderheads erase <span data-o="defRemoved"></span> points of high-ring scoring at the cost of one conceded foul - and since the scoreboard only shows a difference, deleting their points counts exactly like scoring your own. Feed grows your column, defense shrinks theirs, and dock early trades a lap for certainty. Three different jobs, one shared idea: a robot's value is what happens to the <em>margin</em>, not what appears next to its own name.</p>
+    <div class="note">
+      <div class="nh">At a real event</div>
+      <p>The real huddle happens in the queue line with the next match's teams, and it is short. Good ones sound like this: one voice per team, numbers instead of adjectives ("we average nine mid Cells, you take high"), and a plan B agreed out loud before anyone needs it - "if their defender latches onto our high robot, we swap rings and keep rolling." Deciding the swap now costs nothing. Deciding it mid-match, over a crackling headset, costs a lap or two every time.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="note rose">
+      <div class="nh">Going further &middot; optional</div>
+      <p>The planner trusts the scout report exactly, but real robots have good days. Suppose the Thunderheads run hot and lap in <span data-o="tHotLap"></span> seconds instead of <span data-o="tLap"></span> - that is <span data-o="hotDelta"></span> extra points for Alliance 1. Which of your winning plans survives that surprise: the all-scoring squeaker, or the big-margin feed plan? Work out both new margins before you peek. This is why drive coaches chase margin instead of stopping at "projected to win."</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">The squeaker dies: its margin of less than a point becomes roughly <span data-o="allHotM"></span>, a loss. The feed plan shrugs: <span data-o="feedM"></span> minus <span data-o="hotDelta"></span> still wins by about <span data-o="feedHotM"></span>. Margin is not showing off - it is armor against the day the scout report runs hot. Statisticians would say the projection is an expected value and real matches have variance around it; a plan that only wins when every number lands exactly is not really a winning plan. The wider your margin, the more surprise the plan can absorb and still come home ahead.</p>
+      </details>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">Your two best scorers both lap the high ring fastest. Why does the planner pay you more for moving one of them down to mid?</div>
+        <div class="opts">
+          <button class="opt" data-why="The high ring really does pay the most per Cell - but points come from Cells delivered, and two robots squeezed into one lane deliver fewer of them.">It should not - the high ring pays the most, so both robots belong there</button>
+          <button class="opt">Two robots on one ring share a lane and a loading bay, so both laps stretch - the alliance delivers more Cells spread out than stacked up</button>
+          <button class="opt" data-why="Tempting, but check the scoring table: mid pays less per Cell than high. The win comes from lap count, not a secret pay raise.">The mid ring secretly pays more per Cell than the high ring</button>
+        </div>
+        <div class="explain">Stacked on high, each lap stretches by <span data-o="congS"></span> seconds and your Reactor projection is <span data-o="bothHighOff"></span> points; split high and mid, it is <span data-o="splitOff"></span>. Per Cell, high wins. Per alliance, the split wins by <span data-o="congDrop"></span> - the same reason the draft lesson warned you about stacking two scorers behind one loading bay.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">The Lanterns can score about <span data-o="lLowP"></span> points on the low ring, or shadow the Thunderheads instead - erasing <span data-o="defRemoved"></span> points of their scoring while conceding about one foul. Is the switch worth it?</div>
+        <div class="opts">
+          <button class="opt" data-why="The scoreboard only ever shows a difference. A robot that scores zero but deletes more than it gave up has helped the score, full stop.">No - a robot that scores zero points cannot help you win</button>
+          <button class="opt" data-why="A shadow that wanders off to score stops being a shadow. The trade has to stand on its own - and the arithmetic says it does.">Only if the Lanterns sneak in some scoring while they defend</button>
+          <button class="opt">Yes - give up <span data-o="lLowP"></span>, erase <span data-o="defRemoved"></span>, concede <span data-o="foulPts"></span>, and the margin grows by about <span data-o="defSwing"></span></button>
+        </div>
+        <div class="explain">Run the margin math: minus <span data-o="lLowP"></span> from your column, minus <span data-o="defRemoved"></span> from theirs, plus <span data-o="foulPts"></span> back to them for the foul. Net swing: about <span data-o="defSwing"></span> points your way. In the planner, the defense plan wins by about <span data-o="defendM"></span> while the best all-scoring plan wins by less than one.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">From the sim</div>
+        <div class="qt">In the planner, putting the Lanterns on feed drops the Orioles' mid lap from <span data-o="orLapMid"></span> seconds to <span data-o="orLapFed"></span>. What did that single change do to the Orioles' output?</div>
+        <div class="opts">
+          <button class="opt"><span data-o="orMid"></span> Cells became <span data-o="orFed"></span> - four extra Cells, worth <span data-o="orFedGain"></span> more points</button>
+          <button class="opt" data-why="The feed shortens every scoring teammate's lap, whatever ring they cycle - the Fireflies picked up extra high-ring Cells from the very same change.">Nothing - a feeder only helps robots scoring on the high ring</button>
+          <button class="opt" data-why="Earlier laps mean more laps. The scoring window is fixed, so shaving seconds off each lap fits whole extra trips inside it.">The same Cells, just delivered earlier in the match</button>
+        </div>
+        <div class="explain">The window is <span data-o="scoreWin"></span> seconds either way. At <span data-o="orLapMid"></span> seconds a lap that fits <span data-o="orMid"></span> Cells; at <span data-o="orLapFed"></span> it fits <span data-o="orFed"></span>. The Fireflies gained too, <span data-o="fHigh"></span> Cells up to <span data-o="fFed"></span> - so the feeder's sacrificed <span data-o="lLowP"></span> points came back as about <span data-o="feedGain"></span> across the alliance. That is why the biggest win on the board has a robot that never scores.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 4</div>
+        <div class="qt">Docking at <span data-o="earlyLeft"></span> seconds remaining instead of <span data-o="endgameSec"></span> costs the Lanterns about one lap. What do they buy with it?</div>
+        <div class="opts">
+          <button class="opt" data-why="The platform pays four times as much for a Balance as for a park, and a rushed endgame is how you end up with the park. Certainty is a real product.">Nothing - leaving the field early is always wasted time</button>
+          <button class="opt">A locked-in Balance, a settled platform that lifts their teammates' odds, and rule <span data-o="ruleDockId"></span> protection the moment the endgame window opens</button>
+          <button class="opt" data-why="Check the scoring table - ORBIT pays no bonus for arriving first. The value is certainty and Harmony odds, not a multiplier.">Double endgame points for being the first robot home</button>
+        </div>
+        <div class="explain">The lap they give up is worth about <span data-o="dockCost"></span> points. In exchange the Balance (<span data-o="balPts"></span> points) stops being a <span data-o="balL"></span> percent hope and becomes a fact, teammates climb onto a settled platform, and once the final <span data-o="endgameSec"></span> seconds start, rule <span data-o="ruleDockId"></span> makes a robot touching its own platform untouchable. In the planner, high, mid, dock-early wins by about <span data-o="dockM"></span> where the all-scoring version of the same plan wins by less than one.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 2 &middot; 03 &middot; Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Strategy huddle</b><span>Pre-match meeting that ends with one job per robot plus a clock.</span></div>
+        <div class="gl"><b>Job</b><span>Score a ring, feed, defend, or dock early - one per robot.</span></div>
+        <div class="gl"><b>Lane sharing</b><span>Two robots on one ring stretch each other's laps.</span></div>
+        <div class="gl"><b>Feeder</b><span>Scores zero, shows up in every teammate's column.</span></div>
+        <div class="gl"><b>Margin</b><span>The only number the scoreboard shows - grow it from either column.</span></div>
+        <div class="gl"><b>Dock early</b><span>Trade a lap for a certain Balance and a settled platform.</span></div>
+      </div>
+      <a class="next" href="gamesense.html">
+        <div class="n-eyebrow">Course complete &middot; Game Sense</div>
+        <h3>You can read the game now &rarr;</h3>
+        <p>Match anatomy, the manual, scoring math, ranking points, roles, the draft, and the huddle - the whole toolkit. Head back to the course map to clear any checkpoints still open, and bring all of this to your next real event.</p>
+      </a>
+    </div>
+  </section>
+
+</div>
+
+<nav class="coursenav">
+  <a href="gamesense-lesson-6.html">&larr; Part 2 &middot; 02 &middot; Alliance Selection</a>
+  <a class="map" href="gamesense.html">Course map</a>
+  <a href="gamesense.html">Course complete &middot; Back to the map &rarr;</a>
+</nav>
+
+<footer>Game Sense &middot; Reading and playing the FRC game</footer>
+
+<script>
+(function(){
+  "use strict";
+  var O=window.ORBIT;
+  var RINGS=["high","mid","low"];
+
+  /* MODEL-START (validated numerically - see the course feasibility script) */
+  var P={
+    win:O.match.teleopSec-O.match.endgameSec,  /* 105 s scoring window, standard return */
+    earlyLeft:40,                              /* dock early: head home with 40 s on the clock */
+    earlyWin:O.match.teleopSec-40,             /* 95 s scoring window for the early docker */
+    cong:3,         /* +s per extra alliance robot sharing a ring */
+    feedBoost:3,    /* -s to each scoring teammate's lap per feeder */
+    minCyc:5,
+    defSlow:9,      /* +s to the shadowed opponent's lap */
+    defFouls:1,     /* fouls conceded per defender */
+    steadyBump:0.05 /* teammates' balance odds bump when someone docks early */
+  };
+  var YOUR=[
+    {num:"6072", name:"Fireflies", cyc:{high:14, mid:12, low:10}, bal:0.85},
+    {num:"7688", name:"Orioles",   cyc:{high:16, mid:11, low:9},  bal:0.70},
+    {num:"8241", name:"Lanterns",  cyc:{high:40, mid:24, low:9},  bal:0.95}
+  ];
+  var OPP=[
+    {num:"3941", name:"Thunderheads", ring:"high", cyc:11, bal:0.40},
+    {num:"5327", name:"Comets",       ring:"mid",  cyc:9,  bal:0.35},
+    {num:"1773", name:"Badgers",      ring:"low",  cyc:8,  bal:0.30}
+  ];
+  var M2=14; /* mission 2 margin threshold: only the best plan reaches it */
+
+  function endgameExp(rates){
+    var balP=O.scoring.endgame.balance.pts, parkP=O.scoring.endgame.park.pts,
+        hbP=O.scoring.endgame.harmonyBonusEach, total=0;
+    for(var m=0;m<8;m++){
+      var pr=1,n=0,pts=0;
+      for(var i=0;i<3;i++){
+        if(m&(1<<i)){ pr*=rates[i]; n++; pts+=balP; }
+        else { pr*=(1-rates[i]); pts+=parkP; }
+      }
+      if(n>=2) pts+=hbP*n;
+      total+=pr*pts;
+    }
+    return total;
+  }
+
+  /* jobs: 'high' | 'mid' | 'low' | 'feed' | 'defend' | 'dock' */
+  function evalPlan(jobs){
+    var feeders=0, defenders=0, i, r;
+    for(i=0;i<3;i++){ if(jobs[i]==="feed")feeders++; if(jobs[i]==="defend")defenders++; }
+    var ringOf=[null,null,null], counts={high:0,mid:0,low:0};
+    for(i=0;i<3;i++) if(RINGS.indexOf(jobs[i])>=0){ ringOf[i]=jobs[i]; counts[jobs[i]]++; }
+    /* early dockers pick their best ring greedily, in robot order */
+    for(i=0;i<3;i++) if(jobs[i]==="dock"){
+      var best=null, bestPts=-1;
+      for(var k=0;k<3;k++){
+        r=RINGS[k];
+        var c=YOUR[i].cyc[r]-P.feedBoost*feeders+P.cong*counts[r];
+        if(c<P.minCyc)c=P.minCyc;
+        var pts=Math.floor(P.earlyWin/c)*O.scoring.rings[r].tele;
+        if(pts>bestPts){ bestPts=pts; best=r; }
+      }
+      ringOf[i]=best; counts[best]++;
+    }
+    /* offense */
+    var off=0, cells=[0,0,0], effCyc=[0,0,0], ptsArr=[0,0,0];
+    for(i=0;i<3;i++){
+      r=ringOf[i]; if(!r) continue;
+      var cy=YOUR[i].cyc[r]-P.feedBoost*feeders+P.cong*(counts[r]-1);
+      if(cy<P.minCyc)cy=P.minCyc;
+      effCyc[i]=cy;
+      var w=(jobs[i]==="dock")?P.earlyWin:P.win;
+      cells[i]=Math.floor(w/cy);
+      ptsArr[i]=cells[i]*O.scoring.rings[r].tele;
+      off+=ptsArr[i];
+    }
+    /* endgame rates */
+    var anyDock=jobs.indexOf("dock")>=0, rates=[];
+    for(i=0;i<3;i++){
+      if(jobs[i]==="dock") rates.push(1);
+      else rates.push(Math.min(1, YOUR[i].bal+(anyDock?P.steadyBump:0)));
+    }
+    var youEnd=endgameExp(rates);
+    var you=3*O.scoring.leave+off+youEnd;
+    /* opponents: fixed plan, slowed by defenders (k-th defender shadows k-th best) */
+    var order=OPP.map(function(t,ix){return ix;}).sort(function(a,b){
+      return Math.floor(P.win/OPP[b].cyc)*O.scoring.rings[OPP[b].ring].tele-
+             Math.floor(P.win/OPP[a].cyc)*O.scoring.rings[OPP[a].ring].tele;
+    });
+    var defTargets=order.slice(0,defenders);
+    var oppOff=0, oppCells=[], oppPts=[];
+    for(i=0;i<3;i++){
+      var t=OPP[i], slow=defTargets.indexOf(i)>=0?P.defSlow:0;
+      var n=Math.floor(P.win/(t.cyc+slow));
+      oppCells.push(n);
+      oppPts.push(n*O.scoring.rings[t.ring].tele);
+      oppOff+=oppPts[i];
+    }
+    var them=3*O.scoring.leave+oppOff+endgameExp(OPP.map(function(t){return t.bal;}))+
+             defenders*P.defFouls*O.fouls.foul;
+    return { you:you, them:them, margin:you-them, off:off, cells:cells, effCyc:effCyc,
+             ringOf:ringOf, ptsArr:ptsArr, rates:rates, youEnd:youEnd,
+             oppCells:oppCells, oppPts:oppPts, defTargets:defTargets, jobs:jobs.slice() };
+  }
+  /* MODEL-END */
+
+  /* ---- inject numbers into the prose ---- */
+  try{
+    var teleOf=function(r){return O.scoring.rings[r].tele;};
+    var resDefault=evalPlan(["high","high","low"]);
+    var resSplit=evalPlan(["high","mid","low"]);
+    var resFeed=evalPlan(["high","mid","feed"]);
+    var resDefend=evalPlan(["high","mid","defend"]);
+    var resDock=evalPlan(["high","mid","dock"]);
+    var rules=(O.fouls&&O.fouls.rules)||[];
+    var ruleDock=rules.filter(function(x){return /platform/i.test(x.text)&&/30/.test(x.text);})[0]||{};
+    var rulePin=rules.filter(function(x){return /pinning/i.test(x.text);})[0]||{};
+    var tHot=Math.floor(P.win/(OPP[0].cyc-1))*teleOf(OPP[0].ring);
+    var tBase=Math.floor(P.win/OPP[0].cyc)*teleOf(OPP[0].ring);
+    var VALS={
+      totalSec:O.match.totalSec, teleopSec:O.match.teleopSec,
+      endgameSec:O.match.endgameSec, autoSec:O.match.autoSec,
+      balPts:O.scoring.endgame.balance.pts, parkPts:O.scoring.endgame.park.pts,
+      hbPts:O.scoring.endgame.harmonyBonusEach,
+      leavePts:O.scoring.leave, autoBoth:3*O.scoring.leave,
+      foulPts:O.fouls.foul,
+      scoreWin:P.win, earlyLeft:P.earlyLeft,
+      congS:P.cong, feedS:P.feedBoost, defS:P.defSlow,
+      bumpPts:Math.round(P.steadyBump*100),
+      rulePinId:rulePin.id||"", ruleDockId:ruleDock.id||"",
+      tLap:OPP[0].cyc, tHotLap:OPP[0].cyc-1, hotDelta:tHot-tBase,
+      bothHighOff:resDefault.off, splitOff:resSplit.off,
+      congDrop:resSplit.off-resDefault.off,
+      lLowP:resSplit.ptsArr[2],
+      orLapMid:YOUR[1].cyc.mid, orLapFed:resFeed.effCyc[1],
+      orMid:resSplit.cells[1], orFed:resFeed.cells[1],
+      orFedGain:resFeed.ptsArr[1]-resSplit.ptsArr[1],
+      fHigh:resSplit.cells[0], fFed:resFeed.cells[0],
+      feedGain:(resFeed.ptsArr[0]-resSplit.ptsArr[0])+(resFeed.ptsArr[1]-resSplit.ptsArr[1]),
+      defRemoved:resSplit.oppPts[0]-resDefend.oppPts[0],
+      defSwing:Math.round(resDefend.margin-resSplit.margin),
+      defMarginAbs:Math.abs(Math.round(resDefault.margin)),
+      defendM:Math.round(resDefend.margin),
+      dockM:resDock.margin.toFixed(1),
+      dockCost:(resSplit.cells[2]-resDock.cells[2])*teleOf("low"),
+      feedM:resFeed.margin.toFixed(1),
+      feedHotM:(resFeed.margin-(tHot-tBase)).toFixed(1),
+      allHotM:(resSplit.margin-(tHot-tBase)).toFixed(1),
+      balL:Math.round(YOUR[2].bal*100),
+      m2th:M2
+    };
+    document.querySelectorAll('[data-o]').forEach(function(n){
+      var k=n.getAttribute('data-o');
+      if(VALS[k]!==undefined) n.textContent=VALS[k];
+    });
+  }catch(e){}
+
+  /* ---- planner state + UI ---- */
+  var JOBS=[
+    {j:"high",label:"High"},{j:"mid",label:"Mid"},{j:"low",label:"Low"},
+    {j:"feed",label:"Feed"},{j:"defend",label:"Defend"},{j:"dock",label:"Dock early"}
+  ];
+  var DEFAULT=["high","high","low"]; /* each robot's solo-best ring - the trap plan */
+  var jobs=DEFAULT.slice();
+  var cur=null;
+
+  var el={
+    youCards:document.getElementById('youCards'), oppCards:document.getElementById('oppCards'),
+    reset:document.getElementById('resetBtn'), hint:document.getElementById('hint'),
+    roYou:document.getElementById('roYou'), roThem:document.getElementById('roThem'),
+    roMargin:document.getElementById('roMargin'), roBal:document.getElementById('roBal'),
+    verdict:document.getElementById('verdict'), verdictTxt:document.getElementById('verdictTxt'),
+    status:document.getElementById('status')
+  };
+
+  function ringName(r){ return r.charAt(0).toUpperCase()+r.slice(1); }
+  function buildCards(){
+    var html='';
+    YOUR.forEach(function(t,i){
+      html+='<div class="rcard"><div class="rtop"><span class="rname">'+t.num+' '+t.name+'</span>'+
+        '<span class="rbal">'+Math.round(t.bal*100)+'% balance</span></div>'+
+        '<div class="rstats">Laps &middot; high '+t.cyc.high+' s &middot; mid '+t.cyc.mid+' s &middot; low '+t.cyc.low+' s</div>'+
+        '<div class="jbtns">'+JOBS.map(function(jb){
+          return '<button class="jbtn" data-r="'+i+'" data-j="'+jb.j+'">'+jb.label+'</button>';
+        }).join('')+'</div>'+
+        '<div class="rrole" id="roleY'+i+'"></div></div>';
+    });
+    el.youCards.innerHTML=html;
+    html='';
+    OPP.forEach(function(t,i){
+      html+='<div class="rcard opp"><div class="rtop"><span class="rname">'+t.num+' '+t.name+'</span>'+
+        '<span class="rbal">'+Math.round(t.bal*100)+'% balance</span></div>'+
+        '<div class="rstats">'+ringName(t.ring)+' ring &middot; '+t.cyc+' s laps</div>'+
+        '<div class="rrole" id="roleO'+i+'"></div></div>';
+    });
+    el.oppCards.innerHTML=html;
+  }
+
+  /* ---- timeline canvas ---- */
+  var tlcv=document.getElementById('tl'), tlctx=tlcv.getContext('2d');
+  var tlW=0, tlH=0;
+  function fitTL(){
+    var rct=tlcv.getBoundingClientRect(); if(!rct.width)return;
+    var dpr=window.devicePixelRatio||1;
+    tlcv.width=Math.round(rct.width*dpr); tlcv.height=Math.round(rct.height*dpr);
+    tlctx.setTransform(dpr,0,0,dpr,0,0); tlW=rct.width; tlH=rct.height;
+  }
+  fitTL();
+  var RCOL={high:'#FFB020',mid:'#8E8CF8',low:'#34D7C5'};
+  function drawTL(res){
+    var c=tlctx, W=tlW, H=tlH; if(!W)return;
+    c.clearRect(0,0,W,H);
+    var gut=52, x0=gut, x1=W-10, top=26, axisH=20;
+    var total=O.match.totalSec, autoT=O.match.autoSec;
+    var egT=total-O.match.endgameSec, dockT=total-P.earlyLeft;
+    function X(t){ return x0+(x1-x0)*t/total; }
+    var laneH=(H-top-axisH-8)/6, barH=11;
+    function laneY(i){ return top+i*laneH+(i>=3?8:0); }
+    /* endgame band */
+    c.fillStyle='rgba(67,214,126,0.06)';
+    c.fillRect(X(egT),top-6,X(total)-X(egT),H-top-axisH+2);
+    c.strokeStyle='rgba(67,214,126,0.35)'; c.setLineDash([4,4]); c.lineWidth=1;
+    c.beginPath(); c.moveTo(X(egT),top-6); c.lineTo(X(egT),H-axisH+4); c.stroke(); c.setLineDash([]);
+    c.font='9px ui-monospace, Menlo, monospace'; c.textAlign='right';
+    c.fillStyle='rgba(67,214,126,0.8)';
+    c.fillText('endgame · last '+O.match.endgameSec+' s', x1, 14);
+    /* alliance divider */
+    c.strokeStyle='rgba(120,140,180,0.18)';
+    c.beginPath(); c.moveTo(x0-46,laneY(3)-5); c.lineTo(x1,laneY(3)-5); c.stroke();
+    /* lanes */
+    function lane(i,label,labelCol,act,actCol,homeT,txt,balRate){
+      var y=laneY(i), by=y+laneH-barH-3;
+      c.textAlign='left'; c.fillStyle=labelCol;
+      c.font='10px ui-monospace, Menlo, monospace';
+      c.fillText(label, 6, by+barH-2);
+      /* auto */
+      c.fillStyle='#26324A'; c.fillRect(X(0),by,X(autoT)-X(0),barH);
+      /* activity */
+      if(act){
+        c.fillStyle=actCol; c.globalAlpha=(i<3)?0.92:0.5;
+        c.fillRect(X(autoT),by,X(homeT)-X(autoT),barH);
+        c.globalAlpha=1;
+      }
+      /* platform */
+      c.fillStyle='#43D67E'; c.globalAlpha=0.22+0.6*balRate;
+      c.fillRect(X(homeT),by,X(total)-X(homeT),barH);
+      c.globalAlpha=1;
+      /* caption above bar */
+      c.fillStyle=(i<3)?'#92A2BE':'#5E6F8E';
+      c.font='9.5px ui-monospace, Menlo, monospace';
+      c.fillText(txt, X(autoT)+3, by-3);
+    }
+    var i;
+    for(i=0;i<3;i++){
+      var j=res.jobs[i], homeT=(j==='dock')?dockT:egT, txt='', col='#33415e';
+      if(j==='feed'){ col='#ff8fb5'; txt='feeding · laps -'+P.feedBoost+' s'; }
+      else if(j==='defend'){
+        col='#FF6B6B';
+        var k=0; for(var d=0;d<i;d++) if(res.jobs[d]==='defend')k++;
+        var tgt=res.defTargets[k];
+        txt='shadowing '+(tgt!==undefined?OPP[tgt].num:'');
+      } else {
+        col=RCOL[res.ringOf[i]];
+        txt=res.cells[i]+' × '+res.ringOf[i]+' · '+res.ptsArr[i]+' pts'+(j==='dock'?' · docks':'');
+      }
+      lane(i, YOUR[i].num, '#ff8fb5', j!=='none', col, homeT, txt, res.rates[i]);
+    }
+    for(i=0;i<3;i++){
+      var t=OPP[i], shadowed=res.defTargets.indexOf(i)>=0;
+      var otxt=res.oppCells[i]+' × '+t.ring+' · '+res.oppPts[i]+' pts'+(shadowed?' · shadowed':'');
+      lane(3+i, t.num, '#5E6F8E', true, RCOL[t.ring], egT, otxt, t.bal);
+    }
+    /* dock marker */
+    if(res.jobs.indexOf('dock')>=0){
+      c.strokeStyle='#FFB020'; c.setLineDash([3,4]); c.lineWidth=1;
+      c.beginPath(); c.moveTo(X(dockT),top-6); c.lineTo(X(dockT),H-axisH+4); c.stroke(); c.setLineDash([]);
+      c.fillStyle='#FFB020'; c.textAlign='center';
+      c.font='9px ui-monospace, Menlo, monospace';
+      c.fillText(P.earlyLeft+' s left', X(dockT), H-axisH+14);
+      c.textAlign='left';
+    }
+    /* axis */
+    c.fillStyle='#5E6F8E'; c.font='9px ui-monospace, Menlo, monospace';
+    [0,autoT,75,egT,total].forEach(function(t){
+      c.strokeStyle='rgba(120,140,180,0.25)';
+      c.beginPath(); c.moveTo(X(t),H-axisH+2); c.lineTo(X(t),H-axisH+6); c.stroke();
+      c.textAlign=(t===0)?'left':(t===total?'right':'center');
+      if(res.jobs.indexOf('dock')>=0 && Math.abs(X(t)-X(dockT))<26 && t!==total && t!==0) return;
+      c.fillText(String(t), X(t), H-axisH+15);
+    });
+    c.textAlign='left';
+  }
+
+  /* ---- render ---- */
+  function fmtMargin(m){ return (m>=0?'+':'')+m.toFixed(1); }
+  function render(){
+    var res=evalPlan(jobs); cur=res;
+    /* buttons */
+    Array.prototype.forEach.call(el.youCards.querySelectorAll('.jbtn'),function(b){
+      var r=parseInt(b.getAttribute('data-r'),10);
+      b.classList.toggle('active', jobs[r]===b.getAttribute('data-j'));
+    });
+    /* role lines */
+    var i;
+    for(i=0;i<3;i++){
+      var j=jobs[i], html='';
+      if(j==='feed'){
+        html='&rarr; scores 0 &middot; <span class="up">every scoring lap -'+P.feedBoost+' s</span>';
+      } else if(j==='defend'){
+        var k=0; for(var d=0;d<i;d++) if(jobs[d]==='defend')k++;
+        var tgt=res.defTargets[k];
+        if(tgt!==undefined){
+          var lost=Math.floor(P.win/OPP[tgt].cyc)*O.scoring.rings[OPP[tgt].ring].tele-res.oppPts[tgt];
+          html='&rarr; shadows '+OPP[tgt].num+' '+OPP[tgt].name+' &middot; <span class="up">they lose '+lost+' pts</span> &middot; <span class="dn">~'+(P.defFouls*O.fouls.foul)+' pts conceded</span>';
+        } else html='&rarr; shadows their top scorer';
+      } else if(j==='dock'){
+        html='&rarr; '+res.cells[i]+' Cells on '+res.ringOf[i]+' ('+res.ptsArr[i]+' pts), home at <span class="hl">'+P.earlyLeft+' s left</span> &middot; <span class="up">Balance locked</span>';
+      } else {
+        html='&rarr; '+res.cells[i]+' Cells on '+j+' &middot; '+res.ptsArr[i]+' pts &middot; '+res.effCyc[i]+' s laps'+(res.effCyc[i]>YOUR[i].cyc[j]?' <span class="dn">(shared ring)</span>':(res.effCyc[i]<YOUR[i].cyc[j]?' <span class="up">(fed)</span>':''));
+      }
+      document.getElementById('roleY'+i).innerHTML=html;
+    }
+    for(i=0;i<3;i++){
+      var shadowed=res.defTargets.indexOf(i)>=0;
+      document.getElementById('roleO'+i).innerHTML='&rarr; '+res.oppCells[i]+' Cells &middot; '+res.oppPts[i]+' pts'+
+        (shadowed?' &middot; <span class="dn">shadowed</span>':'');
+    }
+    /* readouts */
+    el.roYou.textContent=Math.round(res.you);
+    el.roThem.textContent=Math.round(res.them);
+    el.roMargin.textContent=fmtMargin(res.margin);
+    el.roMargin.className='v '+(res.margin>0?'green':'red');
+    el.roBal.textContent=Math.round(res.rates[0]*res.rates[1]*res.rates[2]*100)+'%';
+    if(res.margin>0){
+      el.verdict.className='verdict good';
+      el.verdictTxt.textContent='Projected: you beat Alliance 1 by '+res.margin.toFixed(1);
+    } else {
+      el.verdict.className='verdict bad';
+      el.verdictTxt.textContent='Projected: Alliance 1 wins by '+(-res.margin).toFixed(1)+' - keep huddling';
+    }
+    drawTL(res);
+  }
+
+  el.youCards.addEventListener('click',function(e){
+    var b=e.target.closest('.jbtn'); if(!b)return;
+    jobs[parseInt(b.getAttribute('data-r'),10)]=b.getAttribute('data-j');
+    el.status.textContent='Plan updated';
+    render();
+  });
+  el.reset.addEventListener('click',function(){
+    jobs=DEFAULT.slice();
+    el.status.textContent='Live projection';
+    render();
+  });
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fitTL();if(cur)drawTL(cur);},120);});
+
+  buildCards();
+  render();
+
+  /* ---- missions (wrapped so a missions bug can never break the lesson) ---- */
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  setInterval(function(){
+    if(!cur) return;
+    if(cur.margin>0){
+      mClear('win');
+      if(cur.jobs.indexOf('dock')>=0) mClear('gold');
+    }
+    if(cur.margin>=M2) mClear('blowout');
+  },200);
+  }catch(e){}
+
+  /* ---- quiz ---- */
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong');
+      try{ var why=opt.getAttribute('data-why');
+        if(why){ var wl=opt.nextElementSibling; if(!wl||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.insertAdjacentElement('afterend',wl); } wl.textContent=why; }
+      }catch(e){} } }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  // auto-mark this lesson complete in the hub once its quiz is finished
+  var KEY="gamesense:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then run the sim
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain');
+  var picked=-1, revealed=false, ran=false;
+  var demos=document.querySelectorAll('.demo');
+  var style=document.createElement('style');
+  style.textContent='#predict .opt.picked{border-color:var(--teal,#34D7C5);box-shadow:0 0 0 2px rgba(52,215,197,.22)}';
+  document.head.appendChild(style);
+  var note=document.createElement('div');
+  note.style.cssText='display:none;font-size:13px;color:#92A2BE;margin-top:10px;font-style:italic';
+  q.appendChild(note);
+  function optText(i){ var t=(opts[i].textContent||'').trim(); return t.length>70 ? t.slice(0,67)+'...' : t; }
+  function reveal(){ if(revealed||picked<0) return; revealed=true;
+    opts.forEach(function(o){o.classList.add('locked');});
+    try{var pr=JSON.parse(localStorage.getItem('frc:predict'))||{r:0,w:0};if(picked===correct){pr.r++;}else{pr.w++;}localStorage.setItem('frc:predict',JSON.stringify(pr));}catch(e){}
+    if(picked===correct){
+      opts[picked].classList.add('correct');
+      note.textContent='You called it. "'+optText(picked)+'" is exactly what happens. Here is why:';
+    } else {
+      opts[picked].classList.add('wrong'); opts[correct].classList.add('correct');
+      note.textContent='You predicted "'+optText(picked)+'". The sim went a different way - the green answer is what really happens, and the surprise is the part worth remembering. Here is why:';
+    }
+    note.style.display='block';
+    explain.classList.add('show'); }
+  function onRan(ev){ if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#predict')) return; ran=true; if(picked>=0) reveal(); }
+  if(demos.length){
+    Array.prototype.forEach.call(demos,function(d){
+      d.addEventListener('pointerdown',onRan,true);
+      d.addEventListener('input',onRan,true);
+    });
+    window.addEventListener('keydown',onRan,true);
+  } else { ran=true; }
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(revealed)return; picked=i;
+    opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
+    if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
+})();
+</script>
+<script src="account-config.js"></script>
+<script src="account.js"></script>
+</body>
+</html>

@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Game Sense · Lesson 1 - Anatomy of a Match</title>
+<script src="gamesense-data.js"></script>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --rose:#ff8fb5;    /* course accent - Game Sense */
+    --amber:#FFB020;   /* endgame */
+    --teal:#34D7C5;    /* teleop */
+    --indigo:#8E8CF8;  /* auto */
+    --red:#FF6B6B;     /* wrong */
+    --green:#43D67E;   /* correct */
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ink); color:var(--text);
+    font-family:var(--sans); font-size:17px; line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(900px 500px at 80% -10%, rgba(255,143,181,.07), transparent 60%),
+      radial-gradient(700px 500px at -10% 10%, rgba(142,140,248,.05), transparent 55%);
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--rose);box-shadow:0 0 12px var(--rose)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--rose)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--rose),var(--indigo));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:46ch;margin-top:6px}
+
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--rose);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  p .sub,.sub{color:var(--muted)}
+  .lead{font-size:19px}
+  em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--rose);font-weight:600;font-size:.94em}
+
+  .formula{font-family:var(--mono);background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:18px 20px;margin:20px 0;font-size:17px;overflow-x:auto;color:#cfe;text-align:center}
+  .formula .small{display:block;font-size:13px;color:var(--muted);margin-top:8px;white-space:normal}
+  .formula b{color:var(--indigo)} .formula .t{color:var(--teal)} .formula .e{color:var(--amber)} .formula .r{color:var(--rose)}
+
+  .terms{display:grid;gap:12px;margin:22px 0 6px}
+  @media(min-width:560px){.terms{grid-template-columns:repeat(3,1fr)}}
+  .term{border:1px solid var(--line);border-radius:10px;padding:14px 15px;background:var(--panel);border-top:2px solid var(--accent,var(--rose))}
+  .term h4{margin:0 0 4px;font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent,var(--rose))}
+  .term p{margin:0;font-size:14.5px;color:var(--muted);line-height:1.45}
+  .term p b{color:var(--text)}
+
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;gap:6px;align-items:center}
+  .demo-tag .live{width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 8px var(--red)}
+  .demo-tag .live.on{background:var(--green);box-shadow:0 0 8px var(--green)}
+  .demo-stage{background:var(--line)}
+  .stage-cell{background:#0B1322;position:relative}
+  .stage-cell .cell-label{position:absolute;top:8px;left:10px;z-index:2;font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);pointer-events:none}
+  canvas.world{display:block;width:100%;height:300px}
+
+  .legend{display:flex;flex-wrap:wrap;gap:16px;padding:11px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .legend i{width:16px;height:2px;border-radius:2px;display:inline-block}
+
+  .feed{padding:10px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:12.5px;color:var(--muted);min-height:40px;display:flex;align-items:center}
+
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--rose);color:var(--text)}
+  .btn:disabled{opacity:.5;cursor:default}
+  .btn:disabled:hover{border-color:var(--line-2);color:var(--muted)}
+  .btn.active{background:var(--rose);border-color:var(--rose);color:#06121f;font-weight:700}
+  .btn.primary{background:linear-gradient(180deg,#ffb5cd,var(--rose));color:#1f0612;font-weight:700;border:none}
+  .slider-group{flex:1 1 200px;display:flex;flex-direction:column;gap:6px;min-width:170px}
+  .slider-group label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+  .slider-group label .val{color:var(--rose)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:var(--line-2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--rose);cursor:pointer;box-shadow:0 0 10px -1px var(--rose)}
+  input[type=range]::-moz-range-thumb{width:18px;height:18px;border:none;border-radius:50%;background:var(--rose);cursor:pointer}
+
+  .readouts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+  @media(min-width:560px){.readouts{grid-template-columns:repeat(6,1fr)}}
+  .ro{background:#0B1322;padding:11px 12px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:18px;font-weight:600;margin-top:3px}
+  .ro .v.rose{color:var(--rose)} .ro .v.amber{color:var(--amber)} .ro .v.teal{color:var(--teal)} .ro .v.indigo{color:var(--indigo)} .ro .v.red{color:var(--red)} .ro .v.ink{color:var(--text)}
+
+  .verdict{display:flex;flex-wrap:wrap;gap:9px;align-items:center;padding:13px 16px;border-top:1px solid var(--line)}
+  .verdict .v-q{font-size:14px;color:var(--muted);flex:1 1 100%}
+  .verdict .v-q b{color:var(--text)}
+  .v-opt.good{background:rgba(67,214,126,.15);border-color:var(--green);color:var(--green)}
+  .v-opt.no{border-color:var(--red);color:var(--red)}
+  .v-res{font-family:var(--mono);font-size:12px;flex:1 1 100%}
+  .v-res.ok{color:var(--green)} .v-res.no{color:var(--red)}
+
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--rose);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--rose);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+  .g-wrap{display:inline-flex;gap:8px;align-items:center;margin-left:4px;flex-wrap:wrap;vertical-align:baseline}
+  .guess-input{font-family:var(--mono);font-size:14px;width:76px;padding:7px 9px;background:var(--panel-2);border:1px solid var(--line-2);border-radius:8px;color:var(--text);outline:none}
+  .guess-input:focus{border-color:var(--rose);box-shadow:0 0 0 3px rgba(255,143,181,.2)}
+  .guess-input:disabled{opacity:.6}
+  .g-state{font-family:var(--mono);font-size:12px;color:var(--muted)}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.rose{border-color:var(--rose);background:rgba(255,143,181,.06)} .note.rose .nh{color:var(--rose)}
+
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)}
+  .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--rose);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7}
+  .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .whyline{margin:2px 0 4px;font-size:13.5px;color:var(--muted);border-left:2px solid var(--red);background:rgba(255,107,107,.05);padding:5px 12px;border-radius:0 8px 8px 0}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--rose);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px}
+  @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px}
+  .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--rose);min-width:130px;text-transform:uppercase}
+  .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(255,143,181,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--rose);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--rose)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)}
+  .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+
+  footer{padding:40px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--rose);color:var(--text)}
+  .coursenav a.map{border-color:transparent;color:var(--indigo)}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="gamesense.html"><span class="dot"></span><span class="name">Game Sense</span></a>
+    <div class="top-meta">Lesson 01 / 07 · Read the Game</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Lesson 01</b> Read the Game</div>
+    <div class="eyebrow">Anatomy of a Match</div>
+    <h1>One match,<br><span class="accent">three clocks</span></h1>
+    <p class="dek">Before you can outscore anyone, you have to know when the points happen. One scripted ORBIT match, one scoreboard, and a scrubber to take it apart second by second.</p>
+  </div>
+
+  <section>
+    <p class="lead">Welcome to Game Sense.</p>
+    <p>This course is about the half of robotics that needs no wrench and no laptop: reading the game, doing the math, and making the plan. Every lesson runs on <strong>ORBIT</strong>, our practice game. Two alliances of three robots collect <span data-o="piecePlural"></span>, feed the Reactor tower at center field, then hurry home to settle on their platform before the buzzer. We wrote the rules ourselves, so they never go out of date.</p>
+    <p>Here is the first thing to know about any FRC-style match: it is not one block of time. It is <strong>three stretches with three different personalities</strong>. Think of a bike race with a strange start: for the first stretch your bike rides a route you programmed the night before, hands off. Then you grab the handlebars and ride the long middle. And in the final sprint, the finish line itself pays prize money.</p>
+    <div class="formula">
+      <b><span data-o="match.autoSec"></span> s auto</b> + <span class="t"><span data-o="calc:teleBody"></span> s teleop</span> + <span class="e"><span data-o="match.endgameSec"></span> s endgame</span> = <span class="r"><span data-o="match.totalSec"></span> s</span>
+      <span class="small">One catch: endgame is not a new period. It is the final <span data-o="match.endgameSec"></span> s of teleop, split out here because it pays differently.</span>
+    </div>
+    <div class="terms">
+      <div class="term" style="--accent:var(--indigo)">
+        <h4>Auto</h4>
+        <p>For <b><span data-o="match.autoSec"></span> seconds</b> the robot is on its own, running moves your team wrote ahead of time. Nobody touches a controller.</p>
+      </div>
+      <div class="term" style="--accent:var(--teal)">
+        <h4>Teleop</h4>
+        <p>Drivers take over for the long middle. Score, feed partners, play defense - this is where most of the driving happens.</p>
+      </div>
+      <div class="term" style="--accent:var(--amber)">
+        <h4>Endgame</h4>
+        <p>The final <b><span data-o="match.endgameSec"></span> seconds</b> of teleop. Nothing pauses, but the platform awards switch on and the smart money heads home.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">The price list</div>
+    <h2>Auto pays double</h2>
+    <p>ORBIT scores <span data-o="piecePlural"></span> on three rings of the Reactor tower, and each ring has <em>two prices</em>. Score during teleop and you get the normal rate. Score the exact same <span data-o="piece"></span> during auto and it pays <strong>double</strong>. Why? Because scoring with no human on the controls is genuinely hard - the game designers pay extra for it, the way a harder trick earns a higher score.</p>
+    <div class="terms">
+      <div class="term" style="--accent:var(--teal)">
+        <h4><span data-o="scoring.rings.low.name"></span></h4>
+        <p>The easy drop. <b><span data-o="scoring.rings.low.tele"></span> pts</b> teleop · <b><span data-o="scoring.rings.low.auto"></span> pts</b> auto.</p>
+      </div>
+      <div class="term" style="--accent:var(--teal)">
+        <h4><span data-o="scoring.rings.mid.name"></span></h4>
+        <p>The steady bet. <b><span data-o="scoring.rings.mid.tele"></span> pts</b> teleop · <b><span data-o="scoring.rings.mid.auto"></span> pts</b> auto.</p>
+      </div>
+      <div class="term" style="--accent:var(--teal)">
+        <h4><span data-o="scoring.rings.high.name"></span></h4>
+        <p>The hard shot. <b><span data-o="scoring.rings.high.tele"></span> pts</b> teleop · <b><span data-o="scoring.rings.high.auto"></span> pts</b> auto.</p>
+      </div>
+    </div>
+    <p>Auto has one more prize, and it is the cheapest in the game: simply driving fully out of your start zone earns <span class="k"><span data-o="scoring.leave"></span> points</span>, called <strong>Leave</strong>. Free points for any robot that can move in a straight line. Good teams never skip it.</p>
+  </section>
+
+  <section>
+    <div class="kicker">The sprint finish</div>
+    <h2>The endgame paycheck</h2>
+    <p>During the last <span data-o="match.endgameSec"></span> seconds, each alliance's tilting <strong>platform</strong> starts paying. There are three levels, and they work like a ladder - you are paid for the <em>best</em> rung you hold when the buzzer sounds:</p>
+    <div class="terms">
+      <div class="term" style="--accent:var(--amber)">
+        <h4><span data-o="scoring.endgame.park.name"></span> · <span data-o="scoring.endgame.park.pts"></span> pts</h4>
+        <p>Get <b><span data-o="scoring.endgame.park.note"></span></b>. The bare minimum.</p>
+      </div>
+      <div class="term" style="--accent:var(--amber)">
+        <h4><span data-o="scoring.endgame.dock.name"></span> · <span data-o="scoring.endgame.dock.pts"></span> pts</h4>
+        <p>Get <b><span data-o="scoring.endgame.dock.note"></span></b>. Halfway up the ladder.</p>
+      </div>
+      <div class="term" style="--accent:var(--amber)">
+        <h4><span data-o="scoring.endgame.balance.name"></span> · <span data-o="scoring.endgame.balance.pts"></span> pts</h4>
+        <p>Get <b><span data-o="scoring.endgame.balance.note"></span></b>. The top rung, and it is worth chasing.</p>
+      </div>
+    </div>
+    <p>Notice the sizes. A single <span data-o="scoring.endgame.balance.name"></span> pays <span class="k"><span data-o="scoring.endgame.balance.pts"></span> points</span> - the same as <span data-o="calc:midPerBalance"></span> whole trips to the <span data-o="scoring.rings.mid.name"></span>. And if two or more alliance robots balance together, each of them adds <span data-o="scoring.endgame.harmonyBonusEach"></span> more. The endgame is short, but it is dense with points, like the sprint at the end of a race where the podium is actually decided.</p>
+    <div class="note">
+      <div class="nh">Rungs upgrade, they do not stack</div>
+      <p>A robot that docks and then levels the platform is scored as Balanced, not Dock plus Balance. The ladder pays your best rung once. Keep that in mind when you watch the scoreboard in a moment - you will see a Dock turn into a Balance.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Try it</div>
+    <h2>Scrub one whole match</h2>
+    <p>We scripted one steady robot through a full ORBIT match: a Leave, two auto <span data-o="piecePlural"></span>, mid-ring trips all through teleop (a clean cycle takes about <span data-o="archetypes.1.cycleSec"></span> seconds, more in traffic), one last <span data-o="piece"></span> inside the endgame window, then home to the platform. Press <strong>Play</strong> to watch it, or drag the timeline and step event to event. Every point the match earns will stack up on the rose line.</p>
+
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="1">
+        <div class="qn">Predict first</div>
+        <div class="qt">This match scores a mid-ring <span data-o="piece"></span> at 8 seconds, during auto, and another mid-ring <span data-o="piece"></span> at 34 seconds, during teleop. Same ring, same <span data-o="piece"></span>. How will their two jumps on the score line compare?</div>
+        <div class="opts">
+          <button class="opt">Same height - the ring decides the points, not the clock</button>
+          <button class="opt">The auto jump is about twice as tall - the clock changes the price</button>
+          <button class="opt">The teleop jump is taller - a human driver aims better than a program</button>
+        </div>
+        <div class="explain">The ring sets the base price, but the clock multiplies it: during auto the <span data-o="scoring.rings.mid.name"></span> pays <span data-o="scoring.rings.mid.auto"></span> points, and the very same <span data-o="piece"></span> in teleop pays <span data-o="scoring.rings.mid.tele"></span>. Watch the step at 8 seconds tower over the one at 34 seconds - that height difference is the whole reason teams pour weeks into their auto routines.</div>
+      </div>
+    </div>
+
+    <div class="demo" id="demo">
+      <div class="demo-head">
+        <span class="demo-title">ORBIT · One scripted match</span>
+        <span class="demo-tag"><span class="live" id="live"></span> <span id="status">Paused</span></span>
+      </div>
+      <div class="demo-stage">
+        <div class="stage-cell"><span class="cell-label">Score vs time</span><canvas class="world" id="world" aria-label="Match timeline scoreboard"></canvas></div>
+      </div>
+      <div class="legend">
+        <span><i style="background:var(--rose)"></i> Score</span>
+        <span><i style="background:var(--indigo)"></i> Auto</span>
+        <span><i style="background:var(--teal)"></i> Teleop</span>
+        <span><i style="background:var(--amber)"></i> Endgame</span>
+      </div>
+      <div class="feed" id="feed"></div>
+      <div class="controls">
+        <button class="btn primary" id="play">Play ▸</button>
+        <button class="btn" id="restart">⟲ Restart</button>
+        <button class="btn" id="prevEv">◂ Event</button>
+        <button class="btn" id="nextEv">Event ▸</button>
+        <div class="slider-group" style="flex:2 1 220px">
+          <label>Timeline <span class="val" id="tlVal">0 s</span></label>
+          <input type="range" id="tl" aria-label="Match timeline scrubber" />
+        </div>
+      </div>
+      <div class="readouts">
+        <div class="ro"><div class="k2">Time</div><div class="v ink" id="roTime">0 s</div></div>
+        <div class="ro"><div class="k2">Phase</div><div class="v indigo" id="roPhase">AUTO</div></div>
+        <div class="ro"><div class="k2">Score</div><div class="v rose" id="roScore">0</div></div>
+        <div class="ro"><div class="k2">Auto pts</div><div class="v indigo" id="roAuto">0</div></div>
+        <div class="ro"><div class="k2">Teleop pts</div><div class="v teal" id="roTele">0</div></div>
+        <div class="ro"><div class="k2">Endgame pts</div><div class="v amber" id="roEnd">0</div></div>
+      </div>
+      <div class="verdict">
+        <span class="v-q"><b>Mission call:</b> after the final buzzer, which phase put the most points on the board?</span>
+        <button class="btn v-opt" data-ph="auto">Auto</button>
+        <button class="btn v-opt" data-ph="teleop">Teleop</button>
+        <button class="btn v-opt" data-ph="endgame">Endgame</button>
+        <span class="v-res" id="vRes"></span>
+      </div>
+    </div>
+    <p class="caption">Played at 6x speed, so the full match takes about 25 seconds to watch. Every jump in the rose line is a scoring event; the flat stretches are the robot driving. Gold hunters: lock your guess in the missions box below before your first Play.</p>
+
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
+      <div class="m-item" data-m="watch"><span class="m-st">○</span><span>Run the <b>whole match</b> once, buzzer to buzzer. Notice the score never glides - it sits flat, then jumps.</span></div>
+      <div class="m-item" data-m="pass20"><span class="m-st">○</span><span>Scrub or step to the exact moment the score <b>first passes 20</b>, and park the playhead there, paused. While you are there, read off which phase the match is in.</span></div>
+      <div class="m-item" data-m="phase"><span class="m-st">○</span><span>Make the <b>mission call</b> under the scoreboard: which phase earned the most points? The three phase counters are your evidence.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> before your first press of Play, guess the final score and lock it in. Land within 5 and it is yours. Use what you read above: a Leave, two auto <span data-o="piecePlural"></span>, a handful of mid-ring trips, a Balance. <span class="g-wrap"><input type="number" class="guess-input" id="guess" inputmode="numeric" min="0" aria-label="Final score guess"><button class="btn" id="lockBtn">Lock it in</button><span class="g-state" id="guessState"></span></span></span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">What it means</div>
+    <h2>Reading the staircase</h2>
+    <p>That rose line is the most important shape in this whole course. Points arrive in <strong>events</strong> - a <span data-o="piece"></span> lands, a robot balances - and between events the score just sits there while robots drive back and forth. So a match is really a staircase: the height of each step is the value of the thing you did, and the flat stretch before it is the time it cost you.</p>
+    <p>Once you see the staircase, strategy stops being vibes and becomes two honest questions. Can we make our steps <em>taller</em>, by scoring a better ring or grabbing the platform? Can we make our flats <em>shorter</em>, by driving cleaner routes? Everything a scout writes down and every plan a drive coach makes is an answer to one of those two questions.</p>
+    <p>And notice what the phase counters told you. The endgame window is the shortest stretch of the match, yet in our scripted match it out-earned the whole middle of teleop, mostly on the strength of one <span data-o="scoring.endgame.balance.name"></span>. That is not a fluke of our script - it is how the game is priced. A team that treats the last <span data-o="match.endgameSec"></span> seconds as an afterthought is leaving a stack of points on the field.</p>
+    <div class="note rose">
+      <div class="nh">Say it like a scout</div>
+      <p>When you watch any match, real or ORBIT, practice calling the score in phases: so many in auto, so many in teleop, so many in the endgame. Three little numbers tell you more about a robot than the final score ever will - and in a few lessons you will use exactly that habit to build a pick list.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="note rose">
+      <div class="nh">Going further · optional</div>
+      <p>The platform has one more trick: the <em>Harmony</em> bonus. When two or more alliance robots balance together, each balanced robot earns an extra <span data-o="scoring.endgame.harmonyBonusEach"></span> points on top of its <span data-o="scoring.endgame.balance.pts"></span>-point Balance. Here is a puzzle worth doing with a pencil: if all three robots on an alliance balance together, what is the alliance's total endgame haul? Work it out before you peek.</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">Each of the three robots earns a full Balance plus the Harmony bonus, so the alliance banks <span data-o="calc:maxEndgame"></span> points in the final seconds alone - more than our scripted robot earned in its entire match. That is why you will hear drive coaches shouting for everyone to come home with time still on the clock: a half-finished cycle is worth nothing, but a third robot on the platform changes the match. Real FRC games do the same thing with their own endgame bonuses, and the teams that win in October are the ones that did this arithmetic in March.</p>
+      </details>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">One ORBIT match runs <span data-o="match.totalSec"></span> seconds. Which picture of that time is right?</div>
+        <div class="opts">
+          <button class="opt" data-why="Equal thirds feels tidy, but the designers made the clock lopsided on purpose - auto is a short sprint and endgame is a countdown living inside teleop.">Three equal periods of <span data-o="calc:third"></span> s each: auto, then teleop, then endgame</button>
+          <button class="opt">Auto for the first <span data-o="match.autoSec"></span> s, then drivers take over - and endgame is simply the last <span data-o="match.endgameSec"></span> s of teleop with extra prizes</button>
+          <button class="opt" data-why="People do talk about endgame like a separate period, but no fresh whistle ever blows - teleop keeps running and the platform awards simply switch on.">Endgame is its own period that starts after teleop ends, with a fresh whistle</button>
+        </div>
+        <div class="explain">A match is one continuous <span data-o="match.totalSec"></span> seconds: <span data-o="match.autoSec"></span> of auto, then teleop until the buzzer. The final <span data-o="match.endgameSec"></span> seconds of teleop are called the endgame because the platform starts paying - it is a name for a stretch of time, not a new period.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2</div>
+        <div class="qt">Your alliance partner drops a <span data-o="piece"></span> into the <span data-o="scoring.rings.high.name"></span> during auto. The scoreboard adds…</div>
+        <div class="opts">
+          <button class="opt" data-why="That is the teleop price. During auto every ring pays double, because scoring with nobody on the controls is genuinely hard."><span data-o="scoring.rings.high.tele"></span> points - a <span data-o="piece"></span> is a <span data-o="piece"></span></button>
+          <button class="opt" data-why="Leave is real, but it is its own separate award, earned once by driving out of the start zone - it does not ride along with every scored piece."><span data-o="calc:highAutoPlusLeave"></span> points - the doubled <span data-o="piece"></span> plus the Leave award</button>
+          <button class="opt"><span data-o="scoring.rings.high.auto"></span> points - auto rates are double</button>
+        </div>
+        <div class="explain">The <span data-o="scoring.rings.high.name"></span> pays <span data-o="scoring.rings.high.tele"></span> in teleop and doubles to <span data-o="scoring.rings.high.auto"></span> during auto. Leave is a separate <span data-o="scoring.leave"></span>-point award the robot earns once by fully exiting its start zone, whether or not it ever scores a <span data-o="piece"></span>.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 3 · From the sim</div>
+        <div class="qt">In the match you just scrubbed, the short endgame window out-earned the whole middle stretch of teleop. What made the difference?</div>
+        <div class="opts">
+          <button class="opt" data-why="Tempting, because auto really does double the rings - but endgame Cells score at plain teleop rates. The endgame jump on the mid ring was the same height as the earlier ones.">Rings pay double during the endgame window</button>
+          <button class="opt">The platform: one <span data-o="scoring.endgame.balance.name"></span> pays <span data-o="scoring.endgame.balance.pts"></span> points, as much as <span data-o="calc:midPerBalance"></span> whole mid-ring trips</button>
+          <button class="opt" data-why="Look at the spacing of the jumps - the endgame cycle took just as long as the others. The difference came from the platform award, not from driving faster.">The robot cycled much faster once the endgame started</button>
+        </div>
+        <div class="explain">Ring prices never change in the endgame - the doubling belongs to auto. What changed was the platform: <span data-o="scoring.endgame.dock.name"></span> pays <span data-o="scoring.endgame.dock.pts"></span>, <span data-o="scoring.endgame.balance.name"></span> pays <span data-o="scoring.endgame.balance.pts"></span>, and a single Balance equals <span data-o="calc:midPerBalance"></span> mid-ring cycles that would take most of a minute to drive. Short window, dense points.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 4</div>
+        <div class="qt">Endgame is the final <span data-o="match.endgameSec"></span> seconds. How many seconds into the match does it begin?</div>
+        <div class="opts">
+          <button class="opt"><span data-o="calc:endgameStart"></span> s</button>
+          <button class="opt" data-why="That is how long teleop lasts, not a moment on the clock. To find the start, subtract the endgame window from the whole match length."><span data-o="match.teleopSec"></span> s</button>
+          <button class="opt" data-why="That is the length of the endgame window, not its start. The countdown clock shows this number in the corner, which is exactly why it tempts."><span data-o="match.endgameSec"></span> s</button>
+        </div>
+        <div class="explain">The match runs <span data-o="match.totalSec"></span> seconds and the endgame is its final <span data-o="match.endgameSec"></span>, so it begins at <span data-o="calc:endgameStart"></span> seconds in. In the sim, that is the dashed line where the amber band starts - the moment a good drive coach starts thinking about the platform.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Lesson 01 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Auto</b><span>The first <span data-o="match.autoSec"></span> s. The robot runs pre-written moves alone, and ring points pay double.</span></div>
+        <div class="gl"><b>Teleop</b><span>The long driver-controlled middle of the match.</span></div>
+        <div class="gl"><b>Endgame</b><span>The final <span data-o="match.endgameSec"></span> s of teleop, when the platform awards switch on.</span></div>
+        <div class="gl"><b>Leave</b><span>The <span data-o="scoring.leave"></span>-point auto award for fully exiting your start zone.</span></div>
+        <div class="gl"><b>Scoring event</b><span>One moment that adds points. The score line jumps, then sits flat while robots travel.</span></div>
+        <div class="gl"><b>Balance</b><span>Fully on the platform with it level - the top rung of the endgame ladder, worth <span data-o="scoring.endgame.balance.pts"></span>.</span></div>
+      </div>
+      <a class="next" href="gamesense-lesson-2.html">
+        <div class="n-eyebrow">Up next · Lesson 02</div>
+        <h3>Reading the Manual</h3>
+        <p>You now know when the points happen. Next you learn where the rules live - how to find the one rule that matters before a referee finds it for you.</p>
+      </a>
+    </div>
+  </section>
+
+</div>
+
+<nav class="coursenav">
+  <a href="gamesense.html">← Game Sense hub</a>
+  <a class="map" href="gamesense.html">Course map</a>
+  <a href="gamesense-lesson-2.html">Lesson 02 · Reading the Manual →</a>
+</nav>
+
+<footer>Game Sense · Reading and playing the FRC game</footer>
+
+<script>
+(function(){
+  "use strict";
+  // Fill every [data-o] span from window.ORBIT so a rebalance edits one file.
+  try{
+    var O=window.ORBIT; if(!O) return;
+    var calc={
+      endgameStart:O.match.totalSec-O.match.endgameSec,
+      teleBody:O.match.teleopSec-O.match.endgameSec,
+      third:Math.round(O.match.totalSec/3),
+      highAutoPlusLeave:O.scoring.rings.high.auto+O.scoring.leave,
+      midPerBalance:O.scoring.endgame.balance.pts/O.scoring.rings.mid.tele,
+      maxEndgame:3*(O.scoring.endgame.balance.pts+O.scoring.endgame.harmonyBonusEach)
+    };
+    var nodes=document.querySelectorAll('[data-o]');
+    Array.prototype.forEach.call(nodes,function(el){
+      var p=el.getAttribute('data-o'), v;
+      if(p.indexOf('calc:')===0){ v=calc[p.slice(5)]; }
+      else { v=p.split('.').reduce(function(a,k){ return (a==null)?a:a[k]; },O); }
+      if(v!==undefined&&v!==null) el.textContent=v;
+    });
+  }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  "use strict";
+  var O=window.ORBIT; if(!O) return;
+  var clamp=function(x,a,b){return x<a?a:(x>b?b:x);};
+  var M=O.match, R=O.scoring.rings, EG=O.scoring.endgame;
+  var TOTAL=M.totalSec, AUTO_END=M.autoSec, EG_START=M.totalSec-M.endgameSec;
+  var SPEED=6;
+
+  // One scripted match: every point value read from ORBIT, only the times are ours.
+  var EV=[
+    {t:3,   pts:O.scoring.leave,          what:"Leave - robot fully exits its start zone"},
+    {t:8,   pts:R.mid.auto,               what:R.mid.name+" "+O.piece+" at the auto rate"},
+    {t:13,  pts:R.low.auto,               what:R.low.name+" "+O.piece+" at the auto rate"},
+    {t:34,  pts:R.mid.tele,               what:R.mid.name+" "+O.piece},
+    {t:56,  pts:R.mid.tele,               what:R.mid.name+" "+O.piece},
+    {t:78,  pts:R.mid.tele,               what:R.mid.name+" "+O.piece},
+    {t:100, pts:R.mid.tele,               what:R.mid.name+" "+O.piece},
+    {t:125, pts:R.mid.tele,               what:R.mid.name+" "+O.piece+" - endgame window, teleop rate"},
+    {t:137, pts:EG.dock.pts,              what:EG.dock.name+" - fully on the platform, tilted"},
+    {t:146, pts:EG.balance.pts-EG.dock.pts, what:EG.balance.name+" - platform level, "+EG.dock.name+" upgrades"}
+  ];
+  var FINAL=EV.reduce(function(a,e){return a+e.pts;},0);
+  var passScore=null,cum=0;
+  EV.forEach(function(e){cum+=e.pts; if(passScore===null&&cum>20)passScore=cum;});
+  var YMAX=Math.max(25,Math.ceil(FINAL/25)*25);
+
+  function scoreAt(t){var s=0;for(var i=0;i<EV.length;i++){if(EV[i].t<=t)s+=EV[i].pts;}return s;}
+  function phaseAt(t){return t<AUTO_END?'auto':(t<EG_START?'teleop':'endgame');}
+  function tallies(t){
+    var a=0,b=0,c=0;
+    EV.forEach(function(e){ if(e.t>t)return; if(e.t<AUTO_END)a+=e.pts; else if(e.t<EG_START)b+=e.pts; else c+=e.pts; });
+    return {auto:a,teleop:b,endgame:c};
+  }
+  var FT=tallies(TOTAL);
+  var correctPhase=(FT.auto>=FT.teleop&&FT.auto>=FT.endgame)?'auto':(FT.teleop>=FT.endgame?'teleop':'endgame');
+  var PH_NAME={auto:'Auto',teleop:'Teleop',endgame:'Endgame'};
+  var PH_CLASS={auto:'indigo',teleop:'teal',endgame:'amber'};
+  var PH_COLOR={auto:'#8E8CF8',teleop:'#34D7C5',endgame:'#FFB020'};
+
+  var cur=0, playing=false, seen=false, interacted=false, lockedGuess=null;
+
+  function makeCanvas(cv){
+    var ctx=cv.getContext('2d'); var o={cv:cv,ctx:ctx,w:0,h:0};
+    function fit(){
+      var r=cv.getBoundingClientRect(); if(!r.width)return;
+      var dpr=window.devicePixelRatio||1;
+      cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr);
+      ctx.setTransform(dpr,0,0,dpr,0,0); o.w=r.width; o.h=r.height;
+    }
+    o.fit=fit; fit(); return o;
+  }
+  var world=makeCanvas(document.getElementById('world'));
+  var MONO='ui-monospace,"SF Mono",Menlo,Consolas,monospace';
+
+  var el={
+    live:document.getElementById('live'), status:document.getElementById('status'),
+    play:document.getElementById('play'), restart:document.getElementById('restart'),
+    prevEv:document.getElementById('prevEv'), nextEv:document.getElementById('nextEv'),
+    tl:document.getElementById('tl'), tlVal:document.getElementById('tlVal'),
+    feed:document.getElementById('feed'), vRes:document.getElementById('vRes'),
+    roTime:document.getElementById('roTime'), roPhase:document.getElementById('roPhase'),
+    roScore:document.getElementById('roScore'), roAuto:document.getElementById('roAuto'),
+    roTele:document.getElementById('roTele'), roEnd:document.getElementById('roEnd'),
+    guess:document.getElementById('guess'), lockBtn:document.getElementById('lockBtn'),
+    gState:document.getElementById('guessState')
+  };
+  el.tl.min='0'; el.tl.max=String(TOTAL); el.tl.step='0.5'; el.tl.value='0';
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  var mClear=function(){};
+  try{
+    var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+    var mSaved={}, mGold={};
+    try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+    try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+    var mItems={};
+    Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+    var mMark=function(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; };
+    mClear=function(id){
+      var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+      mMark(n);
+      var gold=n.classList.contains('gold');
+      var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+      map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+    };
+    Object.keys(mItems).forEach(function(id){
+      if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+    });
+    setInterval(function(){
+      try{
+        if(seen) mClear('watch');
+        if(!playing && passScore!==null && cur<TOTAL && scoreAt(cur)===passScore) mClear('pass20');
+      }catch(e){}
+    },200);
+  }catch(e){}
+
+  function interact(){ interacted=true; }
+
+  function finish(){
+    try{
+      if(lockedGuess!==null){
+        var diff=Math.abs(lockedGuess-FINAL);
+        if(diff<=5){ mClear('gold'); el.gState.textContent='Final '+FINAL+'. You guessed '+lockedGuess+' - within 5. Gold.'; }
+        else { el.gState.textContent='Final '+FINAL+'. You guessed '+lockedGuess+' - off by '+diff+'. Reload the page to try a fresh run.'; }
+      }
+    }catch(e){}
+  }
+  function setCur(t){
+    cur=clamp(t,0,TOTAL);
+    if(cur>=TOTAL&&!seen){ seen=true; finish(); }
+  }
+  function setPlay(on){
+    playing=on;
+    el.play.textContent=on?'Pause':(cur>=TOTAL?'Replay ▸':'Play ▸');
+    el.play.classList.toggle('active',on);
+    el.live.classList.toggle('on',on);
+    el.status.textContent=on?'Live':'Paused';
+  }
+
+  el.play.addEventListener('click',function(){
+    interact();
+    if(playing){ setPlay(false); return; }
+    if(cur>=TOTAL) setCur(0);
+    setPlay(true);
+  });
+  el.restart.addEventListener('click',function(){ interact(); setPlay(false); setCur(0); });
+  el.prevEv.addEventListener('click',function(){
+    interact(); setPlay(false);
+    var t=0;
+    for(var i=0;i<EV.length;i++){ if(EV[i].t<cur-0.01) t=EV[i].t; }
+    setCur(t);
+  });
+  el.nextEv.addEventListener('click',function(){
+    interact(); setPlay(false);
+    var t=TOTAL;
+    for(var i=EV.length-1;i>=0;i--){ if(EV[i].t>cur+0.01) t=EV[i].t; }
+    setCur(t);
+  });
+  el.tl.addEventListener('input',function(){ interact(); setPlay(false); setCur(parseFloat(el.tl.value)||0); });
+
+  el.lockBtn.addEventListener('click',function(){
+    if(lockedGuess!==null) return;
+    if(interacted||seen){ el.gState.textContent='The match already started - reload the page for a fresh gold run.'; return; }
+    var g=parseInt(el.guess.value,10);
+    if(isNaN(g)){ el.gState.textContent='Type your guess first.'; return; }
+    lockedGuess=g;
+    el.guess.disabled=true; el.lockBtn.disabled=true;
+    el.gState.textContent='Locked: '+g+'. Now press Play.';
+  });
+
+  // ---- mission call (which phase earned the most) ----
+  var vDone=false;
+  Array.prototype.forEach.call(document.querySelectorAll('.v-opt'),function(b){
+    b.addEventListener('click',function(){
+      if(vDone) return;
+      if(!seen){ el.vRes.textContent='Watch the whole match first, then make the call.'; el.vRes.className='v-res no'; return; }
+      var ph=b.getAttribute('data-ph');
+      if(ph===correctPhase){
+        vDone=true; b.classList.add('good');
+        Array.prototype.forEach.call(document.querySelectorAll('.v-opt'),function(o){ o.disabled=true; });
+        el.vRes.textContent='Right. '+PH_NAME[correctPhase]+' paid '+FT[correctPhase]+' of the '+FINAL+' points - in the shortest window of the match.';
+        el.vRes.className='v-res ok';
+        try{ mClear('phase'); }catch(e){}
+      } else {
+        b.classList.add('no'); setTimeout(function(){ b.classList.remove('no'); },900);
+        el.vRes.textContent=PH_NAME[ph]+' put up '+FT[ph]+' - check the three phase counters again.';
+        el.vRes.className='v-res no';
+      }
+    });
+  });
+
+  // ---- drawing ----
+  function draw(){
+    var ctx=world.ctx,W=world.w,H=world.h;
+    if(!W||!H) return;
+    ctx.clearRect(0,0,W,H);
+    var left=34,right=12,top=30,bot=H-38;
+    function X(t){return left+(t/TOTAL)*(W-left-right);}
+    function Y(s){return bot-(s/YMAX)*(bot-top);}
+    var ph=phaseAt(cur);
+
+    // phase bands
+    var bands=[
+      {a:0,b:AUTO_END,ph:'auto',n:'AUTO'},
+      {a:AUTO_END,b:EG_START,ph:'teleop',n:'TELEOP'},
+      {a:EG_START,b:TOTAL,ph:'endgame',n:'ENDGAME'}
+    ];
+    bands.forEach(function(bd){
+      var act=bd.ph===ph;
+      ctx.globalAlpha=act?0.15:0.05;
+      ctx.fillStyle=PH_COLOR[bd.ph];
+      ctx.fillRect(X(bd.a),top-6,X(bd.b)-X(bd.a),bot-top+6);
+      ctx.globalAlpha=1;
+      ctx.font=(act?'700 ':'400 ')+'10px '+MONO;
+      ctx.fillStyle=act?PH_COLOR[bd.ph]:'rgba(146,162,190,0.55)';
+      ctx.textAlign='center';
+      ctx.fillText(bd.n,(X(bd.a)+X(bd.b))/2,15);
+    });
+
+    // phase boundaries
+    ctx.strokeStyle='rgba(231,237,246,0.22)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+    [AUTO_END,EG_START].forEach(function(t){
+      ctx.beginPath();ctx.moveTo(X(t),top-6);ctx.lineTo(X(t),bot);ctx.stroke();
+    });
+    ctx.setLineDash([]);
+
+    // score grid
+    ctx.textAlign='right';ctx.font='9px '+MONO;
+    for(var g=0;g<=YMAX;g+=25){
+      ctx.strokeStyle='rgba(120,140,180,0.12)';
+      ctx.beginPath();ctx.moveTo(left,Y(g));ctx.lineTo(W-right,Y(g));ctx.stroke();
+      ctx.fillStyle='rgba(146,162,190,0.6)';
+      ctx.fillText(String(g),left-5,Y(g)+3);
+    }
+
+    // time axis
+    ctx.textAlign='center';
+    var tick=TOTAL/5;
+    for(var t=0;t<=TOTAL;t+=tick){
+      ctx.strokeStyle='rgba(120,140,180,0.2)';
+      ctx.beginPath();ctx.moveTo(X(t),bot);ctx.lineTo(X(t),bot+4);ctx.stroke();
+      ctx.fillStyle='rgba(146,162,190,0.6)';
+      ctx.fillText(t+'s',X(t),bot+15);
+    }
+
+    // score staircase up to the playhead (the future stays hidden)
+    ctx.strokeStyle='#ff8fb5';ctx.lineWidth=2;
+    ctx.shadowColor='#ff8fb5';ctx.shadowBlur=8;
+    ctx.beginPath();ctx.moveTo(X(0),Y(0));
+    var s=0,i;
+    for(i=0;i<EV.length;i++){
+      if(EV[i].t>cur) break;
+      ctx.lineTo(X(EV[i].t),Y(s)); s+=EV[i].pts; ctx.lineTo(X(EV[i].t),Y(s));
+    }
+    ctx.lineTo(X(cur),Y(s));
+    ctx.stroke();ctx.shadowBlur=0;
+
+    // event dots + point labels (revealed once passed)
+    var c2=0;
+    for(i=0;i<EV.length;i++){
+      c2+=EV[i].pts;
+      if(EV[i].t>cur) break;
+      var ex=X(EV[i].t), ey=Y(c2);
+      ctx.fillStyle='#ff8fb5';
+      ctx.beginPath();ctx.arc(ex,ey,3.2,0,7);ctx.fill();
+      ctx.font='9px '+MONO;
+      ctx.fillStyle='rgba(255,143,181,0.85)';
+      ctx.textAlign='center';
+      ctx.fillText('+'+EV[i].pts,ex,ey-(9+(i%3)*10));
+    }
+
+    // live score dot + playhead
+    ctx.strokeStyle='rgba(231,237,246,0.5)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(X(cur),top-6);ctx.lineTo(X(cur),bot);ctx.stroke();
+    ctx.fillStyle='#ff8fb5';
+    ctx.beginPath();ctx.arc(X(cur),Y(s),4.2,0,7);ctx.fill();
+    ctx.font='700 10px '+MONO;
+    ctx.fillStyle='#E7ECF6';
+    ctx.textAlign='center';
+    ctx.fillText(Math.round(cur)+'s',clamp(X(cur),left+12,W-right-14),bot+28);
+  }
+
+  function updateUI(){
+    var sc=scoreAt(cur), ph=phaseAt(cur), tl=tallies(cur);
+    el.roTime.textContent=Math.round(cur)+' s';
+    el.roPhase.textContent=(cur>=TOTAL?'FINAL':PH_NAME[ph].toUpperCase());
+    el.roPhase.className='v '+(cur>=TOTAL?'rose':PH_CLASS[ph]);
+    el.roScore.textContent=sc;
+    el.roAuto.textContent=tl.auto;
+    el.roTele.textContent=tl.teleop;
+    el.roEnd.textContent=tl.endgame;
+    el.tlVal.textContent=Math.round(cur)+' s';
+    el.tl.value=String(cur);
+    var lastEv=null;
+    for(var i=0;i<EV.length;i++){ if(EV[i].t<=cur) lastEv=EV[i]; }
+    if(cur>=TOTAL){
+      el.feed.textContent='FINAL '+FINAL+' pts · Auto '+FT.auto+' · Teleop '+FT.teleop+' · Endgame '+FT.endgame;
+    } else if(!lastEv){
+      el.feed.textContent='Robots set, field lit. Press Play, drag the timeline, or step event to event.';
+    } else {
+      el.feed.textContent='t='+lastEv.t+'s · +'+lastEv.pts+' pts · '+lastEv.what;
+    }
+  }
+
+  var last=0;
+  function frame(ts){
+    var t=ts/1000, dt=last?Math.min(0.05,t-last):0.016; last=t;
+    if(playing){
+      setCur(cur+dt*SPEED);
+      if(cur>=TOTAL) setPlay(false);
+    }
+    draw(); updateUI();
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){world.fit();},120);});
+})();
+</script>
+<script>
+(function(){
+  "use strict";
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong');
+      try{ var why=opt.getAttribute('data-why');
+        if(why){ var wl=opt.nextElementSibling; if(!wl||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.insertAdjacentElement('afterend',wl); } wl.textContent=why; }
+      }catch(e){} } }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  // auto-mark this lesson complete in the hub once its quiz is finished
+  var KEY="gamesense:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then run the sim
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain');
+  var picked=-1, revealed=false, ran=false;
+  var demos=document.querySelectorAll('.demo');
+  var style=document.createElement('style');
+  style.textContent='#predict .opt.picked{border-color:var(--teal,#34D7C5);box-shadow:0 0 0 2px rgba(52,215,197,.22)}';
+  document.head.appendChild(style);
+  var note=document.createElement('div');
+  note.style.cssText='display:none;font-size:13px;color:#92A2BE;margin-top:10px;font-style:italic';
+  q.appendChild(note);
+  function optText(i){ var t=(opts[i].textContent||'').trim(); return t.length>70 ? t.slice(0,67)+'...' : t; }
+  function reveal(){ if(revealed||picked<0) return; revealed=true;
+    opts.forEach(function(o){o.classList.add('locked');});
+    try{var pr=JSON.parse(localStorage.getItem('frc:predict'))||{r:0,w:0};if(picked===correct){pr.r++;}else{pr.w++;}localStorage.setItem('frc:predict',JSON.stringify(pr));}catch(e){}
+    if(picked===correct){
+      opts[picked].classList.add('correct');
+      note.textContent='You called it. "'+optText(picked)+'" is exactly what happens. Here is why:';
+    } else {
+      opts[picked].classList.add('wrong'); opts[correct].classList.add('correct');
+      note.textContent='You predicted "'+optText(picked)+'". The sim went a different way - the green answer is what really happens, and the surprise is the part worth remembering. Here is why:';
+    }
+    note.style.display='block';
+    explain.classList.add('show'); }
+  function onRan(ev){ if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#predict')) return; ran=true; if(picked>=0) reveal(); }
+  if(demos.length){
+    Array.prototype.forEach.call(demos,function(d){
+      d.addEventListener('pointerdown',onRan,true);
+      d.addEventListener('input',onRan,true);
+    });
+    window.addEventListener('keydown',onRan,true);
+  } else { ran=true; }
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(revealed)return; picked=i;
+    opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
+    if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
+})();
+</script>
+<script src="account-config.js"></script>
+<script src="account.js"></script>
+</body>
+</html>

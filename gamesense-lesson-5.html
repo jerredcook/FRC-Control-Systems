@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Game Sense · Part 2.1 - Robot Roles</title>
+<script src="gamesense-data.js"></script>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --rose:#FF8FB5;    /* Game Sense accent */
+    --amber:#FFB020;
+    --teal:#34D7C5;
+    --indigo:#8E8CF8;
+    --red:#FF6B6B;
+    --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+    --maxw:1160px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ink); color:var(--text);
+    font-family:var(--sans); font-size:17px; line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(900px 500px at 80% -10%, rgba(255,143,181,.06), transparent 60%),
+      radial-gradient(700px 500px at -10% 10%, rgba(142,140,248,.05), transparent 55%);
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--rose);box-shadow:0 0 12px var(--rose)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--rose)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--rose),var(--indigo));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:46ch;margin-top:6px}
+
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--rose);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  p .sub,.sub{color:var(--muted)}
+  .lead{font-size:19px}
+  em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--rose);font-weight:600;font-size:.94em}
+
+  .formula{font-family:var(--mono);background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:18px 20px;margin:20px 0;font-size:18px;overflow-x:auto;color:#cfe;text-align:center}
+  .formula .small{display:block;font-size:13px;color:var(--muted);margin-top:8px}
+  .formula b{color:var(--rose)} .formula .t{color:var(--amber)}
+
+  /* term chips */
+  .terms{display:grid;gap:12px;margin:22px 0 6px}
+  @media(min-width:560px){.terms{grid-template-columns:repeat(2,1fr)}}
+  .terms.three{margin:18px 0 6px}
+  @media(min-width:560px){.terms.three{grid-template-columns:repeat(3,1fr)}}
+  .term{border:1px solid var(--line);border-radius:10px;padding:14px 15px;background:var(--panel);border-top:2px solid var(--accent,var(--rose))}
+  .term h4{margin:0 0 4px;font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent,var(--rose))}
+  .term p{margin:0;font-size:14.5px;color:var(--muted);line-height:1.45}
+  .term .big{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--text);margin:2px 0 6px}
+
+  /* interactive panel */
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .simgrid{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line)}
+  @media(min-width:760px){.simgrid{grid-template-columns:1fr 1.12fr}}
+  .simcell{background:#0B1322;padding:14px 16px}
+  .sc-head{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin-bottom:10px}
+
+  .pickgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+  .pbtn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);text-align:left;min-height:48px;padding:8px 11px;border-radius:9px;cursor:pointer;transition:.12s;display:flex;flex-direction:column;gap:2px}
+  .pbtn b{font-size:12.5px;color:var(--text);letter-spacing:.04em}
+  .pbtn span{font-size:10.5px;color:var(--faint);letter-spacing:.03em}
+  .pbtn:hover{border-color:var(--rose)}
+  .pbtn.on{background:rgba(255,143,181,.12);border-color:var(--rose)}
+  .pbtn.on b{color:var(--rose)}
+  .edlegend{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-top:12px;letter-spacing:.04em;line-height:1.7}
+  .edlegend b{color:var(--muted);font-weight:600}
+
+  .projwrap{overflow-x:auto}
+  table.proj{width:100%;border-collapse:collapse;min-width:340px}
+  .proj th{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);text-align:left;padding:4px 8px;border-bottom:1px solid var(--line);font-weight:600}
+  .proj th.r,.proj td.r{text-align:right}
+  .proj td{padding:6px 8px;border-bottom:1px solid var(--line);color:var(--muted);font-family:var(--mono);font-size:12.5px;white-space:nowrap}
+  .proj td.nm{font-family:var(--sans);color:var(--text);font-size:13.5px}
+  .proj td.nm span{color:var(--faint);font-family:var(--mono);font-size:10.5px}
+  .proj tr.sec td{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);padding-top:12px}
+  .proj tr.tot td{color:var(--text);font-weight:700}
+  .proj tr.tot td.r{font-size:15px}
+  .proj tr.tot.you td.r{color:var(--rose)}
+  .proj tr.tot.them td.r{color:var(--indigo)}
+  .proj td.waiting{font-family:var(--sans);color:var(--faint);font-style:italic;white-space:normal}
+  .swingline{font-family:var(--mono);font-size:11px;color:var(--amber);margin-top:10px;letter-spacing:.03em}
+  .swingline.off{color:var(--faint)}
+
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--rose);color:var(--text)}
+  .ctl-hint{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.03em}
+
+  .verdict{padding:12px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--muted);display:flex;align-items:center;gap:10px}
+  .verdict .dotv{width:9px;height:9px;border-radius:50%;background:var(--faint);flex:0 0 auto}
+  .verdict.good .dotv{background:var(--green);box-shadow:0 0 10px var(--green)} .verdict.good{color:var(--green)}
+  .verdict.warn .dotv{background:var(--rose);box-shadow:0 0 10px var(--rose)} .verdict.warn{color:var(--rose)}
+
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--rose);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--rose);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+
+  /* shared callout pattern */
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.rose{border-color:var(--rose);background:rgba(255,143,181,.06)} .note.rose .nh{color:var(--rose)}
+
+  /* quiz */
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)}
+  .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--rose);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7}
+  .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .whyline{margin:2px 0 4px;font-size:13.5px;color:var(--muted);border-left:2px solid var(--red);background:rgba(255,107,107,.05);padding:5px 12px;border-radius:0 8px 8px 0}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--rose);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  /* recap */
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px}
+  @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px}
+  .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--rose);min-width:130px;text-transform:uppercase}
+  .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(142,140,248,0.1),transparent 70%)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--indigo)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)}
+  .next code{font-family:var(--mono);background:var(--panel-2);border:1px solid var(--line-2);padding:2px 8px;border-radius:5px;color:var(--rose);font-size:14px}
+
+  footer{padding:40px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--rose);color:var(--text)}
+  .coursenav a.map{border-color:transparent;color:var(--indigo)}
+
+  @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="gamesense.html"><span class="dot"></span><span class="name">Game Sense</span></a>
+    <div class="top-meta">Part 2 &middot; 01 / 03 &middot; Play the Game</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Part 2 &middot; 01</b> Play the Game</div>
+    <div class="eyebrow">Robot Roles</div>
+    <h1>Pick a job.<br><span class="accent">Play it well</span>.</h1>
+    <p class="dek">A match is three robots a side, and the best alliances hand out jobs before the buzzer: scorer, feeder, defender. Today you are the coach doing the handing.</p>
+  </div>
+
+  <section>
+    <div class="kicker">The alliance</div>
+    <h2>One great robot is not a plan</h2>
+    <p class="lead">Your alliance is three robots. The scoreboard does not care which one of them scores.</p>
+    <p>Part 1 taught you to read the game: the clock, the rules, the scoring math, the standings. Part 2 is about playing it, and playing starts with a question every alliance answers before every match: <strong>what job should each robot do?</strong> Think of a pace line on a group ride. One rider pulls at the front and breaks the wind, one sits behind and saves legs for the sprint, one watches the road and calls the turns. Same bikes, different jobs, and the group is faster than any rider alone.</p>
+    <p>Scouts sort ORBIT robots into four rough <strong>archetypes</strong>. An archetype is not a rulebook thing, it is a performance envelope: how fast the robot cycles, which ring it feeds, and where it ends the match. Only three fit on the floor, so every match, one job gets benched.</p>
+    <div class="terms">
+      <div class="term" style="--accent:var(--rose)">
+        <h4>Scorer</h4>
+        <div class="big"><span data-ob="scCyc"></span> s &middot; high ring</div>
+        <p>Fast trips to the top ring, then a Dock (<span data-ob="dockPts"></span>) at the buzzer. Hungry alone, monstrous when fed.</p>
+      </div>
+      <div class="term" style="--accent:var(--indigo)">
+        <h4>All-arounder</h4>
+        <div class="big"><span data-ob="arCyc"></span> s &middot; mid ring</div>
+        <p>Steady mid-ring work and the only robot that reliably Balances (<span data-ob="balPts"></span>) when it matters.</p>
+      </div>
+      <div class="term" style="--accent:var(--amber)">
+        <h4>Feeder</h4>
+        <div class="big"><span data-ob="fdCyc"></span> s &middot; low ring</div>
+        <p>Hoovers Cells, speeds up every scoring teammate, then Parks (<span data-ob="parkPts"></span>). Its stat line hides its value.</p>
+      </div>
+      <div class="term" style="--accent:var(--teal)">
+        <h4>Defender</h4>
+        <div class="big">0 cycles</div>
+        <p>Scores nothing, Docks (<span data-ob="dockPts"></span>), and doubles the cycle time of whichever rival it shadows.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Points per job</div>
+    <h2>Read a role like a scout</h2>
+    <p>Lesson 03 gave you the tool: points per cycle beats vibes. A role is that tool pointed at a whole match, with one new wrinkle. Smart robots stop cycling before the buzzer, because the last <span class="k" data-ob="endSec"></span> seconds belong to the platform and its endgame points. So the real scoring window is <span class="k" data-ob="teleSec"></span> minus <span class="k" data-ob="endSec"></span>, which leaves <span class="k" data-ob="winSec"></span> seconds of cycling. Divide that by the robot's cycle time, multiply by the ring's value, then add the endgame habit.</p>
+    <div class="formula">
+      role points = (<b><span data-ob="winSec"></span> s</b> &divide; cycle s) &times; <span class="t">ring value</span> + <span class="t">endgame</span>
+      <span class="small">Scorer alone: <span data-ob="winSec"></span> &divide; <span data-ob="scCyc"></span> &rarr; <span data-ob="scAloneTrips"></span> trips &times; <span data-ob="highTele"></span> = <span data-ob="scAlonePts"></span>, plus Dock <span data-ob="dockPts"></span> = <span data-ob="scAloneTotal"></span></span>
+    </div>
+    <p>Now watch what a Feeder does to that number. A Feeder keeps its partners' hoppers full, so they skip the trip to collect Cells. In our model one Feeder multiplies a scoring teammate's cycle time by <span class="k" data-ob="feed1"></span>, and two Feeders by <span class="k" data-ob="feed2"></span>. Same Scorer, three very different matches:</p>
+    <div class="terms three">
+      <div class="term" style="--accent:var(--rose)">
+        <h4>Scorer alone</h4>
+        <div class="big"><span data-ob="scAloneTrips"></span> trips &middot; <span data-ob="scAlonePts"></span> pts</div>
+        <p>Every Cell is a full round trip at <span data-ob="scCyc"></span> seconds.</p>
+      </div>
+      <div class="term" style="--accent:var(--amber)">
+        <h4>+ one Feeder</h4>
+        <div class="big"><span data-ob="scFedTrips"></span> trips &middot; <span data-ob="scFedPts"></span> pts</div>
+        <p>Cycle drops to <span data-ob="scFedEff"></span> s. The Feeder's help shows up in the Scorer's column.</p>
+      </div>
+      <div class="term" style="--accent:var(--teal)">
+        <h4>+ two Feeders</h4>
+        <div class="big"><span data-ob="scFed2Trips"></span> trips &middot; <span data-ob="scFed2Pts"></span> pts</div>
+        <p>Cycle drops to <span data-ob="scFed2Eff"></span> s. One robot now scores like two.</p>
+      </div>
+    </div>
+    <p style="margin-top:16px">Read that middle number again. Feeders do not add to an alliance, they <em>multiply</em> it. And defense works the same trick in reverse: a Defender that shadows a rival doubles that robot's cycle time, cutting its trips roughly in half. Nothing about the point table changes in either case. Jobs only ever change the seconds.</p>
+  </section>
+
+  <section>
+    <div class="kicker">Try it</div>
+    <h2>The lineup room</h2>
+    <p>Scouting report: tonight's rival alliance runs one Scorer fed by two Feeders, and that double-fed star projects them to <span class="k" data-ob="refRaw"></span> points. You have all four archetypes in your pits but only three spots on the floor. Field a trio and the projection runs the full-match math, cycling window plus endgame habits, the moment your third robot steps up.</p>
+
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="1">
+        <div class="qn">Predict first</div>
+        <div class="qt">Suppose your three best scoring jobs together still lose to the rival by a hair. To flip it, you bench your Feeder for a Defender, a robot that scores zero. What happens?</div>
+        <div class="opts">
+          <button class="opt">You lose worse. Trading a scoring robot for a zero-point robot always drops your side of the board</button>
+          <button class="opt">You win comfortably. The Defender takes more off their side than the swap cost yours</button>
+          <button class="opt">The margin stays about the same. The offense you lose and the defense you gain cancel out</button>
+        </div>
+        <div class="explain">The swap costs your column <span data-ob="swapCost"></span> points, but the Defender doubles their star Scorer's cycle time and removes about <span data-ob="steal"></span> points, <span data-ob="cutPct"></span> percent of everything they had. You win <span data-ob="c2"></span> to <span data-ob="refDef"></span>. The scoreboard is a difference between two numbers, and defense pushes on the other one. Go run it in the lineup room.</div>
+      </div>
+    </div>
+
+    <div class="demo" id="demo">
+      <div class="demo-head">
+        <span class="demo-title">ORBIT &middot; The lineup room</span>
+        <span class="demo-tag">You are the drive coach</span>
+      </div>
+      <div class="simgrid">
+        <div class="simcell">
+          <div class="sc-head">Your pits &middot; field three of the four jobs</div>
+          <div class="pickgrid" id="picks"></div>
+          <div class="edlegend">
+            The model: robots cycle for <span data-ob="winSec"></span> s, then run their endgame habit &middot;
+            each <b>Feeder</b> multiplies scoring teammates' cycle time (&times;<span data-ob="feed1"></span> with one, &times;<span data-ob="feed2"></span> with two) &middot;
+            a <b>Defender</b> doubles the rival star's cycle
+          </div>
+        </div>
+        <div class="simcell">
+          <div class="sc-head">Projection &middot; full-match points</div>
+          <div class="projwrap">
+            <table class="proj">
+              <thead><tr><th>Robot</th><th>Cycle</th><th class="r">Cells</th><th class="r">Tele</th><th class="r">End</th><th class="r">Pts</th></tr></thead>
+              <tbody id="projBody"></tbody>
+            </table>
+          </div>
+          <div class="swingline off" id="swingLine">Shadow report: waiting for a full trio.</div>
+        </div>
+      </div>
+      <div class="controls">
+        <button class="btn" id="resetSim">Bench everyone</button>
+        <span class="ctl-hint">The rival always runs Scorer + Feeder + Feeder</span>
+      </div>
+      <div class="verdict" id="verdict"><span class="dotv"></span><span id="verdictTxt">Field three jobs to see the projection.</span></div>
+    </div>
+    <p class="caption">Every point value in the projection comes straight from the ORBIT scoring table. The jobs never touch the point table, only the seconds, which is the whole idea of a role.</p>
+
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
+      <div class="m-item" data-m="offense"><span class="m-st">○</span><span>Field the <b>pure offense</b> trio: Scorer, All-arounder, Feeder. Read the margin twice. It stings by <span data-ob="offLoss"></span>, one low-ring Cell.</span></div>
+      <div class="m-item" data-m="beat"><span class="m-st">○</span><span><b>Beat the rival.</b> Your best scoring trio just lost, so the fix is not more scoring.</span></div>
+      <div class="m-item" data-m="scout"><span class="m-st">○</span><span><b>Scout all four.</b> Only four different trios exist. Project every one and notice what each benched job costs.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> win with <b>no Scorer</b> on the floor. The margin is paper thin, and the optional box below explains why one sloppy shift would erase it.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Why it matters</div>
+    <h2>Roles are chosen, not welded on</h2>
+    <p>Here is the part that surprises new team members: a role is a <em>per-match decision</em>, not your robot's identity. Your build sets which jobs you can do well, the same way your bike's gearing sets which hills you can climb, but the lineup around you decides which job pays most tonight. A robot that scored all morning might spend the afternoon feeding a faster partner, and the team that switches without sulking is the team every captain wants.</p>
+    <p>Defense deserves one honest warning before you fall in love with the flip. It works by crowding a rival, and crowding is exactly where the pinning rules from Lesson 02 live. Every foul hands the other alliance <span class="k" data-ob="foulPts"></span> points, so a careless Defender slowly turns into a scoring machine for the wrong side. Play defense with a stopwatch in your head.</p>
+    <div class="note rose">
+      <div class="nh">The quiet job wins picks</div>
+      <p>At a real event, alliance captains remember the robot that took the boring job and did it perfectly. A Feeder that never missed a handoff, a Defender that never drew a foul. When the draft room opens in the next lesson, watch how much that reputation is worth.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="note rose">
+      <div class="nh">Going further &middot; optional</div>
+      <p>Real FRC scouting runs on the same two moves you just practiced: stats like <span class="k">OPR</span> estimate each robot's scoring envelope, and playoff second picks are very often defenders, chosen to erase the other alliance's star. Now a coach's puzzle: your gold-mission trio wins by <span class="k" data-ob="goldMargin"></span>. How many pinning fouls can your Defender afford before that win evaporates?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">Two. Each foul hands the rival <span data-ob="foulPts"></span> points, so three fouls gift them <span data-ob="foul3"></span>, lifting their shadowed total from <span data-ob="refDef"></span> to <span data-ob="refFoul"></span>, past your <span data-ob="c4"></span>. The Scorer-led defense trios, at <span data-ob="c2"></span> and <span data-ob="c3"></span>, shrug those same three fouls off. That is the deepest role lesson in one number: a lineup is not just how many points it makes, it is how much margin it leaves for mistakes. Thin-margin plans need clean drivers.</p>
+      </details>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1 &middot; From the sim</div>
+        <div class="qt">The rival fields one Scorer and two Feeders. What makes that lineup so strong?</div>
+        <div class="opts">
+          <button class="opt" data-why="A Feeder's own stat line is the smallest on the field, about the same as a handful of low-ring Cells plus a Park. The multiplication happens in the Scorer's column, not the Feeders'.">Feeders score a lot themselves, so it is really three scoring robots</button>
+          <button class="opt">Two Feeders cut their Scorer's cycle time nearly in half, so one robot scores like two</button>
+          <button class="opt" data-why="Nothing in that lineup dodges defense. One Defender shadowing their star collapses the whole plan, which is exactly the flip you ran in the lineup room.">Spreading across three rings makes them impossible to defend</button>
+        </div>
+        <div class="explain">Fed cycles multiply. Their Scorer alone would make <span data-ob="scAloneTrips"></span> trips for <span data-ob="scAlonePts"></span> points; double-fed it makes <span data-ob="scFed2Trips"></span> trips for <span data-ob="scFed2Pts"></span>. The lineup is one star and two multipliers, and its weakness is that the whole total lives in one robot.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 2</div>
+        <div class="qt">How many scoring seconds does a cycling robot really get in an ORBIT match?</div>
+        <div class="opts">
+          <button class="opt">About <span data-ob="winSec"></span>: the <span data-ob="teleSec"></span> of teleop minus the last <span data-ob="endSec"></span> for the trip home</button>
+          <button class="opt" data-why="A robot still cycling at the buzzer trades its Dock or Balance points for half a Cell. The trip home is part of the job.">All <span data-ob="teleSec"></span> teleop seconds. Stopping early wastes time</button>
+          <button class="opt" data-why="Auto is its own <span data-ob="autoSec"></span> seconds with its own doubled point values. The cycle math in this lesson lives in teleop."><span data-ob="totSec"></span>: auto and teleop run together</button>
+        </div>
+        <div class="explain">Endgame points are match points, so smart alliances budget the last <span data-ob="endSec"></span> seconds for the platform. That leaves <span data-ob="winSec"></span> seconds of cycling, and every projection in the lineup room starts from that number.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 3</div>
+        <div class="qt">Swapping your Feeder for a Defender cost your own column <span data-ob="swapCost"></span> points and removed about <span data-ob="steal"></span> from the rival's. What is the general lesson?</div>
+        <div class="opts">
+          <button class="opt" data-why="Flip the numbers and the answer flips too. Against an alliance with no star worth shadowing, a Defender removes little, and the scoring robot wins the argument.">Defense always beats offense, so always field a Defender</button>
+          <button class="opt" data-why="The scoreboard is a difference between two totals. Taking that much off their side moves the difference more than the points you gave up.">A robot that scores zero contributes zero</button>
+          <button class="opt">Judge a role by the swing it causes in the gap between the totals, not by its own stat line</button>
+        </div>
+        <div class="explain">Swing is the coach's number: what you gave up against what they lost, here <span data-ob="steal"></span> against <span data-ob="swapCost"></span>, a winning trade. Against a rival with three even scorers instead of one star, the very same swap could lose. Run the numbers fresh every match.</div>
+      </div>
+      <div class="q" data-correct="1">
+        <div class="qn">Question 4</div>
+        <div class="qt">Why is the All-arounder worth more at the buzzer than its mid-ring stat line suggests?</div>
+        <div class="opts">
+          <button class="opt" data-why="The mid ring is its ceiling. The hidden value sits on the platform, not up the tower.">It sneaks Cells into the high ring when nobody is watching</button>
+          <button class="opt">Its reliable Balance adds <span data-ob="balPts"></span> endgame points, the biggest single endgame prize in ORBIT</button>
+          <button class="opt" data-why="Endgame points add, they never multiply. The Balance lands on top of its Reactor work, not times it.">Balancing multiplies its Reactor points</button>
+        </div>
+        <div class="explain">Fed and cycling, the All-arounder makes about <span data-ob="arFedPts"></span> mid-ring points, then banks <span data-ob="balPts"></span> more by balancing, over a third of its value in the last <span data-ob="endSec"></span> seconds. Endgame habits are part of a role, which is why the lineup room scores them.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Part 2 &middot; 01 &middot; Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Role</b><span>The job a robot plays this match. Chosen in the huddle, not welded to the frame.</span></div>
+        <div class="gl"><b>Archetype</b><span>A robot's performance envelope: cycle speed, favorite ring, endgame habit.</span></div>
+        <div class="gl"><b>Cycling window</b><span>Teleop minus the trip home. The seconds all role math starts from.</span></div>
+        <div class="gl"><b>Fed cycle</b><span>A Feeder multiplies teammates' speed. One helps, two transform.</span></div>
+        <div class="gl"><b>Shadow</b><span>A Defender's job: double the rival star's cycle time and watch their total sag.</span></div>
+        <div class="gl"><b>Swing</b><span>What a swap does to the gap between the totals. The only fair way to judge a role.</span></div>
+      </div>
+      <div class="next">
+        <div class="n-eyebrow">Up next &middot; Part 2 &middot; 02</div>
+        <h3>Alliance Selection</h3>
+        <p style="margin-bottom:0">You can size up a robot's job now. Next comes the room where that skill pays: after qualifications, the top seeds take turns drafting playoff partners in snake order, and you are on the stage. Bring the <code>pick list</code> thinking you just practiced, because the crowd will be cheering for the wrong robot.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<nav class="coursenav">
+  <a href="gamesense-lesson-4.html">&larr; Lesson 04 &middot; Ranking Points</a>
+  <a class="map" href="gamesense.html">Course map</a>
+  <a href="gamesense-lesson-6.html">Part 2 &middot; 02 &middot; Alliance Selection &rarr;</a>
+</nav>
+
+<footer>Game Sense &middot; Reading and playing the FRC game</footer>
+
+<script>
+(function(){
+  "use strict";
+  var O=window.ORBIT, RING=O.scoring.rings, EG=O.scoring.endgame;
+  var TELE=O.match.teleopSec, EGSEC=O.match.endgameSec, WIN=TELE-EGSEC;
+  var ARCH={}; O.archetypes.forEach(function(a){ ARCH[a.key]=a; });
+
+  /* MODEL-START (validated numerically - see the course feasibility script).
+     These are drill parameters in seconds and multipliers, not ORBIT point
+     values; every point value below reads window.ORBIT. */
+  var FEED=[1,0.8,0.55];      // cycle-time multiplier by number of Feeders on the alliance
+  var DEF_SLOW=2;             // a shadowed robot's base cycle time doubles
+  var EGROLE={scorer:EG.dock.pts, allround:EG.balance.pts, feeder:EG.park.pts, defender:EG.dock.pts};
+  var REF=["scorer","feeder","feeder"];  // the rival alliance, every match
+  /* MODEL-END */
+
+  function project(keys, oppDefenders){
+    var feeders=keys.filter(function(k){ return k==="feeder"; }).length;
+    var robots=keys.map(function(k){
+      var a=ARCH[k], r={key:k, eg:EGROLE[k], shadowed:false, base:a.cycleSec};
+      if(k==="defender"||!a.ring){ r.cycles=0; r.tele=0; r.eff=0; r.ringPts=0; }
+      else{
+        var f=(k==="feeder")?1:FEED[Math.min(feeders,2)];
+        r.eff=a.cycleSec*f;
+        r.cycles=Math.floor(WIN/r.eff);
+        r.ringPts=RING[a.ring].tele;
+        r.tele=r.cycles*r.ringPts;
+      }
+      r.total=r.tele+r.eg;
+      return r;
+    });
+    for(var d=0; d<oppDefenders; d++){
+      var best=null;
+      robots.forEach(function(r){ if(r.key!=="defender"&&!r.shadowed&&(!best||r.tele>best.tele)) best=r; });
+      if(!best) break;
+      best.shadowed=true;
+      best.eff=best.base*DEF_SLOW;
+      best.cycles=Math.floor(WIN/best.eff);
+      best.tele=best.cycles*best.ringPts;
+      best.total=best.tele+best.eg;
+    }
+    return {robots:robots, total:robots.reduce(function(s,r){ return s+r.total; },0)};
+  }
+  function d1(x){ return Math.round(x*10)/10; }
+
+  // ---- inject ORBIT + model numbers into the prose, so a rebalance edits one file ----
+  var refRaw=project(REF,0).total, refDef=project(REF,1).total;
+  var c1=project(["scorer","allround","feeder"],0).total,
+      c2=project(["scorer","allround","defender"],0).total,
+      c3=project(["scorer","feeder","defender"],0).total,
+      c4=project(["allround","feeder","defender"],0).total;
+  var V={
+    teleSec:TELE, endSec:EGSEC, winSec:WIN, autoSec:O.match.autoSec, totSec:O.match.totalSec,
+    highTele:RING.high.tele, midTele:RING.mid.tele, lowTele:RING.low.tele,
+    scCyc:ARCH.scorer.cycleSec, arCyc:ARCH.allround.cycleSec, fdCyc:ARCH.feeder.cycleSec,
+    dockPts:EG.dock.pts, balPts:EG.balance.pts, parkPts:EG.park.pts,
+    feed1:FEED[1], feed2:FEED[2],
+    scAloneTrips:Math.floor(WIN/ARCH.scorer.cycleSec),
+    scAlonePts:Math.floor(WIN/ARCH.scorer.cycleSec)*RING.high.tele,
+    scAloneTotal:Math.floor(WIN/ARCH.scorer.cycleSec)*RING.high.tele+EG.dock.pts,
+    scFedEff:d1(ARCH.scorer.cycleSec*FEED[1]),
+    scFedTrips:Math.floor(WIN/(ARCH.scorer.cycleSec*FEED[1])),
+    scFedPts:Math.floor(WIN/(ARCH.scorer.cycleSec*FEED[1]))*RING.high.tele,
+    scFed2Eff:d1(ARCH.scorer.cycleSec*FEED[2]),
+    scFed2Trips:Math.floor(WIN/(ARCH.scorer.cycleSec*FEED[2])),
+    scFed2Pts:Math.floor(WIN/(ARCH.scorer.cycleSec*FEED[2]))*RING.high.tele,
+    arFedPts:Math.floor(WIN/(ARCH.allround.cycleSec*FEED[1]))*RING.mid.tele,
+    refRaw:refRaw, refDef:refDef,
+    steal:refRaw-refDef,
+    cutPct:Math.round((refRaw-refDef)/refRaw*100),
+    c1:c1, c2:c2, c3:c3, c4:c4,
+    offLoss:refRaw-c1, swapCost:c1-c2, goldMargin:c4-refDef,
+    foulPts:O.fouls.foul, foul3:3*O.fouls.foul, refFoul:refDef+3*O.fouls.foul
+  };
+  document.querySelectorAll("[data-ob]").forEach(function(n){
+    var k=n.getAttribute("data-ob");
+    if(k in V) n.textContent=V[k];
+  });
+
+  // ---- the lineup room ----
+  var KEYS=["scorer","allround","feeder","defender"];
+  var LBL={scorer:"Scorer",allround:"All-arounder",feeder:"Feeder",defender:"Defender"};
+  var SUB={
+    scorer:"high ring · "+ARCH.scorer.cycleSec+" s · docks",
+    allround:"mid ring · "+ARCH.allround.cycleSec+" s · balances",
+    feeder:"low ring · "+ARCH.feeder.cycleSec+" s · parks",
+    defender:"shadows their star · docks"
+  };
+  var picked=[];          // sim starts empty: no trio, nothing projected
+  var seenTrios={};       // sorted-key set for the scout mission
+
+  // latest snapshot, read by the missions checker
+  var lastComplete=false, lastKeys=[], lastYou=0, lastThem=0, seenCount=0;
+
+  var picksEl=document.getElementById("picks"),
+      projEl=document.getElementById("projBody"),
+      swingEl=document.getElementById("swingLine"),
+      verdictEl=document.getElementById("verdict"),
+      verdictTxt=document.getElementById("verdictTxt");
+
+  function row(name,note,r){
+    return '<tr><td class="nm">'+name+(note?' <span>&middot; '+note+'</span>':'')+'</td>'+
+      '<td>'+(r.key==="defender"?"shadows":(d1(r.eff)+" s"))+'</td>'+
+      '<td class="r">'+(r.key==="defender"?"-":r.cycles)+'</td>'+
+      '<td class="r">'+r.tele+'</td>'+
+      '<td class="r">'+r.eg+'</td>'+
+      '<td class="r">'+r.total+'</td></tr>';
+  }
+
+  function render(){
+    var ph="";
+    KEYS.forEach(function(k){
+      ph+='<button class="pbtn'+(picked.indexOf(k)>=0?" on":"")+'" data-key="'+k+'">'+
+        '<b>'+LBL[k]+'</b><span>'+SUB[k]+'</span></button>';
+    });
+    picksEl.innerHTML=ph;
+
+    var complete=picked.length===3;
+    var cls="", msg;
+    if(!complete){
+      projEl.innerHTML='<tr><td class="waiting" colspan="6">Field three jobs. '+(3-picked.length)+' more to go.</td></tr>';
+      swingEl.className="swingline off";
+      swingEl.textContent="Shadow report: waiting for a full trio.";
+      msg="Field three jobs to see the projection.";
+      verdictEl.className="verdict";
+      verdictTxt.textContent=msg;
+      lastComplete=false; lastKeys=picked.slice(); lastYou=0; lastThem=0;
+      seenCount=Object.keys(seenTrios).length;
+      return;
+    }
+
+    var nDef=picked.filter(function(k){ return k==="defender"; }).length;
+    var you=project(picked,0);        // the rival fields no Defender, so you cycle untouched
+    var them=project(REF,nDef);
+    seenTrios[picked.slice().sort().join("+")]=true;
+
+    var rows='<tr class="sec"><td colspan="6">Your alliance</td></tr>';
+    you.robots.forEach(function(r){ rows+=row(LBL[r.key],"",r); });
+    rows+='<tr class="tot you"><td class="nm">Your total</td><td></td><td></td><td></td><td></td><td class="r">'+you.total+'</td></tr>';
+    rows+='<tr class="sec"><td colspan="6">Rival alliance</td></tr>';
+    them.robots.forEach(function(r){
+      rows+=row("Their "+LBL[r.key], r.shadowed?"shadowed":(r.key==="scorer"?"fed &times;2":"feeds"), r);
+    });
+    rows+='<tr class="tot them"><td class="nm">Their total</td><td></td><td></td><td></td><td></td><td class="r">'+them.total+'</td></tr>';
+    projEl.innerHTML=rows;
+
+    if(nDef){
+      swingEl.className="swingline";
+      swingEl.textContent="Shadow report: their star slowed from "+d1(ARCH.scorer.cycleSec*FEED[2])+" s to "+(ARCH.scorer.cycleSec*DEF_SLOW)+" s, dropping "+(refRaw-them.total)+" points.";
+    } else {
+      swingEl.className="swingline off";
+      swingEl.textContent="Shadow report: no Defender fielded, the rival cycles untouched.";
+    }
+
+    if(you.total>them.total){
+      cls=" good";
+      msg="You take it "+you.total+" to "+them.total+"."+(nDef?" The shadow did the heavy lifting.":"");
+    } else if(you.total===them.total){
+      msg="Dead even at "+you.total+". One Cell decides it.";
+    } else {
+      cls=" warn";
+      msg="They take it "+them.total+" to "+you.total+".";
+      if(them.total-you.total<=RING.low.tele) msg+=" One low-ring Cell short. Ouch.";
+      else if(!nDef) msg+=" Their star is untouched. Think about who could slow it down.";
+    }
+    verdictEl.className="verdict"+cls;
+    verdictTxt.textContent=msg;
+
+    lastComplete=true; lastKeys=picked.slice(); lastYou=you.total; lastThem=them.total;
+    seenCount=Object.keys(seenTrios).length;
+  }
+
+  picksEl.addEventListener("click",function(e){
+    var b=e.target.closest(".pbtn"); if(!b) return;
+    var k=b.getAttribute("data-key"), i=picked.indexOf(k);
+    if(i>=0){ picked.splice(i,1); }
+    else if(picked.length<3){ picked.push(k); }
+    else {
+      verdictEl.className="verdict";
+      verdictTxt.textContent="Only three robots take the floor. Bench one first.";
+      return;
+    }
+    render();
+  });
+  document.getElementById("resetSim").addEventListener("click",function(){
+    picked=[]; render();
+  });
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+    var MKEY="frc:missions", GKEY="frc:gold", mPage=location.pathname.split("/").pop();
+    var mSaved={}, mGold={};
+    try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+    try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+    var mItems={};
+    Array.prototype.forEach.call(document.querySelectorAll("#missions .m-item"),function(n){ mItems[n.getAttribute("data-m")]=n; });
+    function mMark(n){ n.classList.add("cleared"); n.querySelector(".m-st").textContent=n.classList.contains("gold")?"★":"✓"; }
+    function mClear(id){
+      var n=mItems[id]; if(!n||n.classList.contains("cleared"))return;
+      mMark(n);
+      var gold=n.classList.contains("gold");
+      var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+      map[mPage+"#"+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+    }
+    Object.keys(mItems).forEach(function(id){
+      if((mItems[id].classList.contains("gold")?mGold:mSaved)[mPage+"#"+id]) mMark(mItems[id]);
+    });
+    setInterval(function(){
+      try{
+        if(lastComplete&&lastKeys.slice().sort().join("+")==="allround+feeder+scorer") mClear("offense");
+        if(lastComplete&&lastYou>lastThem) mClear("beat");
+        if(seenCount>=4) mClear("scout");
+        if(lastComplete&&lastYou>lastThem&&lastKeys.indexOf("scorer")<0) mClear("gold");
+      }catch(e){}
+    },200);
+  }catch(e){}
+
+  render();
+})();
+</script>
+<script>
+(function(){
+  "use strict";
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong');
+      try{ var why=opt.getAttribute('data-why');
+        if(why){ var wl=opt.nextElementSibling; if(!wl||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.insertAdjacentElement('afterend',wl); } wl.textContent=why; }
+      }catch(e){} } }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  // auto-mark this lesson complete in the hub once its quiz is finished
+  var KEY="gamesense:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then run the sim
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain');
+  var picked=-1, revealed=false, ran=false;
+  var demos=document.querySelectorAll('.demo');
+  var style=document.createElement('style');
+  style.textContent='#predict .opt.picked{border-color:var(--rose,#FF8FB5);box-shadow:0 0 0 2px rgba(255,143,181,.22)}';
+  document.head.appendChild(style);
+  var note=document.createElement('div');
+  note.style.cssText='display:none;font-size:13px;color:#92A2BE;margin-top:10px;font-style:italic';
+  q.appendChild(note);
+  function optText(i){ var t=(opts[i].textContent||'').trim(); return t.length>70 ? t.slice(0,67)+'...' : t; }
+  function reveal(){ if(revealed||picked<0) return; revealed=true;
+    opts.forEach(function(o){o.classList.add('locked');});
+    try{var pr=JSON.parse(localStorage.getItem('frc:predict'))||{r:0,w:0};if(picked===correct){pr.r++;}else{pr.w++;}localStorage.setItem('frc:predict',JSON.stringify(pr));}catch(e){}
+    if(picked===correct){
+      opts[picked].classList.add('correct');
+      note.textContent='You called it. "'+optText(picked)+'" is exactly what happens. Here is why:';
+    } else {
+      opts[picked].classList.add('wrong'); opts[correct].classList.add('correct');
+      note.textContent='You predicted "'+optText(picked)+'". The sim went a different way - the green answer is what really happens, and the surprise is the part worth remembering. Here is why:';
+    }
+    note.style.display='block';
+    explain.classList.add('show'); }
+  function onRan(ev){ if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#predict')) return; ran=true; if(picked>=0) reveal(); }
+  if(demos.length){
+    Array.prototype.forEach.call(demos,function(d){
+      d.addEventListener('pointerdown',onRan,true);
+      d.addEventListener('input',onRan,true);
+    });
+    window.addEventListener('keydown',onRan,true);
+  } else { ran=true; }
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(revealed)return; picked=i;
+    opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
+    if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
+})();
+</script>
+<script src="account-config.js"></script>
+<script src="account.js"></script>
+</body>
+</html>

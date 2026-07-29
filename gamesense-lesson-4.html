@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Game Sense · Lesson 4 - Ranking Points</title>
+<script src="gamesense-data.js"></script>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --rose:#FF8FB5;    /* Game Sense accent */
+    --amber:#FFB020;
+    --teal:#34D7C5;
+    --indigo:#8E8CF8;
+    --red:#FF6B6B;
+    --green:#43D67E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+    --maxw:1160px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ink); color:var(--text);
+    font-family:var(--sans); font-size:17px; line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(900px 500px at 80% -10%, rgba(255,143,181,.06), transparent 60%),
+      radial-gradient(700px 500px at -10% 10%, rgba(142,140,248,.05), transparent 55%);
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--rose);box-shadow:0 0 12px var(--rose)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--rose)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--rose),var(--indigo));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:46ch;margin-top:6px}
+
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--rose);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  p .sub,.sub{color:var(--muted)}
+  .lead{font-size:19px}
+  em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--rose);font-weight:600;font-size:.94em}
+
+  .formula{font-family:var(--mono);background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:18px 20px;margin:20px 0;font-size:18px;overflow-x:auto;color:#cfe;text-align:center}
+  .formula .small{display:block;font-size:13px;color:var(--muted);margin-top:8px}
+  .formula b{color:var(--rose)} .formula .t{color:var(--amber)}
+
+  /* term chips */
+  .terms{display:grid;gap:12px;margin:22px 0 6px}
+  @media(min-width:560px){.terms{grid-template-columns:repeat(3,1fr)}}
+  .term{border:1px solid var(--line);border-radius:10px;padding:14px 15px;background:var(--panel);border-top:2px solid var(--accent,var(--rose))}
+  .term h4{margin:0 0 4px;font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent,var(--rose))}
+  .term p{margin:0;font-size:14.5px;color:var(--muted);line-height:1.45}
+  .term .big{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--text);margin:2px 0 6px}
+
+  /* interactive panel */
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .simgrid{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line)}
+  @media(min-width:760px){.simgrid{grid-template-columns:1.08fr 1fr}}
+  .simcell{background:#0B1322;padding:14px 16px}
+  .sc-head{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin-bottom:10px}
+
+  .tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+  .tbtn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:12px;letter-spacing:.06em;min-height:32px;padding:5px 11px;border-radius:8px;cursor:pointer;transition:.12s}
+  .tbtn:hover{border-color:var(--rose);color:var(--text)}
+  .tbtn.on{background:var(--rose);border-color:var(--rose);color:#2a0714;font-weight:700}
+
+  .ed-name{font-size:15px;font-weight:650;color:var(--text);margin-bottom:6px}
+  .ed-name span{font-family:var(--mono);font-size:12px;color:var(--rose);font-weight:600}
+  .mrow{display:flex;align-items:center;gap:7px;padding:6px 0;flex-wrap:wrap}
+  .mq{font-family:var(--mono);font-size:11px;color:var(--faint);width:22px;flex:0 0 auto}
+  .seg{display:inline-flex;border:1px solid var(--line-2);border-radius:8px;overflow:hidden;flex:0 0 auto}
+  .segb{border:none;background:var(--panel-2);color:var(--faint);font-family:var(--mono);font-size:12.5px;width:34px;height:32px;cursor:pointer;transition:.12s}
+  .segb+.segb{border-left:1px solid var(--line-2)}
+  .segb.w.on{background:rgba(67,214,126,.2);color:var(--green);font-weight:700}
+  .segb.t.on{background:rgba(255,176,32,.2);color:var(--amber);font-weight:700}
+  .segb.l.on{background:rgba(255,107,107,.18);color:var(--red);font-weight:700}
+  .togl{border:1px solid var(--line-2);background:var(--panel-2);color:var(--faint);font-family:var(--mono);font-size:11px;height:32px;padding:0 9px;border-radius:8px;cursor:pointer;transition:.12s;flex:0 0 auto}
+  .togl.e.on{border-color:var(--amber);color:var(--amber);background:rgba(255,176,32,.12)}
+  .togl.h.on{border-color:var(--teal);color:var(--teal);background:rgba(52,215,197,.12)}
+  .mrp{margin-left:auto;font-family:var(--mono);font-size:12.5px;color:var(--rose);min-width:44px;text-align:right}
+  .edlegend{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-top:10px;letter-spacing:.04em;line-height:1.7}
+  .edlegend b.e{color:var(--amber);font-weight:600} .edlegend b.h{color:var(--teal);font-weight:600}
+
+  .standwrap{overflow-x:auto}
+  table.stand{width:100%;border-collapse:collapse;font-size:13.5px;min-width:290px}
+  .stand th{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);text-align:left;padding:4px 8px;border-bottom:1px solid var(--line);font-weight:600}
+  .stand th.r,.stand td.rp{text-align:right}
+  .stand td{padding:8px;border-bottom:1px solid var(--line);color:var(--muted)}
+  .stand td.rk{font-family:var(--mono);color:var(--faint);width:26px}
+  .stand td.tm{color:var(--text);white-space:nowrap} .stand td.tm span{color:var(--muted);font-size:12.5px}
+  .stand td.rec{font-family:var(--mono);font-size:12.5px;white-space:nowrap}
+  .stand td.bn{font-family:var(--mono);color:var(--amber);font-size:12.5px}
+  .stand td.rp{font-family:var(--mono);color:var(--rose);font-weight:700;font-size:15px}
+  .stand tr.seed1 td{background:rgba(255,143,181,.07)}
+  .stand tr.seed1 td.rk{color:var(--rose);font-weight:700}
+  @keyframes rowflash{0%{background:rgba(255,143,181,.25)}100%{background:transparent}}
+  .stand tr.moved td{animation:rowflash 1s ease-out}
+
+  .controls{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--rose);color:var(--text)}
+  .btn.primary{background:linear-gradient(180deg,#FFB6CE,var(--rose));color:#2a0714;font-weight:700;border:none}
+
+  .verdict{padding:12px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--muted);display:flex;align-items:center;gap:10px}
+  .verdict .dotv{width:9px;height:9px;border-radius:50%;background:var(--faint);flex:0 0 auto}
+  .verdict.good .dotv{background:var(--green);box-shadow:0 0 10px var(--green)} .verdict.good{color:var(--green)}
+  .verdict.warn .dotv{background:var(--rose);box-shadow:0 0 10px var(--rose)} .verdict.warn{color:var(--rose)}
+
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--rose);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--rose);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+
+  /* shared callout pattern */
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.rose{border-color:var(--rose);background:rgba(255,143,181,.06)} .note.rose .nh{color:var(--rose)}
+
+  /* quiz */
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)}
+  .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--rose);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7}
+  .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .whyline{margin:2px 0 4px;font-size:13.5px;color:var(--muted);border-left:2px solid var(--red);background:rgba(255,107,107,.05);padding:5px 12px;border-radius:0 8px 8px 0}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--rose);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  /* recap */
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px}
+  @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px}
+  .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--rose);min-width:130px;text-transform:uppercase}
+  .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(142,140,248,0.1),transparent 70%)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--indigo)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)}
+  .next code{font-family:var(--mono);background:var(--panel-2);border:1px solid var(--line-2);padding:2px 8px;border-radius:5px;color:var(--rose);font-size:14px}
+
+  footer{padding:40px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--rose);color:var(--text)}
+  .coursenav a.map{border-color:transparent;color:var(--indigo)}
+
+  @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="gamesense.html"><span class="dot"></span><span class="name">Game Sense</span></a>
+    <div class="top-meta">Lesson 04 / 07 · Read the Game</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Lesson 04</b> Part 1 · Read the Game</div>
+    <div class="eyebrow">Ranking Points</div>
+    <h1>Lose the match,<br><span class="accent">climb the table</span>.</h1>
+    <p class="dek">Wins move you up the standings, but they are not the only thing that does. Meet the ranking point, the quiet number that decides who picks playoff partners first.</p>
+  </div>
+
+  <section>
+    <div class="kicker">The standings</div>
+    <h2>One long weekend, one big table</h2>
+    <p class="lead">A tournament is not one match. It is a stack of them.</p>
+    <p>Through the qualification rounds, every team plays the same number of matches, each time with a different random pair of partners. All weekend, one big table quietly sorts every team at the event: the <strong>standings</strong>. Your row in that table is your <strong>seed</strong>, and it matters more than any single match, because when qualifications end, the top seeds take turns choosing their playoff partners. Seed high and you pick. Seed low and you hope to be picked.</p>
+    <p>What moves you up the table is not wins. It is <strong>ranking points</strong>, RP for short. In ORBIT, a win pays <span class="k" data-ob="winRP"></span> RP, a tie pays <span class="k" data-ob="tieRP"></span>, and a loss pays <span class="k" data-ob="lossRP"></span>. So far that sounds like every sport you know: win days, collect points, lead the series.</p>
+    <p>Here is where it stops sounding like every sport you know.</p>
+  </section>
+
+  <section>
+    <div class="kicker">The twist</div>
+    <h2>Points for doing it right</h2>
+    <p>Game designers want robots practicing the hard skills all season, not just squeaking out wins. So they attach ranking points to <em>accomplishments</em>, things your alliance does during a match that pay off in the standings whether you win or lose. ORBIT has two:</p>
+    <div class="terms">
+      <div class="term" style="--accent:var(--rose)">
+        <h4>Result</h4>
+        <div class="big"><span data-ob="winRP"></span> / <span data-ob="tieRP"></span> / <span data-ob="lossRP"></span> RP</div>
+        <p>Win, tie, or lose. The classic points, same as any league.</p>
+      </div>
+      <div class="term" style="--accent:var(--amber)">
+        <h4>⚡ <span data-ob="enName"></span></h4>
+        <div class="big">+<span data-ob="bonus"></span> RP</div>
+        <p>Your <span data-ob="enNote"></span>. Feed the Reactor enough and this point is yours.</p>
+      </div>
+      <div class="term" style="--accent:var(--teal)">
+        <h4>🤝 <span data-ob="haName"></span></h4>
+        <div class="big">+<span data-ob="bonus"></span> RP</div>
+        <p>All three <span data-ob="haNoteRest"></span>. The whole alliance comes home together.</p>
+      </div>
+    </div>
+    <p style="margin-top:16px">Read the fine print twice: the bonuses do not care who won. Score at least <span class="k" data-ob="enThresh"></span> Reactor points and <span data-ob="enName"></span> is yours, even in a loss. Get all three robots docked or balanced and <span data-ob="haName"></span> is yours, even in a loss.</p>
+  </section>
+
+  <section>
+    <div class="kicker">Do the math</div>
+    <h2>A loss that pays like a win</h2>
+    <div class="formula">
+      match RP = <b>result</b> + <span class="t">Energized</span> + <span class="t">Harmony</span>
+      <span class="small">best possible match: win + both bonuses = <span data-ob="maxMatch"></span> RP · worst: plain loss = <span data-ob="lossRP"></span> RP</span>
+    </div>
+    <p>Now do the arithmetic that surprises almost everyone at their first event. Lose a match but grab both bonuses: <span class="k" data-ob="lossRP"></span> + <span class="k" data-ob="bonus"></span> + <span class="k" data-ob="bonus"></span> = <span class="k" data-ob="lossBoth"></span> RP. Win a match with no bonuses: <span class="k" data-ob="winRP"></span> RP. The same number. In the standings, that loss and that win are identical.</p>
+    <p>Think of a bike club's summer series. You get points for finishing near the front, sure, but the series also hands out points for riding every hill climb and for the whole crew finishing together. A rider who never wins a single Saturday can still lead the series by stacking up the steady points that the sprinters skip. RP standings work exactly like that, and teams that only chase wins get passed by teams that chase points.</p>
+  </section>
+
+  <section>
+    <div class="kicker">Try it</div>
+    <h2>You keep the standings</h2>
+    <p>Six made-up teams, four qualification matches each, and you are the scorekeeper. Pick a team, set each match to win, tie, or loss, and flip the two bonus toggles. The table re-sorts the instant anything changes. Break the standings, fix them, and see how far bonuses alone can carry a team.</p>
+
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="2">
+        <div class="qn">Predict first</div>
+        <div class="qt">Before you touch the standings: team A loses its match, but its alliance earned both Energized and Harmony. Team B wins its match with no bonuses. Who banked more ranking points from that one match?</div>
+        <div class="opts">
+          <button class="opt">Team B, and it is not close. A win beats a loss every time</button>
+          <button class="opt">Team A. Two bonuses must be worth more than one win</button>
+          <button class="opt">Dead even. They walk away with the same RP</button>
+        </div>
+        <div class="explain">A loss pays <span data-ob="lossRP"></span> RP on its own, but each bonus adds <span data-ob="bonus"></span> more, so team A banks <span data-ob="lossBoth"></span>. A plain win pays <span data-ob="winRP"></span>. Same number. Try it below: give one team a loss with both toggles on and watch it keep pace with a winner in the table.</div>
+      </div>
+    </div>
+
+    <div class="demo" id="demo">
+      <div class="demo-head">
+        <span class="demo-title">ORBIT · Qualification standings</span>
+        <span class="demo-tag">You are the scorekeeper</span>
+      </div>
+      <div class="simgrid">
+        <div class="simcell">
+          <div class="sc-head">Season editor · pick a team</div>
+          <div class="tabs" id="tabs"></div>
+          <div class="ed-name" id="edName"></div>
+          <div id="editor"></div>
+          <div class="edlegend">W / T / L = win, tie, loss · <b class="e">⚡ E</b> = <span data-ob="enName"></span> bonus (+<span data-ob="bonus"></span> RP) · <b class="h">🤝 H</b> = <span data-ob="haName"></span> bonus (+<span data-ob="bonus"></span> RP)</div>
+        </div>
+        <div class="simcell">
+          <div class="sc-head">Live standings · re-sorts as you edit</div>
+          <div class="standwrap">
+            <table class="stand">
+              <thead><tr><th>#</th><th>Team</th><th>W-T-L</th><th>Bonus</th><th class="r">RP</th></tr></thead>
+              <tbody id="standings"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="controls">
+        <button class="btn primary" id="randomize">🎲 Randomize season</button>
+        <button class="btn" id="resetSim">Reset</button>
+      </div>
+      <div class="verdict" id="verdict"><span class="dotv"></span><span id="verdictTxt">--</span></div>
+    </div>
+    <p class="caption">Each editor row is one team's own four matches. A real schedule shares matches between teams, but we untangle that here so you can watch the RP math by itself.</p>
+
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
+      <div class="m-item" data-m="harmony"><span class="m-st">○</span><span>Earn <b>Harmony</b>: pick any team, flip <b>🤝 H</b> on one of its matches, and watch its RP tick up by <span data-ob="bonus"></span> as the row shifts.</span></div>
+      <div class="m-item" data-m="maxmatch"><span class="m-st">○</span><span>Build one <b>perfect match</b>: a win plus Energized plus Harmony on the same match. That single match pays <span data-ob="maxMatch"></span> RP, the most ORBIT allows.</span></div>
+      <div class="m-item" data-m="underdog"><span class="m-st">○</span><span>Make an <b>underdog rise</b>: use the bonus toggles until some team sits strictly above another team that has <b>more wins</b>. More RP with fewer wins, not just a tiebreak.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> rebuild the season so the <b>1 seed is a team that lost two matches</b>. Then explain out loud how it happened. If you can say it, you own it.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Why it matters</div>
+    <h2>The last <span data-ob="endSec"></span> seconds change</h2>
+    <p>Once you see the standings this way, matches look different. A team cruising to a comfortable win should stop scoring and go balance, because winning by more pays nothing extra while <span data-ob="haName"></span> follows them into the standings. And a team getting soundly beaten is not out of things to play for: the bonuses are still on the table, and <span class="k" data-ob="lossBoth"></span> RP from a lost match is the same pay as a plain win. Good teams sprint hardest when they are losing.</p>
+    <div class="note rose">
+      <div class="nh">Fewer wins, higher seed</div>
+      <p>At a real event it is normal for the 2 seed to have more wins than the 1 seed. Nobody cheated. One team treated bonus RP like homework and turned it in every single match. If your sim standings ever look strange, read the bonus column before you read the win column.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="note rose">
+      <div class="nh">Going further &middot; optional</div>
+      <p>Two extras. First: real FRC standings rank by the <em>average</em> RP per match, called the ranking score, so a team that plays one fewer match is not punished. ORBIT uses totals because all six teams play the same four matches, which gives the same order with simpler math. Second, a strategy puzzle: it is the endgame, your alliance is losing by a lot and a comeback is not happening. You sit <span data-ob="highTele"></span> Reactor points short of the <span data-ob="enName"></span> line at <span data-ob="enThresh"></span>, and all three robots can reach the platform. What do you do with the time?</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">Send your fastest scorer for one more high-ring Cell. It is worth exactly <span data-ob="highTele"></span> points, which lands you on the <span data-ob="enName"></span> threshold, and "at least" means exactly enough counts. Meanwhile the other two robots head home and dock. But notice the trap: <span data-ob="haName"></span> needs all three robots docked or balanced, so the scorer's trip back matters as much as the Cell. If the clock only allows one bonus, take the one you can actually finish. Either way you leave a lost match carrying real RP, which is the whole reason this puzzle has a right answer.</p>
+      </details>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">Your alliance loses a qualification match, but you scored enough Reactor points for Energized and all three robots balanced for Harmony. How many RP do you walk away with?</div>
+        <div class="opts">
+          <button class="opt" data-why="It feels right because the scoreboard says you lost, but the bonus points never look at the scoreboard. That is the whole reason they exist.">None. A loss earns nothing</button>
+          <button class="opt"><span data-ob="lossBoth"></span> RP, the same as a plain win</button>
+          <button class="opt" data-why="That is what a tie pays. Bonuses are separate from the result: each one adds its own point on top of whatever the match result paid.">Just <span data-ob="tieRP"></span> RP, a point for coming close</button>
+        </div>
+        <div class="explain">The loss pays <span data-ob="lossRP"></span>, Energized adds <span data-ob="bonus"></span>, Harmony adds <span data-ob="bonus"></span>: <span data-ob="lossBoth"></span> RP total, identical to winning with no bonuses. That quiet arithmetic is what this whole lesson is about.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2 · From the sim</div>
+        <div class="qt">One team goes 4-0 with no bonuses. Another goes 2-2 but earns Energized and Harmony in every match. Who seeds higher?</div>
+        <div class="opts">
+          <button class="opt" data-why="It would in most sports, which is exactly why this one trips people. RP standings reward accomplishments every match, not just results.">The 4-0 team. An unbeaten record always tops the table</button>
+          <button class="opt" data-why="Close, because the lost matches do pay like plain wins. But the two won matches with bonuses pay even more, and that is what pulls ahead.">They land exactly even</button>
+          <button class="opt">The 2-2 team, <span data-ob="q2a"></span> RP to <span data-ob="q2b"></span></button>
+        </div>
+        <div class="explain">Two wins with both bonuses pay <span data-ob="maxMatch"></span> each and two losses with both bonuses pay <span data-ob="lossBoth"></span> each, so the 2-2 team totals <span data-ob="q2a"></span> RP. Four plain wins total <span data-ob="q2b"></span>. If you chased the gold mission, you watched a two-loss team take the 1 seed exactly this way.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">What earns the Energized ranking point in ORBIT?</div>
+        <div class="opts">
+          <button class="opt">The <span data-ob="enNote"></span></button>
+          <button class="opt" data-why="Margin of victory feels like it should matter, but no ORBIT bonus cares about the gap between the two scores, only about what your own alliance did.">Winning the match by <span data-ob="enThresh"></span> points or more</button>
+          <button class="opt" data-why="That one is Harmony, the other bonus. Easy to swap them: Energized is about the Reactor, Harmony is about the platform.">All three alliance robots dock or balance</button>
+        </div>
+        <div class="explain">Straight from the rules: the <span data-ob="enNote"></span>. It is about your alliance's own Reactor output, in a win or a loss, with no attention paid to the opponents' score.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 4</div>
+        <div class="qt">Why does your seed at the end of qualifications actually matter?</div>
+        <div class="opts">
+          <button class="opt" data-why="Quals do not crown anyone. The playoffs decide the winner. Seeding just sets up who gets to build the strongest playoff alliance.">The top seed is the event champion</button>
+          <button class="opt" data-why="Tempting, but playoff matches start dead even. A seed's power is spent before the first playoff match begins, in the picking order.">Higher seeds get bonus points in every playoff match</button>
+          <button class="opt">Higher seeds pick their playoff alliance partners first</button>
+        </div>
+        <div class="explain">The standings' whole job is to set alliance selection order. The 1 seed picks first from every robot at the event. How that picking works, and how to be ready for it, is where this course goes next.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Lesson 04 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Ranking point</b><span>The standings currency: result RP plus bonus RP, every qualification match.</span></div>
+        <div class="gl"><b>Energized</b><span>Bonus RP when your <span data-ob="enNote"></span>. Win or lose.</span></div>
+        <div class="gl"><b>Harmony</b><span>Bonus RP when all three <span data-ob="haNoteRest"></span>. Win or lose.</span></div>
+        <div class="gl"><b>Seed</b><span>Your row in the standings. High seeds pick playoff partners first.</span></div>
+        <div class="gl"><b>Tiebreaker</b><span>Equal on RP? Our sim sorts by wins next. Ties live in the table, not on the field.</span></div>
+        <div class="gl"><b>Qual match</b><span>The scheduled matches that set the standings. Every team plays the same number.</span></div>
+      </div>
+      <div class="next">
+        <div class="n-eyebrow">Up next · Lesson 05</div>
+        <h3>Robot Roles</h3>
+        <p style="margin-bottom:0">You can read the game now: the clock, the rules, the scoring math, the standings. Part 2 is about playing it, starting with the biggest question an alliance asks: what job should your robot actually do - scorer, feeder, or defender? Before you go, the <code>Part 1 Checkpoint</code> on the course map will bank everything you have read so far.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<nav class="coursenav">
+  <a href="gamesense-lesson-3.html">← Lesson 03 · Scoring Math</a>
+  <a class="map" href="gamesense.html">Course map</a>
+  <a href="gamesense-lesson-5.html">Lesson 05 · Robot Roles →</a>
+</nav>
+
+<footer>Game Sense · Reading and playing the FRC game</footer>
+
+<script>
+(function(){
+  "use strict";
+  var O=window.ORBIT, RP=O.rp;
+  var BONUS=RP.bonus; // each bonus accomplishment (Energized, Harmony) pays this many RP, win or lose
+
+  // ---- inject ORBIT numbers into the prose, so a rebalance edits one file ----
+  var V={
+    winRP:RP.win, tieRP:RP.tie, lossRP:RP.loss, bonus:BONUS,
+    maxMatch:RP.win+2*BONUS, lossBoth:RP.loss+2*BONUS,
+    enName:RP.energized.name, enNote:RP.energized.note, enThresh:RP.energized.threshold,
+    haName:RP.harmony.name,
+    haNoteRest:RP.harmony.note.replace(/^all three\s*/i,""),
+    highTele:O.scoring.rings.high.tele,
+    endSec:O.match.endgameSec,
+    q2a:2*(RP.win+2*BONUS)+2*(RP.loss+2*BONUS),
+    q2b:4*RP.win
+  };
+  document.querySelectorAll("[data-ob]").forEach(function(n){
+    var k=n.getAttribute("data-ob");
+    if(k in V) n.textContent=V[k];
+  });
+
+  // ---- the standings sim ----
+  var TEAMS=[
+    {num:314,  name:"Pi-oneers"},
+    {num:508,  name:"Night Owls"},
+    {num:627,  name:"Static"},
+    {num:1123, name:"Comets"},
+    {num:2048, name:"Gearhounds"},
+    {num:4415, name:"Moonshot"}
+  ];
+  function mk(r){ return {r:r,e:false,h:false}; }
+  function defaults(){
+    return [
+      [mk("W"),mk("W"),mk("W"),mk("L")],
+      [mk("W"),mk("W"),mk("L"),mk("L")],
+      [mk("W"),mk("L"),mk("W"),mk("L")],
+      [mk("W"),mk("L"),mk("L"),mk("T")],
+      [mk("W"),mk("L"),mk("L"),mk("L")],
+      [mk("T"),mk("T"),mk("L"),mk("L")]
+    ];
+  }
+  var season=defaults(), sel=0, prevOrder=null;
+
+  function matchRP(m){
+    var base=m.r==="W"?RP.win:(m.r==="T"?RP.tie:RP.loss);
+    return base+(m.e?BONUS:0)+(m.h?BONUS:0);
+  }
+  function teamStats(i){
+    var w=0,t=0,l=0,rp=0,bn=0;
+    season[i].forEach(function(m){
+      if(m.r==="W")w++; else if(m.r==="T")t++; else l++;
+      rp+=matchRP(m); if(m.e)bn+=BONUS; if(m.h)bn+=BONUS;
+    });
+    return {i:i,num:TEAMS[i].num,name:TEAMS[i].name,w:w,t:t,l:l,rp:rp,bn:bn};
+  }
+  function standings(){
+    var st=TEAMS.map(function(_,i){ return teamStats(i); });
+    st.sort(function(a,b){ return b.rp-a.rp || b.w-a.w || a.num-b.num; });
+    return st;
+  }
+  function hasUnderdog(st){
+    for(var a=0;a<st.length;a++)
+      for(var b=a+1;b<st.length;b++)
+        if(st[a].rp>st[b].rp && st[a].w<st[b].w) return true;
+    return false;
+  }
+
+  var tabsEl=document.getElementById("tabs"),
+      edEl=document.getElementById("editor"),
+      edName=document.getElementById("edName"),
+      bodyEl=document.getElementById("standings"),
+      verdictEl=document.getElementById("verdict"),
+      verdictTxt=document.getElementById("verdictTxt");
+
+  function edHTML(){
+    return season[sel].map(function(m,mi){
+      return '<div class="mrow">'+
+        '<span class="mq">Q'+(mi+1)+'</span>'+
+        '<span class="seg" role="group" aria-label="Match '+(mi+1)+' result">'+
+          '<button class="segb w'+(m.r==="W"?" on":"")+'" data-mi="'+mi+'" data-act="W" aria-label="Win">W</button>'+
+          '<button class="segb t'+(m.r==="T"?" on":"")+'" data-mi="'+mi+'" data-act="T" aria-label="Tie">T</button>'+
+          '<button class="segb l'+(m.r==="L"?" on":"")+'" data-mi="'+mi+'" data-act="L" aria-label="Loss">L</button>'+
+        '</span>'+
+        '<button class="togl e'+(m.e?" on":"")+'" data-mi="'+mi+'" data-act="e" title="'+V.enName+' bonus">⚡ E</button>'+
+        '<button class="togl h'+(m.h?" on":"")+'" data-mi="'+mi+'" data-act="h" title="'+V.haName+' bonus">🤝 H</button>'+
+        '<span class="mrp">'+matchRP(m)+' RP</span>'+
+      '</div>';
+    }).join("");
+  }
+
+  function render(){
+    var i;
+    var th="";
+    for(i=0;i<TEAMS.length;i++) th+='<button class="tbtn'+(i===sel?" on":"")+'" data-t="'+i+'">'+TEAMS[i].num+'</button>';
+    tabsEl.innerHTML=th;
+
+    edEl.innerHTML=edHTML();
+
+    var st=standings(), seed=1, mine=null;
+    for(i=0;i<st.length;i++) if(st[i].i===sel){ seed=i+1; mine=st[i]; }
+    edName.innerHTML=TEAMS[sel].num+" "+TEAMS[sel].name+' <span>· seed '+seed+' · '+mine.rp+' RP</span>';
+
+    var rows="";
+    for(i=0;i<st.length;i++){
+      var s=st[i], moved=prevOrder&&prevOrder[i]!==s.num;
+      rows+='<tr class="'+(i===0?"seed1":"")+(moved?" moved":"")+'">'+
+        '<td class="rk">'+(i+1)+'</td>'+
+        '<td class="tm">'+s.num+' <span>'+s.name+'</span></td>'+
+        '<td class="rec">'+s.w+'-'+s.t+'-'+s.l+'</td>'+
+        '<td class="bn">'+(s.bn?("+"+s.bn):"&middot;")+'</td>'+
+        '<td class="rp">'+s.rp+'</td></tr>';
+    }
+    bodyEl.innerHTML=rows;
+    prevOrder=st.map(function(s){ return s.num; });
+
+    var top=st[0], cls="", msg;
+    if(top.l>=2){ cls=" good"; msg="1 seed "+top.num+" "+top.name+" lost "+top.l+" matches and still leads. That is bonus RP at work."; }
+    else if(hasUnderdog(st)){ cls=" warn"; msg="A team with fewer wins now out-ranks one with more. The bonuses are talking."; }
+    else { msg="1 seed: "+top.num+" "+top.name+" &middot; "+top.rp+" RP &middot; record "+top.w+"-"+top.t+"-"+top.l; }
+    verdictEl.className="verdict"+cls;
+    verdictTxt.innerHTML=msg;
+  }
+
+  tabsEl.addEventListener("click",function(e){
+    var b=e.target.closest(".tbtn"); if(!b) return;
+    sel=parseInt(b.getAttribute("data-t"),10); render();
+  });
+  edEl.addEventListener("click",function(e){
+    var b=e.target.closest("[data-act]"); if(!b) return;
+    var mi=parseInt(b.getAttribute("data-mi"),10), act=b.getAttribute("data-act");
+    var m=season[sel][mi];
+    if(act==="e") m.e=!m.e;
+    else if(act==="h") m.h=!m.h;
+    else m.r=act;
+    render();
+  });
+  document.getElementById("randomize").addEventListener("click",function(){
+    season=TEAMS.map(function(){
+      return [0,1,2,3].map(function(){
+        var x=Math.random(), r=x<0.45?"W":(x<0.55?"T":"L");
+        return {r:r,e:Math.random()<0.35,h:Math.random()<0.28};
+      });
+    });
+    render();
+  });
+  document.getElementById("resetSim").addEventListener("click",function(){
+    season=defaults(); prevOrder=null; render();
+  });
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+    var MKEY="frc:missions", GKEY="frc:gold", mPage=location.pathname.split("/").pop();
+    var mSaved={}, mGold={};
+    try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+    try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+    var mItems={};
+    Array.prototype.forEach.call(document.querySelectorAll("#missions .m-item"),function(n){ mItems[n.getAttribute("data-m")]=n; });
+    function mMark(n){ n.classList.add("cleared"); n.querySelector(".m-st").textContent=n.classList.contains("gold")?"★":"✓"; }
+    function mClear(id){
+      var n=mItems[id]; if(!n||n.classList.contains("cleared"))return;
+      mMark(n);
+      var gold=n.classList.contains("gold");
+      var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+      map[mPage+"#"+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+    }
+    Object.keys(mItems).forEach(function(id){
+      if((mItems[id].classList.contains("gold")?mGold:mSaved)[mPage+"#"+id]) mMark(mItems[id]);
+    });
+    setInterval(function(){
+      try{
+        var anyH=false, anyMax=false;
+        season.forEach(function(ms){ ms.forEach(function(m){
+          if(m.h) anyH=true;
+          if(m.r==="W"&&m.e&&m.h) anyMax=true;
+        });});
+        var st=standings();
+        if(anyH) mClear("harmony");
+        if(anyMax) mClear("maxmatch");
+        if(hasUnderdog(st)) mClear("underdog");
+        if(st[0].l>=2) mClear("gold");
+      }catch(e){}
+    },200);
+  }catch(e){}
+
+  render();
+})();
+</script>
+<script>
+(function(){
+  "use strict";
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong');
+      try{ var why=opt.getAttribute('data-why');
+        if(why){ var wl=opt.nextElementSibling; if(!wl||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.insertAdjacentElement('afterend',wl); } wl.textContent=why; }
+      }catch(e){} } }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  // auto-mark this lesson complete in the hub once its quiz is finished
+  var KEY="gamesense:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then run the sim
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain');
+  var picked=-1, revealed=false, ran=false;
+  var demos=document.querySelectorAll('.demo');
+  var style=document.createElement('style');
+  style.textContent='#predict .opt.picked{border-color:var(--rose,#FF8FB5);box-shadow:0 0 0 2px rgba(255,143,181,.22)}';
+  document.head.appendChild(style);
+  var note=document.createElement('div');
+  note.style.cssText='display:none;font-size:13px;color:#92A2BE;margin-top:10px;font-style:italic';
+  q.appendChild(note);
+  function optText(i){ var t=(opts[i].textContent||'').trim(); return t.length>70 ? t.slice(0,67)+'...' : t; }
+  function reveal(){ if(revealed||picked<0) return; revealed=true;
+    opts.forEach(function(o){o.classList.add('locked');});
+    try{var pr=JSON.parse(localStorage.getItem('frc:predict'))||{r:0,w:0};if(picked===correct){pr.r++;}else{pr.w++;}localStorage.setItem('frc:predict',JSON.stringify(pr));}catch(e){}
+    if(picked===correct){
+      opts[picked].classList.add('correct');
+      note.textContent='You called it. "'+optText(picked)+'" is exactly what happens. Here is why:';
+    } else {
+      opts[picked].classList.add('wrong'); opts[correct].classList.add('correct');
+      note.textContent='You predicted "'+optText(picked)+'". The sim went a different way - the green answer is what really happens, and the surprise is the part worth remembering. Here is why:';
+    }
+    note.style.display='block';
+    explain.classList.add('show'); }
+  function onRan(ev){ if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#predict')) return; ran=true; if(picked>=0) reveal(); }
+  if(demos.length){
+    Array.prototype.forEach.call(demos,function(d){
+      d.addEventListener('pointerdown',onRan,true);
+      d.addEventListener('input',onRan,true);
+    });
+    window.addEventListener('keydown',onRan,true);
+  } else { ran=true; }
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(revealed)return; picked=i;
+    opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
+    if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
+})();
+</script>
+<script src="account-config.js"></script>
+<script src="account.js"></script>
+</body>
+</html>

@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Game Sense · Lesson 3 - Scoring Math</title>
+<script src="gamesense-data.js"></script>
+<style>
+  :root{
+    --ink:#0E1525; --panel:#161E30; --panel-2:#1B2540; --line:#26324A; --line-2:#33415e;
+    --text:#E7ECF6; --muted:#92A2BE; --faint:#5E6F8E;
+    --rose:#ff8fb5;    /* course accent */
+    --amber:#FFB020;   /* values / highlights */
+    --teal:#34D7C5;    /* Robot A */
+    --indigo:#8E8CF8;  /* Robot B */
+    --red:#FF6B6B;     /* wrong / short */
+    --green:#43D67E;   /* correct */
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+    --maxw:1160px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ink); color:var(--text);
+    font-family:var(--sans); font-size:17px; line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(900px 500px at 80% -10%, rgba(255,143,181,.06), transparent 60%),
+      radial-gradient(700px 500px at -10% 10%, rgba(142,140,248,.05), transparent 55%);
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+  header.top{border-bottom:1px solid var(--line);background:rgba(14,21,37,0.6);backdrop-filter:blur(6px)}
+  .top-inner{max-width:880px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--rose);box-shadow:0 0 12px var(--rose)}
+  .brand .name{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:.12s}
+  .brand:hover .name{color:var(--text)}
+  .top-meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+
+  .hero{padding:64px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .lesson-no{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  .lesson-no b{color:var(--text);background:var(--panel-2);border:1px solid var(--line-2);padding:3px 9px;border-radius:5px;letter-spacing:.1em}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:.1em 0 .35em;letter-spacing:-.035em;font-weight:850}
+  h1 .accent{background:linear-gradient(90deg,var(--rose),var(--indigo));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dek{font-size:clamp(17px,2.4vw,20px);color:var(--text);max-width:46ch;margin-top:6px}
+
+  section{padding:30px 0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--rose);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--line-2)}
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 .5em;font-weight:820}
+  p{margin:0 0 16px;color:var(--text);font-size:17px}
+  p .sub,.sub{color:var(--muted)}
+  .lead{font-size:19px}
+  em{color:var(--text)}
+  .k{font-family:var(--mono);color:var(--amber);font-weight:600;font-size:.94em}
+
+  .formula{font-family:var(--mono);background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:18px 20px;margin:20px 0;font-size:18px;overflow-x:auto;color:#cfe;text-align:center}
+  .formula .small{display:block;font-size:13px;color:var(--muted);margin-top:8px}
+  .formula b{color:var(--amber)} .formula .t{color:var(--rose)}
+
+  /* term chips */
+  .terms{display:grid;gap:12px;margin:22px 0 6px}
+  @media(min-width:560px){.terms{grid-template-columns:repeat(3,1fr)}}
+  .term{border:1px solid var(--line);border-radius:10px;padding:14px 15px;background:var(--panel);border-top:2px solid var(--accent,var(--rose))}
+  .term h4{margin:0 0 4px;font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent,var(--rose))}
+  .term p{margin:0;font-size:14.5px;color:var(--muted);line-height:1.45}
+  .term p b{color:var(--text)}
+
+  /* interactive panel */
+  .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--panel),#11192B);box-shadow:0 24px 60px -30px rgba(0,0,0,0.8)}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(255,255,255,0.012) 6px,rgba(255,255,255,0.012) 7px)}
+  .demo-head.planhead{border-top:1px solid var(--line)}
+  .demo-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .demo-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+
+  .duel{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line)}
+  @media(min-width:640px){.duel{grid-template-columns:1fr 1fr}}
+  .robo{background:#0B1322;padding:16px}
+  .r-name{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+  .r-name::before{content:"";width:8px;height:8px;border-radius:50%}
+  .r-name.a{color:var(--teal)} .r-name.a::before{background:var(--teal);box-shadow:0 0 8px var(--teal)}
+  .r-name.b{color:var(--indigo)} .r-name.b::before{background:var(--indigo);box-shadow:0 0 8px var(--indigo)}
+  .r-grp{margin-bottom:13px}
+  .r-lab{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-bottom:6px}
+  .rbtns{display:flex;gap:8px;flex-wrap:wrap}
+  .rbtn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.04em;padding:8px 11px;border-radius:8px;cursor:pointer;transition:.12s;min-height:32px}
+  .rbtn:hover{border-color:var(--muted);color:var(--text)}
+  .rbtn.on{background:var(--rose);border-color:var(--rose);color:#2b0917;font-weight:700}
+  .rbtn .rb-p{opacity:.85;margin-left:4px}
+  .slider-group{display:flex;flex-direction:column;gap:6px}
+  .slider-group label{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+  .slider-group label .val{color:var(--amber)}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:5px;border-radius:5px;background:var(--line-2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--amber);cursor:pointer;box-shadow:0 0 10px -1px var(--amber)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--amber);cursor:pointer}
+  .r-ros{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:9px;overflow:hidden;margin-top:2px}
+  .ro{background:#0F1728;padding:10px 12px}
+  .ro .k2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ro .v{font-family:var(--mono);font-size:19px;font-weight:600;margin-top:3px;color:var(--text)}
+  .ro .v.amber{color:var(--amber)} .ro .v.teal{color:var(--teal)} .ro .v.indigo{color:var(--indigo)}
+  .r-math{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:10px}
+  .r-bar{height:7px;border-radius:5px;background:var(--line-2);overflow:hidden;margin-top:9px}
+  .r-bar i{display:block;height:100%;width:0;border-radius:5px;transition:width .25s ease}
+  #barA{background:var(--teal)} #barB{background:var(--indigo)}
+
+  .verdict{padding:12px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:12.5px;letter-spacing:.05em;color:var(--muted);display:flex;align-items:center;gap:10px}
+  .verdict .dotv{width:9px;height:9px;border-radius:50%;background:var(--faint);flex:0 0 auto}
+  .verdict.a{color:var(--teal)} .verdict.a .dotv{background:var(--teal);box-shadow:0 0 10px var(--teal)}
+  .verdict.b{color:var(--indigo)} .verdict.b .dotv{background:var(--indigo);box-shadow:0 0 10px var(--indigo)}
+  .verdict.tie{color:var(--amber)} .verdict.tie .dotv{background:var(--amber);box-shadow:0 0 10px var(--amber)}
+  .verdict.good{color:var(--green)} .verdict.good .dotv{background:var(--green);box-shadow:0 0 10px var(--green)}
+  .verdict.bad{color:var(--red)} .verdict.bad .dotv{background:var(--red);box-shadow:0 0 10px var(--red)}
+
+  .planner{padding:14px 16px}
+  .plan-row{display:grid;gap:12px;grid-template-columns:1fr}
+  @media(min-width:640px){.plan-row{grid-template-columns:1fr 1fr 1fr}}
+  .plan-slot label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-bottom:6px}
+  .plan-slot select{width:100%;background:var(--panel-2);border:1px solid var(--line-2);color:var(--text);font-family:var(--mono);font-size:12.5px;padding:10px;border-radius:8px;min-height:40px;cursor:pointer}
+  .plan-pts{display:block;font-family:var(--mono);font-size:11.5px;color:var(--faint);margin-top:6px}
+  .plan-pts.on{color:var(--teal)}
+
+  .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--rose);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--rose);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+  .hand-row{display:inline-flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap}
+  .hand-in{width:88px;min-height:32px;background:var(--panel-2);border:1px solid var(--line-2);color:var(--text);font-family:var(--mono);font-size:13.5px;border-radius:7px;padding:5px 8px;text-align:center;outline:none}
+  .hand-in:focus{border-color:var(--amber);box-shadow:0 0 0 3px rgba(255,176,32,.2)}
+  .hand-btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:8px 13px;border-radius:8px;cursor:pointer;transition:.12s;min-height:32px}
+  .hand-btn:hover{border-color:var(--rose);color:var(--text)}
+  .hand-fb{font-family:var(--mono);font-size:12px}
+  .hand-fb.ok{color:var(--green)} .hand-fb.no{color:var(--red)}
+
+  /* shared callout pattern */
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
+  .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .note p{margin:0;color:var(--text);font-size:16px}
+  .note.rose{border-color:var(--rose);background:rgba(255,143,181,.06)} .note.rose .nh{color:var(--rose)}
+
+  /* quiz */
+  .quiz{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .q{padding:18px 18px;border-bottom:1px solid var(--line)}
+  .q:last-child{border-bottom:none}
+  .q .qn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+  .q .qt{font-size:16.5px;color:var(--text);margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);padding:11px 14px;border-radius:9px;cursor:pointer;font-size:15px;font-family:var(--sans);transition:.12s}
+  .opt:hover{border-color:var(--muted)}
+  .opt.correct{border-color:var(--green);background:rgba(67,214,126,.12);color:var(--text)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:var(--text)}
+  .opt.locked{cursor:default;opacity:.7}
+  .opt.locked.correct,.opt.locked.wrong{opacity:1}
+  .whyline{margin:2px 0 4px;font-size:13.5px;color:var(--muted);border-left:2px solid var(--red);background:rgba(255,107,107,.05);padding:5px 12px;border-radius:0 8px 8px 0}
+  .explain{margin-top:12px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--rose);padding:4px 0 4px 13px;display:none}
+  .explain.show{display:block}
+
+  /* recap */
+  .recap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),#11192B);padding:22px}
+  .recap h3{margin:0 0 14px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .glossary{display:grid;gap:10px}
+  @media(min-width:560px){.glossary{grid-template-columns:1fr 1fr}}
+  .gl{display:flex;gap:10px;font-size:14.5px}
+  .gl b{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--rose);min-width:130px;text-transform:uppercase}
+  .gl span{color:var(--muted)}
+  .next{margin-top:18px;border:1px solid var(--line-2);border-radius:12px;padding:18px 20px;background:radial-gradient(600px 200px at 0% 0%,rgba(255,143,181,0.1),transparent 70%);display:block;text-decoration:none;transition:.14s}
+  a.next:hover{border-color:var(--rose);transform:translateY(-2px)}
+  .next .n-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--rose)}
+  .next h3{margin:6px 0 8px;font-size:20px;color:var(--text)}
+  .next p{margin-bottom:0;color:var(--muted);font-size:15.5px}
+
+  footer{padding:40px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+
+  .coursenav{max-width:880px;margin:34px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:24px 22px 4px}
+  .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
+  .coursenav a:hover{border-color:var(--rose);color:var(--text)}
+  .coursenav a.map{border-color:transparent;color:var(--indigo)}
+
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="gamesense.html"><span class="dot"></span><span class="name">Game Sense</span></a>
+    <div class="top-meta">Lesson 03 / 07 · Read the Game</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="lesson-no"><b>Lesson 03</b> Part 1 · Read the Game</div>
+    <div class="eyebrow">Scoring Math</div>
+    <h1>Count laps,<br><span class="accent">not vibes</span>.</h1>
+    <p class="dek">One stopwatch number tells you what a robot is really worth. Turn cycle time into points, and points into a plan your whole alliance can trust.</p>
+  </div>
+
+  <section>
+    <p class="lead">Strategy talk gets loud. Math settles it.</p>
+    <p>Watch any ORBIT match and one robot "looks fast" while another "looks clutch". Feelings are fun, but the scoreboard does not run on feelings. It runs on one repeating loop: a robot grabs a Cell, drives to the Reactor, scores it, and heads back for the next one. That loop is a <strong>cycle</strong>, and the seconds one loop takes is the robot's <strong>cycle time</strong>.</p>
+    <p>Think of a paper route on a bike. You do not guess how long the route takes. You time one lap of the block and multiply. Robots are the same. Teleop gives every robot the same <span class="k" id="sTele">135</span> seconds, so divide by the cycle time and you know exactly how many trips fit.</p>
+    <div class="formula">
+      cycles = <span class="t">teleop seconds</span> ÷ <b>cycle time</b>
+      <span class="small">always round down. a lap that ends at the buzzer with the Cell still on the robot scores nothing</span>
+    </div>
+    <p>So a robot with a quick 15 second lap finishes <span class="k" id="sEx1">9</span> full cycles, while a robot that dawdles for 27 seconds a lap manages only <span class="k" id="sEx2">5</span>. Nobody argued. Nobody guessed. The stopwatch did all the work.</p>
+  </section>
+
+  <section>
+    <div class="kicker">The currency</div>
+    <h2>A cycle is worth its ring</h2>
+    <p>Not every trip pays the same. In ORBIT the Reactor has three rings, and each one has its own price tag. Here they are, straight from the manual:</p>
+    <div class="terms">
+      <div class="term"><h4>Low ring</h4><p><b><span id="cLowT">2</span> points</b> per Cell in teleop, <b><span id="cLowA">4</span></b> in auto. Easy to reach, quick to feed.</p></div>
+      <div class="term"><h4>Mid ring</h4><p><b><span id="cMidT">5</span> points</b> per Cell in teleop, <b><span id="cMidA">10</span></b> in auto. The steady middle path.</p></div>
+      <div class="term"><h4>High ring</h4><p><b><span id="cHighT">8</span> points</b> per Cell in teleop, <b><span id="cHighA">16</span></b> in auto. Big pay, hard shot.</p></div>
+    </div>
+    <p>Notice auto pays double for the same ring, which is why teams fight so hard for those opening seconds. But here is the trap: "the high ring pays the most, so the high ring is best, right?" Not so fast. A ring is only as good as how quickly you can feed it. The number that actually settles arguments is the <strong>rate</strong>:</p>
+    <div class="formula">
+      points per second = <span class="t">ring points</span> ÷ <b>cycle time</b>
+      <span class="small">the one number that lets you compare any two robots, any two rings</span>
+    </div>
+    <p>Try it on two ORBIT regulars. A low-ring feeder scoring <span class="k" id="rLowP">2</span> points every <span class="k" id="rLowC">10</span> seconds earns about <span class="k" id="rateLow">0.20</span> points a second. A mid-ring all-arounder scoring <span class="k" id="rMidP">5</span> every <span class="k" id="rMidC">18</span> earns about <span class="k" id="rateMid">0.28</span>. The feeder looks busier, buzzing back and forth all match, but the slower robot is quietly out-earning it. Your eyes vote for hustle. The math votes for rate.</p>
+  </section>
+
+  <section>
+    <div class="kicker">The clock</div>
+    <h2>Spend the last seconds on purpose</h2>
+    <p>One more wrinkle before you get the calculator. The final <span class="k" id="s3Eg">30</span> seconds of teleop are the endgame, and the platform in your corner pays for how well you finish: <span class="k" id="s3Park">5</span> for a park, <span class="k" id="s3Dock">10</span> for a dock, <span class="k" id="s3Bal">20</span> for a full balance. Those seconds get spent either way, so spend them on purpose. A high-ring robot can squeeze about <span class="k" id="s3n">2</span> more cycles into that window, worth <span class="k" id="s3p">16</span> points. Or it can ride home and balance for <span class="k" id="s3Bal2">20</span>. Scoring to the buzzer <em>feels</em> right and pays worse.</p>
+    <p>And your robot's math never stands alone. An alliance is three robots, and their totals add. ORBIT even hands out a bonus <strong>ranking point</strong> called <strong>Energized</strong> when an alliance scores at least <span class="k" id="s3Thresh">40</span> Reactor points, meaning points from the rings themselves. Three ordinary robots with a plan can bank that RP every single match. Three great robots without a plan can miss it. That is why this lesson exists.</p>
+  </section>
+
+  <section>
+    <div class="kicker">Try it</div>
+    <h2>The cycle calculator</h2>
+    <p>Below, two robots play out an entire teleop with the plan you give them. Pick each robot's ring, drag its cycle time, choose how it spends the endgame, and the verdict updates live. Under that, the alliance planner adds three robots together and checks the Energized math for you.</p>
+
+    <div class="quiz predict" id="predict" style="margin:0 0 18px">
+      <div class="q" data-correct="2">
+        <div class="qn">Predict first</div>
+        <div class="qt">Robot A scores on the high ring (<span id="pdHigh">8</span> points) with <span id="pdCycA">14</span> second cycles. Robot B scores on the mid ring (<span id="pdMid">5</span> points) with faster <span id="pdCycB">10</span> second cycles. Both score all the way to the buzzer. Who wins teleop?</div>
+        <div class="opts">
+          <button class="opt">Robot B - a <span id="pdo0b">10</span> second lap beats a <span id="pdo0a">14</span> second lap, and speed wins</button>
+          <button class="opt">Nearly a tie - the bigger ring makes up for the slower lap almost exactly</button>
+          <button class="opt">Robot A - <span id="pdo2h">8</span> points every <span id="pdo2a">14</span> seconds is a better rate than <span id="pdo2m">5</span> every <span id="pdo2b">10</span></button>
+        </div>
+        <div class="explain">Rate decides it. Robot A earns about <span id="pxRateA">0.57</span> points a second while cycling, Robot B only <span id="pxRateB">0.50</span>, so over a full teleop A banks <span id="pxTotA">72</span> to B's <span id="pxTotB">65</span>. B finishes more trips and still loses, because each trip pays less. Now run the calculator with these exact settings and watch the totals land.</div>
+      </div>
+    </div>
+
+    <div class="demo" id="demo">
+      <div class="demo-head"><span class="demo-title">Cycle calculator · head to head</span><span class="demo-tag">live math</span></div>
+      <div class="duel">
+        <div class="robo">
+          <div class="r-name a">Robot A</div>
+          <div class="r-grp">
+            <span class="r-lab">Ring</span>
+            <div class="rbtns" id="ringA">
+              <button class="rbtn" data-ring="low">Low<span class="rb-p" data-rp="low"></span></button>
+              <button class="rbtn" data-ring="mid">Mid<span class="rb-p" data-rp="mid"></span></button>
+              <button class="rbtn" data-ring="high">High<span class="rb-p" data-rp="high"></span></button>
+            </div>
+          </div>
+          <div class="r-grp slider-group">
+            <label>Cycle time <span class="val" id="cycAVal">14 s</span></label>
+            <input type="range" id="cycA" min="6" max="30" step="1" value="14" />
+          </div>
+          <div class="r-grp">
+            <span class="r-lab">Endgame</span>
+            <div class="rbtns" id="egA">
+              <button class="rbtn" data-eg="cycle">Score to the buzzer</button>
+              <button class="rbtn" data-eg="balance">Balance <span class="rb-p" data-balp></span></button>
+            </div>
+          </div>
+          <div class="r-ros">
+            <div class="ro"><div class="k2">Cycles</div><div class="v" id="roCycA">9</div></div>
+            <div class="ro"><div class="k2">Pts / s</div><div class="v amber" id="roRateA">0.57</div></div>
+            <div class="ro"><div class="k2">Total</div><div class="v teal" id="roTotA">72</div></div>
+          </div>
+          <div class="r-math" id="mathA">9 × 8 pts + 0 endgame</div>
+          <div class="r-bar"><i id="barA"></i></div>
+        </div>
+        <div class="robo">
+          <div class="r-name b">Robot B</div>
+          <div class="r-grp">
+            <span class="r-lab">Ring</span>
+            <div class="rbtns" id="ringB">
+              <button class="rbtn" data-ring="low">Low<span class="rb-p" data-rp="low"></span></button>
+              <button class="rbtn" data-ring="mid">Mid<span class="rb-p" data-rp="mid"></span></button>
+              <button class="rbtn" data-ring="high">High<span class="rb-p" data-rp="high"></span></button>
+            </div>
+          </div>
+          <div class="r-grp slider-group">
+            <label>Cycle time <span class="val" id="cycBVal">10 s</span></label>
+            <input type="range" id="cycB" min="6" max="30" step="1" value="10" />
+          </div>
+          <div class="r-grp">
+            <span class="r-lab">Endgame</span>
+            <div class="rbtns" id="egB">
+              <button class="rbtn" data-eg="cycle">Score to the buzzer</button>
+              <button class="rbtn" data-eg="balance">Balance <span class="rb-p" data-balp></span></button>
+            </div>
+          </div>
+          <div class="r-ros">
+            <div class="ro"><div class="k2">Cycles</div><div class="v" id="roCycB">13</div></div>
+            <div class="ro"><div class="k2">Pts / s</div><div class="v amber" id="roRateB">0.50</div></div>
+            <div class="ro"><div class="k2">Total</div><div class="v indigo" id="roTotB">65</div></div>
+          </div>
+          <div class="r-math" id="mathB">13 × 5 pts + 0 endgame</div>
+          <div class="r-bar"><i id="barB"></i></div>
+        </div>
+      </div>
+      <div class="verdict" id="verdict"><span class="dotv"></span><span id="verdictTxt">--</span></div>
+      <div class="demo-head planhead"><span class="demo-title">Alliance planner · three robots, one plan</span><span class="demo-tag">Energized check</span></div>
+      <div class="planner">
+        <div class="plan-row">
+          <div class="plan-slot"><label for="p1">Robot 1</label><select id="p1"></select><span class="plan-pts" id="pp1">--</span></div>
+          <div class="plan-slot"><label for="p2">Robot 2</label><select id="p2"></select><span class="plan-pts" id="pp2">--</span></div>
+          <div class="plan-slot"><label for="p3">Robot 3</label><select id="p3"></select><span class="plan-pts" id="pp3">--</span></div>
+        </div>
+        <div class="verdict" style="border-top:none;padding-left:0;padding-right:0" id="planVerdict"><span class="dotv"></span><span id="planTxt">--</span></div>
+      </div>
+    </div>
+    <p class="caption">The planner counts teleop Reactor points only and has every robot save the last <span id="capEg">30</span> seconds to balance. Auto points would only push the total higher, so a plan that clears Energized here clears it on the field with room to spare.</p>
+
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this calculator - take them at your own pace</span></div>
+      <div class="m-item" data-m="beat"><span class="m-st">○</span><span>Leave both endgames on <b>Score to the buzzer</b>. Set <b>Robot A to the high ring at <span id="m1Cyc">14</span> s</b>, put <b>Robot B on the mid ring</b>, and hunt for a cycle time where B wins the verdict. It exists, and it is quicker than you might think.</span></div>
+      <div class="m-item" data-m="endgame"><span class="m-st">○</span><span>Keep Robot A on the high ring at <span id="m2Cyc">14</span> s and flip its endgame to <b>Balance</b>. It scores <span id="m2Lost">2</span> fewer Cells and its total goes up anyway. Watch it happen, then say why in your head.</span></div>
+      <div class="m-item" data-m="hand"><span class="m-st">○</span><span><b>Pencil time.</b> The All-arounder leaves its start zone in auto (+<span id="m3Leave">3</span>), scores one Cell in the mid ring while auto runs (+<span id="m3Auto">10</span>), then cycles the mid ring every <span id="m3Cyc">18</span> s until it heads home with <span id="m3Eg">30</span> s left and balances (+<span id="m3Bal">20</span>). Work out its full match score on paper, then check yourself:
+      <span class="hand-row"><input class="hand-in" id="handIn" type="number" inputmode="numeric" aria-label="your computed full match score"> <button class="hand-btn" id="handCheck">Check</button> <span class="hand-fb" id="handFb"></span></span></span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> in the alliance planner, build a 3-robot plan that clears Energized (<span id="mThresh">40</span>+ Reactor points) while one robot plays <b>full-time defense</b>. Yes, it can be done.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Why it matters</div>
+    <h2>The stopwatch beats the highlight reel</h2>
+    <p>Everything you just did with sliders works at a real event with a phone. Time three of a robot's cycles from the stands, average them, and you know its rate. Do that for six robots and you can sketch both alliances' totals before the match even starts. When your drive coach says "we need their mid robot to go two seconds faster or we balance early," that is not a hunch. That is this lesson.</p>
+    <div class="note rose">
+      <div class="nh">Talk in numbers, land the plan</div>
+      <p>"You guys looked fast" starts a friendly chat. "You average a <span id="nCycEx">14</span> second high cycle, so together we clear Energized with time to balance" starts a partnership. In the strategy huddle later in this course, the team that shows up with cycle math usually writes the plan everyone else follows.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="note rose">
+      <div class="nh">Going further &middot; optional</div>
+      <p>The calculator quietly assumes every shot lands. Real robots miss. Suppose your high-ring robot (<span id="gfCycA">14</span> s cycles) makes 4 of every 5 shots, while a <span id="gfCycB">10</span> s mid-ring robot never misses. Who really wins teleop now? Work it out with expected points: cycles × ring points × accuracy. Then peek.</p>
+      <details style="margin-top:12px">
+        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Show the thinking</summary>
+        <p style="margin-top:8px">The high robot still runs its <span id="gfN">9</span> cycles, but only 4 in 5 pay out, so its expected total drops to about <span id="gfA">57.6</span>. The mid robot keeps its full <span id="gfB">65</span> and wins. The "weaker" robot on paper is the stronger robot in practice, because accuracy multiplies every single cycle. This is exactly why good scouts track makes and misses, not just speed, and it is the first taste of a stats idea called expected value that you will meet again when we talk about pick lists.</p>
+      </details>
+    </div>
+    <div class="kicker">Checkpoint</div>
+    <h2>Quick check</h2>
+    <p>Pick an answer to see why.</p>
+    <div class="quiz" id="quiz">
+      <div class="q" data-correct="1">
+        <div class="qn">Question 1</div>
+        <div class="qt">Teleop lasts <span id="q1Tele">135</span> seconds and your robot's cycle takes 20 seconds. How many scoring trips does it finish?</div>
+        <div class="opts">
+          <button class="opt" data-why="6.75 feels close enough to round up, but that last lap ends with the Cell still on the robot, and an unfinished lap pays nothing."><span id="q1Ceil">7</span> trips - round up, credit the hustle</button>
+          <button class="opt"><span id="q1Floor">6</span> trips - round down, an unfinished lap scores nothing</button>
+          <button class="opt" data-why="The division is honest, but the scoreboard only counts Cells that actually land in a ring, and there is no such thing as three quarters of a Cell."><span id="q1Exact">6.75</span> trips - the math is the math</button>
+        </div>
+        <div class="explain">Cycles always round down. <span id="q1xTele">135</span> over 20 is <span id="q1xExact">6.75</span>, and the leftover fraction of a lap ends at the buzzer with the Cell still aboard, worth zero. Planning around trips that never finish is how alliances come up short by "just a few points".</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 2 · From the sim</div>
+        <div class="qt">In the calculator, Robot A (high ring, <span id="q2CycA">14</span> s cycles) beat Robot B (mid ring, <span id="q2CycB">10</span> s cycles), <span id="q2TotA">72</span> to <span id="q2TotB">65</span>. What single number explains the win?</div>
+        <div class="opts">
+          <button class="opt" data-why="Pay per trip is only half the story. A cheaper ring fed fast enough can still win, so you always have to divide by the seconds.">Points per cycle - the high ring simply pays more per trip</button>
+          <button class="opt" data-why="Sneaky one: Robot A actually finished fewer trips than B. It won anyway, which is the whole point of this lesson.">Cycle count - Robot A finished more trips</button>
+          <button class="opt">Points per second - <span id="q2oH">8</span> every <span id="q2oCa">14</span> s beats <span id="q2oM">5</span> every <span id="q2oCb">10</span></button>
+        </div>
+        <div class="explain">Rate is the referee. A earns about <span id="q2xRateA">0.57</span> points a second and B about <span id="q2xRateB">0.50</span>, so A wins even while making fewer trips. Whenever two strategies argue, divide each one's points by its seconds and the argument ends.</div>
+      </div>
+      <div class="q" data-correct="0">
+        <div class="qn">Question 3</div>
+        <div class="qt">There are <span id="q3Eg">30</span> seconds left and your high-ring robot (<span id="q3Cyc">14</span> s cycles) can keep scoring or head home to balance. Which plan pays more?</div>
+        <div class="opts">
+          <button class="opt">Balance - those seconds only fit <span id="q3n">2</span> more cycles worth <span id="q3p">16</span>, and Balance pays <span id="q3b">20</span></button>
+          <button class="opt" data-why="Stopping the scoring feels like giving up, which is exactly why this mistake is so common. The window only fits two more cycles, and the platform pays more than they do.">Keep scoring - ring points always beat parking on a platform</button>
+          <button class="opt" data-why="Close is not equal. The gap is small, and small gaps decide close matches, so it still deserves a real decision.">They pay about the same, so do whichever feels safer</button>
+        </div>
+        <div class="explain">Run the numbers, not the adrenaline: <span id="q3xN">2</span> late cycles pay <span id="q3xP">16</span> while a Balance pays <span id="q3xB">20</span>, so heading home early wins by a few points. You watched this exact flip in the calculator, and a few points is a whole match more often than you would believe.</div>
+      </div>
+      <div class="q" data-correct="2">
+        <div class="qn">Question 4</div>
+        <div class="qt">Which of these earns the Energized ranking point in ORBIT?</div>
+        <div class="opts">
+          <button class="opt" data-why="A win pays its own ranking points. Energized is a bonus RP that does not care whether you win, so you can bank it even in a loss.">Winning the match</button>
+          <button class="opt" data-why="That one is Harmony, the other bonus RP. They are easy to mix up, and worth knowing apart before alliance selection.">All three alliance robots docking or balancing together</button>
+          <button class="opt">Scoring at least <span id="q4t">40</span> Reactor points as an alliance</button>
+        </div>
+        <div class="explain">Energized takes at least <span id="q4xT">40</span> Reactor points, points scored on the rings, from all three robots combined. That is alliance math, not solo math, which is why the planner adds three robots together. Even a plan with a full-time defender can clear it, as the gold mission proves.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="recap">
+      <h3>Lesson 03 · Recap</h3>
+      <div class="glossary">
+        <div class="gl"><b>Cycle</b><span>One full scoring loop: grab, drive, score, return.</span></div>
+        <div class="gl"><b>Cycle time</b><span>Seconds per loop; the stopwatch number that rules everything.</span></div>
+        <div class="gl"><b>Points per second</b><span>Ring points over cycle time; the number that settles arguments.</span></div>
+        <div class="gl"><b>Round down</b><span>Unfinished laps score nothing, so cycles never round up.</span></div>
+        <div class="gl"><b>Endgame trade</b><span>Late cycles versus the platform; do the math, not the adrenaline.</span></div>
+        <div class="gl"><b>Energized</b><span>Bonus RP for enough Reactor points from the whole alliance.</span></div>
+      </div>
+      <a class="next" href="gamesense-lesson-4.html">
+        <div class="n-eyebrow">Up next · Lesson 04</div>
+        <h3>Ranking Points &rarr;</h3>
+        <p>You just met Energized. Next: why a team can lose matches and still out-rank you, and how the RP columns quietly decide who picks first at alliance selection.</p>
+      </a>
+    </div>
+  </section>
+
+</div>
+
+<nav class="coursenav">
+  <a href="gamesense-lesson-2.html">&larr; Lesson 02 · Reading the Manual</a>
+  <a class="map" href="gamesense.html">Course map</a>
+  <a href="gamesense-lesson-4.html">Lesson 04 · Ranking Points &rarr;</a>
+</nav>
+
+<footer>Game Sense · Reading and playing the FRC game</footer>
+
+<script>
+(function(){
+  "use strict";
+  var O=window.ORBIT||{};
+  var M=O.match||{}, SC=O.scoring||{}, RINGS=SC.rings||{};
+  var TELE=M.teleopSec||135, EG=M.endgameSec||30;
+  var BAL=(SC.endgame&&SC.endgame.balance)?SC.endgame.balance.pts:20;
+  var LEAVE=(typeof SC.leave==="number")?SC.leave:3;
+  var THRESH=(O.rp&&O.rp.energized)?O.rp.energized.threshold:40;
+  var ARCH={};
+  (O.archetypes||[]).forEach(function(a){ARCH[a.key]=a;});
+  var SCOR=ARCH.scorer||{cycleSec:14,ring:"high",name:"Scorer"};
+  var ALLR=ARCH.allround||{cycleSec:18,ring:"mid",name:"All-arounder"};
+  var FEED=ARCH.feeder||{cycleSec:10,ring:"low",name:"Feeder"};
+  var BCYC=10; // Robot B's example cycle time, a free choice, not a rule
+
+  function $(id){return document.getElementById(id);}
+  function put(id,txt){var n=$(id);if(n)n.textContent=txt;}
+  function ringPts(r){return RINGS[r]?RINGS[r].tele:0;}
+
+  // ---- fill every ORBIT number the prose cites ----
+  put('sTele',TELE);
+  put('sEx1',Math.floor(TELE/15));
+  put('sEx2',Math.floor(TELE/27));
+  put('cLowT',ringPts('low'));   put('cLowA',RINGS.low?RINGS.low.auto:4);
+  put('cMidT',ringPts('mid'));   put('cMidA',RINGS.mid?RINGS.mid.auto:10);
+  put('cHighT',ringPts('high')); put('cHighA',RINGS.high?RINGS.high.auto:16);
+  put('rLowP',ringPts('low'));   put('rLowC',FEED.cycleSec);
+  put('rMidP',ringPts('mid'));   put('rMidC',ALLR.cycleSec);
+  put('rateLow',(ringPts('low')/FEED.cycleSec).toFixed(2));
+  put('rateMid',(ringPts('mid')/ALLR.cycleSec).toFixed(2));
+  var egN=Math.floor(EG/SCOR.cycleSec), egP=egN*ringPts('high');
+  put('s3Eg',EG);
+  put('s3Park',(SC.endgame&&SC.endgame.park)?SC.endgame.park.pts:5);
+  put('s3Dock',(SC.endgame&&SC.endgame.dock)?SC.endgame.dock.pts:10);
+  put('s3Bal',BAL); put('s3Bal2',BAL);
+  put('s3n',egN); put('s3p',egP);
+  put('s3Thresh',THRESH);
+  // predict block
+  put('pdHigh',ringPts('high')); put('pdCycA',SCOR.cycleSec);
+  put('pdMid',ringPts('mid'));   put('pdCycB',BCYC);
+  put('pdo0b',BCYC); put('pdo0a',SCOR.cycleSec);
+  put('pdo2h',ringPts('high')); put('pdo2a',SCOR.cycleSec);
+  put('pdo2m',ringPts('mid'));  put('pdo2b',BCYC);
+  var pTotA=Math.floor(TELE/SCOR.cycleSec)*ringPts('high');
+  var pTotB=Math.floor(TELE/BCYC)*ringPts('mid');
+  put('pxRateA',(ringPts('high')/SCOR.cycleSec).toFixed(2));
+  put('pxRateB',(ringPts('mid')/BCYC).toFixed(2));
+  put('pxTotA',pTotA); put('pxTotB',pTotB);
+  // caption + missions
+  put('capEg',EG);
+  put('m1Cyc',SCOR.cycleSec); put('m2Cyc',SCOR.cycleSec);
+  put('m2Lost',Math.floor(TELE/SCOR.cycleSec)-Math.floor((TELE-EG)/SCOR.cycleSec));
+  put('m3Leave',LEAVE); put('m3Auto',RINGS.mid?RINGS.mid.auto:10);
+  put('m3Cyc',ALLR.cycleSec); put('m3Eg',EG); put('m3Bal',BAL);
+  put('mThresh',THRESH);
+  put('nCycEx',SCOR.cycleSec);
+  // going further
+  put('gfCycA',SCOR.cycleSec); put('gfCycB',BCYC);
+  put('gfN',Math.floor(TELE/SCOR.cycleSec));
+  put('gfA',(Math.floor(TELE/SCOR.cycleSec)*ringPts('high')*0.8).toFixed(1));
+  put('gfB',pTotB);
+  // quiz
+  put('q1Tele',TELE);
+  put('q1Ceil',Math.ceil(TELE/20)); put('q1Floor',Math.floor(TELE/20)); put('q1Exact',(TELE/20).toString());
+  put('q1xTele',TELE); put('q1xExact',(TELE/20).toString());
+  put('q2CycA',SCOR.cycleSec); put('q2CycB',BCYC);
+  put('q2TotA',pTotA); put('q2TotB',pTotB);
+  put('q2oH',ringPts('high')); put('q2oCa',SCOR.cycleSec);
+  put('q2oM',ringPts('mid'));  put('q2oCb',BCYC);
+  put('q2xRateA',(ringPts('high')/SCOR.cycleSec).toFixed(2));
+  put('q2xRateB',(ringPts('mid')/BCYC).toFixed(2));
+  put('q3Eg',EG); put('q3Cyc',SCOR.cycleSec);
+  put('q3n',egN); put('q3p',egP); put('q3b',BAL);
+  put('q3xN',egN); put('q3xP',egP); put('q3xB',BAL);
+  put('q4t',THRESH); put('q4xT',THRESH);
+  // button price tags
+  Array.prototype.forEach.call(document.querySelectorAll('[data-rp]'),function(n){
+    n.textContent='· '+ringPts(n.getAttribute('data-rp'));
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-balp]'),function(n){
+    n.textContent='+'+BAL;
+  });
+
+  // ---- the duel ----
+  var S={a:{ring:SCOR.ring||'high',cyc:SCOR.cycleSec||14,eg:'cycle'},
+         b:{ring:'mid',cyc:BCYC,eg:'cycle'}};
+  var el={
+    cycA:$('cycA'),cycAVal:$('cycAVal'),cycB:$('cycB'),cycBVal:$('cycBVal'),
+    ringA:$('ringA'),ringB:$('ringB'),egA:$('egA'),egB:$('egB'),
+    roCycA:$('roCycA'),roRateA:$('roRateA'),roTotA:$('roTotA'),mathA:$('mathA'),barA:$('barA'),
+    roCycB:$('roCycB'),roRateB:$('roRateB'),roTotB:$('roTotB'),mathB:$('mathB'),barB:$('barB'),
+    verdict:$('verdict'),verdictTxt:$('verdictTxt')
+  };
+  el.cycA.value=S.a.cyc; el.cycB.value=S.b.cyc;
+
+  function calc(r){
+    var secs=r.eg==='balance'?(TELE-EG):TELE;
+    var n=Math.floor(secs/r.cyc);
+    var per=ringPts(r.ring);
+    var end=r.eg==='balance'?BAL:0;
+    return {n:n,per:per,end:end,total:n*per+end,rate:per/r.cyc};
+  }
+  function setOn(container,attr,val){
+    Array.prototype.forEach.call(container.querySelectorAll('.rbtn'),function(b){
+      b.classList.toggle('on',b.getAttribute(attr)===val);
+    });
+  }
+  function update(){
+    var ca=calc(S.a),cb=calc(S.b);
+    el.cycAVal.textContent=S.a.cyc+' s'; el.cycBVal.textContent=S.b.cyc+' s';
+    setOn(el.ringA,'data-ring',S.a.ring); setOn(el.ringB,'data-ring',S.b.ring);
+    setOn(el.egA,'data-eg',S.a.eg); setOn(el.egB,'data-eg',S.b.eg);
+    el.roCycA.textContent=ca.n; el.roRateA.textContent=ca.rate.toFixed(2); el.roTotA.textContent=ca.total;
+    el.roCycB.textContent=cb.n; el.roRateB.textContent=cb.rate.toFixed(2); el.roTotB.textContent=cb.total;
+    el.mathA.textContent=ca.n+' × '+ca.per+' pts + '+ca.end+' endgame';
+    el.mathB.textContent=cb.n+' × '+cb.per+' pts + '+cb.end+' endgame';
+    var mx=Math.max(ca.total,cb.total,1);
+    el.barA.style.width=(ca.total/mx*100)+'%';
+    el.barB.style.width=(cb.total/mx*100)+'%';
+    var cls,msg;
+    if(ca.total>cb.total){cls='a';msg='Robot A takes it, '+ca.total+' to '+cb.total+'.';if(ca.per<cb.per)msg+=' The cheaper ring wins on rate.';}
+    else if(cb.total>ca.total){cls='b';msg='Robot B takes it, '+cb.total+' to '+ca.total+'.';if(cb.per<ca.per)msg+=' The cheaper ring wins on rate.';}
+    else {cls='tie';msg='Dead even at '+ca.total+' apiece. Every second counts now.';}
+    el.verdict.className='verdict '+cls;
+    el.verdictTxt.textContent=msg;
+  }
+  el.ringA.addEventListener('click',function(e){var b=e.target.closest('.rbtn');if(!b)return;S.a.ring=b.getAttribute('data-ring');update();});
+  el.ringB.addEventListener('click',function(e){var b=e.target.closest('.rbtn');if(!b)return;S.b.ring=b.getAttribute('data-ring');update();});
+  el.egA.addEventListener('click',function(e){var b=e.target.closest('.rbtn');if(!b)return;S.a.eg=b.getAttribute('data-eg');update();});
+  el.egB.addEventListener('click',function(e){var b=e.target.closest('.rbtn');if(!b)return;S.b.eg=b.getAttribute('data-eg');update();});
+  el.cycA.addEventListener('input',function(){S.a.cyc=parseInt(el.cycA.value,10);update();});
+  el.cycB.addEventListener('input',function(){S.b.cyc=parseInt(el.cycB.value,10);update();});
+  update();
+
+  // ---- the alliance planner ----
+  var selIds=['p1','p2','p3'];
+  function archPts(key){
+    var a=ARCH[key]; if(!a||!a.ring) return 0;
+    return Math.floor((TELE-EG)/a.cycleSec)*ringPts(a.ring);
+  }
+  function archLabel(a){
+    if(!a.ring) return a.name+' · defense, no cycles';
+    var rn=RINGS[a.ring]?RINGS[a.ring].name:a.ring;
+    return a.name+' · '+rn.toLowerCase()+' every '+a.cycleSec+' s';
+  }
+  selIds.forEach(function(id){
+    var sel=$(id);
+    var op=document.createElement('option'); op.value=''; op.textContent='· choose ·'; sel.appendChild(op);
+    (O.archetypes||[]).forEach(function(a){
+      var o=document.createElement('option'); o.value=a.key; o.textContent=archLabel(a); sel.appendChild(o);
+    });
+    sel.addEventListener('change',planUpdate);
+  });
+  function planUpdate(){
+    var total=0, all=true;
+    selIds.forEach(function(id,i){
+      var v=$(id).value, ptsEl=$('pp'+(i+1));
+      if(!v){all=false; ptsEl.textContent='--'; ptsEl.classList.remove('on'); return;}
+      var p=archPts(v);
+      total+=p;
+      ptsEl.textContent='+'+p+' Reactor pts'+(p===0?' · pressure instead':'');
+      ptsEl.classList.add('on');
+    });
+    var v=$('planVerdict'), t=$('planTxt');
+    if(!all){v.className='verdict';t.textContent='Pick all three robots to run the Energized math.';}
+    else if(total>=THRESH){v.className='verdict good';t.textContent='Energized. '+total+' Reactor points clears the '+THRESH+' point bar - ranking point banked.';}
+    else {v.className='verdict bad';t.textContent=total+' of '+THRESH+' Reactor points. '+(THRESH-total)+' short - rework the plan.';}
+  }
+  planUpdate();
+
+  // ---- pencil check (mission: compute one score by hand) ----
+  var handAns=LEAVE+(RINGS.mid?RINGS.mid.auto:10)+Math.floor((TELE-EG)/ALLR.cycleSec)*ringPts('mid')+BAL;
+  var handOK=false, handMiss=0;
+  function tryHand(){
+    var v=parseInt($('handIn').value,10), fb=$('handFb');
+    if(v===handAns){
+      handOK=true;
+      fb.textContent='✓ '+handAns+' it is. Nice pencil work.';
+      fb.className='hand-fb ok';
+    } else {
+      handMiss++;
+      fb.className='hand-fb no';
+      fb.textContent=(handMiss>=2)
+        ? 'Not yet. Hint: cycling seconds are '+TELE+' - '+EG+' = '+(TELE-EG)+', and cycles always round down.'
+        : 'Not yet. Re-check one piece at a time: auto, cycles, endgame.';
+    }
+  }
+  $('handCheck').addEventListener('click',tryHand);
+  $('handIn').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();tryHand();}});
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  setInterval(function(){
+    var ca=calc(S.a), cb=calc(S.b);
+    if(S.a.ring==='high'&&S.a.cyc===SCOR.cycleSec&&S.a.eg==='cycle'&&
+       S.b.ring==='mid'&&S.b.eg==='cycle'&&cb.total>ca.total) mClear('beat');
+    if(S.a.ring==='high'&&S.a.cyc===SCOR.cycleSec&&S.a.eg==='balance') mClear('endgame');
+    if(handOK) mClear('hand');
+    var picks=selIds.map(function(id){return $(id).value;});
+    if(picks.every(function(p){return !!p;})){
+      var tot=picks.reduce(function(s,p){return s+archPts(p);},0);
+      if(picks.indexOf('defender')!==-1&&tot>=THRESH) mClear('gold');
+    }
+  },200);
+  }catch(e){}
+
+  // ---- quiz ----
+  document.querySelectorAll('#quiz .q').forEach(function(q){
+    var correct=parseInt(q.getAttribute('data-correct'),10);
+    var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
+    opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(done)return; if(i===correct){done=true; opts.forEach(function(o){o.classList.add('locked');}); opt.classList.add('correct'); explain.classList.add('show');} else {opt.classList.add('wrong');
+      try{ var why=opt.getAttribute('data-why');
+        if(why){ var wl=opt.nextElementSibling; if(!wl||!wl.classList.contains('whyline')){ wl=document.createElement('div'); wl.className='whyline'; opt.insertAdjacentElement('afterend',wl); } wl.textContent=why; }
+      }catch(e){} } }); });
+  });
+})();
+</script>
+<script>
+(function(){
+  // auto-mark this lesson complete in the hub once its quiz is finished
+  var KEY="gamesense:done", file=location.pathname.split("/").pop();
+  function mark(){try{var d=JSON.parse(localStorage.getItem(KEY))||{};if(!d[file]){d[file]=true;localStorage.setItem(KEY,JSON.stringify(d));}}catch(e){}}
+  var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
+  function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
+  document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  // predict-first: commit a guess, reveal the answer, then run the sim
+  var q=document.querySelector('#predict .q'); if(!q) return;
+  var correct=parseInt(q.getAttribute('data-correct'),10);
+  var opts=q.querySelectorAll('.opt'); var explain=q.querySelector('.explain');
+  var picked=-1, revealed=false, ran=false;
+  var demos=document.querySelectorAll('.demo');
+  var style=document.createElement('style');
+  style.textContent='#predict .opt.picked{border-color:var(--teal,#34D7C5);box-shadow:0 0 0 2px rgba(52,215,197,.22)}';
+  document.head.appendChild(style);
+  var note=document.createElement('div');
+  note.style.cssText='display:none;font-size:13px;color:#92A2BE;margin-top:10px;font-style:italic';
+  q.appendChild(note);
+  function optText(i){ var t=(opts[i].textContent||'').trim(); return t.length>70 ? t.slice(0,67)+'...' : t; }
+  function reveal(){ if(revealed||picked<0) return; revealed=true;
+    opts.forEach(function(o){o.classList.add('locked');});
+    try{var pr=JSON.parse(localStorage.getItem('frc:predict'))||{r:0,w:0};if(picked===correct){pr.r++;}else{pr.w++;}localStorage.setItem('frc:predict',JSON.stringify(pr));}catch(e){}
+    if(picked===correct){
+      opts[picked].classList.add('correct');
+      note.textContent='You called it. "'+optText(picked)+'" is exactly what happens. Here is why:';
+    } else {
+      opts[picked].classList.add('wrong'); opts[correct].classList.add('correct');
+      note.textContent='You predicted "'+optText(picked)+'". The sim went a different way - the green answer is what really happens, and the surprise is the part worth remembering. Here is why:';
+    }
+    note.style.display='block';
+    explain.classList.add('show'); }
+  function onRan(ev){ if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#predict')) return; ran=true; if(picked>=0) reveal(); }
+  if(demos.length){
+    Array.prototype.forEach.call(demos,function(d){
+      d.addEventListener('pointerdown',onRan,true);
+      d.addEventListener('input',onRan,true);
+    });
+    window.addEventListener('keydown',onRan,true);
+  } else { ran=true; }
+  opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(revealed)return; picked=i;
+    opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
+    if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
+})();
+</script>
+<script src="account-config.js"></script>
+<script src="account.js"></script>
+</body>
+</html>
