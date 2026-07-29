@@ -68,6 +68,18 @@
   .missions .m-item.cleared{color:var(--text)}
   .missions .m-item.cleared .m-st{color:var(--green)}
   .missions .m-item.gold .m-st{color:var(--amber)}
+  .cando{margin:18px 0 4px;border-left:3px solid var(--indigo);background:rgba(138,140,248,.06);border-radius:0 10px 10px 0;padding:12px 16px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);display:block;margin-bottom:8px}
+  .cando ul{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+  .cando li{position:relative;padding-left:19px;font-size:15px;color:var(--muted);line-height:1.5}
+  .cando li::before{content:"\2192";position:absolute;left:0;color:var(--indigo);font-family:var(--mono)}
+  .cando-check{margin:18px 0 0;border-top:1px solid var(--line);padding-top:16px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:flex-start;min-height:28px;padding:5px 2px;cursor:pointer;font-size:15px;color:var(--muted);line-height:1.45;-webkit-tap-highlight-color:transparent}
+  .cando-check .cc-row .cc-box{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--line-2);color:transparent;display:grid;place-items:center;font-size:12px;margin-top:1px;transition:.12s}
+  .cando-check .cc-row.on{color:var(--text)}
+  .cando-check .cc-row.on .cc-box{border-color:var(--green);background:rgba(67,214,126,.16);color:var(--green)}
+  .missions .m-hint{margin:-1px 0 6px 24px;font-size:13px;color:var(--faint);border-left:2px solid var(--indigo);padding:3px 0 3px 11px;line-height:1.5}
 
   .codewrap{margin:18px 0}
   .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
@@ -150,6 +162,11 @@
     <div class="eyebrow">The Drivetrain</div>
     <h1>Make the whole<br><span class="accent">robot</span> move.</h1>
     <p class="dek">A tank drivetrain has just two controls: how fast the left wheels spin and how fast the right ones do. Everything a driver feels, straight, turning, spinning, comes from mixing those two numbers.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Drive a differential base two ways: arcadeDrive from one stick's forward and turn, or tankDrive with a value per side.</li>
+      <li>Work out the wheel commands from the arcade mix - left = forward + turn, right = forward - turn - so a pivot or an arc is no surprise.</li>
+      <li>Spot when the mix clips past 1.0 and say why scaling both sides down together keeps the turn you asked for.</li>
+    </ul></div>
   </div>
 
   <section>
@@ -191,9 +208,13 @@
     <div class="missions" id="missions">
       <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
       <div class="m-item" data-m="pivot"><span class="m-st">○</span><span>Pivot in place: in arcade, drag the stick straight sideways until <b>Turn</b> passes <b>0.50</b> while <b>Forward</b> stays under <b>0.10</b>. Hold it for a second and watch the wheels run opposite - a spin with zero travel, mixed by you.</span></div>
+      <div class="m-hint" data-for="pivot" hidden>Stuck? In arcade, drag the joystick straight left or right with almost no up or down - push Turn past 0.50 while Forward stays under 0.10, and hold it a beat. The two wheel bars swing opposite ways.</div>
       <div class="m-item" data-m="arc"><span class="m-st">○</span><span>Carve a smooth arc: hold the stick so <b>Left</b> reads near <b>0.80</b> and <b>Right</b> near <b>0.40</b> for a second. Feel the shape of it - forward with a little turn folded in, like leaning a bike through a corner.</span></div>
+      <div class="m-hint" data-for="arc" hidden>Stuck? In arcade, ease the stick up and a touch to one side so Left sits near 0.80 and Right near 0.40, then hold steady for about a second. It is mostly forward with a little turn folded in.</div>
       <div class="m-item" data-m="oneoar"><span class="m-st">○</span><span>Switch to <b>tank</b> and push only the <b>L</b> throttle past <b>0.50</b>. With Right at zero, the robot wheels around its stopped side, like paddling a canoe on one side. Notice how different it feels from arcade.</span></div>
+      <div class="m-hint" data-for="oneoar" hidden>Stuck? Click Tank first, then drag only the L throttle up past 0.50 and leave R alone at zero. The robot wheels around its stopped side.</div>
       <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> overflow the mix. In arcade, push the stick toward the top-right corner until <b>Forward + Turn</b> adds past <b>1.30</b>. Watch <b>Left</b> pin at <b>1.00</b> and refuse to climb. You just found the clipping that real drive code fixes by scaling both sides down together.</span></div>
+      <div class="m-hint" data-for="gold" hidden>Stuck? In arcade, drag the joystick into the top-right corner as far as it goes, so Forward plus Turn adds past 1.30. Watch Left pin at 1.00 and stop climbing.</div>
     </div>
   </section>
 
@@ -334,6 +355,12 @@ self.drive.<input class="blank" data-ans="tankdrive" data-reveal="tankDrive" ari
         <div class="gl"><b>The mixing</b><span>left=fwd+turn, right=fwd-turn.</span></div>
         <div class="gl"><b>DifferentialDrive</b><span>WPILib's helper class.</span></div>
         <div class="gl"><b>Pivot</b><span>Opposite sides turn in place.</span></div>
+      </div>
+      <div class="cando-check" id="candoCheck">
+        <span class="cc-h">Can you do these now? Tap each one you have got.</span>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Drive a differential base with arcadeDrive (one stick) or tankDrive (a value per side).</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Work out the wheel commands from the mix: left = forward + turn, right = forward - turn.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Spot when the mix clips past 1.0 and say why desaturating keeps your turn.</span></div>
       </div>
       <a class="next" href="deploy-lesson-24-py.html">
         <div class="n-eyebrow">Up next · Part 6 · 02</div>
@@ -478,6 +505,10 @@ self.drive.<input class="blank" data-ans="tankdrive" data-reveal="tankDrive" ari
   Object.keys(mItems).forEach(function(id){
     if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
   });
+  // stuck hints: after ~150s of active fiddling on an uncleared mission, reveal its hint line
+  var stuckSecs={}, HINT_AT=150, lastAct=0;
+  try{ var mDemo=document.getElementById('demo'); if(mDemo){ ['pointerdown','pointermove','input','keydown'].forEach(function(ev){ mDemo.addEventListener(ev,function(){ lastAct=Date.now(); },true); }); } }catch(e){}
+  function stuckTick(tick){ var actNow=(Date.now()-lastAct)<1500; Object.keys(mItems).forEach(function(id){ var n=mItems[id]; if(!n) return; var h=document.querySelector('#missions .m-hint[data-for="'+id+'"]'); if(n.classList.contains('cleared')){ if(h&&!h.hidden) h.hidden=true; return; } if(actNow){ stuckSecs[id]=(stuckSecs[id]||0)+tick; if(stuckSecs[id]>=HINT_AT && h) h.hidden=false; } }); }
   var mPivot=0, mArc=0, mOar=0;
   setInterval(function(){
     var w=wheels();
@@ -493,6 +524,7 @@ self.drive.<input class="blank" data-ans="tankdrive" data-reveal="tankDrive" ari
       if(tank.l>=0.50&&Math.abs(tank.r)<=0.05){ mOar++; } else { mOar=0; }
       if(mOar>=4) mClear('oneoar');
     }
+    stuckTick(0.2);
   },200);
   }catch(e){}
 
@@ -598,6 +630,21 @@ try{
     });
   }catch(e){}
 })();
+</script>
+<script>
+(function(){try{
+  var K='frc:cando', f=location.pathname.split('/').pop(), map={};
+  try{ map=JSON.parse(localStorage.getItem(K))||{}; }catch(e){}
+  var rows=document.querySelectorAll('#candoCheck .cc-row');
+  Array.prototype.forEach.call(rows,function(r,i){
+    var key=f+'#'+i;
+    if(map[key]) r.classList.add('on');
+    r.addEventListener('click',function(){
+      var on=r.classList.toggle('on'); map[key]=on;
+      try{ localStorage.setItem(K,JSON.stringify(map)); }catch(e){}
+    });
+  });
+}catch(e){}})();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>

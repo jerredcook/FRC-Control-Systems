@@ -69,6 +69,29 @@
   .score{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--indigo)}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
 
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--amber);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+  .m-hint{margin:1px 0 7px 27px;font-size:13px;color:var(--amber);border-left:2px solid rgba(255,176,32,.45);padding:3px 0 3px 10px;font-style:italic;line-height:1.45}
+  .m-hint[hidden]{display:none}
+
+  .cando{border-left:3px solid var(--amber);background:rgba(255,176,32,.05);border-radius:0 10px 10px 0;padding:11px 16px;margin:16px 0 2px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);display:block;margin-bottom:6px}
+  .cando ul{margin:0;padding-left:18px;color:var(--muted);font-size:15px;line-height:1.5}
+  .cando li{margin:2px 0}
+  .cando-check{margin-top:16px;border-top:1px solid var(--line);padding-top:15px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);display:block;margin-bottom:8px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:center;padding:5px 0;min-height:30px;cursor:pointer;font-size:15px;color:var(--muted);transition:.12s}
+  .cando-check .cc-row .cc-box{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--line-2);display:inline-flex;align-items:center;justify-content:center;font-size:12px;line-height:1;color:transparent;transition:.12s}
+  .cando-check .cc-row.on{color:var(--text)}
+  .cando-check .cc-row.on .cc-box{border-color:var(--green);background:rgba(67,214,126,.16);color:var(--green)}
+
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
   .note p{margin:0;color:var(--text);font-size:16px}
@@ -124,6 +147,11 @@
     <div class="eyebrow">Wiring Motors &amp; Controllers</div>
     <h1>Right wire,<br>right <span class="accent">fuse</span>.</h1>
     <p class="dek">Each motor runs through its own controller on a fused branch off the PDH. The wire has to be thick enough to carry the current without overheating, and the breaker has to protect that wire while still letting the motor pull its normal load.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+    <li>Match a wire gauge to a motor's current - thicker wire (lower AWG) carries more amps</li>
+    <li>Size a branch breaker above the motor's draw but at or below what the wire can carry</li>
+    <li>Explain why 10 AWG is thicker than 18 AWG even though the number is smaller</li>
+    </ul></div>
   </div>
 
   <section>
@@ -151,6 +179,17 @@
       </div>
     </div>
     <p class="caption">A thin wire (18 AWG) is fine for a little motor but melts under a drive motor's current. The breaker should sit just above the motor's normal draw and at or below what the wire can handle, that's the sweet spot.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
+      <div class="m-item" data-m="overheat"><span class="m-st">○</span><span>See the danger first: on the drive or heavy motor, pick a gauge too thin for the draw - try <b>18 AWG</b> - and read <b>Wire overheats</b>. Too many amps in too little copper turns straight into heat, not speed.</span></div>
+      <div class="m-hint" data-for="overheat" hidden>Press Next motor to the drive motor, pick 18 AWG, then add any breaker - 18 AWG carries only about 20 A, so a 38 A motor reads Wire overheats.</div>
+      <div class="m-item" data-m="nuisance"><span class="m-st">○</span><span>Now trip a breaker on nerves: on the <b>drive motor</b> (about 38 A), keep the wire thick enough but pick a breaker at or below the draw, like <b>20 A</b>, and watch it <b>nuisance-trip</b> every time the motor works hard.</span></div>
+      <div class="m-hint" data-for="nuisance" hidden>On the drive motor pick 12 AWG (thick enough) and a 20 A breaker - 20 A sits below the 38 A draw, so the breaker nuisance-trips.</div>
+      <div class="m-item" data-m="goodwire"><span class="m-st">○</span><span>Wire one clean: on the small or the drive motor, size both the gauge and the breaker so the feedback turns <b>green</b> and reads <b>Good wiring</b> - wire carries the draw, breaker sits just above it.</span></div>
+      <div class="m-hint" data-for="goodwire" hidden>On the small motor pick 18 AWG + 20 A, or on the drive motor pick 12 AWG + 40 A - both size the wire and breaker right and read Good wiring.</div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> the <b>heavy lift motor</b> (52 A) is a trap. Pick the only wire thick enough, <b>10 AWG</b>, then the smallest breaker above its draw, <b>60 A</b>. Read <b>Wire unprotected</b> - sometimes the offered parts cannot win, and spotting that is the real skill.</span></div>
+      <div class="m-hint" data-for="gold" hidden>Press Next motor to the heavy lift motor, choose 10 AWG, then 60 A - it reads Wire unprotected, since no offered breaker fits between its 52 A draw and the wire's 55 A limit.</div>
+    </div>
   </section>
 
   <section>
@@ -242,6 +281,12 @@
         <div class="gl"><b>Data wire</b><span>CAN tells the controller what to do.</span></div>
         <div class="gl"><b>Polarity</b><span>Red +, black -; check it.</span></div>
       </div>
+      <div class="cando-check" id="candoCheck">
+        <span class="cc-h">You made it - tap each one you can do now</span>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Match a wire gauge to a motor's current - thicker wire (lower AWG) carries more amps</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Size a branch breaker above the motor's draw but at or below what the wire can carry</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Explain why 10 AWG is thicker than 18 AWG even though the number is smaller</span></div>
+      </div>
       <a class="next" href="build-lesson-29.html">
         <div class="n-eyebrow">Up next · Part 6 · 03</div>
         <h3>The Control System</h3>
@@ -302,6 +347,57 @@
   document.getElementById('next').addEventListener('click',function(){ if(idx<MOTORS.length-1){ idx++; show(); } else { idx=0; score=0; total=0; document.getElementById('score').textContent='0 / 0'; show(); } });
   show();
 
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  // checker reads the live pick (g, b) against the current motor (idx), same rules as evalPick
+  setInterval(function(){
+    if(g===null || b===null) return;
+    var draw=MOTORS[idx].draw, wmax=WMAX[g];
+    var over = draw>wmax;
+    var nuis = !over && b<=draw;
+    var unprot = !over && b>draw && b>wmax;
+    var good = !over && b>draw && b<=wmax;
+    if(over) mClear('overheat');
+    if(nuis) mClear('nuisance');
+    if(good) mClear('goodwire');
+    if(idx===2 && g===10 && b===60 && unprot) mClear('gold');
+  },200);
+
+  // stuck-hints: after ~150s of active fiddling on an uncleared mission, surface one nudge
+  var mHintEls={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-hint'),function(h){ mHintEls[h.getAttribute('data-for')]=h; });
+  var mHacc={}, mLastAct=0, mHdemo=document.getElementById('demo');
+  function mHbump(){ mLastAct=Date.now(); }
+  if(mHdemo){ ['pointerdown','input','click'].forEach(function(ev){ mHdemo.addEventListener(ev,mHbump,true); }); }
+  window.addEventListener('keydown',mHbump,true);
+  setInterval(function(){
+    if(!mLastAct || Date.now()-mLastAct>5000) return;
+    Object.keys(mHintEls).forEach(function(id){
+      var it=mItems[id], h=mHintEls[id];
+      if(!it||!h||it.classList.contains('cleared')||!h.hasAttribute('hidden')) return;
+      mHacc[id]=(mHacc[id]||0)+0.2;
+      if(mHacc[id]>=150) h.removeAttribute('hidden');
+    });
+  },200);
+  }catch(e){}
+
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
@@ -317,6 +413,22 @@
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
 })();
+</script>
+<script>
+(function(){ try{
+  var KEY='frc:cando', file=location.pathname.split('/').pop(), box={};
+  try{ box=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+  var rows=document.querySelectorAll('#candoCheck .cc-row');
+  Array.prototype.forEach.call(rows,function(row,i){
+    var k=file+'#'+i;
+    if(box[k]) row.classList.add('on');
+    row.addEventListener('click',function(){
+      var on=!row.classList.contains('on');
+      row.classList.toggle('on',on);
+      box[k]=on; try{ localStorage.setItem(KEY,JSON.stringify(box)); }catch(e){}
+    });
+  });
+}catch(e){} })();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>

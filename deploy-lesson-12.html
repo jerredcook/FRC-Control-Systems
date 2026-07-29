@@ -122,6 +122,19 @@
   .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
   .wm-steps.on{display:block}
   .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
+
+  .cando{border-left:3px solid var(--indigo);background:rgba(138,140,248,.07);border-radius:0 10px 10px 0;padding:11px 15px;margin:18px 0 0;max-width:52ch}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:6px}
+  .cando ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:3px}
+  .cando li{position:relative;font-size:15px;color:var(--muted);line-height:1.45;padding-left:18px}
+  .cando li::before{content:"→";position:absolute;left:0;color:var(--indigo)}
+  .cando-check{margin-top:16px;border-left:3px solid var(--indigo);background:rgba(138,140,248,.07);border-radius:0 10px 10px 0;padding:11px 15px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:6px}
+  .cando-check .cc-row{display:flex;gap:10px;align-items:center;min-height:30px;padding:4px;font-size:15px;color:var(--muted);cursor:pointer;border-radius:8px;transition:.12s}
+  .cando-check .cc-row:hover{background:rgba(138,140,248,.06)}
+  .cando-check .cc-box{font-family:var(--mono);flex:0 0 auto;color:var(--faint)}
+  .cando-check .cc-row.done{color:var(--text)}
+  .cando-check .cc-row.done .cc-box{color:var(--green)}
 </style>
 </head>
 <body>
@@ -140,6 +153,11 @@
     <div class="eyebrow">Subsystems</div>
     <h1>A home for<br>one <span class="accent">mechanism</span>.</h1>
     <p class="dek">A subsystem wraps one piece of hardware - its motor, its sensor, its state - behind a clean set of methods. It's the noun the rest of your robot talks to.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Build a subsystem that owns one mechanism's motor, state, and <b>periodic()</b>.</li>
+      <li>Keep the hardware <b>private</b> so only the subsystem touches its own motor.</li>
+      <li>Give commands a public door in, like <b>setGoal()</b>, instead of the motor.</li>
+    </ul></div>
   </div>
 
   <section>
@@ -282,6 +300,12 @@ intake.<input class="blank" data-ans="setgoal" data-reveal="setGoal" aria-label=
         <div class="gl"><b>periodic()</b><span>Its per-loop heartbeat.</span></div>
         <div class="gl"><b>Encapsulation</b><span>One owner = no fights over a motor.</span></div>
       </div>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Check yourself - tap each one you can now do</div>
+        <div class="cc-row"><span class="cc-box">○</span><span>Build a subsystem that owns one mechanism's motor, state, and periodic().</span></div>
+        <div class="cc-row"><span class="cc-box">○</span><span>Keep the hardware private so only the subsystem touches its own motor.</span></div>
+        <div class="cc-row"><span class="cc-box">○</span><span>Give commands a public door in, like setGoal(), instead of the motor.</span></div>
+      </div>
       <a class="next" href="deploy-lesson-13.html">
         <div class="n-eyebrow">Up next · Part 3 · 03</div>
         <h3>Commands</h3>
@@ -376,6 +400,26 @@ try{
       });
     });
   }catch(e){}
+})();
+</script>
+<script>
+(function(){
+try{
+  var KEY='frc:cando', file=location.pathname.split('/').pop();
+  var box=document.getElementById('candoCheck'); if(!box) return;
+  var saved={}; try{ saved=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+  var rows=box.querySelectorAll('.cc-row');
+  Array.prototype.forEach.call(rows,function(r,i){
+    var b=r.querySelector('.cc-box');
+    if(saved[file+'#'+i]){ r.classList.add('done'); if(b) b.textContent='✓'; }
+    r.addEventListener('click',function(){
+      var on=r.classList.toggle('done');
+      if(b) b.textContent=on?'✓':'○';
+      if(on) saved[file+'#'+i]=true; else delete saved[file+'#'+i];
+      try{ localStorage.setItem(KEY,JSON.stringify(saved)); }catch(e){}
+    });
+  });
+}catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

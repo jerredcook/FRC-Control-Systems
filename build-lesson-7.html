@@ -62,6 +62,20 @@
   .btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:10px 13px;border-radius:8px;cursor:pointer;transition:.12s}
   .btn:hover{border-color:var(--indigo);color:var(--text)}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .cando{border-left:3px solid var(--indigo);background:rgba(255,138,76,.06);border-radius:0 10px 10px 0;padding:11px 15px;margin:16px 0 2px}
+  .cando .cd-h{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:6px}
+  .cando ul{margin:0;padding:0;list-style:none}
+  .cando li{position:relative;font-size:15px;color:var(--muted);padding:3px 0 3px 20px;line-height:1.45}
+  .cando li::before{content:"→";position:absolute;left:0;color:var(--indigo)}
+  .cando-check{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:6px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:flex-start;min-height:28px;padding:5px 0;cursor:pointer;font-size:15px;color:var(--muted);transition:.12s}
+  .cando-check .cc-row:hover{color:var(--text)}
+  .cando-check .cc-box{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--line-2);display:grid;place-items:center;font-size:12px;color:transparent;margin-top:1px;transition:.12s}
+  .cando-check .cc-row.on .cc-box{border-color:var(--green);background:var(--green);color:#06210f}
+  .cando-check .cc-row.on{color:var(--text)}
+  .missions .m-hint{margin:2px 0 6px 26px;font-size:13px;color:var(--muted);font-style:italic;line-height:1.5;border-left:2px solid var(--amber);padding-left:10px}
+  .missions .m-hint b{color:var(--text);font-style:normal}
   .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--indigo);border-radius:12px;background:var(--panel);padding:14px 16px}
   .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:9px}
   .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
@@ -127,6 +141,13 @@
     <div class="eyebrow">Plate, Sheet &amp; Polycarbonate</div>
     <h1>Flat stock,<br>and what <span class="accent">bends</span>.</h1>
     <p class="dek">Tubes are the skeleton; flat stock is everything else, gearbox plates, panels, and clear guards. The biggest gotcha is plastic: polycarbonate bends and bounces back, but its look-alike, acrylic, shatters.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span>
+      <ul>
+        <li>Tell polycarbonate from acrylic by how each behaves under a load.</li>
+        <li>Pick the right flat stock for a job - plate, sheet, or polycarbonate.</li>
+        <li>Recognize a permanent set: metal bent past its yield point that won't spring back.</li>
+      </ul>
+    </div>
   </div>
 
   <section>
@@ -168,9 +189,13 @@
     <div class="missions" id="missions">
       <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
       <div class="m-item" data-m="shatter"><span class="m-st">○</span><span>Pick <b>Acrylic</b> and creep the load up a few % at a time - see if you can catch the exact number where it shatters. It breaks at <b>46%</b>, and slamming the slider sails right past it, so Reset and take it slow. Patience is the whole skill here.</span></div>
+      <div class="m-hint" data-h="shatter" hidden>Pick <b>Acrylic</b>, then creep the Load slider up a few percent at a time. It snaps at 46% - if you overshoot, press Reset and inch up more slowly.</div>
       <div class="m-item" data-m="set"><span class="m-st">○</span><span>Pick <b>Aluminum sheet</b>, push the load to <b>60%</b>, then bring it back to <b>0</b>. Notice the panel keeps a bend, like a paperclip you opened too far. That leftover is a <b>permanent set</b> - once you have seen it here, you will spot it on real robots.</span></div>
+      <div class="m-hint" data-h="set" hidden>Pick <b>Aluminum sheet</b>, push the Load to about 60%, then drag it back to 0. The panel keeps a bend - that leftover is the permanent set.</div>
       <div class="m-item" data-m="recover"><span class="m-st">○</span><span>Pick <b>Polycarbonate</b>, max the load to <b>100%</b>, then back to <b>0</b>. It comes back dead flat, every time. That is why guards take hits all match long and shrug them off.</span></div>
+      <div class="m-hint" data-h="recover" hidden>Pick <b>Polycarbonate</b>, run the Load all the way to 100%, then drag it back to 0. It springs dead flat every time.</div>
       <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> ride the edge. Take aluminum up to at least <b>48%</b> but never past <b>52%</b>, then back to <b>0</b> with the panel still flat. One tick too far and you need <b>Reset</b> - a steady hand wins this one.</span></div>
+      <div class="m-hint" data-h="gold" hidden>Aluminum yields at 52%. Ease the Load up to between 48% and 52%, then back to 0 with the panel still flat - one tick past 52 and you need Reset.</div>
     </div>
   </section>
 
@@ -260,6 +285,12 @@
         <div class="gl"><b>Acrylic</b><span>Brittle look-alike; avoid it.</span></div>
         <div class="gl"><b>Yield</b><span>Aluminum takes a permanent bend.</span></div>
         <div class="gl"><b>Thickness</b><span>Thicker = stiffer and heavier.</span></div>
+      </div>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Can you do these now?</div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Tell polycarbonate from acrylic by how each behaves under a load.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Pick the right flat stock for a job - plate, sheet, or polycarbonate.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Recognize a permanent set: metal bent past its yield point that won't spring back.</span></div>
       </div>
       <a class="next" href="build-lesson-8.html">
         <div class="n-eyebrow">Up next · Part 2 · 03</div>
@@ -368,6 +399,17 @@
   Object.keys(mItems).forEach(function(id){
     if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
   });
+  // stuck-hint timing: after ~150s of active fiddling on a still-open mission, reveal one nudge
+  var mHintT={}, mLastAct=Date.now(), mDemoEl=document.getElementById('demo');
+  if(mDemoEl){ ['pointerdown','input','click'].forEach(function(ev){ mDemoEl.addEventListener(ev,function(){ mLastAct=Date.now(); },true); }); }
+  function mStuck(){
+    var active=(Date.now()-mLastAct)<5000;
+    Object.keys(mItems).forEach(function(id){
+      var n=mItems[id]; if(!n||n.classList.contains('cleared')) return;
+      if(active) mHintT[id]=(mHintT[id]||0)+0.2;
+      if((mHintT[id]||0)>=150){ var h=document.querySelector('#missions .m-hint[data-h="'+id+'"]'); if(h) h.hidden=false; }
+    });
+  }
   var mShatSeen=false, mPolyHigh=false;
   setInterval(function(){
     if(mat==='acrylic'){
@@ -383,6 +425,7 @@
       if(load>=95) mPolyHigh=true;
       if(mPolyHigh&&load<=2) mClear('recover');
     } else { mPolyHigh=false; }
+    mStuck();
   },200);
   }catch(e){}
 
@@ -440,6 +483,26 @@
   opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(revealed)return; picked=i;
     opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
     if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
+})();
+</script>
+<script>
+(function(){
+  try{
+    var wrap=document.getElementById('candoCheck'); if(!wrap) return;
+    var KEY='frc:cando', file=location.pathname.split('/').pop();
+    var saved={}; try{ saved=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+    var rows=wrap.querySelectorAll('.cc-row');
+    Array.prototype.forEach.call(rows,function(row,i){
+      var k=file+'#'+i;
+      if(saved[k]) row.classList.add('on');
+      row.addEventListener('click',function(){
+        var on=!row.classList.contains('on');
+        row.classList.toggle('on',on);
+        if(on){ saved[k]=1; } else { delete saved[k]; }
+        try{ localStorage.setItem(KEY,JSON.stringify(saved)); }catch(e){}
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

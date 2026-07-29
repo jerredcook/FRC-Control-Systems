@@ -97,6 +97,20 @@
   .note p{margin:0;color:var(--text);font-size:16px}
   .note.teal{border-color:var(--teal);background:rgba(52,215,197,.06)} .note.teal .nh{color:var(--teal)}
 
+  .cando{margin:16px 0 4px;border-left:3px solid var(--teal);background:rgba(52,215,197,.06);border-radius:0 10px 10px 0;padding:12px 16px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);display:block;margin-bottom:6px}
+  .cando ul{margin:0;padding-left:18px;color:var(--muted);font-size:15px;line-height:1.5}
+  .cando li{margin:3px 0}
+  .cando-check{margin:4px 0 18px;border:1px solid var(--line-2);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:8px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:flex-start;min-height:28px;padding:5px 4px;cursor:pointer;font-size:15px;color:var(--muted);border-radius:8px;transition:.12s}
+  .cando-check .cc-row:hover{background:rgba(255,255,255,.02)}
+  .cando-check .cc-box{flex:0 0 auto;width:19px;height:19px;border-radius:50%;border:2px solid var(--line-2);color:transparent;display:grid;place-items:center;font-size:12px;margin-top:1px;transition:.12s}
+  .cando-check .cc-row.on{color:var(--text)}
+  .cando-check .cc-row.on .cc-box{border-color:var(--teal);background:rgba(52,215,197,.2);color:var(--teal)}
+  .missions .m-item{flex-wrap:wrap}
+  .missions .m-hint{flex-basis:100%;margin:7px 0 1px 24px;font-size:13px;color:var(--amber);border-left:2px solid rgba(255,176,32,.5);padding:2px 0 3px 11px;font-style:italic;line-height:1.5}
+
   .codewrap{margin:18px 0}
   .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
   .codewrap .clabel .badge{color:var(--teal);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
@@ -179,6 +193,11 @@
     <div class="eyebrow">On-Motor Closed Loop</div>
     <h1>Send a target,<br>not a <span class="accent">voltage</span>.</h1>
     <p class="dek">Put your gains in Slot0, fire off a control request, and the Kraken runs the whole PID + feedforward loop on board - at 1 kHz, without your periodic() lifting a finger.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Store all eight gains in Slot0 and command a target with a control request instead of computing volts.</li>
+      <li>Explain how kG in Slot0 erases the droop that plain kP leaves behind.</li>
+      <li>Swap PositionVoltage for VelocityVoltage - and set GravityType right for an elevator versus an arm.</li>
+    </ul></div>
   </div>
 
   <section>
@@ -306,6 +325,10 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(cf
   </section>
 
   <section>
+    <div class="note teal robotcard">
+      <div class="nh">🤖 Now on your robot &middot; 10 minutes</div>
+      <p>On your robot, drop your mechanism's measured feedforward gains (kS, kG, kV, kA) into <span class="k">Slot0</span> and command a hold with a <span class="k">PositionVoltage</span> request - no setVoltage anywhere. Pass: the mechanism drives to the target and holds with the Error near zero; then set kG to 0 in code and watch it settle below the line, exactly like the sim, before you put kG back. If it parks a few centimeters low and just stays there, the droop row in the <a href="closing-the-loop-troubleshooting.html#symgrid">troubleshooting field guide</a> confirms the fix is feedforward kG. No robot handy? Use the <a href="worksheet.html">tuning worksheet</a> to turn your measured gains into a paste-ready Slot0 block.</p>
+    </div>
     <div class="note teal">
       <div class="nh">Going further &middot; optional</div>
       <p>The device holds more than one gain set: there is a Slot0, Slot1, and Slot2, and a control request can name which to use with <span class="k">withSlot</span>. That lets one mechanism switch gains on the fly, like shifting a bike into a different gear, say gentle gains for holding a game piece and aggressive ones for a fast empty move. Worth chewing on: the <span class="k">PositionVoltage</span> request also carries its own feedforward field you can add per command. When would you want a feedforward that changes move to move instead of one baked into Slot0?</p>
@@ -364,6 +387,12 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(cf
   <section>
     <div class="recap">
       <h3>Part III · 03 · Recap</h3>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Can you do these now? Tap what you've got.</div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Store all eight gains in Slot0 and command a target with a control request instead of computing volts.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Explain how kG in Slot0 erases the droop that plain kP leaves behind.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Swap PositionVoltage for VelocityVoltage - and set GravityType right for an elevator versus an arm.</span></div>
+      </div>
       <div class="glossary">
         <div class="gl"><b>Slot0</b><span>Where the 8 gains live on the device.</span></div>
         <div class="gl"><b>Control request</b><span>PositionVoltage / VelocityVoltage - names a target.</span></div>
@@ -506,7 +535,19 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(cf
     if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
   });
   var mDroopSeen=false, mGoldHold=0;
+  // ---- stuck hints: surface one authored nudge per uncleared mission after ~150s of active fiddling ----
+  var mhHints={
+    droop:"For the droop goal: leave Slot0 kP at 5.0, drag kG all the way down to 0, and let it settle - Error parks near 0.09, which is 0.45 divided by 5.",
+    restore:"For the restore goal: after you have seen the droop, drag kG back up to 0.45 - Error falls to 0.00 as feedforward pays the gravity bill.",
+    ring:"For the ring goal: push Slot0 kP up high, past about 12, until the carriage sails over the target line and rings before it settles.",
+    gold:"For gold: with kG at 0, raise kP until Error holds under 0.03 for two full seconds on kP muscle alone - it takes a lot of gain."
+  };
+  try{ Object.keys(mItems).forEach(function(id){ var n=mItems[id]; if(!n)return; var h=document.createElement('div'); h.className='m-hint'; h.hidden=true; h.textContent=mhHints[id]||''; if(h.textContent){ n.appendChild(h); n.__mh=h; } }); }catch(e){}
+  var mhActMs=0, mhLast=0;
+  try{ var mhEl=document.querySelector('.demo')||document.querySelector('.builder'); if(mhEl){ mhEl.addEventListener('pointerdown',function(){mhLast=Date.now();},true); mhEl.addEventListener('input',function(){mhLast=Date.now();},true); } }catch(e){}
+  function mhTick(ms){ try{ if(mhLast && Date.now()-mhLast<3500) mhActMs+=ms; if(mhActMs>=150000){ Object.keys(mItems).forEach(function(id){ var n=mItems[id]; if(n&&n.__mh&&!n.classList.contains('cleared')) n.__mh.hidden=false; }); } }catch(e){} }
   setInterval(function(){
+    mhTick(200);
     var mErr=S.tgt-S.y, mStill=Math.abs(S.v)<0.01;
     if(S.kG<0.005&&Math.abs(S.kP-5)<0.01&&Math.abs(mErr-0.09)<0.012&&mStill){ mDroopSeen=true; mClear('droop'); }
     if(mDroopSeen&&Math.abs(S.kG-0.45)<0.005&&Math.abs(mErr)<0.01&&mStill) mClear('restore');
@@ -628,6 +669,25 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(cf
         if(shown<items.length){ items[shown].hidden=false; shown++; }
         if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
         else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
+  }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  try{
+    var box=document.getElementById('candoCheck'); if(!box) return;
+    var file=location.pathname.split('/').pop(), KEY='frc:cando', map={};
+    try{ map=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+    var rows=box.querySelectorAll('.cc-row');
+    Array.prototype.forEach.call(rows,function(row,i){
+      var k=file+'#'+i;
+      if(map[k]) row.classList.add('on');
+      row.addEventListener('click',function(){
+        var on=row.classList.toggle('on');
+        if(on){map[k]=1;}else{delete map[k];}
+        try{ localStorage.setItem(KEY,JSON.stringify(map)); }catch(e){}
       });
     });
   }catch(e){}

@@ -61,6 +61,20 @@
   input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--indigo);cursor:pointer;box-shadow:0 0 10px -1px var(--indigo)}
   input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .cando{border-left:3px solid var(--indigo);background:rgba(255,138,76,.06);border-radius:0 10px 10px 0;padding:11px 15px;margin:16px 0 2px}
+  .cando .cd-h{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:6px}
+  .cando ul{margin:0;padding:0;list-style:none}
+  .cando li{position:relative;font-size:15px;color:var(--muted);padding:3px 0 3px 20px;line-height:1.45}
+  .cando li::before{content:"→";position:absolute;left:0;color:var(--indigo)}
+  .cando-check{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:6px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:flex-start;min-height:28px;padding:5px 0;cursor:pointer;font-size:15px;color:var(--muted);transition:.12s}
+  .cando-check .cc-row:hover{color:var(--text)}
+  .cando-check .cc-box{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--line-2);display:grid;place-items:center;font-size:12px;color:transparent;margin-top:1px;transition:.12s}
+  .cando-check .cc-row.on .cc-box{border-color:var(--green);background:var(--green);color:#06210f}
+  .cando-check .cc-row.on{color:var(--text)}
+  .missions .m-hint{margin:2px 0 6px 26px;font-size:13px;color:var(--muted);font-style:italic;line-height:1.5;border-left:2px solid var(--amber);padding-left:10px}
+  .missions .m-hint b{color:var(--text);font-style:normal}
   .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--amber);border-radius:12px;background:var(--panel);padding:14px 16px}
   .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:9px}
   .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
@@ -127,6 +141,13 @@
     <div class="eyebrow">Aluminum Extrusion</div>
     <h1>The robot's<br><span class="accent">skeleton</span>.</h1>
     <p class="dek">Almost every FRC robot is built from aluminum box tube, light, strong, and easy to cut and drill. Pick the right profile and you get a stiff, lightweight frame. Pick wrong and it's heavy or it flexes.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span>
+      <ul>
+        <li>Explain why standing a tube tall makes it far stiffer - stiffness grows with height cubed.</li>
+        <li>Orient a 1x2 tube so its tall side faces the bending load.</li>
+        <li>Compare profiles by weight and stiffness to pick the lightest one that's stiff enough.</li>
+      </ul>
+    </div>
   </div>
 
   <section>
@@ -170,9 +191,13 @@
       <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
       <div class="m-sag" id="mSag">Mid-span sag under a 20 lb push: 0.017 in (1x1 tube, 2.0 ft)</div>
       <div class="m-item" data-m="tall8"><span class="m-st">○</span><span>Set length to <b>3.0 ft</b> on the <b>1x1</b> tube and read the sag above - about <b>0.056 in</b>. Now switch to <b>1x2</b> and watch it drop to about <b>0.007 in</b>. That is <b>8 times</b> stiffer, because 2 cubed is 8. You just watched the cube rule do its work.</span></div>
+      <div class="m-hint" data-h="tall8" hidden>Drag Length to exactly 3.0 ft, click <b>1x1 tube</b> and read the sag, then click <b>1x2 tube</b> while still at 3.0 ft - the mission needs to see both at that length.</div>
       <div class="m-item" data-m="flat"><span class="m-st">○</span><span>Same metal, wrong way up: at <b>3.0 ft</b>, compare <b>1x2</b> with <b>2x1</b>. Both weigh <b>1.4 lb</b>, but laid flat it sags <b>8x</b> more. Worth a slow look - nothing changed except which way the tube stands.</span></div>
+      <div class="m-hint" data-h="flat" hidden>Stay at 3.0 ft and click both the <b>1x2</b> and the <b>2x1</b> buttons. Same tube, same weight - only the orientation, and the sag, changes.</div>
       <div class="m-item" data-m="sag04"><span class="m-st">○</span><span>See if you can push a beam past <b>0.40 in</b> of sag, like a long plank between two chairs. Only a 1-inch-tall profile stretched long gets there - length hurts with its cube too, and now you have felt both cubes.</span></div>
+      <div class="m-hint" data-h="sag04" hidden>Pick a 1-inch-tall profile (<b>1x1</b> or <b>2x1</b>) and drag Length far out - past about 5.8 ft the sag climbs over 0.40 in, like a long plank.</div>
       <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> span <b>3.0 ft</b> with sag under <b>0.050 in</b> at <b>1.1 lb</b> or less. Exactly one profile pulls it off - hunt for it the way a designer would, weight in one hand and stiffness in the other.</span></div>
+      <div class="m-hint" data-h="gold" hidden>You need light <b>and</b> stiff. Set 3.0 ft and try the <b>C-channel</b> - it gives you 1x2 height at barely more than a 1x1's weight.</div>
     </div>
   </section>
 
@@ -262,6 +287,12 @@
         <div class="gl"><b>Profile</b><span>1x1, 1x2, 2x1, C-channel.</span></div>
         <div class="gl"><b>Stiffness ~ height³</b><span>Taller resists bending far better.</span></div>
         <div class="gl"><b>Orientation</b><span>Point the tall side at the load.</span></div>
+      </div>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Can you do these now?</div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Explain why standing a tube tall makes it far stiffer - stiffness grows with height cubed.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Orient a 1x2 tube so its tall side faces the bending load.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Compare profiles by weight and stiffness to pick the lightest one that's stiff enough.</span></div>
       </div>
       <a class="next" href="build-lesson-7.html">
         <div class="n-eyebrow">Up next · Part 2 · 02</div>
@@ -365,6 +396,17 @@
   Object.keys(mItems).forEach(function(id){
     if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
   });
+  // stuck-hint timing: after ~150s of active fiddling on a still-open mission, reveal one nudge
+  var mHintT={}, mLastAct=Date.now(), mDemoEl=document.getElementById('demo');
+  if(mDemoEl){ ['pointerdown','input','click'].forEach(function(ev){ mDemoEl.addEventListener(ev,function(){ mLastAct=Date.now(); },true); }); }
+  function mStuck(){
+    var active=(Date.now()-mLastAct)<5000;
+    Object.keys(mItems).forEach(function(id){
+      var n=mItems[id]; if(!n||n.classList.contains('cleared')) return;
+      if(active) mHintT[id]=(mHintT[id]||0)+0.2;
+      if((mHintT[id]||0)>=150){ var h=document.querySelector('#missions .m-hint[data-h="'+id+'"]'); if(h) h.hidden=false; }
+    });
+  }
   // Teaching model from this lesson: bending stiffness ~ height cubed, sag ~ length cubed.
   // 20 lb push at mid-span, beam supported at both ends. I of a 1x1 x 1/16" tube = 0.0345 in^4,
   // E(aluminum) = 10,000,000 psi; taller profiles scale by h^3 (the open C-channel loses ~20%).
@@ -381,6 +423,7 @@
     if(mSeen12&&mSeen21) mClear('flat');
     if(sag>0.40) mClear('sag04');
     if(at3&&sag<0.05&&PROFS[prof].lbft*len<=1.1) mClear('gold');
+    mStuck();
   },200);
   }catch(e){}
 
@@ -441,6 +484,26 @@
   opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(revealed)return; picked=i;
     opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
     if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
+})();
+</script>
+<script>
+(function(){
+  try{
+    var wrap=document.getElementById('candoCheck'); if(!wrap) return;
+    var KEY='frc:cando', file=location.pathname.split('/').pop();
+    var saved={}; try{ saved=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+    var rows=wrap.querySelectorAll('.cc-row');
+    Array.prototype.forEach.call(rows,function(row,i){
+      var k=file+'#'+i;
+      if(saved[k]) row.classList.add('on');
+      row.addEventListener('click',function(){
+        var on=!row.classList.contains('on');
+        row.classList.toggle('on',on);
+        if(on){ saved[k]=1; } else { delete saved[k]; }
+        try{ localStorage.setItem(KEY,JSON.stringify(saved)); }catch(e){}
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

@@ -60,6 +60,26 @@
   .btn.primary{background:linear-gradient(180deg,#ffb37e,var(--indigo));color:#2a1503;font-weight:700;border:none}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
 
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--amber);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+  .missions .m-hint{flex-basis:100%;margin:4px 0 0 24px;font-size:13px;color:var(--muted);border-left:2px solid var(--amber);padding:2px 0 2px 10px;font-style:italic;line-height:1.5}
+  .cando{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:12px 16px;margin:18px 0 2px}
+  .cando .cd-h{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:7px}
+  .cando ul{margin:0;padding-left:18px;color:var(--muted);font-size:15px;line-height:1.5}
+  .cando li{margin:3px 0}
+  .cando-check{margin-top:16px;border:1px solid var(--line-2);border-left:3px solid var(--amber);border-radius:12px;background:var(--panel);padding:12px 16px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:4px}
+  .cando-check .cc-row{display:flex;gap:10px;align-items:center;font-size:15px;color:var(--muted);padding:6px 2px;min-height:30px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .cando-check .cc-row .cc-box{flex:0 0 auto;width:19px;height:19px;border-radius:50%;border:2px solid var(--faint);color:transparent;font-size:12px;line-height:16px;text-align:center;transition:.12s}
+  .cando-check .cc-row.checked{color:var(--text)}
+  .cando-check .cc-row.checked .cc-box{border-color:var(--green);background:rgba(67,214,126,.15);color:var(--green)}
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
   .note p{margin:0;color:var(--text);font-size:16px}
@@ -115,6 +135,11 @@
     <div class="eyebrow">Shooters &amp; End Effectors</div>
     <h1>Launch it home.</h1>
     <p class="dek">The end effector is the business end of the robot, the part that actually scores. A flywheel shooter spins a wheel up, feeds a game piece into it, and flings it across the field. Dial in the speed and angle, and put it in the goal.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Explain how a flywheel shooter launches a piece and why more RPM means a longer shot.</li>
+      <li>Aim a shot by trading off flywheel RPM and hood angle to land it in the goal.</li>
+      <li>Say why a shooter needs its RPM held rock-steady, and connect it to the Control course's velocity loop.</li>
+    </ul></div>
   </div>
 
   <section>
@@ -149,6 +174,13 @@
       </div>
     </div>
     <p class="caption">The dashed line is the predicted path, change RPM or angle and it moves, so you can aim before firing. Land the piece in the teal goal to score. More RPM throws it farther; the angle controls the height of the arc.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
+      <div class="m-item" data-m="sink"><span class="m-st">○</span><span>Land your <b>first basket</b>: tune the <b>RPM</b> and <b>launch angle</b> until the dashed arc drops through the teal goal, then press <b>Shoot</b>. Aiming with the predicted path before you fire is exactly how real teams do it.<div class="m-hint" hidden>For the first-basket mission: on a wide screen the goal only falls for a nearly maxed wheel - push Flywheel RPM up near 6000 and set the launch angle around 50, then nudge until the dashed arc kisses the goal.</div></span></div>
+      <div class="m-item" data-m="iterate"><span class="m-st">○</span><span>Miss, then fix it: fire a shot that <b>misses the goal</b>, then adjust the <b>RPM</b> or angle and sink the very next one. Adjusting after a miss is the whole job.<div class="m-hint" hidden>For the fix-it mission: set the RPM low so the arc falls well short and Shoot for a miss, then slide the RPM back up near 6000 and Shoot again to score.</div></span></div>
+      <div class="m-item" data-m="twoarc"><span class="m-st">○</span><span>Sink <b>two baskets from two different launch angles</b>, at least <b>6 degrees apart</b> - trade a steeper angle for the RPM that still lands it. Same goal, more than one arc into it.<div class="m-hint" hidden>For the two-arc mission: keep RPM near 6000 and score once around a 46 degree launch angle, then raise the angle to about 53 and score again - both drop through the goal.</div></span></div>
+      <div class="m-item gold" data-m="lob"><span class="m-st">★</span><span><b>Gold:</b> sink a <b>high lob</b> - score with the launch angle at <b>52 degrees or higher</b>. A steep arc drops in from above, the shot that clears a defender parked in your way.<div class="m-hint" hidden>Gold: set the launch angle to 52 or a touch higher, then hunt for the RPM (near 6000 on a wide screen) that still drops the steep arc through the goal.</div></span></div>
+    </div>
   </section>
 
   <section>
@@ -239,6 +271,12 @@
         <div class="gl"><b>Gripper</b><span>Place gently instead of throw.</span></div>
         <div class="gl"><b>Steady RPM</b><span>Consistent shots; a control job.</span></div>
       </div>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Can you do these now? Tap each one you've got.</div>
+        <div class="cc-row"><span class="cc-box"></span><span>Explain how a flywheel shooter launches a piece and why more RPM means a longer shot.</span></div>
+        <div class="cc-row"><span class="cc-box"></span><span>Aim a shot by trading off flywheel RPM and hood angle to land it in the goal.</span></div>
+        <div class="cc-row"><span class="cc-box"></span><span>Say why a shooter needs its RPM held rock-steady, and connect it to the Control course's velocity loop.</span></div>
+      </div>
       <a class="next" href="build.html">
         <div class="n-eyebrow">Part 4 complete · Mechanisms</div>
         <h3>On to Part 5 - The Drivetrain →</h3>
@@ -321,6 +359,60 @@
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
   requestAnimationFrame(step);
 
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  // step() sets `result` to 'score' or 'miss' when the ball lands, and it holds until the next Shoot.
+  // Snapshot the launch angle on the frame result first flips to a score - those are that shot's settings.
+  var mPrev='', mSawMiss=false, mAngles=[];
+  setInterval(function(){
+    if(result==='miss' && mPrev!=='miss') mSawMiss=true;
+    if(result==='score' && mPrev!=='score'){
+      var a=angDeg;
+      mClear('sink');
+      if(mSawMiss) mClear('iterate');
+      if(a>=52) mClear('lob');
+      var two=false;
+      for(var i=0;i<mAngles.length;i++){ if(Math.abs(mAngles[i]-a)>=6){ two=true; break; } }
+      mAngles.push(a);
+      if(two) mClear('twoarc');
+    }
+    mPrev=result;
+  },200);
+
+  // ---- stuck-hints: after ~150s of active fiddling on an uncleared mission, surface one nudge ----
+  var mDemo=document.getElementById('demo'), mLastAct=0;
+  function mPoke(){ mLastAct=Date.now(); }
+  if(mDemo){ mDemo.addEventListener('pointerdown',mPoke,true); mDemo.addEventListener('input',mPoke,true); }
+  window.addEventListener('keydown',mPoke,true);
+  var mStuck={};
+  Object.keys(mItems).forEach(function(id){ mStuck[id]=0; });
+  setInterval(function(){
+    if(Date.now()-mLastAct>4000) return;
+    Object.keys(mItems).forEach(function(id){
+      var n=mItems[id]; if(!n||n.classList.contains('cleared')) return;
+      mStuck[id]+=0.2;
+      if(mStuck[id]>=150){ var h=n.querySelector('.m-hint'); if(h) h.hidden=false; }
+    });
+  },200);
+  }catch(e){}
+
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
@@ -375,6 +467,27 @@
   opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(revealed)return; picked=i;
     opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
     if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
+})();
+</script>
+<script>
+(function(){
+  try{
+    var KEY='frc:cando', file=location.pathname.split('/').pop();
+    var box=document.getElementById('candoCheck'); if(!box) return;
+    var saved={}; try{ saved=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+    var rows=box.querySelectorAll('.cc-row');
+    Array.prototype.forEach.call(rows,function(row,i){
+      var key=file+'#'+i, bx=row.querySelector('.cc-box');
+      if(saved[key]){ row.classList.add('checked'); if(bx) bx.textContent='✓'; }
+      row.addEventListener('click',function(){
+        var on=!row.classList.contains('checked');
+        row.classList.toggle('checked',on);
+        if(bx) bx.textContent=on?'✓':'';
+        if(on){ saved[key]=true; } else { delete saved[key]; }
+        try{ localStorage.setItem(KEY,JSON.stringify(saved)); }catch(e){}
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

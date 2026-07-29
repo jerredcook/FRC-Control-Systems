@@ -106,6 +106,16 @@
   .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
   .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  .cando{border-left:3px solid var(--indigo);background:rgba(255,138,76,.07);border-radius:0 10px 10px 0;padding:12px 16px;margin:18px 0 0}
+  .cando .cd-h{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:6px}
+  .cando ul{margin:0;padding-left:18px} .cando li{color:var(--muted);font-size:15px;line-height:1.5;margin:2px 0}
+  .cando-check{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:8px}
+  .cando-check .cc-row{display:flex;gap:10px;align-items:center;min-height:30px;padding:4px 0;cursor:pointer;font-size:15px;color:var(--muted);transition:.12s}
+  .cando-check .cc-row .cc-box{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--line-2);display:grid;place-items:center;font-size:12px;color:var(--green);line-height:1}
+  .cando-check .cc-row.done{color:var(--text)} .cando-check .cc-row.done .cc-box{border-color:var(--green);background:rgba(67,214,126,.14)}
+  .missions .m-item{flex-wrap:wrap}
+  .missions .m-hint{flex:0 0 100%;margin:7px 0 1px 22px;font-size:13px;color:var(--muted);border-left:2px solid var(--amber);padding-left:10px;line-height:1.5}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -125,6 +135,11 @@
     <div class="eyebrow">Bearings</div>
     <h1>Hold the shaft,<br>let it <span class="accent">spin</span>.</h1>
     <p class="dek">Every gear, sprocket, and pulley rides on a shaft, and that shaft has to spin freely without flopping around. Bearings do both: low friction so it turns easily, and support so it runs true. Support it on one side only and it whips.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Explain what a bearing does for a shaft: low friction plus support</li>
+      <li>Predict when a cantilevered shaft wobbles and when two bearings run it true</li>
+      <li>Match a bearing bore to the shaft it rides on</li>
+    </ul></div>
   </div>
 
   <section>
@@ -163,10 +178,10 @@
     <p class="caption">The cantilever shaft bows under load and the end whirls in a circle as it spins, that wobble is runout, and it wrecks precision and wears parts. The supported shaft, pinned at both ends, barely moves no matter the load.</p>
     <div class="missions" id="missions">
       <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
-      <div class="m-item" data-m="fullload"><span class="m-st">○</span><span>Keep <b>1 bearing</b> selected and push the load to <b>100%</b>. Read the Runout box: <b>high wobble</b>. That is the diving board at its worst - keep that picture, it is what an unsupported shaft always becomes.</span></div>
-      <div class="m-item" data-m="flip"><span class="m-st">○</span><span>Find the flip point. Slide the load down, then creep back up until Runout first flips from <b>wobbling</b> to <b>high wobble</b>, and hold the slider there for a second. It hides a little past halfway - sneak up on it.</span></div>
-      <div class="m-item" data-m="twobearings"><span class="m-st">○</span><span>Leave the load at <b>100%</b> and switch to <b>2 bearings</b>. Runout now reads <b>runs true ✓</b>. Same load, zero wobble - one cheap bearing bought you all of that.</span></div>
-      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> use the fourth-power rule from the note below. A <b>3/4"</b> shaft is exactly twice the diameter of a <b>3/8"</b> shaft. How many times stiffer against bending is it? Work it out, then trust the rule - even if the number feels too big to be true. <input id="mGoldIn" type="number" step="any" inputmode="decimal" style="width:74px;margin-left:4px;background:var(--panel-2);border:1px solid var(--line-2);border-radius:7px;color:var(--text);font-family:var(--mono);font-size:13px;padding:5px 8px"> <button id="mGoldBtn" type="button" style="margin-left:4px;background:var(--panel-2);border:1px solid var(--line-2);border-radius:7px;color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:6px 10px;cursor:pointer">Check</button></span></div>
+      <div class="m-item" data-m="fullload"><span class="m-st">○</span><span>Keep <b>1 bearing</b> selected and push the load to <b>100%</b>. Read the Runout box: <b>high wobble</b>. That is the diving board at its worst - keep that picture, it is what an unsupported shaft always becomes.<div class="m-hint" hidden>For full load: keep 1 bearing selected and drag the load slider all the way to 100%. The Runout box reads high wobble.</div></span></div>
+      <div class="m-item" data-m="flip"><span class="m-st">○</span><span>Find the flip point. Slide the load down, then creep back up until Runout first flips from <b>wobbling</b> to <b>high wobble</b>, and hold the slider there for a second. It hides a little past halfway - sneak up on it.<div class="m-hint" hidden>For the flip point: the sim flips to high wobble just past 55% load. Ease the slider up to about 58% and hold it there a second.</div></span></div>
+      <div class="m-item" data-m="twobearings"><span class="m-st">○</span><span>Leave the load at <b>100%</b> and switch to <b>2 bearings</b>. Runout now reads <b>runs true ✓</b>. Same load, zero wobble - one cheap bearing bought you all of that.<div class="m-hint" hidden>For two bearings: leave the load at 100%, then click 2 bearings (supported). Runout jumps straight to runs true.</div></span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> use the fourth-power rule from the note below. A <b>3/4"</b> shaft is exactly twice the diameter of a <b>3/8"</b> shaft. How many times stiffer against bending is it? Work it out, then trust the rule - even if the number feels too big to be true. <input id="mGoldIn" type="number" step="any" inputmode="decimal" style="width:74px;margin-left:4px;background:var(--panel-2);border:1px solid var(--line-2);border-radius:7px;color:var(--text);font-family:var(--mono);font-size:13px;padding:5px 8px"> <button id="mGoldBtn" type="button" style="margin-left:4px;background:var(--panel-2);border:1px solid var(--line-2);border-radius:7px;color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:6px 10px;cursor:pointer">Check</button><div class="m-hint" hidden>For the gold: a 3/4 inch shaft is twice the diameter of a 3/8 inch shaft, and stiffness climbs with diameter to the fourth power. So 2 to the fourth = 16. Type 16 and Check.</div></span></div>
     </div>
   </section>
 
@@ -256,6 +271,12 @@
         <div class="gl"><b>Cantilever</b><span>One bearing; wobbles under load.</span></div>
         <div class="gl"><b>Supported</b><span>Two bearings; runs true.</span></div>
         <div class="gl"><b>Runout</b><span>Wobble that wears parts.</span></div>
+      </div>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Can you do these now? Tap each one you own.</div>
+        <div class="cc-row"><span class="cc-box"></span><span>Explain what a bearing does for a shaft: low friction plus support</span></div>
+        <div class="cc-row"><span class="cc-box"></span><span>Predict when a cantilevered shaft wobbles and when two bearings run it true</span></div>
+        <div class="cc-row"><span class="cc-box"></span><span>Match a bearing bore to the shaft it rides on</span></div>
       </div>
       <a class="next" href="build-lesson-14.html">
         <div class="n-eyebrow">Up next · Part 3 · 05</div>
@@ -360,6 +381,17 @@
     });
     gIn.addEventListener('input',function(){ gIn.style.borderColor='var(--line-2)'; });
   }
+  // stuck-hints: after ~150s of active fiddling on an uncleared mission, reveal its hint
+  var _demoEl=document.getElementById('demo'), _lastAct=0, _stuckAcc={};
+  if(_demoEl){ ['pointerdown','input'].forEach(function(ev){ _demoEl.addEventListener(ev,function(){ _lastAct=Date.now(); }); }); }
+  setInterval(function(){
+    if(Date.now()-_lastAct>1600) return;
+    Object.keys(mItems).forEach(function(id){
+      var n=mItems[id]; if(!n||n.classList.contains('cleared')) return;
+      _stuckAcc[id]=(_stuckAcc[id]||0)+0.2;
+      if(_stuckAcc[id]>=150){ var h=n.querySelector('.m-hint'); if(h&&h.hidden) h.hidden=false; }
+    });
+  },200);
   }catch(e){}
 
   document.querySelectorAll('#quiz .q').forEach(function(q){
@@ -416,6 +448,24 @@
   opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(revealed)return; picked=i;
     opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
     if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
+})();
+</script>
+<script>
+(function(){
+  try{
+    var KEY="frc:cando", file=location.pathname.split("/").pop();
+    var wrap=document.getElementById("candoCheck"); if(!wrap) return;
+    var rows=wrap.querySelectorAll(".cc-row");
+    var saved={}; try{ saved=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+    function paint(row,on){ row.classList.toggle("done",on); var b=row.querySelector(".cc-box"); if(b) b.textContent=on?"✓":""; }
+    rows.forEach(function(row,i){
+      var k=file+"#"+i; paint(row, !!saved[k]);
+      row.addEventListener("click",function(){
+        var on=!row.classList.contains("done"); paint(row,on);
+        saved[k]=on; try{ localStorage.setItem(KEY,JSON.stringify(saved)); }catch(e){}
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

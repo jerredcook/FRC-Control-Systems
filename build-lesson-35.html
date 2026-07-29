@@ -64,6 +64,27 @@
   .score{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--indigo)}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
 
+  .cando{border-left:3px solid var(--indigo);background:rgba(255,138,76,.06);border-radius:0 10px 10px 0;padding:12px 16px;margin:16px 0 2px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);display:block;margin-bottom:6px}
+  .cando ul{margin:0;padding-left:18px}
+  .cando li{color:var(--muted);font-size:15px;line-height:1.5;margin:3px 0}
+  .cando-check{border-left:3px solid var(--indigo);background:rgba(255,138,76,.06);border-radius:0 10px 10px 0;padding:10px 14px;margin:16px 0 0}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);display:block;margin-bottom:4px}
+  .cando-check .cdrow{display:flex;align-items:center;gap:10px;min-height:30px;padding:3px 0;cursor:pointer;color:var(--muted);font-size:15px;line-height:1.4}
+  .cando-check .cdrow .cdbox{width:20px;height:20px;flex:0 0 auto;border:2px solid var(--line-2);border-radius:50%;display:grid;place-items:center;font-size:12px;color:transparent;transition:.12s}
+  .cando-check .cdrow.on{color:var(--text)}
+  .cando-check .cdrow.on .cdbox{border-color:var(--green);background:var(--green);color:#06210f}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--amber);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+  .missions .m-hint{margin:5px 0 2px 24px;font-size:13px;color:var(--muted);border-left:2px solid var(--amber);padding:3px 0 3px 10px;line-height:1.5;font-style:italic}
+  .missions .m-hint b{color:var(--text)}
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
   .note p{margin:0;color:var(--text);font-size:16px}
@@ -119,6 +140,11 @@
     <div class="eyebrow">Design for Manufacture</div>
     <h1>Design what<br>you can <span class="accent">build</span>.</h1>
     <p class="dek">A perfect CAD model is worthless if your shop can't make the part. Design for manufacture, DFM, means making choices that fit your real tools and skills: standard stock, sensible tolerances, and simple shapes. The best design is the one that actually gets built well, on time.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Spot which of two designs your shop can build faster</li>
+      <li>Name the habits that keep a part easy to make: standard stock, holes on a grid, simple shapes</li>
+      <li>Decide where a tight tolerance earns its keep and where it just wastes time</li>
+    </ul></div>
   </div>
 
   <section>
@@ -139,6 +165,17 @@
       </div>
     </div>
     <p class="caption">The easy-to-make choice usually wins twice: it gets built faster <em>and</em> it's easier to fix or replace at competition. Designing for your shop is designing for reliability.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
+      <div class="m-item" data-m="firstwin"><span class="m-st">○</span><span>Make your <b>first right call</b> - in any round, pick the design your shop can actually build faster. One correct pick and this one is yours.</span></div>
+      <div class="m-hint" data-mh="firstwin" hidden>Stuck? The buildable pick is the plain one: <b>standard stock, holes on a grid, simple flat shapes, generous tolerances</b>. Click that card.</div>
+      <div class="m-item" data-m="allpairs"><span class="m-st">○</span><span>Play all the way through - judge <b>all four</b> head-to-head pairs in one pass, pressing <b>Next round</b> after each pick.</span></div>
+      <div class="m-hint" data-mh="allpairs" hidden>Stuck? Just keep making a pick and pressing <b>Next round</b> until you have answered all four pairs.</div>
+      <div class="m-item" data-m="sweep"><span class="m-st">○</span><span>Ace a full run: get <b>all four picks correct</b> in one pass, a clean 4 out of 4 on the scoreboard.</span></div>
+      <div class="m-hint" data-mh="sweep" hidden>Stuck? Take each round slowly - the manufacturable design is always the simpler, more standard one. Four right in a row makes the sweep.</div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> nail <b>two perfect runs</b>. Ace all four, press <b>Restart</b>, then ace all four again - proof it was skill, not luck.</span></div>
+      <div class="m-hint" data-mh="gold" hidden>Stuck? Score a clean 4 out of 4 (Restart resets the score to zero), then press <b>Restart</b> and score another clean 4 out of 4.</div>
+    </div>
   </section>
 
   <section>
@@ -218,6 +255,11 @@
         <div class="gl"><b>Simple shapes</b><span>Flat plates beat 3D forms.</span></div>
         <div class="gl"><b>Buildable wins</b><span>On time and easy to remake.</span></div>
       </div>
+      <div class="cando-check" id="candoCheck"><span class="cc-h">Check yourself - tap what you've got</span>
+        <div class="cdrow"><span class="cdbox">✓</span><span>I can spot which of two designs my shop can build faster</span></div>
+        <div class="cdrow"><span class="cdbox">✓</span><span>I can name the habits that keep a part easy to make</span></div>
+        <div class="cdrow"><span class="cdbox">✓</span><span>I can decide where a tight tolerance is worth it and where it isn't</span></div>
+      </div>
       <a class="next" href="build.html">
         <div class="n-eyebrow">Part 7 complete · Design &amp; CAD</div>
         <h3>On to Part 8 - Build Season →</h3>
@@ -276,6 +318,42 @@
   document.getElementById('next').addEventListener('click',function(){ if(idx<ROUNDS.length-1){ idx++; show(); } else { idx=0; score=0; total=0; document.getElementById('score').textContent='0 / 0'; show(); } });
   show();
 
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  var mHints={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-hint'),function(h){ mHints[h.getAttribute('data-mh')]=h; });
+  var mActive=0, mLastAct=0, mDemoEl=document.getElementById('demo');
+  if(mDemoEl){ mDemoEl.addEventListener('pointerdown',function(){ mLastAct=Date.now(); },true); mDemoEl.addEventListener('input',function(){ mLastAct=Date.now(); },true); }
+  // score/total live in [0,4] within a pass and reset to 0 on Restart; gClean counts clean sweeps
+  var gPrevTotal=-1, gClean=0;
+  setInterval(function(){ try{
+    if(score>=1) mClear('firstwin');
+    if(total>=4) mClear('allpairs');
+    if(score>=4) mClear('sweep');
+    if(total===4){ if(gPrevTotal!==4){ if(score===4) gClean++; gPrevTotal=4; } } else { gPrevTotal=total; }
+    if(gClean>=2) mClear('gold');
+    if(Date.now()-mLastAct<1600) mActive+=0.2;
+    if(mActive>=150){ Object.keys(mItems).forEach(function(id){ if(!mItems[id].classList.contains('cleared')&&mHints[id]&&mHints[id].hasAttribute('hidden')) mHints[id].removeAttribute('hidden'); }); }
+  }catch(e){} },200);
+  }catch(e){}
+
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
@@ -291,6 +369,22 @@
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
 })();
+</script>
+<script>
+(function(){try{
+  var KEY='frc:cando', file=location.pathname.split('/').pop();
+  var map={}; try{ map=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+  var rows=document.querySelectorAll('#candoCheck .cdrow');
+  Array.prototype.forEach.call(rows,function(row,i){
+    var key=file+'#'+i;
+    if(map[key]) row.classList.add('on');
+    row.addEventListener('click',function(){
+      var on=!row.classList.contains('on');
+      row.classList.toggle('on',on);
+      map[key]=on; try{ localStorage.setItem(KEY,JSON.stringify(map)); }catch(e){}
+    });
+  });
+}catch(e){}})();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>

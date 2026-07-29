@@ -66,6 +66,19 @@
   .missions .m-item.cleared{color:var(--text)}
   .missions .m-item.cleared .m-st{color:var(--green)}
   .missions .m-item.gold .m-st{color:var(--amber)}
+  .m-hint{margin:1px 0 7px 27px;font-size:13px;color:var(--amber);border-left:2px solid rgba(255,176,32,.45);padding:3px 0 3px 10px;font-style:italic;line-height:1.45}
+  .m-hint[hidden]{display:none}
+
+  .cando{border-left:3px solid var(--amber);background:rgba(255,176,32,.05);border-radius:0 10px 10px 0;padding:11px 16px;margin:16px 0 2px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);display:block;margin-bottom:6px}
+  .cando ul{margin:0;padding-left:18px;color:var(--muted);font-size:15px;line-height:1.5}
+  .cando li{margin:2px 0}
+  .cando-check{margin-top:16px;border-top:1px solid var(--line);padding-top:15px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);display:block;margin-bottom:8px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:center;padding:5px 0;min-height:30px;cursor:pointer;font-size:15px;color:var(--muted);transition:.12s}
+  .cando-check .cc-row .cc-box{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--line-2);display:inline-flex;align-items:center;justify-content:center;font-size:12px;line-height:1;color:transparent;transition:.12s}
+  .cando-check .cc-row.on{color:var(--text)}
+  .cando-check .cc-row.on .cc-box{border-color:var(--green);background:rgba(67,214,126,.16);color:var(--green)}
 
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
@@ -122,6 +135,11 @@
     <div class="eyebrow">Swerve Modules</div>
     <h1>Two motors<br>per <span class="accent">wheel</span>.</h1>
     <p class="dek">Swerve is the most capable drivetrain in FRC, and it works by giving every wheel two motors: one to drive it and one to steer it. Each wheel can point any direction and spin any speed, so the robot can move sideways, diagonally, and spin all at once.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+    <li>Name the two motors in a swerve module and the job each one does</li>
+    <li>Explain why four modules make a robot holonomic - move any direction and spin at once</li>
+    <li>Say why a smart module takes the short way around to a new heading</li>
+    </ul></div>
   </div>
 
   <section>
@@ -157,9 +175,13 @@
     <div class="missions" id="missions">
       <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
       <div class="m-item" data-m="steer0"><span class="m-st">○</span><span>Set Drive speed to <b>0%</b>, then swing the Steer angle at least <b>90°</b>. The speed arrow is gone, but the module still points wherever you ask. Two motors, two separate jobs - and you just proved they are independent.</span></div>
+      <div class="m-hint" data-for="steer0" hidden>For the no-speed-still-steers goal: drag Drive speed all the way to 0%, then swing the Steer angle across at least 90 degrees - the module keeps pointing with no speed at all.</div>
       <div class="m-item" data-m="arrow"><span class="m-st">○</span><span>Now flip the experiment around: park the Steer at <b>90°</b> and leave it alone. Sweep Drive speed from <b>20% or less</b> up to <b>90% or more</b> and watch closely - only the arrow grows, the heading never budges.</span></div>
+      <div class="m-hint" data-for="arrow" hidden>Park the Steer angle right at 90 degrees and leave it there, then drag Drive speed from 20% or lower up to 90% or higher - only the arrow grows, the heading holds.</div>
       <div class="m-item" data-m="wrap"><span class="m-st">○</span><span>Try this one slowly: drag the Steer from <b>170°</b> all the way around to <b>-170°</b>. You dragged 340°, but those two headings are only <b>20° apart</b>. A smart module takes the short way - and now you know why it should.</span></div>
+      <div class="m-hint" data-for="wrap" hidden>Drag the Steer angle all the way to 170 degrees, then keep dragging around to -170 degrees - you have to touch both ends for it to clear.</div>
       <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> hold a commanded state, Steer <b>-135°</b> and Drive <b>35%</b>, steady for <b>2 seconds</b>. An angle plus a speed - that is exactly the order swerve kinematics sends each module, and you just carried one out by hand.</span></div>
+      <div class="m-hint" data-for="gold" hidden>Set Steer to -135 degrees and Drive to 35%, then hold both steady for two seconds - the arrow keys nudge one step at a time if you overshoot.</div>
     </div>
   </section>
 
@@ -251,6 +273,12 @@
         <div class="gl"><b>Holonomic</b><span>Move any direction + rotate.</span></div>
         <div class="gl"><b>Buy it</b><span>SDS, WCP, MAXSwerve.</span></div>
         <div class="gl"><b>Kinematics in code</b><span>Deploy 6.2 computes the states.</span></div>
+      </div>
+      <div class="cando-check" id="candoCheck">
+        <span class="cc-h">You made it - tap each one you can do now</span>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Name the two motors in a swerve module and the job each one does</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Explain why four modules make a robot holonomic - move any direction and spin at once</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Say why a smart module takes the short way around to a new heading</span></div>
       </div>
       <a class="next" href="build-lesson-26.html">
         <div class="n-eyebrow">Up next · Part 5 · 05 · Finale</div>
@@ -359,6 +387,23 @@
     if(Math.abs(angDeg+135)<=2 && Math.abs(spd-35)<=2){ mHold+=0.2; } else { mHold=0; }
     if(mHold>=2) mClear('gold');
   },200);
+
+  // stuck-hints: after ~150s of active fiddling on an uncleared mission, surface one nudge
+  var mHintEls={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-hint'),function(h){ mHintEls[h.getAttribute('data-for')]=h; });
+  var mHacc={}, mLastAct=0, mHdemo=document.getElementById('demo');
+  function mHbump(){ mLastAct=Date.now(); }
+  if(mHdemo){ ['pointerdown','input','click'].forEach(function(ev){ mHdemo.addEventListener(ev,mHbump,true); }); }
+  window.addEventListener('keydown',mHbump,true);
+  setInterval(function(){
+    if(!mLastAct || Date.now()-mLastAct>5000) return;
+    Object.keys(mHintEls).forEach(function(id){
+      var it=mItems[id], h=mHintEls[id];
+      if(!it||!h||it.classList.contains('cleared')||!h.hasAttribute('hidden')) return;
+      mHacc[id]=(mHacc[id]||0)+0.2;
+      if(mHacc[id]>=150) h.removeAttribute('hidden');
+    });
+  },200);
   }catch(e){}
 
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
@@ -419,6 +464,22 @@
     opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
     if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
 })();
+</script>
+<script>
+(function(){ try{
+  var KEY='frc:cando', file=location.pathname.split('/').pop(), box={};
+  try{ box=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+  var rows=document.querySelectorAll('#candoCheck .cc-row');
+  Array.prototype.forEach.call(rows,function(row,i){
+    var k=file+'#'+i;
+    if(box[k]) row.classList.add('on');
+    row.addEventListener('click',function(){
+      var on=!row.classList.contains('on');
+      row.classList.toggle('on',on);
+      box[k]=on; try{ localStorage.setItem(KEY,JSON.stringify(box)); }catch(e){}
+    });
+  });
+}catch(e){} })();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>

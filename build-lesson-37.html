@@ -64,6 +64,16 @@
   .score{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--indigo)}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
 
+  .cando{border-left:3px solid var(--indigo);background:rgba(255,138,76,.06);border-radius:0 10px 10px 0;padding:12px 16px;margin:16px 0 2px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);display:block;margin-bottom:6px}
+  .cando ul{margin:0;padding-left:18px}
+  .cando li{color:var(--muted);font-size:15px;line-height:1.5;margin:3px 0}
+  .cando-check{border-left:3px solid var(--indigo);background:rgba(255,138,76,.06);border-radius:0 10px 10px 0;padding:10px 14px;margin:16px 0 0}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);display:block;margin-bottom:4px}
+  .cando-check .cdrow{display:flex;align-items:center;gap:10px;min-height:30px;padding:3px 0;cursor:pointer;color:var(--muted);font-size:15px;line-height:1.4}
+  .cando-check .cdrow .cdbox{width:20px;height:20px;flex:0 0 auto;border:2px solid var(--line-2);border-radius:50%;display:grid;place-items:center;font-size:12px;color:transparent;transition:.12s}
+  .cando-check .cdrow.on{color:var(--text)}
+  .cando-check .cdrow.on .cdbox{border-color:var(--green);background:var(--green);color:#06210f}
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
   .note p{margin:0;color:var(--text);font-size:16px}
@@ -119,6 +129,11 @@
     <div class="eyebrow">Manufacturing Methods</div>
     <h1>The right<br><span class="accent">machine</span>.</h1>
     <p class="dek">A workshop is a set of specialized tools, each good at one kind of cut. Knowing which machine makes which part, and which one is the safe, fast choice, is what turns a CAD model into real aluminum. Pick the right tool and the part takes minutes; pick wrong and you fight it for an hour.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Match a part to the right machine - saw, drill press, mill, or lathe</li>
+      <li>Explain why the bandsaw and drill press make most of a robot</li>
+      <li>Say why safety and mentor sign-off come before you ever run a machine</li>
+    </ul></div>
   </div>
 
   <section>
@@ -219,6 +234,11 @@
         <div class="gl"><b>3D printer</b><span>Complex plastic shapes.</span></div>
         <div class="gl"><b>Safety first</b><span>The skill before all others.</span></div>
       </div>
+      <div class="cando-check" id="candoCheck"><span class="cc-h">Check yourself - tap what you've got</span>
+        <div class="cdrow"><span class="cdbox">✓</span><span>I can match a part to the right machine - saw, drill press, mill, or lathe</span></div>
+        <div class="cdrow"><span class="cdbox">✓</span><span>I can explain why the bandsaw and drill press make most of a robot</span></div>
+        <div class="cdrow"><span class="cdbox">✓</span><span>I can say why safety and mentor sign-off come before running a machine</span></div>
+      </div>
       <a class="next" href="build-lesson-38.html">
         <div class="n-eyebrow">Up next · Part 8 · 03</div>
         <h3>Assembling the Robot</h3>
@@ -295,6 +315,22 @@
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
 })();
+</script>
+<script>
+(function(){try{
+  var KEY='frc:cando', file=location.pathname.split('/').pop();
+  var map={}; try{ map=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+  var rows=document.querySelectorAll('#candoCheck .cdrow');
+  Array.prototype.forEach.call(rows,function(row,i){
+    var key=file+'#'+i;
+    if(map[key]) row.classList.add('on');
+    row.addEventListener('click',function(){
+      var on=!row.classList.contains('on');
+      row.classList.toggle('on',on);
+      map[key]=on; try{ localStorage.setItem(KEY,JSON.stringify(map)); }catch(e){}
+    });
+  });
+}catch(e){}})();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>

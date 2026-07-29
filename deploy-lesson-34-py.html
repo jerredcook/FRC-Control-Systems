@@ -130,6 +130,21 @@
   .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
   .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  /* can-do goals + stuck-hints (training layer) */
+  .cando{border-left:3px solid var(--indigo);background:rgba(138,140,248,.06);border-radius:0 10px 10px 0;padding:12px 16px;margin:18px 0 4px}
+  .cando .cd-h{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:7px}
+  .cando ul{margin:0;padding:0;list-style:none}
+  .cando li{position:relative;font-size:15px;color:var(--muted);padding:3px 0 3px 20px;line-height:1.5}
+  .cando li::before{content:"\2192";position:absolute;left:0;color:var(--indigo)}
+  .cando-check{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:center;min-height:30px;padding:4px 2px;cursor:pointer;font-size:15px;color:var(--muted);transition:.12s}
+  .cando-check .cc-row:hover{color:var(--text)}
+  .cando-check .cc-box{width:20px;height:20px;flex:0 0 auto;border:2px solid var(--line-2);border-radius:6px;display:grid;place-items:center;color:transparent;font-size:12px;transition:.12s}
+  .cando-check .cc-row.on{color:var(--text)}
+  .cando-check .cc-row.on .cc-box{border-color:var(--green);background:var(--green);color:#06210f}
+  .missions .m-item{flex-wrap:wrap}
+  .missions .m-hint{flex-basis:100%;margin:7px 0 1px 24px;font-size:13px;color:var(--muted);border-left:2px solid var(--amber);background:rgba(255,176,32,.05);border-radius:0 6px 6px 0;padding:6px 10px;line-height:1.5}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -150,6 +165,11 @@
     <div class="eyebrow">Unit Testing</div>
     <h1>Prove the logic<br><span class="accent">right</span>.</h1>
     <p class="dek">Some code is pure logic: a gear-ratio conversion, a state transition, a deadband. You can test those in milliseconds, with no robot, and lock them down so a future change can't quietly break them.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Spot which code is pure logic and worth a unit test - conversions, state, decisions</li>
+      <li>Write a test that asserts an expected value against your real code, within a tolerance</li>
+      <li>Read a red test as a caught bug, and get the expected value from paper math, not the code</li>
+    </ul></div>
   </div>
 
   <section>
@@ -172,10 +192,10 @@
     <p class="caption">The red test caught a bug before it ever reached the field: the height conversion forgot to multiply by pi. Apply the fix, re-run, and the whole suite is green. That green is your proof the math is right.</p>
     <div class="missions" id="missions">
       <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
-      <div class="m-item" data-m="redrun"><span class="m-st">○</span><span>Do the math yourself first: 2 drum turns on a 1.0 inch drum travel 2 × pi = <b>6.283</b> inches. Now hit <b>Run tests</b> and hunt down the one red test. Does its expected value match yours? Then the code is the odd one out.</span></div>
-      <div class="m-item" data-m="flagbug"><span class="m-st">○</span><span>Flag the bug: with the fix still <b>off</b>, click the red <b>test_height_from_rotations</b> row and study it. It got <b>2.000</b>, which is just turns times diameter. Say the missing factor out loud before you press <b>Apply fix</b> - naming a bug is half of fixing it.</span></div>
-      <div class="m-item" data-m="allgreen"><span class="m-st">○</span><span>Apply the fix and re-run until the bar reads <b>5/5 passed</b>. Enjoy that solid green for a moment - it is real proof the height math is right.</span></div>
-      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> regression drill. Once everything is green, click <b>Fix applied</b> to sneak the bug back in and watch the re-run catch it in seconds. That is the safety net tests hold under your team on every commit.</span></div>
+      <div class="m-item" data-m="redrun"><span class="m-st">○</span><span>Do the math yourself first: 2 drum turns on a 1.0 inch drum travel 2 × pi = <b>6.283</b> inches. Now hit <b>Run tests</b> and hunt down the one red test. Does its expected value match yours? Then the code is the odd one out.</span><div class="m-hint" hidden>For the red-run mission: just press Run tests with the fix still off - one row turns red, and it is heightFromRotations, expecting 6.283.</div></div>
+      <div class="m-item" data-m="flagbug"><span class="m-st">○</span><span>Flag the bug: with the fix still <b>off</b>, click the red <b>test_height_from_rotations</b> row and study it. It got <b>2.000</b>, which is just turns times diameter. Say the missing factor out loud before you press <b>Apply fix</b> - naming a bug is half of fixing it.</span><div class="m-hint" hidden>For the flag mission: with the fix off and the suite run, click the red heightFromRotations row - it got 2.000, which is missing the times-pi factor.</div></div>
+      <div class="m-item" data-m="allgreen"><span class="m-st">○</span><span>Apply the fix and re-run until the bar reads <b>5/5 passed</b>. Enjoy that solid green for a moment - it is real proof the height math is right.</span><div class="m-hint" hidden>For the all-green mission: press Apply fix, then Run tests - the multiply-by-pi is restored and the bar reads 5/5 passed.</div></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> regression drill. Once everything is green, click <b>Fix applied</b> to sneak the bug back in and watch the re-run catch it in seconds. That is the safety net tests hold under your team on every commit.</span><div class="m-hint" hidden>For gold: once it is 5/5 green, click Fix applied to switch the bug back on and re-run - the red row returns in seconds, exactly like a regression caught on commit.</div></div>
     </div>
   </section>
 
@@ -319,6 +339,12 @@
         <div class="gl"><b>Red / green</b><span>Fail points at a bug; pass proves it.</span></div>
         <div class="gl"><b>Test pure logic</b><span>Math, state, decisions.</span></div>
         <div class="gl"><b>Run on commit</b><span>CI catches regressions.</span></div>
+      </div>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Can you do these now? Tap the ones you've got.</div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Spot which code is pure logic and worth a unit test - conversions, state, decisions</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Write a test that asserts an expected value against your real code, within a tolerance</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Read a red test as a caught bug, and get the expected value from paper math, not the code</span></div>
       </div>
       <a class="next" href="deploy-lesson-35-py.html">
         <div class="n-eyebrow">Up next · Part 8 · 04</div>
@@ -479,6 +505,43 @@
     });
   }catch(e){}
 })();
+</script>
+<script>
+(function(){ try{
+  var KEY='frc:cando', file=location.pathname.split('/').pop();
+  var map={}; try{ map=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+  var rows=document.querySelectorAll('#candoCheck .cc-row');
+  Array.prototype.forEach.call(rows,function(r,i){
+    var k=file+'#'+i;
+    if(map[k]) r.classList.add('on');
+    r.addEventListener('click',function(){
+      var on=!r.classList.contains('on'); r.classList.toggle('on',on);
+      map[k]=on; try{ localStorage.setItem(KEY,JSON.stringify(map)); }catch(e){}
+    });
+  });
+}catch(e){} })();
+</script>
+<script>
+(function(){ try{
+  var missions=document.getElementById('missions'); if(!missions) return;
+  var items=missions.querySelectorAll('.m-item'); if(!items.length) return;
+  var hasHint=false;
+  Array.prototype.forEach.call(items,function(n){ if(n.querySelector('.m-hint')) hasHint=true; });
+  if(!hasHint) return;
+  var active=0, lastPoke=0, THRESH=150, WINDOW=12000;
+  function poke(){ lastPoke=Date.now(); }
+  var demo=document.getElementById('demo');
+  [demo,missions].forEach(function(el){ if(el){ ['pointerdown','input','click'].forEach(function(ev){ el.addEventListener(ev,poke,true); }); } });
+  setInterval(function(){ try{
+    if(Date.now()-lastPoke<WINDOW) active++;
+    if(active>=THRESH){
+      Array.prototype.forEach.call(items,function(n){
+        if(n.classList.contains('cleared')) return;
+        var h=n.querySelector('.m-hint'); if(h) h.hidden=false;
+      });
+    }
+  }catch(e){} },1000);
+}catch(e){} })();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>

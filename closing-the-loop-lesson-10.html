@@ -155,6 +155,21 @@
   .coursenav a.map{border-color:transparent;color:var(--indigo)}
 
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  .missions .m-hint{display:block;margin-top:7px;font-size:13px;line-height:1.5;color:var(--teal);border-left:2px solid var(--line-2);padding-left:10px;font-style:italic}
+  .missions .m-item{flex-wrap:wrap}
+  .missions .m-item .m-hint{flex-basis:100%;margin-left:26px}
+  .missions .m-item .m-hint[hidden]{display:none}
+  .cando{border-left:3px solid var(--teal);background:rgba(52,215,197,.06);border-radius:0 10px 10px 0;padding:12px 16px;margin:18px 0 2px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);display:block;margin-bottom:6px}
+  .cando ul{margin:0;padding-left:18px}
+  .cando li{color:var(--muted);font-size:15px;line-height:1.5;margin:3px 0}
+  .cando li::marker{color:var(--teal)}
+  .cando-check{margin-top:18px;border:1px solid var(--line-2);border-left:3px solid var(--teal);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .cando-check .cdc-h{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin-bottom:6px}
+  .cando-check .cdc-row{display:flex;gap:11px;align-items:center;min-height:30px;padding:4px 0;cursor:pointer;font-size:15px;color:var(--muted)}
+  .cando-check .cdc-box{flex:0 0 auto;width:19px;height:19px;border-radius:50%;border:2px solid var(--line-2);display:grid;place-items:center;font-size:12px;color:var(--teal);transition:.12s}
+  .cando-check .cdc-row.done{color:var(--text)}
+  .cando-check .cdc-row.done .cdc-box{border-color:var(--teal);background:rgba(52,215,197,.14)}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -174,6 +189,10 @@
     <div class="eyebrow">Units, Gears &amp; Conversions</div>
     <h1>Rotations in,<br><span class="accent">meters</span> out.</h1>
     <p class="dek">Your motor counts in turns. Your elevator moves in meters. The gearbox sits in between - and getting this conversion wrong is the single most common real-robot bug.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+    <li>Turn motor rotations into meters through the gear ratio and the drum's circumference</li>
+    <li>Run that conversion backwards to command the motor rotations a target height needs</li>
+    <li>Spot the classic mixed-units bug and use SensorToMechanismRatio to delete the gearbox math</li></ul></div>
   </div>
 
   <section>
@@ -233,10 +252,10 @@
     <p class="caption">A bigger gear ratio means more motor turns per meter - finer control, but a slower mechanism. This trade-off is yours to choose when you design the robot.</p>
     <div class="missions" id="missions">
       <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
-      <div class="m-item" data-m="oneturn"><span class="m-st">○</span><span>Start easy: keep gear at <b>9 : 1</b> and drum at <b>2.0 in</b>, then drag motor rotations to exactly <b>9.0</b>. That is one full drum turn, so Height reads one circumference, about <b>0.16 m</b>. Nine turns in, one out - you just watched the ratio happen.</span></div>
-      <div class="m-item" data-m="reach050"><span class="m-st">○</span><span>Set gear to <b>12 : 1</b>, drum <b>2.0 in</b>. On paper first, work out the motor rotations that reach <b>0.50 m</b>: 0.50 &divide; 0.16 &times; 12. Drag the slider to your answer and watch Height land on <b>0.50 m</b>. Trust your math - the sim will back you up.</span></div>
-      <div class="m-item" data-m="bigdrum"><span class="m-st">○</span><span>Keep <b>12 : 1</b> and <b>37.5</b> rotations, then grow the drum to <b>3.0 in</b>. Call the new Height before you peek: 1.5&times; the drum means 1.5&times; the height, about <b>0.75 m</b>. Bigger drum, bigger bike wheel - every turn takes you further.</span></div>
-      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> reach <b>0.60 m</b> two ways on the <b>2.0 in</b> drum: once at <b>6 : 1</b>, once at <b>18 : 1</b>. Work out both rotation counts on paper before you drag. Triple the ratio costs triple the turns - the same trade as dropping to a low gear on a hill.</span></div>
+      <div class="m-item" data-m="oneturn"><span class="m-st">○</span><span>Start easy: keep gear at <b>9 : 1</b> and drum at <b>2.0 in</b>, then drag motor rotations to exactly <b>9.0</b>. That is one full drum turn, so Height reads one circumference, about <b>0.16 m</b>. Nine turns in, one out - you just watched the ratio happen.</span><div class="m-hint" hidden>For the one-turn mission: leave gear at 9 : 1 and drum at 2.0 in, then drag Motor rotations to exactly 9.0. Height reads about 0.16 m - one full turn of the drum.</div></div>
+      <div class="m-item" data-m="reach050"><span class="m-st">○</span><span>Set gear to <b>12 : 1</b>, drum <b>2.0 in</b>. On paper first, work out the motor rotations that reach <b>0.50 m</b>: 0.50 &divide; 0.16 &times; 12. Drag the slider to your answer and watch Height land on <b>0.50 m</b>. Trust your math - the sim will back you up.</span><div class="m-hint" hidden>For the 0.50 m mission: set gear 12 : 1 and drum 2.0 in, then drag Motor rotations to about 37.5. That is 0.50 ÷ 0.16 × 12, and Height lands on 0.50 m.</div></div>
+      <div class="m-item" data-m="bigdrum"><span class="m-st">○</span><span>Keep <b>12 : 1</b> and <b>37.5</b> rotations, then grow the drum to <b>3.0 in</b>. Call the new Height before you peek: 1.5&times; the drum means 1.5&times; the height, about <b>0.75 m</b>. Bigger drum, bigger bike wheel - every turn takes you further.</span><div class="m-hint" hidden>For the big-drum mission: keep 12 : 1 and Motor rotations at 37.5, then grow the drum to 3.0 in. The bigger drum lifts Height to about 0.75 m.</div></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> reach <b>0.60 m</b> two ways on the <b>2.0 in</b> drum: once at <b>6 : 1</b>, once at <b>18 : 1</b>. Work out both rotation counts on paper before you drag. Triple the ratio costs triple the turns - the same trade as dropping to a low gear on a hill.</span><div class="m-hint" hidden>For gold: reach 0.60 m twice on the 2.0 in drum. At 6 : 1 that is about 22.5 rotations; at 18 : 1 about 67.5. Nail both and both stars light.</div></div>
     </div>
   </section>
 
@@ -360,6 +379,12 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(cf
         <div class="gl"><b>SensorToMechanismRatio</b><span>Phoenix 6 config to report output units directly.</span></div>
         <div class="gl"><b>Arm vs elevator</b><span>Arm: output turns × 360 = degrees (no drum).</span></div>
       </div>
+      <div class="cando-check" id="candoCheck">
+        <div class="cdc-h">Can you? Tap each one you've nailed</div>
+        <div class="cdc-row"><span class="cdc-box"></span><span>Turn motor rotations into meters through the gear ratio and the drum's circumference</span></div>
+        <div class="cdc-row"><span class="cdc-box"></span><span>Run that conversion backwards to command the motor rotations a target height needs</span></div>
+        <div class="cdc-row"><span class="cdc-box"></span><span>Spot the classic mixed-units bug and use SensorToMechanismRatio to delete the gearbox math</span></div>
+      </div>
       <a class="next" href="closing-the-loop-lesson-11.html">
         <div class="n-eyebrow">Up next · Part II · 03</div>
         <h3>Your First Closed Loop in Code</h3>
@@ -445,6 +470,8 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(cf
   Object.keys(mItems).forEach(function(id){
     if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
   });
+  var mLastAct=0, mHintT={}, mAccPrev=Date.now();
+  (function(){ var d=document.getElementById('demo'); if(d){ d.addEventListener('pointerdown',function(){mLastAct=Date.now();},true); d.addEventListener('input',function(){mLastAct=Date.now();},true); } })();
   var mHold={oneturn:0,reach050:0,bigdrum:0,goldA:0,goldB:0}, mGoldA=false, mGoldB=false;
   function mHeld(k,cond){ mHold[k]=cond?mHold[k]+1:0; return mHold[k]>=2; }
   setInterval(function(){
@@ -455,6 +482,8 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(cf
     if(mHeld('goldA', Math.abs(S.G-6)<0.01 && Math.abs(S.diaIn-2)<0.01 && Math.abs(mHt-0.60)<0.004)) mGoldA=true;
     if(mHeld('goldB', Math.abs(S.G-18)<0.01 && Math.abs(S.diaIn-2)<0.01 && Math.abs(mHt-0.60)<0.004)) mGoldB=true;
     if(mGoldA&&mGoldB) mClear('gold');
+    var _now=Date.now(), _dt=Math.min(0.5,(_now-mAccPrev)/1000); mAccPrev=_now;
+    if(_now-mLastAct<12000){ Object.keys(mItems).forEach(function(_k){ var _it=mItems[_k]; if(!_it||_it.classList.contains('cleared'))return; mHintT[_k]=(mHintT[_k]||0)+_dt; if(mHintT[_k]>=150){ var _h=_it.querySelector('.m-hint'); if(_h&&_h.hidden)_h.hidden=false; } }); }
   },200);
   }catch(e){}
 
@@ -611,6 +640,21 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(cf
         if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
         else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
       });
+    });
+  }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  try{
+    var KEY="frc:cando", file=location.pathname.split("/").pop();
+    var wrap=document.getElementById("candoCheck"); if(!wrap) return;
+    var map={}; try{ map=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+    Array.prototype.forEach.call(wrap.querySelectorAll(".cdc-row"),function(r,i){
+      var k=file+"#"+i;
+      function paint(on){ r.classList.toggle("done",!!on); r.querySelector(".cdc-box").textContent=on?"✓":""; }
+      paint(map[k]);
+      r.addEventListener("click",function(){ map[k]=!map[k]; paint(map[k]); try{ localStorage.setItem(KEY,JSON.stringify(map)); }catch(e){} });
     });
   }catch(e){}
 })();

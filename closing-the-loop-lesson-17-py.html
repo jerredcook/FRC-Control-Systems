@@ -98,6 +98,20 @@
   .note p{margin:0;color:var(--text);font-size:16px}
   .note.teal{border-color:var(--teal);background:rgba(52,215,197,.06)} .note.teal .nh{color:var(--teal)}
 
+  .cando{margin:16px 0 4px;border-left:3px solid var(--teal);background:rgba(52,215,197,.06);border-radius:0 10px 10px 0;padding:12px 16px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);display:block;margin-bottom:6px}
+  .cando ul{margin:0;padding-left:18px;color:var(--muted);font-size:15px;line-height:1.5}
+  .cando li{margin:3px 0}
+  .cando-check{margin:4px 0 18px;border:1px solid var(--line-2);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:8px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:flex-start;min-height:28px;padding:5px 4px;cursor:pointer;font-size:15px;color:var(--muted);border-radius:8px;transition:.12s}
+  .cando-check .cc-row:hover{background:rgba(255,255,255,.02)}
+  .cando-check .cc-box{flex:0 0 auto;width:19px;height:19px;border-radius:50%;border:2px solid var(--line-2);color:transparent;display:grid;place-items:center;font-size:12px;margin-top:1px;transition:.12s}
+  .cando-check .cc-row.on{color:var(--text)}
+  .cando-check .cc-row.on .cc-box{border-color:var(--teal);background:rgba(52,215,197,.2);color:var(--teal)}
+  .missions .m-item{flex-wrap:wrap}
+  .missions .m-hint{flex-basis:100%;margin:7px 0 1px 24px;font-size:13px;color:var(--amber);border-left:2px solid rgba(255,176,32,.5);padding:2px 0 3px 11px;font-style:italic;line-height:1.5}
+
   .codewrap{margin:18px 0}
   .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
   .codewrap .clabel .badge{color:var(--teal);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
@@ -181,6 +195,11 @@
     <div class="eyebrow">Motion Magic</div>
     <h1>A smooth move,<br>from <span class="accent">one</span> request.</h1>
     <p class="dek">Part II's motion profile - now built into the motor. Set a cruise speed and acceleration, send a target, and the Kraken plans and tracks the whole trajectory itself.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Turn a lunging PositionVoltage move into a smooth onboard profile with a single MotionMagicVoltage request.</li>
+      <li>Set cruise velocity, acceleration, and jerk to shape the move, and predict how a faster cruise shrinks the cruise roof.</li>
+      <li>Explain when Motion Magic Expo beats plain Motion Magic - and what kV and kA have to do with it.</li>
+    </ul></div>
   </div>
 
   <section>
@@ -297,6 +316,10 @@ motor.<span class="fn">set_control</span>(self.request.<span class="fn">with_pos
   </section>
 
   <section>
+    <div class="note teal robotcard">
+      <div class="nh">🤖 Now on your robot &middot; 10 minutes</div>
+      <p>On your robot, set <span class="k">motion_magic_cruise_velocity</span> and <span class="k">motion_magic_acceleration</span> in your mechanism's config and switch its command to a <span class="k">MotionMagicVoltage</span> request. Start the cruise velocity a little below the free speed you measured, and the acceleration a couple of times that. Pass: the mechanism ramps up and eases into the target instead of lunging, and Tuner X's plot shows the position riding the Motion Magic reference. Overshooting or ringing at the end? The <a href="closing-the-loop-troubleshooting.html#symgrid">troubleshooting field guide</a> lists the kP and kD fixes. No robot handy? Open the <a href="worksheet.html">tuning worksheet</a>, pick your mechanism, and jot the cruise and acceleration you would try into its record.</p>
+    </div>
     <div class="note teal">
       <div class="nh">Going further &middot; optional</div>
       <p>Plain Motion Magic asks you to guess a cruise velocity, but a heavy mechanism can never actually reach the speed you picked, so it spends the whole move accelerating and the profile is a fib. Motion Magic Expo skips the guess: from kV and kA it predicts the real speed-vs-time curve, the way a loaded bike trailer eases toward its own top speed instead of a number you wrote down. Try this thought experiment: if you doubled the load on the carriage, which one would need you to re-pick the cruise velocity, and which would adjust on its own?</p>
@@ -355,6 +378,12 @@ motor.<span class="fn">set_control</span>(self.request.<span class="fn">with_pos
   <section>
     <div class="recap">
       <h3>Part III · 04 · Recap</h3>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Can you do these now? Tap what you've got.</div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Turn a lunging PositionVoltage move into a smooth onboard profile with a single MotionMagicVoltage request.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Set cruise velocity, acceleration, and jerk to shape the move, and predict how a faster cruise shrinks the cruise roof.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Explain when Motion Magic Expo beats plain Motion Magic - and what kV and kA have to do with it.</span></div>
+      </div>
       <div class="glossary">
         <div class="gl"><b>Motion Magic</b><span>Onboard motion profile from one request.</span></div>
         <div class="gl"><b>cruise_velocity</b><span>The move's top speed (rot/sec).</span></div>
@@ -509,7 +538,19 @@ motor.<span class="fn">set_control</span>(self.request.<span class="fn">with_pos
     mMaxPv=0; mMmOk=S.mm; mArr=false;
   });
   el.mmBtn.addEventListener('click',function(){ if(!S.mm) mMmOk=false; });
+  // ---- stuck hints: surface one authored nudge per uncleared mission after ~150s of active fiddling ----
+  var mhHints={
+    lunge:"For the lunge goal: click 'Motion Magic: on' so it reads off, then press Move - the target snaps and the carriage charges at it in one hard lunge.",
+    cruise:"For the cruise goal: turn Motion Magic on, drag cruise velocity down to about 0.44, and Move - the amber trace grows a long flat roof where it holds that speed.",
+    allramp:"For the all-ramp goal: drop acceleration to about 0.5 and Move - the plan spends the whole move ramping and never reaches your cruise speed.",
+    gold:"For gold: keep Motion Magic on and tune both sliders together - a higher cruise with firm acceleration - so a full climb lands in under 2.9 seconds but still rides smooth."
+  };
+  try{ Object.keys(mItems).forEach(function(id){ var n=mItems[id]; if(!n)return; var h=document.createElement('div'); h.className='m-hint'; h.hidden=true; h.textContent=mhHints[id]||''; if(h.textContent){ n.appendChild(h); n.__mh=h; } }); }catch(e){}
+  var mhActMs=0, mhLast=0;
+  try{ var mhEl=document.querySelector('.demo')||document.querySelector('.builder'); if(mhEl){ mhEl.addEventListener('pointerdown',function(){mhLast=Date.now();},true); mhEl.addEventListener('input',function(){mhLast=Date.now();},true); } }catch(e){}
+  function mhTick(ms){ try{ if(mhLast && Date.now()-mhLast<3500) mhActMs+=ms; if(mhActMs>=150000){ Object.keys(mItems).forEach(function(id){ var n=mItems[id]; if(n&&n.__mh&&!n.classList.contains('cleared')) n.__mh.hidden=false; }); } }catch(e){} }
   setInterval(function(){
+    mhTick(200);
     if(!S.mm) mMmOk=false;
     if(mLungeT && !S.mm && Date.now()-mLungeT<2000 && Math.abs(S.v)>0.5){ mClear('lunge'); mLungeT=0; }
     if(S.mm && S.pVel!==0 && Math.abs(Math.abs(S.pVel)-S.vmax)<0.008){ mCruise+=0.2; } else { mCruise=0; }
@@ -657,6 +698,25 @@ motor.<span class="fn">set_control</span>(self.request.<span class="fn">with_pos
         if(shown<items.length){ items[shown].hidden=false; shown++; }
         if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
         else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
+  }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  try{
+    var box=document.getElementById('candoCheck'); if(!box) return;
+    var file=location.pathname.split('/').pop(), KEY='frc:cando', map={};
+    try{ map=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+    var rows=box.querySelectorAll('.cc-row');
+    Array.prototype.forEach.call(rows,function(row,i){
+      var k=file+'#'+i;
+      if(map[k]) row.classList.add('on');
+      row.addEventListener('click',function(){
+        var on=row.classList.toggle('on');
+        if(on){map[k]=1;}else{delete map[k];}
+        try{ localStorage.setItem(KEY,JSON.stringify(map)); }catch(e){}
       });
     });
   }catch(e){}

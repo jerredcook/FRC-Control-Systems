@@ -94,6 +94,29 @@
   .note p{margin:0;color:var(--text);font-size:16px}
   .note.teal{border-color:var(--teal);background:rgba(52,215,197,.06)} .note.teal .nh{color:var(--teal)}
 
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--teal);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0;flex-wrap:wrap}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+  .missions .m-hint{flex-basis:100%;margin:7px 0 1px 24px;font-size:13px;color:var(--amber);border-left:2px solid rgba(255,176,32,.5);padding:2px 0 3px 11px;font-style:italic;line-height:1.5}
+
+  .cando{margin:16px 0 4px;border-left:3px solid var(--teal);background:rgba(52,215,197,.06);border-radius:0 10px 10px 0;padding:12px 16px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);display:block;margin-bottom:6px}
+  .cando ul{margin:0;padding-left:18px;color:var(--muted);font-size:15px;line-height:1.5}
+  .cando li{margin:3px 0}
+  .cando-check{margin:4px 0 18px;border:1px solid var(--line-2);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:8px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:flex-start;min-height:28px;padding:5px 4px;cursor:pointer;font-size:15px;color:var(--muted);border-radius:8px;transition:.12s}
+  .cando-check .cc-row:hover{background:rgba(255,255,255,.02)}
+  .cando-check .cc-box{flex:0 0 auto;width:19px;height:19px;border-radius:50%;border:2px solid var(--line-2);color:transparent;display:grid;place-items:center;font-size:12px;margin-top:1px;transition:.12s}
+  .cando-check .cc-row.on{color:var(--text)}
+  .cando-check .cc-row.on .cc-box{border-color:var(--teal);background:rgba(52,215,197,.2);color:var(--teal)}
+
   .codewrap{margin:18px 0}
   .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
   .codewrap .clabel .badge{color:var(--teal);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
@@ -184,6 +207,11 @@
     <div class="eyebrow">SysId on Phoenix 6</div>
     <h1>Where the<br><span class="accent">gains</span> come from.</h1>
     <p class="dek">Every kS, kV, kA, kG you've typed traces back to one thing: measuring your real mechanism. SysId runs the tests, Tuner X fits the line, and the numbers drop into Slot0.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Explain what SysId measures - kS, kV, kA, and kG - and why a slow ramp isolates kV while a hard step is what reveals kA.</li>
+      <li>Read a mechanism's gains straight off a voltage-vs-velocity fit: the slope is kV, the intercept is kS + kG.</li>
+      <li>Wire up a Phoenix 6 SysIdRoutine with SignalLogger, then drop the fitted gains into Slot0.</li>
+    </ul></div>
   </div>
 
   <section>
@@ -245,6 +273,13 @@
       </div>
     </div>
     <p class="caption">Tuner X does exactly this fit, automatically, across hundreds of logged samples - and adds a step test for kA. You just read off the answers.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
+      <div class="m-item" data-m="collect"><span class="m-st">○</span><span>Press <b>Run ramp test</b> and let the whole ramp play out. Watch the plot fill with a slanted streak of teal dots - each one is a (speed, voltage) pair the mechanism just confessed. Finish the run with <b>at least 30 samples</b> logged.</span></div>
+      <div class="m-item" data-m="fit"><span class="m-st">○</span><span>Now make the indigo line <b>hug that streak</b>. Drag the slope and intercept sliders - or press <b>Auto-fit</b>, the same least-squares fit Tuner X runs - until <b>Fit error (RMS) drops into the green, under 0.03</b>. A tight fit is a fit you can trust.</span></div>
+      <div class="m-item" data-m="readkv"><span class="m-st">○</span><span>Read the gain off the line: the <b>slope is kV</b>, the volts each unit of speed costs. Dial your fit slope to <b>within 0.1 of this rig's true kV of 1.8</b>.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> fit it by eye, no shortcut. <b>Without pressing Auto-fit</b>, nudge the two sliders yourself until <b>Fit error (RMS) falls under 0.02</b>. Already used Auto-fit? Hit <b>Reset</b>, run a fresh ramp, and hand-fit it - the dots ride a touch above the 0.51 you might expect, so the best line lifts its intercept toward 0.57.</span></div>
+    </div>
   </section>
 
   <section>
@@ -301,6 +336,10 @@ cfg.Slot0.kP = <span class="num">12</span>;     <span class="cm">// then tune kP
   </section>
 
   <section>
+    <div class="note teal robotcard">
+      <div class="nh">🤖 Now on your robot &middot; 10 minutes</div>
+      <p>On your robot, add a <span class="k">SysIdRoutine</span> for one mechanism, call <span class="k">SignalLogger.start()</span>, and run the four commands - quasistatic and dynamic, each direction - in a clear, safe space. Pass: a <span class="k">.hoot</span> file opens in Tuner X and its SysId tool fits a tight straight line, reporting kS, kV, kA (and kG for a lifted mechanism). Paste those into Slot0, then nudge kP for crisp tracking. Scattered dots instead of a clean line? The <a href="closing-the-loop-troubleshooting.html#symgrid">troubleshooting field guide</a> lists the usual causes. No robot handy? Open the <a href="worksheet.html">tuning worksheet</a>, pick your mechanism, and record the kS, kV, kA, and kG you would expect into its gains sheet.</p>
+    </div>
     <div class="note teal">
       <div class="nh">Going further &middot; optional</div>
       <p>SysId offers two test shapes, and the names tell you why. The quasistatic ramp creeps up so slowly that acceleration is near zero, which isolates kS and kV cleanly, like riding a bike at a steady crawl to feel exactly how hard you must pedal to hold each speed. The dynamic step slams full voltage so the mechanism accelerates hard, and that burst is what exposes kA. Worth chewing on: why can't a slow ramp ever measure kA well, no matter how careful you are?</p>
@@ -371,6 +410,12 @@ cfg.Slot0.kP = <span class="num">12</span>;     <span class="cm">// then tune kP
   <section>
     <div class="recap">
       <h3>Part III · 05 · Recap</h3>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Can you do these now? Tap what you've got.</div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Explain what SysId measures - kS, kV, kA, and kG - and why a slow ramp isolates kV while a hard step is what reveals kA.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Read a mechanism's gains straight off a voltage-vs-velocity fit: the slope is kV, the intercept is kS + kG.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Wire up a Phoenix 6 SysIdRoutine with SignalLogger, then drop the fitted gains into Slot0.</span></div>
+      </div>
       <div class="glossary">
         <div class="gl"><b>SysIdRoutine</b><span>Drives the ramp + step tests for you.</span></div>
         <div class="gl"><b>VoltageOut</b><span>The plain request SysId uses to drive the motor.</span></div>
@@ -516,6 +561,56 @@ cfg.Slot0.kP = <span class="num">12</span>;     <span class="cm">// then tune kP
     S.fitB=0.30; S.fitM=1.00; syncFitUI();
     el.runBtn.disabled=false; el.autofit.disabled=true; setStatus('Idle',false);
   });
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  // Thresholds validated against this sim's ramp physics with a node feasibility
+  // script: a full ramp logs ~47-55 samples; the least-squares auto-fit lands the
+  // slope at ~1.81-1.84 (true kV = 1.8) with RMS ~0.012; a careful hand-fit near
+  // intercept 0.57 / slope 1.8 reaches RMS comfortably under 0.02, while plausible
+  // wrong fits stay above 0.05. Defaults (fitM 1.00, no samples) clear nothing.
+  var usedAutofit=false;
+  el.autofit.addEventListener('click',function(){ usedAutofit=true; });
+  el.reset.addEventListener('click',function(){ usedAutofit=false; });
+  function fitRms(){ var p=S.pts; if(!p||!p.length) return null; var sm=0,i; for(i=0;i<p.length;i++){var d=p[i].u-(S.fitB+S.fitM*p[i].v);sm+=d*d;} return Math.sqrt(sm/p.length); }
+  // ---- stuck hints: surface one authored nudge per uncleared mission after ~150s of active fiddling ----
+  var mhHints={
+    collect:"For the collect goal: press 'Run ramp test' and leave it be until the status reads 'Log complete' - the plot fills with 50-odd dots on its own.",
+    fit:"For the fit goal: after a run, press 'Auto-fit' - it snaps the indigo line onto the dots and the Fit error (RMS) readout drops into the green.",
+    readkv:"For the read-kV goal: drag the slope slider (or press Auto-fit) until it reads about 1.8 - that is this rig's true kV, the volts per unit of speed.",
+    gold:"For gold: press Reset, run a fresh ramp, then hand-fit only - lift the intercept near 0.57 and set the slope near 1.8, and watch Fit error (RMS) slip under 0.02 with no Auto-fit."
+  };
+  try{ Object.keys(mItems).forEach(function(id){ var n=mItems[id]; if(!n)return; var h=document.createElement('div'); h.className='m-hint'; h.hidden=true; h.textContent=mhHints[id]||''; if(h.textContent){ n.appendChild(h); n.__mh=h; } }); }catch(e){}
+  var mhActMs=0, mhLast=0;
+  try{ var mhEl=document.querySelector('.demo')||document.querySelector('.builder'); if(mhEl){ mhEl.addEventListener('pointerdown',function(){mhLast=Date.now();},true); mhEl.addEventListener('input',function(){mhLast=Date.now();},true); } }catch(e){}
+  function mhTick(ms){ try{ if(mhLast && Date.now()-mhLast<3500) mhActMs+=ms; if(mhActMs>=150000){ Object.keys(mItems).forEach(function(id){ var n=mItems[id]; if(n&&n.__mh&&!n.classList.contains('cleared')) n.__mh.hidden=false; }); } }catch(e){} }
+  setInterval(function(){
+    mhTick(200);
+    var n=(S.pts&&S.pts.length)||0, e=fitRms();
+    if(S.phase==='done' && n>=30) mClear('collect');
+    if(n>=10 && e!=null && e<0.03) mClear('fit');
+    if(n>=10 && Math.abs(S.fitM-1.8)<0.1) mClear('readkv');
+    if(n>=10 && !usedAutofit && e!=null && e<0.02 && Math.abs(S.fitM-1.8)<0.15) mClear('gold');
+  },200);
+  }catch(e){}
+
   function noise(){return (Math.random()-0.5)*0.04;}
 
   function step(dt){
@@ -638,6 +733,25 @@ cfg.Slot0.kP = <span class="num">12</span>;     <span class="cm">// then tune kP
         if(shown<items.length){ items[shown].hidden=false; shown++; }
         if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
         else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
+  }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  try{
+    var box=document.getElementById('candoCheck'); if(!box) return;
+    var file=location.pathname.split('/').pop(), KEY='frc:cando', map={};
+    try{ map=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+    var rows=box.querySelectorAll('.cc-row');
+    Array.prototype.forEach.call(rows,function(row,i){
+      var k=file+'#'+i;
+      if(map[k]) row.classList.add('on');
+      row.addEventListener('click',function(){
+        var on=row.classList.toggle('on');
+        if(on){map[k]=1;}else{delete map[k];}
+        try{ localStorage.setItem(KEY,JSON.stringify(map)); }catch(e){}
       });
     });
   }catch(e){}

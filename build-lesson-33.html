@@ -68,6 +68,18 @@
   .missions .m-item.cleared .m-st{color:var(--green)}
   .missions .m-item.gold .m-st{color:var(--amber)}
 
+  .cando{border-left:3px solid var(--indigo);background:rgba(255,138,76,.06);border-radius:0 10px 10px 0;padding:12px 16px;margin:16px 0 2px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);display:block;margin-bottom:6px}
+  .cando ul{margin:0;padding-left:18px}
+  .cando li{color:var(--muted);font-size:15px;line-height:1.5;margin:3px 0}
+  .cando-check{border-left:3px solid var(--indigo);background:rgba(255,138,76,.06);border-radius:0 10px 10px 0;padding:10px 14px;margin:16px 0 0}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);display:block;margin-bottom:4px}
+  .cando-check .cdrow{display:flex;align-items:center;gap:10px;min-height:30px;padding:3px 0;cursor:pointer;color:var(--muted);font-size:15px;line-height:1.4}
+  .cando-check .cdrow .cdbox{width:20px;height:20px;flex:0 0 auto;border:2px solid var(--line-2);border-radius:50%;display:grid;place-items:center;font-size:12px;color:transparent;transition:.12s}
+  .cando-check .cdrow.on{color:var(--text)}
+  .cando-check .cdrow.on .cdbox{border-color:var(--green);background:var(--green);color:#06210f}
+  .missions .m-hint{margin:5px 0 2px 24px;font-size:13px;color:var(--muted);border-left:2px solid var(--amber);padding:3px 0 3px 10px;line-height:1.5;font-style:italic}
+  .missions .m-hint b{color:var(--text)}
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
   .note p{margin:0;color:var(--text);font-size:16px}
@@ -123,6 +135,11 @@
     <div class="eyebrow">CAD with Onshape</div>
     <h1>Draw it<br>in <span class="accent">3D</span> first.</h1>
     <p class="dek">CAD (computer-aided design) lets you build the entire robot on a screen before touching a saw. You start by drawing a flat sketch, then pull it into a solid 3D part. Onshape does this for free in a web browser, with your whole team editing the same model at once.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Turn a flat 2D sketch into a solid 3D part by extruding it</li>
+      <li>Explain how sketch, feature, part, and assembly build up into a whole robot</li>
+      <li>Say why teams model and fit-check a robot in CAD before cutting any metal</li>
+    </ul></div>
   </div>
 
   <section>
@@ -158,9 +175,13 @@
     <div class="missions" id="missions">
       <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
       <div class="m-item" data-m="solid25"><span class="m-st">○</span><span>Drag the depth to exactly <b>25 mm</b> and watch the <b>State</b> readout flip to <b>solid part</b>. Same outline you started with, now with thickness - that flip is the whole idea of extrude.</span></div>
+      <div class="m-hint" data-mh="solid25" hidden>Stuck? Drag the Extrude depth slider until the readout reads exactly <b>25 mm</b> - the State flips to "solid part" on the way there.</div>
       <div class="m-item" data-m="holehome"><span class="m-st">○</span><span>Make the plate solid, press <b>Add hole</b>, then bring the depth back to <b>0 mm</b>. Notice the hole is still there in the flat drawing, because the sketch owns the shape. The extrude only gives it depth - that split is worth remembering.</span></div>
+      <div class="m-hint" data-mh="holehome" hidden>Stuck? Push the depth up past 1 mm so it reads solid, press <b>Add hole</b>, then drag the depth all the way back to <b>0 mm</b>. The hole stays in the flat sketch.</div>
       <div class="m-item" data-m="edge"><span class="m-st">○</span><span>Before you touch anything, predict what the tag reads at <b>1 mm</b>. Then park the depth there and check yourself. It still says <b>sketch (2D)</b> - one more millimeter makes it a part.</span></div>
+      <div class="m-hint" data-mh="edge" hidden>Stuck? Park the depth on exactly <b>1 mm</b>. It is the last value that still reads "sketch (2D)" - one more millimeter makes it a part.</div>
       <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> with the hole on, ride the depth from <b>0</b> up to the full <b>60 mm</b> and back down to <b>0</b> without removing the hole. One sketch, and the part rebuilds itself every time - that is parametric CAD earning its keep.</span></div>
+      <div class="m-hint" data-mh="gold" hidden>Stuck? Turn the hole on, then sweep the depth from <b>0</b> up to the full <b>60 mm</b> and back down to <b>0</b> without ever pressing Remove hole.</div>
     </div>
   </section>
 
@@ -254,6 +275,11 @@
         <div class="gl"><b>Extrude</b><span>Pull a sketch out to a solid.</span></div>
         <div class="gl"><b>Part</b><span>One finished 3D piece.</span></div>
         <div class="gl"><b>Assembly</b><span>Parts mated into the robot.</span></div>
+      </div>
+      <div class="cando-check" id="candoCheck"><span class="cc-h">Check yourself - tap what you've got</span>
+        <div class="cdrow"><span class="cdbox">✓</span><span>I can turn a flat 2D sketch into a solid 3D part by extruding it</span></div>
+        <div class="cdrow"><span class="cdbox">✓</span><span>I can explain how sketch, feature, part, and assembly build up into a robot</span></div>
+        <div class="cdrow"><span class="cdbox">✓</span><span>I can say why teams fit-check a robot in CAD before cutting any metal</span></div>
       </div>
       <a class="next" href="build-lesson-34.html">
         <div class="n-eyebrow">Up next · Part 7 · 03</div>
@@ -367,6 +393,15 @@
   }
   document.getElementById('depth').addEventListener('input',mCheck);
   document.getElementById('hole').addEventListener('click',mCheck);
+  // stuck hints: after sustained hands-on time on a mission still open, reveal one nudge
+  var mHints={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-hint'),function(h){ mHints[h.getAttribute('data-mh')]=h; });
+  var mActive=0, mLastAct=0, mDemoEl=document.getElementById('demo');
+  if(mDemoEl){ mDemoEl.addEventListener('pointerdown',function(){ mLastAct=Date.now(); },true); mDemoEl.addEventListener('input',function(){ mLastAct=Date.now(); },true); }
+  setInterval(function(){ try{
+    if(Date.now()-mLastAct<1600) mActive+=0.2;
+    if(mActive>=150){ Object.keys(mItems).forEach(function(id){ if(!mItems[id].classList.contains('cleared')&&mHints[id]&&mHints[id].hasAttribute('hidden')) mHints[id].removeAttribute('hidden'); }); }
+  }catch(e){} },200);
   }catch(e){}
 
   document.querySelectorAll('#quiz .q').forEach(function(q){
@@ -424,6 +459,22 @@
     opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
     if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
 })();
+</script>
+<script>
+(function(){try{
+  var KEY='frc:cando', file=location.pathname.split('/').pop();
+  var map={}; try{ map=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+  var rows=document.querySelectorAll('#candoCheck .cdrow');
+  Array.prototype.forEach.call(rows,function(row,i){
+    var key=file+'#'+i;
+    if(map[key]) row.classList.add('on');
+    row.addEventListener('click',function(){
+      var on=!row.classList.contains('on');
+      row.classList.toggle('on',on);
+      map[key]=on; try{ localStorage.setItem(KEY,JSON.stringify(map)); }catch(e){}
+    });
+  });
+}catch(e){}})();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>

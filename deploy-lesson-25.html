@@ -121,6 +121,18 @@
   .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
   .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  .cando{margin:18px 0 4px;border-left:3px solid var(--indigo);background:rgba(138,140,248,.06);border-radius:0 10px 10px 0;padding:12px 16px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);display:block;margin-bottom:8px}
+  .cando ul{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+  .cando li{position:relative;padding-left:19px;font-size:15px;color:var(--muted);line-height:1.5}
+  .cando li::before{content:"\2192";position:absolute;left:0;color:var(--indigo);font-family:var(--mono)}
+  .cando-check{margin:18px 0 0;border-top:1px solid var(--line);padding-top:16px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:flex-start;min-height:28px;padding:5px 2px;cursor:pointer;font-size:15px;color:var(--muted);line-height:1.45;-webkit-tap-highlight-color:transparent}
+  .cando-check .cc-row .cc-box{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--line-2);color:transparent;display:grid;place-items:center;font-size:12px;margin-top:1px;transition:.12s}
+  .cando-check .cc-row.on{color:var(--text)}
+  .cando-check .cc-row.on .cc-box{border-color:var(--green);background:rgba(67,214,126,.16);color:var(--green)}
+  .m-hint{margin:-1px 0 6px 24px;font-size:13px;color:var(--faint);border-left:2px solid var(--indigo);padding:3px 0 3px 11px;line-height:1.5}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -140,6 +152,11 @@
     <div class="eyebrow">Odometry</div>
     <h1>Where am I on<br>the <span class="accent">field</span>?</h1>
     <p class="dek">Add up every wheel turn and every degree of heading, loop after loop, and you can track the robot's position on the field without a GPS. That running estimate is odometry, and it's how autonomous knows where it is.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Turn wheel distance and gyro heading into a live field pose by updating odometry every loop.</li>
+      <li>Anchor odometry at a known start, advance it each loop, and read the current pose back when a routine needs it.</li>
+      <li>Explain why the estimate drifts over a match, and re-anchor it to a known pose when a better fix arrives.</li>
+    </ul></div>
   </div>
 
   <section>
@@ -177,9 +194,13 @@
     <div class="missions" id="missions">
       <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
       <div class="m-item" data-m="drift"><span class="m-st">○</span><span>Drive a <b>full lap</b> around the field and watch tiny per-loop errors pile up. Push <b>Drift from truth</b> past <b>0.30 m</b> - quicker than you might expect.</span></div>
+      <div class="m-hint" data-for="drift" hidden>Stuck? Just keep driving with the joystick - one lap around the field pushes Drift from truth past 0.30 m all on its own. No resets.</div>
       <div class="m-item" data-m="bend"><span class="m-st">○</span><span>Spin in place <b>3 full turns</b>, then drive straight and watch closely. A crooked heading bends the whole trail: Drift jumps another <b>0.50 m</b> in about one meter. Heading error is the expensive kind.</span></div>
+      <div class="m-hint" data-for="bend" hidden>Stuck? Hold the stick hard to one side so the robot spins in place for about 3 full turns, then push straight forward - the crooked heading makes Drift leap another half meter within a meter of driving.</div>
       <div class="m-item" data-m="fix"><span class="m-st">○</span><span>Let Drift build past <b>0.50 m</b>, then press <b>Reset pose</b> and enjoy the snap back to truth. That correction is exactly what a vision fix or a known start gives a real robot.</span></div>
+      <div class="m-hint" data-for="fix" hidden>Stuck? Drive until Drift from truth is past 0.50 m, then press the Reset pose button - the dashed estimate snaps straight back onto the solid robot.</div>
       <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> rack up <b>10 m</b> of driving and <b>2 full turns</b> while Drift never touches <b>0.15 m</b>. Reset pose is your vision fix - use it early and often, and keep your lines smooth.</span></div>
+      <div class="m-hint" data-for="gold" hidden>Stuck? Keep Drift under 0.15 m the whole time by pressing Reset pose early and often, like a vision fix. Drive smoothly and rack up 10 m of travel with a couple of turns before Drift ever reaches 0.15.</div>
     </div>
   </section>
 
@@ -328,6 +349,12 @@ odometry.<input class="blank" data-ans="resetposition" data-fill="resetPosition"
         <div class="gl"><b>Drift</b><span>Errors accumulate over time.</span></div>
         <div class="gl"><b>resetPosition</b><span>Re-anchor to a known pose.</span></div>
       </div>
+      <div class="cando-check" id="candoCheck">
+        <span class="cc-h">Can you do these now? Tap each one you have got.</span>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Turn wheel distance and gyro heading into a live field pose with odometry.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Anchor odometry at a known start, update it every loop, and read the pose back.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Say why odometry drifts, and snap it back to a known pose on a fix.</span></div>
+      </div>
       <a class="next" href="deploy-lesson-26.html">
         <div class="n-eyebrow">Up next · Part 6 · 04</div>
         <h3>Trajectories &amp; PathPlanner</h3>
@@ -445,6 +472,10 @@ odometry.<input class="blank" data-ans="resetposition" data-fill="resetPosition"
   Object.keys(mItems).forEach(function(id){
     if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
   });
+  // stuck hints: after ~150s of active fiddling on an uncleared mission, reveal its hint line
+  var stuckSecs={}, HINT_AT=150, lastAct=0;
+  try{ var mDemo=document.getElementById('demo'); if(mDemo){ ['pointerdown','pointermove','input','keydown'].forEach(function(ev){ mDemo.addEventListener(ev,function(){ lastAct=Date.now(); },true); }); } }catch(e){}
+  function stuckTick(tick){ var actNow=(Date.now()-lastAct)<1500; Object.keys(mItems).forEach(function(id){ var n=mItems[id]; if(!n) return; var h=document.querySelector('#missions .m-hint[data-for="'+id+'"]'); if(n.classList.contains('cleared')){ if(h&&!h.hidden) h.hidden=true; return; } if(actNow){ stuckSecs[id]=(stuckSecs[id]||0)+tick; if(stuckSecs[id]>=HINT_AT && h) h.hidden=false; } }); }
   function mDrift(){ return Math.hypot(tru.x-est.x, tru.y-est.y); }
   var mPT={x:tru.x,y:tru.y,th:tru.th};   // pose at the previous checker tick
   var mSpin=0, mSpun=false, mBendBase=0; // "bend" mission: spins done, drift when they finished
@@ -467,6 +498,7 @@ odometry.<input class="blank" data-ans="resetposition" data-fill="resetPosition"
     } else if(d>=mBendBase+0.5){ mClear('bend'); }
     if(d>=0.15){ mGDist=0; mGTurn=0; }
     else { mGDist+=dist; mGTurn+=dth; if(mGDist>=10&&mGTurn>=4*Math.PI) mClear('gold'); }
+    stuckTick(0.2);
   },200);
   }catch(e){}
 
@@ -583,6 +615,21 @@ odometry.<input class="blank" data-ans="resetposition" data-fill="resetPosition"
     });
   }catch(e){}
 })();
+</script>
+<script>
+(function(){try{
+  var K='frc:cando', f=location.pathname.split('/').pop(), map={};
+  try{ map=JSON.parse(localStorage.getItem(K))||{}; }catch(e){}
+  var rows=document.querySelectorAll('#candoCheck .cc-row');
+  Array.prototype.forEach.call(rows,function(r,i){
+    var key=f+'#'+i;
+    if(map[key]) r.classList.add('on');
+    r.addEventListener('click',function(){
+      var on=r.classList.toggle('on'); map[key]=on;
+      try{ localStorage.setItem(K,JSON.stringify(map)); }catch(e){}
+    });
+  });
+}catch(e){}})();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>

@@ -163,6 +163,21 @@
 
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+
+  /* ---- can-do goals + stuck-hint (additions) ---- */
+  .cando{border-left:3px solid var(--indigo);background:rgba(138,140,248,.07);border-radius:0 10px 10px 0;padding:12px 16px;margin:18px 0 2px;max-width:52ch}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);display:block;margin-bottom:7px}
+  .cando ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px}
+  .cando li{color:var(--muted);font-size:15px;line-height:1.5}
+  .cando li b{color:var(--text)}
+  .cando-check{margin-top:18px;border-top:1px solid var(--line);padding-top:15px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:flex-start;width:100%;text-align:left;background:none;border:none;color:var(--muted);font-family:var(--sans);font-size:15px;line-height:1.45;padding:5px 4px;min-height:30px;cursor:pointer;border-radius:8px;transition:.12s}
+  .cando-check .cc-row:hover{background:var(--panel-2)}
+  .cando-check .cc-row .cc-mark{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--line-2);color:transparent;font-size:12px;display:flex;align-items:center;justify-content:center;margin-top:1px;transition:.12s}
+  .cando-check .cc-row.on{color:var(--text)}
+  .cando-check .cc-row.on .cc-mark{background:var(--green);border-color:var(--green);color:#0a0f24}
+  .missions .m-hint{margin:-1px 0 6px 26px;font-size:13px;line-height:1.5;color:var(--amber);border-left:2px solid rgba(255,176,32,.5);padding:3px 0 3px 11px}
 </style>
 </head>
 <body>
@@ -182,6 +197,11 @@
     <div class="eyebrow">What a Robot Program Is</div>
     <h1>Code that lives<br>on a <span class="accent">robot</span>.</h1>
     <p class="dek">Before any Python: where your code actually runs, how it gets there, and the loop you'll repeat a few hundred times this season.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Name the three machines - <b>laptop</b>, <b>roboRIO</b>, and <b>Driver Station</b> - and say what each one does.</li>
+      <li>Trace the <b>write, build, deploy, run</b> loop you will spin all season.</li>
+      <li>Point to the one class the roboRIO runs and say when <b>robotPeriodic</b> fires.</li>
+    </ul></div>
   </div>
 
   <section>
@@ -386,6 +406,12 @@
         <div class="gl"><b>Robot / TimedRobot</b><span>The entry point WPILib runs for you.</span></div>
         <div class="gl"><b>robotPeriodic()</b><span>Called every 20 ms while powered.</span></div>
       </div>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Can you do these now? Tap each one you have got.</div>
+        <button type="button" class="cc-row"><span class="cc-mark">✓</span><span>Name the laptop, roboRIO, and Driver Station, and what each does.</span></button>
+        <button type="button" class="cc-row"><span class="cc-mark">✓</span><span>Trace the write, build, deploy, run loop.</span></button>
+        <button type="button" class="cc-row"><span class="cc-mark">✓</span><span>Point to the class the roboRIO runs and when robotPeriodic fires.</span></button>
+      </div>
       <a class="next" href="deploy-lesson-2-py.html">
         <div class="n-eyebrow">Up next · Part 1 · 02</div>
         <h3>Setting Up RobotPy</h3>
@@ -579,6 +605,31 @@
       Object.keys(mItems).forEach(function(id){
         if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
       });
+      // ---- stuck hints: sustained active effort on an uncleared mission reveals one nudge (addition) ----
+      try{
+        var mHints={
+          first:"For the first-command mission: click the drive.forward() chip once (or type it and press Enter). The robot obeys right away - that is the whole mission.",
+          pickup:"For the pickup mission: click intake.run() first so the intake turns teal, then drive.forward() so the robot slides up over the orange piece near START. The intake has to be on when you touch it.",
+          deploy:"For the deploy mission: stack at least 3 commands into the program on the left (each click adds a line), then press Deploy and let the robot run the whole list on its own.",
+          square:"For the square mission: deploy forward(), turn(90), forward(), turn(90), forward(), turn(90), forward(), turn(90) - four forwards and four 90-degree turns land you back on START.",
+          goldrun:"For the gold: put intake.run() as the first line of that same square program, so you scoop the orange piece on the first side, then finish all four sides back to START in one deploy."
+        };
+        var mHintEls={};
+        Object.keys(mItems).forEach(function(id){
+          if(!mHints[id]) return; var n=mItems[id]; if(!n||!n.parentNode) return;
+          var h=document.createElement('div'); h.className='m-hint'; h.hidden=true; h.textContent=mHints[id];
+          n.parentNode.insertBefore(h,n.nextSibling); mHintEls[id]=h;
+        });
+        var H_MS=150000, hAct=0, hLast=0, hDemo=document.getElementById('cockpit');
+        var hTouch=function(){ hLast=Date.now(); };
+        if(hDemo){ hDemo.addEventListener('pointerdown',hTouch,true); hDemo.addEventListener('input',hTouch,true); hDemo.addEventListener('keydown',hTouch,true); }
+        setInterval(function(){ try{
+          if(hLast&&(Date.now()-hLast)<4000) hAct+=1000;
+          if(hAct>=H_MS){ Object.keys(mHintEls).forEach(function(id){
+            var n=mItems[id]; mHintEls[id].hidden=!!(n&&n.classList.contains('cleared'));
+          }); }
+        }catch(e){} },1000);
+      }catch(e){}
     }catch(e){}
 
     // ---- world ----
@@ -826,6 +877,24 @@
     renderProg();
     log('cockpit ready. the robot is listening.','sys');
     log('click a command on the left - it runs right away.');
+  }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  try{
+    var KEY="frc:cando", page=location.pathname.split("/").pop();
+    var wrap=document.getElementById("candoCheck"); if(!wrap) return;
+    var rows=wrap.querySelectorAll(".cc-row");
+    var saved={}; try{ saved=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+    Array.prototype.forEach.call(rows,function(r,i){
+      var k=page+"#"+i;
+      if(saved[k]) r.classList.add("on");
+      r.addEventListener("click",function(){
+        var on=!r.classList.contains("on"); r.classList.toggle("on",on);
+        try{ var m=JSON.parse(localStorage.getItem(KEY))||{}; if(on) m[k]=true; else delete m[k]; localStorage.setItem(KEY,JSON.stringify(m)); }catch(e){}
+      });
+    });
   }catch(e){}
 })();
 </script>

@@ -62,6 +62,19 @@
   .missions .m-item.cleared{color:var(--text)}
   .missions .m-item.cleared .m-st{color:var(--green)}
   .missions .m-item.gold .m-st{color:var(--amber)}
+  .m-hint{margin:1px 0 7px 27px;font-size:13px;color:var(--amber);border-left:2px solid rgba(255,176,32,.45);padding:3px 0 3px 10px;font-style:italic;line-height:1.45}
+  .m-hint[hidden]{display:none}
+
+  .cando{border-left:3px solid var(--amber);background:rgba(255,176,32,.05);border-radius:0 10px 10px 0;padding:11px 16px;margin:16px 0 2px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);display:block;margin-bottom:6px}
+  .cando ul{margin:0;padding-left:18px;color:var(--muted);font-size:15px;line-height:1.5}
+  .cando li{margin:2px 0}
+  .cando-check{margin-top:16px;border-top:1px solid var(--line);padding-top:15px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);display:block;margin-bottom:8px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:center;padding:5px 0;min-height:30px;cursor:pointer;font-size:15px;color:var(--muted);transition:.12s}
+  .cando-check .cc-row .cc-box{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--line-2);display:inline-flex;align-items:center;justify-content:center;font-size:12px;line-height:1;color:transparent;transition:.12s}
+  .cando-check .cc-row.on{color:var(--text)}
+  .cando-check .cc-row.on .cc-box{border-color:var(--green);background:rgba(67,214,126,.16);color:var(--green)}
 
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
@@ -119,6 +132,11 @@
     <div class="eyebrow">The Power System</div>
     <h1>From battery<br>to <span class="accent">everything</span>.</h1>
     <p class="dek">Every motor, sensor, and computer on the robot draws from one 12-volt battery. Power flows through a strict chain, protected at every level, so that when something shorts out, it blows a fuse instead of the whole robot.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+    <li>Put the power chain in order: battery, main breaker, PDH, fused branch, load</li>
+    <li>Explain why an overloaded branch blows its own fuse instead of the whole robot</li>
+    <li>Say what the 120 A main breaker is for and why the battery terminals are the biggest hazard</li>
+    </ul></div>
   </div>
 
   <section>
@@ -157,9 +175,13 @@
     <div class="missions" id="missions">
       <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
       <div class="m-item" data-m="onebranch"><span class="m-st">○</span><span>Power on, then press <b>Overload a branch</b> once and read the symptoms the way a pit crew would: one box goes dark, System says <b>partial</b>, and the main breaker still says <b>closed</b>. A branch fuse fired and the main never even noticed - that is the layering doing its job.</span></div>
+      <div class="m-hint" data-for="onebranch" hidden>Press Power on first, then press Overload a branch just once - one box goes dark, System reads partial, and the main breaker stays closed.</div>
       <div class="m-item" data-m="brain"><span class="m-st">○</span><span>Press <b>Overload a branch</b> again. This second fuse feeds the <b>roboRIO</b>, the robot's brain. The robot is now blind, yet System still reads <b>partial</b>. Notice the same layer fired: a fuse, not the main. The symptom tells you where to look.</span></div>
+      <div class="m-hint" data-for="brain" hidden>With the robot on, press Overload a branch a second time - that fuse feeds the roboRIO box, and System still reads partial, not shut down.</div>
       <div class="m-item" data-m="maintrip"><span class="m-st">○</span><span>Now press <b>Short the main</b> and compare: every box goes dark at once and the breaker reads <b>TRIPPED</b>. A whole-robot blackout is the main's signature - once you have seen it, you will never mix the two up. Press <b>Reset</b> and bring System back to <b>running</b>.</span></div>
+      <div class="m-hint" data-for="maintrip" hidden>Press Short the main so every box blacks out and the breaker reads TRIPPED, then press Reset to bring System back to running with no faults.</div>
       <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> blow <b>all three</b> branch fuses without ever tripping the main. Every load is dead, yet System reads <b>partial</b> and the breaker stays <b>closed</b>. The fuses each did their job, so the main never had to - the whole design philosophy in one picture.</span></div>
+      <div class="m-hint" data-for="gold" hidden>Power on, then press Overload a branch three times - blow all three fuses without ever pressing Short the main, and the breaker stays closed.</div>
     </div>
   </section>
 
@@ -256,6 +278,12 @@
         <div class="gl"><b>Layered protection</b><span>Fault blows a fuse, not the robot.</span></div>
         <div class="gl"><b>Order matters</b><span>Battery, breaker, PDH, loads.</span></div>
       </div>
+      <div class="cando-check" id="candoCheck">
+        <span class="cc-h">You made it - tap each one you can do now</span>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Put the power chain in order: battery, main breaker, PDH, fused branch, load</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Explain why an overloaded branch blows its own fuse instead of the whole robot</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Say what the 120 A main breaker is for and why the battery terminals are the biggest hazard</span></div>
+      </div>
       <a class="next" href="build-lesson-28.html">
         <div class="n-eyebrow">Up next · Part 6 · 02</div>
         <h3>Wiring Motors &amp; Controllers</h3>
@@ -351,6 +379,23 @@
     if(mSawTrip && !mainTrip && !branchFault.some(Boolean)) mClear('maintrip');
     if(!mainTrip && branchFault[0]&&branchFault[1]&&branchFault[2]) mClear('gold');
   },200);
+
+  // stuck-hints: after ~150s of active fiddling on an uncleared mission, surface one nudge
+  var mHintEls={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-hint'),function(h){ mHintEls[h.getAttribute('data-for')]=h; });
+  var mHacc={}, mLastAct=0, mHdemo=document.getElementById('demo');
+  function mHbump(){ mLastAct=Date.now(); }
+  if(mHdemo){ ['pointerdown','input','click'].forEach(function(ev){ mHdemo.addEventListener(ev,mHbump,true); }); }
+  window.addEventListener('keydown',mHbump,true);
+  setInterval(function(){
+    if(!mLastAct || Date.now()-mLastAct>5000) return;
+    Object.keys(mHintEls).forEach(function(id){
+      var it=mItems[id], h=mHintEls[id];
+      if(!it||!h||it.classList.contains('cleared')||!h.hasAttribute('hidden')) return;
+      mHacc[id]=(mHacc[id]||0)+0.2;
+      if(mHacc[id]>=150) h.removeAttribute('hidden');
+    });
+  },200);
   }catch(e){}
 
   document.querySelectorAll('#quiz .q').forEach(function(q){
@@ -408,6 +453,22 @@
     opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
     if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
 })();
+</script>
+<script>
+(function(){ try{
+  var KEY='frc:cando', file=location.pathname.split('/').pop(), box={};
+  try{ box=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+  var rows=document.querySelectorAll('#candoCheck .cc-row');
+  Array.prototype.forEach.call(rows,function(row,i){
+    var k=file+'#'+i;
+    if(box[k]) row.classList.add('on');
+    row.addEventListener('click',function(){
+      var on=!row.classList.contains('on');
+      row.classList.toggle('on',on);
+      box[k]=on; try{ localStorage.setItem(KEY,JSON.stringify(box)); }catch(e){}
+    });
+  });
+}catch(e){} })();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>

@@ -175,6 +175,30 @@
 
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
 
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--teal);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+  .missions .m-hint{display:block;margin-top:7px;font-size:13px;line-height:1.5;color:var(--teal);border-left:2px solid var(--line-2);padding-left:10px;font-style:italic}
+  .missions .m-item{flex-wrap:wrap}
+  .missions .m-item .m-hint{flex-basis:100%;margin-left:26px}
+  .missions .m-item .m-hint[hidden]{display:none}
+  .cando{border-left:3px solid var(--teal);background:rgba(52,215,197,.06);border-radius:0 10px 10px 0;padding:12px 16px;margin:18px 0 2px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);display:block;margin-bottom:6px}
+  .cando ul{margin:0;padding-left:18px}
+  .cando li{color:var(--muted);font-size:15px;line-height:1.5;margin:3px 0}
+  .cando li::marker{color:var(--teal)}
+  .cando-check{margin-top:18px;border:1px solid var(--line-2);border-left:3px solid var(--teal);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .cando-check .cdc-h{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin-bottom:6px}
+  .cando-check .cdc-row{display:flex;gap:11px;align-items:center;min-height:30px;padding:4px 0;cursor:pointer;font-size:15px;color:var(--muted)}
+  .cando-check .cdc-box{flex:0 0 auto;width:19px;height:19px;border-radius:50%;border:2px solid var(--line-2);display:grid;place-items:center;font-size:12px;color:var(--teal);transition:.12s}
+  .cando-check .cdc-row.done{color:var(--text)}
+  .cando-check .cdc-row.done .cdc-box{border-color:var(--teal);background:rgba(52,215,197,.14)}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -195,6 +219,10 @@
     <div class="eyebrow">The Complete Controller</div>
     <h1>Everything,<br><span class="accent">together</span>.</h1>
     <p class="dek">Feedforward to predict. Feedback to correct. A motion profile to follow. This is the controller real FRC teams ship - and the bridge to writing it for real.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+    <li>Combine feedforward and feedback into the one control law real FRC teams ship</li>
+    <li>Explain why feeding a motion profile's velocity to feedforward keeps error tiny the whole move</li>
+    <li>Predict what feedforward-only does when a surprise load appears - and why feedback is the fix</li></ul></div>
   </div>
 
   <section>
@@ -263,6 +291,13 @@
       </div>
     </div>
     <p class="caption">FF + FB tracks the amber profile almost perfectly and shrugs off the load. Feedforward-only follows beautifully - until you add load. Feedback-only lags the move and droops under gravity.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
+      <div class="m-item" data-m="ffonly"><span class="m-st">○</span><span>Switch to <b>Feedforward only</b>, then drag <b>Added load</b> up past <b>0.15</b>. The carriage sags away and <b>Error climbs past 0.10</b> - feedforward was never told about that load. Open-loop has no eyes.</span><div class="m-hint" hidden>For the feedforward-only mission: click the Feedforward only button, then drag Added load to about 0.2. With no feedback watching, the carriage sinks and Error runs well past 0.10.</div></div>
+      <div class="m-item" data-m="both"><span class="m-st">○</span><span>Back to <b>FF + FB</b>. Add that same disturbance - <b>Added load near 0.15</b> - and the complete controller barely flinches: <b>Error holds under 0.03</b>. Feedback quietly carries what feedforward missed.</span><div class="m-hint" hidden>For the FF + FB mission: click FF + FB, set Added load to about 0.15, and let it settle. Feedback absorbs the load and pulls Error back under 0.03 on its own.</div></div>
+      <div class="m-item" data-m="fbdroop"><span class="m-st">○</span><span>Now <b>Feedback only</b>, load back to <b>0</b>. Even with no disturbance the carriage parks low - <b>Error near 0.075</b> (that is g ÷ kP, 0.45/6) - because feedback alone must invent the gravity-holding voltage from error. That gap is exactly what feedforward erases.</span><div class="m-hint" hidden>For the feedback-only mission: click Feedback only and drag Added load back to 0. Let it settle - the carriage parks about 0.075 below the line, which is 0.45 divided by your kP of 6.</div></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> in <b>FF + FB</b>, pile on a heavy <b>Added load of 0.25</b> and still pin <b>Error under 0.02</b>. Pure P feedback needs help here - crank <b>kP</b> up toward 15-20 so the leftover load ÷ kP shrinks below 0.02.</span><div class="m-hint" hidden>For gold: stay in FF + FB, set Added load to 0.25, then push kP up to about 16 or higher. The steady error is load divided by kP, so a big kP squeezes it under 0.02.</div></div>
+    </div>
   </section>
 
   <section>
@@ -316,6 +351,11 @@ self.motor.<span class="fn">setVoltage</span>( <input class="blank" data-ans="fe
   </section>
 
   <section>
+    <div class="note teal robotcard">
+      <div class="nh">🤖 Now on your robot · 10 minutes</div>
+      <p><b>Assemble the gold-standard controller.</b> On a real mechanism, create an <span class="k">ElevatorFeedforward</span> (or <span class="k">ArmFeedforward</span>) next to a <span class="k">ProfiledPIDController</span>, feed the profile's velocity into feedforward, and send the sum to <span class="k">setVoltage</span> - the four lines from this lesson. Start feedforward-heavy: drop in your measured kS, kG, kV, kA with a <em>small</em> kP, then raise kP only until a hand-shove is shrugged off quickly. <b>Pass test:</b> push the mechanism mid-hold and it returns to target in well under a second with no ringing. If it overshoots or oscillates, walk the symptoms in <a href="closing-the-loop-troubleshooting.html" style="color:var(--teal)">the troubleshooting field guide</a>, then lock your final gains into <a href="worksheet.html" style="color:var(--teal)">the tuning worksheet</a>.</p>
+      <p class="sub"><b>No robot yet?</b> Open <a href="worksheet.html" style="color:var(--teal)">worksheet.html</a>, pick the elevator, and enter kS 0.06, kG 0.45, kV 1.8, kA 1.0 with kP 6 - reading the generated feedforward-plus-PID code makes the assembly muscle memory before build season.</p>
+    </div>
     <div class="note teal">
       <div class="nh">Going further &middot; optional</div>
       <p>This whole course built the controller in volts inside your own periodic loop, but modern FRC motor controllers like a CTRE Kraken can run this exact recipe onboard the motor itself at roughly 1000 times a second, far faster than the 50 Hz robot loop - you hand it the feedforward gains and the profile constraints and it closes the loop locally. Here is the payoff question to carry forward: if a faster loop means less delay between sensing and acting, why does moving the control onto the motor let you safely turn the gains up higher than you ever could from the main robot code?</p>
@@ -393,6 +433,12 @@ self.motor.<span class="fn">setVoltage</span>( <input class="blank" data-ans="fe
         <div class="gl"><b>Feedback's job</b><span>Correct the leftover - disturbances and model error.</span></div>
         <div class="gl"><b>ProfiledPIDController</b><span>WPILib class: profile + feedback in one.</span></div>
         <div class="gl"><b>The gold standard</b><span>Strong feedforward, light feedback - every FRC mechanism.</span></div>
+      </div>
+      <div class="cando-check" id="candoCheck">
+        <div class="cdc-h">Can you? Tap each one you've nailed</div>
+        <div class="cdc-row"><span class="cdc-box"></span><span>Combine feedforward and feedback into the one control law real FRC teams ship</span></div>
+        <div class="cdc-row"><span class="cdc-box"></span><span>Explain why feeding a motion profile's velocity to feedforward keeps error tiny the whole move</span></div>
+        <div class="cdc-row"><span class="cdc-box"></span><span>Predict what feedforward-only does when a surprise load appears - and why feedback is the fix</span></div>
       </div>
       <a class="next" href="closing-the-loop.html">
         <div class="n-eyebrow">Course complete · Part I</div>
@@ -532,6 +578,40 @@ self.motor.<span class="fn">setVoltage</span>( <input class="blank" data-ans="fe
   el.load.addEventListener('input',function(){S.load=parseFloat(el.load.value);el.loadVal.textContent=S.load.toFixed(2);});
   el.kp.addEventListener('input',function(){S.kP=parseFloat(el.kp.value);el.kpVal.textContent=S.kP.toFixed(1);});
 
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  var mHold={};
+  function mHeld(k,cond){ mHold[k]=cond?(mHold[k]||0)+1:0; return mHold[k]>=3; }
+  var mLastAct=0, mHintT={}, mAccPrev=Date.now();
+  (function(){ var d=document.getElementById('demo'); if(d){ d.addEventListener('pointerdown',function(){mLastAct=Date.now();},true); d.addEventListener('input',function(){mLastAct=Date.now();},true); } })();
+  setInterval(function(){
+    var _err=S.sp-S.y, _settled=Math.abs(S.v)<0.04;
+    if(mHeld('ffonly', S.mode==='ff' && S.load>=0.13 && Math.abs(_err)>0.10)) mClear('ffonly');
+    if(mHeld('both', S.mode==='both' && S.load>=0.13 && _settled && Math.abs(_err)<0.03)) mClear('both');
+    if(mHeld('fbdroop', S.mode==='fb' && S.load<0.02 && _settled && _err>0.03 && Math.abs(_err-0.45/S.kP)<0.02)) mClear('fbdroop');
+    if(mHeld('gold', S.mode==='both' && S.load>=0.25 && _settled && Math.abs(_err)<0.02)) mClear('gold');
+    var _now=Date.now(), _dt=Math.min(0.5,(_now-mAccPrev)/1000); mAccPrev=_now;
+    if(_now-mLastAct<12000){ Object.keys(mItems).forEach(function(_k){ var _it=mItems[_k]; if(!_it||_it.classList.contains('cleared'))return; mHintT[_k]=(mHintT[_k]||0)+_dt; if(mHintT[_k]>=150){ var _h=_it.querySelector('.m-hint'); if(_h&&_h.hidden)_h.hidden=false; } }); }
+  },200);
+  }catch(e){}
+
   function updateProfile(dt){
     var dist=S.sp-S.pPos;
     var dir=dist>=0?1:-1;
@@ -660,6 +740,21 @@ self.motor.<span class="fn">setVoltage</span>( <input class="blank" data-ans="fe
   opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(revealed)return; picked=i;
     opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
     if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
+})();
+</script>
+<script>
+(function(){
+  try{
+    var KEY="frc:cando", file=location.pathname.split("/").pop();
+    var wrap=document.getElementById("candoCheck"); if(!wrap) return;
+    var map={}; try{ map=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+    Array.prototype.forEach.call(wrap.querySelectorAll(".cdc-row"),function(r,i){
+      var k=file+"#"+i;
+      function paint(on){ r.classList.toggle("done",!!on); r.querySelector(".cdc-box").textContent=on?"✓":""; }
+      paint(map[k]);
+      r.addEventListener("click",function(){ map[k]=!map[k]; paint(map[k]); try{ localStorage.setItem(KEY,JSON.stringify(map)); }catch(e){} });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

@@ -115,6 +115,18 @@
   .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
   .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  .cando{margin:18px 0 4px;border-left:3px solid var(--indigo);background:rgba(138,140,248,.06);border-radius:0 10px 10px 0;padding:12px 16px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);display:block;margin-bottom:8px}
+  .cando ul{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+  .cando li{position:relative;padding-left:19px;font-size:15px;color:var(--muted);line-height:1.5}
+  .cando li::before{content:"\2192";position:absolute;left:0;color:var(--indigo);font-family:var(--mono)}
+  .cando-check{margin:18px 0 0;border-top:1px solid var(--line);padding-top:16px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:flex-start;min-height:28px;padding:5px 2px;cursor:pointer;font-size:15px;color:var(--muted);line-height:1.45;-webkit-tap-highlight-color:transparent}
+  .cando-check .cc-row .cc-box{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--line-2);color:transparent;display:grid;place-items:center;font-size:12px;margin-top:1px;transition:.12s}
+  .cando-check .cc-row.on{color:var(--text)}
+  .cando-check .cc-row.on .cc-box{border-color:var(--green);background:rgba(67,214,126,.16);color:var(--green)}
+  .m-hint{margin:-1px 0 6px 24px;font-size:13px;color:var(--faint);border-left:2px solid var(--indigo);padding:3px 0 3px 11px;line-height:1.5}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -135,6 +147,11 @@
     <div class="eyebrow">Trajectories &amp; PathPlanner</div>
     <h1>Plan the<br><span class="accent">route</span>.</h1>
     <p class="dek">Instead of driving by hand, you draw a smooth path through a few waypoints ahead of time. A follower then steers the robot along that curve on its own, using the pose from odometry to stay on track.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Explain how a few waypoints become one smooth, timed trajectory the robot promises to follow.</li>
+      <li>Describe how a path follower stays on the line: compare the odometry pose to the path and correct with feedback.</li>
+      <li>Load a path you drew in PathPlanner or Choreo by name and wrap it in a follow command for autonomous.</li>
+    </ul></div>
   </div>
 
   <section>
@@ -168,9 +185,13 @@
     <div class="missions" id="missions">
       <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
       <div class="m-item" data-m="hit"><span class="m-st">○</span><span>Press <b>Play</b> and let the starting path run to <b>100%</b>. Watch the robot plow straight through the <b>crate</b> without a flinch. A follower obeys its path, even a bad one.</span></div>
+      <div class="m-hint" data-for="hit" hidden>Stuck? Do not drag any waypoint yet - just press Play and let the robot run the starting path all the way to 100 percent, straight through the CRATE box.</div>
       <div class="m-item" data-m="clear"><span class="m-st">○</span><span>Your turn to fix it: drag the middle waypoints until the readout says <b>CLEAR</b>, keep <b>1</b> on START and <b>4</b> on GOAL, then Play a clean run. That is real path planning.</span></div>
+      <div class="m-hint" data-for="clear" hidden>Stuck? Drag waypoints 2 and 3 so the teal curve steers around the CRATE box until the readout reads CLEAR, and keep dot 1 on the START pad and dot 4 on the GOAL pad. Then press Play.</div>
       <div class="m-item" data-m="efficient"><span class="m-st">○</span><span>Detours cost autonomous seconds. See how tight you can route it: a clean run with the path under <b>14.0 m</b>.</span></div>
+      <div class="m-hint" data-for="efficient" hidden>Stuck? Once the path reads CLEAR, pull the middle waypoints in so the curve is straighter and the "path ... m" readout drops to 14.0 m or less, then Play a clean run.</div>
       <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> a clean run under <b>12.0 m</b>. Hug the crate like a cyclist taking the tightest line around a corner - quick, but still clear.</span></div>
+      <div class="m-hint" data-for="gold" hidden>Stuck? Tuck the middle waypoints in tight against the CRATE - as close as they go while the readout still says CLEAR - to get the path length under 12.0 m, then Play.</div>
     </div>
   </section>
 
@@ -312,6 +333,12 @@ auto = <input class="blank" data-ans="pathplannerauto" data-fill="PathPlannerAut
         <div class="gl"><b>AutoBuilder</b><span>Turns a path into a command.</span></div>
         <div class="gl"><b>Needs odometry</b><span>The follower closes on your pose.</span></div>
       </div>
+      <div class="cando-check" id="candoCheck">
+        <span class="cc-h">Can you do these now? Tap each one you have got.</span>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Explain how waypoints turn into a smooth, timed trajectory.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Say how a follower uses your pose plus feedback to stay on the planned line.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Load a GUI-designed path by name and turn it into a follow command.</span></div>
+      </div>
       <a class="next" href="deploy-lesson-27-py.html">
         <div class="n-eyebrow">Up next · Part 6 · 05 · Finale</div>
         <h3>Building an Autonomous</h3>
@@ -424,6 +451,10 @@ auto = <input class="blank" data-ans="pathplannerauto" data-fill="PathPlannerAut
   Object.keys(mItems).forEach(function(id){
     if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
   });
+  // stuck hints: after ~150s of active fiddling on an uncleared mission, reveal its hint line
+  var stuckSecs={}, HINT_AT=150, lastAct=0;
+  try{ var mDemo=document.getElementById('demo'); if(mDemo){ ['pointerdown','pointermove','input','keydown'].forEach(function(ev){ mDemo.addEventListener(ev,function(){ lastAct=Date.now(); },true); }); } }catch(e){}
+  function stuckTick(tick){ var actNow=(Date.now()-lastAct)<1500; Object.keys(mItems).forEach(function(id){ var n=mItems[id]; if(!n) return; var h=document.querySelector('#missions .m-hint[data-for="'+id+'"]'); if(n.classList.contains('cleared')){ if(h&&!h.hidden) h.hidden=true; return; } if(actNow){ stuckSecs[id]=(stuckSecs[id]||0)+tick; if(stuckSecs[id]>=HINT_AT && h) h.hidden=false; } }); }
   // the field is treated as 16 m x 8 m; crate and start/goal pads in field fractions
   var OB={x:0.46,y:0.40,w:0.14,h:0.30};
   var MSTART={x:0.05,y:0.68,w:0.13,h:0.24};
@@ -492,6 +523,7 @@ auto = <input class="blank" data-ans="pathplannerauto" data-fill="PathPlannerAut
       }
       mPrevRun=playing&&!end;
     }catch(e){}
+    stuckTick(0.2);
   },200);
   }catch(e){}
 
@@ -608,6 +640,21 @@ auto = <input class="blank" data-ans="pathplannerauto" data-fill="PathPlannerAut
     });
   }catch(e){}
 })();
+</script>
+<script>
+(function(){try{
+  var K='frc:cando', f=location.pathname.split('/').pop(), map={};
+  try{ map=JSON.parse(localStorage.getItem(K))||{}; }catch(e){}
+  var rows=document.querySelectorAll('#candoCheck .cc-row');
+  Array.prototype.forEach.call(rows,function(r,i){
+    var key=f+'#'+i;
+    if(map[key]) r.classList.add('on');
+    r.addEventListener('click',function(){
+      var on=r.classList.toggle('on'); map[key]=on;
+      try{ localStorage.setItem(K,JSON.stringify(map)); }catch(e){}
+    });
+  });
+}catch(e){}})();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>

@@ -92,6 +92,24 @@
   .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
   .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)} .coursenav a.next-link{color:var(--amber);border-color:rgba(255,176,32,.4)}
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  .cando{border-left:3px solid var(--indigo);background:rgba(255,138,76,.07);border-radius:0 10px 10px 0;padding:12px 16px;margin:18px 0 0}
+  .cando .cd-h{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:6px}
+  .cando ul{margin:0;padding-left:18px} .cando li{color:var(--muted);font-size:15px;line-height:1.5;margin:2px 0}
+  .cando-check{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:8px}
+  .cando-check .cc-row{display:flex;gap:10px;align-items:center;min-height:30px;padding:4px 0;cursor:pointer;font-size:15px;color:var(--muted);transition:.12s}
+  .cando-check .cc-row .cc-box{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--line-2);display:grid;place-items:center;font-size:12px;color:var(--green);line-height:1}
+  .cando-check .cc-row.done{color:var(--text)} .cando-check .cc-row.done .cc-box{border-color:var(--green);background:rgba(67,214,126,.14)}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--amber);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+  .missions .m-hint{flex:0 0 100%;margin:7px 0 1px 22px;font-size:13px;color:var(--muted);border-left:2px solid var(--amber);padding-left:10px;line-height:1.5}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -111,6 +129,11 @@
     <div class="eyebrow">Brackets, Gussets &amp; Joining</div>
     <h1>One bolt is a<br><span class="accent">hinge</span>.</h1>
     <p class="dek">Tubes and plates are just parts until they're joined into a rigid frame. A gusset ties two tubes at a corner, but only if it's bolted right. One bolt lets the joint pivot; spread two or more and it locks solid.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Bolt a gusset across a corner with two bolts in each tube so the joint can't pivot</li>
+      <li>Explain why one bolt makes a hinge and two lock the angle</li>
+      <li>Spot a frame that racks and fix it with a diagonal or gusset to make a triangle</li>
+    </ul></div>
   </div>
 
   <section>
@@ -145,6 +168,13 @@
       </div>
     </div>
     <p class="caption">A single bolt in a tube is a hinge, the tube just rotates around it. Two bolts, spread apart, stop the rotation. That's why every real gusset has a pattern of bolts, never just one.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
+      <div class="m-item" data-m="rigid"><span class="m-st">○</span><span>Make the joint read <b>rigid</b>: click two holes in each tube. Two bolts, spread apart, in <b>both</b> tubes - the Joint readout turns green and Test load holds.<div class="m-hint" hidden>For rigid: click two holes in the horizontal tube and two in the vertical tube. Once each tube has two bolts, the Joint readout turns green.</div></span></div>
+      <div class="m-item" data-m="hinge"><span class="m-st">○</span><span>Build a hinge on purpose: put <b>just one bolt</b> in a tube (leave the other tube with two), then press <b>Test load</b>. Watch it sag - one bolt is a pivot, so the corner folds.<div class="m-hint" hidden>For the sag: put one bolt in the vertical tube and two in the horizontal, then press Test load. One bolt is a hinge, so the corner folds.</div></span></div>
+      <div class="m-item" data-m="collapse"><span class="m-st">○</span><span>Now the worst case: bolt one tube solid with <b>two bolts</b> but leave the <b>other tube empty</b>, then Test load. A tube with zero bolts is not joined at all, so the whole corner drops.<div class="m-hint" hidden>For the collapse: fill both bolts in one tube but leave the other tube empty, then Test load. A tube with no bolts is not joined, so the corner collapses.</div></span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> rigid with the <b>least hardware</b> - exactly <b>two bolts per tube</b>, no more, and it still reads rigid. That is the smallest bolt pattern that locks a corner.<div class="m-hint" hidden>For the gold: use exactly two bolts per tube - four bolts total, spread apart, and nothing extra. That is the least hardware that still reads rigid.</div></span></div>
+    </div>
   </section>
 
   <section>
@@ -234,6 +264,12 @@
         <div class="gl"><b>Rivets / nutserts</b><span>Thin walls or no back access.</span></div>
         <div class="gl"><b>Triangles</b><span>Don't rack; rectangles do.</span></div>
       </div>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Can you do these now? Tap each one you own.</div>
+        <div class="cc-row"><span class="cc-box"></span><span>Bolt a gusset across a corner with two bolts in each tube so the joint can't pivot</span></div>
+        <div class="cc-row"><span class="cc-box"></span><span>Explain why one bolt makes a hinge and two lock the angle</span></div>
+        <div class="cc-row"><span class="cc-box"></span><span>Spot a frame that racks and fix it with a diagonal or gusset to make a triangle</span></div>
+      </div>
       <a class="next" href="build.html">
         <div class="n-eyebrow">Part 2 complete · Materials &amp; Stock</div>
         <h3>On to Part 3 - Power Transmission →</h3>
@@ -320,6 +356,45 @@
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
   requestAnimationFrame(step);
 
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  setInterval(function(){
+    var c=counts(), s=state();
+    if(s==='rigid') mClear('rigid');
+    if(testing && s==='wobbly') mClear('hinge');
+    if(testing && ((c.bH>=2&&c.bV===0)||(c.bV>=2&&c.bH===0))) mClear('collapse');
+    if(s==='rigid' && c.bH===2 && c.bV===2) mClear('gold');
+  },200);
+  // stuck-hints: after ~150s of active fiddling on an uncleared mission, reveal its hint
+  var _demoEl=document.getElementById('demo'), _lastAct=0, _stuckAcc={};
+  if(_demoEl){ ['pointerdown','input'].forEach(function(ev){ _demoEl.addEventListener(ev,function(){ _lastAct=Date.now(); }); }); }
+  setInterval(function(){
+    if(Date.now()-_lastAct>1600) return;
+    Object.keys(mItems).forEach(function(id){
+      var n=mItems[id]; if(!n||n.classList.contains('cleared')) return;
+      _stuckAcc[id]=(_stuckAcc[id]||0)+0.2;
+      if(_stuckAcc[id]>=150){ var h=n.querySelector('.m-hint'); if(h&&h.hidden) h.hidden=false; }
+    });
+  },200);
+  }catch(e){}
+
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
@@ -374,6 +449,24 @@
   opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(revealed)return; picked=i;
     opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
     if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
+})();
+</script>
+<script>
+(function(){
+  try{
+    var KEY="frc:cando", file=location.pathname.split("/").pop();
+    var wrap=document.getElementById("candoCheck"); if(!wrap) return;
+    var rows=wrap.querySelectorAll(".cc-row");
+    var saved={}; try{ saved=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+    function paint(row,on){ row.classList.toggle("done",on); var b=row.querySelector(".cc-box"); if(b) b.textContent=on?"✓":""; }
+    rows.forEach(function(row,i){
+      var k=file+"#"+i; paint(row, !!saved[k]);
+      row.addEventListener("click",function(){
+        var on=!row.classList.contains("done"); paint(row,on);
+        saved[k]=on; try{ localStorage.setItem(KEY,JSON.stringify(saved)); }catch(e){}
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

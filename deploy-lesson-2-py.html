@@ -160,6 +160,21 @@
 
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+
+  /* ---- can-do goals + stuck-hint (additions) ---- */
+  .cando{border-left:3px solid var(--indigo);background:rgba(138,140,248,.07);border-radius:0 10px 10px 0;padding:12px 16px;margin:18px 0 2px;max-width:52ch}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);display:block;margin-bottom:7px}
+  .cando ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px}
+  .cando li{color:var(--muted);font-size:15px;line-height:1.5}
+  .cando li b{color:var(--text)}
+  .cando-check{margin-top:18px;border-top:1px solid var(--line);padding-top:15px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:flex-start;width:100%;text-align:left;background:none;border:none;color:var(--muted);font-family:var(--sans);font-size:15px;line-height:1.45;padding:5px 4px;min-height:30px;cursor:pointer;border-radius:8px;transition:.12s}
+  .cando-check .cc-row:hover{background:var(--panel-2)}
+  .cando-check .cc-row .cc-mark{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--line-2);color:transparent;font-size:12px;display:flex;align-items:center;justify-content:center;margin-top:1px;transition:.12s}
+  .cando-check .cc-row.on{color:var(--text)}
+  .cando-check .cc-row.on .cc-mark{background:var(--green);border-color:var(--green);color:#0a0f24}
+  .missions .m-hint{margin:-1px 0 6px 26px;font-size:13px;line-height:1.5;color:var(--amber);border-left:2px solid rgba(255,176,32,.5);padding:3px 0 3px 11px}
 </style>
 </head>
 <body>
@@ -179,6 +194,11 @@
     <div class="eyebrow">Setting Up RobotPy</div>
     <h1>Your first<br><span class="accent">project</span>.</h1>
     <p class="dek">Install the tools, generate a project, and meet every file it makes for you - so the folder full of code stops looking like a maze.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Generate a fresh command-based project with <b>robotpy init</b>.</li>
+      <li>Find your way around the project tree and name which files you actually edit.</li>
+      <li>Say why you start from the <b>command-based</b> example over plain TimedRobot.</li>
+    </ul></div>
   </div>
 
   <section>
@@ -321,6 +341,12 @@
         <div class="gl"><b>robotpy sync</b><span>Fetches the libraries in pyproject.toml.</span></div>
         <div class="gl"><b>RobotContainer</b><span>Where you assemble the robot.</span></div>
         <div class="gl"><b>Command-based</b><span>The example to start from.</span></div>
+      </div>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Can you do these now? Tap each one you have got.</div>
+        <button type="button" class="cc-row"><span class="cc-mark">✓</span><span>Generate a project with robotpy init.</span></button>
+        <button type="button" class="cc-row"><span class="cc-mark">✓</span><span>Name the files you will actually edit day to day.</span></button>
+        <button type="button" class="cc-row"><span class="cc-mark">✓</span><span>Explain why command-based beats plain TimedRobot.</span></button>
       </div>
       <a class="next" href="deploy-lesson-3-py.html">
         <div class="n-eyebrow">Up next · Part 1 · 03</div>
@@ -475,6 +501,29 @@
   Object.keys(mItems).forEach(function(id){
     if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
   });
+  // ---- stuck hints: sustained active effort on an uncleared mission reveals one nudge (addition) ----
+  try{
+    var mHints={
+      create:"For the create mission: open the terminal, run robotpy init, choose the command-based example, type 1234 for the team, then hit Generate. Those are the exact steps of a real season.",
+      find:"For the find mission: after you generate, the file tree appears - click robot.py, the lifecycle file from Lesson 1.1.",
+      gold:"For the gold: press Start over to reset the wrong-pick counter, then make only correct choices all the way to Generate - the counter in the corner must still read 0."
+    };
+    var mHintEls={};
+    Object.keys(mItems).forEach(function(id){
+      if(!mHints[id]) return; var n=mItems[id]; if(!n||!n.parentNode) return;
+      var h=document.createElement('div'); h.className='m-hint'; h.hidden=true; h.textContent=mHints[id];
+      n.parentNode.insertBefore(h,n.nextSibling); mHintEls[id]=h;
+    });
+    var H_MS=150000, hAct=0, hLast=0, hDemo=document.getElementById('cockpit');
+    var hTouch=function(){ hLast=Date.now(); };
+    if(hDemo){ hDemo.addEventListener('pointerdown',hTouch,true); hDemo.addEventListener('input',hTouch,true); hDemo.addEventListener('keydown',hTouch,true); }
+    setInterval(function(){ try{
+      if(hLast&&(Date.now()-hLast)<4000) hAct+=1000;
+      if(hAct>=H_MS){ Object.keys(mHintEls).forEach(function(id){
+        var n=mItems[id]; mHintEls[id].hidden=!!(n&&n.classList.contains('cleared'));
+      }); }
+    }catch(e){} },1000);
+  }catch(e){}
   }catch(e){}
 
   function introStage(){
@@ -607,6 +656,24 @@
   opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(revealed)return; picked=i;
     opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
     if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
+})();
+</script>
+<script>
+(function(){
+  try{
+    var KEY="frc:cando", page=location.pathname.split("/").pop();
+    var wrap=document.getElementById("candoCheck"); if(!wrap) return;
+    var rows=wrap.querySelectorAll(".cc-row");
+    var saved={}; try{ saved=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+    Array.prototype.forEach.call(rows,function(r,i){
+      var k=page+"#"+i;
+      if(saved[k]) r.classList.add("on");
+      r.addEventListener("click",function(){
+        var on=!r.classList.contains("on"); r.classList.toggle("on",on);
+        try{ var m=JSON.parse(localStorage.getItem(KEY))||{}; if(on) m[k]=true; else delete m[k]; localStorage.setItem(KEY,JSON.stringify(m)); }catch(e){}
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

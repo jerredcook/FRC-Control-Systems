@@ -100,6 +100,20 @@
   .note p{margin:0;color:var(--text);font-size:16px}
   .note.teal{border-color:var(--teal);background:rgba(52,215,197,.06)} .note.teal .nh{color:var(--teal)}
 
+  .cando{margin:16px 0 4px;border-left:3px solid var(--teal);background:rgba(52,215,197,.06);border-radius:0 10px 10px 0;padding:12px 16px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);display:block;margin-bottom:6px}
+  .cando ul{margin:0;padding-left:18px;color:var(--muted);font-size:15px;line-height:1.5}
+  .cando li{margin:3px 0}
+  .cando-check{margin:4px 0 18px;border:1px solid var(--line-2);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:8px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:flex-start;min-height:28px;padding:5px 4px;cursor:pointer;font-size:15px;color:var(--muted);border-radius:8px;transition:.12s}
+  .cando-check .cc-row:hover{background:rgba(255,255,255,.02)}
+  .cando-check .cc-box{flex:0 0 auto;width:19px;height:19px;border-radius:50%;border:2px solid var(--line-2);color:transparent;display:grid;place-items:center;font-size:12px;margin-top:1px;transition:.12s}
+  .cando-check .cc-row.on{color:var(--text)}
+  .cando-check .cc-row.on .cc-box{border-color:var(--teal);background:rgba(52,215,197,.2);color:var(--teal)}
+  .missions .m-item{flex-wrap:wrap}
+  .missions .m-hint{flex-basis:100%;margin:7px 0 1px 24px;font-size:13px;color:var(--amber);border-left:2px solid rgba(255,176,32,.5);padding:2px 0 3px 11px;font-style:italic;line-height:1.5}
+
   .codewrap{margin:18px 0}
   .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
   .codewrap .clabel .badge{color:var(--teal);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
@@ -179,6 +193,11 @@
     <div class="eyebrow">Configuring a TalonFX</div>
     <h1>Set it up<br><span class="accent">once</span>.</h1>
     <p class="dek">Current limits, brake mode, sensor ratios - a one-time setup before the motor can safely run your loop. Build one below and watch the Java write itself.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Build a TalonFXConfiguration with current limits, neutral mode, and a sensor ratio, then apply it once at startup.</li>
+      <li>Choose brake versus coast, and set a stator versus a supply current limit, for a given mechanism.</li>
+      <li>Set up a FusedCANcoder so an arm knows its true angle the instant the robot powers on.</li>
+    </ul></div>
   </div>
 
   <section>
@@ -302,6 +321,10 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(<i
   </section>
 
   <section>
+    <div class="note teal robotcard">
+      <div class="nh">🤖 Now on your robot &middot; 10 minutes</div>
+      <p>Pick one Kraken mechanism on your team's robot and write its <b>TalonFXConfiguration</b>: choose Brake or Coast, set a stator and a supply current limit, and set <span class="k">SensorToMechanismRatio</span> to the real gear ratio. Apply it once in the constructor. Pass: deploy, then in Tuner X plot the position and confirm one full turn of the mechanism reads 1.0, and that a disabled mechanism behaves as your neutral mode says - Brake resists a push, Coast rolls free. If a motor keeps tripping its breaker under load, the <a href="closing-the-loop-troubleshooting.html#symgrid">troubleshooting field guide</a> has the current-limit fix. No robot handy? Open the <a href="worksheet.html">tuning worksheet</a>, pick your mechanism, and note the config block it writes so your numbers have a home.</p>
+    </div>
     <div class="note teal">
       <div class="nh">Going further &middot; optional</div>
       <p>The stator limit caps current right at the windings, but it also caps torque, since torque rises with current, like how hard you can push the pedals sets how fast you can climb a hill. Set it too low and your arm cannot lift its own weight; too high and you cook the motor or pop a breaker. A real edge case competitive teams hit: apply() returns a status code, and if a device is missing or miswired the config silently never lands. The careful move is to check that code, or call apply() in a small retry loop. What would a robot do if its current limits never actually applied?</p>
@@ -360,6 +383,12 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(<i
   <section>
     <div class="recap">
       <h3>Part III · 02 · Recap</h3>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Can you do these now? Tap what you've got.</div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Build a TalonFXConfiguration with current limits, neutral mode, and a sensor ratio, then apply it once at startup.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Choose brake versus coast, and set a stator versus a supply current limit, for a given mechanism.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Set up a FusedCANcoder so an arm knows its true angle the instant the robot powers on.</span></div>
+      </div>
       <div class="glossary">
         <div class="gl"><b>TalonFXConfiguration</b><span>One object holding every device setting.</span></div>
         <div class="gl"><b>CurrentLimits</b><span>Stator (motor) &amp; supply (breaker) protection.</span></div>
@@ -460,7 +489,19 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(<i
   Object.keys(mItems).forEach(function(id){
     if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
   });
+  // ---- stuck hints: surface one authored nudge per uncleared mission after ~150s of active fiddling ----
+  var mhHints={
+    pitpush:"For the pit-push goal: click the neutral mode switch over to Coast - now the wheels roll free when you push the robot across the pit.",
+    breaker:"For the breaker goal: drag Supply current limit down to 35 A or lower, and keep Stator current limit at 60 A or higher so the motor keeps its torque.",
+    armboot:"For the arm-boot goal: set the gear ratio slider to exactly 25 and pick Fused CANcoder - watch the Feedback block rewrite itself.",
+    gold:"For gold: line up all four at once - Brake, Fused CANcoder at 25:1, supply at 35 A or less, and stator at 60 A or more."
+  };
+  try{ Object.keys(mItems).forEach(function(id){ var n=mItems[id]; if(!n)return; var h=document.createElement('div'); h.className='m-hint'; h.hidden=true; h.textContent=mhHints[id]||''; if(h.textContent){ n.appendChild(h); n.__mh=h; } }); }catch(e){}
+  var mhActMs=0, mhLast=0;
+  try{ var mhEl=document.querySelector('.demo')||document.querySelector('.builder'); if(mhEl){ mhEl.addEventListener('pointerdown',function(){mhLast=Date.now();},true); mhEl.addEventListener('input',function(){mhLast=Date.now();},true); } }catch(e){}
+  function mhTick(ms){ try{ if(mhLast && Date.now()-mhLast<3500) mhActMs+=ms; if(mhActMs>=150000){ Object.keys(mItems).forEach(function(id){ var n=mItems[id]; if(n&&n.__mh&&!n.classList.contains('cleared')) n.__mh.hidden=false; }); } }catch(e){} }
   setInterval(function(){
+    mhTick(200);
     var mMode=String(S.neutral).toUpperCase();
     if(mMode==='COAST') mClear('pitpush');
     if(S.supply<=35 && S.stator>=60) mClear('breaker');
@@ -521,6 +562,25 @@ motor.<span class="fn">getConfigurator</span>().<span class="fn">apply</span>(<i
         if(shown<items.length){ items[shown].hidden=false; shown++; }
         if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
         else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
+  }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  try{
+    var box=document.getElementById('candoCheck'); if(!box) return;
+    var file=location.pathname.split('/').pop(), KEY='frc:cando', map={};
+    try{ map=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+    var rows=box.querySelectorAll('.cc-row');
+    Array.prototype.forEach.call(rows,function(row,i){
+      var k=file+'#'+i;
+      if(map[k]) row.classList.add('on');
+      row.addEventListener('click',function(){
+        var on=row.classList.toggle('on');
+        if(on){map[k]=1;}else{delete map[k];}
+        try{ localStorage.setItem(KEY,JSON.stringify(map)); }catch(e){}
       });
     });
   }catch(e){}

@@ -103,6 +103,31 @@
   .legend i{width:16px;height:2px;border-radius:2px;display:inline-block}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
 
+  /* can-do goals + closing check (added) */
+  .cando{border-left:3px solid var(--teal);background:rgba(52,215,197,.06);border-radius:0 10px 10px 0;padding:12px 16px;margin:16px 0 4px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);display:block;margin-bottom:6px}
+  .cando ul{margin:0;padding-left:20px}
+  .cando li{color:var(--muted);font-size:15px;line-height:1.5;margin:3px 0}
+  .cando-check{margin-top:18px;display:grid;gap:8px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:flex-start;min-height:28px;padding:7px 11px;border:1px solid var(--line-2);border-radius:9px;background:var(--panel-2);cursor:pointer;font-size:15px;color:var(--muted);transition:.12s}
+  .cando-check .cc-row:hover{border-color:var(--teal)}
+  .cando-check .cc-row .cc-box{flex:0 0 auto;width:19px;height:19px;border-radius:50%;border:2px solid var(--faint);color:transparent;display:grid;place-items:center;font-size:12px;line-height:1;margin-top:1px}
+  .cando-check .cc-row.on{color:var(--text);border-color:var(--green)}
+  .cando-check .cc-row.on .cc-box{border-color:var(--green);background:rgba(67,214,126,.15);color:var(--green)}
+
+  /* missions + stuck hints (added) */
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--teal);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+  .missions .m-hint{flex:0 0 100%;margin:6px 0 0 22px;font-size:13px;color:var(--teal);border-left:2px solid var(--line-2);padding-left:10px;font-style:italic}
+
   /* shared callout pattern */
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
@@ -199,6 +224,8 @@
     <div class="eyebrow">Derivative Control</div>
     <h1>Easing off<br>before you <span class="accent">arrive</span>.</h1>
     <p class="dek">The third term watches how fast you're closing in and brakes early. With it, you have the full PID.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Say what the derivative reacts to - the error's rate of change - and why that lets it brake before you arrive.</li><li>Finish a full PID controller in code, all three terms working together.</li><li>Explain why a big kD plus a noisy sensor makes the motor spike, and name the fix for it.</li></ul></div>
   </div>
 
   <section>
@@ -273,6 +300,13 @@
       </div>
     </div>
     <p class="caption">Drop kD to zero and the ringing returns. Raise it and the landing smooths out - until you overdo it, or turn on noise.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
+      <div class="m-item" data-m="ring"><span class="m-st">○</span><span>Drag <b>kD to 0</b>, press Step, and watch the carriage <b>overshoot and ring</b> before it settles - the wobble the derivative was quietly hiding.</span><div class="m-hint" hidden>For the ring mission: pull the kD slider to 0.0, then press Step. With no brake it sails past the line and bounces a few times - that ringing is exactly what kD was damping.</div></div>
+      <div class="m-item" data-m="brake"><span class="m-st">○</span><span>Bring <b>kD back to about 2</b>, Step, and watch the <b>D-term (V) readout swing negative</b> during the fast part of the climb - that dip is the brake biting.</span><div class="m-hint" hidden>For the brake mission: set kD to 2, press Step, and stare at the D-term readout while it climbs. Mid-climb it dives to roughly -1 V, the derivative pushing back against the motion.</div></div>
+      <div class="m-item" data-m="noise"><span class="m-st">○</span><span>Turn <b>Noise on</b> and push <b>kD up to 5 or 6</b>. Watch the motor voltage turn to hash - the derivative's dark side, blowing up sensor jitter.</span><div class="m-hint" hidden>For the noise mission: click the Noise button on, then drag kD up to 6. Differentiating a jittery sensor spikes the D-term wildly and the trace goes to static.</div></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> with Noise off, find gains that land it dead on the line - Error under 0.01 - and hold steady for 2 seconds.</span><div class="m-hint" hidden>For gold: leave the defaults (kP 4, kI 1, kD 2) with Noise off and press Step. That trio damps the approach and trims the error to zero - hold it for the full 2 seconds.</div></div>
+    </div>
   </section>
 
   <section>
@@ -423,6 +457,12 @@ self.motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="out
         <div class="gl"><b>On measurement</b><span>Differentiating the measurement instead, to avoid the kick.</span></div>
         <div class="gl"><b>Full PID</b><span>kP, kI, and kD working together.</span></div>
       </div>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Can you do these now? Tap each one you own.</div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Say what the derivative reacts to - the error's rate of change - and why that lets it brake before you arrive.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Finish a full PID controller in code, all three terms working together.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Explain why a big kD plus a noisy sensor makes the motor spike, and name the fix for it.</span></div>
+      </div>
       <div class="next">
         <div class="n-eyebrow">Up next · Lesson 05</div>
         <h3>Tuning PID</h3>
@@ -554,6 +594,41 @@ self.motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="out
   el.run.addEventListener('click',function(){setRun(!S.running);});
   el.noiseBtn.addEventListener('click',function(){S.noise=!S.noise;el.noiseBtn.textContent='Noise: '+(S.noise?'on':'off');el.noiseBtn.classList.toggle('active',S.noise);});
 
+  // ---- missions + stuck hints (wrapped so a bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  var mHold=0, mStuck={};
+  setInterval(function(){
+    if(!S.running) return;
+    var err=S.sp-S.y;
+    if(S.kD<0.05 && S.y>S.sp+0.03) mClear('ring');
+    if(S.kD>=1 && S.dterm<-0.5) mClear('brake');
+    if(S.noise && S.kD>=4.5 && Math.abs(S.dterm)>0.4) mClear('noise');
+    if(Math.abs(err)<0.01 && Math.abs(S.v)<0.012){ mHold+=0.2; } else { mHold=0; }
+    if(mHold>=2) mClear('gold');
+    Object.keys(mItems).forEach(function(id){
+      var n=mItems[id]; if(n.classList.contains('cleared')) return;
+      mStuck[id]=(mStuck[id]||0)+0.2;
+      if(mStuck[id]>=150){ var h=n.querySelector('.m-hint'); if(h&&h.hasAttribute('hidden')) h.removeAttribute('hidden'); }
+    });
+  },200);
+  }catch(e){}
   function step(dt){
     if(S.running){
       var meas=S.y+(S.noise?(Math.random()*2-1)*0.004:0);
@@ -678,6 +753,22 @@ self.motor.<span class="fn">setVoltage</span>(<input class="blank" data-ans="out
     });
   }catch(e){}
 })();
+</script>
+<script>
+(function(){try{
+  var KEY="frc:cando", file=location.pathname.split("/").pop();
+  var map={}; try{map=JSON.parse(localStorage.getItem(KEY))||{};}catch(e){}
+  var rows=document.querySelectorAll("#candoCheck .cc-row");
+  Array.prototype.forEach.call(rows,function(row,i){
+    var k=file+"#"+i;
+    if(map[k]) row.classList.add("on");
+    row.addEventListener("click",function(){
+      var on=row.classList.toggle("on");
+      if(on){map[k]=true;}else{delete map[k];}
+      try{localStorage.setItem(KEY,JSON.stringify(map));}catch(e){}
+    });
+  });
+}catch(e){}})();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>

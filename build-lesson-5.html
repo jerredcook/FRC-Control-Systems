@@ -58,6 +58,29 @@
   .btn.primary{background:linear-gradient(180deg,#ffb37e,var(--indigo));color:#2a1503;font-weight:700;border:none}
   .hint{font-family:var(--mono);font-size:11px;color:var(--faint)}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--amber);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+  .missions .m-hint{margin:2px 0 6px 26px;font-size:13px;color:var(--muted);font-style:italic;line-height:1.5;border-left:2px solid var(--amber);padding-left:10px}
+  .missions .m-hint b{color:var(--text);font-style:normal}
+  .cando{border-left:3px solid var(--indigo);background:rgba(255,138,76,.06);border-radius:0 10px 10px 0;padding:11px 15px;margin:16px 0 2px}
+  .cando .cd-h{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:6px}
+  .cando ul{margin:0;padding:0;list-style:none}
+  .cando li{position:relative;font-size:15px;color:var(--muted);padding:3px 0 3px 20px;line-height:1.45}
+  .cando li::before{content:"→";position:absolute;left:0;color:var(--indigo)}
+  .cando-check{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:6px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:flex-start;min-height:28px;padding:5px 0;cursor:pointer;font-size:15px;color:var(--muted);transition:.12s}
+  .cando-check .cc-row:hover{color:var(--text)}
+  .cando-check .cc-box{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--line-2);display:grid;place-items:center;font-size:12px;color:transparent;margin-top:1px;transition:.12s}
+  .cando-check .cc-row.on .cc-box{border-color:var(--green);background:var(--green);color:#06210f}
+  .cando-check .cc-row.on{color:var(--text)}
 
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
@@ -115,6 +138,13 @@
     <div class="eyebrow">Fasteners</div>
     <h1>Tight, but not<br><span class="accent">too</span> tight.</h1>
     <p class="dek">A robot is held together by hundreds of bolts. Pick the right size, thread it into the right hole, and torque it just enough. Too loose and it rattles out mid-match; too tight and you strip the threads.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span>
+      <ul>
+        <li>Read a bolt's name, like 1/4-20, into its diameter and thread pitch.</li>
+        <li>Tighten a bolt to snug and stop before the threads strip.</li>
+        <li>Pick a way to keep a fastener from rattling loose - nylock or threadlocker.</li>
+      </ul>
+    </div>
   </div>
 
   <section>
@@ -153,6 +183,17 @@
       </div>
     </div>
     <p class="caption">Each bolt size has its own proper torque, bigger bolts take more. Stop in the green and it's snug and secure. Blow past the red line and you've stripped the threads, and the part has to come apart to fix it.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
+      <div class="m-item" data-m="snug"><span class="m-st">○</span><span>Pick the <b>#10-32</b> and let go of the button with the needle in the <b>green band</b> (about 12 to 22 in-lb). Its window is narrow - snug takes a light touch.</span></div>
+      <div class="m-hint" data-h="snug" hidden>The #10-32 climbs fast, so tap the button in short bursts instead of holding. Nudge the needle into the green 12-22 band, then let go and leave it.</div>
+      <div class="m-item" data-m="big"><span class="m-st">○</span><span>Switch to the <b>1/4-20</b> and snug it too. Same wrist, but its green band sits way up at <b>55 to 80 in-lb</b> - a bigger bolt takes a lot more.</span></div>
+      <div class="m-hint" data-h="big" hidden>Click the 1/4-20 button first. It needs far more torque, so you can hold a little longer - release when the readout shows somewhere around 55 to 80 in-lb.</div>
+      <div class="m-item" data-m="strip"><span class="m-st">○</span><span>Now feel "too far": hold the button past the red line and <b>strip a bolt</b> on purpose. That soft, spinning-free feeling is a stripped thread - learn it here, not on the robot.</span></div>
+      <div class="m-hint" data-h="strip" hidden>Pick either bolt and just hold the button down without letting go. The needle sweeps through green, past the red line, and the threads shear - that is the strip.</div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> release <b>dead center</b> of a green band - the middle third, not just inside it. A steady, practiced hand parks the needle right in the sweet spot.</span></div>
+      <div class="m-hint" data-h="gold" hidden>Aim for the middle of a band, not the edge. On the 1/4-20 shoot for about 67 in-lb; on the #10-32 about 17. Short taps, then release right in the center.</div>
+    </div>
   </section>
 
   <section>
@@ -243,6 +284,12 @@
         <div class="gl"><b>Threadlocker</b><span>Blue Loctite holds it fast.</span></div>
         <div class="gl"><b>Engagement</b><span>Enough threads must bite.</span></div>
       </div>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Can you do these now?</div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Read a bolt's name, like 1/4-20, into its diameter and thread pitch.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Tighten a bolt to snug and stop before the threads strip.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Pick a way to keep a fastener from rattling loose - nylock or threadlocker.</span></div>
+      </div>
       <a class="next" href="build.html">
         <div class="n-eyebrow">Part 1 complete · The Shop</div>
         <h3>On to Part 2 - Materials &amp; Stock →</h3>
@@ -327,6 +374,48 @@
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
   requestAnimationFrame(step);
 
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  // stuck-hint timing: after ~150s of active fiddling on a still-open mission, reveal one nudge
+  var mHintT={}, mLastAct=Date.now(), mDemoEl=document.getElementById('demo');
+  if(mDemoEl){ ['pointerdown','input','click'].forEach(function(ev){ mDemoEl.addEventListener(ev,function(){ mLastAct=Date.now(); },true); }); }
+  function mStuck(){
+    var active=(Date.now()-mLastAct)<5000;
+    Object.keys(mItems).forEach(function(id){
+      var n=mItems[id]; if(!n||n.classList.contains('cleared')) return;
+      if(active) mHintT[id]=(mHintT[id]||0)+0.2;
+      if((mHintT[id]||0)>=150){ var h=document.querySelector('#missions .m-hint[data-h="'+id+'"]'); if(h) h.hidden=false; }
+    });
+  }
+  setInterval(function(){
+    if(!holding&&!stripped&&tq>0){
+      var s=S();
+      if(tq>=s.lo&&tq<=s.hi){ mClear(sz==='10'?'snug':'big'); }
+      var w=s.hi-s.lo, c0=s.lo+w/3, c1=s.hi-w/3;
+      if(tq>=c0&&tq<=c1) mClear('gold');
+    }
+    if(stripped) mClear('strip');
+    mStuck();
+  },200);
+  }catch(e){}
+
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
@@ -381,6 +470,26 @@
   opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(revealed)return; picked=i;
     opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
     if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
+})();
+</script>
+<script>
+(function(){
+  try{
+    var wrap=document.getElementById('candoCheck'); if(!wrap) return;
+    var KEY='frc:cando', file=location.pathname.split('/').pop();
+    var saved={}; try{ saved=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+    var rows=wrap.querySelectorAll('.cc-row');
+    Array.prototype.forEach.call(rows,function(row,i){
+      var k=file+'#'+i;
+      if(saved[k]) row.classList.add('on');
+      row.addEventListener('click',function(){
+        var on=!row.classList.contains('on');
+        row.classList.toggle('on',on);
+        if(on){ saved[k]=1; } else { delete saved[k]; }
+        try{ localStorage.setItem(KEY,JSON.stringify(saved)); }catch(e){}
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

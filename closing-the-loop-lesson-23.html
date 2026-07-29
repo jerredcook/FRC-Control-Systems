@@ -167,6 +167,21 @@
   .coursenav a.map{border-color:transparent;color:var(--indigo)}
 
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  /* can-do goals + tap-to-check mirror (added) */
+  .cando{border-left:3px solid var(--teal);background:rgba(52,215,197,.06);border-radius:0 10px 10px 0;padding:12px 16px;margin:18px 0 0}
+  .cando .cd-h{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:7px}
+  .cando ul{margin:0;padding-left:20px}
+  .cando li{color:var(--muted);font-size:15px;margin:4px 0;line-height:1.5}
+  .cando-check{margin-top:16px;border-left:3px solid var(--teal);background:rgba(52,215,197,.05);border-radius:0 10px 10px 0;padding:6px 14px 10px}
+  .cando-check .cc-h{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin:8px 0 4px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:center;min-height:30px;padding:5px 2px;cursor:pointer;font-size:15px;color:var(--muted)}
+  .cando-check .cc-row .cc-mark{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--line-2);display:flex;align-items:center;justify-content:center;font-size:12px;line-height:1;color:var(--green)}
+  .cando-check .cc-row.checked{color:var(--text)}
+  .cando-check .cc-row.checked .cc-mark{border-color:var(--green);background:rgba(67,214,126,.14)}
+  /* stuck-hints (added) */
+  .m-hint{font-size:13px;color:var(--teal);border-left:2px solid var(--line-2);padding:3px 0 3px 11px;font-style:italic;margin-top:8px}
+  .missions .m-item{flex-wrap:wrap}
+  .missions .m-item .m-hint{flex-basis:100%;margin:6px 0 0 26px}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -186,6 +201,11 @@
     <div class="eyebrow">Vision-Assisted Control</div>
     <h1>Close the loop<br>on what it <span class="accent">sees</span>.</h1>
     <p class="dek">A camera hands you one number - how far off-target you are. Drive that number to zero and you've got auto-aim. It's the very first controller you ever built, fed by a new sensor.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Read a camera's tx as an error and aim with it - turn rate is minus kP times tx, the same proportional loop from Lesson 2.</li>
+      <li>Predict what too much aim gain does - the aim overshoots and hunts - and ease kP back until the lock sits calm.</li>
+      <li>Explain what vision gives that odometry can't: an absolute field fix from a known AprilTag that corrects drift.</li>
+    </ul></div>
   </div>
 
   <section>
@@ -242,10 +262,10 @@
     <p class="caption">The amber wedge is the camera's view of the offset; the teal line is where the robot points. Auto-aim closes the gap - pure proportional control.</p>
     <div class="missions" id="missions">
       <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
-      <div class="m-item" data-m="lock"><span class="m-st">○</span><span>Turn <b>auto-aim off</b>, drag the target until <b>tx reads 35°</b> or more, then flip aim back on. Watch the loop wake up and reel that big error down to zero - it never gets old.</span></div>
-      <div class="m-item" data-m="rate"><span class="m-st">○</span><span>Turn rate is kP times tx, so think like the formula: push the <b>Turn rate</b> readout past <b>8.0</b>. You need a big error and a <b>big kP</b> at the same moment - set up the miss first, then let the loop loose.</span></div>
-      <div class="m-item" data-m="track"><span class="m-st">○</span><span>Sweep the target a full <b>40°</b> without ever losing <b>locked on</b>. Drag slow and steady - the aim is always a beat behind you, so give it a pace it can hold. Patience wins this one.</span></div>
-      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> do the 40° locked sweep again, this time with <b>kP at 2.0 or less</b>. A weak gain can only follow a target that crawls - how slow and smooth can your hand get?</span></div>
+      <div class="m-item" data-m="lock"><span class="m-st">○</span><span>Turn <b>auto-aim off</b>, drag the target until <b>tx reads 35°</b> or more, then flip aim back on. Watch the loop wake up and reel that big error down to zero - it never gets old.</span><div class="m-hint" hidden>Stuck? Click Auto-aim to off, drag Target bearing until tx reads 35° or more, then click Auto-aim back on - the loop reels tx down to zero on its own.</div></div>
+      <div class="m-item" data-m="rate"><span class="m-st">○</span><span>Turn rate is kP times tx, so think like the formula: push the <b>Turn rate</b> readout past <b>8.0</b>. You need a big error and a <b>big kP</b> at the same moment - set up the miss first, then let the loop loose.</span><div class="m-hint" hidden>Stuck? With Auto-aim off, push kP up high and drag the target to a big offset near 40°, then flip Auto-aim on - the Turn rate readout spikes past 8.0 in that first instant.</div></div>
+      <div class="m-item" data-m="track"><span class="m-st">○</span><span>Sweep the target a full <b>40°</b> without ever losing <b>locked on</b>. Drag slow and steady - the aim is always a beat behind you, so give it a pace it can hold. Patience wins this one.</span><div class="m-hint" hidden>Stuck? Get Locked on? to yes first, then drag the Target bearing slowly across a full 40° - slow enough that Locked on? never flips back to no.</div></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> do the 40° locked sweep again, this time with <b>kP at 2.0 or less</b>. A weak gain can only follow a target that crawls - how slow and smooth can your hand get?</span><div class="m-hint" hidden>Stuck? Drop kP to 2.0 or less, lock on, then inch the target across 40° even more slowly - a weak gain only holds a target that crawls.</div></div>
     </div>
     <div class="clinic" id="clinic">
       <div class="c-head">🩺 Fault clinic <span class="c-sub">load a symptom, name the fault, then fix it</span></div>
@@ -261,6 +281,7 @@
         <div class="opts" id="clinicOpts"></div>
         <div class="c-why" id="clinicWhy"></div>
         <div class="c-fix" id="clinicFix"></div>
+        <div class="m-hint" id="clinicHint" hidden></div>
       </div>
     </div>
   </section>
@@ -313,6 +334,10 @@ drive.<span class="fn">drive</span>(<span class="num">0</span>, <span class="num
   </section>
 
   <section>
+    <div class="note teal robotcard">
+      <div class="nh">🤖 Now on your robot &middot; 10 minutes</div>
+      <p>On your robot with a camera bolted on, wire the tag's horizontal offset <span class="k">tx</span> into a turn command: turn rate equals kP times tx, with a small deadband so it stops hunting right at center. Tune kP up until the robot squares onto the tag quickly, then ease off the moment it starts to wag back and forth. Pass: from several starting offsets the robot turns to face the tag, settles inside a degree, and holds there without buzzing. Overshooting past center and swinging back? The <a href="closing-the-loop-troubleshooting.html#symgrid" style="color:var(--teal)">troubleshooting field guide</a> covers a loop that oscillates. No camera yet? Run the aim loop in the WPILib simulator against a fake target, or practice reading tx by hand until you can call the turn direction from its sign alone.</p>
+    </div>
     <div class="note teal">
       <div class="nh">Going further &middot; optional</div>
       <p>Pure proportional auto-aim hides a flaw that only shows up against a moving target: because the turn rate is only kP times the current offset, the robot is always chasing where the target was a frame ago, not where it is now, so it forever lags a hair behind. The camera's tens-of-milliseconds delay makes that lag worse. One fix is to aim at where the target is heading rather than where it sits, the way you lead a thrown ball with your glove instead of reaching for where it already passed. Worth chewing on: against a target drifting sideways at a steady speed, would a plain P loop ever truly settle on zero offset, or hold a small steady miss?</p>
@@ -378,6 +403,11 @@ drive.<span class="fn">drive</span>(<span class="num">0</span>, <span class="num
         <div class="gl"><b>AprilTag</b><span>Known field location → absolute position.</span></div>
         <div class="gl"><b>addVisionMeasurement</b><span>Blend vision into odometry, fix drift.</span></div>
         <div class="gl"><b>Latency &amp; trust</b><span>Time-stamp frames; reject wild jumps.</span></div>
+      </div>
+      <div class="cando-check" id="candoCheck"><span class="cc-h">Can you do these now? Tap each one you've got</span>
+        <div class="cc-row"><span class="cc-mark"></span><span>I can turn a camera's tx into an auto-aim P loop.</span></div>
+        <div class="cc-row"><span class="cc-mark"></span><span>I can explain why too much aim gain overshoots and hunts.</span></div>
+        <div class="cc-row"><span class="cc-mark"></span><span>I can say what an AprilTag gives that odometry can't.</span></div>
       </div>
       <a class="next" href="closing-the-loop-lesson-24.html">
         <div class="n-eyebrow">Up next · Part V · 03 · Finale</div>
@@ -447,6 +477,8 @@ drive.<span class="fn">drive</span>(<span class="num">0</span>, <span class="num
   Object.keys(mItems).forEach(function(id){
     if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
   });
+  var mLastAct=0, mHintT={}, mAccPrev=Date.now();
+  (function(){ var d=document.getElementById('demo'); if(d){ d.addEventListener('pointerdown',function(){mLastAct=Date.now();},true); d.addEventListener('input',function(){mLastAct=Date.now();},true); } })();
   // checker rides requestAnimationFrame: at high kP the turn-rate spike lasts one
   // frame, so a 200ms poll would miss it. Sampling every frame never does.
   var mArmed=false, mSweep=0, mPrevTb=S.targetBearing;
@@ -459,6 +491,8 @@ drive.<span class="fn">drive</span>(<span class="num">0</span>, <span class="num
       if(mLocked){ mSweep+=Math.abs(S.targetBearing-mPrevTb)*DEG; } else { mSweep=0; }
       mPrevTb=S.targetBearing;
       if(mSweep>=40){ mClear('track'); if(S.kP<=2.05) mClear('gold'); }
+      var _now=Date.now(), _dt=Math.min(0.5,(_now-mAccPrev)/1000); mAccPrev=_now;
+      if(_now-mLastAct<12000){ Object.keys(mItems).forEach(function(_k){ var _it=mItems[_k]; if(!_it||_it.classList.contains('cleared'))return; mHintT[_k]=(mHintT[_k]||0)+_dt; if(mHintT[_k]>=150){ var _h=_it.querySelector('.m-hint'); if(_h&&_h.hidden)_h.hidden=false; } }); }
     }catch(e){}
     requestAnimationFrame(mTick);
   }
@@ -490,7 +524,7 @@ drive.<span class="fn">drive</span>(<span class="num">0</span>, <span class="num
       confirm:'There it is - a starved kP. Turn rate is kP times tx, so a weak gain can only crawl. Real gain, real turn - feel the difference.',
       inject:function(){ cSetAim(true); cSetKp(0.5); cKick(); },
       pre:function(){ return S.aim && S.kP>=3.5; },
-      kick:true, hold:0.6
+      kick:true, hold:0.6, hint:'Stuck on the cure? Slide kP up to 3.5 or more - turn rate is kP times tx, so a real gain finally buys a real turn and the robot snaps onto the tag.'
     },
     dead:{
       q:'Symptom loaded. tx reads over 20 degrees and holds, yet the turn rate sits at exactly 0.0. Exactly zero is a clue all by itself. Name the fault.',
@@ -506,7 +540,7 @@ drive.<span class="fn">drive</span>(<span class="num">0</span>, <span class="num
       confirm:'There it is - the loop was simply switched off. Every gain in the world does nothing until the controller actually runs. Check the simple things first, always.',
       inject:function(){ cSetAim(false); cSetKp(4); cKick(); },
       pre:function(){ return S.aim; },
-      kick:true, hold:0.6
+      kick:true, hold:0.6, hint:'Stuck on the cure? Click Auto-aim back on - the gain was fine all along, the loop just was not running. The moment it runs, it drives tx to zero on its own.'
     },
     drift:{
       q:'Symptom loaded. The robot aims, but parks a few degrees off center and just sits there, like holding your bike line in a steady crosswind. Name the fault.',
@@ -522,16 +556,17 @@ drive.<span class="fn">drive</span>(<span class="num">0</span>, <span class="num
       confirm:'There it is - against a steady push, a P-only loop keeps a standing miss of about 10 degrees divided by kP. Your extra gain squeezed the miss under the lock threshold, and LOCKED finally stuck.',
       inject:function(){ cSetAim(true); cSetKp(2); },
       pre:function(){ return S.aim; },
-      kick:false, hold:1.2
+      kick:false, hold:1.2, hint:'Stuck on the cure? The crosswind stays on, so keep nudging kP up - the standing miss is about 10 degrees divided by kP, so more gain squeezes it inside the lock zone until LOCKED sticks.'
     }
   };
-  var cCur=null,cDiag=false,cSolved=false,cLockAt=0,cPreWas=false,cDrift=false;
+  var cCur=null,cDiag=false,cSolved=false,cLockAt=0,cPreWas=false,cDrift=false,cHintSec=0;
   function cLoad(id){
     cCur=id; cDiag=false; cSolved=false; cLockAt=0; cPreWas=false; cDrift=(id==='drift');
     Object.keys(cBtns).forEach(function(k){ cBtns[k].classList.toggle('active',k===id); });
     var c=CASES[id]; c.inject();
     cBody.hidden=false; cQ.textContent=c.q;
-    cWhy.textContent=''; cFix.textContent=''; cFix.className='c-fix';
+    cWhy.textContent=''; cFix.textContent=''; cFix.className='c-fix'; cHintSec=0;
+    var _hn=document.getElementById('clinicHint'); if(_hn){ _hn.hidden=true; _hn.textContent=''; }
     cOpts.innerHTML='';
     c.opts.forEach(function(o){
       var b=document.createElement('button'); b.type='button'; b.className='opt'; b.textContent=o.t;
@@ -548,12 +583,14 @@ drive.<span class="fn">drive</span>(<span class="num">0</span>, <span class="num
   }
   Object.keys(cBtns).forEach(function(id){ cBtns[id].addEventListener('click',function(){ cLoad(id); }); });
   document.getElementById('clinicReset').addEventListener('click',function(){
-    cCur=null; cDrift=false; cBody.hidden=true;
+    cCur=null; cDrift=false; cBody.hidden=true; cHintSec=0;
+    var _hn=document.getElementById('clinicHint'); if(_hn){ _hn.hidden=true; _hn.textContent=''; }
     Object.keys(cBtns).forEach(function(k){ cBtns[k].classList.remove('active'); });
     cSetAim(true); cSetKp(4); S.heading=0;
   });
   function cSolve(){
     cSolved=true; cDrift=false;
+    var _hn=document.getElementById('clinicHint'); if(_hn){ _hn.hidden=true; _hn.textContent=''; }
     cFix.textContent=CASES[cCur].confirm; cFix.className='c-fix ok';
     var cb=cBtns[cCur]; cb.classList.remove('active'); cb.classList.add('cleared');
     if(cb.textContent.indexOf('✓')!==0) cb.textContent='✓ '+cb.textContent;
@@ -568,6 +605,7 @@ drive.<span class="fn">drive</span>(<span class="num">0</span>, <span class="num
       }
       if(cCur && cDiag && !cSolved){
         var c=CASES[cCur], pre=false;
+        if((Date.now()-mLastAct)<12000){ cHintSec+=dtc; if(cHintSec>=90){ var _hn=document.getElementById('clinicHint'); if(_hn&&_hn.hidden){ _hn.textContent=c.hint||''; _hn.hidden=false; } } }
         try{ pre=!!c.pre(); }catch(e){}
         if(pre && !cPreWas && c.kick){ cKick(); cLockAt=0; }
         cPreWas=pre;
@@ -751,6 +789,22 @@ drive.<span class="fn">drive</span>(<span class="num">0</span>, <span class="num
     });
   }catch(e){}
 })();
+</script>
+<script>
+(function(){ try{
+  var box=document.getElementById('candoCheck'); if(!box) return;
+  var K='frc:cando', f=location.pathname.split('/').pop();
+  var st={}; try{ st=JSON.parse(localStorage.getItem(K))||{}; }catch(e){}
+  Array.prototype.forEach.call(box.querySelectorAll('.cc-row'),function(row,i){
+    var key=f+'#'+i, mark=row.querySelector('.cc-mark');
+    if(st[key]){ row.classList.add('checked'); if(mark)mark.textContent='✓'; }
+    row.addEventListener('click',function(){
+      var on=row.classList.toggle('checked');
+      if(mark)mark.textContent=on?'✓':'';
+      st[key]=on; try{ localStorage.setItem(K,JSON.stringify(st)); }catch(e){}
+    });
+  });
+}catch(e){} })();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>

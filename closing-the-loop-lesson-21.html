@@ -169,6 +169,21 @@
   .coursenav a.next-link{color:var(--teal);border-color:rgba(52,215,197,.4)}
 
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  /* can-do goals + tap-to-check mirror (added) */
+  .cando{border-left:3px solid var(--teal);background:rgba(52,215,197,.06);border-radius:0 10px 10px 0;padding:12px 16px;margin:18px 0 0}
+  .cando .cd-h{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:7px}
+  .cando ul{margin:0;padding-left:20px}
+  .cando li{color:var(--muted);font-size:15px;margin:4px 0;line-height:1.5}
+  .cando-check{margin-top:16px;border-left:3px solid var(--teal);background:rgba(52,215,197,.05);border-radius:0 10px 10px 0;padding:6px 14px 10px}
+  .cando-check .cc-h{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin:8px 0 4px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:center;min-height:30px;padding:5px 2px;cursor:pointer;font-size:15px;color:var(--muted)}
+  .cando-check .cc-row .cc-mark{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--line-2);display:flex;align-items:center;justify-content:center;font-size:12px;line-height:1;color:var(--green)}
+  .cando-check .cc-row.checked{color:var(--text)}
+  .cando-check .cc-row.checked .cc-mark{border-color:var(--green);background:rgba(67,214,126,.14)}
+  /* stuck-hints (added) */
+  .m-hint{font-size:13px;color:var(--teal);border-left:2px solid var(--line-2);padding:3px 0 3px 11px;font-style:italic;margin-top:8px}
+  .missions .m-item{flex-wrap:wrap}
+  .missions .m-item .m-hint{flex-basis:100%;margin:6px 0 0 26px}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -188,6 +203,11 @@
     <div class="eyebrow">The Flywheel</div>
     <h1>Hold a <span class="accent">speed</span>,<br>not a place.</h1>
     <p class="dek">A shooter doesn't go somewhere - it spins at a target RPM and recovers the instant a game piece steals its energy. Welcome to velocity control, where kV runs the show.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Explain why kV carries a velocity loop and kP stays small - a big kP makes the speed hunt.</li>
+      <li>Wait for At speed before firing, then let kV hold the base while kP refills the dip after a shot.</li>
+      <li>Spot when a flywheel is starved, sleepy, or running hot, and fix each from the sliders.</li>
+    </ul></div>
   </div>
 
   <section>
@@ -253,10 +273,10 @@
     <p class="caption">Turn kP way up and the recovery starts to oscillate - the speed overshoots and hunts. Velocity loves a strong kV and a gentle kP.</p>
     <div class="missions" id="missions">
       <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
-      <div class="m-item" data-m="ffhold"><span class="m-st">○</span><span>Slide <b>kP to 0</b>, then trim <b>kV</b> until <b>At speed?</b> says yes and stays yes for <b>2 seconds</b>. No feedback at all - that is feedforward holding the speed entirely on its own. Take a second to enjoy that.</span></div>
-      <div class="m-item" data-m="gap"><span class="m-st">○</span><span>Now break the feedforward on purpose: <b>kV to 0.30</b>, <b>kP all the way to 8</b>, target at <b>0.70</b>. Watch the wheel settle just short and never read at speed. Even maxed out, feedback can only trim a good kV - it cannot replace one.</span></div>
-      <div class="m-item" data-m="recover"><span class="m-st">○</span><span>Make it whole again: <b>kV back to 0.90</b>, <b>kP at 3 or less</b>. Wait for at speed, hit <b>Shoot</b>, and be back <b>at speed within 0.9 s</b>. Notice how a gentle kP recovers fast when kV carries the base load - that is the partnership working.</span></div>
-      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> rapid fire. Land <b>3 shots in 8 seconds</b>, each recovered within <b>0.9 s</b>, with kP still at <b>3 or less</b>. Find the rhythm: fire the moment At speed? flips back to yes.</span></div>
+      <div class="m-item" data-m="ffhold"><span class="m-st">○</span><span>Slide <b>kP to 0</b>, then trim <b>kV</b> until <b>At speed?</b> says yes and stays yes for <b>2 seconds</b>. No feedback at all - that is feedforward holding the speed entirely on its own. Take a second to enjoy that.</span><div class="m-hint" hidden>Stuck? Slide kP all the way to 0, then nudge kV up or down until At speed? reads yes and holds - feedforward is carrying the whole speed by itself.</div></div>
+      <div class="m-item" data-m="gap"><span class="m-st">○</span><span>Now break the feedforward on purpose: <b>kV to 0.30</b>, <b>kP all the way to 8</b>, target at <b>0.70</b>. Watch the wheel settle just short and never read at speed. Even maxed out, feedback can only trim a good kV - it cannot replace one.</span><div class="m-hint" hidden>Stuck? Drag kV down to 0.30 and kP all the way up to 8 with the target at 0.70. The wheel settles just short and never reads at speed.</div></div>
+      <div class="m-item" data-m="recover"><span class="m-st">○</span><span>Make it whole again: <b>kV back to 0.90</b>, <b>kP at 3 or less</b>. Wait for at speed, hit <b>Shoot</b>, and be back <b>at speed within 0.9 s</b>. Notice how a gentle kP recovers fast when kV carries the base load - that is the partnership working.</span><div class="m-hint" hidden>Stuck? Set kV to 0.90 and kP to 3 or less, wait for At speed? yes, then hit Shoot - a gentle kP snaps it back to speed within about a second.</div></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> rapid fire. Land <b>3 shots in 8 seconds</b>, each recovered within <b>0.9 s</b>, with kP still at <b>3 or less</b>. Find the rhythm: fire the moment At speed? flips back to yes.</span><div class="m-hint" hidden>Stuck? Keep kV at 0.90 and kP at 3 or less, then fire the instant At speed? flips back to yes - land three quick shots inside 8 seconds.</div></div>
     </div>
     <div class="missions" id="clinic" style="border-left-color:var(--amber)">
       <div class="m-head" style="color:var(--amber)">🩺 Fault clinic <span class="m-sub">a drill, nothing saved - just you and the wheel</span></div>
@@ -386,6 +406,10 @@ cfg.Slot0.kP = <span class="num">5.0</span>;    <span class="cm">// amps per rps
   </section>
 
   <section>
+    <div class="note teal robotcard">
+      <div class="nh">🤖 Now on your robot &middot; 10 minutes</div>
+      <p>On your robot, set the shooter to a <span class="k">VelocityVoltage</span> request, lean on kV for the bulk of the effort, keep kP small, and gate every shot behind <span class="k">atSpeed()</span>. Pass: it winds up to your target rps, holds it steady, and after a shot drops the piece and climbs back to speed before the next one instead of firing slow. Swap in a heavier wheel and the dip per shot should shrink. Shots landing short and inconsistent? The <a href="closing-the-loop-troubleshooting.html#symgrid" style="color:var(--teal)">troubleshooting field guide</a> covers a flywheel that never settles. No robot to borrow? Open the <a href="worksheet.html#form" style="color:var(--teal)">tuning worksheet</a>, pick Flywheel, enter your wheel and gearing, and read off the kV it predicts so you fire feedforward first.</p>
+    </div>
     <div class="note teal">
       <div class="nh">Going further &middot; optional</div>
       <p>There is a sneaky reason a flywheel recovers faster than your gut expects: the same spinning mass that makes it slow to start also makes it a tiny energy bank. Right after a shot, the wheel still carries most of its stored spin, so feedforward plus a gentle kP only has to top off a small dip rather than rebuild from zero, like a heavy bike flywheel that barely flinches when you tap the brake. That points at a real design tension: a heavier wheel dips less per shot but takes longer to spin up the first time. If your match plan is rapid-fire scoring, would you reach for a heavier wheel or a lighter one, and what does that cost you?</p>
@@ -463,6 +487,11 @@ cfg.Slot0.kP = <span class="num">5.0</span>;    <span class="cm">// amps per rps
         <div class="gl"><b>kP small</b><span>Big kP makes the speed hunt.</span></div>
         <div class="gl"><b>No kG</b><span>Gravity doesn't slow a spinning wheel.</span></div>
         <div class="gl"><b>atSpeed()</b><span>Wait for it, then shoot; recover, repeat.</span></div>
+      </div>
+      <div class="cando-check" id="candoCheck"><span class="cc-h">Can you do these now? Tap each one you've got</span>
+        <div class="cc-row"><span class="cc-mark"></span><span>I can explain why kV leads and kP stays small on a flywheel.</span></div>
+        <div class="cc-row"><span class="cc-mark"></span><span>I can time a shot: wait for at speed, then let it recover.</span></div>
+        <div class="cc-row"><span class="cc-mark"></span><span>I can diagnose a starved, sleepy, or overfed flywheel.</span></div>
       </div>
       <a class="next" href="closing-the-loop.html">
         <div class="n-eyebrow">Part IV complete · Tune a Real Mechanism</div>
@@ -603,6 +632,8 @@ cfg.Slot0.kP = <span class="num">5.0</span>;    <span class="cm">// amps per rps
   Object.keys(mItems).forEach(function(id){
     if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
   });
+  var mLastAct=0, mHintT={}, mAccPrev=Date.now();
+  (function(){ var d=document.getElementById('demo'); if(d){ d.addEventListener('pointerdown',function(){mLastAct=Date.now();},true); d.addEventListener('input',function(){mLastAct=Date.now();},true); } })();
   var mFFHold=0, mGapHold=0, mLastW=S.w, mShotT=-1, mShotKpOk=false, mHits=[];
   el.shoot.addEventListener('click',function(){
     // runs after the sim's own listener, so loadTimer===0.16 means this click really fired a shot
@@ -634,6 +665,8 @@ cfg.Slot0.kP = <span class="num">5.0</span>;    <span class="cm">// amps per rps
         mShotT=-1;
       }
     }
+    var _now=Date.now(), _dt=Math.min(0.5,(_now-mAccPrev)/1000); mAccPrev=_now;
+    if(_now-mLastAct<12000){ Object.keys(mItems).forEach(function(_k){ var _it=mItems[_k]; if(!_it||_it.classList.contains('cleared'))return; mHintT[_k]=(mHintT[_k]||0)+_dt; if(mHintT[_k]>=150){ var _h=_it.querySelector('.m-hint'); if(_h&&_h.hidden)_h.hidden=false; } }); }
   },100);
   }catch(e){}
 
@@ -842,6 +875,22 @@ cfg.Slot0.kP = <span class="num">5.0</span>;    <span class="cm">// amps per rps
     });
   }catch(e){}
 })();
+</script>
+<script>
+(function(){ try{
+  var box=document.getElementById('candoCheck'); if(!box) return;
+  var K='frc:cando', f=location.pathname.split('/').pop();
+  var st={}; try{ st=JSON.parse(localStorage.getItem(K))||{}; }catch(e){}
+  Array.prototype.forEach.call(box.querySelectorAll('.cc-row'),function(row,i){
+    var key=f+'#'+i, mark=row.querySelector('.cc-mark');
+    if(st[key]){ row.classList.add('checked'); if(mark)mark.textContent='✓'; }
+    row.addEventListener('click',function(){
+      var on=row.classList.toggle('checked');
+      if(mark)mark.textContent=on?'✓':'';
+      st[key]=on; try{ localStorage.setItem(K,JSON.stringify(st)); }catch(e){}
+    });
+  });
+}catch(e){} })();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>

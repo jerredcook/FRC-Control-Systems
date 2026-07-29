@@ -90,6 +90,18 @@
   pre.code{font-family:var(--mono);font-size:13px;line-height:1.85;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
   .code .cm{color:var(--faint);font-style:italic} .code .kw{color:#ff9bbf} .code .ty{color:var(--teal)} .code .fn{color:var(--indigo)} .code .num{color:var(--amber)} .code .st{color:#9ce8b0}
 
+  .cando{margin:18px 0 4px;border-left:3px solid var(--indigo);background:rgba(138,140,248,.06);border-radius:0 10px 10px 0;padding:12px 16px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);display:block;margin-bottom:8px}
+  .cando ul{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+  .cando li{position:relative;padding-left:19px;font-size:15px;color:var(--muted);line-height:1.5}
+  .cando li::before{content:"\2192";position:absolute;left:0;color:var(--indigo);font-family:var(--mono)}
+  .cando-check{margin:18px 0 0;border-top:1px solid var(--line);padding-top:16px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:flex-start;min-height:28px;padding:5px 2px;cursor:pointer;font-size:15px;color:var(--muted);line-height:1.45;-webkit-tap-highlight-color:transparent}
+  .cando-check .cc-row .cc-box{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--line-2);color:transparent;display:grid;place-items:center;font-size:12px;margin-top:1px;transition:.12s}
+  .cando-check .cc-row.on{color:var(--text)}
+  .cando-check .cc-row.on .cc-box{border-color:var(--green);background:rgba(67,214,126,.16);color:var(--green)}
+  .missions .m-hint{margin:-1px 0 6px 24px;font-size:13px;color:var(--faint);border-left:2px solid var(--indigo);padding:3px 0 3px 11px;line-height:1.5}
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
   .note p{margin:0;color:var(--text);font-size:16px}
@@ -172,6 +184,11 @@
     <div class="eyebrow">NetworkTables &amp; Dashboards</div>
     <h1>See what the<br><span class="accent">robot</span> sees.</h1>
     <p class="dek">NetworkTables is a shared notebook both the robot and your laptop can read and write. Publish a number and it appears on a dashboard instantly. Change a number on the dashboard and the robot reads it back.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Publish a robot value to NetworkTables by name so it shows up live on a dashboard.</li>
+      <li>Read a value the dashboard writes back, so you can tune a number with no code redeploy.</li>
+      <li>Explain why a value you publish every loop can't be tuned from the dashboard - your next write stomps it.</li>
+    </ul></div>
   </div>
 
   <section>
@@ -228,9 +245,13 @@
     <div class="missions" id="missions">
       <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
       <div class="m-item" data-m="readback"><span class="m-st">○</span><span>Drag <b>Shooter/kP</b> to exactly <b>0.30</b> and watch the amber row and the read-back follow you instantly. The dashboard wrote it, the robot read it, and you never redeployed. That loop is the superpower here.</span></div>
+      <div class="m-hint" data-for="readback" hidden>Stuck? Grab the Shooter/kP slider and slide it until the value reads exactly 0.30 - the amber row and the read-back both jump to match you the moment you land on it.</div>
       <div class="m-item" data-m="sag"><span class="m-st">○</span><span>Watch <b>PDH/voltage</b> drain like a phone battery. The moment it dips below <b>12.0 V</b>, drag kP down to <b>0.05 or lower</b>. Nice save - you read one stream and answered on another.</span></div>
+      <div class="m-hint" data-for="sag" hidden>Stuck? Keep an eye on PDH/voltage as it drains. The moment it drops under 12.0 V, drag kP down to 0.05 or lower - both have to be true at the same time for the save to count.</div>
       <div class="m-item" data-m="restore"><span class="m-st">○</span><span>Now bring kP back home to the code default, exactly <b>0.18</b>. Watch, react, recover - a full round trip, and the robot never rebooted once.</span></div>
+      <div class="m-hint" data-for="restore" hidden>Stuck? Once you have done the sag save, slide kP back up until it reads exactly 0.18, the code default printed on the slider label.</div>
       <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> sweep the whole range, <b>0.00</b> up to <b>0.50</b> and back to exactly <b>0.18</b>, in under <b>10 seconds</b>. A calm hand gets it done. One redeploy takes longer than that whole sweep.</span></div>
+      <div class="m-hint" data-for="gold" hidden>Stuck? One smooth sweep - slide kP all the way down to 0.00, then up past 0.50, then land on exactly 0.18, all inside about 10 seconds.</div>
     </div>
   </section>
 
@@ -381,6 +402,12 @@ rpmPub.<span class="fn">set</span>(shooter.<span class="fn">getRPM</span>());</p
         <div class="gl"><b>Dashboards</b><span>Elastic, Shuffleboard, AdvantageScope.</span></div>
         <div class="gl"><b>Log liberally</b><span>Can't debug what you can't see.</span></div>
       </div>
+      <div class="cando-check" id="candoCheck">
+        <span class="cc-h">Can you do these now? Tap each one you have got.</span>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Publish a robot value to NetworkTables by name so it shows up live on a dashboard.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Read a dashboard value back to tune a number with no code redeploy.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Explain why a value you publish every loop can't be tuned - your next write stomps it.</span></div>
+      </div>
       <a class="next" href="closing-the-loop.html">
         <div class="n-eyebrow">Part 5 · Make It Move · the Control course</div>
         <h3>On to Closing the Loop →</h3>
@@ -475,6 +502,11 @@ rpmPub.<span class="fn">set</span>(shooter.<span class="fn">getRPM</span>());</p
     else if(mPhase===1 && kp>0.495){ mPhase=2; }
     else if(mPhase===2 && Math.abs(kp-0.18)<0.005){ if(now-mT0<=10000) mClear('gold'); mPhase=0; }
   });
+  // stuck hints: after ~150s of active fiddling on an uncleared mission, reveal its hint line
+  var stuckSecs={}, HINT_AT=150, lastAct=0;
+  try{ var mDemo=document.getElementById('demo'); if(mDemo){ ['pointerdown','pointermove','input','keydown'].forEach(function(ev){ mDemo.addEventListener(ev,function(){ lastAct=Date.now(); },true); }); } }catch(e){}
+  function stuckTick(tick){ var actNow=(Date.now()-lastAct)<1500; Object.keys(mItems).forEach(function(id){ var n=mItems[id]; if(!n) return; var h=document.querySelector('#missions .m-hint[data-for="'+id+'"]'); if(n.classList.contains('cleared')){ if(h&&!h.hidden) h.hidden=true; return; } if(actNow){ stuckSecs[id]=(stuckSecs[id]||0)+tick; if(stuckSecs[id]>=HINT_AT && h) h.hidden=false; } }); }
+  setInterval(function(){ stuckTick(0.2); },200);
   }catch(e){}
 
   var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
@@ -579,6 +611,21 @@ try{
     });
   }catch(e){}
 })();
+</script>
+<script>
+(function(){try{
+  var K='frc:cando', f=location.pathname.split('/').pop(), map={};
+  try{ map=JSON.parse(localStorage.getItem(K))||{}; }catch(e){}
+  var rows=document.querySelectorAll('#candoCheck .cc-row');
+  Array.prototype.forEach.call(rows,function(r,i){
+    var key=f+'#'+i;
+    if(map[key]) r.classList.add('on');
+    r.addEventListener('click',function(){
+      var on=r.classList.toggle('on'); map[key]=on;
+      try{ localStorage.setItem(K,JSON.stringify(map)); }catch(e){}
+    });
+  });
+}catch(e){}})();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>

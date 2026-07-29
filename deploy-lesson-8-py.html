@@ -139,6 +139,21 @@
   .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
   .wm-steps.on{display:block}
   .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
+
+  .cando{border-left:3px solid var(--indigo);background:rgba(138,140,248,.07);border-radius:0 10px 10px 0;padding:11px 15px;margin:18px 0 0;max-width:52ch}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:6px}
+  .cando ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:3px}
+  .cando li{position:relative;font-size:15px;color:var(--muted);line-height:1.45;padding-left:18px}
+  .cando li::before{content:"→";position:absolute;left:0;color:var(--indigo)}
+  .cando-check{margin-top:16px;border-left:3px solid var(--indigo);background:rgba(138,140,248,.07);border-radius:0 10px 10px 0;padding:11px 15px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:6px}
+  .cando-check .cc-row{display:flex;gap:10px;align-items:center;min-height:30px;padding:4px;font-size:15px;color:var(--muted);cursor:pointer;border-radius:8px;transition:.12s}
+  .cando-check .cc-row:hover{background:rgba(138,140,248,.06)}
+  .cando-check .cc-box{font-family:var(--mono);flex:0 0 auto;color:var(--faint)}
+  .cando-check .cc-row.done{color:var(--text)}
+  .cando-check .cc-row.done .cc-box{color:var(--green)}
+  .missions .m-hint{margin:2px 0 6px 26px;padding:5px 0 5px 11px;border-left:2px solid var(--amber);font-size:13px;color:var(--muted);line-height:1.5}
+  .missions .m-hint b{color:var(--text)}
 </style>
 </head>
 <body>
@@ -158,6 +173,11 @@
     <div class="eyebrow">Classes &amp; Objects</div>
     <h1>Blueprints<br>and <span class="accent">things</span>.</h1>
     <p class="dek">A class is a blueprint. An object is a real thing you stamp out from it. This is how your code models a motor, an arm, a whole robot.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Read a class as a blueprint - its attributes, its <b>__init__</b>, its methods.</li>
+      <li>Stamp out objects by <b>calling the class</b>, each one carrying its own data.</li>
+      <li>Explain why editing one Motor's CAN id never touches another.</li>
+    </ul></div>
   </div>
 
   <section>
@@ -320,6 +340,12 @@ can = shooter.<input class="blank" data-ans="can_id" data-reveal="can_id" aria-l
         <div class="gl"><b>Call the class</b><span>Motor(…) stamps out a fresh object.</span></div>
         <div class="gl"><b>self</b><span>Refers to the current object.</span></div>
       </div>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Check yourself - tap each one you can now do</div>
+        <div class="cc-row"><span class="cc-box">○</span><span>Read a class as a blueprint - its attributes, its __init__, its methods.</span></div>
+        <div class="cc-row"><span class="cc-box">○</span><span>Stamp out objects by calling the class, each one carrying its own data.</span></div>
+        <div class="cc-row"><span class="cc-box">○</span><span>Explain why editing one Motor's CAN id never touches another.</span></div>
+      </div>
       <a class="next" href="deploy-lesson-9-py.html">
         <div class="n-eyebrow">Up next · Part 2 · 04</div>
         <h3>Inheritance &amp; Interfaces</h3>
@@ -427,6 +453,31 @@ can = shooter.<input class="blank" data-ans="can_id" data-reveal="can_id" aria-l
     inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); inp.blur(); } });
     inp.addEventListener('blur',commit);
   });
+
+  // ---- stuck hints: after sustained active fiddling, surface one hint per still-open mission ----
+  var _hints={
+    pair:'For the pair mission: type the name <b>Left</b> with CAN id <b>1</b> and press the + button, then <b>Right</b> with CAN id <b>2</b>. The checker reads the names, so spell them Left and Right.',
+    edit9:'For the independence mission: click the <b>CAN id</b> number on left\'s card, type <b>9</b>, and press Enter. right keeps its own 2 - editing one card never reaches the other.',
+    fleet:'For the fleet mission: make <b>four</b> Motors in all and give each a different CAN id (1, 2, 3, 4) so no two collide.',
+    gold:'For the gold: make two Motors share one CAN id on purpose - say both on 1 - then click one card and change it to a free number. Watching the clash and fixing it is the whole drill.'
+  };
+  Object.keys(mItems).forEach(function(id){
+    if(!_hints[id]) return;
+    var h=document.createElement('div'); h.className='m-hint'; h.hidden=true; h.innerHTML=_hints[id];
+    mItems[id].parentNode.insertBefore(h, mItems[id].nextSibling); mItems[id]._hint=h;
+  });
+  var _stuckSecs=0, _lastInteract=0;
+  function _bump(){ _lastInteract=Date.now(); }
+  var _root=document.querySelector('.play');
+  if(_root){ _root.addEventListener('pointerdown',_bump,true); _root.addEventListener('input',_bump,true); }
+  setInterval(function(){ try{
+    if(Date.now()-_lastInteract>4000) return;
+    if(++_stuckSecs<150) return;
+    Object.keys(mItems).forEach(function(id){
+      var n=mItems[id]; if(!n||n.classList.contains('cleared')||!n._hint) return;
+      n._hint.hidden=false;
+    });
+  }catch(e){} },1000);
   }catch(e){}
 
   var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
@@ -487,6 +538,26 @@ try{
       });
     });
   }catch(e){}
+})();
+</script>
+<script>
+(function(){
+try{
+  var KEY='frc:cando', file=location.pathname.split('/').pop();
+  var box=document.getElementById('candoCheck'); if(!box) return;
+  var saved={}; try{ saved=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+  var rows=box.querySelectorAll('.cc-row');
+  Array.prototype.forEach.call(rows,function(r,i){
+    var b=r.querySelector('.cc-box');
+    if(saved[file+'#'+i]){ r.classList.add('done'); if(b) b.textContent='✓'; }
+    r.addEventListener('click',function(){
+      var on=r.classList.toggle('done');
+      if(b) b.textContent=on?'✓':'○';
+      if(on) saved[file+'#'+i]=true; else delete saved[file+'#'+i];
+      try{ localStorage.setItem(KEY,JSON.stringify(saved)); }catch(e){}
+    });
+  });
+}catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

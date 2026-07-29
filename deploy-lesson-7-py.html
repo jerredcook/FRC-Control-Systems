@@ -137,6 +137,21 @@
   .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
   .wm-steps.on{display:block}
   .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
+
+  .cando{border-left:3px solid var(--indigo);background:rgba(138,140,248,.07);border-radius:0 10px 10px 0;padding:11px 15px;margin:18px 0 0;max-width:52ch}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:6px}
+  .cando ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:3px}
+  .cando li{position:relative;font-size:15px;color:var(--muted);line-height:1.45;padding-left:18px}
+  .cando li::before{content:"→";position:absolute;left:0;color:var(--indigo)}
+  .cando-check{margin-top:16px;border-left:3px solid var(--indigo);background:rgba(138,140,248,.07);border-radius:0 10px 10px 0;padding:11px 15px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:6px}
+  .cando-check .cc-row{display:flex;gap:10px;align-items:center;min-height:30px;padding:4px;font-size:15px;color:var(--muted);cursor:pointer;border-radius:8px;transition:.12s}
+  .cando-check .cc-row:hover{background:rgba(138,140,248,.06)}
+  .cando-check .cc-box{font-family:var(--mono);flex:0 0 auto;color:var(--faint)}
+  .cando-check .cc-row.done{color:var(--text)}
+  .cando-check .cc-row.done .cc-box{color:var(--green)}
+  .missions .m-hint{margin:2px 0 6px 26px;padding:5px 0 5px 11px;border-left:2px solid var(--amber);font-size:13px;color:var(--muted);line-height:1.5}
+  .missions .m-hint b{color:var(--text)}
 </style>
 </head>
 <body>
@@ -156,6 +171,11 @@
     <div class="eyebrow">Methods &amp; Logic</div>
     <h1>Decisions and<br><span class="accent">reusable</span> code.</h1>
     <p class="dek">A method is a named block of code you can run anytime. Add if/else to make decisions and loops to repeat - and you can express any robot behavior.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Write a method that takes inputs and hands a result back with <b>return</b>.</li>
+      <li>Use <b>if / else</b> to pick a branch - like a deadband that ignores tiny joystick wiggle.</li>
+      <li>Loop over all four swerve modules with one <b>for</b> loop instead of copy-paste.</li>
+    </ul></div>
   </div>
 
   <section>
@@ -311,6 +331,12 @@ speed = <input class="blank" data-ans="deadband" data-reveal="deadband" aria-lab
         <div class="gl"><b>for / while</b><span>Repeat a block N times / until done.</span></div>
         <div class="gl"><b>Small methods</b><span>Keep code readable and fixable.</span></div>
       </div>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Check yourself - tap each one you can now do</div>
+        <div class="cc-row"><span class="cc-box">○</span><span>Write a method that takes inputs and hands a result back with return.</span></div>
+        <div class="cc-row"><span class="cc-box">○</span><span>Use if / else to pick a branch - like a deadband that ignores tiny joystick wiggle.</span></div>
+        <div class="cc-row"><span class="cc-box">○</span><span>Loop over all four swerve modules with one for loop instead of copy-paste.</span></div>
+      </div>
       <a class="next" href="deploy-lesson-8-py.html">
         <div class="n-eyebrow">Up next · Part 2 · 03</div>
         <h3>Classes &amp; Objects</h3>
@@ -384,6 +410,31 @@ speed = <input class="blank" data-ans="deadband" data-reveal="deadband" aria-lab
     if(inside && Math.abs(ax-0.07)<0.005 && Math.abs(tv-0.08)<0.005) mClear('gold');
   }
   x.addEventListener('input',mCheck); t.addEventListener('input',mCheck); mCheck();
+
+  // ---- stuck hints: after sustained active fiddling, surface one hint per still-open mission ----
+  var _hints={
+    zero:'For the no-deadband mission: drag <b>tol</b> down to 0.00, then nudge <b>x</b> to about 0.03. With the band gone, even that wiggle escapes to the motors.',
+    edge:'For the edge mission: park <b>tol</b> at 0.10, then step <b>x</b> from 0.08 up to 0.11 one nudge at a time - you need to sit just inside (0.08, 0.09) and just outside (0.11) so the highlight flips.',
+    dead:'For the wide-band mission: push <b>tol</b> to its max, 0.40, then bring <b>x</b> out to about 0.35. It still parks at 0 - the band swallows it.',
+    gold:'For the gold: set <b>x</b> to exactly 0.07, then lower <b>tol</b> to 0.08. Since the test is strictly less-than, 0.08 is the smallest tol that still keeps 0.07 inside.'
+  };
+  Object.keys(mItems).forEach(function(id){
+    if(!_hints[id]) return;
+    var h=document.createElement('div'); h.className='m-hint'; h.hidden=true; h.innerHTML=_hints[id];
+    mItems[id].parentNode.insertBefore(h, mItems[id].nextSibling); mItems[id]._hint=h;
+  });
+  var _stuckSecs=0, _lastInteract=0;
+  function _bump(){ _lastInteract=Date.now(); }
+  x.addEventListener('input',_bump); t.addEventListener('input',_bump);
+  var _play=document.getElementById('play'); if(_play){ _play.addEventListener('pointerdown',_bump,true); }
+  setInterval(function(){ try{
+    if(Date.now()-_lastInteract>4000) return;
+    if(++_stuckSecs<150) return;
+    Object.keys(mItems).forEach(function(id){
+      var n=mItems[id]; if(!n||n.classList.contains('cleared')||!n._hint) return;
+      n._hint.hidden=false;
+    });
+  }catch(e){} },1000);
   }catch(e){}
 
   var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
@@ -444,6 +495,26 @@ try{
       });
     });
   }catch(e){}
+})();
+</script>
+<script>
+(function(){
+try{
+  var KEY='frc:cando', file=location.pathname.split('/').pop();
+  var box=document.getElementById('candoCheck'); if(!box) return;
+  var saved={}; try{ saved=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+  var rows=box.querySelectorAll('.cc-row');
+  Array.prototype.forEach.call(rows,function(r,i){
+    var b=r.querySelector('.cc-box');
+    if(saved[file+'#'+i]){ r.classList.add('done'); if(b) b.textContent='✓'; }
+    r.addEventListener('click',function(){
+      var on=r.classList.toggle('done');
+      if(b) b.textContent=on?'✓':'○';
+      if(on) saved[file+'#'+i]=true; else delete saved[file+'#'+i];
+      try{ localStorage.setItem(KEY,JSON.stringify(saved)); }catch(e){}
+    });
+  });
+}catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

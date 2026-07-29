@@ -68,6 +68,18 @@
   .missions .m-item.cleared{color:var(--text)}
   .missions .m-item.cleared .m-st{color:var(--green)}
   .missions .m-item.gold .m-st{color:var(--amber)}
+  .cando{margin:18px 0 4px;border-left:3px solid var(--indigo);background:rgba(138,140,248,.06);border-radius:0 10px 10px 0;padding:12px 16px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);display:block;margin-bottom:8px}
+  .cando ul{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+  .cando li{position:relative;padding-left:19px;font-size:15px;color:var(--muted);line-height:1.5}
+  .cando li::before{content:"\2192";position:absolute;left:0;color:var(--indigo);font-family:var(--mono)}
+  .cando-check{margin:18px 0 0;border-top:1px solid var(--line);padding-top:16px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:flex-start;min-height:28px;padding:5px 2px;cursor:pointer;font-size:15px;color:var(--muted);line-height:1.45;-webkit-tap-highlight-color:transparent}
+  .cando-check .cc-row .cc-box{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--line-2);color:transparent;display:grid;place-items:center;font-size:12px;margin-top:1px;transition:.12s}
+  .cando-check .cc-row.on{color:var(--text)}
+  .cando-check .cc-row.on .cc-box{border-color:var(--green);background:rgba(67,214,126,.16);color:var(--green)}
+  .missions .m-hint{margin:-1px 0 6px 24px;font-size:13px;color:var(--faint);border-left:2px solid var(--indigo);padding:3px 0 3px 11px;line-height:1.5}
 
   .codewrap{margin:18px 0}
   .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
@@ -149,6 +161,11 @@
     <div class="eyebrow">Swerve Drive in Code</div>
     <h1>Every wheel<br><span class="accent">steers</span>.</h1>
     <p class="dek">Swerve gives each of four wheels its own steering motor. Point them together and the robot slides any direction; point them in a pinwheel and it spins. The math that aims them is swerve kinematics.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Turn one chassis command into four module states with toSwerveModuleStates, then scale them with desaturateWheelSpeeds.</li>
+      <li>Read the module arrows: all parallel for pure translation, a pinwheel for pure rotation, a blend for both at once.</li>
+      <li>Use fromFieldRelativeSpeeds with the gyro so "push away" stays down-field no matter which way the robot faces.</li>
+    </ul></div>
   </div>
 
   <section>
@@ -185,9 +202,13 @@
     <div class="missions" id="missions">
       <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
       <div class="m-item" data-m="parallel"><span class="m-st">○</span><span>Start simple: drag translation at least <b>halfway out</b> with <b>omega at 0</b>. All four arrows point the same way, so the robot slides without turning. Keep that picture in mind.</span></div>
+      <div class="m-hint" data-for="parallel" hidden>Stuck? Leave the omega slider at 0, then drag inside the robot at least halfway to the edge. With no spin, all four arrows line up the same way.</div>
       <div class="m-item" data-m="pinwheel"><span class="m-st">○</span><span>Press <b>Center</b>, then slide <b>omega to 0.5</b> or more with no translation. The arrows form a <b>pinwheel</b>, each wheel pushing along the circle around the center. Pure spin - the opposite of your first mission.</span></div>
+      <div class="m-hint" data-for="pinwheel" hidden>Stuck? Press Center to clear translation, then slide omega to 0.5 or more without dragging inside the robot. The four arrows fan out into a pinwheel.</div>
       <div class="m-item" data-m="saturate"><span class="m-st">○</span><span>Now combine them: drag translation <b>to the edge</b> and push <b>omega to 1.0</b>. The fastest module pins at <b>100%</b> and every arrow shrinks together - that is desaturateWheelSpeeds quietly keeping the robot on course. Find the longest arrow: it is the wheel whose spin push lines up with your travel direction.</span></div>
+      <div class="m-hint" data-for="saturate" hidden>Stuck? Drag translation all the way to the edge, then push omega up to 1.0. The fastest module readout pins at 100% and every arrow shrinks together.</div>
       <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> a tricky one, worth the patience. With <b>omega near 0.5</b>, drag translation until one wheel's arrow <b>vanishes</b> while the other three keep pushing. You have put the turn center right on that wheel, so the robot pivots around it, like planting one foot and swinging around it.</span></div>
+      <div class="m-hint" data-for="gold" hidden>Stuck? Set omega near 0.5, then slowly drag translation around until one wheel's arrow shrinks to nothing while the other three keep pushing. That spot is the turn center landing on that wheel.</div>
     </div>
   </section>
 
@@ -328,6 +349,12 @@
         <div class="gl"><b>Module state</b><span>One angle + speed per wheel.</span></div>
         <div class="gl"><b>desaturate</b><span>Scale down if one exceeds max.</span></div>
       </div>
+      <div class="cando-check" id="candoCheck">
+        <span class="cc-h">Can you do these now? Tap each one you have got.</span>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Turn one chassis command into four module states, then desaturate them.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Read the arrows: parallel for translation, a pinwheel for rotation, a blend for both.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Use the gyro with fromFieldRelativeSpeeds so "push away" stays down-field.</span></div>
+      </div>
       <a class="next" href="deploy-lesson-25.html">
         <div class="n-eyebrow">Up next · Part 6 · 03</div>
         <h3>Odometry</h3>
@@ -436,6 +463,10 @@
   Object.keys(mItems).forEach(function(id){
     if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
   });
+  // stuck hints: after ~150s of active fiddling on an uncleared mission, reveal its hint line
+  var stuckSecs={}, HINT_AT=150, lastAct=0;
+  try{ var mDemo=document.getElementById('demo'); if(mDemo){ ['pointerdown','pointermove','input','keydown'].forEach(function(ev){ mDemo.addEventListener(ev,function(){ lastAct=Date.now(); },true); }); } }catch(e){}
+  function stuckTick(tick){ var actNow=(Date.now()-lastAct)<1500; Object.keys(mItems).forEach(function(id){ var n=mItems[id]; if(!n) return; var h=document.querySelector('#missions .m-hint[data-for="'+id+'"]'); if(n.classList.contains('cleared')){ if(h&&!h.hidden) h.hidden=true; return; } if(actNow){ stuckSecs[id]=(stuckSecs[id]||0)+tick; if(stuckSecs[id]>=HINT_AT && h) h.hidden=false; } }); }
   setInterval(function(){
     var t=Math.hypot(vx,vy), w=Math.abs(omega), st=states();
     var mn=Math.min.apply(null, st.arr.map(function(s){return s.sp;}));
@@ -443,6 +474,7 @@
     if(w>=0.5 && t<0.05) mClear('pinwheel');
     if(t>=0.9 && w>=0.9 && st.max>1) mClear('saturate');
     if(w>=0.35 && w<=0.75 && t>=0.3 && mn<=0.15) mClear('gold');
+    stuckTick(0.2);
   },200);
   }catch(e){}
 
@@ -548,6 +580,21 @@ try{
     });
   }catch(e){}
 })();
+</script>
+<script>
+(function(){try{
+  var K='frc:cando', f=location.pathname.split('/').pop(), map={};
+  try{ map=JSON.parse(localStorage.getItem(K))||{}; }catch(e){}
+  var rows=document.querySelectorAll('#candoCheck .cc-row');
+  Array.prototype.forEach.call(rows,function(r,i){
+    var key=f+'#'+i;
+    if(map[key]) r.classList.add('on');
+    r.addEventListener('click',function(){
+      var on=r.classList.toggle('on'); map[key]=on;
+      try{ localStorage.setItem(K,JSON.stringify(map)); }catch(e){}
+    });
+  });
+}catch(e){}})();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>

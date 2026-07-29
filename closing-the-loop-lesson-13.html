@@ -99,6 +99,20 @@
   .note p{margin:0;color:var(--text);font-size:16px}
   .note.teal{border-color:var(--teal);background:rgba(52,215,197,.06)} .note.teal .nh{color:var(--teal)}
 
+  .cando{margin:16px 0 4px;border-left:3px solid var(--teal);background:rgba(52,215,197,.06);border-radius:0 10px 10px 0;padding:12px 16px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);display:block;margin-bottom:6px}
+  .cando ul{margin:0;padding-left:18px;color:var(--muted);font-size:15px;line-height:1.5}
+  .cando li{margin:3px 0}
+  .cando-check{margin:4px 0 18px;border:1px solid var(--line-2);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:8px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:flex-start;min-height:28px;padding:5px 4px;cursor:pointer;font-size:15px;color:var(--muted);border-radius:8px;transition:.12s}
+  .cando-check .cc-row:hover{background:rgba(255,255,255,.02)}
+  .cando-check .cc-box{flex:0 0 auto;width:19px;height:19px;border-radius:50%;border:2px solid var(--line-2);color:transparent;display:grid;place-items:center;font-size:12px;margin-top:1px;transition:.12s}
+  .cando-check .cc-row.on{color:var(--text)}
+  .cando-check .cc-row.on .cc-box{border-color:var(--teal);background:rgba(52,215,197,.2);color:var(--teal)}
+  .missions .m-item{flex-wrap:wrap}
+  .missions .m-hint{flex-basis:100%;margin:7px 0 1px 24px;font-size:13px;color:var(--amber);border-left:2px solid rgba(255,176,32,.5);padding:2px 0 3px 11px;font-style:italic;line-height:1.5}
+
   .codewrap{margin:18px 0}
   .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
   .codewrap .clabel .badge{color:var(--teal);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
@@ -189,6 +203,11 @@
     <div class="eyebrow">Motion Profiles</div>
     <h1>Give the move<br>a <span class="accent">plan</span>.</h1>
     <p class="dek">Stop snapping the setpoint and hoping. A motion profile maps out a smooth ramp-cruise-slow - and assembles the entire gold-standard controller in code.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Explain why snapping a setpoint makes a mechanism lunge, and how a motion profile eases it into a ramp, cruise, and gentle stop.</li>
+      <li>Shape a move with max velocity and max acceleration - and tell when the plan is a triangle instead of a full trapezoid.</li>
+      <li>Assemble the gold-standard controller in code: a ProfiledPIDController plus an ElevatorFeedforward fed the profile's velocity.</li>
+    </ul></div>
   </div>
 
   <section>
@@ -380,6 +399,12 @@ motor.<span class="fn">setVoltage</span>(ffVolts + fbVolts);</pre>
   <section>
     <div class="recap">
       <h3>Part II · 05 · Recap</h3>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Can you do these now? Tap what you've got.</div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Explain why snapping a setpoint makes a mechanism lunge, and how a motion profile eases it into a ramp, cruise, and gentle stop.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Shape a move with max velocity and max acceleration - and tell when the plan is a triangle instead of a full trapezoid.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Assemble the gold-standard controller in code: a ProfiledPIDController plus an ElevatorFeedforward fed the profile's velocity.</span></div>
+      </div>
       <div class="glossary">
         <div class="gl"><b>Motion profile</b><span>A smooth ramp-cruise-slow plan for a move.</span></div>
         <div class="gl"><b>TrapezoidProfile</b><span>WPILib's profile, bounded by max vel &amp; accel.</span></div>
@@ -571,7 +596,19 @@ motor.<span class="fn">setVoltage</span>(ffVolts + fbVolts);</pre>
   // (0.62 cruise at defaults); short-hop peak 0.967 at vmax 1.2 with amax 1.5
   // (reaches 1.2 if amax is raised); plan gap 0.196 at defaults vs 0.088 at vmax 0.22.
   var mLastSp=S.sp, mActive=false, mPeakPv=0, mFar=0, mGap=0;
+  // ---- stuck hints: surface one authored nudge per uncleared mission after ~150s of active fiddling ----
+  var mhHints={
+    snap:"For the snap goal: click 'Motion profile: on' so it flips to off, then press Move - watch Total (V) spike as the carriage meets the whole 0.67 of error at once.",
+    triangle:"For the triangle goal: turn the profile back on, drag max acceleration down to 0.3, then Move - the amber plan peaks near 0.45 and never reaches your cruise limit.",
+    shorthop:"For the short-hop goal: set max acceleration to 1.5 and max velocity to 1.2, then Move - Profile vel tops out near 0.97 and never reaches 1.2.",
+    gold:"For gold: drag max velocity down to 0.22 or lower and Move - a slow plan is easy to ride, so the carriage stays within 0.10 of the amber line the whole way."
+  };
+  try{ Object.keys(mItems).forEach(function(id){ var n=mItems[id]; if(!n)return; var h=document.createElement('div'); h.className='m-hint'; h.hidden=true; h.textContent=mhHints[id]||''; if(h.textContent){ n.appendChild(h); n.__mh=h; } }); }catch(e){}
+  var mhActMs=0, mhLast=0;
+  try{ var mhEl=document.querySelector('.demo')||document.querySelector('.builder'); if(mhEl){ mhEl.addEventListener('pointerdown',function(){mhLast=Date.now();},true); mhEl.addEventListener('input',function(){mhLast=Date.now();},true); } }catch(e){}
+  function mhTick(ms){ try{ if(mhLast && Date.now()-mhLast<3500) mhActMs+=ms; if(mhActMs>=150000){ Object.keys(mItems).forEach(function(id){ var n=mItems[id]; if(n&&n.__mh&&!n.classList.contains('cleared')) n.__mh.hidden=false; }); } }catch(e){} }
   setInterval(function(){
+    mhTick(100);
     if(!S.profiled && Math.abs(S.pPos-S.y)>0.4) mClear('snap');
     if(S.sp!==mLastSp){ mLastSp=S.sp; mActive=true; mPeakPv=0; mFar=0; mGap=0; }
     if(!mActive) return;
@@ -681,6 +718,25 @@ motor.<span class="fn">setVoltage</span>(ffVolts + fbVolts);</pre>
         if(shown<items.length){ items[shown].hidden=false; shown++; }
         if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
         else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
+      });
+    });
+  }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  try{
+    var box=document.getElementById('candoCheck'); if(!box) return;
+    var file=location.pathname.split('/').pop(), KEY='frc:cando', map={};
+    try{ map=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+    var rows=box.querySelectorAll('.cc-row');
+    Array.prototype.forEach.call(rows,function(row,i){
+      var k=file+'#'+i;
+      if(map[k]) row.classList.add('on');
+      row.addEventListener('click',function(){
+        var on=row.classList.toggle('on');
+        if(on){map[k]=1;}else{delete map[k];}
+        try{ localStorage.setItem(KEY,JSON.stringify(map)); }catch(e){}
       });
     });
   }catch(e){}

@@ -132,6 +132,21 @@
   .wm-steps{display:none;margin:10px 0 0;padding-left:22px}
   .wm-steps.on{display:block}
   .wm-steps li{color:var(--muted);font-size:14px;margin:9px 0;line-height:1.55}
+
+  .cando{border-left:3px solid var(--indigo);background:rgba(138,140,248,.07);border-radius:0 10px 10px 0;padding:11px 15px;margin:18px 0 0;max-width:52ch}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:6px}
+  .cando ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:3px}
+  .cando li{position:relative;font-size:15px;color:var(--muted);line-height:1.45;padding-left:18px}
+  .cando li::before{content:"→";position:absolute;left:0;color:var(--indigo)}
+  .cando-check{margin-top:16px;border-left:3px solid var(--indigo);background:rgba(138,140,248,.07);border-radius:0 10px 10px 0;padding:11px 15px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:6px}
+  .cando-check .cc-row{display:flex;gap:10px;align-items:center;min-height:30px;padding:4px;font-size:15px;color:var(--muted);cursor:pointer;border-radius:8px;transition:.12s}
+  .cando-check .cc-row:hover{background:rgba(138,140,248,.06)}
+  .cando-check .cc-box{font-family:var(--mono);flex:0 0 auto;color:var(--faint)}
+  .cando-check .cc-row.done{color:var(--text)}
+  .cando-check .cc-row.done .cc-box{color:var(--green)}
+  .missions .m-hint{margin:2px 0 6px 26px;padding:5px 0 5px 11px;border-left:2px solid var(--amber);font-size:13px;color:var(--muted);line-height:1.5}
+  .missions .m-hint b{color:var(--text)}
 </style>
 </head>
 <body>
@@ -150,6 +165,11 @@
     <div class="eyebrow">Collections &amp; Enums</div>
     <h1>Many things,<br>named <span class="accent">states</span>.</h1>
     <p class="dek">Hold a whole group of values at once with arrays and lists - and give a robot a clear set of states with an enum. The last Java you need before building robots.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Reach any element of an array by index, remembering the first is <b>0</b>.</li>
+      <li>Grow a <b>List</b> with add() when the count keeps changing.</li>
+      <li>Name a mechanism's states with an <b>enum</b> and switch on them.</li>
+    </ul></div>
   </div>
 
   <section>
@@ -312,6 +332,12 @@ autos.<input class="blank" data-ans="add" data-reveal="add" aria-label="blank" a
         <div class="gl"><b>switch</b><span>Branch on which enum value you have.</span></div>
         <div class="gl"><b>State machine</b><span>States + events = clear behavior.</span></div>
       </div>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Check yourself - tap each one you can now do</div>
+        <div class="cc-row"><span class="cc-box">○</span><span>Reach any element of an array by index, remembering the first is 0.</span></div>
+        <div class="cc-row"><span class="cc-box">○</span><span>Grow a List with add() when the count keeps changing.</span></div>
+        <div class="cc-row"><span class="cc-box">○</span><span>Name a mechanism's states with an enum and switch on them.</span></div>
+      </div>
       <a class="next" href="code.html">
         <div class="n-eyebrow">Part 2 complete · Just-Enough Java</div>
         <h3>On to Part 3 - Command-Based Robots →</h3>
@@ -403,6 +429,31 @@ autos.<input class="blank" data-ans="add" data-reveal="add" aria-label="blank" a
       }
     }catch(err){}
   },true);
+
+  // ---- stuck hints: after sustained active fiddling, surface one hint per still-open mission ----
+  var _hints={
+    loop:'For the loop mission: press <b>Advance</b> over and over - at least four presses in a row - until the machine rolls off SHOOTING and lands back on IDLE. Do not click a chip in between; that resets the count.',
+    piece:'For the sensor mission: press Advance until the lit chip reads <b>INTAKING</b>, then click the <b>READY</b> chip - that is the state the machine moves to once a game piece is in.',
+    atspeed:'For the at-speed mission: get the lit chip to <b>READY</b>, then click the <b>SHOOTING</b> chip - at speed, the shooter fires the piece.',
+    gold:'For the gold: start on <b>IDLE</b>, then click the chips in order - INTAKING, READY, SHOOTING, IDLE - each the very next state. Use chip clicks only, no Advance, and no wrong clicks or the streak restarts.'
+  };
+  Object.keys(mItems).forEach(function(id){
+    if(!_hints[id]) return;
+    var h=document.createElement('div'); h.className='m-hint'; h.hidden=true; h.innerHTML=_hints[id];
+    mItems[id].parentNode.insertBefore(h, mItems[id].nextSibling); mItems[id]._hint=h;
+  });
+  var _stuckSecs=0, _lastInteract=0;
+  function _bump(){ _lastInteract=Date.now(); }
+  var _root=document.querySelector('.play');
+  if(_root){ _root.addEventListener('pointerdown',_bump,true); }
+  setInterval(function(){ try{
+    if(Date.now()-_lastInteract>4000) return;
+    if(++_stuckSecs<150) return;
+    Object.keys(mItems).forEach(function(id){
+      var n=mItems[id]; if(!n||n.classList.contains('cleared')||!n._hint) return;
+      n._hint.hidden=false;
+    });
+  }catch(e){} },1000);
   }catch(e){}
 
   var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
@@ -463,6 +514,26 @@ try{
       });
     });
   }catch(e){}
+})();
+</script>
+<script>
+(function(){
+try{
+  var KEY='frc:cando', file=location.pathname.split('/').pop();
+  var box=document.getElementById('candoCheck'); if(!box) return;
+  var saved={}; try{ saved=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+  var rows=box.querySelectorAll('.cc-row');
+  Array.prototype.forEach.call(rows,function(r,i){
+    var b=r.querySelector('.cc-box');
+    if(saved[file+'#'+i]){ r.classList.add('done'); if(b) b.textContent='✓'; }
+    r.addEventListener('click',function(){
+      var on=r.classList.toggle('done');
+      if(b) b.textContent=on?'✓':'○';
+      if(on) saved[file+'#'+i]=true; else delete saved[file+'#'+i];
+      try{ localStorage.setItem(KEY,JSON.stringify(saved)); }catch(e){}
+    });
+  });
+}catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

@@ -71,7 +71,19 @@
   .missions .m-item.cleared{color:var(--text)}
   .missions .m-item.cleared .m-st{color:var(--green)}
   .missions .m-item.gold .m-st{color:var(--amber)}
+  .missions .m-item{flex-wrap:wrap}
+  .missions .m-hint{flex-basis:100%;margin:4px 0 0 24px;font-size:13px;color:var(--muted);border-left:2px solid var(--amber);padding:2px 0 2px 10px;font-style:italic;line-height:1.5}
 
+  .cando{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:12px 16px;margin:18px 0 2px}
+  .cando .cd-h{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:7px}
+  .cando ul{margin:0;padding-left:18px;color:var(--muted);font-size:15px;line-height:1.5}
+  .cando li{margin:3px 0}
+  .cando-check{margin-top:16px;border:1px solid var(--line-2);border-left:3px solid var(--amber);border-radius:12px;background:var(--panel);padding:12px 16px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:4px}
+  .cando-check .cc-row{display:flex;gap:10px;align-items:center;font-size:15px;color:var(--muted);padding:6px 2px;min-height:30px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .cando-check .cc-row .cc-box{flex:0 0 auto;width:19px;height:19px;border-radius:50%;border:2px solid var(--faint);color:transparent;font-size:12px;line-height:16px;text-align:center;transition:.12s}
+  .cando-check .cc-row.checked{color:var(--text)}
+  .cando-check .cc-row.checked .cc-box{border-color:var(--green);background:rgba(67,214,126,.15);color:var(--green)}
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
   .note p{margin:0;color:var(--text);font-size:16px}
@@ -127,6 +139,11 @@
     <div class="eyebrow">Linkages &amp; Four-Bars</div>
     <h1>Reach out,<br>stay <span class="accent">level</span>.</h1>
     <p class="dek">A plain arm tilts whatever it carries as it swings, a tray would spill. A four-bar linkage uses a clever bit of geometry to extend reach while keeping the end effector at exactly the same angle the whole way. It's free, and it's everywhere.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Explain why a parallel four-bar keeps its tray level while a plain single arm tips its load off.</li>
+      <li>Predict a single arm's tray tilt from its angle with the rule tilt = 90 minus the arm angle.</li>
+      <li>Decide when a level four-bar is the right call, and when you'd want a non-parallel one that tilts on purpose.</li>
+    </ul></div>
   </div>
 
   <section>
@@ -166,10 +183,10 @@
     <p class="caption">Watch the tray and its game piece. On the four-bar it stays perfectly level no matter where the arms point, so the piece rides along safely. On the single arm the tray tilts with the arm and the piece would roll right off.</p>
     <div class="missions" id="missions">
       <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
-      <div class="m-item" data-m="compute"><span class="m-st">○</span><span>Switch to <b>Single arm</b>. The tilt rule is tilt = 90 - arm angle. Work out the tilt at <b>30°</b> in your head first, then drag the slider there and check yourself. It should read <b>60°</b> - predicting before you peek is the habit that makes this stick.</span></div>
-      <div class="m-item" data-m="level"><span class="m-st">○</span><span>Still on <b>Single arm</b>, swing well away, then hunt down the one arm angle where the tray reads <b>0°</b> tilt again. There is exactly one - enjoy the search.</span></div>
-      <div class="m-item" data-m="sweep"><span class="m-st">○</span><span>Switch to <b>Four-bar</b> and press <b>Auto-swing</b>. Sit back and watch a full sweep: the tilt never leaves <b>0°</b>. That is the parallelogram doing the work for free - no sensors, no code, just good geometry.</span></div>
-      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> run the rule backwards. Park the single arm so the tilt reads exactly <b>-45°</b>. Work out the arm angle on paper first, then check yourself - running a formula in reverse is a real engineering move.</span></div>
+      <div class="m-item" data-m="compute"><span class="m-st">○</span><span>Switch to <b>Single arm</b>. The tilt rule is tilt = 90 - arm angle. Work out the tilt at <b>30°</b> in your head first, then drag the slider there and check yourself. It should read <b>60°</b> - predicting before you peek is the habit that makes this stick.</span><div class="m-hint" hidden>For the compute mission: click Single arm, then drag the Swing slider all the way down to 30 degrees. The tilt readout should land on exactly 60.</div></div>
+      <div class="m-item" data-m="level"><span class="m-st">○</span><span>Still on <b>Single arm</b>, swing well away, then hunt down the one arm angle where the tray reads <b>0°</b> tilt again. There is exactly one - enjoy the search.</span><div class="m-hint" hidden>For the level mission: stay on Single arm, swing well away from 90, then bring the Swing slider back to exactly 90 degrees - that is the one spot the tray reads 0 tilt again.</div></div>
+      <div class="m-item" data-m="sweep"><span class="m-st">○</span><span>Switch to <b>Four-bar</b> and press <b>Auto-swing</b>. Sit back and watch a full sweep: the tilt never leaves <b>0°</b>. That is the parallelogram doing the work for free - no sensors, no code, just good geometry.</span><div class="m-hint" hidden>For the sweep mission: switch to Four-bar, press Auto-swing, and let it run one full pass so the swing dips near 30 and climbs past 145 - the tilt never leaves 0.</div></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> run the rule backwards. Park the single arm so the tilt reads exactly <b>-45°</b>. Work out the arm angle on paper first, then check yourself - running a formula in reverse is a real engineering move.</span><div class="m-hint" hidden>Gold: on Single arm, park the Swing slider at exactly 135 degrees. The rule tilt = 90 - angle gives 90 - 135, which is -45.</div></div>
     </div>
   </section>
 
@@ -259,6 +276,12 @@
         <div class="gl"><b>Single arm</b><span>Rotates the end effector with it.</span></div>
         <div class="gl"><b>Non-parallel</b><span>Tilts a set amount on purpose.</span></div>
         <div class="gl"><b>Geometry, not code</b><span>The angle is in the bar lengths.</span></div>
+      </div>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Can you do these now? Tap each one you've got.</div>
+        <div class="cc-row"><span class="cc-box"></span><span>Explain why a parallel four-bar keeps its tray level while a plain single arm tips its load off.</span></div>
+        <div class="cc-row"><span class="cc-box"></span><span>Predict a single arm's tray tilt from its angle with tilt = 90 minus the arm angle.</span></div>
+        <div class="cc-row"><span class="cc-box"></span><span>Decide when a level four-bar is the right call, and when you'd want a non-parallel one that tilts on purpose.</span></div>
       </div>
       <a class="next" href="build-lesson-18.html">
         <div class="n-eyebrow">Up next · Part 4 · 03</div>
@@ -363,6 +386,22 @@
       if(mLo<=35&&mHi>=145) mClear('sweep');
     }
   },200);
+
+  // ---- stuck-hints: after ~150s of active fiddling on an uncleared mission, surface one nudge ----
+  var mDemo=document.getElementById('demo'), mLastAct=0;
+  function mPoke(){ mLastAct=Date.now(); }
+  if(mDemo){ mDemo.addEventListener('pointerdown',mPoke,true); mDemo.addEventListener('input',mPoke,true); }
+  window.addEventListener('keydown',mPoke,true);
+  var mStuck={};
+  Object.keys(mItems).forEach(function(id){ mStuck[id]=0; });
+  setInterval(function(){
+    if(Date.now()-mLastAct>4000) return;
+    Object.keys(mItems).forEach(function(id){
+      var n=mItems[id]; if(!n||n.classList.contains('cleared')) return;
+      mStuck[id]+=0.2;
+      if(mStuck[id]>=150){ var h=n.querySelector('.m-hint'); if(h) h.hidden=false; }
+    });
+  },200);
   }catch(e){}
 
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
@@ -422,6 +461,27 @@
   opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(revealed)return; picked=i;
     opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
     if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
+})();
+</script>
+<script>
+(function(){
+  try{
+    var KEY='frc:cando', file=location.pathname.split('/').pop();
+    var box=document.getElementById('candoCheck'); if(!box) return;
+    var saved={}; try{ saved=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+    var rows=box.querySelectorAll('.cc-row');
+    Array.prototype.forEach.call(rows,function(row,i){
+      var key=file+'#'+i, bx=row.querySelector('.cc-box');
+      if(saved[key]){ row.classList.add('checked'); if(bx) bx.textContent='✓'; }
+      row.addEventListener('click',function(){
+        var on=!row.classList.contains('checked');
+        row.classList.toggle('checked',on);
+        if(bx) bx.textContent=on?'✓':'';
+        if(on){ saved[key]=true; } else { delete saved[key]; }
+        try{ localStorage.setItem(KEY,JSON.stringify(saved)); }catch(e){}
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

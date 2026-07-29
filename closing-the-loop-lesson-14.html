@@ -82,6 +82,29 @@
   .note p{margin:0;color:var(--text);font-size:16px}
   .note.teal{border-color:var(--teal);background:rgba(52,215,197,.06)} .note.teal .nh{color:var(--teal)}
 
+  .cando{margin:16px 0 4px;border-left:3px solid var(--teal);background:rgba(52,215,197,.06);border-radius:0 10px 10px 0;padding:12px 16px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);display:block;margin-bottom:6px}
+  .cando ul{margin:0;padding-left:18px;color:var(--muted);font-size:15px;line-height:1.5}
+  .cando li{margin:3px 0}
+  .cando-check{margin:4px 0 18px;border:1px solid var(--line-2);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:8px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:flex-start;min-height:28px;padding:5px 4px;cursor:pointer;font-size:15px;color:var(--muted);border-radius:8px;transition:.12s}
+  .cando-check .cc-row:hover{background:rgba(255,255,255,.02)}
+  .cando-check .cc-box{flex:0 0 auto;width:19px;height:19px;border-radius:50%;border:2px solid var(--line-2);color:transparent;display:grid;place-items:center;font-size:12px;margin-top:1px;transition:.12s}
+  .cando-check .cc-row.on{color:var(--text)}
+  .cando-check .cc-row.on .cc-box{border-color:var(--teal);background:rgba(52,215,197,.2);color:var(--teal)}
+
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--teal);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0;flex-wrap:wrap}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+  .missions .m-hint{flex-basis:100%;margin:7px 0 1px 24px;font-size:13px;color:var(--amber);border-left:2px solid rgba(255,176,32,.5);padding:2px 0 3px 11px;font-style:italic;line-height:1.5}
+
   .codewrap{margin:18px 0}
   .codewrap .clabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px}
   .codewrap .clabel .badge{color:var(--teal);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;font-size:10px;letter-spacing:.1em}
@@ -146,6 +169,11 @@
     <div class="eyebrow">Meet Phoenix 6 &amp; the Kraken</div>
     <h1>The motor that<br><span class="accent">thinks</span>.</h1>
     <p class="dek">A Kraken isn't just a motor - it's a controller with its own processor, running your control loop on board at 1 kHz. Time to move the loop off the roboRIO.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Explain what a TalonFX is - and why running the loop on the motor at 1 kHz beats 50 Hz on the roboRIO.</li>
+      <li>Name the four pieces you'll work with - TalonFX, CAN bus, Phoenix 6, Tuner X - and what each one does.</li>
+      <li>Grab a Kraken in code by its CAN id and read its position and velocity as status signals.</li>
+    </ul></div>
   </div>
 
   <section>
@@ -191,6 +219,13 @@
       </div>
     </div>
     <p class="caption">Same number of seconds, very different number of corrections. A loop that runs 20× more often catches disturbances 20× sooner.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
+      <div class="m-item" data-m="onrio"><span class="m-st">○</span><span>Try the old way first: click <b>Loop on roboRIO</b> and watch the left box light up. This is where your PID lived all through Part II, ticking 50 times a second.</span></div>
+      <div class="m-item" data-m="back"><span class="m-st">○</span><span>Now click <b>Loop on TalonFX</b> to send it back onto the motor - where a Kraken runs the very same loop at <b>1 kHz</b>, right next to the windings.</span></div>
+      <div class="m-item" data-m="gap"><span class="m-st">○</span><span>Sit back and let it run. The TalonFX counter pulls away fast - wait until it leads the roboRIO counter by more than <b>2,000</b> corrections. That widening gap is the whole point.</span></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> keep watching until the roboRIO counter passes <b>200</b>. Check the other readout - the TalonFX sits near <b>4,000</b>, almost exactly 20 times more loops in the same seconds.</span></div>
+    </div>
   </section>
 
   <section>
@@ -225,6 +260,10 @@
   </section>
 
   <section>
+    <div class="note teal robotcard">
+      <div class="nh">🤖 Now on your robot &middot; 10 minutes</div>
+      <p>Open <b>Tuner X</b> and connect to your robot (over USB or the radio). Pull up the CAN bus device list and count your Krakens and Falcons - every one should show up with a green status and a firmware version that matches across the bus. Pass: click a single TalonFX in the list and press <b>Blink</b>, and the light on that exact motor blinks so you can point to it on the robot. If a device is missing or shows red, the symptom-to-fix rows in the <a href="closing-the-loop-troubleshooting.html#symgrid">troubleshooting field guide</a> cover the usual causes - a duplicate CAN id, a loose connector, or missing bus termination. No robot handy? Watch CTRE's Tuner X walkthrough video and note where CAN id, firmware, and Blink live in the interface, so you can find them fast in the pit.</p>
+    </div>
     <div class="note teal">
       <div class="nh">Going further &middot; optional</div>
       <p>The motor runs its loop at 1 kHz, but a status signal traveling back over the CAN bus only updates as fast as that wire allows, by default around 50 to 100 times a second, like a fast worker whose progress reports you only read once in a while. So the onboard loop is genuinely quick even though the number your roboRIO sees refreshes slower. For tighter timing, teams raise the update rate or move devices onto a faster CANivore bus. Worth pondering: why is it fine for the control to be faster than what you can watch?</p>
@@ -283,6 +322,12 @@
   <section>
     <div class="recap">
       <h3>Part III · 01 · Recap</h3>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Can you do these now? Tap what you've got.</div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Explain what a TalonFX is - and why running the loop on the motor at 1 kHz beats 50 Hz on the roboRIO.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Name the four pieces you'll work with - TalonFX, CAN bus, Phoenix 6, Tuner X - and what each one does.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Grab a Kraken in code by its CAN id and read its position and velocity as status signals.</span></div>
+      </div>
       <div class="glossary">
         <div class="gl"><b>TalonFX</b><span>The controller inside a Kraken/Falcon.</span></div>
         <div class="gl"><b>1 kHz loop</b><span>On-motor control runs 20× faster than the roboRIO.</span></div>
@@ -413,6 +458,46 @@
   requestAnimationFrame(frame);
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){SY.o.fit();},120);});
 
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  // authored stuck hints: reveal one nudge per uncleared mission after ~150s of active fiddling
+  var mhHints={
+    onrio:"For this goal: click the left button in the toggle, 'Loop on roboRIO' - the left box lights up and the 'Loop runs on' readout switches to roboRIO.",
+    back:"For this goal: after you have tried roboRIO, click 'Loop on TalonFX' - the right box lights back up, and that is where a Kraken's 1 kHz loop belongs.",
+    gap:"For this goal: just leave the sim running a few seconds without touching it - the TalonFX counter climbs 20 times faster, so the gap between the two counters races past 2,000.",
+    gold:"For gold: let it run about four seconds. When the roboRIO counter passes 200, glance at the TalonFX counter - it sits near 4,000, about 20 times more."
+  };
+  try{ Object.keys(mItems).forEach(function(id){ var n=mItems[id]; if(!n)return; var h=document.createElement('div'); h.className='m-hint'; h.hidden=true; h.textContent=mhHints[id]||''; if(h.textContent){ n.appendChild(h); n.__mh=h; } }); }catch(e){}
+  var mhActMs=0, mhLast=0;
+  try{ var mhEl=document.querySelector('.demo')||document.querySelector('.builder'); if(mhEl){ mhEl.addEventListener('pointerdown',function(){mhLast=Date.now();},true); mhEl.addEventListener('input',function(){mhLast=Date.now();},true); } }catch(e){}
+  function mhTick(ms){ try{ if(mhLast && Date.now()-mhLast<3500) mhActMs+=ms; if(mhActMs>=150000){ Object.keys(mItems).forEach(function(id){ var n=mItems[id]; if(n&&n.__mh&&!n.classList.contains('cleared')) n.__mh.hidden=false; }); } }catch(e){} }
+  var mWentRio=false;
+  setInterval(function(){
+    mhTick(200);
+    if(SY.mode==='rio'){ mWentRio=true; mClear('onrio'); }
+    if(mWentRio && SY.mode==='talon') mClear('back');
+    if((SY.talonTick-SY.rioTick)>=2000) mClear('gap');
+    if(SY.rioTick>=200 && SY.talonTick>=3800) mClear('gold');
+  },200);
+  }catch(e){}
+
   // quiz
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
@@ -471,6 +556,25 @@
   opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(revealed)return; picked=i;
     opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
     if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
+})();
+</script>
+<script>
+(function(){
+  try{
+    var box=document.getElementById('candoCheck'); if(!box) return;
+    var file=location.pathname.split('/').pop(), KEY='frc:cando', map={};
+    try{ map=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+    var rows=box.querySelectorAll('.cc-row');
+    Array.prototype.forEach.call(rows,function(row,i){
+      var k=file+'#'+i;
+      if(map[k]) row.classList.add('on');
+      row.addEventListener('click',function(){
+        var on=row.classList.toggle('on');
+        if(on){map[k]=1;}else{delete map[k];}
+        try{ localStorage.setItem(KEY,JSON.stringify(map)); }catch(e){}
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

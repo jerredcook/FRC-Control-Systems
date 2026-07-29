@@ -177,6 +177,21 @@
   .coursenav a.map{border-color:transparent;color:var(--indigo)}
 
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  /* can-do goals + tap-to-check mirror (added) */
+  .cando{border-left:3px solid var(--teal);background:rgba(52,215,197,.06);border-radius:0 10px 10px 0;padding:12px 16px;margin:18px 0 0}
+  .cando .cd-h{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:7px}
+  .cando ul{margin:0;padding-left:20px}
+  .cando li{color:var(--muted);font-size:15px;margin:4px 0;line-height:1.5}
+  .cando-check{margin-top:16px;border-left:3px solid var(--teal);background:rgba(52,215,197,.05);border-radius:0 10px 10px 0;padding:6px 14px 10px}
+  .cando-check .cc-h{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin:8px 0 4px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:center;min-height:30px;padding:5px 2px;cursor:pointer;font-size:15px;color:var(--muted)}
+  .cando-check .cc-row .cc-mark{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--line-2);display:flex;align-items:center;justify-content:center;font-size:12px;line-height:1;color:var(--green)}
+  .cando-check .cc-row.checked{color:var(--text)}
+  .cando-check .cc-row.checked .cc-mark{border-color:var(--green);background:rgba(67,214,126,.14)}
+  /* stuck-hints (added) */
+  .m-hint{font-size:13px;color:var(--teal);border-left:2px solid var(--line-2);padding:3px 0 3px 11px;font-style:italic;margin-top:8px}
+  .missions .m-item{flex-wrap:wrap}
+  .missions .m-item .m-hint{flex-basis:100%;margin:6px 0 0 26px}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -196,6 +211,11 @@
     <div class="eyebrow">The Arm</div>
     <h1>Gravity that<br><span class="accent">moves</span>.</h1>
     <p class="dek">An elevator fights the same gravity everywhere. An arm's load changes with its angle - full at horizontal, zero straight up. One cosine fixes it.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Explain why an arm's gravity hold follows cos(angle) - strongest at horizontal, zero straight up.</li>
+      <li>Set GravityType.Arm_Cosine with the arm's zero at horizontal, so the device scales kG on every loop.</li>
+      <li>Diagnose an arm that sags, drifts high, or floats, and trace each back to its kG or cosine setting.</li>
+    </ul></div>
   </div>
 
   <section>
@@ -261,10 +281,10 @@
     <p class="caption">Watch the gravity factor: near horizontal it's ~1 (needs the most hold), near vertical it falls toward 0. Cosine comp tracks that; a flat kG can't.</p>
     <div class="missions" id="missions">
       <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
-      <div class="m-item" data-m="drift"><span class="m-st">○</span><span>Break it on purpose: switch <b>cosine comp off</b>, keep <b>kG 0.50</b>, and send the target to <b>90°</b>. Let it settle, then read the Error - the flat kG shoves the arm about <b>10° past</b> straight up. That miss is the whole lesson in one number.</span></div>
-      <div class="m-item" data-m="ff25"><span class="m-st">○</span><span>Comp back <b>on</b>, kG <b>0.50</b>. Do the math before the sim does: the hold voltage at 60° is kG × cos 60° = 0.50 × 0.5. Now set the target to <b>60°</b> and watch Feedforward read <b>0.25 V</b> - you predicted the robot's arithmetic before it happened.</span></div>
-      <div class="m-item" data-m="sag"><span class="m-st">○</span><span>Comp on, target <b>45°</b>. Now starve the arm: drop <b>kG to 0.25</b>, half the true gravity, and watch it park about <b>3° low</b>. Feedback is doing its best to cover for the weak feedforward - it just never quite can.</span></div>
-      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> comp <b>off</b>, target <b>90°</b>. Find the <b>kG</b> that holds it there with <b>0° error</b>. Before you touch the slider, ask yourself: how hard does gravity twist an arm that points straight up? Trust that answer.</span></div>
+      <div class="m-item" data-m="drift"><span class="m-st">○</span><span>Break it on purpose: switch <b>cosine comp off</b>, keep <b>kG 0.50</b>, and send the target to <b>90°</b>. Let it settle, then read the Error - the flat kG shoves the arm about <b>10° past</b> straight up. That miss is the whole lesson in one number.</span><div class="m-hint" hidden>Stuck? Click Cosine comp to off, leave kG at 0.50, and drag the target all the way to 90°. Let it settle and the Error parks near -10°.</div></div>
+      <div class="m-item" data-m="ff25"><span class="m-st">○</span><span>Comp back <b>on</b>, kG <b>0.50</b>. Do the math before the sim does: the hold voltage at 60° is kG × cos 60° = 0.50 × 0.5. Now set the target to <b>60°</b> and watch Feedforward read <b>0.25 V</b> - you predicted the robot's arithmetic before it happened.</span><div class="m-hint" hidden>Stuck? Turn Cosine comp on, keep kG at 0.50, and set the target to exactly 60° - the Feedforward readout lands on 0.25 V.</div></div>
+      <div class="m-item" data-m="sag"><span class="m-st">○</span><span>Comp on, target <b>45°</b>. Now starve the arm: drop <b>kG to 0.25</b>, half the true gravity, and watch it park about <b>3° low</b>. Feedback is doing its best to cover for the weak feedforward - it just never quite can.</span><div class="m-hint" hidden>Stuck? Comp on, target 45°, then slide kG down to exactly 0.25 - half the real gravity - and it parks a few degrees low.</div></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> comp <b>off</b>, target <b>90°</b>. Find the <b>kG</b> that holds it there with <b>0° error</b>. Before you touch the slider, ask yourself: how hard does gravity twist an arm that points straight up? Trust that answer.</span><div class="m-hint" hidden>Stuck? Comp off, target 90°, then slide kG all the way down to 0 - straight up, gravity gives the arm no twist, so it needs no hold at all.</div></div>
     </div>
     <div class="clinic" id="clinic">
       <div class="c-head">🩺 Fault clinic <span class="c-sub">load a symptom, name the fault, then cure it with the controls above</span></div>
@@ -279,6 +299,7 @@
         <div class="opts" id="clinicOpts"></div>
         <div class="c-why" id="clinicWhy"></div>
         <div class="c-status" id="clinicStatus"></div>
+        <div class="m-hint" id="clinicHint" hidden></div>
       </div>
     </div>
   </section>
@@ -327,6 +348,10 @@ cfg.Slot0.GravityType = <span class="ty">GravityTypeValue</span>.<input class="b
   </section>
 
   <section>
+    <div class="note teal robotcard">
+      <div class="nh">🤖 Now on your robot &middot; 10 minutes</div>
+      <p>On your robot, tune the arm with gravity compensation switched on. Set the gravity type to <span class="k">Arm_Cosine</span>, zero the encoder at a known angle so the loop knows where horizontal is, run SysId for kS, kG, kV, kA, add just enough kP to trim, then send it to every scoring angle. Pass: it holds dead still at horizontal with no hand on it, nails each angle five trips in a row, and does not sag any worse when you hang a game piece in the gripper. Sagging at horizontal but fine pointing straight up? The <a href="closing-the-loop-troubleshooting.html#symgrid" style="color:var(--teal)">troubleshooting field guide</a> points you at kG. No robot to borrow? Open the <a href="worksheet.html#form" style="color:var(--teal)">tuning worksheet</a>, pick Arm, type in the real length and mass, and read off the starting kG it predicts - that is your gravity term done on paper.</p>
+    </div>
     <div class="note teal">
       <div class="nh">Going further &middot; optional</div>
       <p>The cosine trick assumes the heavy part of the arm sits at the far end, so the pull is strongest at horizontal. But put a real game piece in the gripper and the arm's effective weight, and the angle where its mass actually balances, both shift, which means the kG you measured empty is now slightly off. Top teams handle this by switching to a second gains slot, or scaling kG, the moment they pick up a piece. Worth chewing on: if your kG is tuned empty, would a loaded arm tend to sag below the target or drift above it, and at which angle would you notice it most?</p>
@@ -392,6 +417,11 @@ cfg.Slot0.GravityType = <span class="ty">GravityTypeValue</span>.<input class="b
         <div class="gl"><b>Zero at horizontal</b><span>So cos(0)=1 lines up with full gravity.</span></div>
         <div class="gl"><b>ArmFeedforward</b><span>WPILib version; takes the angle directly.</span></div>
         <div class="gl"><b>FusedCANcoder</b><span>Absolute angle from power-on.</span></div>
+      </div>
+      <div class="cando-check" id="candoCheck"><span class="cc-h">Can you do these now? Tap each one you've got</span>
+        <div class="cc-row"><span class="cc-mark"></span><span>I can explain why arm gravity follows cos(angle).</span></div>
+        <div class="cc-row"><span class="cc-mark"></span><span>I can set up Arm_Cosine with a horizontal zero.</span></div>
+        <div class="cc-row"><span class="cc-mark"></span><span>I can diagnose a sagging, drifting, or floating arm.</span></div>
       </div>
       <a class="next" href="closing-the-loop-lesson-21.html">
         <div class="n-eyebrow">Up next · Part IV · 03</div>
@@ -533,6 +563,8 @@ cfg.Slot0.GravityType = <span class="ty">GravityTypeValue</span>.<input class="b
   Object.keys(mItems).forEach(function(id){
     if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
   });
+  var mLastAct=0, mHintT={}, mAccPrev=Date.now();
+  (function(){ var d=document.getElementById('demo'); if(d){ d.addEventListener('pointerdown',function(){mLastAct=Date.now();},true); d.addEventListener('input',function(){mLastAct=Date.now();},true); } })();
   var mHold={};
   function mSteady(id,cond){ if(cond){ mHold[id]=(mHold[id]||0)+1; if(mHold[id]>=4) mClear(id); } else { mHold[id]=0; } }
   setInterval(function(){
@@ -541,6 +573,8 @@ cfg.Slot0.GravityType = <span class="ty">GravityTypeValue</span>.<input class="b
     mSteady('ff25', S.cos && Math.abs(S.kG-0.5)<0.006 && tgtD===60 && still && Math.abs(errD)<1 && Math.abs(S.ffv-0.25)<0.01);
     mSteady('sag', S.cos && Math.abs(S.kG-0.25)<0.006 && tgtD===45 && still && errD>1.8 && errD<4.6);
     mSteady('gold', !S.cos && tgtD===90 && S.kG<0.05 && still && Math.abs(errD)<0.5);
+    var _now=Date.now(), _dt=Math.min(0.5,(_now-mAccPrev)/1000); mAccPrev=_now;
+    if(_now-mLastAct<12000){ Object.keys(mItems).forEach(function(_k){ var _it=mItems[_k]; if(!_it||_it.classList.contains('cleared'))return; mHintT[_k]=(mHintT[_k]||0)+_dt; if(mHintT[_k]>=150){ var _h=_it.querySelector('.m-hint'); if(_h&&_h.hidden)_h.hidden=false; } }); }
   },200);
   }catch(e){}
 
@@ -565,7 +599,8 @@ cfg.Slot0.GravityType = <span class="ty">GravityTypeValue</span>.<input class="b
       ],
       inject:function(){ cSetCos(true); cSetKG(0.15); cSetTgt(30); },
       fixed:function(errD,still){ return S.cos && Math.abs(S.kG-0.5)<=0.05 && still && Math.abs(errD)<1.5; },
-      fixMsg:'There it is - a starved kG. Back near 0.50, feedforward carries gravity on its own and the error just melts away. Feel how little work feedback has to do now.'
+      fixMsg:'There it is - a starved kG. Back near 0.50, feedforward carries gravity on its own and the error just melts away. Feel how little work feedback has to do now.',
+      hint:'Stuck on the cure? Slide kG back up to about 0.50 and the sag melts away - feedforward carries the weight so feedback stops straining.'
     },
     drift:{
       sym:'Symptom: aim high and the arm sails <b>past</b> the target. The closer to vertical you aim, the further past it parks. Near horizontal it behaves fine. Notice where it misbehaves - that is half the diagnosis.',
@@ -579,7 +614,8 @@ cfg.Slot0.GravityType = <span class="ty">GravityTypeValue</span>.<input class="b
       ],
       inject:function(){ cSetKG(0.5); cSetTgt(80); cSetCos(false); },
       fixed:function(errD,still){ return S.cos && Math.abs(S.kG-0.5)<=0.1 && still && Math.abs(errD)<1.5; },
-      fixMsg:'There it is - cosine comp was switched off. With cos(angle) back in the loop, the hold voltage fades exactly as the gravity load does, and the arm lands right on the line. Feel how much calmer that is.'
+      fixMsg:'There it is - cosine comp was switched off. With cos(angle) back in the loop, the hold voltage fades exactly as the gravity load does, and the arm lands right on the line. Feel how much calmer that is.',
+      hint:'Stuck on the cure? Click Cosine comp back on - that is the whole fix. The hold voltage fades with the angle again and the arm settles onto the line.'
     },
     float:{
       sym:'Symptom: the arm parks a few degrees <b>high</b> of every target. Worst near horizontal, nearly gone pointing straight up. Sound familiar? It is the sag case in a mirror.',
@@ -593,13 +629,17 @@ cfg.Slot0.GravityType = <span class="ty">GravityTypeValue</span>.<input class="b
       ],
       inject:function(){ cSetCos(true); cSetKG(0.85); cSetTgt(35); },
       fixed:function(errD,still){ return S.cos && Math.abs(S.kG-0.5)<=0.05 && still && Math.abs(errD)<1.5; },
-      fixMsg:'There it is - an overfed kG. At 0.50 the feedforward matches gravity instead of beating it, and the float disappears. Matching always beats muscling.'
+      fixMsg:'There it is - an overfed kG. At 0.50 the feedforward matches gravity instead of beating it, and the float disappears. Matching always beats muscling.',
+      hint:'Stuck on the cure? Slide kG back down to about 0.50 so feedforward matches gravity instead of beating it, and the float disappears.'
     }
   };
   var cActive=null, cSolved=false, cDone=false, cHold=0;
+  var cHintSec=0, cLastAct=0;
+  (function(){ var d=document.getElementById('demo'); if(d){ d.addEventListener('pointerdown',function(){cLastAct=Date.now();},true); d.addEventListener('input',function(){cLastAct=Date.now();},true); } })();
   function cLoad(id){
     var c=CASES[id]; if(!c)return;
-    cActive=id; cSolved=false; cDone=false; cHold=0;
+    cActive=id; cSolved=false; cDone=false; cHold=0; cHintSec=0;
+    var _hn=document.getElementById('clinicHint'); if(_hn){ _hn.hidden=true; _hn.textContent=''; }
     c.inject();
     Array.prototype.forEach.call(document.querySelectorAll('#clinic [data-case]'),function(b){
       b.classList.toggle('active', b.getAttribute('data-case')===id);
@@ -629,6 +669,7 @@ cfg.Slot0.GravityType = <span class="ty">GravityTypeValue</span>.<input class="b
   });
   setInterval(function(){
     if(!cActive||!cSolved||cDone)return;
+    if((Date.now()-cLastAct)<12000){ cHintSec+=0.2; if(cHintSec>=90){ var _hn=document.getElementById('clinicHint'); if(_hn&&_hn.hidden){ _hn.textContent=(CASES[cActive]&&CASES[cActive].hint)||''; _hn.hidden=false; } } }
     var c=CASES[cActive];
     var errD=(S.target-S.theta)/DEG, still=Math.abs(S.omega)<0.02;
     if(c.fixed(errD,still)){ cHold++; if(cHold>=5){ cDone=true; cStatus.textContent=c.fixMsg; cStatus.classList.add('fixed'); } }
@@ -756,6 +797,22 @@ cfg.Slot0.GravityType = <span class="ty">GravityTypeValue</span>.<input class="b
     });
   }catch(e){}
 })();
+</script>
+<script>
+(function(){ try{
+  var box=document.getElementById('candoCheck'); if(!box) return;
+  var K='frc:cando', f=location.pathname.split('/').pop();
+  var st={}; try{ st=JSON.parse(localStorage.getItem(K))||{}; }catch(e){}
+  Array.prototype.forEach.call(box.querySelectorAll('.cc-row'),function(row,i){
+    var key=f+'#'+i, mark=row.querySelector('.cc-mark');
+    if(st[key]){ row.classList.add('checked'); if(mark)mark.textContent='✓'; }
+    row.addEventListener('click',function(){
+      var on=row.classList.toggle('checked');
+      if(mark)mark.textContent=on?'✓':'';
+      st[key]=on; try{ localStorage.setItem(K,JSON.stringify(st)); }catch(e){}
+    });
+  });
+}catch(e){} })();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>

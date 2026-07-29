@@ -60,6 +60,29 @@
   input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--indigo);cursor:pointer;box-shadow:0 0 10px -1px var(--indigo)}
   input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:var(--indigo);cursor:pointer}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--amber);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+  .missions .m-hint{margin:2px 0 6px 26px;font-size:13px;color:var(--muted);font-style:italic;line-height:1.5;border-left:2px solid var(--amber);padding-left:10px}
+  .missions .m-hint b{color:var(--text);font-style:normal}
+  .cando{border-left:3px solid var(--indigo);background:rgba(255,138,76,.06);border-radius:0 10px 10px 0;padding:11px 15px;margin:16px 0 2px}
+  .cando .cd-h{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:6px}
+  .cando ul{margin:0;padding:0;list-style:none}
+  .cando li{position:relative;font-size:15px;color:var(--muted);padding:3px 0 3px 20px;line-height:1.45}
+  .cando li::before{content:"→";position:absolute;left:0;color:var(--indigo)}
+  .cando-check{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:6px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:flex-start;min-height:28px;padding:5px 0;cursor:pointer;font-size:15px;color:var(--muted);transition:.12s}
+  .cando-check .cc-row:hover{color:var(--text)}
+  .cando-check .cc-box{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--line-2);display:grid;place-items:center;font-size:12px;color:transparent;margin-top:1px;transition:.12s}
+  .cando-check .cc-row.on .cc-box{border-color:var(--green);background:var(--green);color:#06210f}
+  .cando-check .cc-row.on{color:var(--text)}
 
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
@@ -117,6 +140,13 @@
     <div class="eyebrow">Power Tools</div>
     <h1>Match the<br><span class="accent">speed</span>.</h1>
     <p class="dek">A power tool does in seconds what a hand tool does in minutes, which also means it makes mistakes in seconds. The first skill is matching the tool's speed to the material. Too fast burns; too slow chatters.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span>
+      <ul>
+        <li>Match a drill's speed to the material - slow for steel, fast for wood.</li>
+        <li>Spot a bit running too fast from the heat, smoke, and glowing tip.</li>
+        <li>Clamp a part before drilling so the tool fights the clamp, not your fingers.</li>
+      </ul>
+    </div>
   </div>
 
   <section>
@@ -155,6 +185,17 @@
       </div>
     </div>
     <p class="caption">The green band on the gauge is the right speed for the chosen material. Land in it for a clean cut. Push past it and the contact point glows, that's heat ruining the bit and the part.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
+      <div class="m-item" data-m="steel"><span class="m-st">○</span><span>The counterintuitive one: pick <b>Steel</b> and drag the speed <b>down</b> into its green band (about <b>350 to 850 rpm</b>). Harder metal wants to go slower, not faster.</span></div>
+      <div class="m-hint" data-h="steel" hidden>Click <b>Steel</b>, then pull the speed slider way down - its green band sits low, around 350 to 850 rpm, far below where wood likes to run.</div>
+      <div class="m-item" data-m="wood"><span class="m-st">○</span><span>Now the opposite: pick <b>Wood</b> and push the speed <b>up high</b> into its green band (about <b>1900 to 3000 rpm</b>). Soft material likes it fast.</span></div>
+      <div class="m-hint" data-h="wood" hidden>Click <b>Wood</b> and slide the speed up toward the top - its green band runs 1900 to 3000 rpm, near the fast end of the slider.</div>
+      <div class="m-item" data-m="burn"><span class="m-st">○</span><span>Overheat one on purpose: push any material past the top of its band until the gauge goes <b>red</b> and the tip glows. That glow is heat killing the bit.</span></div>
+      <div class="m-hint" data-h="burn" hidden>Pick <b>Steel</b> and shove the speed up past 850 rpm - the tip glows and smokes, and the result readout turns red. That red is the mission.</div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> dial <b>all four materials</b> into their own green band, one at a time. Each one has a different sweet spot - find every one.</span></div>
+      <div class="m-hint" data-h="gold" hidden>One material at a time, land each in its own green band: steel low (350-850), polycarb (700-1400), aluminum (1400-2400), wood high (1900-3000).</div>
+    </div>
   </section>
 
   <section>
@@ -248,6 +289,12 @@
         <div class="gl"><b>Reach speed first</b><span>Then ease the tool in.</span></div>
         <div class="gl"><b>Cutting fluid</b><span>Keeps metal cool and edges sharp.</span></div>
       </div>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Can you do these now?</div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Match a drill's speed to the material - slow for steel, fast for wood.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Spot a bit running too fast from the heat, smoke, and glowing tip.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Clamp a part before drilling so the tool fights the clamp, not your fingers.</span></div>
+      </div>
       <a class="next" href="build-lesson-4.html">
         <div class="n-eyebrow">Up next · Part 1 · 04</div>
         <h3>Measure &amp; Mark</h3>
@@ -330,6 +377,48 @@
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
   requestAnimationFrame(step);
 
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  // stuck-hint timing: after ~150s of active fiddling on a still-open mission, reveal one nudge
+  var mHintT={}, mLastAct=Date.now(), mDemoEl=document.getElementById('demo');
+  if(mDemoEl){ ['pointerdown','input','click'].forEach(function(ev){ mDemoEl.addEventListener(ev,function(){ mLastAct=Date.now(); },true); }); }
+  function mStuck(){
+    var active=(Date.now()-mLastAct)<5000;
+    Object.keys(mItems).forEach(function(id){
+      var n=mItems[id]; if(!n||n.classList.contains('cleared')) return;
+      if(active) mHintT[id]=(mHintT[id]||0)+0.2;
+      if((mHintT[id]||0)>=150){ var h=document.querySelector('#missions .m-hint[data-h="'+id+'"]'); if(h) h.hidden=false; }
+    });
+  }
+  var mGreen={};
+  setInterval(function(){
+    var st=status();
+    if(st.s==='ok') mGreen[mat]=true;
+    if(mat==='steel'&&st.s==='ok') mClear('steel');
+    if(mat==='wood'&&st.s==='ok') mClear('wood');
+    if(st.s==='fast') mClear('burn');
+    if(mGreen.alum&&mGreen.steel&&mGreen.wood&&mGreen.poly) mClear('gold');
+    mStuck();
+  },200);
+  }catch(e){}
+
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
@@ -384,6 +473,26 @@
   opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(revealed)return; picked=i;
     opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
     if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
+})();
+</script>
+<script>
+(function(){
+  try{
+    var wrap=document.getElementById('candoCheck'); if(!wrap) return;
+    var KEY='frc:cando', file=location.pathname.split('/').pop();
+    var saved={}; try{ saved=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+    var rows=wrap.querySelectorAll('.cc-row');
+    Array.prototype.forEach.call(rows,function(row,i){
+      var k=file+'#'+i;
+      if(saved[k]) row.classList.add('on');
+      row.addEventListener('click',function(){
+        var on=!row.classList.contains('on');
+        row.classList.toggle('on',on);
+        if(on){ saved[k]=1; } else { delete saved[k]; }
+        try{ localStorage.setItem(KEY,JSON.stringify(saved)); }catch(e){}
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

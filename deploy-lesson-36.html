@@ -136,6 +136,21 @@
   .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
   .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)} .coursenav a.next-link{color:var(--teal);border-color:rgba(52,215,197,.4)}
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  /* can-do goals + stuck-hints (training layer) */
+  .cando{border-left:3px solid var(--indigo);background:rgba(138,140,248,.06);border-radius:0 10px 10px 0;padding:12px 16px;margin:18px 0 4px}
+  .cando .cd-h{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:7px}
+  .cando ul{margin:0;padding:0;list-style:none}
+  .cando li{position:relative;font-size:15px;color:var(--muted);padding:3px 0 3px 20px;line-height:1.5}
+  .cando li::before{content:"\2192";position:absolute;left:0;color:var(--indigo)}
+  .cando-check{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:center;min-height:30px;padding:4px 2px;cursor:pointer;font-size:15px;color:var(--muted);transition:.12s}
+  .cando-check .cc-row:hover{color:var(--text)}
+  .cando-check .cc-box{width:20px;height:20px;flex:0 0 auto;border:2px solid var(--line-2);border-radius:6px;display:grid;place-items:center;color:transparent;font-size:12px;transition:.12s}
+  .cando-check .cc-row.on{color:var(--text)}
+  .cando-check .cc-row.on .cc-box{border-color:var(--green);background:var(--green);color:#06210f}
+  .missions .m-item{flex-wrap:wrap}
+  .missions .m-hint{flex-basis:100%;margin:7px 0 1px 24px;font-size:13px;color:var(--muted);border-left:2px solid var(--amber);background:rgba(255,176,32,.05);border-radius:0 6px 6px 0;padding:6px 10px;line-height:1.5}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -155,6 +170,11 @@
     <div class="eyebrow">Competition-Ready</div>
     <h1>Win on<br><span class="accent">Saturday</span>.</h1>
     <p class="dek">The last skill isn't code, it's discipline. Commit early, deploy only tested code, and run the same checklist before every match. A good robot with sloppy habits loses to a decent robot with great ones.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Run the pre-event git ritual: add, commit, push, and tag the exact build</li>
+      <li>Say what the practice field is for - never deploy untested code into a real match</li>
+      <li>Use a written pre-match checklist so 'ready' is a fact you can point to, not a feeling</li>
+    </ul></div>
   </div>
 
   <section>
@@ -170,10 +190,10 @@
     <p class="caption">Every item is a match someone lost by skipping it: code committed so a crash can't lose your work, auto selected so the robot moves, a charged battery so it doesn't brown out. Run the list the same way every time.</p>
     <div class="missions" id="missions">
       <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
-      <div class="m-item" data-m="cleared"><span class="m-st">○</span><span>Get yourself cleared to compete: tick all <b>6</b> items and take the meter to <b>100%</b>. Ready is a fact you can point to, not a feeling - and now you have the receipt.</span></div>
-      <div class="m-item" data-m="ritual"><span class="m-st">○</span><span>Run it like a pit crew: clear the list <b>top to bottom, in the printed order</b>, no takebacks. Unchecking anything restarts the run - order is the discipline here.</span></div>
-      <div class="m-item" data-m="commit-cmd"><span class="m-st">○</span><span>In the code exercise below, type the git command from memory and press <b>Check</b> until it says Correct. One rule: touch <b>Reveal</b> and this mission stays locked. Trust your fingers, you know this.</span></div>
-      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> pretend your next match is in 20 minutes. Uncheck everything and run the whole list in order a <b>second</b> time. The ritual runs before every match, not once a day - let it become muscle memory.</span></div>
+      <div class="m-item" data-m="cleared"><span class="m-st">○</span><span>Get yourself cleared to compete: tick all <b>6</b> items and take the meter to <b>100%</b>. Ready is a fact you can point to, not a feeling - and now you have the receipt.</span><div class="m-hint" hidden>For the cleared mission: click all six checklist rows so the meter fills to 100% and the green Cleared banner appears.</div></div>
+      <div class="m-item" data-m="ritual"><span class="m-st">○</span><span>Run it like a pit crew: clear the list <b>top to bottom, in the printed order</b>, no takebacks. Unchecking anything restarts the run - order is the discipline here.</span><div class="m-hint" hidden>For the ritual mission: tick the six items strictly top to bottom in the printed order, and do not uncheck any - unchecking restarts the run.</div></div>
+      <div class="m-item" data-m="commit-cmd"><span class="m-st">○</span><span>In the code exercise below, type the git command from memory and press <b>Check</b> until it says Correct. One rule: touch <b>Reveal</b> and this mission stays locked. Trust your fingers, you know this.</span><div class="m-hint" hidden>For the git mission: in the code exercise below, type add, commit, push, and tag into the four blanks and press Check - just do not touch Reveal.</div></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> pretend your next match is in 20 minutes. Uncheck everything and run the whole list in order a <b>second</b> time. The ritual runs before every match, not once a day - let it become muscle memory.</span><div class="m-hint" hidden>For gold: after clearing the list once in order, uncheck everything and run all six in order a second time - the ritual repeats before every match.</div></div>
     </div>
   </section>
 
@@ -340,6 +360,12 @@ git <input class="blank" data-ans="tag" data-reveal="tag" aria-label="blank" aut
         <div class="gl"><b>Checklist</b><span>Make "ready" verifiable.</span></div>
         <div class="gl"><b>Slow is smooth</b><span>Discipline wins on Saturday.</span></div>
       </div>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Can you do these now? Tap the ones you've got.</div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Run the pre-event git ritual: add, commit, push, and tag the exact build</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Say what the practice field is for - never deploy untested code into a real match</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Use a written pre-match checklist so 'ready' is a fact you can point to, not a feeling</span></div>
+      </div>
     </div>
   </section>
 
@@ -487,6 +513,43 @@ git <input class="blank" data-ans="tag" data-reveal="tag" aria-label="blank" aut
     });
   }catch(e){}
 })();
+</script>
+<script>
+(function(){ try{
+  var KEY='frc:cando', file=location.pathname.split('/').pop();
+  var map={}; try{ map=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+  var rows=document.querySelectorAll('#candoCheck .cc-row');
+  Array.prototype.forEach.call(rows,function(r,i){
+    var k=file+'#'+i;
+    if(map[k]) r.classList.add('on');
+    r.addEventListener('click',function(){
+      var on=!r.classList.contains('on'); r.classList.toggle('on',on);
+      map[k]=on; try{ localStorage.setItem(KEY,JSON.stringify(map)); }catch(e){}
+    });
+  });
+}catch(e){} })();
+</script>
+<script>
+(function(){ try{
+  var missions=document.getElementById('missions'); if(!missions) return;
+  var items=missions.querySelectorAll('.m-item'); if(!items.length) return;
+  var hasHint=false;
+  Array.prototype.forEach.call(items,function(n){ if(n.querySelector('.m-hint')) hasHint=true; });
+  if(!hasHint) return;
+  var active=0, lastPoke=0, THRESH=150, WINDOW=12000;
+  function poke(){ lastPoke=Date.now(); }
+  var demo=document.getElementById('demo');
+  [demo,missions].forEach(function(el){ if(el){ ['pointerdown','input','click'].forEach(function(ev){ el.addEventListener(ev,poke,true); }); } });
+  setInterval(function(){ try{
+    if(Date.now()-lastPoke<WINDOW) active++;
+    if(active>=THRESH){
+      Array.prototype.forEach.call(items,function(n){
+        if(n.classList.contains('cleared')) return;
+        var h=n.querySelector('.m-hint'); if(h) h.hidden=false;
+      });
+    }
+  }catch(e){} },1000);
+}catch(e){} })();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>

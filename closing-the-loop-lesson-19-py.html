@@ -149,6 +149,21 @@
   .coursenav a.map{border-color:transparent;color:var(--indigo)}
 
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  /* can-do goals + tap-to-check mirror (added) */
+  .cando{border-left:3px solid var(--teal);background:rgba(52,215,197,.06);border-radius:0 10px 10px 0;padding:12px 16px;margin:18px 0 0}
+  .cando .cd-h{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:7px}
+  .cando ul{margin:0;padding-left:20px}
+  .cando li{color:var(--muted);font-size:15px;margin:4px 0;line-height:1.5}
+  .cando-check{margin-top:16px;border-left:3px solid var(--teal);background:rgba(52,215,197,.05);border-radius:0 10px 10px 0;padding:6px 14px 10px}
+  .cando-check .cc-h{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin:8px 0 4px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:center;min-height:30px;padding:5px 2px;cursor:pointer;font-size:15px;color:var(--muted)}
+  .cando-check .cc-row .cc-mark{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--line-2);display:flex;align-items:center;justify-content:center;font-size:12px;line-height:1;color:var(--green)}
+  .cando-check .cc-row.checked{color:var(--text)}
+  .cando-check .cc-row.checked .cc-mark{border-color:var(--green);background:rgba(67,214,126,.14)}
+  /* stuck-hints (added) */
+  .m-hint{font-size:13px;color:var(--teal);border-left:2px solid var(--line-2);padding:3px 0 3px 11px;font-style:italic;margin-top:8px}
+  .missions .m-item{flex-wrap:wrap}
+  .missions .m-item .m-hint{flex-basis:100%;margin:6px 0 0 26px}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -169,6 +184,11 @@
     <div class="eyebrow">The Elevator, End to End</div>
     <h1>From bare metal<br>to <span class="accent">dialed in</span>.</h1>
     <p class="dek">Every piece you've learned, in order, on one real elevator: configure, characterize, tune, profile, validate. This is the workflow a competitive team runs.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Run the five tuning steps in the right order - configure, characterize, add kP, set Motion Magic, validate - without skipping ahead.</li>
+      <li>Explain why feedforward comes before feedback, so kP is left only a tiny error to trim.</li>
+      <li>Judge when a mechanism is truly validated: it hits every height repeatably, holds under load, and never oscillates.</li>
+    </ul></div>
   </div>
 
   <section>
@@ -240,10 +260,10 @@
     <p class="caption">Tap the scoring presets - each move is a clean profile, and the carriage holds dead-on even as you drag the load up.</p>
     <div class="missions" id="missions">
       <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
-      <div class="m-item" data-m="sweep"><span class="m-st">○</span><span>Run step 5 yourself: tap all four presets, <b>Stow, L1, L2, L3</b>, and get <b>On target? yes</b> at every height. That run is what tuned feels like.</span></div>
-      <div class="m-item" data-m="hold"><span class="m-st">○</span><span>Park at any height, then drag <b>Added load</b> to about <b>0.10</b> (anywhere from <b>0.08 to 0.13</b>) and keep <b>On target? yes</b>. Feedback quietly absorbs weight it was never told about - like your legs steadying a heavier backpack.</span></div>
-      <div class="m-item" data-m="limit"><span class="m-st">○</span><span>Now find the edge: push <b>Added load past 0.25</b>. The carriage settles low and <b>On target?</b> flips to <b>no</b>. The leftover error is about <b>load ÷ kP</b>, and kP can only hide so much - worth seeing once for yourself.</span></div>
-      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> find the ceiling. Get <b>Added load to 0.16 or more</b> while <b>On target?</b> stays <b>yes</b>. Past about <b>0.20</b> it is impossible, so creep up on it slowly and notice exactly where the loop gives out.</span></div>
+      <div class="m-item" data-m="sweep"><span class="m-st">○</span><span>Run step 5 yourself: tap all four presets, <b>Stow, L1, L2, L3</b>, and get <b>On target? yes</b> at every height. That run is what tuned feels like.</span><div class="m-hint" hidden>Stuck? Tap Stow and wait for On target? to read yes, then L1, then L2, then L3 - one at a time, letting each land before the next. All four have to show yes.</div></div>
+      <div class="m-item" data-m="hold"><span class="m-st">○</span><span>Park at any height, then drag <b>Added load</b> to about <b>0.10</b> (anywhere from <b>0.08 to 0.13</b>) and keep <b>On target? yes</b>. Feedback quietly absorbs weight it was never told about - like your legs steadying a heavier backpack.</span><div class="m-hint" hidden>Stuck? Park at any height, drag Added load to about 0.10, and just wait a moment - feedback pulls On target? back to yes on its own.</div></div>
+      <div class="m-item" data-m="limit"><span class="m-st">○</span><span>Now find the edge: push <b>Added load past 0.25</b>. The carriage settles low and <b>On target?</b> flips to <b>no</b>. The leftover error is about <b>load ÷ kP</b>, and kP can only hide so much - worth seeing once for yourself.</span><div class="m-hint" hidden>Stuck? Drag Added load past 0.25 and let the carriage settle. It parks a little low and On target? flips to no - that is the leftover error kP cannot hide.</div></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> find the ceiling. Get <b>Added load to 0.16 or more</b> while <b>On target?</b> stays <b>yes</b>. Past about <b>0.20</b> it is impossible, so creep up on it slowly and notice exactly where the loop gives out.</span><div class="m-hint" hidden>Stuck? Nudge Added load up to exactly 0.16 one small step at a time, pausing after each so the loop settles back to yes. Past about 0.20 it is impossible, so sneak up slowly.</div></div>
     </div>
   </section>
 
@@ -295,6 +315,10 @@
   </section>
 
   <section>
+    <div class="note teal robotcard">
+      <div class="nh">🤖 Now on your robot &middot; 10 minutes</div>
+      <p>Take your team's elevator - or borrow any mechanism with a motor and a gearbox - and walk it through the five steps in order, no skipping. Set the current limit, brake mode, and gear ratio; run SysId for kS, kG, kV, kA; add just enough kP to trim; pick a Motion Magic cruise and acceleration; then send it to every scoring height. Pass: it nails stow, L1, L2, and L3 five trips in a row, holds when you lean a hand on the carriage, and never buzzes. Log every gain in the <a href="worksheet.html#form" style="color:var(--teal)">tuning worksheet</a> as you go, so next season inherits your numbers instead of starting from scratch. No robot to borrow? Open the worksheet, type in the elevator's real mass and gearing, and read off the starting kG and kV it predicts - that is step 2 done on paper.</p>
+    </div>
     <div class="note teal">
       <div class="nh">Going further &middot; optional</div>
       <p>Step 5 says "validate," but a real elevator hides a trap the demo does not: it usually has two motors, a leader and a follower, bolted to the same carriage. If the follower is configured to spin the wrong direction it fights the leader instead of helping, and the giveaway is current, not motion. The carriage might still reach its target while both motors draw far more amps than they should, quietly cooking themselves. Something to ponder: which readout would catch a backwards follower first, position error or stator current, and why?</p>
@@ -360,6 +384,11 @@
         <div class="gl"><b>Step 4 · Motion Magic</b><span>Cruise velocity + acceleration.</span></div>
         <div class="gl"><b>Step 5 · Validate</b><span>Repeatable, loaded, no oscillation.</span></div>
         <div class="gl"><b>Order matters</b><span>Feedforward before feedback, always.</span></div>
+      </div>
+      <div class="cando-check" id="candoCheck"><span class="cc-h">Can you do these now? Tap each one you've got</span>
+        <div class="cc-row"><span class="cc-mark"></span><span>I can run the five tuning steps in order, without skipping ahead.</span></div>
+        <div class="cc-row"><span class="cc-mark"></span><span>I can explain why feedforward comes before feedback.</span></div>
+        <div class="cc-row"><span class="cc-mark"></span><span>I can tell when an elevator is truly validated.</span></div>
       </div>
       <a class="next" href="closing-the-loop-lesson-20-py.html">
         <div class="n-eyebrow">Up next · Part IV · 02</div>
@@ -502,6 +531,8 @@
   Object.keys(mItems).forEach(function(id){
     if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
   });
+  var mLastAct=0, mHintT={}, mAccPrev=Date.now();
+  (function(){ var d=document.getElementById('demo'); if(d){ d.addEventListener('pointerdown',function(){mLastAct=Date.now();},true); d.addEventListener('input',function(){mLastAct=Date.now();},true); } })();
   var mSeen={}, mHoldN=0, mLimitN=0, mGoldN=0;
   setInterval(function(){
     var mErr=S.tgt-S.y;
@@ -514,6 +545,8 @@
     if(mLimitN>=4) mClear('limit');
     if(S.load>=0.1599 && at && Math.abs(S.v)<0.01){ mGoldN++; } else { mGoldN=0; }
     if(mGoldN>=5) mClear('gold');
+    var _now=Date.now(), _dt=Math.min(0.5,(_now-mAccPrev)/1000); mAccPrev=_now;
+    if(_now-mLastAct<12000){ Object.keys(mItems).forEach(function(_k){ var _it=mItems[_k]; if(!_it||_it.classList.contains('cleared'))return; mHintT[_k]=(mHintT[_k]||0)+_dt; if(mHintT[_k]>=150){ var _h=_it.querySelector('.m-hint'); if(_h&&_h.hidden)_h.hidden=false; } }); }
   },200);
   }catch(e){}
 
@@ -613,6 +646,22 @@
     opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
     if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
 })();
+</script>
+<script>
+(function(){ try{
+  var box=document.getElementById('candoCheck'); if(!box) return;
+  var K='frc:cando', f=location.pathname.split('/').pop();
+  var st={}; try{ st=JSON.parse(localStorage.getItem(K))||{}; }catch(e){}
+  Array.prototype.forEach.call(box.querySelectorAll('.cc-row'),function(row,i){
+    var key=f+'#'+i, mark=row.querySelector('.cc-mark');
+    if(st[key]){ row.classList.add('checked'); if(mark)mark.textContent='✓'; }
+    row.addEventListener('click',function(){
+      var on=row.classList.toggle('checked');
+      if(mark)mark.textContent=on?'✓':'';
+      st[key]=on; try{ localStorage.setItem(K,JSON.stringify(st)); }catch(e){}
+    });
+  });
+}catch(e){} })();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>

@@ -62,6 +62,19 @@
   .missions .m-item.cleared{color:var(--text)}
   .missions .m-item.cleared .m-st{color:var(--green)}
   .missions .m-item.gold .m-st{color:var(--amber)}
+  .m-hint{margin:1px 0 7px 27px;font-size:13px;color:var(--amber);border-left:2px solid rgba(255,176,32,.45);padding:3px 0 3px 10px;font-style:italic;line-height:1.45}
+  .m-hint[hidden]{display:none}
+
+  .cando{border-left:3px solid var(--amber);background:rgba(255,176,32,.05);border-radius:0 10px 10px 0;padding:11px 16px;margin:16px 0 2px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);display:block;margin-bottom:6px}
+  .cando ul{margin:0;padding-left:18px;color:var(--muted);font-size:15px;line-height:1.5}
+  .cando li{margin:2px 0}
+  .cando-check{margin-top:16px;border-top:1px solid var(--line);padding-top:15px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);display:block;margin-bottom:8px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:center;padding:5px 0;min-height:30px;cursor:pointer;font-size:15px;color:var(--muted);transition:.12s}
+  .cando-check .cc-row .cc-box{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--line-2);display:inline-flex;align-items:center;justify-content:center;font-size:12px;line-height:1;color:transparent;transition:.12s}
+  .cando-check .cc-row.on{color:var(--text)}
+  .cando-check .cc-row.on .cc-box{border-color:var(--green);background:rgba(67,214,126,.16);color:var(--green)}
 
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
@@ -119,6 +132,11 @@
     <div class="eyebrow">Pneumatics</div>
     <h1>Power with<br><span class="accent">air</span>.</h1>
     <p class="dek">Not everything needs a motor. Compressed air gives you fast, strong, snap-action motion that holds its position with no current at all, perfect for on-off jobs like clamping a game piece or popping out a hook. It's a whole little system: compressor, tank, valve, cylinder.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+    <li>Put the air system in order: compressor, tank, solenoid valve, cylinder</li>
+    <li>Explain what pneumatics is best at - fast on-off jobs that hold with no current</li>
+    <li>Budget shots against tank pressure and know why to watch air during a match</li>
+    </ul></div>
   </div>
 
   <section>
@@ -160,9 +178,13 @@
     <div class="missions" id="missions">
       <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
       <div class="m-item" data-m="shot"><span class="m-st">○</span><span>Fill the tank to <b>full (120 psi)</b>, switch the compressor <b>off</b>, then fire <b>one shot</b>. Keep your eye on the tank readout - each full-force shot costs about <b>6 psi</b>, and now you have watched it happen.</span></div>
+      <div class="m-hint" data-for="shot" hidden>Press Run compressor until the tank reads full at 120 psi, press Stop compressor, then press Fire cylinder once - the tank drops about 6 psi.</div>
       <div class="m-item" data-m="crawl"><span class="m-st">○</span><span>Keep the compressor off and keep firing until the tank is nearly <b>empty</b>. Feel the change: the piston stops snapping out and only <b>crawls</b>. No stored air, no push - the tank is the muscle.</span></div>
+      <div class="m-hint" data-for="crawl" hidden>Leave the compressor off and keep pressing Fire cylinder until the tank reads near 0 psi - the piston stops snapping and only crawls out.</div>
       <div class="m-item" data-m="band"><span class="m-st">○</span><span>Match play time: get the tank into the <b>40 to 60 psi</b> band, then land <b>6 shots</b> without leaving it. Run the compressor in <b>short bursts</b> between shots to top back up. It is a juggle, and drive teams do it every match.</span></div>
+      <div class="m-hint" data-for="band" hidden>Bring the tank to between 40 and 60 psi, then fire 6 shots, tapping Run compressor in short bursts between shots so the pressure never leaves the band.</div>
       <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> each shot really costs about <b>6.5 psi</b>, so one full tank holds <b>12 shots</b> before dipping under <b>40 psi</b>. Prove the math to yourself: fill to full, compressor <b>off</b>, land all <b>12</b>, then stop firing while the tank still reads <b>40 or more</b>.</span></div>
+      <div class="m-hint" data-for="gold" hidden>Fill to full at 120 psi, leave the compressor off, and fire 12 shots in a row - then stop while the tank still reads 40 or more.</div>
     </div>
   </section>
 
@@ -252,6 +274,12 @@
         <div class="gl"><b>Cylinder</b><span>Air pushes the piston.</span></div>
         <div class="gl"><b>Best for on-off</b><span>Strong, snappy, holds free.</span></div>
         <div class="gl"><b>Limited supply</b><span>Watch pressure in a match.</span></div>
+      </div>
+      <div class="cando-check" id="candoCheck">
+        <span class="cc-h">You made it - tap each one you can do now</span>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Put the air system in order: compressor, tank, solenoid valve, cylinder</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Explain what pneumatics is best at - fast on-off jobs that hold with no current</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Budget shots against tank pressure and know why to watch air during a match</span></div>
       </div>
       <a class="next" href="build-lesson-41.html">
         <div class="n-eyebrow">Up next · Part 6 · 06</div>
@@ -372,6 +400,23 @@
     if(mGoldOn && mShot){ mGoldShots++; mGoldHold=0; }
     if(mGoldOn && mGoldShots>=12){ mGoldHold+=0.1; if(mGoldHold>=2) mClear('gold'); }
   },100);
+
+  // stuck-hints: after ~150s of active fiddling on an uncleared mission, surface one nudge
+  var mHintEls={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-hint'),function(h){ mHintEls[h.getAttribute('data-for')]=h; });
+  var mHacc={}, mLastAct=0, mHdemo=document.getElementById('demo');
+  function mHbump(){ mLastAct=Date.now(); }
+  if(mHdemo){ ['pointerdown','input','click'].forEach(function(ev){ mHdemo.addEventListener(ev,mHbump,true); }); }
+  window.addEventListener('keydown',mHbump,true);
+  setInterval(function(){
+    if(!mLastAct || Date.now()-mLastAct>5000) return;
+    Object.keys(mHintEls).forEach(function(id){
+      var it=mItems[id], h=mHintEls[id];
+      if(!it||!h||it.classList.contains('cleared')||!h.hasAttribute('hidden')) return;
+      mHacc[id]=(mHacc[id]||0)+0.2;
+      if(mHacc[id]>=150) h.removeAttribute('hidden');
+    });
+  },200);
   }catch(e){}
 
   requestAnimationFrame(tick);
@@ -431,6 +476,22 @@
     opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
     if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
 })();
+</script>
+<script>
+(function(){ try{
+  var KEY='frc:cando', file=location.pathname.split('/').pop(), box={};
+  try{ box=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+  var rows=document.querySelectorAll('#candoCheck .cc-row');
+  Array.prototype.forEach.call(rows,function(row,i){
+    var k=file+'#'+i;
+    if(box[k]) row.classList.add('on');
+    row.addEventListener('click',function(){
+      var on=!row.classList.contains('on');
+      row.classList.toggle('on',on);
+      box[k]=on; try{ localStorage.setItem(KEY,JSON.stringify(box)); }catch(e){}
+    });
+  });
+}catch(e){} })();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>

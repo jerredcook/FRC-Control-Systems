@@ -169,6 +169,21 @@
   .hunt-feed{margin-top:10px;font-size:14px;color:var(--muted);border-left:2px solid var(--red);padding:2px 0 2px 12px;display:none}
   .hunt-feed.show{display:block}
   .hunt-feed.ok{border-color:var(--green)}
+
+  /* ---- can-do goals + stuck-hint (additions) ---- */
+  .cando{border-left:3px solid var(--indigo);background:rgba(138,140,248,.07);border-radius:0 10px 10px 0;padding:12px 16px;margin:18px 0 2px;max-width:52ch}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);display:block;margin-bottom:7px}
+  .cando ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px}
+  .cando li{color:var(--muted);font-size:15px;line-height:1.5}
+  .cando li b{color:var(--text)}
+  .cando-check{margin-top:18px;border-top:1px solid var(--line);padding-top:15px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:flex-start;width:100%;text-align:left;background:none;border:none;color:var(--muted);font-family:var(--sans);font-size:15px;line-height:1.45;padding:5px 4px;min-height:30px;cursor:pointer;border-radius:8px;transition:.12s}
+  .cando-check .cc-row:hover{background:var(--panel-2)}
+  .cando-check .cc-row .cc-mark{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--line-2);color:transparent;font-size:12px;display:flex;align-items:center;justify-content:center;margin-top:1px;transition:.12s}
+  .cando-check .cc-row.on{color:var(--text)}
+  .cando-check .cc-row.on .cc-mark{background:var(--green);border-color:var(--green);color:#0a0f24}
+  .missions .m-hint{margin:-1px 0 6px 26px;font-size:13px;line-height:1.5;color:var(--amber);border-left:2px solid rgba(255,176,32,.5);padding:3px 0 3px 11px}
 </style>
 </head>
 <body>
@@ -187,6 +202,11 @@
     <div class="eyebrow">Docs &amp; Vendordeps</div>
     <h1>Add libraries,<br>never get <span class="accent">stuck</span>.</h1>
     <p class="dek">WPILib covers the basics, but your motors come from vendors. A vendordep pulls in their library - and the docs are how you answer your own questions.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Add a vendor library like <b>Phoenix 6</b> with Manage Vendor Libraries.</li>
+      <li>Pick the <b>smallest set of vendordeps</b> a robot actually needs.</li>
+      <li>Find an answer in the <b>docs</b> instead of guessing method names.</li>
+    </ul></div>
   </div>
 
   <section>
@@ -364,6 +384,12 @@
         <div class="gl"><b>The docs</b><span>WPILib / CTRE / REV / Chief Delphi.</span></div>
         <div class="gl"><b>The skill</b><span>Finding answers, not memorizing.</span></div>
       </div>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Can you do these now? Tap each one you have got.</div>
+        <button type="button" class="cc-row"><span class="cc-mark">✓</span><span>Add a vendordep with Manage Vendor Libraries.</span></button>
+        <button type="button" class="cc-row"><span class="cc-mark">✓</span><span>Pick the smallest set of vendordeps a robot needs.</span></button>
+        <button type="button" class="cc-row"><span class="cc-mark">✓</span><span>Find an answer in the docs instead of guessing.</span></button>
+      </div>
       <a class="next" href="code.html">
         <div class="n-eyebrow">Part 1 complete · The Toolchain</div>
         <h3>On to Part 2 - Just-Enough Java →</h3>
@@ -434,6 +460,30 @@
   Object.keys(mItems).forEach(function(id){
     if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
   });
+  // ---- stuck hints: sustained active effort on an uncleared mission reveals one nudge (addition) ----
+  try{
+    var mHints={
+      unlock:"For the unlock mission: click the CTRE Phoenix 6 card so it turns on - TalonFX appears under Now you can import.",
+      kraken:"For the Kraken mission: turn on exactly CTRE Phoenix 6, Studica navX, and PathPlannerLib, and turn every other card off. REVLib stays off - Krakens are CTRE.",
+      neo:"For the NEO mission: this robot needs only REV REVLib and PhotonLib. Turn those two on and drop PathPlanner and every CTRE card - the autos are hand-written.",
+      gold:"For the gold: Falcon drive and the Pigeon 2 both live in CTRE Phoenix 6 (read its fine print), and AprilTags need PhotonLib - so turn on exactly those two cards, nothing else."
+    };
+    var mHintEls={};
+    Object.keys(mItems).forEach(function(id){
+      if(!mHints[id]) return; var n=mItems[id]; if(!n||!n.parentNode) return;
+      var h=document.createElement('div'); h.className='m-hint'; h.hidden=true; h.textContent=mHints[id];
+      n.parentNode.insertBefore(h,n.nextSibling); mHintEls[id]=h;
+    });
+    var H_MS=150000, hAct=0, hLast=0, hDemo=document.getElementById('demo');
+    var hTouch=function(){ hLast=Date.now(); };
+    if(hDemo){ hDemo.addEventListener('pointerdown',hTouch,true); hDemo.addEventListener('input',hTouch,true); hDemo.addEventListener('keydown',hTouch,true); }
+    setInterval(function(){ try{
+      if(hLast&&(Date.now()-hLast)<4000) hAct+=1000;
+      if(hAct>=H_MS){ Object.keys(mHintEls).forEach(function(id){
+        var n=mItems[id]; mHintEls[id].hidden=!!(n&&n.classList.contains('cleared'));
+      }); }
+    }catch(e){} },1000);
+  }catch(e){}
   var mAll=['phoenix','rev','pathplanner','photon','navx'];
   var mGoals={kraken:['phoenix','navx','pathplanner'],neo:['rev','photon'],gold:['phoenix','photon']};
   var mHold={kraken:0,neo:0,gold:0};
@@ -511,6 +561,31 @@
   Object.keys(mItems).forEach(function(id){
     if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
   });
+
+  // ---- stuck hints: sustained active effort on an uncleared mission reveals one nudge (addition) ----
+  try{
+    var mHints={
+      vlib:"For the install mission: work the four screens in order - the WPILib W, Manage Vendor Libraries, Install new libraries (online), then paste the maven .json URL - to reach the green Installed panel.",
+      vgold:"For the gold: press Run it again, then pick the right option on all four screens with no wrong clicks - the W logo, Manage Vendor Libraries, Install new (online), and the maven Phoenix6 .json.",
+      hunt:"For the scavenger hunt: click the dashed-underlined answer inside each excerpt - TalonFX for the Kraken, set for half speed, Tuner X for flashing firmware. Find all three.",
+      hgold:"For the gold: reload the page for a clean run, then click only the right answer in each excerpt - TalonFX, set, Tuner X - with no wrong guesses."
+    };
+    var mHintEls={};
+    Object.keys(mItems).forEach(function(id){
+      if(!mHints[id]) return; var n=mItems[id]; if(!n||!n.parentNode) return;
+      var h=document.createElement('div'); h.className='m-hint'; h.hidden=true; h.textContent=mHints[id];
+      n.parentNode.insertBefore(h,n.nextSibling); mHintEls[id]=h;
+    });
+    var H_MS=150000, hAct=0, hLast=0;
+    var hTouch=function(){ hLast=Date.now(); };
+    ['ckdemo','huntdemo'].forEach(function(idv){ var d=document.getElementById(idv); if(d){ d.addEventListener('pointerdown',hTouch,true); d.addEventListener('input',hTouch,true); d.addEventListener('keydown',hTouch,true); } });
+    setInterval(function(){ try{
+      if(hLast&&(Date.now()-hLast)<4000) hAct+=1000;
+      if(hAct>=H_MS){ Object.keys(mHintEls).forEach(function(id){
+        var n=mItems[id]; mHintEls[id].hidden=!!(n&&n.classList.contains('cleared'));
+      }); }
+    }catch(e){} },1000);
+  }catch(e){}
 
   // ---- part a: the Manage Vendor Libraries click path ----
   try{
@@ -619,6 +694,24 @@
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  try{
+    var KEY="frc:cando", page=location.pathname.split("/").pop();
+    var wrap=document.getElementById("candoCheck"); if(!wrap) return;
+    var rows=wrap.querySelectorAll(".cc-row");
+    var saved={}; try{ saved=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+    Array.prototype.forEach.call(rows,function(r,i){
+      var k=page+"#"+i;
+      if(saved[k]) r.classList.add("on");
+      r.addEventListener("click",function(){
+        var on=!r.classList.contains("on"); r.classList.toggle("on",on);
+        try{ var m=JSON.parse(localStorage.getItem(KEY))||{}; if(on) m[k]=true; else delete m[k]; localStorage.setItem(KEY,JSON.stringify(m)); }catch(e){}
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

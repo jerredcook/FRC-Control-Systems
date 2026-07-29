@@ -65,7 +65,19 @@
   .missions .m-item.cleared{color:var(--text)}
   .missions .m-item.cleared .m-st{color:var(--green)}
   .missions .m-item.gold .m-st{color:var(--amber)}
+  .missions .m-item{flex-wrap:wrap}
+  .missions .m-hint{flex-basis:100%;margin:4px 0 0 24px;font-size:13px;color:var(--muted);border-left:2px solid var(--amber);padding:2px 0 2px 10px;font-style:italic;line-height:1.5}
 
+  .cando{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:12px 16px;margin:18px 0 2px}
+  .cando .cd-h{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:7px}
+  .cando ul{margin:0;padding-left:18px;color:var(--muted);font-size:15px;line-height:1.5}
+  .cando li{margin:3px 0}
+  .cando-check{margin-top:16px;border:1px solid var(--line-2);border-left:3px solid var(--amber);border-radius:12px;background:var(--panel);padding:12px 16px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:4px}
+  .cando-check .cc-row{display:flex;gap:10px;align-items:center;font-size:15px;color:var(--muted);padding:6px 2px;min-height:30px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .cando-check .cc-row .cc-box{flex:0 0 auto;width:19px;height:19px;border-radius:50%;border:2px solid var(--faint);color:transparent;font-size:12px;line-height:16px;text-align:center;transition:.12s}
+  .cando-check .cc-row.checked{color:var(--text)}
+  .cando-check .cc-row.checked .cc-box{border-color:var(--green);background:rgba(67,214,126,.15);color:var(--green)}
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
   .note p{margin:0;color:var(--text);font-size:16px}
@@ -121,6 +133,11 @@
     <div class="eyebrow">The Frame / Chassis</div>
     <h1>The box it all<br>bolts <span class="accent">to</span>.</h1>
     <p class="dek">The frame is the foundation every mechanism mounts to. It has to be rigid, the right size, and stable. The big trap is height: pile a heavy mechanism up high and the robot tips over the first time it stops fast.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Explain what tips a robot - its center of mass swinging past a wheel during a hard start or stop.</li>
+      <li>Name the two geometry fixes that keep a robot planted: a low center of mass and a wide wheelbase.</li>
+      <li>Judge where to mount heavy parts like the battery to drop the center of mass.</li>
+    </ul></div>
   </div>
 
   <section>
@@ -157,10 +174,10 @@
     <p class="caption">The amber dot is the center of mass; the red arrow is the inertia from accelerating or stopping. When that combined pull leans past the front wheel, over it goes. A tall, narrow robot tips with a gentle nudge; a low, wide one shrugs it off.</p>
     <div class="missions" id="missions">
       <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
-      <div class="m-item" data-m="wobble"><span class="m-st">○</span><span>Keep the wheelbase at <b>50%</b> and the stop at its starting <b>0.4 g</b> (1 g means slowing as hard as gravity pulls, like grabbing both bike brakes). Raise only the <b>CoM height</b> until the readout says <b>wobbling</b> - you are watching a robot turn top-heavy one notch at a time.</span></div>
-      <div class="m-item" data-m="edge"><span class="m-st">○</span><span>Slide CoM height to <b>100%</b>, wheelbase still at <b>50%</b>. Push the stop until it says <b>TIPPING</b>, then ease back to the biggest stop the tall robot survives and hold it. That number is its tipping threshold - every robot has one, and now you know how to find it.</span></div>
-      <div class="m-item" data-m="rescue"><span class="m-st">○</span><span>Keep CoM height at <b>100%</b> and set the stop to <b>0.8 g</b>, then save the tall robot by moving only the <b>wheelbase</b> slider. Wobbling counts - it is still on its wheels, and you just rescued a top-heavy design with geometry alone.</span></div>
-      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> survive the full <b>1.2 g</b> panic stop with CoM height still at <b>60% or higher</b>. The window is tiny, but it is there - patient sliding will find it.</span></div>
+      <div class="m-item" data-m="wobble"><span class="m-st">○</span><span>Keep the wheelbase at <b>50%</b> and the stop at its starting <b>0.4 g</b> (1 g means slowing as hard as gravity pulls, like grabbing both bike brakes). Raise only the <b>CoM height</b> until the readout says <b>wobbling</b> - you are watching a robot turn top-heavy one notch at a time.</span><div class="m-hint" hidden>For the wobble mission: leave Wheelbase at 50% and the stop at 0.4 g, then slide CoM height up near the top (about 98 to 100%) until the readout reads wobbling.</div></div>
+      <div class="m-item" data-m="edge"><span class="m-st">○</span><span>Slide CoM height to <b>100%</b>, wheelbase still at <b>50%</b>. Push the stop until it says <b>TIPPING</b>, then ease back to the biggest stop the tall robot survives and hold it. That number is its tipping threshold - every robot has one, and now you know how to find it.</span><div class="m-hint" hidden>For the edge mission: with CoM height 100% and Wheelbase 50%, push the stop past 0.56 g to make it TIP, then ease back to about 0.55 g - the most this tall robot survives.</div></div>
+      <div class="m-item" data-m="rescue"><span class="m-st">○</span><span>Keep CoM height at <b>100%</b> and set the stop to <b>0.8 g</b>, then save the tall robot by moving only the <b>wheelbase</b> slider. Wobbling counts - it is still on its wheels, and you just rescued a top-heavy design with geometry alone.</span><div class="m-hint" hidden>For the rescue mission: keep CoM height 100% and the stop at 0.8 g, then widen the Wheelbase slider up near the top (about 96 to 100%) until the robot rides it out.</div></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> survive the full <b>1.2 g</b> panic stop with CoM height still at <b>60% or higher</b>. The window is tiny, but it is there - patient sliding will find it.</span><div class="m-hint" hidden>Gold: push the stop to the full 1.2 g, set Wheelbase to 100%, and hold CoM height right at 60% - the survival window is tiny but real.</div></div>
     </div>
   </section>
 
@@ -251,6 +268,12 @@
         <div class="gl"><b>Low CoM</b><span>Heavy parts down low.</span></div>
         <div class="gl"><b>Wide base</b><span>Bigger footprint, more stable.</span></div>
         <div class="gl"><b>Frame perimeter</b><span>Footprint the rules limit.</span></div>
+      </div>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Can you do these now? Tap each one you've got.</div>
+        <div class="cc-row"><span class="cc-box"></span><span>Explain what tips a robot - its center of mass swinging past a wheel during a hard start or stop.</span></div>
+        <div class="cc-row"><span class="cc-box"></span><span>Name the two geometry fixes that keep a robot planted: a low center of mass and a wide wheelbase.</span></div>
+        <div class="cc-row"><span class="cc-box"></span><span>Judge where to mount heavy parts like the battery to drop the center of mass.</span></div>
       </div>
       <a class="next" href="build-lesson-23.html">
         <div class="n-eyebrow">Up next · Part 5 · 02</div>
@@ -356,6 +379,22 @@
     if(aPct===120 && hPct>=60 && ag<margin){ mGoldHold+=0.2; } else { mGoldHold=0; }
     if(mGoldHold>=1) mClear('gold');
   },200);
+
+  // ---- stuck-hints: after ~150s of active fiddling on an uncleared mission, surface one nudge ----
+  var mDemo=document.getElementById('demo'), mLastAct=0;
+  function mPoke(){ mLastAct=Date.now(); }
+  if(mDemo){ mDemo.addEventListener('pointerdown',mPoke,true); mDemo.addEventListener('input',mPoke,true); }
+  window.addEventListener('keydown',mPoke,true);
+  var mStuck={};
+  Object.keys(mItems).forEach(function(id){ mStuck[id]=0; });
+  setInterval(function(){
+    if(Date.now()-mLastAct>4000) return;
+    Object.keys(mItems).forEach(function(id){
+      var n=mItems[id]; if(!n||n.classList.contains('cleared')) return;
+      mStuck[id]+=0.2;
+      if(mStuck[id]>=150){ var h=n.querySelector('.m-hint'); if(h) h.hidden=false; }
+    });
+  },200);
   }catch(e){}
 
   document.querySelectorAll('#quiz .q').forEach(function(q){
@@ -412,6 +451,27 @@
   opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(revealed)return; picked=i;
     opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
     if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
+})();
+</script>
+<script>
+(function(){
+  try{
+    var KEY='frc:cando', file=location.pathname.split('/').pop();
+    var box=document.getElementById('candoCheck'); if(!box) return;
+    var saved={}; try{ saved=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+    var rows=box.querySelectorAll('.cc-row');
+    Array.prototype.forEach.call(rows,function(row,i){
+      var key=file+'#'+i, bx=row.querySelector('.cc-box');
+      if(saved[key]){ row.classList.add('checked'); if(bx) bx.textContent='✓'; }
+      row.addEventListener('click',function(){
+        var on=!row.classList.contains('checked');
+        row.classList.toggle('checked',on);
+        if(bx) bx.textContent=on?'✓':'';
+        if(on){ saved[key]=true; } else { delete saved[key]; }
+        try{ localStorage.setItem(KEY,JSON.stringify(saved)); }catch(e){}
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

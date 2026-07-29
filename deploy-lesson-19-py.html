@@ -70,6 +70,18 @@
   pre.code{font-family:var(--mono);font-size:13px;line-height:1.85;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
   .code .cm{color:var(--faint);font-style:italic} .code .kw{color:#ff9bbf} .code .ty{color:var(--teal)} .code .fn{color:var(--indigo)} .code .num{color:var(--amber)}
 
+  .cando{margin:18px 0 4px;border-left:3px solid var(--indigo);background:rgba(138,140,248,.06);border-radius:0 10px 10px 0;padding:12px 16px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);display:block;margin-bottom:8px}
+  .cando ul{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+  .cando li{position:relative;padding-left:19px;font-size:15px;color:var(--muted);line-height:1.5}
+  .cando li::before{content:"\2192";position:absolute;left:0;color:var(--indigo);font-family:var(--mono)}
+  .cando-check{margin:18px 0 0;border-top:1px solid var(--line);padding-top:16px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:flex-start;min-height:28px;padding:5px 2px;cursor:pointer;font-size:15px;color:var(--muted);line-height:1.45;-webkit-tap-highlight-color:transparent}
+  .cando-check .cc-row .cc-box{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--line-2);color:transparent;display:grid;place-items:center;font-size:12px;margin-top:1px;transition:.12s}
+  .cando-check .cc-row.on{color:var(--text)}
+  .cando-check .cc-row.on .cc-box{border-color:var(--green);background:rgba(67,214,126,.16);color:var(--green)}
+  .missions .m-hint{margin:-1px 0 6px 24px;font-size:13px;color:var(--faint);border-left:2px solid var(--indigo);padding:3px 0 3px 11px;line-height:1.5}
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
   .note p{margin:0;color:var(--text);font-size:16px}
@@ -145,6 +157,11 @@
     <div class="eyebrow">Gyros &amp; the IMU</div>
     <h1>Which way is<br><span class="accent">forward</span>?</h1>
     <p class="dek">A gyro gives the robot a sense of direction, the heading. It is the one number that lets "push the stick away from you" always mean "go down-field," no matter which way the robot is spun.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Pull the robot's heading out of a Pigeon 2 or navX in code, as degrees with get_yaw() or a Rotation2d with get_rotation2d().</li>
+      <li>Say why continuous yaw keeps climbing past 360 while the wrapped reading folds back into -180 to 180.</li>
+      <li>Zero the gyro with set_yaw(0) at the start of a match so "push the stick away" always means down-field.</li>
+    </ul></div>
   </div>
 
   <section>
@@ -183,9 +200,13 @@
     <div class="missions" id="missions">
       <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
       <div class="m-item" data-m="snap"><span class="m-st">○</span><span>Start easy: hold <b>⟲</b> and watch the wrapped readout as you pass <b>+180</b>. Did you catch it? It snaps straight to <b>-180</b> while continuous keeps climbing like nothing happened.</span></div>
+      <div class="m-hint" data-for="snap" hidden>Stuck? Hold ⟲ and keep turning right past +180 without letting go. Watch only the wrapped readout and you will catch it flip to -180 while continuous climbs on.</div>
       <div class="m-item" data-m="wrap450"><span class="m-st">○</span><span>Park continuous at about <b>+450</b> (within 10) and let go. Make your prediction for wrapped before you peek. It reads <b>+90</b>: one full turn, plus 90. Called it? Nice.</span></div>
+      <div class="m-hint" data-for="wrap450" hidden>Stuck? Hold ⟲ for one full lap and a bit more, then let go with the continuous readout between about 440 and 460 - releasing the button is what lets it register.</div>
       <div class="m-item" data-m="rezero"><span class="m-st">○</span><span>Turn until wrapped reads at least <b>45</b> either way, then press <b>Zero gyro</b> and watch. That is <b>set_yaw(0)</b> at work: the heading you chose just became the new zero, the new down-field.</span></div>
+      <div class="m-hint" data-for="rezero" hidden>Stuck? Turn until the wrapped readout passes 45 either way, then press Zero gyro - that snapshots the heading you chose and makes it the new zero.</div>
       <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> a steady-hand challenge. Park continuous within <b>6</b> of <b>+720</b>. Wrapped sits near <b>0</b> and full turns reads about <b>2.00</b>: the nose is back where it started, but the gyro quietly remembers both laps.</span></div>
+      <div class="m-hint" data-for="gold" hidden>Stuck? This is two full laps. Ease up until the continuous readout nears 720, then release - anything within 6 of 720 counts, so let go gently over the last few degrees.</div>
     </div>
   </section>
 
@@ -325,6 +346,12 @@ heading = gyro.<input class="blank" data-ans="get_rotation2d" data-reveal="get_r
         <div class="gl"><b>set_yaw(0)</b><span>Defines down-field as zero.</span></div>
         <div class="gl"><b>Field-relative</b><span>Forward stays down-field.</span></div>
       </div>
+      <div class="cando-check" id="candoCheck">
+        <span class="cc-h">Can you do these now? Tap each one you have got.</span>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Read the heading in code with get_yaw() for degrees or get_rotation2d() for kinematics.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Explain why continuous yaw climbs past 360 while wrapped folds back to -180..180.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Zero the gyro with set_yaw(0) so "push away" always means down-field.</span></div>
+      </div>
       <a class="next" href="deploy-lesson-20-py.html">
         <div class="n-eyebrow">Up next · Part 4 · 04</div>
         <h3>Switches &amp; Digital Sensors</h3>
@@ -416,6 +443,10 @@ heading = gyro.<input class="blank" data-ans="get_rotation2d" data-reveal="get_r
   Object.keys(mItems).forEach(function(id){
     if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
   });
+  // stuck hints: after ~150s of active fiddling on an uncleared mission, reveal its hint line
+  var stuckSecs={}, HINT_AT=150, lastAct=0;
+  try{ var mDemo=document.getElementById('demo'); if(mDemo){ ['pointerdown','pointermove','input','keydown'].forEach(function(ev){ mDemo.addEventListener(ev,function(){ lastAct=Date.now(); },true); }); } }catch(e){}
+  function stuckTick(tick){ var actNow=(Date.now()-lastAct)<1500; Object.keys(mItems).forEach(function(id){ var n=mItems[id]; if(!n) return; var h=document.querySelector('#missions .m-hint[data-for="'+id+'"]'); if(n.classList.contains('cleared')){ if(h&&!h.hidden) h.hidden=true; return; } if(actNow){ stuckSecs[id]=(stuckSecs[id]||0)+tick; if(stuckSecs[id]>=HINT_AT && h) h.hidden=false; } }); }
   var mPrevW=wrapped(), mLastYaw=yaw, mZeroSnap=null, mZeroBtn=document.getElementById('zero');
   mZeroBtn.addEventListener('pointerdown',function(){ mZeroSnap=yaw; });
   mZeroBtn.addEventListener('click',function(){
@@ -432,6 +463,7 @@ heading = gyro.<input class="blank" data-ans="get_rotation2d" data-reveal="get_r
       if(Math.abs(yaw-720)<=6) mClear('gold');
     }
     mLastYaw=yaw;
+    stuckTick(0.1);
   },100);
   }catch(e){}
 
@@ -537,6 +569,21 @@ try{
     });
   }catch(e){}
 })();
+</script>
+<script>
+(function(){try{
+  var K='frc:cando', f=location.pathname.split('/').pop(), map={};
+  try{ map=JSON.parse(localStorage.getItem(K))||{}; }catch(e){}
+  var rows=document.querySelectorAll('#candoCheck .cc-row');
+  Array.prototype.forEach.call(rows,function(r,i){
+    var key=f+'#'+i;
+    if(map[key]) r.classList.add('on');
+    r.addEventListener('click',function(){
+      var on=r.classList.toggle('on'); map[key]=on;
+      try{ localStorage.setItem(K,JSON.stringify(map)); }catch(e){}
+    });
+  });
+}catch(e){}})();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>

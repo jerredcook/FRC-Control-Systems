@@ -61,6 +61,29 @@
   .btn.primary{background:linear-gradient(180deg,#ffb37e,var(--indigo));color:#2a1503;font-weight:700;border:none}
   .score{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--indigo)}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--amber);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+  .missions .m-hint{margin:2px 0 6px 26px;font-size:13px;color:var(--muted);font-style:italic;line-height:1.5;border-left:2px solid var(--amber);padding-left:10px}
+  .missions .m-hint b{color:var(--text);font-style:normal}
+  .cando{border-left:3px solid var(--indigo);background:rgba(255,138,76,.06);border-radius:0 10px 10px 0;padding:11px 15px;margin:16px 0 2px}
+  .cando .cd-h{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:6px}
+  .cando ul{margin:0;padding:0;list-style:none}
+  .cando li{position:relative;font-size:15px;color:var(--muted);padding:3px 0 3px 20px;line-height:1.45}
+  .cando li::before{content:"→";position:absolute;left:0;color:var(--indigo)}
+  .cando-check{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:6px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:flex-start;min-height:28px;padding:5px 0;cursor:pointer;font-size:15px;color:var(--muted);transition:.12s}
+  .cando-check .cc-row:hover{color:var(--text)}
+  .cando-check .cc-box{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--line-2);display:grid;place-items:center;font-size:12px;color:transparent;margin-top:1px;transition:.12s}
+  .cando-check .cc-row.on .cc-box{border-color:var(--green);background:var(--green);color:#06210f}
+  .cando-check .cc-row.on{color:var(--text)}
 
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
@@ -117,6 +140,13 @@
     <div class="eyebrow">Hand Tools</div>
     <h1>The right tool<br>for the <span class="accent">job</span>.</h1>
     <p class="dek">Most of building a robot is a handful of simple hand tools used well. Knowing which one to reach for, and using it the right way, is half the battle. Forcing the wrong tool rounds off bolts and bloodies knuckles.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span>
+      <ul>
+        <li>Reach for the right hand tool for a job - hex key, ratchet, hacksaw, or file.</li>
+        <li>Match a driver to a fastener so it seats snug instead of stripping the head.</li>
+        <li>Deburr a fresh cut so the edge is smooth and won't slice a hand.</li>
+      </ul>
+    </div>
   </div>
 
   <section>
@@ -134,6 +164,15 @@
       </div>
     </div>
     <p class="caption">There's usually one obviously-right answer and a few that sort of work. Reach for the right one and the job is quick, clean, and doesn't chew up your hardware.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this matcher - take them at your own pace</span></div>
+      <div class="m-item" data-m="three"><span class="m-st">○</span><span>Work through the jobs and get <b>3 of them right</b>. Reading the job, then reaching for the one obviously-right tool, is the whole skill in miniature.</span></div>
+      <div class="m-hint" data-h="three" hidden>Slow down and read what each job actually needs: a socket-head screw wants a hex key, a fresh cut edge wants a file, a measurement wants the tape. Pick the obvious tool and the count climbs.</div>
+      <div class="m-item" data-m="run"><span class="m-st">○</span><span>Finish a <b>full pass</b> - answer all <b>5 jobs</b> in one run. Even the ones you miss teach you something, so see it through to the end.</span></div>
+      <div class="m-hint" data-h="run" hidden>You do not have to be right, just keep pressing Next and answer every job through to Job 5 of 5. A miss still counts as answered.</div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> a flawless pass - <b>5 out of 5</b>, no misses. Press Restart and try it clean now that you know the kit.</span></div>
+      <div class="m-hint" data-h="gold" hidden>Press Restart for a fresh slate, then take each job slowly: hex key for socket-head screws, ratchet for a hex-head bolt with a nut, hacksaw to cut tube, file to deburr, tape to measure and mark.</div>
+    </div>
   </section>
 
   <section>
@@ -215,6 +254,12 @@
         <div class="gl"><b>Match the size</b><span>Wrong size strips the head.</span></div>
         <div class="gl"><b>Measure first</b><span>Mark before you cut.</span></div>
       </div>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Can you do these now?</div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Reach for the right hand tool for a job - hex key, ratchet, hacksaw, or file.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Match a driver to a fastener so it seats snug instead of stripping the head.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Deburr a fresh cut so the edge is smooth and won't slice a hand.</span></div>
+      </div>
       <a class="next" href="build-lesson-3.html">
         <div class="n-eyebrow">Up next · Part 1 · 03</div>
         <h3>Power Tools</h3>
@@ -285,6 +330,44 @@
   });
   showTask();
 
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  // stuck-hint timing: after ~150s of active fiddling on a still-open mission, reveal one nudge
+  var mHintT={}, mLastAct=Date.now(), mDemoEl=document.getElementById('demo');
+  if(mDemoEl){ ['pointerdown','input','click'].forEach(function(ev){ mDemoEl.addEventListener(ev,function(){ mLastAct=Date.now(); },true); }); }
+  function mStuck(){
+    var active=(Date.now()-mLastAct)<5000;
+    Object.keys(mItems).forEach(function(id){
+      var n=mItems[id]; if(!n||n.classList.contains('cleared')) return;
+      if(active) mHintT[id]=(mHintT[id]||0)+0.2;
+      if((mHintT[id]||0)>=150){ var h=document.querySelector('#missions .m-hint[data-h="'+id+'"]'); if(h) h.hidden=false; }
+    });
+  }
+  setInterval(function(){
+    if(score>=3) mClear('three');
+    if(total>=5) mClear('run');
+    if(score>=5) mClear('gold');
+    mStuck();
+  },200);
+  }catch(e){}
+
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
@@ -299,6 +382,26 @@
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  try{
+    var wrap=document.getElementById('candoCheck'); if(!wrap) return;
+    var KEY='frc:cando', file=location.pathname.split('/').pop();
+    var saved={}; try{ saved=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+    var rows=wrap.querySelectorAll('.cc-row');
+    Array.prototype.forEach.call(rows,function(row,i){
+      var k=file+'#'+i;
+      if(saved[k]) row.classList.add('on');
+      row.addEventListener('click',function(){
+        var on=!row.classList.contains('on');
+        row.classList.toggle('on',on);
+        if(on){ saved[k]=1; } else { delete saved[k]; }
+        try{ localStorage.setItem(KEY,JSON.stringify(saved)); }catch(e){}
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

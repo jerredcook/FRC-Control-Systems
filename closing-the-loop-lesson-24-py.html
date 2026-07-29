@@ -176,6 +176,21 @@
   .coursenav a.next-link{color:var(--teal);border-color:rgba(52,215,197,.4)}
 
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  /* can-do goals + tap-to-check mirror (added) */
+  .cando{border-left:3px solid var(--teal);background:rgba(52,215,197,.06);border-radius:0 10px 10px 0;padding:12px 16px;margin:18px 0 0}
+  .cando .cd-h{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:7px}
+  .cando ul{margin:0;padding-left:20px}
+  .cando li{color:var(--muted);font-size:15px;margin:4px 0;line-height:1.5}
+  .cando-check{margin-top:16px;border-left:3px solid var(--teal);background:rgba(52,215,197,.05);border-radius:0 10px 10px 0;padding:6px 14px 10px}
+  .cando-check .cc-h{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin:8px 0 4px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:center;min-height:30px;padding:5px 2px;cursor:pointer;font-size:15px;color:var(--muted)}
+  .cando-check .cc-row .cc-mark{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--line-2);display:flex;align-items:center;justify-content:center;font-size:12px;line-height:1;color:var(--green)}
+  .cando-check .cc-row.checked{color:var(--text)}
+  .cando-check .cc-row.checked .cc-mark{border-color:var(--green);background:rgba(67,214,126,.14)}
+  /* stuck-hints (added) */
+  .m-hint{font-size:13px;color:var(--teal);border-left:2px solid var(--line-2);padding:3px 0 3px 11px;font-style:italic;margin-top:8px}
+  .missions .m-item{flex-wrap:wrap}
+  .missions .m-item .m-hint{flex-basis:100%;margin:6px 0 0 26px}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -196,6 +211,11 @@
     <div class="eyebrow">State-Space &amp; LQR</div>
     <h1>PID's smarter<br><span class="accent">sibling</span>.</h1>
     <p class="dek">The math the whole course kept promising. It's less scary than it sounds - and it turns out you've been doing a simple version of it the entire time.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Describe a mechanism by its state - for an elevator, just position and velocity - and write its controller as u = K(reference - x).</li>
+      <li>Recognize that state feedback on position and velocity is exactly PD control: k1 is your kP, k2 is your kD.</li>
+      <li>Explain what LQR does - from Q (how much error costs) and R (how much effort costs), it solves for the whole optimal gain set at once.</li>
+    </ul></div>
   </div>
 
   <section>
@@ -262,10 +282,10 @@
     <p class="caption">One knob, both gains. LQR derives k₁ and k₂ together from a single choice: how much you value tight tracking versus gentle effort.</p>
     <div class="missions" id="missions">
       <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
-      <div class="m-item" data-m="sweep"><span class="m-st">○</span><span>Sweep the knob from full <b>gentle</b> to full <b>tight</b> and keep an eye on the readouts: <b>k₁</b> and <b>k₂</b> climb together, in step. One choice sets both gains - that is the whole trick.</span></div>
-      <div class="m-item" data-m="gentle"><span class="m-st">○</span><span>Park the knob at full <b>gentle (high R)</b>, then press <b>Move ▸</b> until the carriage makes the big climb. Notice what cheap effort buys: over <b>2.8 s</b> to settle, but a peak push under <b>3 V</b>. Saving effort costs time.</span></div>
-      <div class="m-item" data-m="tight"><span class="m-st">○</span><span>Now go full <b>tight (high Q)</b> and climb again. It settles in under <b>1.9 s</b>, but the peak push blows past <b>10 V</b>. Speed is bought with volts - you just saw the price.</span></div>
-      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> find the sweet spot - a knob position that settles a climb in under <b>2 s</b> with a peak push under <b>5 V</b>. Hunt below the middle and be patient. That balance you find by hand is exactly what LQR computes for you.</span></div>
+      <div class="m-item" data-m="sweep"><span class="m-st">○</span><span>Sweep the knob from full <b>gentle</b> to full <b>tight</b> and keep an eye on the readouts: <b>k₁</b> and <b>k₂</b> climb together, in step. One choice sets both gains - that is the whole trick.</span><div class="m-hint" hidden>Stuck? Drag the knob all the way left to full gentle, then all the way right to full tight - touching both ends is what clears it, and k₁ and k₂ climb together as you go.</div></div>
+      <div class="m-item" data-m="gentle"><span class="m-st">○</span><span>Park the knob at full <b>gentle (high R)</b>, then press <b>Move ▸</b> until the carriage makes the big climb. Notice what cheap effort buys: over <b>2.8 s</b> to settle, but a peak push under <b>3 V</b>. Saving effort costs time.</span><div class="m-hint" hidden>Stuck? Slide the knob to full gentle (all the way left), press Move, and let the carriage fully settle - the log lands over 2.8 s with a peak push under 3 V.</div></div>
+      <div class="m-item" data-m="tight"><span class="m-st">○</span><span>Now go full <b>tight (high Q)</b> and climb again. It settles in under <b>1.9 s</b>, but the peak push blows past <b>10 V</b>. Speed is bought with volts - you just saw the price.</span><div class="m-hint" hidden>Stuck? Slide the knob to full tight (all the way right), press Move, and let it settle - it finishes in under 1.9 s but the peak push blows past 10 V.</div></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> find the sweet spot - a knob position that settles a climb in under <b>2 s</b> with a peak push under <b>5 V</b>. Hunt below the middle and be patient. That balance you find by hand is exactly what LQR computes for you.</span><div class="m-hint" hidden>Stuck? Set the knob a little below the middle, press Move, and read the log - hunt for a spot that settles under 2 s with a peak push under 5 V.</div></div>
       <div class="m-live" id="mLive">Press <b>Move ▸</b> and let the carriage settle to log a climb here.</div>
     </div>
   </section>
@@ -324,6 +344,10 @@ volts = lqr.<span class="fn">calculate</span>(x, reference)[<span class="num">0<
   </section>
 
   <section>
+    <div class="note teal robotcard">
+      <div class="nh">🤖 Now on your robot &middot; 10 minutes</div>
+      <p>On your robot, let LQR pick the gains for one mechanism instead of hand-tuning them. Run SysId to measure the true kV and kA, build the plant model from those numbers, hand LQR your cost weights, and let it hand back K. Deploy it on a single elevator or arm and compare against your best hand-tuned loop. Pass: LQR tracks just as tight with far less knob-twisting, because the honest model did the work up front. Coming up short or blowing through the target? That is almost always a model problem, not a weights problem - remeasure kV and kA before you touch anything else. No robot to borrow? Open the <a href="worksheet.html#form" style="color:var(--teal)">tuning worksheet</a>, pick your mechanism, and record the kV and kA you measured - those two numbers are the model LQR builds on.</p>
+    </div>
     <div class="note teal">
       <div class="nh">Going further &middot; optional</div>
       <p>LQR hands you the best gains only if your A and B tables match the real machine, so the deeper skill is honesty about the model, not the math. If your model thinks the elevator is lighter than it really is, LQR confidently picks gains that are too gentle and the carriage comes up short, which is why SysId comes first: it measures the true A and B instead of letting you wish them. There is also a sibling for the other half of the problem, the Kalman filter, which does for noisy sensors what LQR does for control, blending a shaky measurement with the model's prediction the way you trust both your eyes and your sense of balance to stay upright on a bike. Worth chewing on: if you handed LQR a model that overstated the motor's strength, would it tend to overshoot or undershoot, and why?</p>
@@ -409,6 +433,11 @@ volts = lqr.<span class="fn">calculate</span>(x, reference)[<span class="num">0<
         <div class="gl"><b>Q</b><span>How much you penalize state error.</span></div>
         <div class="gl"><b>R</b><span>How much control effort costs.</span></div>
         <div class="gl"><b>LQR</b><span>Computes the optimal K from Q and R.</span></div>
+      </div>
+      <div class="cando-check" id="candoCheck"><span class="cc-h">Can you do these now? Tap each one you've got</span>
+        <div class="cc-row"><span class="cc-mark"></span><span>I can write a mechanism's state and its controller as u = K(reference - x).</span></div>
+        <div class="cc-row"><span class="cc-mark"></span><span>I can explain why state feedback on position and velocity is just PD.</span></div>
+        <div class="cc-row"><span class="cc-mark"></span><span>I can say what Q and R tell LQR, and what it hands back.</span></div>
       </div>
       <a class="next" href="closing-the-loop.html">
         <div class="n-eyebrow">The whole course · 24 lessons</div>
@@ -549,6 +578,8 @@ volts = lqr.<span class="fn">calculate</span>(x, reference)[<span class="num">0<
   Object.keys(mItems).forEach(function(id){
     if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
   });
+  var mLastAct=0, mHintT={}, mAccPrev=Date.now();
+  (function(){ var d=document.getElementById('demo'); if(d){ d.addEventListener('pointerdown',function(){mLastAct=Date.now();},true); d.addEventListener('input',function(){mLastAct=Date.now();},true); } })();
   var mLive=document.getElementById('mLive');
   var mLo=false,mHi=false;
   el.agg.addEventListener('input',function(){
@@ -563,6 +594,8 @@ volts = lqr.<span class="fn">calculate</span>(x, reference)[<span class="num">0<
     else { mRun=false; }
   });
   setInterval(function(){
+    var _now=Date.now(), _dt=Math.min(0.5,(_now-mAccPrev)/1000); mAccPrev=_now;
+    if(_now-mLastAct<12000){ Object.keys(mItems).forEach(function(_k){ var _it=mItems[_k]; if(!_it||_it.classList.contains('cleared'))return; mHintT[_k]=(mHintT[_k]||0)+_dt; if(mHintT[_k]>=150){ var _h=_it.querySelector('.m-hint'); if(_h&&_h.hidden)_h.hidden=false; } }); }
     if(!mRun)return;
     var au=Math.abs(S.u); if(au>mPeak)mPeak=au;
     if(Math.abs(S.sp-S.y)<0.02&&Math.abs(S.v)<0.02){ mHold+=0.1; } else { mHold=0; }
@@ -696,6 +729,22 @@ volts = lqr.<span class="fn">calculate</span>(x, reference)[<span class="num">0<
     });
   }catch(e){}
 })();
+</script>
+<script>
+(function(){ try{
+  var box=document.getElementById('candoCheck'); if(!box) return;
+  var K='frc:cando', f=location.pathname.split('/').pop();
+  var st={}; try{ st=JSON.parse(localStorage.getItem(K))||{}; }catch(e){}
+  Array.prototype.forEach.call(box.querySelectorAll('.cc-row'),function(row,i){
+    var key=f+'#'+i, mark=row.querySelector('.cc-mark');
+    if(st[key]){ row.classList.add('checked'); if(mark)mark.textContent='✓'; }
+    row.addEventListener('click',function(){
+      var on=row.classList.toggle('checked');
+      if(mark)mark.textContent=on?'✓':'';
+      st[key]=on; try{ localStorage.setItem(K,JSON.stringify(st)); }catch(e){}
+    });
+  });
+}catch(e){} })();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>

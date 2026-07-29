@@ -111,6 +111,21 @@
   .sd-why.show{display:block}
   .sd-doneline{margin-top:12px;font-size:14.5px;color:var(--green);display:none}
   .sd-doneline.show{display:block}
+  .cando{border-left:3px solid var(--indigo);background:rgba(255,138,76,.07);border-radius:0 10px 10px 0;padding:12px 16px;margin:20px 0 0}
+  .cando .cd-h{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--indigo);margin-bottom:7px}
+  .cando ul{margin:0;padding-left:18px;display:grid;gap:5px}
+  .cando li{color:var(--muted);font-size:15px;line-height:1.5}
+  .cando-check{margin:18px 0 2px;border-top:1px solid var(--line);padding-top:16px}
+  .cando-check .cd-h{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--indigo);margin-bottom:10px}
+  .cdrow{display:flex;align-items:center;gap:11px;width:100%;text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--text);padding:8px 12px;border-radius:9px;cursor:pointer;font-family:var(--sans);font-size:15px;min-height:38px;margin-bottom:8px;transition:.12s}
+  .cdrow:last-child{margin-bottom:0}
+  .cdrow:hover{border-color:var(--muted)}
+  .cdrow .cdbox{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--faint);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--ink);transition:.12s}
+  .cdrow.on{border-color:var(--green);background:rgba(67,214,126,.1)}
+  .cdrow.on .cdbox{background:var(--green);border-color:var(--green)}
+  .cdrow.on .cdbox::after{content:"\2713"}
+  .cdrow .cdtxt{color:var(--muted)}
+  .cdrow.on .cdtxt{color:var(--text)}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -130,6 +145,14 @@
     <div class="eyebrow">Deploying to SystemCore</div>
     <h1>Image first,<br><span class="accent">then deploy</span>.</h1>
     <p class="dek">SystemCore runs real-time Linux, so getting code onto it works in two stages: first you "image" the board to set up its operating system, then you send your robot code. If you have ever set up a Raspberry Pi, this will feel familiar.</p>
+    <div class="cando" id="cando">
+      <span class="cd-h">By the end you can</span>
+      <ul>
+        <li>Explain the difference between imaging (set up the Linux operating system, once) and deploying (load your code, often)</li>
+        <li>Say how SystemCore's workflow differs from the roboRIO's Gradle deploy, and why it feels like setting up a Raspberry Pi</li>
+        <li>Remember that the exact 2027 steps are still being finalized - follow the official docs - and that vendordeps stay</li>
+      </ul>
+    </div>
   </div>
 
   <div class="note red">
@@ -312,6 +335,29 @@
         <div class="gl"><b>Web interface</b><span>Configure and monitor from a browser.</span></div>
         <div class="gl"><b>vendordeps</b><span>Still declare your libraries.</span></div>
       </div>
+      <div class="cando-check" id="candoCheck">
+        <span class="cd-h">Can you do these now?</span>
+        <button type="button" class="cdrow"><span class="cdbox"></span><span class="cdtxt">Explain the difference between imaging (set up the Linux operating system, once) and deploying (load your code, often)</span></button>
+        <button type="button" class="cdrow"><span class="cdbox"></span><span class="cdtxt">Say how SystemCore's workflow differs from the roboRIO's Gradle deploy, and why it feels like setting up a Raspberry Pi</span></button>
+        <button type="button" class="cdrow"><span class="cdbox"></span><span class="cdtxt">Remember that the exact 2027 steps are still being finalized - follow the official docs - and that vendordeps stay</span></button>
+      </div>
+      <script>
+      (function(){
+        try{
+          var box=document.getElementById("candoCheck"); if(!box) return;
+          var file=location.pathname.split("/").pop(), KEY="frc:cando", store={};
+          try{ store=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){ store={}; }
+          box.querySelectorAll(".cdrow").forEach(function(row,i){
+            var k=file+"#"+i;
+            if(store[k]) row.classList.add("on");
+            row.addEventListener("click",function(){
+              var on=row.classList.toggle("on");
+              try{ var s=JSON.parse(localStorage.getItem(KEY))||{}; if(on){s[k]=true;}else{delete s[k];} localStorage.setItem(KEY,JSON.stringify(s)); }catch(e){}
+            });
+          });
+        }catch(e){}
+      })();
+      </script>
       <a class="next" href="systemcore-lesson-9.html">
         <div class="n-eyebrow">Up next &middot; Part 3 &middot; 03</div>
         <h3>What Carries Over &amp; Getting Ready &rarr;</h3>

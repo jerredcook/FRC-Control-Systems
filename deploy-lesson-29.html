@@ -115,6 +115,18 @@
   .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
   .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  .cando{margin:18px 0 4px;border-left:3px solid var(--indigo);background:rgba(138,140,248,.06);border-radius:0 10px 10px 0;padding:12px 16px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);display:block;margin-bottom:8px}
+  .cando ul{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+  .cando li{position:relative;padding-left:19px;font-size:15px;color:var(--muted);line-height:1.5}
+  .cando li::before{content:"\2192";position:absolute;left:0;color:var(--indigo);font-family:var(--mono)}
+  .cando-check{margin:18px 0 0;border-top:1px solid var(--line);padding-top:16px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:flex-start;min-height:28px;padding:5px 2px;cursor:pointer;font-size:15px;color:var(--muted);line-height:1.45;-webkit-tap-highlight-color:transparent}
+  .cando-check .cc-row .cc-box{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--line-2);color:transparent;display:grid;place-items:center;font-size:12px;margin-top:1px;transition:.12s}
+  .cando-check .cc-row.on{color:var(--text)}
+  .cando-check .cc-row.on .cc-box{border-color:var(--green);background:rgba(67,214,126,.16);color:var(--green)}
+  .m-hint{margin:-1px 0 6px 24px;font-size:13px;color:var(--faint);border-left:2px solid var(--indigo);padding:3px 0 3px 11px;line-height:1.5}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -134,6 +146,11 @@
     <div class="eyebrow">Closing the Loop on Vision</div>
     <h1>Aim with the<br><span class="accent">camera</span>.</h1>
     <p class="dek">You have tx, the angle to the target. That's an error. A PID loop is a feedback recipe that pushes harder the bigger the error and eases off as it shrinks (taught in full in the Control course, Part 5): feed it tx and turn until tx is zero. Vision aiming is that same loop with a camera for a sensor.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Aim the robot at a tag by feeding tx into a PID controller with a setpoint of zero and applying the output as a turn.</li>
+      <li>Explain why too high a gain makes a laggy camera loop overshoot and hunt - and calm it with a gentler kP or a touch of D.</li>
+      <li>Gate the shot: only finish and fire once tx sits inside a small tolerance band.</li>
+    </ul></div>
   </div>
 
   <section>
@@ -227,6 +244,9 @@
         </div>
       </div>
       <div class="fixline" id="clinicFixline"></div>
+      <div class="m-hint" data-fault="lowgain" hidden style="margin:0 18px 16px">Stuck fixing "Slow and lazy"? The real gain is far below the label. Drag kP up to about 0.10 - the robot should turn with purpose and the status hold LOCKED for a couple of seconds.</div>
+      <div class="m-hint" data-fault="hunt" hidden style="margin:0 18px 16px">Stuck fixing "Overshoots every time"? The gain is too hot for a camera that reports late. Drag kP down to about 0.08 - the swinging dies away and the status settles on LOCKED.</div>
+      <div class="m-hint" data-fault="drift" hidden style="margin:0 18px 16px">Stuck fixing "Never quite locks"? A steady push is nudging you off, and a P-only loop leaves a little error against it. Raise kP to about 0.15 - just enough to pull the leftover error inside the band and hold LOCKED. Push it much higher and the latency hunting comes back.</div>
     </div>
     <p class="caption">The clinic plants a hidden fault in the sim above, so the slider labels can lie to you. Trust the behavior over the labels - the robot always tells the truth about itself. Name the fault, then fix it with the sliders until the status holds LOCKED.</p>
   </section>
@@ -370,6 +390,12 @@ drive.<input class="blank" data-ans="arcadedrive" data-fill="arcadeDrive" style=
         <div class="gl"><b>Camera latency</b><span>Stale data, so go gentle on kP.</span></div>
         <div class="gl"><b>Tolerance</b><span>Lock when |tx| is small.</span></div>
         <div class="gl"><b>Gate the shot</b><span>Fire only once aimed.</span></div>
+      </div>
+      <div class="cando-check" id="candoCheck">
+        <span class="cc-h">Can you do these now? Tap each one you have got.</span>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Turn tx into a turn command with a PID controller aimed at zero.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Explain why a high kP plus camera latency causes hunting, and how to calm it.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Only fire once |tx| is inside a tolerance band - locked on.</span></div>
       </div>
       <a class="next" href="deploy-lesson-30.html">
         <div class="n-eyebrow">Up next · Part 7 · 03</div>
@@ -542,6 +568,22 @@ drive.<input class="blank" data-ans="arcadedrive" data-fill="arcadeDrive" style=
         }catch(e){}
         requestAnimationFrame(clinicFrame);
       })();
+      // stuck hint: after ~90s stuck in the fix-it phase, reveal the exact move for this fault
+      var clinicStuck=0, clinicLastAct=0, clinicPrevFault=null;
+      function clinicHideHints(){ Array.prototype.forEach.call(document.querySelectorAll('#clinic .m-hint'),function(h){ h.hidden=true; }); }
+      function clinicAct(){ clinicLastAct=Date.now(); }
+      ['pointerdown','input','keydown'].forEach(function(ev){
+        var d=document.getElementById('demo'); if(d) d.addEventListener(ev,clinicAct,true);
+        var c=document.getElementById('clinic'); if(c) c.addEventListener(ev,clinicAct,true);
+      });
+      setInterval(function(){
+        try{
+          if(clinicFault!==clinicPrevFault){ clinicPrevFault=clinicFault; clinicStuck=0; clinicHideHints(); }
+          if(!clinicArmed || clinicDone){ clinicStuck=0; if(clinicDone) clinicHideHints(); return; }
+          if(Date.now()-clinicLastAct<1600){ clinicStuck+=0.2; }
+          if(clinicStuck>=90){ var h=document.querySelector('#clinic .m-hint[data-fault="'+clinicFault+'"]'); if(h) h.hidden=false; }
+        }catch(e){}
+      },200);
     }
   }catch(e){}
 })();
@@ -643,6 +685,21 @@ drive.<input class="blank" data-ans="arcadedrive" data-fill="arcadeDrive" style=
     });
   }catch(e){}
 })();
+</script>
+<script>
+(function(){try{
+  var K='frc:cando', f=location.pathname.split('/').pop(), map={};
+  try{ map=JSON.parse(localStorage.getItem(K))||{}; }catch(e){}
+  var rows=document.querySelectorAll('#candoCheck .cc-row');
+  Array.prototype.forEach.call(rows,function(r,i){
+    var key=f+'#'+i;
+    if(map[key]) r.classList.add('on');
+    r.addEventListener('click',function(){
+      var on=r.classList.toggle('on'); map[key]=on;
+      try{ localStorage.setItem(K,JSON.stringify(map)); }catch(e){}
+    });
+  });
+}catch(e){}})();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>

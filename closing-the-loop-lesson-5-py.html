@@ -103,6 +103,25 @@
   .legend i{width:16px;height:2px;border-radius:2px;display:inline-block}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
 
+  /* can-do goals + closing check (added) */
+  .cando{border-left:3px solid var(--teal);background:rgba(52,215,197,.06);border-radius:0 10px 10px 0;padding:12px 16px;margin:16px 0 4px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);display:block;margin-bottom:6px}
+  .cando ul{margin:0;padding-left:20px}
+  .cando li{color:var(--muted);font-size:15px;line-height:1.5;margin:3px 0}
+  .cando-check{margin-top:18px;display:grid;gap:8px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:flex-start;min-height:28px;padding:7px 11px;border:1px solid var(--line-2);border-radius:9px;background:var(--panel-2);cursor:pointer;font-size:15px;color:var(--muted);transition:.12s}
+  .cando-check .cc-row:hover{border-color:var(--teal)}
+  .cando-check .cc-row .cc-box{flex:0 0 auto;width:19px;height:19px;border-radius:50%;border:2px solid var(--faint);color:transparent;display:grid;place-items:center;font-size:12px;line-height:1;margin-top:1px}
+  .cando-check .cc-row.on{color:var(--text);border-color:var(--green)}
+  .cando-check .cc-row.on .cc-box{border-color:var(--green);background:rgba(67,214,126,.15);color:var(--green)}
+
+  /* now-on-your-robot card (added) */
+  .robotcard .rc-task{margin:0 0 9px}
+  .robotcard .rc-link{font-size:15px;margin:0 0 9px}
+  .robotcard .rc-link a{color:var(--teal);font-weight:600}
+  .robotcard .rc-fall{color:var(--muted);font-size:14px;margin:0}
+
   /* shared callout pattern */
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
@@ -213,6 +232,8 @@
     <div class="eyebrow">Tuning PID</div>
     <h1>Turning the<br><span class="accent">right</span> knob.</h1>
     <p class="dek">Three gains, a handful of symptoms, one reliable method. Read the response and know exactly what to adjust.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Tune in the right order: kP for response, kD to damp, then kI for any leftover error.</li><li>Read a symptom off the scope - sluggish, overshoot, droop, windup, buzz - and reach for the gain that fixes it.</li><li>Push gains to Shuffleboard and tune live against the plot instead of redeploying for every tweak.</li></ul></div>
   </div>
 
   <section>
@@ -364,6 +385,15 @@ self.controller.<span class="fn">setPID</span>(<input class="blank" data-ans="kp
   </section>
 
   <section>
+    <div class="note teal robotcard">
+      <div class="nh">🤖 Now on your robot · 10 minutes</div>
+      <p class="rc-task">Grab a real geared mechanism - your team's elevator or arm, or any motor on a test stand. Zero kI and kD. Raise <b>kP</b> one small step at a time until it reaches its target fast and <em>just barely</em> overshoots, and note that value. Now add <b>kD</b> until the overshoot settles into a clean stop. <b>Pass test:</b> the mechanism arrives quickly and holds without bouncing or buzzing.</p>
+      <p class="rc-link">Log both gains in the <a href="worksheet.html#record">tuning worksheet</a> so they come out as paste-ready Phoenix 6 code, and if a symptom stumps you, match it in the <a href="closing-the-loop-troubleshooting.html">troubleshooting field guide</a>.</p>
+      <p class="rc-fall">No mechanism free? Load the <b>Oscillating</b> preset in the clinic above and practice the same read-then-fix on the sim - lower kP or raise kD until the scope trace stops bouncing.</p>
+    </div>
+  </section>
+
+  <section>
     <div class="note teal">
       <div class="nh">Going further &middot; optional</div>
       <p>The hand-tuning order here is reliable, but there is a classic recipe worth knowing called the Ziegler-Nichols method: you raise kP alone until the mechanism oscillates steadily and never dies down, then read off that critical gain and the period of the swing, and plug both into a table that suggests starting kI and kD. It is rarely the final tune on a robot because deliberately driving a real mechanism to the edge of instability is rough on hardware, but it is a great way to feel where the limits are. The deeper idea: the gain and frequency at which a system rings tell you a lot about how fast you can safely push it.</p>
@@ -429,6 +459,12 @@ self.controller.<span class="fn">setPID</span>(<input class="blank" data-ans="kp
         <div class="gl"><b>Parks low</b><span>Add a little kI.</span></div>
         <div class="gl"><b>Buzzing</b><span>Lower kD, filter the sensor.</span></div>
         <div class="gl"><b>Live tuning</b><span>Push gains to Shuffleboard; tune against the plot.</span></div>
+      </div>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Can you do these now? Tap each one you own.</div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Tune in the right order: kP for response, kD to damp, then kI for any leftover error.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Read a symptom off the scope - sluggish, overshoot, droop, windup, buzz - and reach for the gain that fixes it.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Push gains to Shuffleboard and tune live against the plot instead of redeploying for every tweak.</span></div>
       </div>
       <div class="next">
         <div class="n-eyebrow">Up next · Lesson 06</div>
@@ -706,6 +742,22 @@ self.controller.<span class="fn">setPID</span>(<input class="blank" data-ans="kp
     });
   }catch(e){}
 })();
+</script>
+<script>
+(function(){try{
+  var KEY="frc:cando", file=location.pathname.split("/").pop();
+  var map={}; try{map=JSON.parse(localStorage.getItem(KEY))||{};}catch(e){}
+  var rows=document.querySelectorAll("#candoCheck .cc-row");
+  Array.prototype.forEach.call(rows,function(row,i){
+    var k=file+"#"+i;
+    if(map[k]) row.classList.add("on");
+    row.addEventListener("click",function(){
+      var on=row.classList.toggle("on");
+      if(on){map[k]=true;}else{delete map[k];}
+      try{localStorage.setItem(KEY,JSON.stringify(map));}catch(e){}
+    });
+  });
+}catch(e){}})();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>

@@ -115,6 +115,30 @@
   .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
   .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--indigo);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+  /* can-do goals + stuck-hints (training layer) */
+  .cando{border-left:3px solid var(--indigo);background:rgba(138,140,248,.06);border-radius:0 10px 10px 0;padding:12px 16px;margin:18px 0 4px}
+  .cando .cd-h{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:7px}
+  .cando ul{margin:0;padding:0;list-style:none}
+  .cando li{position:relative;font-size:15px;color:var(--muted);padding:3px 0 3px 20px;line-height:1.5}
+  .cando li::before{content:"\2192";position:absolute;left:0;color:var(--indigo)}
+  .cando-check{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:center;min-height:30px;padding:4px 2px;cursor:pointer;font-size:15px;color:var(--muted);transition:.12s}
+  .cando-check .cc-row:hover{color:var(--text)}
+  .cando-check .cc-box{width:20px;height:20px;flex:0 0 auto;border:2px solid var(--line-2);border-radius:6px;display:grid;place-items:center;color:transparent;font-size:12px;transition:.12s}
+  .cando-check .cc-row.on{color:var(--text)}
+  .cando-check .cc-row.on .cc-box{border-color:var(--green);background:var(--green);color:#06210f}
+  .missions .m-item{flex-wrap:wrap}
+  .missions .m-hint{flex-basis:100%;margin:7px 0 1px 24px;font-size:13px;color:var(--muted);border-left:2px solid var(--amber);background:rgba(255,176,32,.05);border-radius:0 6px 6px 0;padding:6px 10px;line-height:1.5}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -135,6 +159,11 @@
     <div class="eyebrow">Debugging &amp; Robust Code</div>
     <h1>Survive the<br><span class="accent">match</span>.</h1>
     <p class="dek">Tests catch logic bugs on your laptop. The field throws physics at you instead: a battery that sags, a sensor that drops out, a command that fires at the wrong moment. Robust code expects all of it and keeps running.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Explain a brownout - why a sagging battery makes the roboRIO cut the motors</li>
+      <li>Cap a motor's supply current so the whole bus stays above the brownout line</li>
+      <li>Name defensive habits: guard inputs before using them and give every command a safe default</li>
+    </ul></div>
   </div>
 
   <section>
@@ -168,6 +197,13 @@
       </div>
     </div>
     <p class="caption">With limits off, max load drags the battery into the red brownout zone and the robot disables itself, exactly what loses matches. Turn limits on and the same load stays safely above the line. The robot keeps driving.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
+      <div class="m-item" data-m="brownout"><span class="m-st">○</span><span>Leave <b>current limits OFF</b> and drag the Load up to about <b>90%</b> or more - watch the battery cross the 6.8 V line into the red and the robot <b>brown out</b>.</span><div class="m-hint" hidden>For the brownout mission: leave Current limits OFF and drag Load up to about 90% or more - the battery crosses the 6.8 V line into the red and the robot disables.</div></div>
+      <div class="m-item" data-m="capped"><span class="m-st">○</span><span>Now turn <b>current limits ON</b> and push Load past halfway - the current draw stops climbing at the green <b>110 A limit line</b> no matter how hard you push.</span><div class="m-hint" hidden>For the cap mission: turn Current limits ON, then push Load past halfway - the draw stops climbing at the green 110 A limit line.</div></div>
+      <div class="m-item" data-m="rescued"><span class="m-st">○</span><span>Keep limits <b>ON</b> and shove Load to <b>full</b>: it still sags, but settles near <b>10 V</b>, safely above 6.8 V, and the robot keeps driving.</span><div class="m-hint" hidden>For the rescue mission: keep Current limits ON and shove Load to full - it still sags, but settles near 10 V, safely above the line, and stays enabled.</div></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> at <b>full load</b>, brown it out with limits <b>OFF</b>, then flip limits <b>ON</b> without touching the slider. Same load, but now it settles safe - one flag is the whole difference.</span><div class="m-hint" hidden>For gold: at full load, brown it out with limits OFF, then flip limits ON without touching the slider - same load, but now it settles safe.</div></div>
+    </div>
   </section>
 
   <section>
@@ -309,6 +345,12 @@ motor.<span class="fn">configurator</span>.<input class="blank" data-ans="apply|
         <div class="gl"><b>Safe defaults</b><span>Dropped sensor coasts to stop.</span></div>
         <div class="gl"><b>Expect the worst</b><span>The field is harsher than the bench.</span></div>
       </div>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Can you do these now? Tap the ones you've got.</div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Explain a brownout - why a sagging battery makes the roboRIO cut the motors</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Cap a motor's supply current so the whole bus stays above the brownout line</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Name defensive habits: guard inputs before using them and give every command a safe default</span></div>
+      </div>
       <a class="next" href="deploy-lesson-36-py.html">
         <div class="n-eyebrow">Up next · Part 8 · 05 · Course finale</div>
         <h3>Competition-Ready</h3>
@@ -378,6 +420,37 @@ motor.<span class="fn">configurator</span>.<input class="blank" data-ans="apply|
   document.getElementById('limit').addEventListener('click',function(){ limits=!limits; this.textContent='Current limits: '+(limits?'ON':'OFF'); this.classList.toggle('on',limits); });
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
   requestAnimationFrame(step);
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  var mSawBrownHi=false, mSawSafeHi=false;
+  setInterval(function(){ try{
+    var desired=load/100*300, cur2=limits?Math.min(desired,110):desired;
+    if(!limits && volt<BROWN) mClear('brownout');
+    if(limits && cur2>=109.5) mClear('capped');
+    if(limits && load>=95 && volt>8) mClear('rescued');
+    if(!limits && load>=95 && volt<BROWN) mSawBrownHi=true;
+    if(limits && load>=95 && volt>8) mSawSafeHi=true;
+    if(mSawBrownHi && mSawSafeHi) mClear('gold');
+  }catch(e){} },200);
+  }catch(e){}
 
   var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
   function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'');}
@@ -483,6 +556,43 @@ motor.<span class="fn">configurator</span>.<input class="blank" data-ans="apply|
     });
   }catch(e){}
 })();
+</script>
+<script>
+(function(){ try{
+  var KEY='frc:cando', file=location.pathname.split('/').pop();
+  var map={}; try{ map=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+  var rows=document.querySelectorAll('#candoCheck .cc-row');
+  Array.prototype.forEach.call(rows,function(r,i){
+    var k=file+'#'+i;
+    if(map[k]) r.classList.add('on');
+    r.addEventListener('click',function(){
+      var on=!r.classList.contains('on'); r.classList.toggle('on',on);
+      map[k]=on; try{ localStorage.setItem(KEY,JSON.stringify(map)); }catch(e){}
+    });
+  });
+}catch(e){} })();
+</script>
+<script>
+(function(){ try{
+  var missions=document.getElementById('missions'); if(!missions) return;
+  var items=missions.querySelectorAll('.m-item'); if(!items.length) return;
+  var hasHint=false;
+  Array.prototype.forEach.call(items,function(n){ if(n.querySelector('.m-hint')) hasHint=true; });
+  if(!hasHint) return;
+  var active=0, lastPoke=0, THRESH=150, WINDOW=12000;
+  function poke(){ lastPoke=Date.now(); }
+  var demo=document.getElementById('demo');
+  [demo,missions].forEach(function(el){ if(el){ ['pointerdown','input','click'].forEach(function(ev){ el.addEventListener(ev,poke,true); }); } });
+  setInterval(function(){ try{
+    if(Date.now()-lastPoke<WINDOW) active++;
+    if(active>=THRESH){
+      Array.prototype.forEach.call(items,function(n){
+        if(n.classList.contains('cleared')) return;
+        var h=n.querySelector('.m-hint'); if(h) h.hidden=false;
+      });
+    }
+  }catch(e){} },1000);
+}catch(e){} })();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>

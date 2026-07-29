@@ -65,7 +65,19 @@
   .missions .m-item.cleared{color:var(--text)}
   .missions .m-item.cleared .m-st{color:var(--green)}
   .missions .m-item.gold .m-st{color:var(--amber)}
+  .missions .m-item{flex-wrap:wrap}
+  .missions .m-hint{flex-basis:100%;margin:4px 0 0 24px;font-size:13px;color:var(--muted);border-left:2px solid var(--amber);padding:2px 0 2px 10px;font-style:italic;line-height:1.5}
 
+  .cando{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:12px 16px;margin:18px 0 2px}
+  .cando .cd-h{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:7px}
+  .cando ul{margin:0;padding-left:18px;color:var(--muted);font-size:15px;line-height:1.5}
+  .cando li{margin:3px 0}
+  .cando-check{margin-top:16px;border:1px solid var(--line-2);border-left:3px solid var(--amber);border-radius:12px;background:var(--panel);padding:12px 16px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:4px}
+  .cando-check .cc-row{display:flex;gap:10px;align-items:center;font-size:15px;color:var(--muted);padding:6px 2px;min-height:30px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .cando-check .cc-row .cc-box{flex:0 0 auto;width:19px;height:19px;border-radius:50%;border:2px solid var(--faint);color:transparent;font-size:12px;line-height:16px;text-align:center;transition:.12s}
+  .cando-check .cc-row.checked{color:var(--text)}
+  .cando-check .cc-row.checked .cc-box{border-color:var(--green);background:rgba(67,214,126,.15);color:var(--green)}
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
   .note p{margin:0;color:var(--text);font-size:16px}
@@ -121,6 +133,11 @@
     <div class="eyebrow">Arms &amp; Wrists</div>
     <h1>Gravity hits<br><span class="accent">sideways</span>.</h1>
     <p class="dek">An arm is the easiest mechanism to build and one of the trickiest to hold in place, because gravity's pull on it changes with the angle. It fights hardest when the arm sticks straight out, and not at all when it points straight up or down.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Explain why an arm's holding torque peaks at horizontal and drops to zero when it points straight up.</li>
+      <li>Estimate the holding torque at any angle using cos(angle measured from horizontal).</li>
+      <li>Name the build and code fixes that tame gravity on an arm - gearing, hard stops, a counterbalance, and ArmFeedforward's kG term.</li>
+    </ul></div>
   </div>
 
   <section>
@@ -155,10 +172,10 @@
     <p class="caption">The dashed line is the moment arm, the horizontal distance from the pivot to the load. It's longest when the arm is level, so the holding torque (the amber bar) is biggest there. Point the arm straight up and the load sits over the pivot, moment arm zero, no torque needed.</p>
     <div class="missions" id="missions">
       <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
-      <div class="m-item" data-m="half"><span class="m-st">○</span><span>Park the arm at exactly <b>45°</b> and hold it there. The torque reads about <b>71%</b>, not 50 - half the swing is not half the fight, and you just caught the cosine curve in the act.</span></div>
-      <div class="m-item" data-m="fifty"><span class="m-st">○</span><span>Find the angle below vertical where the holding torque reads exactly <b>50%</b> and hold it there. It hides past 45° - creep up on it a degree at a time.</span></div>
-      <div class="m-item" data-m="mirror"><span class="m-st">○</span><span>Drop the arm to <b>-30°</b>, then raise it to <b>+30°</b>. Both read <b>87%</b> - gravity's twist is a mirror image around horizontal. Worth pausing on: the arm does not care which side of level it sits.</span></div>
-      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> swing past vertical all the way to <b>120°</b>. The torque climbs back to <b>50%</b>, but now gravity is tipping the arm over backward. Notice what flipped there - that flip is exactly why arms that cross vertical need hard stops.</span></div>
+      <div class="m-item" data-m="half"><span class="m-st">○</span><span>Park the arm at exactly <b>45°</b> and hold it there. The torque reads about <b>71%</b>, not 50 - half the swing is not half the fight, and you just caught the cosine curve in the act.</span><div class="m-hint" hidden>For the 45 mission: drag the Arm angle slider to exactly 45 degrees and hold it there - the torque settles around 71%, not 50.</div></div>
+      <div class="m-item" data-m="fifty"><span class="m-st">○</span><span>Find the angle below vertical where the holding torque reads exactly <b>50%</b> and hold it there. It hides past 45° - creep up on it a degree at a time.</span><div class="m-hint" hidden>For the 50% mission: creep the slider up past 45 to exactly 60 degrees - cos(60) is one half, so the torque lands on 50%.</div></div>
+      <div class="m-item" data-m="mirror"><span class="m-st">○</span><span>Drop the arm to <b>-30°</b>, then raise it to <b>+30°</b>. Both read <b>87%</b> - gravity's twist is a mirror image around horizontal. Worth pausing on: the arm does not care which side of level it sits.</span><div class="m-hint" hidden>For the mirror mission: park the slider at -30 degrees, then move it to +30 - both read 87%, a mirror image around horizontal.</div></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> swing past vertical all the way to <b>120°</b>. The torque climbs back to <b>50%</b>, but now gravity is tipping the arm over backward. Notice what flipped there - that flip is exactly why arms that cross vertical need hard stops.</span><div class="m-hint" hidden>Gold: push the slider past vertical all the way to 120 degrees - the torque climbs back to about 50%, but now gravity is tipping the arm over backward.</div></div>
     </div>
   </section>
 
@@ -248,6 +265,12 @@
         <div class="gl"><b>Hard stops</b><span>Limit how far it can swing.</span></div>
         <div class="gl"><b>Counterbalance</b><span>Offloads gravity from the motor.</span></div>
         <div class="gl"><b>ArmFeedforward</b><span>kG·cos cancels gravity in code.</span></div>
+      </div>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Can you do these now? Tap each one you've got.</div>
+        <div class="cc-row"><span class="cc-box"></span><span>Explain why an arm's holding torque peaks at horizontal and drops to zero when it points straight up.</span></div>
+        <div class="cc-row"><span class="cc-box"></span><span>Estimate the holding torque at any angle using cos(angle measured from horizontal).</span></div>
+        <div class="cc-row"><span class="cc-box"></span><span>Name the build and code fixes that tame gravity on an arm - gearing, hard stops, a counterbalance, and ArmFeedforward's kG term.</span></div>
       </div>
       <a class="next" href="build-lesson-20.html">
         <div class="n-eyebrow">Up next · Part 4 · 05</div>
@@ -349,6 +372,22 @@
     mHoldGold=(angDeg>90&&mT>=50)?mHoldGold+0.2:0;
     if(mHoldGold>=0.8) mClear('gold');
   },200);
+
+  // ---- stuck-hints: after ~150s of active fiddling on an uncleared mission, surface one nudge ----
+  var mDemo=document.getElementById('demo'), mLastAct=0;
+  function mPoke(){ mLastAct=Date.now(); }
+  if(mDemo){ mDemo.addEventListener('pointerdown',mPoke,true); mDemo.addEventListener('input',mPoke,true); }
+  window.addEventListener('keydown',mPoke,true);
+  var mStuck={};
+  Object.keys(mItems).forEach(function(id){ mStuck[id]=0; });
+  setInterval(function(){
+    if(Date.now()-mLastAct>4000) return;
+    Object.keys(mItems).forEach(function(id){
+      var n=mItems[id]; if(!n||n.classList.contains('cleared')) return;
+      mStuck[id]+=0.2;
+      if(mStuck[id]>=150){ var h=n.querySelector('.m-hint'); if(h) h.hidden=false; }
+    });
+  },200);
   }catch(e){}
 
   document.querySelectorAll('#quiz .q').forEach(function(q){
@@ -405,6 +444,27 @@
   opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(revealed)return; picked=i;
     opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
     if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
+})();
+</script>
+<script>
+(function(){
+  try{
+    var KEY='frc:cando', file=location.pathname.split('/').pop();
+    var box=document.getElementById('candoCheck'); if(!box) return;
+    var saved={}; try{ saved=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+    var rows=box.querySelectorAll('.cc-row');
+    Array.prototype.forEach.call(rows,function(row,i){
+      var key=file+'#'+i, bx=row.querySelector('.cc-box');
+      if(saved[key]){ row.classList.add('checked'); if(bx) bx.textContent='✓'; }
+      row.addEventListener('click',function(){
+        var on=!row.classList.contains('checked');
+        row.classList.toggle('checked',on);
+        if(bx) bx.textContent=on?'✓':'';
+        if(on){ saved[key]=true; } else { delete saved[key]; }
+        try{ localStorage.setItem(KEY,JSON.stringify(saved)); }catch(e){}
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

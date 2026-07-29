@@ -57,6 +57,27 @@
   .ctl input[type=range]{width:100%;accent-color:var(--indigo);height:22px}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
 
+  .cando{border-left:3px solid var(--indigo);background:rgba(255,138,76,.06);border-radius:0 10px 10px 0;padding:12px 16px;margin:16px 0 2px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);display:block;margin-bottom:6px}
+  .cando ul{margin:0;padding-left:18px}
+  .cando li{color:var(--muted);font-size:15px;line-height:1.5;margin:3px 0}
+  .cando-check{border-left:3px solid var(--indigo);background:rgba(255,138,76,.06);border-radius:0 10px 10px 0;padding:10px 14px;margin:16px 0 0}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);display:block;margin-bottom:4px}
+  .cando-check .cdrow{display:flex;align-items:center;gap:10px;min-height:30px;padding:3px 0;cursor:pointer;color:var(--muted);font-size:15px;line-height:1.4}
+  .cando-check .cdrow .cdbox{width:20px;height:20px;flex:0 0 auto;border:2px solid var(--line-2);border-radius:50%;display:grid;place-items:center;font-size:12px;color:transparent;transition:.12s}
+  .cando-check .cdrow.on{color:var(--text)}
+  .cando-check .cdrow.on .cdbox{border-color:var(--green);background:var(--green);color:#06210f}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--amber);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+  .missions .m-hint{margin:5px 0 2px 24px;font-size:13px;color:var(--muted);border-left:2px solid var(--amber);padding:3px 0 3px 10px;line-height:1.5;font-style:italic}
+  .missions .m-hint b{color:var(--text)}
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
   .note p{margin:0;color:var(--text);font-size:16px}
@@ -112,6 +133,11 @@
     <div class="eyebrow">Battery Science</div>
     <h1>The robot's<br><span class="accent">heartbeat</span>.</h1>
     <p class="dek">The whole robot runs on one 12-volt battery. The reason a robot browns out and freezes mid-match lives inside that battery, in a part you cannot see from the outside.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Explain why a battery's terminal voltage sags the moment the robot pulls hard</li>
+      <li>Use terminal voltage = resting voltage minus current times internal resistance</li>
+      <li>Say why a resting-voltage check cannot prove a battery is healthy</li>
+    </ul></div>
   </div>
 
   <section>
@@ -171,6 +197,17 @@
       </div>
     </div>
     <p class="caption">Drag the current up and watch the terminal voltage sag. Then drag the health slider toward tired and watch the same current sag the battery much harder. Try 100 amps at 15 milliohms: you should land near 11.3 volts.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
+      <div class="m-item" data-m="sag"><span class="m-st">○</span><span>Put the battery under real load - drag the current up until the <b>Voltage drop</b> readout reads at least <b>1.5 V</b>. That is volts vanishing inside the pack before they reach a single motor.</span></div>
+      <div class="m-hint" data-mh="sag" hidden>Stuck? Drop equals current times internal resistance. On a fresh 15 mΩ pack, dial the current to about <b>100 A</b> and the drop hits 1.5 V.</div>
+      <div class="m-item" data-m="tired"><span class="m-st">○</span><span>Drag the health slider to <b>tired (25 mΩ or higher)</b> and push the current until the <b>Status</b> reads <b>brownout risk</b>. A fresh pack would still read healthy at that same current - the resistance is the whole difference.</span></div>
+      <div class="m-hint" data-mh="tired" hidden>Stuck? Set health to <b>25 mΩ</b> or more, then raise current to about <b>235 A</b>. Terminal voltage dips under 7 V and Status flips to brownout risk.</div>
+      <div class="m-item" data-m="worn200"><span class="m-st">○</span><span>Match the numbers: set current to <b>200 A</b> and health to <b>worn (25 mΩ)</b>. The terminal lands right on <b>7.8 V</b> - the worn pack ate a full 5 volts the fresh one would have kept.</span></div>
+      <div class="m-hint" data-mh="worn200" hidden>Stuck? Put the current slider on exactly <b>200 A</b> and the health slider on <b>25 mΩ</b>. Read Terminal voltage: 12.8 - (200 × 0.025) = 7.8 V.</div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> brown out a battery that is still labeled <b>good</b>, not tired. Set health to <b>20 mΩ</b> and pin the current to the max <b>300 A</b> - the terminal just dips under the 7 V line to <b>6.8 V</b>. Even a decent pack can't survive a 300 A slam.</span></div>
+      <div class="m-hint" data-mh="gold" hidden>Stuck? Health slider down to <b>20 mΩ</b> (still labeled "good"), current slider all the way up to <b>300 A</b>. Terminal lands at 6.8 V, just under the brownout line.</div>
+    </div>
   </section>
 
   <section>
@@ -260,6 +297,11 @@
         <div class="gl"><b>Resting voltage</b><span>How full, not how healthy.</span></div>
         <div class="gl"><b>Test under load</b><span>The only honest health check.</span></div>
       </div>
+      <div class="cando-check" id="candoCheck"><span class="cc-h">Check yourself - tap what you've got</span>
+        <div class="cdrow"><span class="cdbox">✓</span><span>I can explain why terminal voltage sags the moment the robot pulls hard</span></div>
+        <div class="cdrow"><span class="cdbox">✓</span><span>I can use terminal voltage = resting voltage minus current times resistance</span></div>
+        <div class="cdrow"><span class="cdbox">✓</span><span>I can say why a resting-voltage check cannot prove a battery is healthy</span></div>
+      </div>
       <a class="next" href="build-lesson-42.html">
         <div class="n-eyebrow">Next · Part 6 · 07</div>
         <h3>The Power Budget &amp; Brownout →</h3>
@@ -316,6 +358,41 @@
   res.addEventListener('input',update);
   update();
 
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  var mHints={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-hint'),function(h){ mHints[h.getAttribute('data-mh')]=h; });
+  var mActive=0, mLastAct=0, mDemoEl=document.getElementById('demo');
+  if(mDemoEl){ mDemoEl.addEventListener('pointerdown',function(){ mLastAct=Date.now(); },true); mDemoEl.addEventListener('input',function(){ mLastAct=Date.now(); },true); }
+  setInterval(function(){ try{
+    var amps=parseInt(curr.value,10), mOhm=parseInt(res.value,10);
+    var drop=amps*mOhm/1000, term=REST-drop; if(term<0) term=0;
+    if(drop>=1.5) mClear('sag');
+    if(mOhm>=25 && term<7) mClear('tired');
+    if(amps===200 && mOhm===25) mClear('worn200');
+    if(mOhm<=20 && term<7) mClear('gold');
+    if(Date.now()-mLastAct<1600) mActive+=0.2;
+    if(mActive>=150){ Object.keys(mItems).forEach(function(id){ if(!mItems[id].classList.contains('cleared')&&mHints[id]&&mHints[id].hasAttribute('hidden')) mHints[id].removeAttribute('hidden'); }); }
+  }catch(e){} },200);
+  }catch(e){}
+
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
@@ -371,6 +448,22 @@
     opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
     if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
 })();
+</script>
+<script>
+(function(){try{
+  var KEY='frc:cando', file=location.pathname.split('/').pop();
+  var map={}; try{ map=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+  var rows=document.querySelectorAll('#candoCheck .cdrow');
+  Array.prototype.forEach.call(rows,function(row,i){
+    var key=file+'#'+i;
+    if(map[key]) row.classList.add('on');
+    row.addEventListener('click',function(){
+      var on=!row.classList.contains('on');
+      row.classList.toggle('on',on);
+      map[key]=on; try{ localStorage.setItem(KEY,JSON.stringify(map)); }catch(e){}
+    });
+  });
+}catch(e){}})();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>

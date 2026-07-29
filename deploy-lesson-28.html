@@ -125,6 +125,18 @@
   .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
   .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)}
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  .cando{margin:18px 0 4px;border-left:3px solid var(--indigo);background:rgba(138,140,248,.06);border-radius:0 10px 10px 0;padding:12px 16px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);display:block;margin-bottom:8px}
+  .cando ul{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+  .cando li{position:relative;padding-left:19px;font-size:15px;color:var(--muted);line-height:1.5}
+  .cando li::before{content:"\2192";position:absolute;left:0;color:var(--indigo);font-family:var(--mono)}
+  .cando-check{margin:18px 0 0;border-top:1px solid var(--line);padding-top:16px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:flex-start;min-height:28px;padding:5px 2px;cursor:pointer;font-size:15px;color:var(--muted);line-height:1.45;-webkit-tap-highlight-color:transparent}
+  .cando-check .cc-row .cc-box{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--line-2);color:transparent;display:grid;place-items:center;font-size:12px;margin-top:1px;transition:.12s}
+  .cando-check .cc-row.on{color:var(--text)}
+  .cando-check .cc-row.on .cc-box{border-color:var(--green);background:rgba(67,214,126,.16);color:var(--green)}
+  .m-hint{margin:-1px 0 6px 24px;font-size:13px;color:var(--faint);border-left:2px solid var(--indigo);padding:3px 0 3px 11px;line-height:1.5}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -144,6 +156,11 @@
     <div class="eyebrow">Vision &amp; AprilTags</div>
     <h1>Give the robot<br><span class="accent">eyes</span>.</h1>
     <p class="dek">A camera spots AprilTags, the printed markers scattered around the field, and hands your code a simple answer: which tag, and how far off-center it is. From that, the robot can aim and even locate itself.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Read the best target off a vision camera and pull its tag ID, yaw (tx), pitch, and area.</li>
+      <li>Explain why the heavy image work runs on a coprocessor while the roboRIO just reads numbers over NetworkTables.</li>
+      <li>Read tx as the off-center aiming error and know it heads to zero as a tag centers on the crosshair.</li>
+    </ul></div>
   </div>
 
   <section>
@@ -181,9 +198,13 @@
     <div class="missions" id="missions">
       <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
       <div class="m-item" data-m="center5"><span class="m-st">○</span><span>Pan until <b>tag 5</b> sits right on the crosshair and <b>tx reads 0.0°</b>. Savor that zero - it is exactly the error your aiming code will chase next lesson.</span></div>
+      <div class="m-hint" data-for="center5" hidden>Stuck? Slide the Pan control (or drag across the view) until tag 5 sits on the crosshair - it centers around a pan of about +4, where the tx readout ticks to 0.0.</div>
       <div class="m-item" data-m="takeover"><span class="m-st">○</span><span>Pan right slowly and watch for the moment <b>ID 7</b> takes over as best target while big <b>tag 5</b> is still on screen. Best means closest to the crosshair, not biggest - a rule that surprises almost everyone.</span></div>
+      <div class="m-hint" data-for="takeover" hidden>Stuck? Pan to the right, past about +15 degrees. Even though tag 5 looks bigger, the Best target ID flips to 7 the moment 7 sits closer to the crosshair.</div>
       <div class="m-item" data-m="survey"><span class="m-st">○</span><span>Survey the whole wall: center <b>all three tags</b>, tx within <b>0.5°</b> each. Give tag 3, tag 5, and tag 7 each a turn on the crosshair. No rush - precision first.</span></div>
+      <div class="m-hint" data-for="survey" hidden>Stuck? Center each tag in turn until tx reads 0.0: tag 3 sits near a pan of -22, tag 5 near +4, and tag 7 near +26. Land all three, one at a time.</div>
       <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> now add speed. Go from <b>tag 3 centered</b> to <b>tag 7 centered</b> in under <b>4 seconds</b>. That 48° snap is what a real turret does when it switches targets.</span></div>
+      <div class="m-hint" data-for="gold" hidden>Stuck? Center tag 3 first (pan about -22), then drag the view fast all the way to center tag 7 (pan about +26) - the whole 48 degree swing has to land within 4 seconds.</div>
     </div>
   </section>
 
@@ -328,6 +349,12 @@
         <div class="gl"><b>Fiducial ID</b><span>Which tag you're looking at.</span></div>
         <div class="gl"><b>Over NetworkTables</b><span>roboRIO just reads numbers.</span></div>
       </div>
+      <div class="cando-check" id="candoCheck">
+        <span class="cc-h">Can you do these now? Tap each one you have got.</span>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Read the best target's ID, tx, ty, and area from the camera.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Explain where the vision math runs and what the roboRIO actually reads.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Use tx as the off-center aiming error that drops to zero on target.</span></div>
+      </div>
       <a class="next" href="deploy-lesson-29.html">
         <div class="n-eyebrow">Up next · Part 7 · 02</div>
         <h3>Closing the Loop on Vision</h3>
@@ -434,6 +461,10 @@
   Object.keys(mItems).forEach(function(id){
     if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
   });
+  // stuck hints: after ~150s of active fiddling on an uncleared mission, reveal its hint line
+  var stuckSecs={}, HINT_AT=150, lastAct=0;
+  try{ var mDemo=document.getElementById('demo'); if(mDemo){ ['pointerdown','pointermove','input','keydown'].forEach(function(ev){ mDemo.addEventListener(ev,function(){ lastAct=Date.now(); },true); }); } }catch(e){}
+  function stuckTick(tick){ var actNow=(Date.now()-lastAct)<1500; Object.keys(mItems).forEach(function(id){ var n=mItems[id]; if(!n) return; var h=document.querySelector('#missions .m-hint[data-for="'+id+'"]'); if(n.classList.contains('cleared')){ if(h&&!h.hidden) h.hidden=true; return; } if(actNow){ stuckSecs[id]=(stuckSecs[id]||0)+tick; if(stuckSecs[id]>=HINT_AT && h) h.hidden=false; } }); }
   var mHit3=false, mHit5=false, mHit7=false, mT3=0;
   setInterval(function(){
     var b=bestTarget(); if(!b) return;
@@ -443,6 +474,7 @@
     if(b.t.id===3&&ax<=0.5){ mHit3=true; mT3=Date.now(); }
     if(b.t.id===7&&ax<=0.5){ mHit7=true; if(mT3&&Date.now()-mT3<=4000) mClear('gold'); }
     if(mHit3&&mHit5&&mHit7) mClear('survey');
+    stuckTick(0.2);
   },200);
   }catch(e){}
 
@@ -559,6 +591,21 @@
     });
   }catch(e){}
 })();
+</script>
+<script>
+(function(){try{
+  var K='frc:cando', f=location.pathname.split('/').pop(), map={};
+  try{ map=JSON.parse(localStorage.getItem(K))||{}; }catch(e){}
+  var rows=document.querySelectorAll('#candoCheck .cc-row');
+  Array.prototype.forEach.call(rows,function(r,i){
+    var key=f+'#'+i;
+    if(map[key]) r.classList.add('on');
+    r.addEventListener('click',function(){
+      var on=r.classList.toggle('on'); map[key]=on;
+      try{ localStorage.setItem(K,JSON.stringify(map)); }catch(e){}
+    });
+  });
+}catch(e){}})();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>

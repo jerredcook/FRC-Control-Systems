@@ -174,6 +174,30 @@
 
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
 
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--teal);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+  .missions .m-hint{display:block;margin-top:7px;font-size:13px;line-height:1.5;color:var(--teal);border-left:2px solid var(--line-2);padding-left:10px;font-style:italic}
+  .missions .m-item{flex-wrap:wrap}
+  .missions .m-item .m-hint{flex-basis:100%;margin-left:26px}
+  .missions .m-item .m-hint[hidden]{display:none}
+  .cando{border-left:3px solid var(--teal);background:rgba(52,215,197,.06);border-radius:0 10px 10px 0;padding:12px 16px;margin:18px 0 2px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);display:block;margin-bottom:6px}
+  .cando ul{margin:0;padding-left:18px}
+  .cando li{color:var(--muted);font-size:15px;line-height:1.5;margin:3px 0}
+  .cando li::marker{color:var(--teal)}
+  .cando-check{margin-top:18px;border:1px solid var(--line-2);border-left:3px solid var(--teal);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .cando-check .cdc-h{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin-bottom:6px}
+  .cando-check .cdc-row{display:flex;gap:11px;align-items:center;min-height:30px;padding:4px 0;cursor:pointer;font-size:15px;color:var(--muted)}
+  .cando-check .cdc-box{flex:0 0 auto;width:19px;height:19px;border-radius:50%;border:2px solid var(--line-2);display:grid;place-items:center;font-size:12px;color:var(--teal);transition:.12s}
+  .cando-check .cdc-row.done{color:var(--text)}
+  .cando-check .cdc-row.done .cdc-box{border-color:var(--teal);background:rgba(52,215,197,.14)}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -194,6 +218,10 @@
     <div class="eyebrow">System Identification</div>
     <h1>Stop guessing.<br><span class="accent">Measure</span> it.</h1>
     <p class="dek">kS, kG, kV, kA aren't magic numbers. You pull them straight out of your own mechanism with two simple tests.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+    <li>Run a quasistatic ramp test and see why voltage-vs-velocity data lands on a straight line</li>
+    <li>Read kV off that line's slope, and pull kS and kG apart by ramping up and then down</li>
+    <li>Explain why a fast step test - not the slow ramp - is what finally measures kA</li></ul></div>
   </div>
 
   <section>
@@ -265,6 +293,13 @@
       </div>
     </div>
     <p class="caption">Drag the two sliders until the indigo line lies right through the cloud. When it does, you've measured your gains by hand - then hit Auto-fit to see how close you got.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
+      <div class="m-item" data-m="runramp"><span class="m-st">○</span><span>Press <b>Run ramp test</b> and let it run all the way to the end. The dots pile up into a slanted cloud - dozens of steady-speed samples. No cloud, nothing to fit.</span><div class="m-hint" hidden>For the data mission: just press Run ramp test once and wait - do not touch Reset. The bar fills on its own and the Data points readout climbs past 40 when it finishes.</div></div>
+      <div class="m-item" data-m="green"><span class="m-st">○</span><span>Now fit it. Drag <b>Fit intercept</b> and <b>Fit slope</b> until the indigo line lies right through the cloud - or tap <b>Auto-fit</b> - and get <b>Fit error (RMS)</b> to turn <b>green</b>, under 0.03. That green line IS your measured gains.</span><div class="m-hint" hidden>For the fit mission: the fastest path is the Auto-fit button - it drops RMS near 0.01 in one tap. To do it by hand, slide the slope to about 1.8, then raise the intercept until the readout flips from amber to green.</div></div>
+      <div class="m-item" data-m="readkv"><span class="m-st">○</span><span>Read <b>kV</b> straight off the line - the slope <em>is</em> kV. Set the <b>Fit slope</b> slider to <b>1.80</b> and settle the intercept until RMS stays green. You just measured a gain with a ruler.</span><div class="m-hint" hidden>For the kV mission: drag Fit slope until the readout reads 1.80, then nudge Fit intercept up or down until Fit error goes green. Slope equals kV - that is the whole trick.</div></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> beat the computer by hand. Get <b>RMS under 0.03 using only the two sliders</b> - no Auto-fit this time. Match what least-squares finds, by eye alone.</span><div class="m-hint" hidden>For gold: do not press Auto-fit (if you already did, tap Reset and re-run). Set the slope near 1.80, then creep the intercept one step at a time and stop the instant RMS turns green.</div></div>
+    </div>
   </section>
 
   <section>
@@ -343,6 +378,11 @@ ks = <input class="blank" data-ans="(up_intercept-down_intercept)/2|(up_intercep
   </section>
 
   <section>
+    <div class="note teal robotcard">
+      <div class="nh">🤖 Now on your robot · 10 minutes</div>
+      <p><b>Characterize one real axis.</b> Pick a mechanism your team has - an elevator, a wrist, a shooter - and prop it so it can move freely. In code, drive a slow, steadily rising voltage (or run a real WPILib <span class="k">SysIdRoutine</span>) and plot voltage against velocity. Do it going up <em>and</em> coming down, read the two intercepts, and split out kS and kG the way this lesson showed. Then open <a href="worksheet.html" style="color:var(--teal)">the tuning worksheet</a> and type your kS, kG, kV, kA into the fields - it hands back paste-ready Phoenix 6 gains and a printable gains record. <b>Pass test:</b> your fitted kV times a cruise speed you actually command predicts the holding voltage the log shows, within about a volt.</p>
+      <p class="sub"><b>No robot yet?</b> Open <a href="worksheet.html" style="color:var(--teal)">worksheet.html</a> and enter the sim's own numbers - kS 0.06, kG 0.45, kV 1.8 - and watch each gain reshape the generated code, so the tool feels familiar before you ever have real data.</p>
+    </div>
     <div class="note teal">
       <div class="nh">Going further &middot; optional</div>
       <p>Fitting a line by eye works, but the analyzer does it with least squares: it picks the slope and intercept that make the total of all the squared up-and-down distances from the dots to the line as small as possible. Squaring is the clever part - it punishes one wildly-off point far more than several slightly-off ones, which is why a single bad data sample can drag your whole fit. Try this: why would the same tests run on a worn-out chain or a cold battery hand you slightly different gains each time, and what does that tell you about how often a competitive team should re-characterize a mechanism?</p>
@@ -408,6 +448,12 @@ ks = <input class="blank" data-ans="(up_intercept-down_intercept)/2|(up_intercep
         <div class="gl"><b>Intercept → kS + kG</b><span>Voltage at zero velocity - friction plus gravity.</span></div>
         <div class="gl"><b>Up + down</b><span>Two intercepts split kS from kG.</span></div>
         <div class="gl"><b>Dynamic step → kA</b><span>A hard, brief push reveals the acceleration gain.</span></div>
+      </div>
+      <div class="cando-check" id="candoCheck">
+        <div class="cdc-h">Can you? Tap each one you've nailed</div>
+        <div class="cdc-row"><span class="cdc-box"></span><span>Run a quasistatic ramp test and see why voltage-vs-velocity data lands on a straight line</span></div>
+        <div class="cdc-row"><span class="cdc-box"></span><span>Read kV off that line's slope, and pull kS and kG apart by ramping up and then down</span></div>
+        <div class="cdc-row"><span class="cdc-box"></span><span>Explain why a fast step test - not the slow ramp - is what finally measures kA</span></div>
       </div>
       <a class="next" href="closing-the-loop-lesson-8-py.html">
         <div class="n-eyebrow">Up next · Lesson 08</div>
@@ -565,6 +611,42 @@ ks = <input class="blank" data-ans="(up_intercept-down_intercept)/2|(up_intercep
     setStatus('Idle',false);
   });
 
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  var mHold={};
+  function mHeld(k,cond){ mHold[k]=cond?(mHold[k]||0)+1:0; return mHold[k]>=3; }
+  var mLastAct=0, mHintT={}, mAccPrev=Date.now();
+  (function(){ var d=document.getElementById('demo'); if(d){ d.addEventListener('pointerdown',function(){mLastAct=Date.now();},true); d.addEventListener('input',function(){mLastAct=Date.now();},true); } })();
+  setInterval(function(){
+    var _e=rmsError(), _n=S.pts.length;
+    if(mHeld('runramp', _n>=40)) mClear('runramp');
+    if(_e!=null){
+      if(mHeld('green', _n>=40 && _e<0.03)) mClear('green');
+      if(mHeld('readkv', _n>=40 && Math.abs(S.fitM-1.80)<0.06 && _e<0.05)) mClear('readkv');
+      if(mHeld('gold', _n>=40 && !S.showTrue && _e<0.03)) mClear('gold');
+    }
+    var _now=Date.now(), _dt=Math.min(0.5,(_now-mAccPrev)/1000); mAccPrev=_now;
+    if(_now-mLastAct<12000){ Object.keys(mItems).forEach(function(_k){ var _it=mItems[_k]; if(!_it||_it.classList.contains('cleared'))return; mHintT[_k]=(mHintT[_k]||0)+_dt; if(mHintT[_k]>=150){ var _h=_it.querySelector('.m-hint'); if(_h&&_h.hidden)_h.hidden=false; } }); }
+  },200);
+  }catch(e){}
+
   // pseudo-random noise without Date/Math.random reliance is fine here (browser)
   function noise(){return (Math.random()-0.5)*0.04;}
 
@@ -705,6 +787,21 @@ ks = <input class="blank" data-ans="(up_intercept-down_intercept)/2|(up_intercep
         if(shown>=items.length){ btn.textContent="🧭 That's every step - you've got this"; btn.disabled=true; }
         else { btn.textContent="🧭 Next step ("+shown+" of "+items.length+" shown)"; }
       });
+    });
+  }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  try{
+    var KEY="frc:cando", file=location.pathname.split("/").pop();
+    var wrap=document.getElementById("candoCheck"); if(!wrap) return;
+    var map={}; try{ map=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+    Array.prototype.forEach.call(wrap.querySelectorAll(".cdc-row"),function(r,i){
+      var k=file+"#"+i;
+      function paint(on){ r.classList.toggle("done",!!on); r.querySelector(".cdc-box").textContent=on?"✓":""; }
+      paint(map[k]);
+      r.addEventListener("click",function(){ map[k]=!map[k]; paint(map[k]); try{ localStorage.setItem(KEY,JSON.stringify(map)); }catch(e){} });
     });
   }catch(e){}
 })();

@@ -62,6 +62,19 @@
   .missions .m-item.cleared{color:var(--text)}
   .missions .m-item.cleared .m-st{color:var(--green)}
   .missions .m-item.gold .m-st{color:var(--amber)}
+  .m-hint{margin:1px 0 7px 27px;font-size:13px;color:var(--amber);border-left:2px solid rgba(255,176,32,.45);padding:3px 0 3px 10px;font-style:italic;line-height:1.45}
+  .m-hint[hidden]{display:none}
+
+  .cando{border-left:3px solid var(--amber);background:rgba(255,176,32,.05);border-radius:0 10px 10px 0;padding:11px 16px;margin:16px 0 2px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);display:block;margin-bottom:6px}
+  .cando ul{margin:0;padding-left:18px;color:var(--muted);font-size:15px;line-height:1.5}
+  .cando li{margin:2px 0}
+  .cando-check{margin-top:16px;border-top:1px solid var(--line);padding-top:15px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);display:block;margin-bottom:8px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:center;padding:5px 0;min-height:30px;cursor:pointer;font-size:15px;color:var(--muted);transition:.12s}
+  .cando-check .cc-row .cc-box{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--line-2);display:inline-flex;align-items:center;justify-content:center;font-size:12px;line-height:1;color:transparent;transition:.12s}
+  .cando-check .cc-row.on{color:var(--text)}
+  .cando-check .cc-row.on .cc-box{border-color:var(--green);background:rgba(67,214,126,.16);color:var(--green)}
 
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
@@ -118,6 +131,11 @@
     <div class="eyebrow">The Control System</div>
     <h1>The robot's<br>nervous <span class="accent">system</span>.</h1>
     <p class="dek">The roboRIO is the brain, the radio is its link to the driver station, and the CAN bus is the nerve that carries commands to every motor controller and sensor. The catch with the CAN bus: it's one long daisy chain, and a break anywhere takes out everything past it.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+    <li>Say what the roboRIO, the radio, and the CAN bus each do</li>
+    <li>Explain why the CAN bus is a daisy chain and what a single break takes out</li>
+    <li>Read an online-device count and reason back to where the bus break is</li>
+    </ul></div>
   </div>
 
   <section>
@@ -158,9 +176,13 @@
     <div class="missions" id="missions">
       <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
       <div class="m-item" data-m="blackout"><span class="m-st">○</span><span>Break the <b>first link</b>, right after the roboRIO, and watch the dominoes fall. One bad connector and all 5 downstream devices go dark: <b>1 / 6</b> online. One loose plug did all of that.</span></div>
+      <div class="m-hint" data-for="blackout" hidden>Click the very first link on the chain, the one right after the roboRIO - everything downstream drops and the count falls to 1 of 6.</div>
       <div class="m-item" data-m="term"><span class="m-st">○</span><span>Reconnect all, then break <b>only the last link</b>. Just the <b>120 Ω</b> terminator drops - the smallest outage on the board - but keep in mind a real bus with no terminator gets garbled everywhere.</span></div>
+      <div class="m-hint" data-for="term" hidden>Press Reconnect all, then click only the last link, the one just before the 120 ohm terminator - a single device drops to 5 of 6.</div>
       <div class="m-item" data-m="three"><span class="m-st">○</span><span>Here comes a real pit report: exactly <b>3 / 6</b> devices are answering. Recreate that symptom with a <b>single break</b>. Which link has to be the loose one? Reason it out before you click.</span></div>
+      <div class="m-hint" data-for="three" hidden>Reconnect all, then break the third link - the one between SparkMax and PDH - so the first three devices still answer and it reads 3 of 6.</div>
       <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> break <b>two different links</b>, then get back to <b>6 / 6</b> by clicking the links, no Reconnect button. Fixing the first break only reveals the second - which is exactly how real debugging feels, one layer at a time.</span></div>
+      <div class="m-hint" data-for="gold" hidden>Click two different links to break them, then click those same two links again to reconnect - repair it without the Reconnect all button.</div>
     </div>
   </section>
 
@@ -252,6 +274,12 @@
         <div class="gl"><b>Daisy chain</b><span>Device to device, in series.</span></div>
         <div class="gl"><b>Termination</b><span>Caps the end of the bus.</span></div>
         <div class="gl"><b>Break = downstream off</b><span>Loses everything after it.</span></div>
+      </div>
+      <div class="cando-check" id="candoCheck">
+        <span class="cc-h">You made it - tap each one you can do now</span>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Say what the roboRIO, the radio, and the CAN bus each do</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Explain why the CAN bus is a daisy chain and what a single break takes out</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Read an online-device count and reason back to where the bus break is</span></div>
       </div>
       <a class="next" href="build-lesson-30.html">
         <div class="n-eyebrow">Up next · Part 6 · 04</div>
@@ -359,6 +387,23 @@
     if(nb>=2) mArmed=true;
     if(mArmed&&nb===0){ mArmed=false; mClear('gold'); }
   },200);
+
+  // stuck-hints: after ~150s of active fiddling on an uncleared mission, surface one nudge
+  var mHintEls={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-hint'),function(h){ mHintEls[h.getAttribute('data-for')]=h; });
+  var mHacc={}, mLastAct=0, mHdemo=document.getElementById('demo');
+  function mHbump(){ mLastAct=Date.now(); }
+  if(mHdemo){ ['pointerdown','input','click'].forEach(function(ev){ mHdemo.addEventListener(ev,mHbump,true); }); }
+  window.addEventListener('keydown',mHbump,true);
+  setInterval(function(){
+    if(!mLastAct || Date.now()-mLastAct>5000) return;
+    Object.keys(mHintEls).forEach(function(id){
+      var it=mItems[id], h=mHintEls[id];
+      if(!it||!h||it.classList.contains('cleared')||!h.hasAttribute('hidden')) return;
+      mHacc[id]=(mHacc[id]||0)+0.2;
+      if(mHacc[id]>=150) h.removeAttribute('hidden');
+    });
+  },200);
   }catch(e){}
 
   refresh(); requestAnimationFrame(step);
@@ -418,6 +463,22 @@
     opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
     if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
 })();
+</script>
+<script>
+(function(){ try{
+  var KEY='frc:cando', file=location.pathname.split('/').pop(), box={};
+  try{ box=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+  var rows=document.querySelectorAll('#candoCheck .cc-row');
+  Array.prototype.forEach.call(rows,function(row,i){
+    var k=file+'#'+i;
+    if(box[k]) row.classList.add('on');
+    row.addEventListener('click',function(){
+      var on=!row.classList.contains('on');
+      row.classList.toggle('on',on);
+      box[k]=on; try{ localStorage.setItem(KEY,JSON.stringify(box)); }catch(e){}
+    });
+  });
+}catch(e){} })();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>

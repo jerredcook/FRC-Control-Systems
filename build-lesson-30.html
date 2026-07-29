@@ -67,6 +67,19 @@
   .missions .m-item.cleared{color:var(--text)}
   .missions .m-item.cleared .m-st{color:var(--green)}
   .missions .m-item.gold .m-st{color:var(--amber)}
+  .m-hint{margin:1px 0 7px 27px;font-size:13px;color:var(--amber);border-left:2px solid rgba(255,176,32,.45);padding:3px 0 3px 10px;font-style:italic;line-height:1.45}
+  .m-hint[hidden]{display:none}
+
+  .cando{border-left:3px solid var(--amber);background:rgba(255,176,32,.05);border-radius:0 10px 10px 0;padding:11px 16px;margin:16px 0 2px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);display:block;margin-bottom:6px}
+  .cando ul{margin:0;padding-left:18px;color:var(--muted);font-size:15px;line-height:1.5}
+  .cando li{margin:2px 0}
+  .cando-check{margin-top:16px;border-top:1px solid var(--line);padding-top:15px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);display:block;margin-bottom:8px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:center;padding:5px 0;min-height:30px;cursor:pointer;font-size:15px;color:var(--muted);transition:.12s}
+  .cando-check .cc-row .cc-box{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--line-2);display:inline-flex;align-items:center;justify-content:center;font-size:12px;line-height:1;color:transparent;transition:.12s}
+  .cando-check .cc-row.on{color:var(--text)}
+  .cando-check .cc-row.on .cc-box{border-color:var(--green);background:rgba(67,214,126,.16);color:var(--green)}
 
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
@@ -123,6 +136,11 @@
     <div class="eyebrow">Wiring Best Practices</div>
     <h1>Wiring is a<br><span class="accent">craft</span>.</h1>
     <p class="dek">A robot takes thousands of jolts in a match. The difference between one that runs all season and one that mysteriously dies mid-match is rarely the design, it's the wiring. A solid crimp and a little strain relief are what keep a connection alive when the robot gets slammed.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+    <li>Run a pull test on a connection and decide if it holds</li>
+    <li>Explain why a crimp beats a twist and what strain relief adds</li>
+    <li>Say why a joint needs both a good crimp and strain relief, not just one</li>
+    </ul></div>
   </div>
 
   <section>
@@ -161,9 +179,13 @@
     <div class="missions" id="missions">
       <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
       <div class="m-item" data-m="baseline"><span class="m-st">○</span><span>Tug the joint just as it starts, <b>Twisted + None</b>, and watch it <b>pull out</b>. That is the connection a rushed build makes - worth seeing once so you recognize it forever.</span></div>
+      <div class="m-hint" data-for="baseline" hidden>Leave the joint on Twisted and Relief on None, then press Tug it - it pulls right out, no crimp and no anchor.</div>
       <div class="m-item" data-m="halffix"><span class="m-st">○</span><span>Now prove half a fix still fails: get a pull out with <b>Crimped + None</b>, then another with <b>Twisted + Zip-tied</b>. The crimp and the zip tie do different jobs, and you need both of them doing theirs.</span></div>
+      <div class="m-hint" data-for="halffix" hidden>Set Crimped + None and tug for a pull-out, then set Twisted + Zip-tied and tug for another - each half-fix still fails.</div>
       <div class="m-item" data-m="holds"><span class="m-st">○</span><span>Build the joint that passes: <b>Crimped + Zip-tied</b>. Tug it and read <b>HOLDS</b>. That word is what every joint on the robot should say.</span></div>
+      <div class="m-hint" data-for="holds" hidden>Set the joint to Crimped and the relief to Zip-tied, then press Tug it - that combo is the only one that reads HOLDS.</div>
       <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> test all <b>4 combos</b> in one run, flipping only <b>one toggle</b> between tugs. Changing one thing at a time is how you trace any fault - a habit worth building right here.</span></div>
+      <div class="m-hint" data-for="gold" hidden>Run all four combos in a row, and after each tug flip just one toggle before the next tug - one from None to Zip-tied, one from Twisted to Crimped, never both at once.</div>
     </div>
   </section>
 
@@ -255,6 +277,12 @@
         <div class="gl"><b>Label &amp; color</b><span>Trace faults fast; red +, black -.</span></div>
         <div class="gl"><b>Tidy runs</b><span>Routed, bundled, short.</span></div>
         <div class="gl"><b>Fix on the bench</b><span>Not in the pits before a match.</span></div>
+      </div>
+      <div class="cando-check" id="candoCheck">
+        <span class="cc-h">You made it - tap each one you can do now</span>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Run a pull test on a connection and decide if it holds</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Explain why a crimp beats a twist and what strain relief adds</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Say why a joint needs both a good crimp and strain relief, not just one</span></div>
       </div>
       <a class="next" href="build-lesson-31.html">
         <div class="n-eyebrow">Up next · Part 6 · 05 · Finale</div>
@@ -381,6 +409,23 @@
     }
     if(!pulling && !failed) mTested=false;
   },150);
+
+  // stuck-hints: after ~150s of active fiddling on an uncleared mission, surface one nudge
+  var mHintEls={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-hint'),function(h){ mHintEls[h.getAttribute('data-for')]=h; });
+  var mHacc={}, mLastAct=0, mHdemo=document.getElementById('demo');
+  function mHbump(){ mLastAct=Date.now(); }
+  if(mHdemo){ ['pointerdown','input','click'].forEach(function(ev){ mHdemo.addEventListener(ev,mHbump,true); }); }
+  window.addEventListener('keydown',mHbump,true);
+  setInterval(function(){
+    if(!mLastAct || Date.now()-mLastAct>5000) return;
+    Object.keys(mHintEls).forEach(function(id){
+      var it=mItems[id], h=mHintEls[id];
+      if(!it||!h||it.classList.contains('cleared')||!h.hasAttribute('hidden')) return;
+      mHacc[id]=(mHacc[id]||0)+0.2;
+      if(mHacc[id]>=150) h.removeAttribute('hidden');
+    });
+  },200);
   }catch(e){}
 
   document.querySelectorAll('#quiz .q').forEach(function(q){
@@ -438,6 +483,22 @@
     opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
     if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
 })();
+</script>
+<script>
+(function(){ try{
+  var KEY='frc:cando', file=location.pathname.split('/').pop(), box={};
+  try{ box=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+  var rows=document.querySelectorAll('#candoCheck .cc-row');
+  Array.prototype.forEach.call(rows,function(row,i){
+    var k=file+'#'+i;
+    if(box[k]) row.classList.add('on');
+    row.addEventListener('click',function(){
+      var on=!row.classList.contains('on');
+      row.classList.toggle('on',on);
+      box[k]=on; try{ localStorage.setItem(KEY,JSON.stringify(box)); }catch(e){}
+    });
+  });
+}catch(e){} })();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>

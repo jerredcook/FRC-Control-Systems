@@ -67,6 +67,18 @@
   .missions .m-item.cleared .m-st{color:var(--green)}
   .missions .m-item.gold .m-st{color:var(--amber)}
 
+  .cando{border-left:3px solid var(--indigo);background:rgba(255,138,76,.06);border-radius:0 10px 10px 0;padding:12px 16px;margin:16px 0 2px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);display:block;margin-bottom:6px}
+  .cando ul{margin:0;padding-left:18px}
+  .cando li{color:var(--muted);font-size:15px;line-height:1.5;margin:3px 0}
+  .cando-check{border-left:3px solid var(--indigo);background:rgba(255,138,76,.06);border-radius:0 10px 10px 0;padding:10px 14px;margin:16px 0 0}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);display:block;margin-bottom:4px}
+  .cando-check .cdrow{display:flex;align-items:center;gap:10px;min-height:30px;padding:3px 0;cursor:pointer;color:var(--muted);font-size:15px;line-height:1.4}
+  .cando-check .cdrow .cdbox{width:20px;height:20px;flex:0 0 auto;border:2px solid var(--line-2);border-radius:50%;display:grid;place-items:center;font-size:12px;color:transparent;transition:.12s}
+  .cando-check .cdrow.on{color:var(--text)}
+  .cando-check .cdrow.on .cdbox{border-color:var(--green);background:var(--green);color:#06210f}
+  .missions .m-hint{margin:5px 0 2px 24px;font-size:13px;color:var(--muted);border-left:2px solid var(--amber);padding:3px 0 3px 10px;line-height:1.5;font-style:italic}
+  .missions .m-hint b{color:var(--text)}
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
   .note p{margin:0;color:var(--text);font-size:16px}
@@ -122,6 +134,11 @@
     <div class="eyebrow">Prototyping</div>
     <h1>Test it<br><span class="accent">cheap</span> first.</h1>
     <p class="dek">A drawing can look perfect and still fail in real life. Smart teams build a rough, throwaway version out of cardboard or wood to find the problems while they're free to fix, then climb up to metal only once the cheap mockup has answered the hard questions.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Match a design question to the cheapest material that can answer it</li>
+      <li>Explain why many cheap tries beat one expensive guess</li>
+      <li>Decide when a prototype has earned the jump to real metal</li>
+    </ul></div>
   </div>
 
   <section>
@@ -161,9 +178,13 @@
     <div class="missions" id="missions">
       <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
       <div class="m-item" data-m="trade"><span class="m-st">○</span><span>Slide through all <b>three rungs</b> and watch the trade play out: the tries you can afford drop from <b>12</b> to <b>2</b> while time goes from minutes to an afternoon. Every prototype you will ever build lives somewhere on that slope.</span></div>
+      <div class="m-hint" data-mh="trade" hidden>Stuck? Drag the Material slider across all three stops - <b>cardboard, plywood, aluminum</b> - so you have visited each one.</div>
       <div class="m-item" data-m="shape"><span class="m-st">○</span><span>Build season asks questions like: <b>will the intake grab the piece? Will it reach the top shelf?</b> Those are shape questions. Dial in the rung that answers shape almost for free and hold it for <b>2 seconds</b>.</span></div>
+      <div class="m-hint" data-mh="shape" hidden>Stuck? Shape questions are cheapest - slide to <b>Cardboard</b> (far left) and leave it there a couple of seconds.</div>
       <div class="m-item" data-m="motion"><span class="m-st">○</span><span>Next question: <b>will the arm really swing through its full travel?</b> That is motion, not just shape - a different question needs a different rung. Pick the matching one and hold it for <b>2 seconds</b>.</span></div>
+      <div class="m-hint" data-mh="motion" hidden>Stuck? Real motion needs some stiffness - slide to <b>Plywood</b> (the middle rung) and hold it a moment.</div>
       <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> the final ask: <b>will it survive a full match load, and is it match-ready?</b> Only one rung can answer that. Hold it for <b>2 seconds</b>, and notice what that answer costs you.</span></div>
+      <div class="m-hint" data-mh="gold" hidden>Stuck? Only metal answers "match-ready" - slide all the way to <b>Aluminum</b> (far right) and hold it there for two seconds.</div>
     </div>
   </section>
 
@@ -254,6 +275,11 @@
         <div class="gl"><b>Match the question</b><span>Right material for what you're asking.</span></div>
         <div class="gl"><b>Then commit</b><span>Metal once you're confident.</span></div>
       </div>
+      <div class="cando-check" id="candoCheck"><span class="cc-h">Check yourself - tap what you've got</span>
+        <div class="cdrow"><span class="cdbox">✓</span><span>I can match a design question to the cheapest material that answers it</span></div>
+        <div class="cdrow"><span class="cdbox">✓</span><span>I can explain why many cheap tries beat one expensive guess</span></div>
+        <div class="cdrow"><span class="cdbox">✓</span><span>I can decide when a prototype has earned the jump to metal</span></div>
+      </div>
       <a class="next" href="build-lesson-35.html">
         <div class="n-eyebrow">Up next · Part 7 · 04 · Finale</div>
         <h3>Design for Manufacture</h3>
@@ -343,6 +369,10 @@
   function mDone(id){ return !!mItems[id]&&mItems[id].classList.contains('cleared'); }
   var mSeen={}, mAt=fid, mHold=0, mTouched=false;
   document.getElementById('fid').addEventListener('input',function(e){ mTouched=true; mSeen[+e.target.value]=true; });
+  // stuck hints: after sustained hands-on time on a mission still open, reveal one nudge
+  var mHints={}, mActive=0, mLastAct=0, mDemoEl=document.getElementById('demo');
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-hint'),function(h){ mHints[h.getAttribute('data-mh')]=h; });
+  if(mDemoEl){ mDemoEl.addEventListener('pointerdown',function(){ mLastAct=Date.now(); },true); mDemoEl.addEventListener('input',function(){ mLastAct=Date.now(); },true); }
   setInterval(function(){
     mSeen[fid]=true;
     if(mSeen[0]&&mSeen[1]&&mSeen[2]) mClear('trade');
@@ -352,6 +382,8 @@
       if(fid===1&&mDone('shape')) mClear('motion');
       if(fid===2&&mDone('motion')) mClear('gold');
     }
+    if(Date.now()-mLastAct<1600) mActive+=0.2;
+    if(mActive>=150){ Object.keys(mItems).forEach(function(id){ if(!mItems[id].classList.contains('cleared')&&mHints[id]&&mHints[id].hasAttribute('hidden')) mHints[id].removeAttribute('hidden'); }); }
   },200);
   }catch(e){}
 
@@ -410,6 +442,22 @@
     opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
     if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
 })();
+</script>
+<script>
+(function(){try{
+  var KEY='frc:cando', file=location.pathname.split('/').pop();
+  var map={}; try{ map=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+  var rows=document.querySelectorAll('#candoCheck .cdrow');
+  Array.prototype.forEach.call(rows,function(row,i){
+    var key=file+'#'+i;
+    if(map[key]) row.classList.add('on');
+    row.addEventListener('click',function(){
+      var on=!row.classList.contains('on');
+      row.classList.toggle('on',on);
+      map[key]=on; try{ localStorage.setItem(KEY,JSON.stringify(map)); }catch(e){}
+    });
+  });
+}catch(e){}})();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>

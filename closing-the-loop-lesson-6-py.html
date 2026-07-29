@@ -103,6 +103,37 @@
   .legend i{width:16px;height:2px;border-radius:2px;display:inline-block}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
 
+  /* can-do goals + closing check (added) */
+  .cando{border-left:3px solid var(--teal);background:rgba(52,215,197,.06);border-radius:0 10px 10px 0;padding:12px 16px;margin:16px 0 4px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);display:block;margin-bottom:6px}
+  .cando ul{margin:0;padding-left:20px}
+  .cando li{color:var(--muted);font-size:15px;line-height:1.5;margin:3px 0}
+  .cando-check{margin-top:18px;display:grid;gap:8px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:flex-start;min-height:28px;padding:7px 11px;border:1px solid var(--line-2);border-radius:9px;background:var(--panel-2);cursor:pointer;font-size:15px;color:var(--muted);transition:.12s}
+  .cando-check .cc-row:hover{border-color:var(--teal)}
+  .cando-check .cc-row .cc-box{flex:0 0 auto;width:19px;height:19px;border-radius:50%;border:2px solid var(--faint);color:transparent;display:grid;place-items:center;font-size:12px;line-height:1;margin-top:1px}
+  .cando-check .cc-row.on{color:var(--text);border-color:var(--green)}
+  .cando-check .cc-row.on .cc-box{border-color:var(--green);background:rgba(67,214,126,.15);color:var(--green)}
+
+  /* missions + stuck hints (added) */
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--teal);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+  .missions .m-hint{flex:0 0 100%;margin:6px 0 0 22px;font-size:13px;color:var(--teal);border-left:2px solid var(--line-2);padding-left:10px;font-style:italic}
+
+  /* now-on-your-robot card (added) */
+  .robotcard .rc-task{margin:0 0 9px}
+  .robotcard .rc-link{font-size:15px;margin:0 0 9px}
+  .robotcard .rc-link a{color:var(--teal);font-weight:600}
+  .robotcard .rc-fall{color:var(--muted);font-size:14px;margin:0}
+
   /* shared callout pattern */
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
@@ -199,6 +230,8 @@
     <div class="eyebrow">Feedforward</div>
     <h1>Knowing the<br><span class="accent">answer</span> in advance.</h1>
     <p class="dek">PID reacts to error. Feedforward predicts the voltage a move needs before any error even appears.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Explain how feedforward predicts a move's voltage in advance instead of waiting for error the way PID does.</li><li>Name the four feedforward terms - kS, kG, kV, kA - and say which two matter even for a dead-still hold.</li><li>Hold an elevator on target with kG and no integral, and predict where a wrong kG will park it.</li></ul></div>
   </div>
 
   <section>
@@ -277,6 +310,13 @@
       </div>
     </div>
     <p class="caption">With kG matched to the load and feedforward on, the error sits at zero from the first instant - no droop, no integral, no waiting.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
+      <div class="m-item" data-m="hold"><span class="m-st">○</span><span>Leave <b>kI at 0</b> and Feedforward <b>on</b> with kG at 0.45. Press Step: the carriage <b>holds dead on the line</b>, Error at 0.00, with no integral at all. That is kG paying gravity's bill directly.</span><div class="m-hint" hidden>For the hold mission: keep kI at 0.0, the Feedforward button on, and kG at 0.45, then press Step. Feedforward hands the motor gravity's exact voltage, so the error sits at 0.00 from the start.</div></div>
+      <div class="m-item" data-m="droop"><span class="m-st">○</span><span>Now press <b>Feedforward off</b> (kI still 0) and Step. Watch Lesson 2's <b>droop snap right back</b> - the carriage sags below the line with only kP to fight gravity.</span><div class="m-hint" hidden>For the droop mission: click Feedforward to off with kI still at 0, then press Step. With gravity's voltage gone, pure P needs leftover error to hold, so it parks about 0.11 low.</div></div>
+      <div class="m-item" data-m="over"><span class="m-st">○</span><span>Feedforward back <b>on</b>, then drag <b>kG up to about 0.9</b> - double what gravity needs. Step and watch the carriage park <b>above the line</b>, shoved there by the surplus push.</span><div class="m-hint" hidden>For the over mission: with Feedforward on and kI at 0, slide kG up to 0.90 and press Step. The extra 0.45 V lifts it past the line - a feedforward that lies gets paid back in error.</div></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> with Feedforward on and kG matched, land it dead on the line - Error under 0.01 - and hold steady for 2 seconds.</span><div class="m-hint" hidden>For gold: Feedforward on, kG at 0.45, and press Step. The prediction carries the whole gravity load, so it settles on the line immediately - hold it for the full 2 seconds.</div></div>
+    </div>
   </section>
 
   <section>
@@ -341,6 +381,15 @@ self.motor.<span class="fn">setVoltage</span>(feedforward + <input class="blank"
           <li hidden>The answers: kg, then feedback. Fill them in and press Check. The 'Predict, then correct' section above tells the same two-step story in prose if you want it again.</li>
         </ol>
       </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="note teal robotcard">
+      <div class="nh">🤖 Now on your robot · 10 minutes</div>
+      <p class="rc-task">Measure <b>kG</b> on a real elevator or arm. With the mechanism safely supported, command tiny open-loop voltages - step up by about 0.1 V at a time - until it just barely holds its height without creeping up or sagging down. <b>Pass test:</b> at that one voltage the mechanism floats in place, hands off. That number is your kG.</p>
+      <p class="rc-link">Record it in the <a href="worksheet.html#record">tuning worksheet</a>, which turns your kS, kG, kV, and kA into a ready-to-paste <span class="k">ElevatorFeedforward</span>.</p>
+      <p class="rc-fall">No mechanism handy? In the sim above, switch Feedforward off, then hunt for the kG that makes the carriage hold dead on the line with kI at zero - that hunt is exactly the on-robot procedure.</p>
     </div>
   </section>
 
@@ -410,6 +459,12 @@ self.motor.<span class="fn">setVoltage</span>(feedforward + <input class="blank"
         <div class="gl"><b>kV, kA</b><span>Voltage for a target speed and acceleration (moving only).</span></div>
         <div class="gl"><b>Predictive vs reactive</b><span>Feedforward acts in advance; PID corrects the rest.</span></div>
         <div class="gl"><b>The combination</b><span>Strong feedforward + light PID = the FRC gold standard.</span></div>
+      </div>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Can you do these now? Tap each one you own.</div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Explain how feedforward predicts a move's voltage in advance instead of waiting for error the way PID does.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Name the four feedforward terms - kS, kG, kV, kA - and say which two matter even for a dead-still hold.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Hold an elevator on target with kG and no integral, and predict where a wrong kG will park it.</span></div>
       </div>
       <div class="next">
         <div class="n-eyebrow">Up next · Lesson 07</div>
@@ -544,6 +599,41 @@ self.motor.<span class="fn">setVoltage</span>(feedforward + <input class="blank"
   el.run.addEventListener('click',function(){setRun(!S.running);});
   el.ffBtn.addEventListener('click',function(){S.ff=!S.ff;el.ffBtn.textContent='Feedforward: '+(S.ff?'on':'off');el.ffBtn.classList.toggle('active',S.ff);});
 
+  // ---- missions + stuck hints (wrapped so a bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  var mHold=0, mStuck={};
+  setInterval(function(){
+    if(!S.running) return;
+    var err=S.sp-S.y;
+    if(S.ff && S.kI<0.05 && Math.abs(S.kG-0.45)<0.05 && Math.abs(err)<0.02 && Math.abs(S.v)<0.015) mClear('hold');
+    if(!S.ff && S.kI<0.05 && Math.abs(S.v)<0.02 && err>0.06) mClear('droop');
+    if(S.ff && S.kG>0.75 && S.kI<0.05 && S.y>S.sp+0.03) mClear('over');
+    if(S.ff && Math.abs(err)<0.01 && Math.abs(S.v)<0.012){ mHold+=0.2; } else { mHold=0; }
+    if(mHold>=2) mClear('gold');
+    Object.keys(mItems).forEach(function(id){
+      var n=mItems[id]; if(n.classList.contains('cleared')) return;
+      mStuck[id]=(mStuck[id]||0)+0.2;
+      if(mStuck[id]>=150){ var h=n.querySelector('.m-hint'); if(h&&h.hasAttribute('hidden')) h.removeAttribute('hidden'); }
+    });
+  },200);
+  }catch(e){}
   function step(dt){
     if(S.running){
       var meas=S.y;
@@ -668,6 +758,22 @@ self.motor.<span class="fn">setVoltage</span>(feedforward + <input class="blank"
     });
   }catch(e){}
 })();
+</script>
+<script>
+(function(){try{
+  var KEY="frc:cando", file=location.pathname.split("/").pop();
+  var map={}; try{map=JSON.parse(localStorage.getItem(KEY))||{};}catch(e){}
+  var rows=document.querySelectorAll("#candoCheck .cc-row");
+  Array.prototype.forEach.call(rows,function(row,i){
+    var k=file+"#"+i;
+    if(map[k]) row.classList.add("on");
+    row.addEventListener("click",function(){
+      var on=row.classList.toggle("on");
+      if(on){map[k]=true;}else{delete map[k];}
+      try{localStorage.setItem(KEY,JSON.stringify(map));}catch(e){}
+    });
+  });
+}catch(e){}})();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>

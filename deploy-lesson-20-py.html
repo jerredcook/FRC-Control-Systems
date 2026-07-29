@@ -61,6 +61,27 @@
   pre.code{font-family:var(--mono);font-size:13px;line-height:1.85;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;color:#cdd9ec;margin:0;white-space:pre;tab-size:2}
   .code .cm{color:var(--faint);font-style:italic} .code .kw{color:#ff9bbf} .code .ty{color:var(--teal)} .code .fn{color:var(--indigo)} .code .num{color:var(--amber)} .code .bl{color:#ff9bbf}
 
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--indigo);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+  .cando{margin:18px 0 4px;border-left:3px solid var(--indigo);background:rgba(138,140,248,.06);border-radius:0 10px 10px 0;padding:12px 16px}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);display:block;margin-bottom:8px}
+  .cando ul{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+  .cando li{position:relative;padding-left:19px;font-size:15px;color:var(--muted);line-height:1.5}
+  .cando li::before{content:"\2192";position:absolute;left:0;color:var(--indigo);font-family:var(--mono)}
+  .cando-check{margin:18px 0 0;border-top:1px solid var(--line);padding-top:16px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:flex-start;min-height:28px;padding:5px 2px;cursor:pointer;font-size:15px;color:var(--muted);line-height:1.45;-webkit-tap-highlight-color:transparent}
+  .cando-check .cc-row .cc-box{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--line-2);color:transparent;display:grid;place-items:center;font-size:12px;margin-top:1px;transition:.12s}
+  .cando-check .cc-row.on{color:var(--text)}
+  .cando-check .cc-row.on .cc-box{border-color:var(--green);background:rgba(67,214,126,.16);color:var(--green)}
+  .missions .m-hint{margin:-1px 0 6px 24px;font-size:13px;color:var(--faint);border-left:2px solid var(--indigo);padding:3px 0 3px 11px;line-height:1.5}
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
   .note p{margin:0;color:var(--text);font-size:16px}
@@ -136,6 +157,11 @@
     <div class="eyebrow">Switches &amp; Digital Sensors</div>
     <h1>Yes or<br><span class="accent">no</span>.</h1>
     <p class="dek">Some sensors don't give a number, just a true or a false. That one bit is exactly what you need to find a known zero and to tell when a game piece has arrived.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Read a limit switch or beam break in code with DigitalInput.get(), inverting it so true means "active."</li>
+      <li>Home a mechanism against a switch to hand a relative encoder a known, absolute zero on every boot.</li>
+      <li>Use a beam break to know, live, when a game piece is in the robot - and remember the sensor keeps no memory of it.</li>
+    </ul></div>
   </div>
 
   <section>
@@ -170,6 +196,17 @@
       </div>
     </div>
     <p class="caption">Homing creeps the elevator down until the switch reads True, then defines that spot as position 0. The beam break flips to BROKEN the instant a game piece crosses it, which is how the robot knows to stop the intake.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
+      <div class="m-item" data-m="home"><span class="m-st">○</span><span>Press <b>Run homing</b> and watch the carriage creep down to the switch on its own. The instant the switch reads <b>PRESSED</b>, Elevator zero flips to <b>set</b> - your absolute reference, found the same way every boot.</span></div>
+      <div class="m-hint" data-for="home" hidden>Stuck? Just press Run homing once and wait - the carriage drives down by itself and the zero sets the moment it touches the switch. No other buttons needed.</div>
+      <div class="m-item" data-m="forget"><span class="m-st">○</span><span>Once it is homed, press <b>Raise</b> and keep an eye on Elevator zero. The moment the carriage lifts off the switch it drops back to <b>not set</b> - a relative encoder has no memory of where zero was.</span></div>
+      <div class="m-hint" data-for="forget" hidden>Stuck? Home it first so the zero reads set, then press Raise. Watch the zero fall back to not set the instant the carriage leaves the switch.</div>
+      <div class="m-item" data-m="rehome"><span class="m-st">○</span><span>Lost the zero after raising? Press <b>Run homing</b> again to get it back. Homing is cheap and repeatable, which is why teams re-home whenever they want a fresh, trustworthy zero.</span></div>
+      <div class="m-hint" data-for="rehome" hidden>Stuck? Do a full round: home, then Raise, then Run homing a second time. The zero setting itself twice is what clears this one.</div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> the full round trip. Home it, press <b>Raise</b> and let it run <b>all the way up</b> until it parks itself back at the top, then <b>home it once more</b>. You just drove the mechanism across its entire travel and back to a known zero.</span></div>
+      <div class="m-hint" data-for="gold" hidden>Stuck? After the first home, press Raise and be patient - let the carriage travel all the way to the top and stop before you press Run homing the second time.</div>
+    </div>
   </section>
 
   <section>
@@ -317,6 +354,12 @@ self.elevator.<input class="blank" data-ans="setposition" data-reveal="setPositi
         <div class="gl"><b>Homing</b><span>Drive to a switch for absolute zero.</span></div>
         <div class="gl"><b>Invert with not</b><span>Make True mean "active."</span></div>
       </div>
+      <div class="cando-check" id="candoCheck">
+        <span class="cc-h">Can you do these now? Tap each one you have got.</span>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Read a switch or beam break with DigitalInput.get(), inverted so true means "pressed."</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Home a mechanism against a switch to give a relative encoder an absolute zero.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Use a beam break to detect a game piece live, knowing it has no memory.</span></div>
+      </div>
       <a class="next" href="deploy-lesson-21-py.html">
         <div class="n-eyebrow">Up next · Part 4 · 05</div>
         <h3>The Gamepad</h3>
@@ -404,6 +447,44 @@ self.elevator.<input class="blank" data-ans="setposition" data-reveal="setPositi
   document.getElementById('feed').addEventListener('click',function(){ if(beamPiece<0) beamPiece=-0.18; });
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
   refresh(); requestAnimationFrame(loop);
+
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  // stuck hints: after ~150s of active fiddling on an uncleared mission, reveal its hint line
+  var stuckSecs={}, HINT_AT=150, lastAct=0;
+  try{ var mDemo=document.getElementById('demo'); if(mDemo){ ['pointerdown','pointermove','input','keydown'].forEach(function(ev){ mDemo.addEventListener(ev,function(){ lastAct=Date.now(); },true); }); } }catch(e){}
+  function stuckTick(tick){ var actNow=(Date.now()-lastAct)<1500; Object.keys(mItems).forEach(function(id){ var n=mItems[id]; if(!n) return; var h=document.querySelector('#missions .m-hint[data-for="'+id+'"]'); if(n.classList.contains('cleared')){ if(h&&!h.hidden) h.hidden=true; return; } if(actNow){ stuckSecs[id]=(stuckSecs[id]||0)+tick; if(stuckSecs[id]>=HINT_AT && h) h.hidden=false; } }); }
+  var mSawHomed=false, mPrevZero=false, mHomedCount=0, mSawRaising=false, mSawFullRaise=false;
+  setInterval(function(){
+    if(state==='homed') mSawHomed=true;
+    if(state==='raising') mSawRaising=true;
+    if(zeroSet && !mPrevZero) mHomedCount++;
+    mPrevZero=zeroSet;
+    if(mSawRaising && state==='idle' && f<=0.06) mSawFullRaise=true;
+    if(zeroSet) mClear('home');
+    if(mSawHomed && !zeroSet) mClear('forget');
+    if(mHomedCount>=2) mClear('rehome');
+    if(mHomedCount>=2 && mSawFullRaise) mClear('gold');
+    stuckTick(0.2);
+  },200);
+  }catch(e){}
 
   var blanks=Array.prototype.slice.call(document.querySelectorAll('.code-ex .blank'));
   function norm(s){return s.trim().toLowerCase().replace(/\s+/g,'').replace(/\(\)$/,'');}
@@ -507,6 +588,21 @@ try{
     });
   }catch(e){}
 })();
+</script>
+<script>
+(function(){try{
+  var K='frc:cando', f=location.pathname.split('/').pop(), map={};
+  try{ map=JSON.parse(localStorage.getItem(K))||{}; }catch(e){}
+  var rows=document.querySelectorAll('#candoCheck .cc-row');
+  Array.prototype.forEach.call(rows,function(r,i){
+    var key=f+'#'+i;
+    if(map[key]) r.classList.add('on');
+    r.addEventListener('click',function(){
+      var on=r.classList.toggle('on'); map[key]=on;
+      try{ localStorage.setItem(K,JSON.stringify(map)); }catch(e){}
+    });
+  });
+}catch(e){}})();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>

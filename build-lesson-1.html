@@ -58,6 +58,20 @@
   .banner .bt{font-family:var(--mono);font-size:14px;letter-spacing:.16em;text-transform:uppercase;color:var(--green);font-weight:700}
   .banner .bs{font-size:14px;color:var(--muted);margin-top:4px}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .cando{border-left:3px solid var(--indigo);background:rgba(255,138,76,.06);border-radius:0 10px 10px 0;padding:11px 15px;margin:16px 0 2px}
+  .cando .cd-h{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:6px}
+  .cando ul{margin:0;padding:0;list-style:none}
+  .cando li{position:relative;font-size:15px;color:var(--muted);padding:3px 0 3px 20px;line-height:1.45}
+  .cando li::before{content:"→";position:absolute;left:0;color:var(--indigo)}
+  .cando-check{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:6px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:flex-start;min-height:28px;padding:5px 0;cursor:pointer;font-size:15px;color:var(--muted);transition:.12s}
+  .cando-check .cc-row:hover{color:var(--text)}
+  .cando-check .cc-box{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--line-2);display:grid;place-items:center;font-size:12px;color:transparent;margin-top:1px;transition:.12s}
+  .cando-check .cc-row.on .cc-box{border-color:var(--green);background:var(--green);color:#06210f}
+  .cando-check .cc-row.on{color:var(--text)}
+  .missions .m-hint{margin:2px 0 6px 26px;font-size:13px;color:var(--muted);font-style:italic;line-height:1.5;border-left:2px solid var(--amber);padding-left:10px}
+  .missions .m-hint b{color:var(--text);font-style:normal}
   .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--amber);border-radius:12px;background:var(--panel);padding:14px 16px}
   .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:9px}
   .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
@@ -124,6 +138,13 @@
     <div class="eyebrow">Shop Safety &amp; Mindset</div>
     <h1>Keep all ten<br><span class="accent">fingers</span>.</h1>
     <p class="dek">Before you touch a single tool, you learn to work safely. It isn't the exciting part, but it's the one that lets you come back tomorrow. Good builders make safety a habit, not an afterthought.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span>
+      <ul>
+        <li>Run the whole shop-readiness check from memory - glasses on, nothing dangling, e-stop found - before any tool spins.</li>
+        <li>Say why bare hands beat gloves on anything that spins, and when gloves are actually fine.</li>
+        <li>Put a hand on the power kill for any machine in the room in seconds.</li>
+      </ul>
+    </div>
   </div>
 
   <section>
@@ -140,9 +161,13 @@
     <div class="missions" id="missions">
       <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
       <div class="m-item" data-m="cleared"><span class="m-st">○</span><span>Run the whole routine once: check all <b>6</b> items and watch the tag flip to <b>cleared ★</b>. That little flip is the feeling you are after before every real build session.</span></div>
+      <div class="m-hint" data-h="cleared" hidden>Tap all six rows so each one turns green - the tag up top flips to <b>cleared ★</b> the moment the last box is checked.</div>
       <div class="m-item" data-m="onemiss"><span class="m-st">○</span><span>Now uncheck <b>any one item</b> and watch cleared vanish on the spot. <b>5 / 6</b> is not ready - safety is all or nothing, and you just saw the list agree with you.</span></div>
+      <div class="m-hint" data-h="onemiss" hidden>First get to <b>cleared</b> (all six on), then tap any one row to uncheck it. Watch cleared vanish the instant you drop to 5 of 6.</div>
       <div class="m-item" data-m="estop"><span class="m-st">○</span><span>Empty the list back to <b>0 / 6</b>, then make <b>the e-stop item</b> your very first check. Knowing where the kill switch is before anything spins is a habit worth building on day one.</span></div>
+      <div class="m-hint" data-h="estop" hidden>Tap every row off so it reads <b>0 / 6</b>, then make your very first tap the "You know where the e-stop is" row.</div>
       <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> from <b>0 / 6</b>, clear all six in one clean pass in under <b>7 seconds</b>, no unchecking. When it flows that smoothly you are not reading a list anymore - that is what a habit feels like.</span></div>
+      <div class="m-hint" data-h="gold" hidden>From an empty <b>0 / 6</b>, check all six quickly without unchecking any - aim to finish the whole sweep in under 7 seconds.</div>
     </div>
   </section>
 
@@ -233,6 +258,12 @@
         <div class="gl"><b>Clean bench</b><span>Clutter hides hazards.</span></div>
         <div class="gl"><b>Ask when unsure</b><span>Stopping is always allowed.</span></div>
       </div>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Can you do these now?</div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Run the whole shop-readiness check from memory - glasses on, nothing dangling, e-stop found - before any tool spins.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Say why bare hands beat gloves on anything that spins, and when gloves are actually fine.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Put a hand on the power kill for any machine in the room in seconds.</span></div>
+      </div>
       <a class="next" href="build-lesson-2.html">
         <div class="n-eyebrow">Up next · Part 1 · 02</div>
         <h3>Hand Tools</h3>
@@ -297,6 +328,18 @@
   Object.keys(mItems).forEach(function(id){
     if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
   });
+  // stuck-hint timing: after ~150s of active fiddling on a still-open mission, reveal one nudge
+  var mHintT={}, mLastAct=Date.now(), mDemoEl=document.getElementById('demo');
+  if(mDemoEl){ ['pointerdown','input','click'].forEach(function(ev){ mDemoEl.addEventListener(ev,function(){ mLastAct=Date.now(); },true); }); }
+  function mStuck(){
+    var active=(Date.now()-mLastAct)<5000;
+    Object.keys(mItems).forEach(function(id){
+      var n=mItems[id]; if(!n||n.classList.contains('cleared')) return;
+      if(active) mHintT[id]=(mHintT[id]||0)+0.2;
+      if((mHintT[id]||0)>=150){ var h=document.querySelector('#missions .m-hint[data-h="'+id+'"]'); if(h) h.hidden=false; }
+    });
+  }
+  setInterval(mStuck,200);
   var mPrev=state.slice(), mWasCleared=false, mClean=false, mT0=0;
   var mRun=(state.filter(Boolean).length===0);
   checks.addEventListener('click',function(){
@@ -332,6 +375,26 @@
   var qs=document.querySelectorAll("#quiz .q"); if(!qs.length) return;
   function check(){var all=true;qs.forEach(function(q){if(!q.querySelector(".opt.locked"))all=false;});if(all)mark();}
   document.querySelectorAll("#quiz .opt").forEach(function(o){o.addEventListener("click",function(){setTimeout(check,40);});});
+})();
+</script>
+<script>
+(function(){
+  try{
+    var wrap=document.getElementById('candoCheck'); if(!wrap) return;
+    var KEY='frc:cando', file=location.pathname.split('/').pop();
+    var saved={}; try{ saved=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+    var rows=wrap.querySelectorAll('.cc-row');
+    Array.prototype.forEach.call(rows,function(row,i){
+      var k=file+'#'+i;
+      if(saved[k]) row.classList.add('on');
+      row.addEventListener('click',function(){
+        var on=!row.classList.contains('on');
+        row.classList.toggle('on',on);
+        if(on){ saved[k]=1; } else { delete saved[k]; }
+        try{ localStorage.setItem(KEY,JSON.stringify(saved)); }catch(e){}
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

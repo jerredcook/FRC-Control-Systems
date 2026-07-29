@@ -95,6 +95,21 @@
   .sd-why.show{display:block}
   .sd-doneline{margin-top:12px;font-size:14.5px;color:var(--green);display:none}
   .sd-doneline.show{display:block}
+  .cando{border-left:3px solid var(--indigo);background:rgba(255,138,76,.07);border-radius:0 10px 10px 0;padding:12px 16px;margin:20px 0 0}
+  .cando .cd-h{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--indigo);margin-bottom:7px}
+  .cando ul{margin:0;padding-left:18px;display:grid;gap:5px}
+  .cando li{color:var(--muted);font-size:15px;line-height:1.5}
+  .cando-check{margin:18px 0 2px;border-top:1px solid var(--line);padding-top:16px}
+  .cando-check .cd-h{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--indigo);margin-bottom:10px}
+  .cdrow{display:flex;align-items:center;gap:11px;width:100%;text-align:left;border:1px solid var(--line-2);background:var(--panel-2);color:var(--text);padding:8px 12px;border-radius:9px;cursor:pointer;font-family:var(--sans);font-size:15px;min-height:38px;margin-bottom:8px;transition:.12s}
+  .cdrow:last-child{margin-bottom:0}
+  .cdrow:hover{border-color:var(--muted)}
+  .cdrow .cdbox{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--faint);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--ink);transition:.12s}
+  .cdrow.on{border-color:var(--green);background:rgba(67,214,126,.1)}
+  .cdrow.on .cdbox{background:var(--green);border-color:var(--green)}
+  .cdrow.on .cdbox::after{content:"\2713"}
+  .cdrow .cdtxt{color:var(--muted)}
+  .cdrow.on .cdtxt{color:var(--text)}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -114,6 +129,14 @@
     <div class="eyebrow">The roboRIO retires</div>
     <h1>One board to<br><span class="accent">replace them all</span>.</h1>
     <p class="dek">For the 2027 season, the roboRIO and the wireless radio both step aside. In their place comes SystemCore: one smaller, more powerful board, meant to cost less than the roboRIO, that folds the brain, the radio, and the camera smarts into a single slab.</p>
+    <div class="cando" id="cando">
+      <span class="cd-h">By the end you can</span>
+      <ul>
+        <li>Say what SystemCore replaces - both the roboRIO brain and the separate wireless radio, folded into one board</li>
+        <li>Place SystemCore in the family line (cRIO, roboRIO in 2015, SystemCore) and name when it arrives for FRC: January 2027</li>
+        <li>Explain why a 2027 robot runs one brain, not two, and that every team gets a SystemCore in the Kit of Parts</li>
+      </ul>
+    </div>
   </div>
 
   <section>
@@ -294,6 +317,29 @@
         <div class="gl"><b>Kit of Parts</b><span>Every 2027 team gets a SystemCore.</span></div>
         <div class="gl"><b>Limelight</b><span>The group that builds SystemCore.</span></div>
       </div>
+      <div class="cando-check" id="candoCheck">
+        <span class="cd-h">Can you do these now?</span>
+        <button type="button" class="cdrow"><span class="cdbox"></span><span class="cdtxt">Say what SystemCore replaces - both the roboRIO brain and the separate wireless radio, folded into one board</span></button>
+        <button type="button" class="cdrow"><span class="cdbox"></span><span class="cdtxt">Place SystemCore in the family line (cRIO, roboRIO in 2015, SystemCore) and name when it arrives for FRC: January 2027</span></button>
+        <button type="button" class="cdrow"><span class="cdbox"></span><span class="cdtxt">Explain why a 2027 robot runs one brain, not two, and that every team gets a SystemCore in the Kit of Parts</span></button>
+      </div>
+      <script>
+      (function(){
+        try{
+          var box=document.getElementById("candoCheck"); if(!box) return;
+          var file=location.pathname.split("/").pop(), KEY="frc:cando", store={};
+          try{ store=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){ store={}; }
+          box.querySelectorAll(".cdrow").forEach(function(row,i){
+            var k=file+"#"+i;
+            if(store[k]) row.classList.add("on");
+            row.addEventListener("click",function(){
+              var on=row.classList.toggle("on");
+              try{ var s=JSON.parse(localStorage.getItem(KEY))||{}; if(on){s[k]=true;}else{delete s[k];} localStorage.setItem(KEY,JSON.stringify(s)); }catch(e){}
+            });
+          });
+        }catch(e){}
+      })();
+      </script>
       <a class="next" href="systemcore-lesson-2.html">
         <div class="n-eyebrow">Up next &middot; Part 1 &middot; 02</div>
         <h3>Meet SystemCore &rarr;</h3>

@@ -59,6 +59,29 @@
   .btn:hover{border-color:var(--indigo);color:var(--text)}
   .btn.primary{background:linear-gradient(180deg,#ffb37e,var(--indigo));color:#2a1503;font-weight:700;border:none}
   .caption{font-size:14px;color:var(--muted);margin-top:14px;font-style:italic}
+  .missions{margin-top:14px;border:1px solid var(--line-2);border-left:3px solid var(--amber);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .missions .m-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:9px}
+  .missions .m-head .m-sub{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:8px}
+  .missions .m-item{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);padding:5px 0}
+  .missions .m-item b{color:var(--text)}
+  .missions .m-st{font-family:var(--mono);color:var(--faint);flex:0 0 auto}
+  .missions .m-item.cleared{color:var(--text)}
+  .missions .m-item.cleared .m-st{color:var(--green)}
+  .missions .m-item.gold .m-st{color:var(--amber)}
+  .missions .m-hint{margin:2px 0 6px 26px;font-size:13px;color:var(--muted);font-style:italic;line-height:1.5;border-left:2px solid var(--amber);padding-left:10px}
+  .missions .m-hint b{color:var(--text);font-style:normal}
+  .cando{border-left:3px solid var(--indigo);background:rgba(255,138,76,.06);border-radius:0 10px 10px 0;padding:11px 15px;margin:16px 0 2px}
+  .cando .cd-h{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:6px}
+  .cando ul{margin:0;padding:0;list-style:none}
+  .cando li{position:relative;font-size:15px;color:var(--muted);padding:3px 0 3px 20px;line-height:1.45}
+  .cando li::before{content:"→";position:absolute;left:0;color:var(--indigo)}
+  .cando-check{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:6px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:flex-start;min-height:28px;padding:5px 0;cursor:pointer;font-size:15px;color:var(--muted);transition:.12s}
+  .cando-check .cc-row:hover{color:var(--text)}
+  .cando-check .cc-box{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--line-2);display:grid;place-items:center;font-size:12px;color:transparent;margin-top:1px;transition:.12s}
+  .cando-check .cc-row.on .cc-box{border-color:var(--green);background:var(--green);color:#06210f}
+  .cando-check .cc-row.on{color:var(--text)}
 
   .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:22px 0;font-size:.97em}
   .note .nh{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
@@ -115,6 +138,13 @@
     <div class="eyebrow">Measure &amp; Mark</div>
     <h1>Measure twice,<br>cut <span class="accent">once</span>.</h1>
     <p class="dek">A robot is hundreds of parts that all have to line up. That precision starts at the measurement. A caliper reads to the thousandth of an inch, and knowing how to use one separates parts that bolt together from parts that don't.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span>
+      <ul>
+        <li>Read a caliper to the thousandth of an inch.</li>
+        <li>Judge a reading against a tolerance band and call it pass or fail.</li>
+        <li>Center-punch a hole so the drill starts on your mark instead of wandering.</li>
+      </ul>
+    </div>
   </div>
 
   <section>
@@ -149,6 +179,17 @@
       </div>
     </div>
     <p class="caption">The amber block between the jaws is the part you're measuring. Get the reading within 0.005 inch of the target and it counts. That tolerance band is exactly how a real part is judged.</p>
+    <div class="missions" id="missions">
+      <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
+      <div class="m-item" data-m="band"><span class="m-st">○</span><span>Slide the jaws until the reading settles <b>inside the ±0.005 band</b> of the target and hold it there. That green window is exactly how a real part is judged.</span></div>
+      <div class="m-hint" data-h="band" hidden>Read the amber Target number, then slide the jaws until the green Reading lands within 0.005 of it and stop moving. Hold steady for a beat and it clears.</div>
+      <div class="m-item" data-m="edge"><span class="m-st">○</span><span>Park the reading <b>exactly on the edge</b> - precisely 0.005 off the target - and see it still count. A spec's edge is razor sharp.</span></div>
+      <div class="m-hint" data-h="edge" hidden>Take the target and add exactly 0.005 - if it reads 1.250, park the jaws at 1.255 and hold. That is the band's very edge, and it still passes.</div>
+      <div class="m-item" data-m="reject"><span class="m-st">○</span><span>Now feel the other side: hold a reading <b>just past the band</b>, 0.006 to 0.010 off - the reject zone. One thousandth is the whole difference between pass and scrap.</span></div>
+      <div class="m-hint" data-h="reject" hidden>Nudge one or two thousandths past the edge - say 0.007 over the target - and hold there. Close enough to tempt you, far enough to be a reject.</div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> nail <b>three different targets</b> in tolerance. Press New target between each. Precision you can repeat is the real skill.</span></div>
+      <div class="m-hint" data-h="gold" hidden>Land one target in tolerance, press New target, land the next, and again. Three different numbers, each inside its own band.</div>
+    </div>
   </section>
 
   <section>
@@ -238,6 +279,12 @@
         <div class="gl"><b>Measure twice</b><span>Re-check before cutting.</span></div>
         <div class="gl"><b>Tight where it counts</b><span>Loose tolerance elsewhere.</span></div>
       </div>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Can you do these now?</div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Read a caliper to the thousandth of an inch.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Judge a reading against a tolerance band and call it pass or fail.</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Center-punch a hole so the drill starts on your mark instead of wandering.</span></div>
+      </div>
       <a class="next" href="build-lesson-5.html">
         <div class="n-eyebrow">Up next · Part 1 · 05 · Finale</div>
         <h3>Fasteners</h3>
@@ -307,6 +354,49 @@
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){fit();},120);});
   refresh(); requestAnimationFrame(loop);
 
+  // ---- missions (wrapped so a missions bug can never break the lesson) ----
+  try{
+  var MKEY='frc:missions', GKEY='frc:gold', mPage=location.pathname.split('/').pop();
+  var mSaved={}, mGold={};
+  try{ mSaved=JSON.parse(localStorage.getItem(MKEY))||{}; }catch(e){}
+  try{ mGold=JSON.parse(localStorage.getItem(GKEY))||{}; }catch(e){}
+  var mItems={};
+  Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ mItems[n.getAttribute('data-m')]=n; });
+  function mMark(n){ n.classList.add('cleared'); n.querySelector('.m-st').textContent=n.classList.contains('gold')?'★':'✓'; }
+  function mClear(id){
+    var n=mItems[id]; if(!n||n.classList.contains('cleared'))return;
+    mMark(n);
+    var gold=n.classList.contains('gold');
+    var map=gold?mGold:mSaved, key=gold?GKEY:MKEY;
+    map[mPage+'#'+id]=true; try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){}
+  }
+  Object.keys(mItems).forEach(function(id){
+    if((mItems[id].classList.contains('gold')?mGold:mSaved)[mPage+'#'+id]) mMark(mItems[id]);
+  });
+  // stuck-hint timing: after ~150s of active fiddling on a still-open mission, reveal one nudge
+  var mHintT={}, mLastAct=Date.now(), mDemoEl=document.getElementById('demo');
+  if(mDemoEl){ ['pointerdown','input','click'].forEach(function(ev){ mDemoEl.addEventListener(ev,function(){ mLastAct=Date.now(); },true); }); }
+  function mStuck(){
+    var active=(Date.now()-mLastAct)<5000;
+    Object.keys(mItems).forEach(function(id){
+      var n=mItems[id]; if(!n||n.classList.contains('cleared')) return;
+      if(active) mHintT[id]=(mHintT[id]||0)+0.2;
+      if((mHintT[id]||0)>=150){ var h=document.querySelector('#missions .m-hint[data-h="'+id+'"]'); if(h) h.hidden=false; }
+    });
+  }
+  var hBand=0, hEdge=0, hRej=0, mPassed={};
+  setInterval(function(){
+    var diff=Math.abs(meas-target);
+    hBand=(diff<=5)?hBand+1:0;
+    hEdge=(diff===5)?hEdge+1:0;
+    hRej=(diff>=6&&diff<=10)?hRej+1:0;
+    if(hBand>=2){ mClear('band'); mPassed[target]=1; if(Object.keys(mPassed).length>=3) mClear('gold'); }
+    if(hEdge>=2) mClear('edge');
+    if(hRej>=2) mClear('reject');
+    mStuck();
+  },200);
+  }catch(e){}
+
   document.querySelectorAll('#quiz .q').forEach(function(q){
     var correct=parseInt(q.getAttribute('data-correct'),10);
     var opts=q.querySelectorAll('.opt');var explain=q.querySelector('.explain');var done=false;
@@ -361,6 +451,26 @@
   opts.forEach(function(opt,i){ opt.addEventListener('click',function(){ if(revealed)return; picked=i;
     opts.forEach(function(o){o.classList.remove('picked');}); opt.classList.add('picked');
     if(ran){ reveal(); } else { note.textContent='Your prediction: "'+optText(i)+'". Change it any time before you try the sim. When you are ready, go see what really happens.'; note.style.display='block'; } }); });
+})();
+</script>
+<script>
+(function(){
+  try{
+    var wrap=document.getElementById('candoCheck'); if(!wrap) return;
+    var KEY='frc:cando', file=location.pathname.split('/').pop();
+    var saved={}; try{ saved=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+    var rows=wrap.querySelectorAll('.cc-row');
+    Array.prototype.forEach.call(rows,function(row,i){
+      var k=file+'#'+i;
+      if(saved[k]) row.classList.add('on');
+      row.addEventListener('click',function(){
+        var on=!row.classList.contains('on');
+        row.classList.toggle('on',on);
+        if(on){ saved[k]=1; } else { delete saved[k]; }
+        try{ localStorage.setItem(KEY,JSON.stringify(saved)); }catch(e){}
+      });
+    });
+  }catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

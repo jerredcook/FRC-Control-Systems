@@ -139,6 +139,21 @@
   .missions .m-item.cleared .m-st{color:var(--green)}
   .missions .m-item.gold .m-st{color:var(--amber)}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
+
+  .cando{border-left:3px solid var(--indigo);background:rgba(138,140,248,.07);border-radius:0 10px 10px 0;padding:11px 15px;margin:18px 0 0;max-width:52ch}
+  .cando .cd-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:6px}
+  .cando ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:3px}
+  .cando li{position:relative;font-size:15px;color:var(--muted);line-height:1.45;padding-left:18px}
+  .cando li::before{content:"→";position:absolute;left:0;color:var(--indigo)}
+  .cando-check{margin-top:16px;border-left:3px solid var(--indigo);background:rgba(138,140,248,.07);border-radius:0 10px 10px 0;padding:11px 15px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:6px}
+  .cando-check .cc-row{display:flex;gap:10px;align-items:center;min-height:30px;padding:4px;font-size:15px;color:var(--muted);cursor:pointer;border-radius:8px;transition:.12s}
+  .cando-check .cc-row:hover{background:rgba(138,140,248,.06)}
+  .cando-check .cc-box{font-family:var(--mono);flex:0 0 auto;color:var(--faint)}
+  .cando-check .cc-row.done{color:var(--text)}
+  .cando-check .cc-row.done .cc-box{color:var(--green)}
+  .missions .m-hint{margin:2px 0 6px 26px;padding:5px 0 5px 11px;border-left:2px solid var(--amber);font-size:13px;color:var(--muted);line-height:1.5}
+  .missions .m-hint b{color:var(--text)}
 </style>
 </head>
 <body>
@@ -158,6 +173,11 @@
     <div class="eyebrow">The Big Picture</div>
     <h1>One scheduler,<br>running <span class="accent">everything</span>.</h1>
     <p class="dek">Command-based robots have a heartbeat: a scheduler that, every 20 ms, reads your inputs, runs your active actions, and updates every mechanism. Meet it before the pieces.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Name the <b>three steps</b> the CommandScheduler runs every 20 ms.</li>
+      <li>Trace what runs next in a loop - each subsystem's periodic(), then the scheduled commands.</li>
+      <li>Explain why a command scheduled mid-loop waits for the <b>next full pass</b>.</li>
+    </ul></div>
   </div>
 
   <section>
@@ -330,6 +350,12 @@
         <div class="gl"><b>Command</b><span>An action over time (verb).</span></div>
         <div class="gl"><b>RobotContainer</b><span>Create &amp; wire it all, once.</span></div>
         <div class="gl"><b>robotPeriodic()</b><span>Calls scheduler.run() every 20 ms.</span></div>
+      </div>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Check yourself - tap each one you can now do</div>
+        <div class="cc-row"><span class="cc-box">○</span><span>Name the three steps the CommandScheduler runs every 20 ms.</span></div>
+        <div class="cc-row"><span class="cc-box">○</span><span>Trace what runs next in a loop - each subsystem's periodic(), then the scheduled commands.</span></div>
+        <div class="cc-row"><span class="cc-box">○</span><span>Explain why a command scheduled mid-loop waits for the next full pass.</span></div>
       </div>
       <a class="next" href="deploy-lesson-12-py.html">
         <div class="n-eyebrow">Up next · Part 3 · 02</div>
@@ -517,7 +543,56 @@
       else { el.ftMsg.className='no'; el.ftMsg.textContent='Not that loop. Cancel, re-schedule, and watch the Loop readout when its box lights.'; }
     });
     paint();
+
+    // ---- stuck hints: after sustained active use, surface one hint per still-open mission ----
+    try{
+      var _mi={};
+      Array.prototype.forEach.call(document.querySelectorAll('#missions .m-item'),function(n){ _mi[n.getAttribute('data-m')]=n; });
+      var _hints={
+        predict3:'For the prediction mission: before each Step, click the box you think fires next. The order each loop is robotPeriodic(), run(), Elevator.periodic(), Intake.periodic(), then the command phase - line up three in a row.',
+        firsttick:'For the first-run mission: Step once or twice so you are mid-loop, press <b>Schedule RaiseElevator</b>, then read the <b>Loop</b> readout and type the <b>next</b> loop number into the checker - a mid-loop command waits for the next full pass.',
+        cancelmid:'For the interrupt mission: schedule RaiseElevator and Step until its execute() has run at least once, then press <b>Cancel it</b> and Step around to the command phase - the queue comes up empty.',
+        gold:'For the gold: build a five-in-a-row prediction streak and press <b>Schedule RaiseElevator</b> somewhere during that run, so the queue shifts while you keep calling the next box right.'
+      };
+      Object.keys(_mi).forEach(function(id){
+        if(!_hints[id]) return;
+        var h=document.createElement('div'); h.className='m-hint'; h.hidden=true; h.innerHTML=_hints[id];
+        _mi[id].parentNode.insertBefore(h,_mi[id].nextSibling); _mi[id]._hint=h;
+      });
+      var _stuckSecs=0,_lastInteract=0;
+      var _ck=document.getElementById('cockpit');
+      var _bump=function(){ _lastInteract=Date.now(); };
+      if(_ck){ _ck.addEventListener('pointerdown',_bump,true); _ck.addEventListener('input',_bump,true); }
+      setInterval(function(){ try{
+        if(Date.now()-_lastInteract>4000) return;
+        if(++_stuckSecs<150) return;
+        Object.keys(_mi).forEach(function(id){
+          var n=_mi[id]; if(!n||n.classList.contains('cleared')||!n._hint) return;
+          n._hint.hidden=false;
+        });
+      }catch(e){} },1000);
+    }catch(e){}
   }catch(e){}
+})();
+</script>
+<script>
+(function(){
+try{
+  var KEY='frc:cando', file=location.pathname.split('/').pop();
+  var box=document.getElementById('candoCheck'); if(!box) return;
+  var saved={}; try{ saved=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+  var rows=box.querySelectorAll('.cc-row');
+  Array.prototype.forEach.call(rows,function(r,i){
+    var b=r.querySelector('.cc-box');
+    if(saved[file+'#'+i]){ r.classList.add('done'); if(b) b.textContent='✓'; }
+    r.addEventListener('click',function(){
+      var on=r.classList.toggle('done');
+      if(b) b.textContent=on?'✓':'○';
+      if(on) saved[file+'#'+i]=true; else delete saved[file+'#'+i];
+      try{ localStorage.setItem(KEY,JSON.stringify(saved)); }catch(e){}
+    });
+  });
+}catch(e){}
 })();
 </script>
 <script src="account-config.js"></script>

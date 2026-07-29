@@ -129,6 +129,21 @@
   .coursenav a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--line-2);border-radius:9px;padding:10px 13px;transition:.12s;line-height:1.3}
   .coursenav a:hover{border-color:var(--indigo);color:var(--text)} .coursenav a.map{border-color:transparent;color:var(--teal)} .coursenav a.next-link{color:var(--teal);border-color:rgba(52,215,197,.4)}
   footer{padding:30px 0 60px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  /* can-do goals + stuck-hints (training layer) */
+  .cando{border-left:3px solid var(--indigo);background:rgba(138,140,248,.06);border-radius:0 10px 10px 0;padding:12px 16px;margin:18px 0 4px}
+  .cando .cd-h{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo);margin-bottom:7px}
+  .cando ul{margin:0;padding:0;list-style:none}
+  .cando li{position:relative;font-size:15px;color:var(--muted);padding:3px 0 3px 20px;line-height:1.5}
+  .cando li::before{content:"\2192";position:absolute;left:0;color:var(--indigo)}
+  .cando-check{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+  .cando-check .cc-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .cando-check .cc-row{display:flex;gap:11px;align-items:center;min-height:30px;padding:4px 2px;cursor:pointer;font-size:15px;color:var(--muted);transition:.12s}
+  .cando-check .cc-row:hover{color:var(--text)}
+  .cando-check .cc-box{width:20px;height:20px;flex:0 0 auto;border:2px solid var(--line-2);border-radius:6px;display:grid;place-items:center;color:transparent;font-size:12px;transition:.12s}
+  .cando-check .cc-row.on{color:var(--text)}
+  .cando-check .cc-row.on .cc-box{border-color:var(--green);background:var(--green);color:#06210f}
+  .missions .m-item{flex-wrap:wrap}
+  .missions .m-hint{flex-basis:100%;margin:7px 0 1px 24px;font-size:13px;color:var(--muted);border-left:2px solid var(--amber);background:rgba(255,176,32,.05);border-radius:0 6px 6px 0;padding:6px 10px;line-height:1.5}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -148,6 +163,11 @@
     <div class="eyebrow">State Machines</div>
     <h1>One clear<br><span class="accent">state</span> at a time.</h1>
     <p class="dek">A superstructure has a lot of moving parts. Instead of juggling a dozen booleans, name the states the robot can be in and the events that move between them. Illegal combinations simply can't happen.</p>
+    <div class="cando" id="cando"><span class="cd-h">By the end you can</span><ul>
+      <li>Model a superstructure as named states plus the events that move between them</li>
+      <li>Keep one state field so the robot is always in exactly one state</li>
+      <li>Explain why a state machine makes illegal combos - like intaking and shooting at once - impossible</li>
+    </ul></div>
   </div>
 
   <section>
@@ -168,10 +188,10 @@
     <p class="caption">A valid event slides the highlight to the next state. An invalid one (shoot while IDLE, note while LOADED) is rejected and logged, the machine refuses to enter an impossible situation. That refusal is the whole point.</p>
     <div class="missions" id="missions">
       <div class="m-head">🎯 Missions <span class="m-sub">your goals for this sim - take them at your own pace</span></div>
-      <div class="m-item" data-m="guard"><span class="m-st">○</span><span>Prove the guardrail: while in <b>IDLE</b>, press <b>shoot</b>, then read the <b>ignored</b> line in the log. That quiet no is the point.</span></div>
-      <div class="m-item" data-m="cancel"><span class="m-st">○</span><span>A little mystery: <b>INTAKING</b> has a second exit besides note detected. Poke around and find the event that cancels back to <b>IDLE</b>.</span></div>
-      <div class="m-item" data-m="fast"><span class="m-st">○</span><span>From a fresh <b>IDLE</b>, reach <b>SHOOTING</b> in just <b>3 presses</b>. Plan your route first - no wasted taps.</span></div>
-      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> get an event <b>ignored in all 4 states</b>. Experiment away - each state answers only to its own short list, and everything else bounces off.</span></div>
+      <div class="m-item" data-m="guard"><span class="m-st">○</span><span>Prove the guardrail: while in <b>IDLE</b>, press <b>shoot</b>, then read the <b>ignored</b> line in the log. That quiet no is the point.</span><div class="m-hint" hidden>For the guardrail mission: while the tag still says IDLE, press Press shoot - there is no path, so read the ignored line in the log.</div></div>
+      <div class="m-item" data-m="cancel"><span class="m-st">○</span><span>A little mystery: <b>INTAKING</b> has a second exit besides note detected. Poke around and find the event that cancels back to <b>IDLE</b>.</span><div class="m-hint" hidden>For the cancel mission: press intake once to enter INTAKING, then press intake a second time - that repeat press is the secret exit back to IDLE.</div></div>
+      <div class="m-item" data-m="fast"><span class="m-st">○</span><span>From a fresh <b>IDLE</b>, reach <b>SHOOTING</b> in just <b>3 presses</b>. Plan your route first - no wasted taps.</span><div class="m-hint" hidden>For the 3-press mission: from a fresh IDLE the route is intake, then note detected, then shoot - three taps, no wasted presses, and you are in SHOOTING.</div></div>
+      <div class="m-item gold" data-m="gold"><span class="m-st">★</span><span><b>Gold:</b> get an event <b>ignored in all 4 states</b>. Experiment away - each state answers only to its own short list, and everything else bounces off.</span><div class="m-hint" hidden>For gold: get one event rejected in every state - try shoot from IDLE, shoot from INTAKING, intake from LOADED, and intake from SHOOTING.</div></div>
     </div>
   </section>
 
@@ -328,6 +348,12 @@
         <div class="gl"><b>Illegal = impossible</b><span>Bad combos can't exist.</span></div>
         <div class="gl"><b>Triggers fire them</b><span>Ties back to Lesson 3.5.</span></div>
       </div>
+      <div class="cando-check" id="candoCheck">
+        <div class="cc-h">Can you do these now? Tap the ones you've got.</div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Model a superstructure as named states plus the events that move between them</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Keep one state field so the robot is always in exactly one state</span></div>
+        <div class="cc-row"><span class="cc-box">✓</span><span>Explain why a state machine makes illegal combos - like intaking and shooting at once - impossible</span></div>
+      </div>
       <a class="next" href="code.html">
         <div class="n-eyebrow">Part 7 complete · Seeing &amp; Thinking</div>
         <h3>On to Part 8 - Pro Practices →</h3>
@@ -476,6 +502,43 @@
     });
   }catch(e){}
 })();
+</script>
+<script>
+(function(){ try{
+  var KEY='frc:cando', file=location.pathname.split('/').pop();
+  var map={}; try{ map=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+  var rows=document.querySelectorAll('#candoCheck .cc-row');
+  Array.prototype.forEach.call(rows,function(r,i){
+    var k=file+'#'+i;
+    if(map[k]) r.classList.add('on');
+    r.addEventListener('click',function(){
+      var on=!r.classList.contains('on'); r.classList.toggle('on',on);
+      map[k]=on; try{ localStorage.setItem(KEY,JSON.stringify(map)); }catch(e){}
+    });
+  });
+}catch(e){} })();
+</script>
+<script>
+(function(){ try{
+  var missions=document.getElementById('missions'); if(!missions) return;
+  var items=missions.querySelectorAll('.m-item'); if(!items.length) return;
+  var hasHint=false;
+  Array.prototype.forEach.call(items,function(n){ if(n.querySelector('.m-hint')) hasHint=true; });
+  if(!hasHint) return;
+  var active=0, lastPoke=0, THRESH=150, WINDOW=12000;
+  function poke(){ lastPoke=Date.now(); }
+  var demo=document.getElementById('demo');
+  [demo,missions].forEach(function(el){ if(el){ ['pointerdown','input','click'].forEach(function(ev){ el.addEventListener(ev,poke,true); }); } });
+  setInterval(function(){ try{
+    if(Date.now()-lastPoke<WINDOW) active++;
+    if(active>=THRESH){
+      Array.prototype.forEach.call(items,function(n){
+        if(n.classList.contains('cleared')) return;
+        var h=n.querySelector('.m-hint'); if(h) h.hidden=false;
+      });
+    }
+  }catch(e){} },1000);
+}catch(e){} })();
 </script>
 <script src="account-config.js"></script>
 <script src="account.js"></script>
